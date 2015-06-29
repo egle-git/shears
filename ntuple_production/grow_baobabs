@@ -1,0 +1,379 @@
+#!/usr/bin/env python
+"""
+Commmand to launch baobab ntuple production
+"""
+import argparse
+import sys
+import re
+import sqlite3
+import time
+import hashlib
+import os
+
+eos_command="/afs/cern.ch/project/eos/installation/pro/bin/eos.select"
+
+try:
+    from CRABAPI.RawCommand import crabCommand
+    from CRABClient.ClientExceptions import ClientException, TaskNotFoundException, CachefileNotFoundException, ConfigurationException, ConfigException, UsernameException, ProxyException
+except ImportError:
+    sys.stderr,write("CRAB 3 environment needs to be set before running this script.")
+    sys.exit(1)
+
+from httplib import HTTPException
+from WMCore.Configuration import Configuration
+
+def hashfile(afile, hasher, blocksize=65536):
+    buf = afile.read(blocksize)
+    while len(buf) > 0:
+        hasher.update(buf)
+        buf = afile.read(blocksize)
+    return hasher.hexdigest()
+
+def createDatabase():
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    conn.execute('''CREATE TABLE IF NOT EXISTS jobs (
+dataset    TEXT    PRIMARY KEY,
+ntuple_dir TEXT,
+submit_ts  INTEGER,
+status     TEXT,
+status_ts  INTEGER,
+uniquerequestname TEXT,
+requestname TEXT
+n_events INTEGER,
+n_files INTEGER,
+lumi_file_md5sum TEXT
+)''')
+    conn.commit()
+    conn.close()
+
+def format_cell(cell):
+    if type(cell) is float:
+        new_cell = "%.2g" % cell
+    else:
+        new_cell = str(cell)
+    return new_cell
+
+
+def print_table(table, header = [], out = sys.stdout, format="org"):
+    """Print a table. Argument table is a 2D array containing the table content. Argument header
+    provides the column names. Argument format specify the output format. Supported formats are:
+    org and twiki."""
+    table = [ map(format_cell, row) for row in table]
+    if format == "twiki":
+        header = [ map(lambda x: "*" + str(x) + "*", r) for r in header] 
+    else:
+        header = map(str, header)
+    #calculates column widths:
+    if header:
+        w = [ max(map(lambda x: len(str(x)), r)) for r in zip(header,*table)]
+    else:
+        w = [ max(map(lambda x: len(str(x)), r)) for r in zip(*table)]
+    #row display format string:
+    fmt = "| " + " | ".join([ "%" + str(x) + "s" for x in w ]) + " |\n"
+    #separarion line:
+    if format != "twiki":
+        sep_line = "|-" + "-+-".join([ '-' * x for x in w ]) + "-|\n"
+    else:
+        sep_line = None
+        
+    if len(header) > 0:
+        print fmt
+        print header
+        if format == "twiki":
+            out.write(cgi.escape(fmt % tple(header)))
+        else:
+            out.write(fmt % tuple(header))
+        #endif format...
+    #endif len(header)...
+
+    if len(header) > 0 and sep_line:
+        out.write(sep_line)
+        
+    for r in table:
+        if format == "twiki":
+            out.write(cgi.escape(fmt % tuple(map(str, r))))
+        else:
+            out.write(fmt % tuple(map(str, r)))
+#
+
+
+def print_query_result(cur):
+    column_names =  zip(*cur.description)[0]
+    ts_type = []
+    for i, c in enumerate(column_names):
+        if c.endswith("_ts"):
+            ts_type.append(True)
+        else:
+            ts_type.append(False)
+    table = []
+    for x in cur:
+        y = []
+        for i, c in enumerate(x):
+            if ts_type[i]:
+                y.append(time.strftime("%b %e, %Y", time.localtime(c)))
+            else:
+                y.append(str(c))
+            #endif ts_type[i]
+        #next i, c
+        table.append(y)
+    #next x
+    print_table(table, column_names)
+    return zip(*table) #returned transposed table
+
+def dumpDatabase():
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    c = conn.cursor()
+    c.execute('''SELECT * FROM jobs''')
+    print_query_result(c)
+    conn.close()
+
+def getDatasetStatus(dataset):
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    c = conn.cursor()
+    c.execute('''SELECT status FROM jobs WHERE dataset=%s''' % dataset)
+    r = c.fetchone()
+    if r:
+        return str(r[0])
+    else:
+        return None
+
+def insertDataset(dataset,ntuple_dir,ts,status):
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    try:
+        conn.execute("INSERT INTO jobs VALUES('%s','%s',%d,'%s', NULL, NULL, NULL, NULL, NULL)" % (dataset, ntuple_dir, ts, status))
+        rc =  True
+    except sqlite3.IntegrityError:
+        rc =  False
+    conn.commit()
+    conn.close()
+    return rc
+
+def updateDatasetRecord(dataset, props):
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    sql = 'UPDATE jobs SET '
+    sql += ",".join([ " %s='%s'" % (k,v) for (k,v) in props.items()])
+    sql += " WHERE dataset='%s'" % dataset
+    nrows = conn.execute(sql).rowcount
+    conn.commit()
+    conn.close()
+    return (nrows > 0)
+
+def clearDatasetRecord(dataset):
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    sql = "DELETE FROM jobs WHERE dataset='%s'" % dataset
+    nrows = conn.execute(sql).rowcount
+    conn.commit()
+    conn.close()
+    return (nrows > 0)
+
+def checkDataSetName(dataset):
+    a = dataset.split("/")
+    if len(a) != 4:
+        sys.stderr.write("Dataset name must contains three part /primary_dataset/conditions/tier")
+        return False
+    p = re.compile("MINIAOD(|SIM)")
+    if not p.match(a[3]):
+        sys.stderr.write("Only MINIAOD and MINIOADSIM data tiers are supported.")
+        return False
+    return True
+
+def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
+    """Build the crab configuration file."""
+#    dataset_tier = dataset.split("/")[3]
+#
+#    if dataset_tier.find("SIM") > 0:
+#        isMC = True
+#    else:
+#        isMC = False
+    config = Configuration()
+
+    config.section_('General')
+#----------------------------------------------------------------------
+
+#Request name. Used to identify job batch and to name the result directory    
+    config.General.requestName = dataset.split('/')[1]
+
+#Switch for the copy of the results to the storage site.
+    config.General.transferOutputs = True
+
+#Whether or not to copy the job log files to the storage site.
+    config.General.transferLogs = True
+
+    config.section_('JobType')
+#----------------------------------------------------------------------
+
+# CMSS Configuration file
+    config.JobType.psetName = 'grow_baobabs_cfg.py'
+#    config.JobType.psetName = 'pset.py'
+
+    config.section_('Data')
+#----------------------------------------------------------------------
+# Name of the dataset to analyze
+    config.Data.inputDataset = dataset
+
+# Output directory on the storage site (storage site defined in the Site section)
+    config.Data.outLFNDirBase = outDir
+
+#Mode to use to split the task in jobs. 
+# for 'Analysis' job type: 'FileBased', 'LumiBased' (recommended for real data), or 'EventAwareLumiBased'
+# for 'PrivateMC' job type: 'EventBased'
+    config.Data.splitting = 'EventAwareLumiBased'
+
+# Number of units to produce or process
+    if maxEvents and maxEvents > 0:
+        config.Data.totalUnits = maxEvents
+
+# Number of units (events in case of PrivateMC)  per job
+    config.Data.unitsPerJob = unitsPerJob
+
+# Switch for publication of output data to DBS
+    config.Data.publication = False
+
+    config.section_('User')
+#----------------------------------------------------------------------
+    
+    config.section_('Site')
+#----------------------------------------------------------------------
+
+#A list of sites where the jobs should not run.
+    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_Demokritos', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP']
+    
+#Site where the output should be copied. 
+# See https://cmsweb.cern.ch/sitedb/prod/sites/ for the list of site names
+    config.Site.storageSite = 'T2_CH_CERN'
+    
+    return config
+
+def submitJobs(dataset, unitsPerJob, outDir, maxEvents):
+    """Submit crab jobs to produce the Baobab ntuple from a provided dataset."""
+    crab_config = getCrabConfig(dataset, unitsPerJob, outDir, maxEvents)
+
+    f = open("crab_" + dataset.split("/")[1] + ".py", "w")
+    f.write(str(crab_config))
+    f.close()
+
+    try:
+        res = crabCommand('submit', config = crab_config)
+        print res
+        try:
+            props = { k: res[k] for k in ["uniquerequestname", "requestname"]}
+            props["status"] = "submitted"
+            updateDatasetRecord(dataset, props)
+        except KeyError:
+            sys.stderr.write("Error while submitting job for dataset %s. No requestname was returned." % dataset)
+            updateDatasetRecord(dataset, { "status": "submission_error"})
+    except HTTPException, e:
+        updateDatasetRecord(dataset, { "status": "submission_error"})
+        print e.headers
+    except ConfigException, e:
+        updateDatasetRecord(dataset, { "status": "submission_error"})
+        print e
+
+def check():
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    c = tuple(conn.execute("SELECT dataset, status, status_ts, requestname, ntuple_dir FROM jobs WHERE status != 'finished'"))
+    conn.close()
+    for r in c:
+        (dataset, status, status_ts, requestname, ntuple_dir) = r
+        res = crabCommand("status", "-d", requestname)
+
+        if status != 'report_done':
+            if res["status"] != status:
+                updateDatasetRecord(dataset, {"status": res["status"], "status_ts": int(time.time())})
+            else:
+                dt_hours = (time.time() - status_ts)/3600
+                if dt_hours > 10:
+                    sys.stderr.write("Job of dataset %s is stuck in state %s for %d hour(s).\n" % 
+                                     (dataset, status, int(dt_hours+0.5)))
+                 #endif
+            #endif
+            if res["status"] == "COMPLETED":
+                res = crabCommand("report", "-d", requestname)
+                print res
+                lumiSummaryFile = requestname + "/results/lumiSummary.json"
+                try:
+                    f = open(lumiSummaryFile)
+                    md5sum = hashfile(f, hashlib.md5())
+                    #copy lumi file to result directory on EOS
+                    print "Save lumi summary into %s " %  (ntuple_dir + "/" + lumiSummaryFile)
+                    rc = os.system(eos_command + " cp -s " + lumiSummaryFile + " /eos/cms/" + ntuple_dir + "/" + requestname + "/lumiSummary.json")
+                    if rc!=0:
+                        sys.stderr.write("Failed to copy luminorsity summary file into EOS for dataset '%s'"  % dataset)
+                    else:
+                        updateDatasetRecord(dataset, {"status": "report_done", "n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file_md5sum": md5sum})
+                except IOError, e:
+                    sys.stderr.write(e)
+
+def main():
+    createDatabase()
+
+    if args.check:
+        if args.dataset_catalogs and len(args.dataset_catalogs):
+            sys.stderr.write("No further argument should be provided with the --check option.")
+            return
+        else:
+            check()
+    elif args.list:
+        dumpDatabase()
+
+    else:
+        process_dataset_catalogs()
+
+def process_dataset_catalogs():
+    outDirLine = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
+    commentLine = re.compile(r'^\s*^#')
+    for dataset_catalog in args.dataset_catalogs:
+        try:
+            f = open(dataset_catalog)
+        except IOError, e:
+            print e
+            continue
+        outDir = None
+        for dataset in f:
+            m = outDirLine.match(dataset)
+            if m and len(m.groups()) > 0:
+                outDir = m.groups()[0]
+            elif not outDir:
+                sys.stderr.write('''Fatal error while processing dataset catalog '%s'.
+Output directory line is missing from the input dataset catalog.
+The line should be before any dataset name and should have the following format:
+# output directory: /store/group/phys_smp/AnalysisFramework/Baobab/.../ntuples.
+''' % dataset_catalog)
+                break
+            #endif not outDir
+            dataset=dataset.strip()
+            if len(dataset) == 0 or commentLine.match(dataset):
+                continue
+            if checkDataSetName(dataset):
+                if args.clear:
+                    clearDatasetRecord(dataset)
+                elif insertDataset(dataset, outDir, int(time.time()), 'submitting'):
+                    submitJobs(dataset, args.events_per_job, outDir, args.max_events)
+                else:
+                    sys.stderr.write("dataset %s already submitted.\n" % dataset)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
+
+    parser.add_argument('dataset_catalogs', nargs='*',
+                        help='Catalog files containing the list of CMS datasets to process')
+
+    parser.add_argument('--max-events', type=int, action='store', default=-1,
+                        help='Specify maximum number of events to process for each dataset. The default is to process to full dataset.')
+
+    parser.add_argument('--events-per-job', type=int, action='store', default = 5000,
+                        help='Specify the number of events each job should process')
+
+    parser.add_argument('--check', action='store_true',
+                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs')
+
+    parser.add_argument('--clear', action='store_true',
+                        help='Clear from the database datasets listed in the dataset catalogs. To be used with care.')
+
+    parser.add_argument('--list', action='store_true',
+                        help="Display contents of database")
+
+    args = parser.parse_args()
+
+    main()
+

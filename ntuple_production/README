@@ -1,0 +1,39 @@
+Scripts to produce Baobab Ntuples
+---------------------------------
+
+Author: Ph. Gras. CEA/Saclay
+
+
+Usage:
+-----
+
+1. Set crab 3 environment
+2. Set up Tuple enviroment following instructions from https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/readme.txt.
+3. Run grow_baobabs. See options in the next section.
+
+Important: CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
+
+Different options of grow_baobabs run:
+------------------------------------
+
+To submit new jobs, you should specify the catalog of dataset to process [1], like this:
+
+./grow_baobabs.py datasets.txt
+
+To check running job and generate lumi section summary json file, use the --check option:
+
+./grow_baobabs.py --check
+
+The production is kept track in the baobab_prod.sqlite3 database file. For a production, it is important to run grow_baobabs.py always in the same disk directory as this database file is picked up form the working directory.
+
+To list the content of the production database file, used the --list option:
+
+./grow_baobabs.py --list
+
+simple_grow_baobabs
+-------------------
+
+simple_grow_baobabs is a simple script to submit the jobs to produce Baobab ntuples. It does not keep track of the production as grow_baobabs does. For a central production, grow_baobabs should be used
+
+
+[1] https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction

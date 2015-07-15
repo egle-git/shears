@@ -9,6 +9,7 @@ import sqlite3
 import time
 import hashlib
 import os
+import das_client
 
 eos_command="/afs/cern.ch/project/eos/installation/pro/bin/eos.select"
 
@@ -16,37 +17,103 @@ try:
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException, TaskNotFoundException, CachefileNotFoundException, ConfigurationException, ConfigException, UsernameException, ProxyException
 except ImportError:
-    sys.stderr,write("CRAB 3 environment needs to be set before running this script.")
+    sys.stderr.write("CRAB 3 environment needs to be set before running this script.")
     sys.exit(1)
 
 from httplib import HTTPException
 from WMCore.Configuration import Configuration
 
-def hashfile(afile, hasher, blocksize=65536):
-    buf = afile.read(blocksize)
-    while len(buf) > 0:
-        hasher.update(buf)
-        buf = afile.read(blocksize)
-    return hasher.hexdigest()
+def dasQuery(query):
+    """Performs a query to the DAQ database"""
+    host='https://cmsweb.cern.ch'
+    idx=0
+    limit=0
+    debug=False
+    if args.verbosity > 0:
+        sys.stderr.write("DAS query: %s\n" % query)  
+    das_res=das_client.get_data(host, query, idx, limit, debug)
+    data=das_res['data']
+    res=[]
+    for r in data:
+        val = das_client.prim_value(r)
+        res.append(val)
+    return res
+
+def dasQuery2(query, att):
+    """Performs a query to the DAQ database"""
+    host='https://cmsweb.cern.ch'
+    idx=0
+    limit=0
+    debug=False
+    obj, item = att.split(".")
+    if args.verbosity > 0:
+        sys.stderr.write("DAS query: %s\n" % query)  
+    das_res=das_client.get_data(host, query, idx, limit, debug)
+    data = das_res['data']
+    res = []
+    for r in data:
+        if obj in r:
+            load = r[obj]
+            for x in load:
+                if item in x:
+                    res.append(x[item])
+                    break
+    return res
+
+
+def dasQueryPrint(query):
+    """Makes a DAS database query and displays the result"""
+    res = dasQuery(query)
+    print "\n".join(res)
+
+def dasRuns(dataset):
+    """Retrieves from the DAS database the list of available runs for a given dataset."""
+    return dasQuery('run dataset=' + dataset);
+
+#def hashfile(afile, hasher, blocksize=65536):
+#    buf = afile.read(blocksize)
+#    while len(buf) > 0:
+#        hasher.update(buf)
+#        buf = afile.read(blocksize)
+#    return hasher.hexdigest()
+
+def getDbConn():
+    """Gets job management connection and cursor."""
+    conn = sqlite3.connect('baobab_prod.sqlite3')
+    conn.execute('PRAGMA foreign_keys')
+    return (conn, conn.cursor())
 
 def createDatabase():
-    conn = sqlite3.connect('baobab_prod.sqlite3')
+    """Creates sqlite3 database used to manage the jobs submissions. Tables are created only if they do not already exists."""
+    (conn, c) = getDbConn()
     conn.execute('''CREATE TABLE IF NOT EXISTS jobs (
-dataset    TEXT    PRIMARY KEY,
-ntuple_dir TEXT,
-submit_ts  INTEGER,
-status     TEXT,
-status_ts  INTEGER,
+dataset     TEXT,
+batch_id    INTEGER,
+datatype    TEXT,
+ntuple_dir  TEXT,
+ntuple_subdir TEXT,
+submit_ts   INTEGER,
+status      TEXT,
+status_ts   INTEGER,
 uniquerequestname TEXT,
-requestname TEXT
-n_events INTEGER,
-n_files INTEGER,
-lumi_file_md5sum TEXT
+requestname TEXT,
+n_files     INTEGER,
+lumi_file_md5sum TEXT,
+PRIMARY KEY(dataset, batch_id)
 )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS runs (
+dataset TEXT,
+run INTEGER,
+batch_id INTEGER,
+PRIMARY KEY (dataset, run),
+FOREIGN KEY (dataset, batch_id) REFERENCES jobs (dataset, batch_id))
+''')
     conn.commit()
     conn.close()
+#enddef
 
 def format_cell(cell):
+    """Formats a table cell for display. Used by print_table."""
     if type(cell) is float:
         new_cell = "%.2g" % cell
     else:
@@ -55,7 +122,7 @@ def format_cell(cell):
 
 
 def print_table(table, header = [], out = sys.stdout, format="org"):
-    """Print a table. Argument table is a 2D array containing the table content. Argument header
+    """Prints a table. Argument table is a 2D array containing the table content. Argument header
     provides the column names. Argument format specify the output format. Supported formats are:
     org and twiki."""
     table = [ map(format_cell, row) for row in table]
@@ -77,8 +144,6 @@ def print_table(table, header = [], out = sys.stdout, format="org"):
         sep_line = None
         
     if len(header) > 0:
-        print fmt
-        print header
         if format == "twiki":
             out.write(cgi.escape(fmt % tple(header)))
         else:
@@ -94,10 +159,11 @@ def print_table(table, header = [], out = sys.stdout, format="org"):
             out.write(cgi.escape(fmt % tuple(map(str, r))))
         else:
             out.write(fmt % tuple(map(str, r)))
-#
+#enddef
 
 
 def print_query_result(cur):
+    """Displays the results of an sql query in a table form."""
     column_names =  zip(*cur.description)[0]
     ts_type = []
     for i, c in enumerate(column_names):
@@ -110,7 +176,10 @@ def print_query_result(cur):
         y = []
         for i, c in enumerate(x):
             if ts_type[i]:
-                y.append(time.strftime("%b %e, %Y", time.localtime(c)))
+                try:
+                    y.append(time.strftime("%b %e, %Y", time.localtime(c)))
+                except TypeError:
+                    y.append(str(c))
             else:
                 y.append(str(c))
             #endif ts_type[i]
@@ -121,45 +190,133 @@ def print_query_result(cur):
     return zip(*table) #returned transposed table
 
 def dumpDatabase():
-    conn = sqlite3.connect('baobab_prod.sqlite3')
-    c = conn.cursor()
+    """Displays the content of the job database"""
+    conn, c = getDbConn()
     c.execute('''SELECT * FROM jobs''')
     print_query_result(c)
     conn.close()
 
-def getDatasetStatus(dataset):
-    conn = sqlite3.connect('baobab_prod.sqlite3')
-    c = conn.cursor()
-    c.execute('''SELECT status FROM jobs WHERE dataset=%s''' % dataset)
+def isDatasetInDb(dataset):
+    """Checks if a dataset is in the job management database"""
+    conn, c = getDbConn()
+    c.execute("SELECT dataset FROM jobs WHERE dataset='%s'" % dataset)
+    return c.fetchone() is not None
+
+def getBatchStatus(dataset, batch_id):
+    """Retrieves from job management database the status of a job batch"""
+    conn, c = getDbConn()
+    c.execute("SELECT status FROM jobs WHERE dataset='%s' AND batch_id=%d" % (dataset, batch_id))
     r = c.fetchone()
     if r:
         return str(r[0])
     else:
         return None
 
-def insertDataset(dataset,ntuple_dir,ts,status):
-    conn = sqlite3.connect('baobab_prod.sqlite3')
-    try:
-        conn.execute("INSERT INTO jobs VALUES('%s','%s',%d,'%s', NULL, NULL, NULL, NULL, NULL)" % (dataset, ntuple_dir, ts, status))
-        rc =  True
-    except sqlite3.IntegrityError:
-        rc =  False
-    conn.commit()
-    conn.close()
-    return rc
+def getDatatypeFromDb(dataset):
+    """Retrieves the datatype (mc or data) from the job management database."""
+    conn, c = getDbConn()
+    c.execute("SELECT DISTINCT datatype FROM jobs")
+    r = c.fetchall()
+    if len(r) > 1:
+        raise error.Runtime("Inconsistency found in job management database!")
+    elif len(r) == 1:
+        return r[0][0]
+    else:
+        return None
 
-def updateDatasetRecord(dataset, props):
-    conn = sqlite3.connect('baobab_prod.sqlite3')
+def lastBatchId(dataset):
+    """Gets the latest batch id (maximum batch id value) for the processing of a dataset."""
+    conn, c  = getDbConn()
+    c.execute("SELECT MAX(batch_id) FROM runs WHERE dataset='%s'" % dataset)
+    r = c.fetchone()
+    if r:
+        r = r[0]
+    return r
+
+def getRunsFromDb(dataset):
+    """Retrieves the list of runs entered in job database for a dataset and the last batch id."""
+    conn, c = getDbConn()
+    c.execute("SELECT run FROM runs WHERE dataset='%s'" % dataset)
+    r = c.fetchall()
+    conn.close()
+    if len(r) > 0:
+        r = zip(*r)[0]
+    return r
+
+def checkRunToProcess(dataset):
+    """Checks for new run to consider for a dataset. Applies to real data only."""
+    available = dasRuns(dataset)
+    known = getRunsFromDb(dataset)
+    toprocess = sorted(tuple(set(available) - set(known)))
+    if args.max_run_num:
+        toprocess = [ x for x in toprocess if x < args.max_run_num]
+    return toprocess
+
+def insertBatch(dataset,ntuple_dir,ts):
+    """"Checks if a dataset needs to be processed and if it does
+inserts the job batch in the database. Return the batch_id or None."""
+    datatype = getDatatypeFromDb(dataset)
+    if datatype:
+        newDataset = False
+    else:
+        newDataset = True
+        res = dasQuery2("dataset dataset=%s" % dataset, "dataset.datatype");
+        print res
+        if len(res) == 0:
+            sys.stderr.write("Dataset %s was not found in DAS. This dataset will be skipped.\n" % dataset);
+            return None
+        datatype = str(res[0])
+        if datatype not in ["mc", "data"]:
+            sys.stderr.write("Datatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
+            return None
+    if newDataset:
+        batch_id = 1
+    if (not newDataset) and datatype == 'mc':
+        #no top-up for MC
+        return None
+    if datatype == 'mc':
+        runs = []
+    else: #real data
+        runs =  checkRunToProcess(dataset)
+        if len(runs) > 0:
+            if args.verbosity > 0:
+                sys.stderr.write("Prepare job batch for dataset %s, runs %s\n" % (dataset, ",".join(map(str, runs))))
+            batch_id = lastBatchId(dataset)
+            if batch_id:
+                batch_id = batch_id + 1
+            else:
+                batch_id = 1
+        else:
+            if args.verbosity > 0:
+                sys.stderr.write("No new run for dataset %s.\n" % dataset)
+            return None
+    #endif datatype
+    #endif newDataset
+    #this point is reached when a job batch needs to be inserted.
+    try:
+        conn, c = getDbConn()
+        conn.execute("INSERT INTO jobs VALUES('%s',%d,'%s','%s',%d, NULL, '%s', NULL, NULL, NULL, NULL, NULL)" % (dataset, batch_id, datatype, ntuple_dir, ts, 'to_submit'))
+        conn.commit()
+        conn.close()
+    except sqlite3.IntegrityError:
+        sys.stderr.write("Unexpected error when processing dataset %s. % dataset")
+        return None
+    return (batch_id, runs)
+
+def updateDatasetRecord(dataset, batch_id, props):
+    """Update the record of a dataset job batch in the job management database."""
+    conn, c = getDbConn()
     sql = 'UPDATE jobs SET '
     sql += ",".join([ " %s='%s'" % (k,v) for (k,v) in props.items()])
-    sql += " WHERE dataset='%s'" % dataset
+    sql += " WHERE dataset='%s' AND batch_id=%d" % (dataset, batch_id)
     nrows = conn.execute(sql).rowcount
     conn.commit()
     conn.close()
     return (nrows > 0)
 
 def clearDatasetRecord(dataset):
-    conn = sqlite3.connect('baobab_prod.sqlite3')
+    """Removes a dataset from the job management database. To be used be care."""
+    conn, c = getDbConn()
     sql = "DELETE FROM jobs WHERE dataset='%s'" % dataset
     nrows = conn.execute(sql).rowcount
     conn.commit()
@@ -167,6 +324,7 @@ def clearDatasetRecord(dataset):
     return (nrows > 0)
 
 def checkDataSetName(dataset):
+    """Validates a dataset name"""
     a = dataset.split("/")
     if len(a) != 4:
         sys.stderr.write("Dataset name must contains three part /primary_dataset/conditions/tier")
@@ -177,8 +335,8 @@ def checkDataSetName(dataset):
         return False
     return True
 
-def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
-    """Build the crab configuration file."""
+def getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
+    """Builds the crab configuration file."""
 #    dataset_tier = dataset.split("/")[3]
 #
 #    if dataset_tier.find("SIM") > 0:
@@ -191,7 +349,7 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
 #----------------------------------------------------------------------
 
 #Request name. Used to identify job batch and to name the result directory    
-    config.General.requestName = dataset.split('/')[1]
+    config.General.requestName = dataset.split('/')[1] + ("-%04d" % batch_id)
 
 #Switch for the copy of the results to the storage site.
     config.General.transferOutputs = True
@@ -206,6 +364,9 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
     config.JobType.psetName = 'grow_baobabs_cfg.py'
 #    config.JobType.psetName = 'pset.py'
 
+# Output files that need to be collected, besides default CMSSW outputs
+#    config.JobType.outputFiles = [ ]
+
     config.section_('Data')
 #----------------------------------------------------------------------
 # Name of the dataset to analyze
@@ -218,6 +379,9 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
 # for 'Analysis' job type: 'FileBased', 'LumiBased' (recommended for real data), or 'EventAwareLumiBased'
 # for 'PrivateMC' job type: 'EventBased'
     config.Data.splitting = 'EventAwareLumiBased'
+
+# Runs to process (if runs list is empty, set to empty string, which indicates no run filter)
+    config.Data.runRange = ",".join(map(str,runs))
 
 # Number of units to produce or process
     if maxEvents and maxEvents > 0:
@@ -244,78 +408,118 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
     
     return config
 
-def submitJobs(dataset, unitsPerJob, outDir, maxEvents):
-    """Submit crab jobs to produce the Baobab ntuple from a provided dataset."""
-    crab_config = getCrabConfig(dataset, unitsPerJob, outDir, maxEvents)
+def submitJobs(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
+    """Submits crab jobs to produce the Baobab ntuple from a provided dataset."""
+    crab_config = getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents)
 
-    f = open("crab_" + dataset.split("/")[1] + ".py", "w")
+    f = open("crab_" + dataset.split("/")[1] + ("-%04d" % batch_id) + ".py", "w")
     f.write(str(crab_config))
     f.close()
 
     try:
         res = crabCommand('submit', config = crab_config)
-        print res
+        print "Task name:", res['uniquerequestname']
         try:
             props = { k: res[k] for k in ["uniquerequestname", "requestname"]}
             props["status"] = "submitted"
-            updateDatasetRecord(dataset, props)
+            props['ntuple_subdir'] = props['requestname'][5:] + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
+            updateDatasetRecord(dataset, batch_id, props)
         except KeyError:
             sys.stderr.write("Error while submitting job for dataset %s. No requestname was returned." % dataset)
-            updateDatasetRecord(dataset, { "status": "submission_error"})
+            updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
     except HTTPException, e:
-        updateDatasetRecord(dataset, { "status": "submission_error"})
+        updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
         print e.headers
     except ConfigException, e:
-        updateDatasetRecord(dataset, { "status": "submission_error"})
+        updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
         print e
 
-def check():
-    conn = sqlite3.connect('baobab_prod.sqlite3')
-    c = tuple(conn.execute("SELECT dataset, status, status_ts, requestname, ntuple_dir FROM jobs WHERE status != 'finished'"))
+def check(dataset = None, batch_id = None):
+    conn, c = getDbConn()
+    sql = "SELECT dataset, batch_id, status, status_ts, requestname, ntuple_dir, ntuple_subdir FROM jobs WHERE status != 'finished order by dataset, batch_id ORDER BY dataset, batch_id'";
+    if dataset:
+        sql += " AND dataset='%s'" % dataset
+    if batch_id:
+        sql += " AND batch_id=%d" % batch_id
+    c = tuple(conn.execute(sql))
     conn.close()
     for r in c:
-        (dataset, status, status_ts, requestname, ntuple_dir) = r
-        res = crabCommand("status", "-d", requestname)
-
-        if status != 'report_done':
-            if res["status"] != status:
-                updateDatasetRecord(dataset, {"status": res["status"], "status_ts": int(time.time())})
+        (dataset, batch_id, status, status_ts, requestname, ntuple_dir, ntuple_subdir) = r
+        if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES']:
+            if status != 'CLOSED_WITH_FAILURES':
+                res = crabCommand("status", "-d", requestname)
+                new_status="REPORT_DONE"
+                if res["status"] != status:
+                    updateDatasetRecord(dataset, batch_id, {"status": res["status"], "status_ts": int(time.time())})
+                    status = res["status"]
+                else:
+                    dt_hours = (time.time() - status_ts)/3600
+                    if dt_hours > 10:
+                        sys.stderr.write("Job batch %d of dataset %s is stuck in state %s for %d hour(s).\n" % 
+                                         (batch_id, dataset, status, int(dt_hours+0.5)))
+                    #endif dt_hours
+                #endif res["status"]
             else:
-                dt_hours = (time.time() - status_ts)/3600
-                if dt_hours > 10:
-                    sys.stderr.write("Job of dataset %s is stuck in state %s for %d hour(s).\n" % 
-                                     (dataset, status, int(dt_hours+0.5)))
-                 #endif
-            #endif
-            if res["status"] == "COMPLETED":
+                new_status="REPORT_DONE_WITH_FAILURES"
+            #endif status
+         
+            if status in ["COMPLETED", "CLOSED_WITH_FAILURES"]:
                 res = crabCommand("report", "-d", requestname)
-                print res
+                #print res
                 lumiSummaryFile = requestname + "/results/lumiSummary.json"
+                lumiSummaryFileEosCpy = " /eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
                 try:
                     f = open(lumiSummaryFile)
                     md5sum = hashfile(f, hashlib.md5())
                     #copy lumi file to result directory on EOS
-                    print "Save lumi summary into %s " %  (ntuple_dir + "/" + lumiSummaryFile)
-                    rc = os.system(eos_command + " cp -s " + lumiSummaryFile + " /eos/cms/" + ntuple_dir + "/" + requestname + "/lumiSummary.json")
+                    print "Save lumi summary into %s " %  (lumiSummaryFileEosCpy + "/" + lumiSummaryFile)
+                    rc = os.system(eos_command + " cp -s " + lumiSummaryFile + " " +  lumiSummaryFileEosCpy)
                     if rc!=0:
-                        sys.stderr.write("Failed to copy luminorsity summary file into EOS for dataset '%s'"  % dataset)
+                        sys.stderr.write("Failed to copy luminosity summary file into EOS for dataset '%s'"  % dataset)
                     else:
-                        updateDatasetRecord(dataset, {"status": "report_done", "n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file_md5sum": md5sum})
+                        updateDatasetRecord(dataset, batch_id, {"status": new_status, "n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file_md5sum": md5sum})
                 except IOError, e:
                     sys.stderr.write(e)
+            #endif status
+
+def forceClose(dataset, batch_id):
+    if not isDatasetInDb(dataset, batch_id):
+        sys.stderr.write("No job batch found for dataset %s. Please check the dataset name.\n" % dataset)
+        return
+    print "\nChecking the status of the jobs for dataset %s..." % dataset
+    check(dataset, batch_id)
+    status =  getDatasetStatus(dataset, batch_id)
+    if not status:
+        sys.stderr.write("Could not find the job status for dataset %s. Check dataset name.\n" % dataset)
+    elif status in ['CLOSED_WITH_FAILURES', 'report_done']:
+        sys.stderr.write("Job batch for dataset %s is already closed.\n")
+    elif status != 'FAILED':
+        sys.stderr.write("Job batch for dataset %s is in status %s. Only batch with status FAILED can be closed with this command.\n" % (dataset, status))
+    else:
+        if updateDatasetRecord(dataset, batch_id, {"status": "CLOSED_WITH_FAILURES"}):
+            print "The job batch for dataset %s has closed." % dataset
+        else:
+            sys.stderr.write("Failed to close job batch for dataset %s\n" % dataset)
+    print "\nObtaining the crab report..."
+    #call check() again to produce the crab report
+    check(dataset, batch_id)
+
+def listRuns(dataset):
+    print "Asking DAS database. This operation can take a while..."
+    sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, dasRuns(dataset)))))
 
 def main():
     createDatabase()
 
     if args.check:
-        if args.dataset_catalogs and len(args.dataset_catalogs):
-            sys.stderr.write("No further argument should be provided with the --check option.")
-            return
-        else:
-            check()
+        check()
+    elif args.force_close:
+        forceClose(args.force_close)
     elif args.list:
         dumpDatabase()
-
+    elif args.list_run2_datasets:
+        print "Asking the DAS database. This operation can take a while..."
+        dasQueryPrint("dataset=/*/Run2015*/MINIAOD")
     else:
         process_dataset_catalogs()
 
@@ -345,12 +549,22 @@ The line should be before any dataset name and should have the following format:
             if len(dataset) == 0 or commentLine.match(dataset):
                 continue
             if checkDataSetName(dataset):
+                submitJob = True
                 if args.clear:
                     clearDatasetRecord(dataset)
-                elif insertDataset(dataset, outDir, int(time.time()), 'submitting'):
-                    submitJobs(dataset, args.events_per_job, outDir, args.max_events)
-                else:
-                    sys.stderr.write("dataset %s already submitted.\n" % dataset)
+                    submitJob = False
+                if args.list_runs:
+                    listRuns(dataset)
+                    submitJob = False
+                if args.new_runs:
+                    runs = checkRunToProcess(dataset);
+                    print "%s: %s" % (dataset, ",".join(map(str, runs)))
+                    submitJob = False
+                if submitJob:
+                    res = insertBatch(dataset, outDir, int(time.time()))
+                    if res:
+                        batch_id, runs = res
+                        submitJobs(dataset, batch_id, runs, args.events_per_job, outDir, args.max_events)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
@@ -358,20 +572,40 @@ if __name__ == '__main__':
     parser.add_argument('dataset_catalogs', nargs='*',
                         help='Catalog files containing the list of CMS datasets to process')
 
+    parser.add_argument('--force-close', action='store', metavar='DATASET', default=None,
+                        help='Close a failed job batch for a dataset.')
+
     parser.add_argument('--max-events', type=int, action='store', default=-1,
                         help='Specify maximum number of events to process for each dataset. The default is to process to full dataset.')
 
-    parser.add_argument('--events-per-job', type=int, action='store', default = 5000,
+    parser.add_argument('--max-run-num', type=int, action='store', default=None,
+                        help='Specifies a maximum run number above which runs are ignored new job submissions. This maximum applies also for the result returned by --new-runs option.')
+
+    parser.add_argument('--events-per-job', type=int, action='store', default = 250000,
                         help='Specify the number of events each job should process')
 
-    parser.add_argument('--check', action='store_true',
-                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs')
+#    parser.add_argument('--check',  action='append', nargs='?', metavar='DATASET',
+#                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs. If an argument is provided, limit the check to the specified dataset. Repeat the --check DATASET options to specify several datasets.')
+    parser.add_argument('--check',  action='store_true',
+                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs.')
+
+    parser.add_argument('--new-runs', action='store_true',
+                        help='Checks and displays for each dataset the list of new runs not yet submitted. For real data.')
 
     parser.add_argument('--clear', action='store_true',
                         help='Clear from the database datasets listed in the dataset catalogs. To be used with care.')
 
     parser.add_argument('--list', action='store_true',
-                        help="Display contents of database")
+                        help="Display contents of database.")
+
+    parser.add_argument('--list-runs', action='store_true',
+                        help="List available runs for the datasets list in the catalogs.")
+
+    parser.add_argument('--list-run2-datasets', action='store_true',
+                       help="List avaialble run 2 datasets.")
+
+    parser.add_argument('-v', action='count', dest='verbosity',
+                        help="Increase verbosity")
 
     args = parser.parse_args()
 

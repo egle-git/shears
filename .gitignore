@@ -1,0 +1,53 @@
+# git will ignore the executable files:
+runVJets
+runZJets
+runRecoComparison
+runFinalUnfold
+runUnfoldingZJets
+runCombination
+dispatcher
+runMakeStatisticsTable
+DYJets/Sources/plotRespMatrix
+
+# git will not consider the following files:
+*.root
+*.o
+DYJets/RooUnfold-1.1.1/libRooUnfold.rootmap
+DYJets/RooUnfold-1.1.1/tmp
+DYJets/RooUnfold/libRooUnfold.rootmap
+DYJets/RooUnfold/tmp
+DYJets/RooUnfold/tmp/linuxx8664gcc/Roo*
+*.so
+*.d
+*.log
+tmp*.cc
+*.swp
+*.DS_Store
+copyToPNFS.sh
+
+# git will ignore the nohup output files
+.nfs*
+# git will ignore the config files
+*.cfg
+
+# git will not consider the following directory:
+
+# ignores input data files
+Data_Z_5311
+Data_Z_5311_New
+DataW
+DataTTbarEMu
+
+# ignores output root files
+DYJets/HistoFiles*
+DYJets/SystPlot*
+DYJets/UnfoldingCheck*
+DYJets/Combination*
+
+# ignores pngs and pdf output files
+DYJets/RecoComparison*
+DYJets/Unfolded*
+
+
+# feng personal files
+Azimuthal*.sh

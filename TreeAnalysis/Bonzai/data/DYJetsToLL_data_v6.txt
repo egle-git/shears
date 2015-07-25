@@ -1,0 +1,6 @@
+Data/v6/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150723_081246/0000/ntuple_1.root
+Data/v6/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150723_081246/0000/ntuple_2.root
+Data/v6/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150723_081246/0000/ntuple_3.root
+Data/v6/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150723_081246/0000/ntuple_4.root
+Data/v6/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150723_081246/0000/ntuple_5.root
+

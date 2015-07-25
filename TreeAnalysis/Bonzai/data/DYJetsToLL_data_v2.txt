@@ -1,0 +1,7 @@
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_1.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_2.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_3.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_4.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_5.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_6.root
+Data/v2/Ntuple/DoubleMuon/crab_DoubleMuon-0001/150720_203129/0000/ntuple_7.root

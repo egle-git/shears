@@ -1,0 +1,69 @@
+CINT/ROOT C/C++ Interpreter version 5.18.00, July 2, 2010
+Type ? for help. Commands must be C++ statements.
+Enclose multiple statements between { }.
+root [0] TFile *f =  new TFile("file:/eos/cms/store/group/phys_smp/VJets/DYJetsToLL_ntuple.root");
+Error in <TFile::TFile>: file /eos/cms/store/group/phys_smp/VJets/DYJetsToLL_ntuple.root does not exist
+root [1] TFile *f =  TFile::Open("root://eoscms//eos/cms/store/group/phys_smp/VJets/DYJetsToLL_ntuple.root");
+root [2] TBrowser t
+root [3] f->ls()
+TNetXNGFile**		root://eoscms//eos/cms/store/group/phys_smp/VJets/DYJetsToLL_ntuple.root	
+ TNetXNGFile*		root://eoscms//eos/cms/store/group/phys_smp/VJets/DYJetsToLL_ntuple.root	
+  TDirectoryFile*		tupel	tupel
+   OBJ: TTree	MuonTree	MuonTree : 0 at: 0x2e994f0
+   OBJ: TTree	MuonTree	MuonTree : 0 at: 0x30a7280
+   KEY: TTree	MuonTree;19	MuonTree
+   KEY: TTree	MuonTree;18	MuonTree
+  KEY: TDirectoryFile	tupel;1	tupel
+root [4] MuonTree -> Print();
+MuonTree -> MakeClass("BonzaiMaker")
+
+
+[agrebeny@lxplus0017]~/CMSSW_7_4_0_pre9/src/Bonzai% ./runMyTree DYJetsToLL_ntuple.txt
+
+https://github.com/iihe-cms-sw/TreeAnalysis/blob/master/Bonzais/BonzaiMaker.cc
+
+root [9] tree->Draw("patMuonPt_", "abs(patMuonEta_) <= 2.4 && patMuonPt_ > 20")
+(Long64_t)18998
+root [13] MuonTree->Draw("Bare01LepPt", "abs(Bare01LepId) == 13 && abs(Bare01LepEta) <= 2.4 && Bare01LepPt > 20")
+
+https://github.com/iihe-cms-sw/TreeAnalysis/blob/master/Bonzais/BonzaiMaker.cc
+(Long64_t)19065
+https://github.com/iihe-cms-sw/TreeAnalysis/blob/master/DYJets/example.cfg
+https://github.com/UGent/Tupel/blob/master/Tupel/src/Tupel.cc
+
+https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
+https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuons
+
+
+https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjAnalysisFramework
+https://indico.cern.ch/event/373976/
+https://github.com/iihe-cms-sw/TreeAnalysis
+------------------------------------------------------------------------------
+
+
+
+EvtIsRealData : Int -> Bool
+
+EvtNumVtx
+
+Id: some Int some unsigned Int
+
+JetAk04JetBetaClassic  vs  JetAk04JetBeta?
+
+GJetAk04ChFrac is empty
+
+JetAk04JetBetaStar  is empty
+JetAk04JetBeta    is empty
+
+----------------
+DEF_BIT(TrigHlt, 0, Elec17_Elec8);
+
+if(std::string(trigname[i]).find("HLT_Mu17_Mu8")!=std::string::npos)    *TrigHlt_ |= Mu17_Mu8;
+if(std::string(trigname[i]).find("HLT_Mu17_TkMu8")!=std::string::npos)  *TrigHlt_ |= Mu17_TkMu8;
+if(std::string(trigname[i]).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) 
+                                                                        *TrigHlt_ |= kElec17_Elec8_;
+      }
+
+-------------------------
+JetAk04ChHadFrac;
+

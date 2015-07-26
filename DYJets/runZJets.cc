@@ -20,8 +20,10 @@ int main(int argc, char **argv)
     TString histoDir   = cfg.getS("histoDir", "HistoFilesAugust");
     TString lepSel     = cfg.getS("lepSel", "DMu");
     TString doWhat     = cfg.getS("doWhat", "DYJETS");
-    int lepPtMin       = cfg.getI("lepPtMin", 20);
-    int lepEtaMax      = cfg.getI("lepEtaMax", 24);
+   // int lepPtMin       = cfg.getI("lepPtMin", 20);
+   // int lepEtaMax      = cfg.getI("lepEtaMax", 24);
+    int lepPtMin       = cfg.getI("lepPtMin", 0);
+    int lepEtaMax      = cfg.getI("lepEtaMax", 55);
     int jetPtMin       = cfg.getI("jetPtMin", 30);
     int jetEtaMax      = cfg.getI("jetEtaMax", 24);
     int whichSyst      = cfg.getI("whichSyst", -1);
@@ -161,7 +163,7 @@ int main(int argc, char **argv)
         hasGenInfo = false;
         for (unsigned int i(start); i < NSystData; i++) {
             if (i == 0 && !doCentral && whichSyst < 0) continue;
-            ZJets Data(lepSel + "_8TeV_Data_dR", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets Data(lepSel + "_DYJetsToLL_data_v5_13TeV", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             Data.Loop(hasRecoInfo, hasGenInfo);
             //ZJets DMudataA(lepSel + "_8TeV_Data_dR_RunA", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             //DMudataA.Loop(hasRecoInfo, hasGenInfo);
@@ -230,7 +232,7 @@ int main(int argc, char **argv)
 
         for (unsigned int i(start); i < NSystSig; i++) { 
             if (i == 0 && !doCentral && whichSyst < 0) continue;
-            ZJets DYMix(lepSel + "_8TeV_DYJetsToLL_MIX_50toInf_UNFOLDING_dR", lumi*3531.8*1000/30459503., 1, dySyst[i], dyDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets DYMix(lepSel + "_MC_DYJets_13TeV", 1., 1, dySyst[i], dyDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             DYMix.Loop(hasRecoInfo, hasGenInfo);
             //ZJets DY(lepSel + "_8TeV_DYJetsToLL_50toInf_UNFOLDING_dR", lumi*3531.8*1000/30459503., 1, dySyst[i], dyDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             //DY.Loop(hasRecoInfo, hasGenInfo);
@@ -256,9 +258,11 @@ int main(int argc, char **argv)
     }
 
     if (doWhat == "AMCATNLO") {
+        hasRecoInfo = true; 
+        hasGenInfo = true;
         //ZJets DYamcatNLO(lepSel + "_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_dR", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-        ZJets DYamcatNLO(lepSel + "_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-        DYamcatNLO.Loop(0, 1, "", -1, muR, muF);
+        ZJets DYamcatNLO(lepSel + "_DYJetsToLL_amcatnlo_13TeV", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+        DYamcatNLO.Loop(hasRecoInfo, hasGenInfo, "", -1, muR, muF);  // AG: original: DYamcatNLO.Loop(0, 1, "", -1, muR, muF
    /*     for (int pdfMember(0); pdfMember <= 100; ++pdfMember) {
             ZJets DYamcatNLO(lepSel + "_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             DYamcatNLO.Loop(0, 1, "", pdfMember, 0, 0);

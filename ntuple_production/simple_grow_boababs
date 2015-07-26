@@ -5,29 +5,51 @@ Commmand to launch baobab ntuple production
 import argparse
 import sys
 import re
+import glob
+import os.path
 
 try:
     from CRABAPI.RawCommand import crabCommand
 except ImportError:
-    sys.stderr,write("CRAB 3 environment needs to be set before running this script.")
+    sys.stderr.write("\nCRAB 3 environment needs to be set before running this script and before setting the CMSSW environment (cmsenv or scram runtime).\n\n")
     sys.exit(1)
 
 from httplib import HTTPException
 from WMCore.Configuration import Configuration
 
+input_json_file="/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_*-*_13TeV_PromptReco_Collisions15_JSON.txt"
 
-parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
+parser = argparse.ArgumentParser(description='Tool from the Shears framwork [1] to launch a Baobab nutple production on the GRID.', epilog='[1]  https://twiki.cern.ch/twiki/bin/viewauth/CMS/ShearsAnalysisFramework')
 
 parser.add_argument('dataset_catalogs', nargs='+',
                     help='Catalog files containing the list of CMS datasets to process')
 
 parser.add_argument('--max-events', type=int, action='store', default=-1,
-                    help='Specify maximum number of events to process for each dataset. The default is to process to full dataset.')
+                    help='Specify the maximum number of events to process for each dataset. The default is to process to full dataset.')
 
 parser.add_argument('--events-per-job', type=int, action='store', default = 100000,
                     help='Specify the number of events each job should process')
 
+parser.add_argument('--no-submit', action='store_true',
+                    help='With this option the crab configuration files are created but the crab tasks are not submitted')
+
+
 args = parser.parse_args()
+
+def getLumiMaskJsonFile():
+    """Gets the input json file indicating the certified luminosity section which can be processed."""
+    candidates = glob.glob(input_json_file)
+    latest_ts = 0
+    latest_file = None
+    for f in candidates:
+        ts = os.path.getmtime(f)
+        if ts > latest_ts:
+            latest_file = f
+            latest_ts = ts
+    if not latest_file:
+        raise RuntimeError("JSON file required to process real data was not found. We have looked for files named %s" % input_json_file)
+    return latest_file
+
 
 def checkDataSetName(dataset):
     a = dataset.split("/")
@@ -42,19 +64,22 @@ def checkDataSetName(dataset):
 
 def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
     """Build the crab configuration file."""
-#    dataset_tier = dataset.split("/")[3]
-#
-#    if dataset_tier.find("SIM") > 0:
-#        isMC = True
-#    else:
-#        isMC = False
+    
+    dataset_tier = dataset.split("/")[3]
+
+    if dataset_tier.find("SIM") > 0:
+        isMC = True
+    else:
+        isMC = False
+    #endif
+    
     config = Configuration()
 
     config.section_('General')
 #----------------------------------------------------------------------
 
 #Request name. Used to identify job batch and to name the result directory    
-    config.General.requestName = dataset.split('/')[2]
+    config.General.requestName = dataset.split('/')[1]
 
 #Switch for the copy of the results to the storage site.
     config.General.transferOutputs = True
@@ -74,6 +99,11 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
 # Name of the dataset to analyze
     config.Data.inputDataset = dataset
 
+# List of certified luminosity section, which can be processed
+# (applies to real data only)
+    if not isMC:
+        config.Data.lumiMask = getLumiMaskJsonFile()
+
 # Output directory on the storage site (storage site defined in the Site section)
     config.Data.outLFNDirBase = outDir
 
@@ -85,6 +115,8 @@ def getCrabConfig(dataset, unitsPerJob, outDir, maxEvents):
 # Number of units to produce or process
     if maxEvents and maxEvents > 0:
         config.Data.totalUnits = maxEvents
+        if maxEvents < unitsPerJob:
+            unitsPerJob = maxEvents
 
 # Number of units (events in case of PrivateMC)  per job
     config.Data.unitsPerJob = unitsPerJob
@@ -111,9 +143,14 @@ def submitJobs(dataset, unitsPerJob, outDir, maxEvents):
     """Submit crab jobs to produce the Baobab ntuple from a provided dataset."""
     crab_config = getCrabConfig(dataset, unitsPerJob, outDir, maxEvents)
 
-    f = open("crab_" + dataset.split("/")[2] + ".py", "w")
+    crab_cfg_file = "crab_" + dataset.split("/")[1] + ".py"
+    f = open(crab_cfg_file, "w")
     f.write(str(crab_config))
     f.close()
+
+    if args.no_submit:
+        print "Crab configuration file %s created." % crab_cfg_file
+        return
 
     try:
         res = crabCommand('submit', config = crab_config)

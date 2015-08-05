@@ -24,7 +24,7 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     TH1::SetDefaultSumw2();
     gStyle->SetOptStat(0);
 
-    TString energy = "8TeV";
+    TString energy = "13TeV";
 
     int Colors[NFILESDYJETS];
     TString legendNames[NFILESDYJETS];
@@ -136,7 +136,7 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     TLatex *intLumi = new TLatex();
     intLumi->SetTextSize(0.03);
     intLumi->SetTextFont(42);
-    intLumi->SetLineWidth(2);
+    intLumi->SetLineWidth(2);  
     intLumi->SetTextColor(kBlack);
     intLumi->SetNDC();
     intLumi->SetTextAlign(31);
@@ -231,7 +231,7 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
                 else {
                     ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |#eta^{jet}| < " << (0.1*jetEtaMax);
                 }
-                jetAlgo->DrawLatex(0.13,0.74, "anti-k_{t} jets,  R = 0.5");
+                jetAlgo->DrawLatex(0.13,0.74, "anti-k_{t} jets,  R = 0.4");
                 jetCuts->DrawLatex(0.13,0.70, ptLegend.str().c_str());
             }
             pad1->Draw();

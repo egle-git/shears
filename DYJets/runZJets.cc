@@ -110,7 +110,8 @@ int main(int argc, char **argv)
 
     double lumi; 
     if      (lepSel == "DE")  lumi = 19.618;
-    else if (lepSel == "DMu") lumi = 19.584;
+    else if (lepSel == "DMu") lumi = 18.747;  // 13 TeV data v7
+    else if (lepSel == "DMu") lumi = 21.468;   // 13 TeV data v7_1
     else if (lepSel == "SMu") lumi = 19.244;
     else if (lepSel == "SE")  lumi = 19.174;
 
@@ -163,16 +164,16 @@ int main(int argc, char **argv)
         hasGenInfo = false;
         for (unsigned int i(start); i < NSystData; i++) {
             if (i == 0 && !doCentral && whichSyst < 0) continue;
-            ZJets Data(lepSel + "_DYJetsToLL_data_v5_13TeV", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+          //  ZJets Data(lepSel + "_DYJetsToLL_data_v7_fullstat_13TeV", 1./18.747, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+          // ZJets Data(lepSel + "_DYJetsToLL_data_v7_1_fullstat_13TeV", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+        //   ZJets Data(lepSel + "_data_tot", 1000.*19.6/(21.468*1.8), 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+         ZJets Data(lepSel + "_data_tot", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
             Data.Loop(hasRecoInfo, hasGenInfo);
-            //ZJets DMudataA(lepSel + "_8TeV_Data_dR_RunA", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-            //DMudataA.Loop(hasRecoInfo, hasGenInfo);
-            //ZJets DMudataB(lepSel + "_8TeV_Data_dR_RunB", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-            //DMudataB.Loop(hasRecoInfo, hasGenInfo);
-            //ZJets DMudataC(lepSel + "_8TeV_Data_dR_RunC", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-            //DMudataC.Loop(hasRecoInfo, hasGenInfo);
-            //ZJets DMudataD(lepSel + "_8TeV_Data_dR_RunD", 1, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-            //DMudataD.Loop(hasRecoInfo, hasGenInfo);
+   
         }
     }
 
@@ -257,11 +258,22 @@ int main(int argc, char **argv)
         DYShe.Loop(1, 1);
     }
 
+//cout << "lepSel " << lepSel << "\n";
     if (doWhat == "AMCATNLO") {
+      //  cout << "we are here" << "\n";
         hasRecoInfo = true; 
         hasGenInfo = true;
         //ZJets DYamcatNLO(lepSel + "_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_dR", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
-        ZJets DYamcatNLO(lepSel + "_DYJetsToLL_amcatnlo_13TeV", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+        // amcatnlo_v1_fullstat: sumWeight: 9.33656e+10, Nev: 5943064
+       //  ZJets DYamcatNLO(lepSel + "_DYJetsToLL_amcatnlo_v1_fullstat_13TeV", 2008./(9.33656e+10), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets DYamcatNLO(lepSel +"_amcatnlo_ntuple_1", 21.468*2008.*3/(3.91442e+09), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+       // ZJets DYamcatNLO(lepSel + "_DYJetsToLL_v3_amcatnlo_fullstat_13TeV", 21.468*2008.*3/(3.12994e+11), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+       // ZJets DYamcatNLO(lepSel + "_DYJetsToLL_v3_amcatnlo_smallSample_13TeV", 21.468*2008.*3/(1.56452e+09), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+
+
+
         DYamcatNLO.Loop(hasRecoInfo, hasGenInfo, "", -1, muR, muF);  // AG: original: DYamcatNLO.Loop(0, 1, "", -1, muR, muF
    /*     for (int pdfMember(0); pdfMember <= 100; ++pdfMember) {
             ZJets DYamcatNLO(lepSel + "_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR", lumi*3531.8*1000., 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);

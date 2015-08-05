@@ -2,7 +2,7 @@
 #define __fileNames__
 
 //-- directory of input root files --------------------
-const string FILESDIRECTORY("HistoFilesAugust/");
+const string FILESDIRECTORY("HistoFiles/");
 //---------- lets add basic information on samples inot common struct -------------------------------------------
 struct processInfoStruct{
     string filename;
@@ -14,8 +14,10 @@ struct processInfoStruct{
 const processInfoStruct ProcessInfo[] = {
     //--  Name  ---------------------------- #events ---- xsec - branch - xsec error (%) -- color for plot -- name on legend
     {"Data_dR",                           1,          1.,      1,         1,             kBlack,      " Data"},
-    {"WJetsALL_MIX_UNFOLDING_dR",         76102995.,  36864.,  1,         0.03,          kPink,       " WJets"},
-    {"ZZ_dR",	                          9799908.,   17.654,  1,         0.04,          kOrange,     " ZZ"},    
+    {"WJetsALL_MIX_UNFOLDING_dR",         1,  	      1.,      1,         1,            kPink,       " WJets"},
+  //  {"WJetsALL_MIX_UNFOLDING_dR",         76102995.,  36864.,  1,         0.03,          kPink,       " WJets"},
+ /* 
+   {"ZZ_dR",	                          9799908.,   17.654,  1,         0.04,          kOrange,     " ZZ"},    
     {"WZ_dR",	                          10000283.,  33.21,   1,         0.05,          kRed+1,      " WZ"},	
     {"WW_dR",	                          10000431.,  54.838,  1,         0.05,          kViolet+5,   " WW"},
     {"T_s_channel_dR",	                  259961.,    3.79,    1,         0.10,          kMagenta,    " Ts"},
@@ -41,6 +43,7 @@ const processInfoStruct ProcessInfo[] = {
     {"WJetsALL_MIX_dR",                   76102995.,  36864.,  1,         0.03,          kPink,       " WJets"}, // relative weight for mixed DY and WJ files are set inthe code
     {"WJetsALL_dR",                       76102995.,  36864.,  1,         0.03,          kPink,       " WJets"},
     {"DYJetsToLL_50toInf_UNFOLDING_dR",   30459503.,  3531.8,  1,         0.04,          kAzure+10,   " DYJets"}, /// up to this line files are set for W+jet s and TTbar
+*/
 };
 
 //--- first element must point to the data
@@ -59,37 +62,37 @@ const int DYMADGRAPHFILENAME(13); // Exclusive files
 //-- file names ---------------------------------------
 const string FILENAMESTTbar[NFILESTTBAR] = {
     "Data_dR",
-    "ZZ_dR",
-    "WZ_dR",
-    "WW_dR",
+   // "ZZ_dR",
+   // "WZ_dR",
+   // "WW_dR",
     "WJetsALL_UNFOLDING_dR",
-    "DataQCD_dR",
-    "Top_dR",
-    "TTJets_dR",
-    "DYJets10toInf3_dR",
+   // "DataQCD_dR",
+   // "Top_dR",
+   // "TTJets_dR",
+   // "DYJets10toInf3_dR",
 };
 const int NFILESVJETS(14);
 const string FILENAMES[NFILESVJETS] = {
     "Data_dR",
     "WJetsALL_MIX_dR",
-    "DYJets_FromTau_UNFOLDING_dR_Inf3",
-    "Top_dR",
-    "ZZJets2L2Nu_dR",
-    "ZZJets4L_dR",
-    "ZZJets2L2Q_dR",
-    "WZJets3LNu_dR",
-    "WZJets2L2Q_dR",
-    "WWJets2L2Nu_dR",
-    "TTJets_dR",
+  //  "DYJets_FromTau_UNFOLDING_dR_Inf3",
+   // "Top_dR",
+   // "ZZJets2L2Nu_dR",
+   // "ZZJets4L_dR",
+   // "ZZJets2L2Q_dR",
+    //"WZJets3LNu_dR",
+   // "WZJets2L2Q_dR",
+   // "WWJets2L2Nu_dR",
+   // "TTJets_dR",
     //"DYJets_UNFOLDING_NOLEPTON",
     //"DYJets_UNFOLDING_dR_Inf3",
-    "DYJets_MIX_UNFOLDING_dR_Inf3",
+   // "DYJets_MIX_UNFOLDING_dR_Inf3",
     // "DY01234Jets_UNFOLDING_dR_Inf3",
     //"DYJets_PowhegNLO1Jet_GEN",
-    "DYJets_PowhegZ2jMiNLO_dR_GEN_CernMOJ",
+    //"DYJets_PowhegZ2jMiNLO_dR_GEN_CernMOJ",
     //"DYJets_UNFOLDING_Sherpa",
     //"DY_Sherpa_1NLO4_HepMC_dR_Full_List",
-    "DY_Sherpa_2NLO4_HepMC_dR_Full_ListALL"
+    //"DY_Sherpa_2NLO4_HepMC_dR_Full_ListALL"
 }; 
 //-----------------------------------------------------
 

@@ -86,7 +86,7 @@ void BonzaiMaker::Loop()
    
    TFile *outputFile = new TFile(outFileRoot.c_str(), "recreate");   
    if(cfg_.getS("outputDir") == "eos"){
-            string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/"+cfg_.getS("lepSel")+"_"+ strNew + "_" + cfg_.getS("CMEnergy")+".root" ;  
+            string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/"+cfg_.getS("lepSel")+"_"+ strNew + "_fullstat_" + cfg_.getS("CMEnergy")+".root" ;  
           outputFile = new TFile(outFileRoot.c_str(), "recreate");  
     }
 
@@ -104,6 +104,7 @@ void BonzaiMaker::Loop()
 
     // statistics 
     int passedEvents = 0;
+    double weight_amcNLO_sum = 0;
     //--------------------------------------------------------
 
     //--------------------------------------------------------
@@ -340,6 +341,10 @@ void BonzaiMaker::Loop()
 
        if (jentry % 10000 == 0) cout << jentry << " of " << nentries << endl; 
        if (DEBUG) cout << " EvtNum : " << EvtNum << endl;
+
+       if (!EvtIsRealData) weight_amcNLO_sum += EvtWeights->at(0); 
+
+
        EvtVtxCnt_out = -111;
        EvtRunNum_out = -111;
        EvtLumiNum_out = -111;
@@ -455,7 +460,7 @@ void BonzaiMaker::Loop()
                 if ((abs(GLepSt3Id->at(i)) >= 11 &&  abs(GLepSt3Id->at(i)) <= 16) || (abs(GLepSt3Id->at(i)) < 7)) {
                     if (leptonIdSum != 24 && abs(GLepSt3Id->at(i)) == lepID) genLep++; 
                 }
-                //    double sign = GLepSt3Id->at(i) > 0 ? 1 : -1;
+                  //  double sign = GLepSt3Id->at(i) > 0 ? 1 : -1;
 /*
                     // cout << "sign = " << sign << "\n";
                     GLepSt1and3Id_out.push_back((int) GLepSt3Id->at(i)); 
@@ -612,15 +617,23 @@ void BonzaiMaker::Loop()
                     else invIsoCountMuon++;
                 }
 
-
+ 
                double muonTrig = 0 ;
                //cout << TrigHlt << "\n";
-               //if (leptonIdSum == 13 && TRIGbits[6]) muonTrig += 1 ; // single muon HLT_IsoMu24_eta2p1_v ?? 
+/*
+               if (leptonIdSum == 13 && TrigHlt & 8 ) muonTrig += 8 ;  // single HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v2 
+               if (leptonIdSum == 13 && TrigHlt & 14 ) muonTrig += 14 ; // HLT_IsoMu24_eta2p1_CentralPFJet30_BTagCSV07_v2 
+               if (leptonIdSum == 13 && TrigHlt & 15 ) muonTrig += 15 ; // HLT_IsoMu24_eta2p1_TriCentralPFJet30_v2
+               if (leptonIdSum == 13 && TrigHlt & 16 ) muonTrig += 16 ;  //  HLT_IsoMu24_eta2p1_TriCentralPFJet50_40_30_v2
+               if (leptonIdSum == 13 && TrigHlt & 17 ) muonTrig += 17 ;  // HLT_IsoMu24_eta2p1_v2
+*/
+               if (leptonIdSum == 13 && TrigHlt & 14) muonTrig += 1 ; 
                if (leptonIdSum == 26 && TrigHlt & 2) muonTrig += 4 ; // HLT_Mu17_TkMu8_v muon ?? 
-               if (leptonIdSum == 26 && TrigHlt & 1) muonTrig += 8 ; // HLT_Mu17_Mu8_v muon ?? 
+             //  if (leptonIdSum == 26 && TrigHlt & 1) muonTrig += 1 ; // HLT_Mu17_Mu8_v muon ?? 
+
                // if (leptonIdSum == 24 && TRIGbits[4]) muonTrig += 16 ; // MuEle ?? 
                // if (leptonIdSum == 24 && TRIGbits[5]) muonTrig += 32 ; // EleMu ?? 
-               // cout << muonTrig << "\n";
+            //    cout << muonTrig << "\n";
                 patMuonTrig_.push_back(muonTrig);
                 MuVtxZ_out.push_back((float)MuVtxZ->at(i));
              
@@ -701,6 +714,7 @@ void BonzaiMaker::Loop()
    //-- save the output tree --
    outputTree->Write();
    cout << " Passed netries =  " << passedEvents << endl;
+   cout << " weight_amcNLO_sum = " << weight_amcNLO_sum << "\n";
    cout << " Saving the tree " << endl;
     //  delete outputFile;
    outputFile->Close();

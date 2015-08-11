@@ -4,6 +4,7 @@
 // Jul. 24, 15. Cloned Squeezer and adapted to the Shears framework
 
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <iomanip>
 #include <sys/time.h>
@@ -12,6 +13,9 @@
 #include "TBranch.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TChain.h"
+#include "TLeaf.h"
+#include <libgen.h>
 
 #include "Pruner.h"
 
@@ -21,44 +25,73 @@ using std::endl;
 
 std::map<std::string, Pruner::ClassRecord> Pruner::daughters_;
 
-void Pruner::listEvents(std::ostream& o, const char* inputDataFile){
-
-  fin_ = std::auto_ptr<TFile>(new TFile(inputDataFile));
-
-  if(fin_->IsZombie()){ cout << "Failed to open input ntuple file "
-			     << inputDataFile << endl;
-    return;
-  }
-  //  for(Long64_t i = 0; i < eventSummary_->GetEntries(); ++i){
-  //    eventSummary_->GetEntry(i);
-  //  o << std::setw(8) << runNum_ << std::setw(8) << " " << eventNum_ << endl;
-  //}
-  o << "This functionnality is not implemented yet" << endl;
+void Pruner::listEvents(std::ostream& o, const char* const catalog){
+  setInput(catalog);
+  listEvents(o);
 }
 
-void Pruner::listBranches(std::ostream& o, const char* inputDataFile){
+void Pruner::listEvents(std::ostream& o, size_t nInputFiles, const char* const inputFiles[]){
+ setInput(nInputFiles, inputFiles);
+ listEvents(o);
+}
 
-  init(inputDataFile);
-
-  if(eventTree_.inTree){
-    //TIter itTree(&trees_);
-    //while(itTree.Next()){
-    //TTree* tree = ((TreeRcd*) (*itTree))->tree;
-    //TO CHECK: is list of leaves fine or should we use GetListOfBranches
-    //recursively?
-    //TObjArray* ls = tree->GetListOfLeaves();
-    TObjArray* ls = eventTree_.inTree->GetListOfLeaves();
-    TIter it(ls);
-    while(it.Next()) o << (*it)->GetName() << endl;
+void Pruner::listEvents(std::ostream& o){
+  if((eventNum_ == 0) || (runNum_ == 0)){
+    std::cerr << "Event and/or run number information was not found in the input "
+      "file.\n";
+    return;
   }
+
+  int treeNum = -1;
+  //For performance concerns, we don't call GetEntries, which requires access
+  //to all the files of the chain.
+  std::string f_basename;
+  for(Long64_t i = 0;; ++i){
+    if(treeNum != chain_.LoadTree(i)){
+      char* f = strdup(chain_.GetFile()->GetName());
+      if(f){
+	f_basename = basename(f);
+	free(f);
+      } else{
+	f_basename = "";
+      }
+    }
+    if(0 == chain_.GetEntry(i)) break;
+    o << std::setw(8) << *runNum_ << std::setw(8) << "\t" << *eventNum_
+      << "\t" << f_basename << endl;
+  }
+}
+
+void Pruner::listBranchesFromCat(std::ostream& o, const char* catalog){
+  setInput(catalog);
+  listBranches(o);
+}
+void Pruner::listBranches(std::ostream& o, const char* inputDataFile){
+  setInput(1, &inputDataFile);
+  listBranches(o);
+}
+void Pruner::listBranches(std::ostream& o){
+  TObjArray* ls = chain_.GetListOfLeaves();
+  TIter it(ls);
+  while(it.Next()) o << (*it)->GetName() << endl;
 }
 
 void Pruner::fillRunSummary(){
 
-  const char* treesToCopy[] = {"Header", "Description", "BitFields"};
+  std::cerr << "Pruner::fillRunSummary(), event " << ievent_
+	    << "\tfile " << chain_.GetFile()->GetName() << "\n";
 
-  fin_->cd();
-  fin_->cd("tupel");
+  struct {
+    const char* name;
+    TTree** ppTree;
+    bool singleEntry;
+  } outTrees [] = {{"Header", &outHeaderTree_, false},
+		      {"Description", &outDescriptionTree_, true},
+		      {"BitFields", &outBitFieldsTree_, true}};
+
+  TFile* fin = chain_.GetFile();
+  fin->cd();
+  fin->cd("tupel");
   TList* fcontent = gDirectory->GetListOfKeys();
   TIter it(fcontent);
   TKey* key = 0;
@@ -67,11 +100,11 @@ void Pruner::fillRunSummary(){
 
     if(strcmp(key->GetClassName(), "TTree") != 0) continue;
 
-    bool toCopy = false;
-    for(unsigned i = 0; i < sizeof(treesToCopy)/sizeof(treesToCopy[0]); ++i){
-      if(strcmp(key->GetName(), treesToCopy[i]) == 0) toCopy = true;
+    unsigned iTree = 0;
+    for(; iTree < sizeof(outTrees)/sizeof(outTrees[0]); ++iTree){
+      if(strcmp(key->GetName(), outTrees[iTree].name) == 0) break;
     }
-    if(!toCopy) continue;
+    if(iTree == sizeof(outTrees)/sizeof(outTrees[0])) continue;
 
     TTree* tree =  (TTree*) key->ReadObj();
     if(tree==0){
@@ -87,38 +120,55 @@ void Pruner::fillRunSummary(){
     fout_->cd();
     TDirectory::CurrentDirectory()->cd("tupel");
 
-    TTree* treeOut = tree->CloneTree(0);
+    if(*outTrees[iTree].ppTree){
+      if(outTrees[iTree].singleEntry) continue; //only tree of 1st file should be copied
+      tree->CopyAddresses(*outTrees[iTree].ppTree);
+    } else{
+      *outTrees[iTree].ppTree = tree->CloneTree(0);
+    }
     tree->GetEntry(0);
-    treeOut->Fill();
-    treeOut->AutoSave();
-    fin_->cd();
+
+    (*outTrees[iTree].ppTree)->Fill();
+    (*outTrees[iTree].ppTree)->AutoSave();
+    fin->cd();
   }
 }
 
-void Pruner::run(const char* inputDataFile, const char* outputDataFile){
+void Pruner::run(const char* inputCatalog, const char* outputDataFile){
+  setInput(inputCatalog);
+  if(!init((TChain*) &chain_)){
+    std::cerr << "Failed to initialize the event filter. Method "
+	      << (className_.size() > 0 ? className_ + "::" : "")
+	      << "init(TChain*) returned code false.\n";
+    return;
+  }
+  if(!setOutput(outputDataFile)) return;
+  run();
+}
+
+void Pruner::run(size_t nInputFiles, const char* const inputDataFiles[], const char* outputDataFile){
+  setInput(nInputFiles, inputDataFiles);
+  if(!init((TChain*) &chain_)){
+    std::cerr << "Failed to initialize the event filter. Method "
+	      << className_ << "::init(TChain*) returned code false.\n";
+    return;
+  }
+  if(!setOutput(outputDataFile)) return;
+  run();
+}
+
+void Pruner::run(){
   timeval start;
 
   gettimeofday(&start, 0);
 
-  init(inputDataFile, outputDataFile);
+  if(chain_.GetFile() == 0) return;
 
-  fin_->cd();
+  chain_.GetFile()->cd(); //Is this cd needed?
 
-  ////----
   Long64_t nevts;
-//  TIter itT(&trees_);
-//  while(itT.Next()){
-//    nevts = ((TreeRcd*)(*itT))->tree->GetEntries();
-//  }
 
-  if(eventTree_.inTree == 0) return;
-
-  init(eventTree_.inTree);
-
-
-
-  nevts = eventTree_.inTree->GetEntries();
-
+  nevts = chain_.GetEntries();
 
   if(maxEvents_ >=0 && nevts > maxEvents_) nevts = maxEvents_;
 
@@ -155,11 +205,9 @@ void Pruner::run(const char* inputDataFile, const char* outputDataFile){
   } //next event
   cout << "\n";
 
-  fillRunSummary();
+  //  fillRunSummary();
 
-  //  TIter itTree(&trees_);
-  //while(itTree.Next()){ ((TreeRcd*) (*itTree))->outTree->AutoSave(); }
-  if(eventTree_.outTree) eventTree_.outTree->AutoSave();
+  if(outEventTree_) outEventTree_->AutoSave();
   fout_->Close();
 
   gettimeofday(&t, 0);
@@ -180,11 +228,17 @@ void Pruner::readEventList(const char* fileName){
     //      while(0==fscanf(f, " # ")) {/*NOP*/}
     int run;
     int event;
-    int n = fscanf(f, " %d %d ", &run, &event);
-    if(n!=2){
+
+    char buffer[256];
+    int n = fscanf(f, " %d %d %255s\n", &run, &event, buffer);
+    if(n==2){
+      buffer[0] = 0;
+      n = 3;
+    }
+    if(n!=3){
       ++nerr;
     } else{
-      eventList_.push_back((((Long64_t)run) <<RUN_OFFSET) + event);
+      eventList_.push_back(EventRcd(run, event, std::string(buffer)));
     }
   }
   sort(eventList_.begin(), eventList_.end());
@@ -192,19 +246,19 @@ void Pruner::readEventList(const char* fileName){
   if(verbose_>1){
     cout << "Event to select: \n";
     for(size_t i = 0; i < eventList_.size(); ++i){
-      cout << "Run " << (eventList_[i] >>32) << " event "
-	   << (eventList_[i] & 0xFFFFFFFF) << "\n";
+      cout << "Run " << eventList_[i].event << " event "
+	   << eventList_[i].run << "\n";
     }
   }
 }
 
-void Pruner::readExcludedBranchList(const char* fileName){
+void Pruner::readBranchList(const char* fileName){
   FILE* f = fopen(fileName, "r");
   if(f==0) {
     cout << "Failed to open exluded tree list file "
 	 << fileName << endl; abort();
   }
-  excludedBranchList_.clear();
+  branchList_.clear();
   int nerr = 0;
   while(!feof(f)){
     //      while(0==fscanf(f, " # ")) {/*NOP*/}
@@ -214,146 +268,212 @@ void Pruner::readExcludedBranchList(const char* fileName){
     if(n!=1){
       ++nerr;
     } else{
-      excludedBranchList_.push_back(std::string(branchName));
+      branchList_.push_back(std::string(branchName));
     }
   }
 
-  sort(excludedBranchList_.begin(), excludedBranchList_.end());
+  sort(branchList_.begin(), branchList_.end());
   if(nerr!=0) cout << nerr << " lines of " << fileName << " were skipped\n";
   if(verbose_>1){
-    cout << "Branches to exclude from copy: \n";
-    for(size_t i = 0; i < excludedBranchList_.size(); ++i){
-      cout << excludedBranchList_[i] << "\n";
+    cout << "Branches to include in the tree copy: \n";
+    for(size_t i = 0; i < branchList_.size(); ++i){
+      cout << branchList_[i] << "\n";
     }
   }
 }
 
-
 /** Initialize input and output files and trees
  */
-bool Pruner::init(const char* inputDataFile, const char* outputDataFile){
-
-  fin_ = std::auto_ptr<TFile>(new TFile(inputDataFile));
-
-  if(fin_->IsZombie()){
-    cout << "Failed to open input ntuple file "
-	 << inputDataFile << endl;
-    abort();
+void Pruner::setInput(size_t nInputFiles, const char* const inputDataFiles[]){
+  for(unsigned i = 0; i < nInputFiles; ++i){
+    chain_.Add(TString(inputDataFiles[i]));
   }
 
-  fin_->ls();
-  fin_->cd("tupel");
-  TList* fcontent = gDirectory->GetListOfKeys();
-  if(fcontent==0) {
-    cout << "File " << inputDataFile << " is empty! " << endl;
-    abort();
+  //sets runNum_ and eventNum_ pointers
+  TBranch* br = chain_.GetBranch("EvtNum");
+  TLeaf* leaf;
+  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+    eventNum_ = (UInt_t*) leaf->GetValuePointer();
+  }
+  br = chain_.GetBranch("EvtRunNum");
+  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+    runNum_ = (UInt_t*) leaf->GetValuePointer();
   }
 
+}
+
+void Pruner::setInput(const char* catalog){
+  std::ifstream f(catalog);
+  if(!f.good()){
+    std::cerr << "Failed to open file "<< catalog << "!\n";
+    return;
+  }
+
+  int iline = 0;
+  while(f.good()){
+    ++iline;
+    std::string l;
+    std::string::size_type p;
+
+    std::getline(f, l);
+
+    //trim white spaces:
+    p = l.find_first_not_of(" \t");
+    if(p!=std::string::npos) l.erase(0, p);
+    p = l.find_last_not_of(" \t\n\r");
+    if(p!=std::string::npos) l.erase(p + 1);
+    else l.clear();
+
+    //skip empty lines and comment lines:
+    if (!l.size() || l[0] == '#') continue;
+
+    //extract first column (file name):
+    p = l.find_first_of(" \t");
+    if(p!=std::string::npos) l.erase(p);
+
+    //sanity check:
+    const char ext[] = ".root";
+
+    if(l.size() < sizeof(ext) || l.substr(l.size() - sizeof(ext) + 1) != ext){
+      std::cerr << "Line " << iline << " of catalog file " << catalog << " was skipped.\n";
+      continue;
+    }
+
+    //Solves EOS paths:
+    if(l.substr(0,7) == "/store/"){
+      //A CMS EOS path
+      l.insert(0, "root://eoscms//eos/cms");
+    }
+
+    //Adds path to tree within the ROOT file structure:
+    //l.append("/tupel/EventTree");
+
+    if(verbose_>0){
+      std::cout << "Add file " << l.c_str() << " to the list of input files.\n";
+    }
+
+    chain_.Add(l.c_str());
+  }
+
+  //sets runNum_ and eventNum_ pointers
+  TBranch* br = chain_.GetBranch("EvtNum");
+  TLeaf* leaf;
+  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+    eventNum_ = (UInt_t*) leaf->GetValuePointer();
+  }
+  br = chain_.GetBranch("EvtRunNum");
+  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+    runNum_ = (UInt_t*) leaf->GetValuePointer();
+  }
+}
+
+bool Pruner::setOutput(const char* outputDataFile){
   if(outputDataFile){
     fout_ = std::auto_ptr<TFile>(new TFile(outputDataFile, "RECREATE"));
 
     if(fout_->IsZombie()){
       cout << "Failed to open output ntuple file " << outputDataFile << endl;
-      abort();
+      return false;
     }
 
     foutDir_ =  fout_->mkdir("tupel");
     if(foutDir_ == 0){
       cerr << "Failed to create directory tupel in output ROOT file " << outputDataFile << endl;
+      return false;
     } else{
       foutDir_ = fout_.get();
     }
   }
 
-  TIter it(fcontent);
-
-  //looks for the EventTree ROOT tree:
-  bool found = false;
-  TKey* key = 0;
-  while(it.Next() && !found){
-    key = (TKey*) (*it);
-    found = (strcmp(key->GetClassName(), "TTree") == 0)
-      && (strcmp(key->GetName(), "EventTree") == 0);
-  }
-
-  if(!found){
-    std::cerr << "No tree with name EventTree was found in tupel directory of "
-	      << inputDataFile << " ROOT file!\n";
-    return false;
-  }
-
-  //  TreeRcd* treeRcd = new TreeRcd;
-  //treeRcd->tree = (TTree*)  key->ReadObj();
-  eventTree_.inTree = (TTree*)  key->ReadObj();
-
-  //  if(treeRcd->tree==0) {
-  if(eventTree_.inTree==0) {
-    std::cerr << "Failed to read object " << key->GetName() << endl;
-    return false;
-  }
-
-  //check branch to be copied
   //  TObjArray* bs = treeRcd->tree->GetListOfBranches();
-  TObjArray* bs = eventTree_.inTree->GetListOfBranches();
+  TObjArray* bs = chain_.GetListOfBranches();
   TIter itBranches(bs);
   while(itBranches.Next()){
     TBranch* b = (TBranch*)(*itBranches);
+    if(strcmp(b->GetName(), "EvtNum") == 0)
     //disable copy of filered-out branches:
-    if(!filterBranch(b->GetName())){
+    if(strcmp(b->GetName(), "EvtNum") != 0
+       && strcmp(b->GetName(), "EvtRunNum") != 0
+       && !filterBranch(b->GetName())){
       if(verbose_) cout << "Disable branch " << b->GetName() << "\n";
       //      treeRcd->tree->SetBranchStatus(b->GetName(), 0);
-      eventTree_.inTree->SetBranchStatus(b->GetName(), 0);
+      chain_.SetBranchStatus(b->GetName(), 0);
     }
   }
 
-  //  trees_.Add(treeRcd);
   if(fout_.get()){
     fout_->cd();
     TDirectory::CurrentDirectory()->cd("tupel");
-    eventTree_.outTree = eventTree_.inTree->CloneTree(0);
-    fin_->cd();
+    outEventTree_ = chain_.CloneTree(0);
+    chain_.GetFile()->cd(); //Is this cd needed?
   }
+
 
   return true;
 }
 
 void Pruner::copyEvent(){
-  if(verbose_ > 1) cout << "Copying event " << eventNum_ << " of run " << runNum_ << endl;
-  //  TIter itTree(&trees_);
-  //while(itTree.Next()){
-  //TreeRcd* tree = (TreeRcd*) *itTree;
-  // if(verbose_ > 1) cout << "\ttree " << tree->tree->GetName() << endl;
-    for(Int_t ielt = 0; ielt < eventTree_.nelts; ++ielt){
-      if(verbose_ > 1) cout << "\t\tcopy object " << (ielt+1) << endl;
-      fin_->cd();
-      eventTree_.inTree->GetEntry(eventTree_.begin + ielt);
-      fout_->cd();
-      eventTree_.outTree->Fill();
-    }
-    //}
+  if(verbose_ > 1) cout << "Copying event " << (*eventNum_) << " of run " << (*runNum_) << endl;
+  fout_->cd();
+  outEventTree_->Fill();
 }
 
 bool Pruner::nextEvent(){
-  ++ievent;
-  //update tree event startpointers:
-  //  bool rc = false;
-  //  if(ievent>0){
-  //    TIter it(&trees_);
-  //    while(it.Next()) rc |= ((TreeRcd*)(*it))->tree->GetEntry(ievent);
-  //  }
-  //  return rc;
-  return eventTree_.inTree != 0 && eventTree_.inTree->GetEntry(ievent);
+  ++ievent_;
+  Long64_t entryInTree = chain_.LoadTree(ievent_);
+  switch(entryInTree){
+  case -1: //The chain is empty.
+    std::cerr << "No event found in input file(s)!\n";
+    return false;
+  case -2: //The requested entry number is negative or is too large for the chain,
+    //       or too large for the large TTree (?).
+    return false;
+  case -3: //The file corresponding to the entry could not be correctly open
+    std::cerr << "Failed to open file containing the event #" << ievent_ << "\n";
+    return false;
+  case -4: //The TChainElement corresponding to the entry is missing or
+    //       the TTree is missing from the file.
+    std::cerr << "EventTree was not found in file ";
+    if(chain_.GetFile()) std::cerr << chain_.GetFile()->GetName();
+    std::cerr << "\n";
+    return false;
+  }
+
+  if (chain_.GetTreeNumber() != treeNum_) {
+    treeNum_ = chain_.GetTreeNumber();
+    char* f = strdup(chain_.GetFile()->GetName());
+    if(f){
+      fileBaseName_ = *basename(f);
+      free(f);
+    } else{
+      fileBaseName_ = "";
+    }
+
+    fillRunSummary();
+  }
+
+  return chain_.GetEntry(ievent_);
 }
 
-void Pruner::processTree(TTree* tree){
-
-  foutDir_->cd();
-  TTree* outTree = tree->CloneTree(0);
-  fin_->cd();
-  const Long64_t nentries = tree->GetEntriesFast();
-  for(Long64_t i = 0; i < nentries && i < 2; ++i){
-    tree->GetEntry(i);
-    outTree->Fill();
+void Pruner::listSelections(std::ostream& o){
+  o << "\nList of available selections (--selection) and subselections (--subselections)\n\n";
+  for(std::map<std::string, ClassRecord>::const_iterator it = daughters_.begin();
+      it != daughters_.end(); ++it){
+    const ClassRecord& rcd = it->second;
+    o << rcd.className;
+    if(rcd.description.size() > 0){
+      o << "\t" << rcd.description;
+    }
+    o << "\n";
+    rcd.instance->declareSubSelections();
+    std::vector<SubSelection>& subSels = rcd.instance->subSelections_;
+    if(subSels.size() > 0){
+      o << "\n\t"<< rcd.className << " Subselections:\n\n";
+      for(unsigned i = 0; i < subSels.size(); ++i){
+	o << "\t" << subSels[i].tag << "\t"
+	  << subSels[i].description << "\n";
+      }
+    }
   }
-  outTree->AutoSave();
+  o << std::endl;
 }

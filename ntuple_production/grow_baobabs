@@ -2,6 +2,13 @@
 """
 Commmand to launch baobab ntuple production
 """
+
+#TODO: 
+#  1. Make a function to restore/repair production database
+#  2. Add a --report-error option similar than --report but for errors.
+#  3. Evaluate the use of json file diff to determine the list of top-up runs instead of querying DAS.
+#  4. Add support to work without eos mount. Eos mount  is available only on lxplus.
+
 import argparse
 import sys
 import re
@@ -18,6 +25,7 @@ import glob
 import urllib
 import tempfile
 import urllib
+import urllib2
 import platform
 import atexit
 from sets import Set
@@ -33,11 +41,6 @@ myself=os.path.realpath(__file__)
 mydir=os.path.dirname(myself)
 getlumi=mydir + "/getlumi"
 eos_mount_point=None
-
-#TODO: 
-#  1. Make a function to restore/repair production database
-#  2. Add a --report-error option similar than --report but for errors.
-#  3. Evaluate the use of json file diff to determine the list of top-up runs instead of querying DAS.
 
 try:
     from CRABAPI.RawCommand import crabCommand
@@ -182,7 +185,7 @@ def eos_mount():
     try:
         if mymount:
             mountpoint = mkdtemp(prefix='grow_baobabs')
-            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + "> /dev/null")
+            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + "> /dev/null 2>&1")
             if rc != 0:
                 mountpoint = None
         #endif
@@ -534,8 +537,13 @@ def db_das_get_runs(dataset):
 
 def db_das_list_runs(dataset):
     print "\nAsking DAS database. This operation can take some time..."
-    sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, sorted(db_das_get_runs(dataset))))))
-
+    try:
+        sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, sorted(db_das_get_runs(dataset))))))
+    except urllib2.HTTPError, e:
+        if e.code == 403:
+            sys.stderr.write("\nError: problem with DAS. Access refused (HTTP error 403).\n\n")
+        else:
+            raise
 
 def db_get_conn():
     """Gets job management connection and cursor."""
@@ -735,10 +743,12 @@ def db_clear_task_record(prim_dataset, task_id):
 #
 def catalog_set_default(catalog_path):
     (conn, c) = db_get_conn()
-    c.execute("UPDATE production SET dataset_catalog='%s'" % catalog_path)
+    canonized_path = eos_to_eos_path(catalog_path)
+    local_path     = eos_to_local_path(catalog_path)
+    c.execute("UPDATE production SET dataset_catalog='%s'" % canonized_path)
     if c.rowcount == 0:
         #first time the default catalog is set
-        c.execute("INSERT INTO production(dataset_catalog) VALUES('%s')" % catalog_path)
+        c.execute("INSERT INTO production(dataset_catalog) VALUES('%s')" % canonized_path)
 
     catalog_link = 'datasets.txt'
     if os.path.isfile(catalog_link):
@@ -747,7 +757,7 @@ def catalog_set_default(catalog_path):
             if old_link != catalog_path:
                 print "\nUpdating the file link %s to point to %s instead of %s." % (catalog_link, catalog_path, old_link)
                 os.remove(catalog_link)
-                os.symlink(catalog_path, catalog_link)
+                os.symlink(local_path, catalog_link)
             #endif
         elif os.path.realpath(catalog_link) != os.path.realpath(catalog_path):
             sys.stderr.write("\nWarning: a file other than an older symbolic link is on the way, the symbolic link dataset.txt will not be created. This link is for user convenience and is not use by grow_baobabs.\n")
@@ -761,19 +771,23 @@ def catalog_set_default(catalog_path):
     conn.close()
 #enddef
 
-def catalog_get_default():
-    """Retrieves the file path of the current input dataset catalog."""
+def catalog_get(local_path = True):
+    """Retrieves the file path of the current input dataset catalog. If local_path parameter is True, an EOS path will be converted to a local path."""
+    if args.one_shot_catalog:
+        return args.one_shot_catalog
     (conn, c) = db_get_conn()
     c.execute("SELECT dataset_catalog FROM production")
     r = c.fetchone()
     if not r or len(r) == 0:
         return None
+    elif local_path:
+        return eos_to_local_path(local_path)
     else:
         return r[0]
 
 def catalog_show():
     """Displays the content of the current input dataset catalog."""
-    catalog = catalog_get_default()
+    catalog = catalog_get()
     if not catalog:
         sys.stdout.write("\nNo dataset catalog set. The catalog can be set using the --catalog option.\n")
     else:
@@ -781,7 +795,7 @@ def catalog_show():
         if args.verbosity > 0:
             local_path = eos_to_local_path(catalog)
             if not local_path:
-                sys.stderr.write("\nCatalog file %s is on EOS, while EOS file system is not mounted. The catalog contents will not be shown\n")
+                sys.stderr.write("\nCatalog file %s is on EOS, while the EOS file system is not mounted. The catalog contents will not be shown\n")
             else:
                 print "\nCatalog file contents:"
                 with open(local_path) as f:
@@ -833,44 +847,43 @@ def catalog_read(filepath):
     jsonFile = None
     datasets = []
 
-    with open(filepath) as f:
-        for i, l in enumerate(f):
-            l = l.strip()
-            if len(l) == 0:
-                continue
-            m = outDirLine.match(l)
-            if m:
-                if outDir:
-                    sys.stderr.write("\nWarning: output directory is defined several times in the catalog file %s.\n")
-                #endif
-                outDir = m.groups()[0]
-                continue
-            m = jsonFileLine.match(l)
-            if m:
-                if jsonFile:
-                    sys.stderr.write("\nWarning: json file is defined several times in the catalog file %s.\n")
-                #endif
-                jsonFile = m.groups()[0]
-                continue
-            if commentLine.match(l):
-                continue
-            m = datasetLine.match(l)
-            if m:
-                if not ds_check_dataset_name(m.groups()[0]):
-                    sys.stderr.write("\nWarning: dataset name '%s' found in line %d is not valid. Line ignored." % (m.groups()[0], i+1))
-                dataset_rcd = {}
-                dataset_rcd['dataset'] = m.groups()[0]
-                runs = runspec_expand(m.groups()[1])
-                if runs is None:
-                    sys.stderr.write("\nWarning: line %d of %s will be ignored! The run list specification is not valid. A run list specification must a comma-separeted list of runs and run ranges. A run range is written as m-n, with m the first run number and n the last run number. Either m or n can be omitted to indicate an open range. Few examples of valid specifications: 156787; 156787,165877; 156787,165877-165900; -156787,187000-\n" % (i+1, filepath))
-                else:
-                    dataset_rcd['runs'] = runs
-                    datasets.append(dataset_rcd)
-                #endif validateRunSpec
-                continue
-            sys.stderr.write("\nWarning: line %d of %s was not understood and will be ignored!\n"  % (i+1, filepath))
-        #next line    
-    #endwith
+    f = open(filepath)
+    for i, l in enumerate(f):
+        l = l.strip()
+        if len(l) == 0:
+            continue
+        m = outDirLine.match(l)
+        if m:
+            if outDir:
+                sys.stderr.write("\nWarning: output directory is defined several times in the catalog file %s.\n")
+            #endif
+            outDir = m.groups()[0]
+            continue
+        m = jsonFileLine.match(l)
+        if m:
+            if jsonFile:
+                sys.stderr.write("\nWarning: json file is defined several times in the catalog file %s.\n")
+            #endif
+            jsonFile = m.groups()[0]
+            continue
+        if commentLine.match(l):
+            continue
+        m = datasetLine.match(l)
+        if m:
+            if not ds_check_dataset_name(m.groups()[0]):
+                sys.stderr.write("\nWarning: dataset name '%s' found in line %d is not valid. Line ignored." % (m.groups()[0], i+1))
+            dataset_rcd = {}
+            dataset_rcd['dataset'] = m.groups()[0]
+            runs = runspec_expand(m.groups()[1])
+            if runs is None:
+                sys.stderr.write("\nWarning: line %d of %s will be ignored! The run list specification is not valid. A run list specification must a comma-separeted list of runs and run ranges. A run range is written as m-n, with m the first run number and n the last run number. Either m or n can be omitted to indicate an open range. Few examples of valid specifications: 156787; 156787,165877; 156787,165877-165900; -156787,187000-\n" % (i+1, filepath))
+            else:
+                dataset_rcd['runs'] = runs
+                datasets.append(dataset_rcd)
+            #endif validateRunSpec
+            continue
+        sys.stderr.write("\nWarning: line %d of %s was not understood and will be ignored!\n"  % (i+1, filepath))
+    #next line    
     return (outDir, jsonFile, datasets)
 
 def catalog_get_out_dir(catalog):
@@ -1560,7 +1573,7 @@ def prod_process_ds_catalogs():
         catalog_set_default(dataset_catalog)
     #endif args.catalog
 
-    dataset_catalog = catalog_get_default()
+    dataset_catalog = catalog_get()
     if dataset_catalog is None:
         sys.stderr.write("\nNo catalog file defined. You need to set first the catalog file using the --catalog option before running this command.\n")
         return
@@ -1604,7 +1617,7 @@ def prod_process_ds_catalogs():
 def prod_new_version():
     """Creates directory structure for production output of a new ntuple version."""
 
-    datasets = catalog_get_default()
+    datasets = catalog_get()
 
     if not datasets:
         sys.stderr.write("A dataset catalog must be set with --catalog command in order to run the --new-version command\n\n")
@@ -1775,6 +1788,9 @@ def parse_command_line():
     parser.add_argument('--catalog', action='store', default=None,
                         help='Sets the catalog file path. If combined with other option specifying an action to take, the action will be processed already with this new catalog.')
 
+    parser.add_argument('--one-shot-catalog', metavar='CATALOG', action='store', default=None,
+                        help='Uses CATALOG for this command only without changing the stored default catalog')
+
     parser.add_argument('--description', action='store', default=None,
                         help='Sets description of the ntuple production.')
 
@@ -1863,7 +1879,9 @@ def main():
     try:
         with lock_acquire() as lock_ok:
             if lock_ok:
-                with eos_mount():
+                with eos_mount() as eos_mount_point:
+                    if not eos_mount_point:
+                        sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
                     run()
                 #endwith
             #endif

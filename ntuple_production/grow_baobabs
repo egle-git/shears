@@ -1568,95 +1568,6 @@ def copy_catalog(src, dest, new_ntuple_directory):
     if not fake:
         fout.close()
 
-### Original version. It was getting separately the dataset catalog file and the ntuple base directory.
-### This has been simplified by using the dataset catalog file which must already contains the ntuple base
-### directory. An input dataset catalog file is mandatory for the new version, which was not the case
-### for the original one.
-### def new_version():
-###     """Creates directory structure for production output of a new ntuple version."""
-### 
-###     (basedir, last_vers_in_db) = getNtupleBaseDir()
-### 
-###     basedir = to_mounted_eos(basedir)
-### 
-###     if not basedir:
-###         sys.stderr.write("Failed to setup a new production version setup.\n")
-###         return
-### 
-###     if not os.path.isdir(basedir):
-###         sys.stderr.write("Directory %s was not found! Failed to setup a new production version setup.\n" % basedir)
-###         return
-### 
-###     dirs=os.listdir(basedir)
-###     r=re.compile("v([\d]+)")
-###     dirs_=[]
-###     last_vers=None
-###     for d in dirs:
-###         m=r.match(d)
-###         if m and len(m.groups()) > 0:
-###             dirs_.append(int(m.groups()[0]))
-### 
-###     if len(dirs_) == 0:
-###         sys.stderr.write("Warning: first version. The datasets.txt catalog file will be empty.\n")
-###         new_vers=1
-###     else:
-###         last_vers = max(dirs_)
-###         new_vers = last_vers + 1
-###         olddir=basedir + "/v" + str(last_vers)
-### 
-###         datasets_oldfile = getDefaultCatalog()
-### 
-###         if not datasets_oldfile or not os.path.isfile(datasets_oldfile):
-###             datasets_oldfile_ = datasets_oldfile
-###             datasets_oldfile = olddir + "/Catalogs/datasets.txt"
-###             if os.path.isfile(datasets_oldfile):
-###                 if datasets_oldfile_:
-###                     sys.stderr.write("Warning: default catalog, %s,was not found or is not readable. Catalog %s will be used\n\n" % (datasets_oldfile_, datasets_oldfile))
-###                 else:
-###                     sys.stderr.write("Warning: catalog not configured, Catalog %s will be used\n\n" % datasets_oldfile)
-###                 #endif dataset_oldfile_
-###             else:
-###                 sys.stderr.write("Warning: no catalog file was found. An empty catalog will be created.\n\n")
-###                 datasets_oldfile = None
-###             #endif
-###         #endif
-###     #endif
-### 
-###     newdir = basedir + "/v" + str(new_vers)
-###     ntuple_newdir = cleanup_eos_path(newdir + "/Ntuple")
-###     datasets_newfile = newdir + "/Catalogs/datasets.txt"
-###     if ntuple_newdir.find("/store/") > 1 and ntuple_newdir.find('root:') !=0:
-###         sys.stderr.write("Warning: Ntuple directory path,\n\n%s\n\ncontains a directory named store, suggesting a path on a locally EOS mounted point.\n\nIf it is indeed the case, we recommend to edit the path indicated in file,\n\n%s\n\nto use a /store/.. path. The path will then be independent of the EOS mount point.\n\n" % (ntuple_newdir, datasets_newfile))
-### 
-###     if fake:
-###         print "New directory: %s"  % newdir
-###     else:
-###         os.makedirs(newdir + "/Catalogs")
-###         os.mkdir(newdir + "/Ntuple")
-###         
-###     datasets_file_copied = False
-###     if datasets_oldfile is None:
-###         if fake or args.verbosity > 0:
-###             print "An empty catalog will be produced."
-###         else:
-###             f = open(newdir + "/Catalogs/datasets.txt", "w")
-###             f.write("# output directory: %s\n\n#Add below the list of datasets to be processed\n" % ntuple_newdir)
-###             f.close()
-###         #endif fake
-###     else:
-###         if fake or args.verbosity > 0:
-###             print "Catalog copied from %s." % datasets_oldfile
-###         #endif fake
-###         copy_catalog(datasets_oldfile, datasets_newfile, ntuple_newdir)
-###         #endif fake
-###         datasets_file_copied = True
-###     #endif datasets_oldfile is None
-###     if not fake:
-###         setDefaultCatalog(datasets_newfile)
-###     print "\nNew production directory %s created successfully. Catalog file changed to %s.\n" % (newdir, datasets_newfile)
-### #enddef
-
-
 def new_version():
     """Creates directory structure for production output of a new ntuple version."""
 
@@ -1814,26 +1725,8 @@ def to_mounted_eos(path):
     #endif
 #enddef
 
-#        with open("/etc/mtab") as f:
-#            pat = re.compile(r'eoscms.cern.ch ([^\s]+) fuse (?:[^\s]+,)*user=([^\s]+)')
-#            for l in f:
-#                m = pat.match(l)
-#                if m:
-#                    (mountpoint, user) = m.groups()
-#                    if user == myusername:
-#                        return mountpoint + "/cms" + path
-#                    #endif user
-#                #endif m
-#            #next l
-#        #endwith
-#    #endif path.find
-#    return None
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
-
-#    parser.add_argument('dataset_catalogs', nargs='*',
-#                        help='Catalog files containing the list of CMS datasets to process')
 
     parser.add_argument('--catalog', action='store', default=None,
                         help='Sets the catalog file path. If combined with other option specifying an action to take, the action will be processed already with this new catalog.')

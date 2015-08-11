@@ -1,0 +1,140 @@
+#!/bin/bash
+
+myself="`readlink -f "$0"`"
+mydir="`dirname "$myself"`"
+
+#dirs="/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_25ns/MC \
+#/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data \
+#/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/MC"
+
+dirs="/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data"
+
+mailbox="~shearsop/work/.shears-mailbox"
+
+die(){
+    echo "$@" 1>&2
+    exit 2
+}
+
+source /cvmfs/cms.cern.ch/crab3/crab.sh
+
+tmp="`cd /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSSW && scram runtime -sh`"
+
+[ $? = 0 ] || die "Failed to set CMSSW runtime environment. Is directory /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSS existing?"
+
+eval "$tmp"
+
+echo CMSSW_BASE: $CMSSW_BASE
+
+which python
+
+[ $? = 0 ] || die "Failed to set CMSSW runtime environment."
+
+function run(){
+    for d in $dirs; do
+	echo $d
+	(cd "$d" && "$mydir/grow_baobabs" --check --report "$mailbox")
+    done	
+
+}
+
+function to_min(){
+    exp=`echo "$1" | sed 's/w/10080/g
+s/d/*1440+/g
+s/h/*60+/g
+s/m/+/g
+s/[[:digit:]]*s//g
+s/+$//g'`
+    res="`echo "$exp" | bc -l`"
+    if [ $res = 0 ]; then
+	echo "Bad time expression" 2>&1
+	echo 1440
+    else
+	echo "$res"
+    fi
+}
+
+
+function help(){
+    fmt -w ${COLUMNS:-80} <<EOF
+Usage: warden [--loop CYCLE_TIME] [--prompt-report] [--report EVERY_CYCLE]
+
+Shears framework [1]. Checks the status of Boabab production and takes the required actions: submission for new data or dataset, closing ending tasks, reporting new ntuple sets.
+
+With the --loop option, the command runs every CYCLE_TIME. CYCLE_TIME default unit is minutes, w (week), d (day), h (hour) can be used and units can be combined, as 3d12h for 3 days 12 hours.
+
+The --promt-report and --report allows email notification. With the first option email notifications are sent immediatly, while with the second option they are grouped and send only at EVERY_CYCLE iterations of the loop.
+
+Note: the command needs the grid authentication proxy to run and is not able to renew it on its own.
+
+EOF
+}
+
+temp=`getopt -o hl:pr: --long help,loop:,prompt-notification,report: \
+     -n 'ffind' -- "$@"`
+
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+    # Note the quotes around `$TEMP': they are essential!
+eval set -- "$temp"
+
+unset loop
+unset prompt_reco
+unset report_every
+while true ; do
+    case "$1" in
+        -h|--help) help; exit 0;; 
+        -l|--loop) loop="$2"; shift 2;;
+        -p|--prompt-notification) prompt_report=y; shift;;
+	-r|--report) report_every="$2"; shift 2;;
+        --) shift ; break ;; #end of options. It remains only the args.
+        *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
+
+
+
+if [ "$1" = -h -a "$1" = --help ]; then
+    help
+    exit 0
+fi
+
+echo "$report_every" | grep -q '^[[:digit:]]*$' || { help; exit 1; }
+
+trap "makeitnow=1" SIGHUP
+
+if [ -z "$loop"  ]; then
+    #one shot run
+    run
+    if [ "$prompt_report" = y ]; then
+	"$mydir/send_shears_emails"
+    fi
+else
+    
+    cycle="`to_min $loop`"
+
+    i=0
+    while true; do
+	t=`date +%s`
+	makeitnow=0
+	
+	run
+
+	i=$((i+1))
+
+	if [ "$i" = "$report_every" ]; then
+	    echo "Checking for notifications to send."
+	    "$mydir/send_shears_emails"
+	    i=0
+	fi
+
+	t1=`date +%s`
+	dt=$((60*cycle+t-t1))
+	echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up..."
+	while [ $dt -gt 0 -a $makeitnow != 1 ]; do
+            sleep 10
+            t1=`date +%s`
+            dt=$((60*cycle+t-t1))
+	done
+    done
+fi

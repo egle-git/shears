@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [  $# -lt 1 -o "$1" = -h -o "$1" = --help ]; then
+   cat <<EOF
+Usage: getlumi JSON_FILE
+
+Calculates processed integrated luminosity from a crab job lumi section report.
+EOF
+fi
+
+if [ "$1" = -r ]; then
+    recorded_only=y
+    shift
+else
+    recorded_only=n
+fi
+
+filter(){
+    if [ "$recorded_only" = y ]; then
+	awk '/Integrated Lumi/{if($7=="recorded=") print $8}'
+    else
+	cat
+    fi
+}
+
+
+python /afs/cern.ch/user/m/marlow/public/lcr2/lcr2.py -i  "$1" | filter

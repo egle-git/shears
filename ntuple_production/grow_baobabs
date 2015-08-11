@@ -10,18 +10,148 @@ import time
 import hashlib
 import os
 import das_client
+import os.path
+import datetime
+import operator
+import pwd
+import glob
+import urllib
+import tempfile
+import urllib
+import platform
+import atexit
+from sets import Set
+from contextlib import contextmanager
+from threading import Timer
+from tempfile import mkdtemp
 
-eos_command="/afs/cern.ch/project/eos/installation/pro/bin/eos.select"
+fake = False
+
+eos_cmd="/afs/cern.ch/project/eos/installation/pro/bin/eos.select"
+
+myself=os.path.realpath(__file__)
+mydir=os.path.dirname(myself)
+getlumi=mydir + "/getlumi"
+eos_mount_point=None
+
+#TODO: 
+#  1. Make a function to restore/repair production database
+#  2. Add a --report-error option similar than --report but for errors.
+#  3. Evaluate the use of json file diff to determine the list of top-up runs instead of querying DAS.
 
 try:
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException, TaskNotFoundException, CachefileNotFoundException, ConfigurationException, ConfigException, UsernameException, ProxyException
 except ImportError:
-    sys.stderr.write("CRAB 3 environment needs to be set before running this script.")
+    sys.stderr.write("\nFatal error: CRAB 3 environment needs to be set before running this script.\n")
     sys.exit(1)
 
 from httplib import HTTPException
 from WMCore.Configuration import Configuration
+from WMCore.Configuration import loadConfigurationFile
+
+lock_cycle = 30
+lock_file = ".grow_baobab.lock"
+lock_acquired = False
+
+def release_lock():
+    """Release exclusive lock. Must be called only if we own the lock."""
+    global lock_acquired
+    if lock_acquired:
+#        os.remove(lock_file)
+        lock_acquired = False
+
+@contextmanager
+def get_lock():
+    """Acquire an exclusive lock used to prevent two instance of this program to run at the same time"""
+
+    global lock_acquired
+
+    atexit.register(release_lock)
+
+    p=re.compile(r'([^\s]+) +(\d+)')
+
+    #cleanup:
+    try:
+        s = os.stat(lock_file)
+    except OSError,e:
+        if e.errno == os.errno.ENOENT: #file does not exists.
+            pass
+        else:
+            raise
+    else:
+        file_age = time.time() - s.st_mtime
+        print "Lock file age: ", file_age, time.gmtime(), s.st_mtime
+        if file_age > 2 * lock_cycle:
+            print "Warning: cleaned a %d s old lock file." % int(file_age)
+            os.remove(lock_file)
+        else:
+        #in case lock is on current host, check if the instance is still running
+            try:
+                f = open(lock_file)
+                m = p.match(f.readline())
+                if m:
+                    (host, pid) = m.groups()
+                    if host ==  platform.node():
+                        try:
+                            os.kill(int(pid), 0)
+                        except OSError: #process does not exist
+                            print "Warning: cleared the lock put by instance from host %s with pid %s as this instance seems to have terminated." % (host, pid)
+                            os.remove(lock_file)
+                        #endtry
+                    #endif host
+                #endif m
+            except:
+                pass
+            #endtry
+        #endif file_age
+    #endtry
+    #End of clean-up section
+    
+    rc = False
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
+    try:
+        file_handle = os.open(lock_file, flags)
+        with os.fdopen(file_handle, 'w') as f:
+            f.write("%s %d\n" % (platform.node(), os.getpid()))
+            lock_acquired = True
+            rc = True
+    except OSError as e:
+        if e.errno == os.errno.EEXIST:  # Failed as the file already exists.
+            try:
+                f = open(lock_file)
+                m = p.match(f.readline())
+                if m:
+                    (host, pid) = m.groups()
+                else:
+                    raise RuntimeError
+            except:
+                sys.stderr.write("Another grow_baobabs process is running at the same time. Please try again.\n")
+            else:
+                sys.stderr.write("Another grow_baobabs process is running on host %s (PID %s) at the same time. Please try again. If it fails, wait for %d second, the maximum time for automatic clean-up of locks and try a third time.\n" % (host, pid, 2 * lock_cycle))
+        else:  # Something unexpected went wrong so reraise the exception.
+            raise
+    if rc:
+        t = start_lock_update()
+    yield rc
+    if rc:
+        t.cancel()
+
+def start_lock_update():
+    os.utime(lock_file, None)
+    t = Timer(lock_cycle, start_lock_update)
+    t.start()
+    return t
+
+def time2str(t):
+    return time.strftime("%Y-%M-%d-%T-%Z", time.localtime(t))
+
+def myCrabCommand(command, *args, **kwargs):
+    try:
+        return crabCommand(command, args, kwargs)
+    except CRABClient.ClientExceptions.ClientException, e:
+        sys.stderr.write("\n%s\n" % e.message)
+        return None
 
 def dasQuery(query):
     """Performs a query to the DAQ database"""
@@ -30,7 +160,7 @@ def dasQuery(query):
     limit=0
     debug=False
     if args.verbosity > 0:
-        sys.stderr.write("DAS query: %s\n" % query)  
+        sys.stderr.write("\nDAS query: %s\n" % query)  
     das_res=das_client.get_data(host, query, idx, limit, debug)
     data=das_res['data']
     res=[]
@@ -47,10 +177,15 @@ def dasQuery2(query, att):
     debug=False
     obj, item = att.split(".")
     if args.verbosity > 0:
-        sys.stderr.write("DAS query: %s\n" % query)  
+        sys.stderr.write("\nDAS query: %s\n" % query)  
     das_res=das_client.get_data(host, query, idx, limit, debug)
-    data = das_res['data']
     res = []
+    
+    if not das_res.has_key('data'):
+        sys.stderr.write("\nWarning: das query '%s% failed." % query)
+        return res
+
+    data = das_res['data']
     for r in data:
         if obj in r:
             load = r[obj]
@@ -70,25 +205,26 @@ def dasRuns(dataset):
     """Retrieves from the DAS database the list of available runs for a given dataset."""
     return dasQuery('run dataset=' + dataset);
 
-#def hashfile(afile, hasher, blocksize=65536):
-#    buf = afile.read(blocksize)
-#    while len(buf) > 0:
-#        hasher.update(buf)
-#        buf = afile.read(blocksize)
-#    return hasher.hexdigest()
+def hashfile(afile, hasher, blocksize=65536):
+    buf = afile.read(blocksize)
+    while len(buf) > 0:
+        hasher.update(buf)
+        buf = afile.read(blocksize)
+    return hasher.hexdigest()
 
 def getDbConn():
     """Gets job management connection and cursor."""
     conn = sqlite3.connect('baobab_prod.sqlite3')
-    conn.execute('PRAGMA foreign_keys')
+    conn.execute('PRAGMA foreign_keys = ON')
     return (conn, conn.cursor())
 
 def createDatabase():
     """Creates sqlite3 database used to manage the jobs submissions. Tables are created only if they do not already exists."""
     (conn, c) = getDbConn()
     conn.execute('''CREATE TABLE IF NOT EXISTS jobs (
+prim_dataset TEXT,
+task_id     INTEGER,
 dataset     TEXT,
-batch_id    INTEGER,
 datatype    TEXT,
 ntuple_dir  TEXT,
 ntuple_subdir TEXT,
@@ -98,19 +234,89 @@ status_ts   INTEGER,
 uniquerequestname TEXT,
 requestname TEXT,
 n_files     INTEGER,
+n_events    INTERGER,
+lumi        REAL,
+lumi_file   TEXT,
 lumi_file_md5sum TEXT,
-PRIMARY KEY(dataset, batch_id)
+run_spec    TEXT,
+PRIMARY KEY(prim_dataset, task_id)
 )''')
     conn.execute('''CREATE TABLE IF NOT EXISTS runs (
-dataset TEXT,
+prim_dataset TEXT,
 run INTEGER,
-batch_id INTEGER,
-PRIMARY KEY (dataset, run),
-FOREIGN KEY (dataset, batch_id) REFERENCES jobs (dataset, batch_id))
+task_id INTEGER,
+PRIMARY KEY (prim_dataset, run),
+FOREIGN KEY (prim_dataset, task_id) REFERENCES jobs (prim_dataset, task_id) ON DELETE CASCADE)
+''')
+
+#TODO table and filpath column to be renamed -> production, catalog
+    conn.execute('''CREATE TABLE IF NOT EXISTS production (
+dataset_catalog TEXT,
+description TEXT)
 ''')
     conn.commit()
     conn.close()
 #enddef
+
+def setDefaultCatalog(catalog_path):
+    (conn, c) = getDbConn()
+    c.execute("UPDATE production SET dataset_catalog='%s'" % catalog_path)
+    if c.rowcount == 0:
+        #first time the default catalog is set
+        c.execute("INSERT INTO production(dataset_catalog) VALUES('%s')" % catalog_path)
+
+    catalog_link = 'datasets.txt'
+    if os.path.isfile(catalog_link):
+        if os.path.islink(catalog_link):
+            old_link = os.readlink(catalog_link)
+            if old_link != catalog_path:
+                print "\nUpdating the file link %s to point to %s instead of %s." % (catalog_link, catalog_path, old_link)
+                os.remove(catalog_link)
+                os.symlink(catalog_path, catalog_link)
+            #endif
+        elif os.path.realpath(catalog_link) != os.path.realpath(catalog_path):
+            sys.stderr.write("\nWarning: a file other than an older symbolic link is on the way, the symbolic link dataset.txt will not be created. This link is for user convenience and is not use by grow_baobabs.\n")
+        #endif
+    else:
+        print '\nCreating a symbolic link %s to %s.' % (catalog_link, catalog_path)
+        os.symlink(catalog_path, catalog_link)
+    #endif
+
+    conn.commit()
+    conn.close()
+#enddef
+
+def getDefaultCatalog():
+    (conn, c) = getDbConn()
+    c.execute("SELECT dataset_catalog FROM production")
+    r = c.fetchone()
+    if not r or len(r) == 0:
+        return None
+    else:
+        return r[0]
+
+def showCatalog():
+    catalog = getDefaultCatalog()
+    if not catalog:
+        sys.stdout.write("\nNo dataset catalog set. The catalog can be set using the --catalog option.\n")
+    else:
+        print "Catalog file: %s" % catalog
+        if args.verbosity > 0:
+            local_path = to_mounted_eos(catalog)
+            if not local_path:
+                sys.stderr.write("\nCatalog file %s is on EOS, while EOS file system is not mounted. The catalog contents will not be shown\n")
+            else:
+                print "\nCatalog file contents:"
+                with open(local_path) as f:
+                    for l in f:
+                        sys.stdout.write("\t%s" % l)
+                    #next l
+                #endwith
+            #endif
+        #endif
+    #endif not catalog
+#enddef
+
 
 def format_cell(cell):
     """Formats a table cell for display. Used by print_table."""
@@ -177,7 +383,7 @@ def print_query_result(cur):
         for i, c in enumerate(x):
             if ts_type[i]:
                 try:
-                    y.append(time.strftime("%b %e, %Y", time.localtime(c)))
+                    y.append(time2str(c))
                 except TypeError:
                     y.append(str(c))
             else:
@@ -192,31 +398,113 @@ def print_query_result(cur):
 def dumpDatabase():
     """Displays the content of the job database"""
     conn, c = getDbConn()
-    c.execute('''SELECT * FROM jobs''')
-    print_query_result(c)
+    c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
+    table = []
+    header = ["Prim. dataset", "Task", "Status", "Reco tag", "Runs", "Submission time"]
+    for x in c:
+        prim_dataset, dataset, task_id, submit_ts, status, run_spec, requestname = x
+        toks = dataset.split("/")
+        if len(toks) != 4:
+            system.stderr.write("Internal error: found an invalid dataset name, %s, in the local production database." % dataset)
+            processed_dataset = ""
+        else:
+            processed_dataset = toks[2]
+        if prim_dataset != toks[1]:
+            system.stderr.write("Internal error: found an inconsistentcy in the local production database.")
+        table.append([ prim_dataset, task_id, status, processed_dataset, run_spec, time2str(submit_ts)])
+
+    print_table(table, header)
     conn.close()
 
-def isDatasetInDb(dataset):
-    """Checks if a dataset is in the job management database"""
-    conn, c = getDbConn()
-    c.execute("SELECT dataset FROM jobs WHERE dataset='%s'" % dataset)
-    return c.fetchone() is not None
+def compactRunSpec(run_spec):
+    """Compactify a run list specification. The run specification run_spec must be a list of run number and pair of run numbers. Pairs of run number are list of two run numbers reprensenting a run range. The methods return a new run specification in the most compact form"""
+    lbound = None
+    ubound = None
+    #sort intervals/run number in increasing lower bound/run number.
+    #Assert also that run_spec does not contain empty ranges, which
+    #is import for the 'for; loop below
+    run_spec = sorted(run_spec, key = lambda x: x[0])
+    new_spec = []
 
-def getBatchStatus(dataset, batch_id):
-    """Retrieves from job management database the status of a job batch"""
+    for r in run_spec + [[]]:    #Empty range iteration used to insert the last range
+
+        #replace individual run number by a range:
+        if len(r) == 1:
+            r.append(r[0])
+
+        if len(r) > 1 and not ubound:
+            lbound = r[0]
+            ubound = r[1]
+        elif len(r) > 1 and r[0] <= ubound:
+            #run interval can be merged with previous one
+            ubound = r[1]
+        else:
+            #[lbound, ubound] interval cannot be merged with next
+            #one or is the last one (len(r)==0 end marker)
+            if lbound == ubound:
+                #Simplify singlet: [n,n] -> n
+                new_spec.append(lbound)
+            else:
+                new_spec.append([lbound, ubound])
+            if len(r) < 2:
+                break
+            lbound = r[0]
+            ubound = r[1]
+        #endif
+
+    return new_spec
+
+
+def prettyRunSpec(run_spec):
+    """Converts a run specification (list of runs) to a string suitable to display."""
+    res = ""
+    run_spec = compactRunSpec(run_spec)
+    c = ""
+    all_runs = False
+    for r in run_spec:
+        if len(r) == 1:
+            res = res + c + r[0]
+        elif len(r) == 2:
+            if r[0] == 1 and r[1] == 999999:
+                return "all"
+            elif r[0] == 1:
+                    res = res + c + "< %d" % (r[1] + 1)
+            elif r[1] == 999999:
+                res = res + c + "> %d" % (r[0] - 1)
+            else:
+                res = res  + c + str(r)
+        else: #should normally not happen
+            res = res + c + str(r)
+        c= ", "
+    #next r
+    return res
+
+def getTaskStatus(prim_dataset, task_id):
+    """Retrieves from job management database the status of a task"""
     conn, c = getDbConn()
-    c.execute("SELECT status FROM jobs WHERE dataset='%s' AND batch_id=%d" % (dataset, batch_id))
+    c.execute("SELECT status FROM jobs WHERE prim_dataset='%s' AND task_id=%d" % (prim_dataset, task_id))
     r = c.fetchone()
+    conn.close()
     if r:
         return str(r[0])
     else:
         return None
 
-def getDatatypeFromDb(dataset):
+def primDataset(dataset):
+    """Extracts primary dataset name from a full dataset name"""
+    toks = dataset.split("/")
+    if toks < 2:
+        return None
+    else:
+        return toks[1]
+#enddef
+
+def getDatatypeFromDb(prim_dataset):
     """Retrieves the datatype (mc or data) from the job management database."""
     conn, c = getDbConn()
-    c.execute("SELECT DISTINCT datatype FROM jobs")
+    c.execute("SELECT DISTINCT datatype FROM jobs WHERE prim_dataset='%s'" % prim_dataset)
     r = c.fetchall()
+    conn.close()
     if len(r) > 1:
         raise error.Runtime("Inconsistency found in job management database!")
     elif len(r) == 1:
@@ -224,101 +512,125 @@ def getDatatypeFromDb(dataset):
     else:
         return None
 
-def lastBatchId(dataset):
-    """Gets the latest batch id (maximum batch id value) for the processing of a dataset."""
+def lastTaskId(prim_dataset):
+    """Gets the latest task id (maximum task id value) for the processing of a primary dataset."""
     conn, c  = getDbConn()
-    c.execute("SELECT MAX(batch_id) FROM runs WHERE dataset='%s'" % dataset)
+    c.execute("SELECT MAX(task_id) FROM jobs WHERE prim_dataset='%s'" % prim_dataset)
     r = c.fetchone()
+    conn.close()
     if r:
         r = r[0]
     return r
 
-def getRunsFromDb(dataset):
-    """Retrieves the list of runs entered in job database for a dataset and the last batch id."""
+def getRunsFromDb(prim_dataset):
+    """Retrieves the list of runs entered in job database for a dataset and the last task id."""
     conn, c = getDbConn()
-    c.execute("SELECT run FROM runs WHERE dataset='%s'" % dataset)
+    c.execute("SELECT run FROM runs WHERE prim_dataset='%s'" % prim_dataset)
     r = c.fetchall()
     conn.close()
     if len(r) > 0:
         r = zip(*r)[0]
     return r
 
-def checkRunToProcess(dataset):
-    """Checks for new run to consider for a dataset. Applies to real data only."""
-    available = dasRuns(dataset)
-    known = getRunsFromDb(dataset)
+def checkRunToProcess(dataset, runs = None):
+    """Checks for new run to consider for a primary dataset. Applies to real data only."""
+    available = sorted(dasRuns(dataset))
+    prim_dataset = primDataset(dataset)
+    known = sorted(getRunsFromDb(prim_dataset))
     toprocess = sorted(tuple(set(available) - set(known)))
     if args.max_run_num:
         toprocess = [ x for x in toprocess if x < args.max_run_num]
+    if runs:
+        toprocess_ = set()
+        for x in toprocess:
+            for r in runs:
+                if len(r) == 1:
+                    if x == r:
+                        toprocess_.add(x)
+                    #endif
+                else: #len(r) == 2: [min, max]
+                    if r[0] <= x and  x <= r[1]:
+                        toprocess_.add(x)
+                    #endif
+                #endif
+            #next r
+        #next x
+        toprocess = list(toprocess_)
+    #endif runs
     return toprocess
 
-def insertBatch(dataset,ntuple_dir,ts):
-    """"Checks if a dataset needs to be processed and if it does
-inserts the job batch in the database. Return the batch_id or None."""
+def insertTask(dataset, ntuple_dir, runs, ts):
+    """Checks if a dataset needs to be processed and if it does
+inserts the task in the database. Return the task_id or None."""
     datatype = getDatatypeFromDb(dataset)
     if datatype:
         newDataset = False
     else:
         newDataset = True
-        res = dasQuery2("dataset dataset=%s" % dataset, "dataset.datatype");
-        print res
+        sys.stdout.write("\nChecking if dataset %s is in the DAS database. This operation can take some time..." % dataset)
+        res = dasQuery2("dataset dataset=%s" % dataset, "dataset.datatype")
+        sys.stdout.write(" Done.\n")
         if len(res) == 0:
-            sys.stderr.write("Dataset %s was not found in DAS. This dataset will be skipped.\n" % dataset);
+            sys.stderr.write("\nDataset %s was not found in DAS. This dataset will be skipped.\n" % dataset)
             return None
         datatype = str(res[0])
         if datatype not in ["mc", "data"]:
-            sys.stderr.write("Datatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
-            return None
-    if newDataset:
-        batch_id = 1
-    if (not newDataset) and datatype == 'mc':
-        #no top-up for MC
-        return None
-    if datatype == 'mc':
-        runs = []
-    else: #real data
-        runs =  checkRunToProcess(dataset)
-        if len(runs) > 0:
-            if args.verbosity > 0:
-                sys.stderr.write("Prepare job batch for dataset %s, runs %s\n" % (dataset, ",".join(map(str, runs))))
-            batch_id = lastBatchId(dataset)
-            if batch_id:
-                batch_id = batch_id + 1
-            else:
-                batch_id = 1
-        else:
-            if args.verbosity > 0:
-                sys.stderr.write("No new run for dataset %s.\n" % dataset)
+            sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
             return None
     #endif datatype
-    #endif newDataset
-    #this point is reached when a job batch needs to be inserted.
+    prim_dataset = primDataset(dataset)
+    runs_in_str = prettyRunSpec(runs)
+    runs =  checkRunToProcess(dataset, runs)
+    if len(runs) > 0:
+        if args.verbosity > 0:
+            sys.stderr.write("\nPrepare task for primary dataset %s, runs %s\n" % (prim_dataset, ",".join(map(str, runs))))
+        task_id = lastTaskId(prim_dataset)
+        if task_id:
+            task_id = task_id + 1
+        else:
+            task_id = 1
+    else:
+        if args.verbosity > 0:
+            sys.stderr.write("\nNo new run for primary dataset %s.\n" % prim_dataset)
+        return None
+    #endif datatype
+    #this point is reached when a task needs to be inserted.
     try:
         conn, c = getDbConn()
-        conn.execute("INSERT INTO jobs VALUES('%s',%d,'%s','%s',%d, NULL, '%s', NULL, NULL, NULL, NULL, NULL)" % (dataset, batch_id, datatype, ntuple_dir, ts, 'to_submit'))
+        conn.execute("INSERT INTO jobs(prim_dataset, task_id, dataset, datatype, ntuple_dir, submit_ts, status, status_ts, run_spec) VALUES('%s',%d,'%s', '%s','%s',%d, '%s', %d, '%s')" % (prim_dataset, task_id, dataset, datatype, ntuple_dir, ts, 'to_submit', ts, runs_in_str))
+        if datatype != 'mc': #data
+            #in case of data, runs was obtained from checkRunToProcess function and is a list of individual runs
+            for run in runs:
+                conn.execute("INSERT INTO runs(prim_dataset, run, task_id) VALUES('%s', %d, %d)" % (prim_dataset, run, task_id))
+            #next runs
+        #endif
         conn.commit()
         conn.close()
-    except sqlite3.IntegrityError:
-        sys.stderr.write("Unexpected error when processing dataset %s. % dataset")
+    except sqlite3.IntegrityError, e:
+        sys.stderr.write("\nUnexpected error when processing dataset %s. %s." % (dataset, e.message))
         return None
-    return (batch_id, runs)
+    return (task_id, runs, datatype)
 
-def updateDatasetRecord(dataset, batch_id, props):
-    """Update the record of a dataset job batch in the job management database."""
+def updateDatasetRecord(prim_dataset, task_id, props):
+    """Update the record of a dataset task in the job management database."""
     conn, c = getDbConn()
     sql = 'UPDATE jobs SET '
     sql += ",".join([ " %s='%s'" % (k,v) for (k,v) in props.items()])
-    sql += " WHERE dataset='%s' AND batch_id=%d" % (dataset, batch_id)
+    sql += " WHERE prim_dataset='%s' AND task_id=%d" % (prim_dataset, task_id)
     nrows = conn.execute(sql).rowcount
     conn.commit()
     conn.close()
     return (nrows > 0)
 
-def clearDatasetRecord(dataset):
+#TODO: cleat also ntuples and crab directory. Confirmation could be asked if some ntuples are found
+def clearDatasetRecord(prim_dataset, task_id):
     """Removes a dataset from the job management database. To be used be care."""
     conn, c = getDbConn()
-    sql = "DELETE FROM jobs WHERE dataset='%s'" % dataset
+    sql = "DELETE FROM jobs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
     nrows = conn.execute(sql).rowcount
+#    Following already done by the ON DELETE CASCADE
+#    sql = "DELETE FROM runs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
+#    conn.execute(sql)
     conn.commit()
     conn.close()
     return (nrows > 0)
@@ -327,29 +639,23 @@ def checkDataSetName(dataset):
     """Validates a dataset name"""
     a = dataset.split("/")
     if len(a) != 4:
-        sys.stderr.write("Dataset name must contains three part /primary_dataset/conditions/tier")
+        sys.stderr.write("\nDataset name '%s' is not valid. A dataset name must contain three parts /primary_dataset/conditions/tier\n" % dataset)
         return False
     p = re.compile("MINIAOD(|SIM)")
     if not p.match(a[3]):
-        sys.stderr.write("Only MINIAOD and MINIOADSIM data tiers are supported.")
+        sys.stderr.write("\nOnly MINIAOD and MINIOADSIM data tiers are supported.\n")
         return False
     return True
 
-def getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
+def getCrabConfig(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents):
     """Builds the crab configuration file."""
-#    dataset_tier = dataset.split("/")[3]
-#
-#    if dataset_tier.find("SIM") > 0:
-#        isMC = True
-#    else:
-#        isMC = False
     config = Configuration()
 
     config.section_('General')
 #----------------------------------------------------------------------
 
-#Request name. Used to identify job batch and to name the result directory    
-    config.General.requestName = dataset.split('/')[1] + ("-%04d" % batch_id)
+#Request name. Used to identify task and to name the result directory    
+    config.General.requestName = dataset.split('/')[1] + ("-%04d" % task_id)
 
 #Switch for the copy of the results to the storage site.
     config.General.transferOutputs = True
@@ -383,6 +689,9 @@ def getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
 # Runs to process (if runs list is empty, set to empty string, which indicates no run filter)
     config.Data.runRange = ",".join(map(str,runs))
 
+    if datatype != 'mc':
+        config.Data.lumiMask = getLumiMaskJsonFile(json_file)
+
 # Number of units to produce or process
     if maxEvents and maxEvents > 0:
         config.Data.totalUnits = maxEvents
@@ -408,175 +717,1147 @@ def getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
     
     return config
 
-def submitJobs(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents):
-    """Submits crab jobs to produce the Baobab ntuple from a provided dataset."""
-    crab_config = getCrabConfig(dataset, batch_id, runs, unitsPerJob, outDir, maxEvents)
+def getLumiMaskJsonFile(jsonFile):
+    """Gets the input json file indicating the certified luminosity section which can be processed."""
+    candidates = glob.glob(jsonFile)
+    latest_ts = 0
+    latest_file = None
+    for f in candidates:
+        ts = os.path.getmtime(f)
+        if ts > latest_ts:
+            latest_file = f
+            latest_ts = ts
+    if not latest_file:
+        raise RuntimeError("JSON file required to process real data was not found. We have looked for files named %s" % input_json_file)
+    return latest_file
 
-    f = open("crab_" + dataset.split("/")[1] + ("-%04d" % batch_id) + ".py", "w")
+def submitJobs(prim_dataset, task_id, dataset, json_file, datatype, runs, unitsPerJob, outDir, maxEvents):
+    """Submits crab jobs to produce the Baobab ntuple from a provided dataset."""
+
+    if primDataset(dataset) != prim_dataset:
+        raise RuntimeError("\nInternal error. Inconsistency in primary dataset name.")
+
+    crab_config = getCrabConfig(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents)
+
+    crab_config_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
+
+    f = open(crab_config_file, "w")
     f.write(str(crab_config))
     f.close()
 
-    try:
-        res = crabCommand('submit', config = crab_config)
-        print "Task name:", res['uniquerequestname']
-        try:
-            props = { k: res[k] for k in ["uniquerequestname", "requestname"]}
-            props["status"] = "submitted"
-            props['ntuple_subdir'] = props['requestname'][5:] + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
-            updateDatasetRecord(dataset, batch_id, props)
-        except KeyError:
-            sys.stderr.write("Error while submitting job for dataset %s. No requestname was returned." % dataset)
-            updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
-    except HTTPException, e:
-        updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
-        print e.headers
-    except ConfigException, e:
-        updateDatasetRecord(dataset, batch_id, { "status": "submission_error"})
-        print e
+    if args.no_submit:
+        return
+    else:
+        doJobSubmission(prim_dataset, task_id)
+    #endif
+#enddef
 
-def check(dataset = None, batch_id = None):
+def doJobSubmission(prim_dataset, task_id, resubmission = False):
+    """Submit a task to CRAB"""
+
+    crab_config_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
+
+    try:
+        globs = {}
+        locs = {}
+        execfile(crab_config_file, globs, locs)
+        if resubmission:
+            cmd = 'resubmit'
+        else:
+            cmd='submit'
+        res = crabCommand('resubmit', config=locs['config'])
+        taskname = res['uniquerequestname']
+        print "Task name:", taskname
+
+        print "Glidemon monitoring URL: http://glidemon.web.cern.ch/glidemon/jobs.php?taskname=%s" % urllib.quote_plus(taskname)
+        print "Dashboard monitoring URL:http://dashb-cms-job.cern.ch/dashboard/templates/task-analysis/#user=crab&refresh=0&table=Jobs&p=1&records=25&activemenu=2&status=&site=&tid=%s" % urllib.quote_plus(taskname)
+
+
+        try:
+#            props = { k: res[k] for k in ["uniquerequestname", "requestname"] }
+            for k in "uniquerequestname", "requestname":
+                props[k] = res[k]
+            props["status"] = "submitted"
+            props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
+            updateDatasetRecord(prim_dataset, task_id, props)
+        except KeyError:
+            sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % dataset)
+            updateDatasetRecord(prim_dataset, task_id, { "status": "submission_error"})
+    except HTTPException, e:
+        updateDatasetRecord(prim_dataset, task_id, { "status": "submission_error"})
+        print e.headers
+    except ClientException, e:
+        updateDatasetRecord(prim_dataset, task_id, { "status": "submission_error"})
+        print e
+#enddef
+
+def reportCloseDataset(prod_desc, dataset, task_id, catalog, json_file, nevents, status, submit_ts):
+    prim_dataset, reco = dataset.split("/")[1:3]
+    if not args.report:
+        return
+    try:
+        f = open(os.path.expanduser(args.report), "a")
+        f.write('''
+New bobab ntuple:
+----------------
+
+Production description: %s
+Primary dataset: %s
+Reconstruction tag: %s
+Task id: %s
+Number of processed events: %d
+Ntuple catalog location: %s
+Json file: %s
+Submission time: %s
+Task ended with status: %s
+
+''' % (prod_desc, prim_dataset, reco, task_id, nevents, catalog, json_file, time2str(submit_ts), status))
+    except IOError,e:
+        sys.stderr.write(str(e))
+    finally:
+        f.close()
+#enddef
+        
+
+#TODO: when .requestname is not found, perform automatic cleanup
+def check(prim_dataset = None, task_id = None):
     conn, c = getDbConn()
-    sql = "SELECT dataset, batch_id, status, status_ts, requestname, ntuple_dir, ntuple_subdir FROM jobs WHERE status != 'finished order by dataset, batch_id ORDER BY dataset, batch_id'";
-    if dataset:
-        sql += " AND dataset='%s'" % dataset
-    if batch_id:
-        sql += " AND batch_id=%d" % batch_id
+    sql = "SELECT prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir FROM jobs ORDER BY dataset, task_id";
+    if prim_dataset:
+        sql += " AND prim_dataset='%s'" % prim_dataset
+    if task_id:
+        sql += " AND task_id=%d" % task_id
     c = tuple(conn.execute(sql))
     conn.close()
-    for r in c:
-        (dataset, batch_id, status, status_ts, requestname, ntuple_dir, ntuple_subdir) = r
-        if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES']:
-            if status != 'CLOSED_WITH_FAILURES':
-                res = crabCommand("status", "-d", requestname)
-                new_status="REPORT_DONE"
+    for i, r in enumerate(c):
+        (prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir) = r
+        if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES', 'CAT_WRITTEN', 'CAT_WRITTEN_WITH_FAILURES']:
+            if status == 'CLOSED_WITH_FAILURES':
+                target_status="REPORT_DONE_WITH_FAILURES"
+            else:
+                ntries=2
+                failed = False
+                for itry in range(0, ntries):
+                    try:
+                        if itry > 0:
+                            #problems experienced with crabCommand. Can it be improved by waiting a bit 
+                            #between two calls?
+                            time.sleep(1)
+                        if not requestname:
+                            sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'\n" % (dataset, task_id))
+                            requestname = "crab_" + dataset.split('/')[1] + ("-%04d" % task_id)
+                        print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
+                        if args.verbosity > 0:
+                            res = crabCommand("status", "-d", requestname, '--verboseErrors')
+                        else:
+                            res = crabCommand("status", "-d", requestname)
+                        #print "Status of request %s: " % requestname, res
+                        break
+                    except HTTPException, e:
+                        delay=3
+                        if itry < ntries - 1:
+                            sys.stderr.write(str(e) + "\n")
+                            sys.stderr.write("\nFailed to run crab status. Waiting for %d seconds and trying again...\n" % delay)
+                            time.sleep(delay)
+                        else:
+                            sys.stderr.write("\nFailed to check status of primary dataset %s, task_id %d.\n" % (prim_dataset, task_id))
+                            failed = True
+                    except ClientException, e:
+                            sys.stderr.write(str(e) + "\n")
+                            sys.stderr.write("\nFailed to check status of primary dataset %s, task_id %d.\n" % (prim_dataset, task_id))
+                            failed = True
+                            break
+                #next itry
+                if failed:
+                    continue
+                target_status="REPORT_DONE"
                 if res["status"] != status:
-                    updateDatasetRecord(dataset, batch_id, {"status": res["status"], "status_ts": int(time.time())})
+                    updateDatasetRecord(prim_dataset, task_id, {"status": res["status"], "status_ts": int(time.time())})
                     status = res["status"]
                 else:
                     dt_hours = (time.time() - status_ts)/3600
-                    if dt_hours > 10:
-                        sys.stderr.write("Job batch %d of dataset %s is stuck in state %s for %d hour(s).\n" % 
-                                         (batch_id, dataset, status, int(dt_hours+0.5)))
+                    if dt_hours > 10 and res["status"] != "FAILED":
+                        sys.stderr.write("\ntask %d of primary dataset %s is stuck in state %s for %d hour(s).\n" % 
+                                         (task_id, prim_dataset, status, int(dt_hours+0.5)))
                     #endif dt_hours
                 #endif res["status"]
-            else:
-                new_status="REPORT_DONE_WITH_FAILURES"
-            #endif status
+            #endif status == CLOSED_WITH_FAILURE
          
             if status in ["COMPLETED", "CLOSED_WITH_FAILURES"]:
-                res = crabCommand("report", "-d", requestname)
-                #print res
-                lumiSummaryFile = requestname + "/results/lumiSummary.json"
-                lumiSummaryFileEosCpy = " /eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
                 try:
-                    f = open(lumiSummaryFile)
-                    md5sum = hashfile(f, hashlib.md5())
-                    #copy lumi file to result directory on EOS
-                    print "Save lumi summary into %s " %  (lumiSummaryFileEosCpy + "/" + lumiSummaryFile)
-                    rc = os.system(eos_command + " cp -s " + lumiSummaryFile + " " +  lumiSummaryFileEosCpy)
-                    if rc!=0:
-                        sys.stderr.write("Failed to copy luminosity summary file into EOS for dataset '%s'"  % dataset)
+                    time.sleep(1)
+                    res = crabCommand("report", "-d", requestname)
+                    lumiSummaryFile = requestname + "/results/lumiSummary.json"
+                    if datatype != 'mc':
+                        lumiFile = requestname + "/results/lumi"
+                        os.system(getlumi + " -r " + lumiSummaryFile + " > " + lumiFile)
+                        try:
+                            with open(lumiFile) as f:
+                                lumi = f.readline()
+                        #endwith
+                        except:
+                            sys.stderr.write("\nError: failed to compute luminosity for CRAB request %s.\n" % requestname)
                     else:
-                        updateDatasetRecord(dataset, batch_id, {"status": new_status, "n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file_md5sum": md5sum})
-                except IOError, e:
-                    sys.stderr.write(e)
+                        lumi = -1
+                    #endif
+                    lumiSummaryFileEosCpyShort =  ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
+                    lumiSummaryFileEosCpy = "/eos/cms/" + lumiSummaryFileEosCpyShort
+                    lumiFileEosCpy = "/eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumi"
+
+                    try:
+                        with open(lumiSummaryFile) as f:
+                            md5sum = hashfile(f, hashlib.md5())
+                        #copy lumi file to result directory on EOS
+                        print "Saving lumi summary into %s and %s." %  (lumiSummaryFileEosCpy, lumiFileEosCpy)
+                        rc = os.system(eos_cmd + " cp -s " + lumiSummaryFile + " " +  lumiSummaryFileEosCpy)
+                        if datatype != 'mc':
+                            rc |= os.system(eos_cmd + " cp -s " + lumiFile + " " +  lumiFileEosCpy)
+                        if rc!=0:
+                            sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
+                        else:
+                            updateDatasetRecord(prim_dataset, task_id, {"n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
+                            catalog = makeNtupleCatalog(prim_dataset, task_id)
+                            if catalog:
+                                updateDatasetRecord(prim_dataset, task_id, {"status": target_status})
+                                reportCloseDataset(getProdDescription() or '', dataset, task_id, catalog, lumiSummaryFileEosCpyShort, res['eventsRead'], target_status, submit_ts)
+
+                    except IOError, e:
+                        sys.stderr.write("%s\n" % str(e))
+                except ClientException, e:
+                      sys.stderr.write("%s\n" % str(e))
             #endif status
 
-def forceClose(dataset, batch_id):
-    if not isDatasetInDb(dataset, batch_id):
-        sys.stderr.write("No job batch found for dataset %s. Please check the dataset name.\n" % dataset)
+def makeNtupleCatalog(prim_dataset, task_id):
+    conn, c = getDbConn();
+    c.execute("SELECT dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, n_events, n_files, lumi_file, lumi_file_md5sum, lumi, submit_ts FROM jobs WHERE prim_dataset='%s' AND task_id='%s'" % (prim_dataset, task_id))
+    r = c.fetchone()
+    if not r:
+        conn.close()
+        return None
+
+    dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, nevents, nfiles, lumi_file, lumi_file_md5sum, lumi, submit_ts = r
+
+    reco_dataset = dataset.split("/")[2]
+
+    if lumi < 0:
+        lumi = None
+
+    ntuple_dir_path = to_mounted_eos(ntuple_dir)
+
+    if not ntuple_dir_path:
+        sys.stderr("\nNot EOS mount point found. A mount point is needed to access the %d directory\n" % dirpath)
+        conn.close()
+        return None
+    
+    cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs"
+    ntuple_dir_path += "/" + ntuple_subdir
+
+    #creates directory if it does not exist as it should
+    try:
+        os.mkdir(cat_dir_path)
+    except OSError:
+        pass
+
+    catalogs = os.listdir(cat_dir_path)
+    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
+    latest_cat = None
+    latest_cat_num = 0
+    #look for latest catalog file:
+    for f in catalogs:
+        m = catname.match(f)
+        if not m:
+            continue
+        catnum  = int(m.groups()[0])
+        if (not latest_cat) or (catnum > latest_cat_num):
+            latest_cat_num = catnum
+            latest_cat    = f
+
+    def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
+        fout.write('''# primary dataset: %s
+# data type: %s
+# processed events: %s
+# processed files: %s
+# lumi: %s
+
+''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
+    #enddef
+
+    new_cat_num = latest_cat_num +  1
+    new_cat_file = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, new_cat_num)
+    file_deleted = False
+
+    try:
+        fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(new_cat_file), delete=False)
+        #file header processing
+        try:
+            with open(latest_cat) as fin:
+                pds_line     = re.compile('^\s*#\s*primary dataset[:\s=]+([^\s]+)')
+                dtype_line   = re.compile('^\s*#\s*data type[:\s=]+([^\s]+)')
+                nevents_line = re.compile('^\s*#\s*processed events[:\s=]+([^\s]+)')
+                nfiles_line = re.compile('^\s*#\s*processed files[:\s=]+([^\s]+)')
+                lumi_line        = re.compile('^\s*#\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?)')
+                task_block_start = re.compile('^\s*#\s*task id[:\s=]+.*')
+                comment_line = re.compile('^\s*#')
+                no_comment_line = re.compile('^\s*[^#]')
+                tot_evts = None
+                tot_files = None
+                 
+                readHeader = True
+                for l in fin:
+                    l = l.strip()
+                    if readHeader:
+                        m = pds_line.match(l)
+                        if m:
+                            pds = m.groups()[0]
+                            if pds != prim_dataset:
+                                sys.stderr.write("Error: the catalog file %s does not contain the expected primary dataset parameter: %s instead of %s. The catalog files will not be updated for primary dataset %s" % (latest_cat, pds, prim_dataset))
+                            #endif
+                            break
+                        #endif
+                        m = dtype_line.match(l)
+                        if m:
+                            if m.groups()[0] != datatype:
+                                sys.stderr.write("Warning: the catalog file %s does not contain the expected data type parameter: %s instead of %s." % (latest_cat, m.groups()[0], datatype, prim_dataset))
+                            continue
+                        m = nevents_line.match(l)
+                        if m:
+                            tot_evts = int(m.groups()[0]) + nevents
+                            continue
+                        m = nfiles_line.match(l)
+                        if m:
+                            tot_files = int(m.groups()[0]) + nfiles
+                            continue
+                        m = lumi_line.match(l)
+                        if m and lumi >= 0:
+                            tot_lumi = int(m.groups()[0]) + lumi
+                            continue
+
+                    if no_comment_line.match(l) or start_block_line.match(l):
+                        #The header must be at beginning of the file, a no comment line
+                        #signs the end of the header
+                        write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
+                        readHeader = False
+                    
+                    #when this point is reached, the header has been processed and the
+                    #rest of the file will be copied verbatim
+                    fout.write(l)
+        except IOError:
+            write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+        except TypeError: #TypeError in case latest_cat is None
+            if latest_cat is None: #expected exception
+                write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+            else:
+                #unexpected exception, rethrow it:
+                raise
+        #File header written and list of previous ntuple files written
+        fout.write('''
+# task id: %d
+# task submission date: %s
+# reco dataset: %s
+# task nevents: %d
+# task lumi: %s /pb
+'''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
+        for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
+            statinfo = os.stat(ntf)
+            eos_path = cleanup_eos_path(ntf)
+            fout.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
+        #next cf
+        #atomic copy of the temporary file (hardlink):
+        try:
+            fout.close()
+            os.rename(fout.name, new_cat_file)            
+            file_deleted = True
+            sys.stdout.write("\nNtuple catalog file written to %s\n" % new_cat_file)
+        except IOError, e:
+            sys.stderr.write("\nError. Failed to write new catalog file for primary dataset %s to include ntuples of task %d.\n" % (prim_dataset, task_id))
+            conn.close()
+            return None
+    finally:
+        if not file_deleted:
+            fout.close()
+            os.unlink(fout.name)
+    conn.close()
+    return cleanup_eos_path(new_cat_file)
+#enddef
+
+def forceClose(prim_dataset, task_id):
+    if not getTaskStatus(prim_dataset, task_id):
+        sys.stderr.write("\nNo task found for primary dataset %s. Please check the dataset name.\n" % prim_dataset)
         return
     print "\nChecking the status of the jobs for dataset %s..." % dataset
-    check(dataset, batch_id)
-    status =  getDatasetStatus(dataset, batch_id)
+    check(prim_dataset, task_id)
+    status =  getTaskStatus(prim_dataset, task_id)
     if not status:
-        sys.stderr.write("Could not find the job status for dataset %s. Check dataset name.\n" % dataset)
+        sys.stderr.write("\nCould not find the job status for primary dataset %s. Check dataset name.\n" % prim_dataset)
     elif status in ['CLOSED_WITH_FAILURES', 'report_done']:
-        sys.stderr.write("Job batch for dataset %s is already closed.\n")
+        sys.stderr.write("\ntask for primary dataset %s is already closed.\n" % prim_dataset)
     elif status != 'FAILED':
-        sys.stderr.write("Job batch for dataset %s is in status %s. Only batch with status FAILED can be closed with this command.\n" % (dataset, status))
+        sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED can be closed with this command.\n" % (prim_dataset, status))
     else:
-        if updateDatasetRecord(dataset, batch_id, {"status": "CLOSED_WITH_FAILURES"}):
-            print "The job batch for dataset %s has closed." % dataset
+        if updateDatasetRecord(prim_dataset, task_id, {"status": "CLOSED_WITH_FAILURES"}):
+            print "\nThe task for dataset %s has closed." % dataset
         else:
-            sys.stderr.write("Failed to close job batch for dataset %s\n" % dataset)
+            sys.stderr.write("\nFailed to close task for primary dataset %s\n" % prim_dataset)
     print "\nObtaining the crab report..."
     #call check() again to produce the crab report
-    check(dataset, batch_id)
+    check(prim_dataset, task_id)
 
 def listRuns(dataset):
-    print "Asking DAS database. This operation can take a while..."
-    sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, dasRuns(dataset)))))
+    print "\nAsking DAS database. This operation can take some time..."
+    sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, sorted(dasRuns(dataset))))))
+
+def exec_on(func, nargs, filename):
+    """Reads the argument of a function from a file and executes the function for each line of the file."""
+    f = open(filename)
+    #pattern matching record line, either in space or comma separated values format,
+    # or in format of a table with | as cell boudaries: | val1 | val2 |...
+    line_pat = re.compile(r'^\|?' + '\s*[\s\|,]'.join(['\s*([^|\s]*)'] * nargs))
+    #matches a table separation line made with |, - and + signs
+    table_sep = re.compile(r'^\|-[-+]*-|$')
+    arg_list = []
+    header_found = False
+    table = None
+    iline = 0
+    for l in f:
+        iline = iline + 1
+        l = l.strip()
+        if len(l) == 0 or l[0] == '#':
+            continue
+        #endif
+
+        if table is None: 
+            table = (l[0] == '|')
+        #endif
+
+        if table and (not header_found) and table_sep.match(l):
+                #found a separation line, assumes that the line separate column headers with table contents
+                #reset arg_list which must contain column header text
+                arg_list = []
+                #further separation lines will be ignored:
+                header_found = True
+                continue
+        #endif
+        
+        m = line_pat.match(l)
+
+        if m and len(m.groups()) == nargs:
+            a=[]
+            for x in m.groups():
+                #converts numbers to number type:
+                try:
+                    x = float(x)
+                    x = int(x)
+                except ValueError:
+                    pass
+                a.append(x)
+            arg_list.append(a)
+        else:
+            sys.stderr.write("\nWarning: line %d of file %s will be ignored.\n") % (iline, filename)
+        #endif
+    #next l
+            
+    for arg in arg_list:
+        if args.verbosity > 0:
+            print "Calling %s(%s)." % (func.__name__, str(arg)[1:-1])
+        #endif
+        func(*arg)
+    #next arg
+
+def check_task_args():
+    if len(args.task) < 2 or args.task[0][0] ==  '-' or args.task[1][0] == '-':
+        sys.stderr.write("\nThe --task option takes two argument.\n")
+        return False
+    try:
+        args.task[1]= int(args.task[1])
+    except TypeError:
+        sys.stderr.write("\nThe second parameter of --task option must be an integer number.\n")
+        return False
+    #endtry
+    return True
+#enddef
+
+def setProdDescription(description):
+    conn, c = getDbConn()
+    c.execute("UPDATE production SET description='%s'" % description)
+    if c.rowcount == 0:
+        #first time the default production is set
+        c.execute("INSERT INTO production(description) VALUES('%s')" % description)
+    conn.commit()
+    conn.close()
+
+def getProdDescription():
+    (conn, c) = getDbConn()
+    c.execute("SELECT description FROM production")
+    r = c.fetchone()
+    if not r or len(r) == 0 or not r[0]:
+        return None
+    else:
+        return r[0]
+#enddef
+
+def showProdDescription():
+    r = getProdDescription()
+    if r:
+        sys.stdout.write("\n%s\n" % r)
+    else:
+        sys.stderr.write("\nNo description.\n")
+#enddef
+
 
 def main():
     createDatabase()
 
+    if args.task != [None, None] and not check_task_args():
+        return 1
+
+    if args.description:
+        setProdDescription(args.description)
+
     if args.check:
-        check()
+        check(*args.task)
     elif args.force_close:
-        forceClose(args.force_close)
+        forceClose(args.force_close[0], args.force_close[1])
+    elif args.force_close_from:
+        exec_on(forceClose, 2, args.force_close_from)
+    elif args.clear:
+        clearDatasetRecord(args.clear[0], args.clear[1])
+    elif args.clear_from:
+        exec_on(clearDatasetRecord, 2, args.clear_from)
     elif args.list:
         dumpDatabase()
+    elif args.new_version:
+        new_version()
     elif args.list_run2_datasets:
-        print "Asking the DAS database. This operation can take a while..."
+        print "Asking the DAS database. This operation can take some time..."
         dasQueryPrint("dataset=/*/Run2015*/MINIAOD")
+    elif args.show_catalog:
+        showCatalog()
+    elif args.submit and args.task != [None, None]:
+        submit(*args)
+    elif args.resubmit:
+        resubmit(*args)
+    elif args.show_description:
+        showProdDescription()
     else:
         process_dataset_catalogs()
+    print
+
+def getOutDir(catalog):
+    """Reads the ouput directory specified in a dataset catalog file"""
+    outDirLine = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
+    outDir = None
+    with open(catalog) as f:
+        for l in f:
+            m = outDirLine.match(l)
+            if m and len(m.groups()) > 0:
+                outDir = m.groups()[0]
+                break
+            #endif
+        #next l
+    return outDir
+
+def runSpec(runs, runMin = 1, runMax = 999999):
+    """Interprets a shears run list specification after filtering runs out of [runMin, runMax] range. Returns a Python list of integers and lists of two integers. The two-integer lists specify run intervals."""
+    run = re.compile(r'[\d]{6}')
+    if not runs:
+        return [[runMin, runMax]]
+    r_ranges = runs.split(",")
+    for i, r_range in enumerate(r_ranges):
+        bounds = r_range.split("-")
+        if len(bounds) == 0:
+            continue
+        if len(bounds) >  2:
+            sys.stderr.write("\nWarning: %s is not valid run range specification\n")
+            return None
+        for bound in bounds:
+            if len(bound) > 0 and not run.match(bound):
+                sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.' % bound\n")
+                return None
+            #endif not run.match
+        #next bound
+            
+        # Appies runMin and runMax requirement and resolves open intervals:
+        if len(bounds) == 1:
+            r_ranges[i] = int(bounds[0])
+            if r_ranges[i] < runMin or r_ranges[i] > runMax:
+                r_ranges[i] = None
+        else:
+            if len(bounds[0]) == 0:
+                bounds[0] = runMin
+            else:
+                bounds[0] = max(int(bounds[0]), runMin)
+            if len(bounds[1]) == 0:
+                bounds[1] = runMax
+            else:
+                bounds[1] = min(int(bounds[1]), runMax)
+            r_ranges[i] = [bounds[0], bounds[1]]
+        #endif
+    #next r_range
+    #removes None values from r_range:
+    r_ranges = [r for r in r_ranges if r]
+    return r_ranges
+#enddef
+
+def validateShearsRunSpec(runs):
+    """Validate a run list specification of runs parameter of catalog file"""
+    return runSpec(runs) is not None
+#enddef
+
+def readCatalog(filepath):
+    """Read and interpreat a dataset catalog file. On success returns (outDir, jsonFile, datasets) with outDir, the destination directory for the job results (output directory parameter), jsonFile, the lumi section mask json file (json file parameter) and datasets the list of dataset records. A record is an associative array with two keys, dataset and runs."""
+
+    commentLine  = re.compile(r'^\s*^#')
+    outDirLine   = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
+    jsonFileLine = re.compile(r'#\s*json file[:\s=]+\s*([^\s]+)')
+    datasetLine  = re.compile(r'([^\s]+)(?:[\s]+([^\s]+))?')
+
+    outDir = None
+    jsonFile = None
+    datasets = []
+
+    with open(filepath) as f:
+        for i, l in enumerate(f):
+            l = l.strip()
+            if len(l) == 0:
+                continue
+            m = outDirLine.match(l)
+            if m:
+                if outDir:
+                    sys.stderr.write("\nWarning: output directory is defined several times in the catalog file %s.\n")
+                #endif
+                outDir = m.groups()[0]
+                continue
+            m = jsonFileLine.match(l)
+            if m:
+                if jsonFile:
+                    sys.stderr.write("\nWarning: json file is defined several times in the catalog file %s.\n")
+                #endif
+                jsonFile = m.groups()[0]
+                continue
+            if commentLine.match(l):
+                continue
+            m = datasetLine.match(l)
+            if m:
+                if not checkDataSetName(m.groups()[0]):
+                    sys.stderr.write("\nWarning: dataset name '%s' found in line %d is not valid. Line ignored." % (m.groups()[0], i+1))
+                dataset_rcd = {}
+                dataset_rcd['dataset'] = m.groups()[0]
+                runs = runSpec(m.groups()[1])
+                if runs is None:
+                    sys.stderr.write("\nWarning: line %d of %s will be ignored! The run list specification is not valid. A run list specification must a comma-separeted list of runs and run ranges. A run range is written as m-n, with m the first run number and n the last run number. Either m or n can be omitted to indicate an open range. Few examples of valid specifications: 156787; 156787,165877; 156787,165877-165900; -156787,187000-\n" % (i+1, filepath))
+                else:
+                    dataset_rcd['runs'] = runs
+                    datasets.append(dataset_rcd)
+                #endif validateRunSpec
+                continue
+            sys.stderr.write("\nWarning: line %d of %s was not understood and will be ignored!\n"  % (i+1, filepath))
+        #next line    
+    #endwith
+    return (outDir, jsonFile, datasets)
+
+
+def doesOverlap(run_list_1, run_list_2):
+    """Checks if two run lists have some overlap. A run list is a list of individual runs and run ranges"""
+    for r1 in run_list_1:
+        for r2 in run_list_2:
+            #Turns the case to the case of two intervals r1, r2 with 
+            #lower bound of r1 <= lower bound of r2
+            if len(r1) == 1:
+                r1 = [r1, r1]
+            if len(r2) == 1:
+                r2 = [r2, r2]
+            if r2[0] < r1[0]:
+                tmp = r2
+                r2 = r1
+                r1 = tmp
+            #At the stage we have two intervals [r1[0],r1[1]] and 
+            #[r2[0],r2[1]] with r1[0] <= r2[0]
+            if r2[0] <=  r1[1]:
+                return True
+        #next r2
+    #next r1
+    return False
+
+def checkRunDuplicate(datasets):
+    """Check if any run specification of a same primary dataset overlaps. The parameter datasets must contain a dataset list in the format used by the readCatalog method. Return True iff a duplicate is found."""
+    n = len(datasets)
+    for i,ds1 in enumerate(datasets):
+        if len(ds1['dataset'].split("/")) < 2:
+            continue
+        for j in xrange(i + 1, n):
+            ds2 = datasets[j]
+            if len(ds2['dataset'].split("/")) < 2:
+                continue
+            if ds1['dataset'].split("/")[1] == ds2['dataset'].split("/")[1]:
+                if doesOverlap(ds1['runs'], ds2['runs']):
+                    sys.stderr.write("\nDatasets %s and %s have overlaps in their run list (resp. %s and %s).\n" % (ds1['dataset'], ds2['dataset'], str(ds1['runs']), str(ds2['runs'])))
+                    return True
+                #endif
+            #endif
+        #endif
+    #endif
+    return False
+#enddef
+
+def submit(prim_dataset = None, task_id = None):
+    """Submit task in to_submit status"""
+    conn, c = getDbConn()
+    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='to_submit'"
+    if prim_dataset:
+        sql += " AND prim_dataset='%s'" % prim_dataset
+    if task_id:
+        sql += " AND task_id=%d" % task_id
+    c.execute(sql)
+    rows = c.fetchall()
+    conn.close()
+    for prim_dataset, task_id in rows:
+        crab_cfg_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
+        doJobSubmission(prim_dataset, task_id)
+
+def resubmit(prim_dataset = None, task_id = None):
+    """Resubmit task in FAILED status"""
+    conn, c = getDbConn()
+    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED'"
+    if prim_dataset:
+        sql += " AND prim_dataset='%s'" % prim_dataset
+    if task_id:
+        sql += " AND task_id=%d" % task_id
+    c.execute(sql)
+    rows = c.fetchall()
+    conn.close()
+    for prim_dataset, task_id in rows:
+        crab_cfg_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
+        doJobSubmission(prim_dataset, task_id, resubmission=True)
+
 
 def process_dataset_catalogs():
     outDirLine = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
     commentLine = re.compile(r'^\s*^#')
-    for dataset_catalog in args.dataset_catalogs:
+    
+    if args.catalog:
         try:
-            f = open(dataset_catalog)
-        except IOError, e:
-            print e
-            continue
-        outDir = None
-        for dataset in f:
-            m = outDirLine.match(dataset)
-            if m and len(m.groups()) > 0:
-                outDir = m.groups()[0]
-            elif not outDir:
-                sys.stderr.write('''Fatal error while processing dataset catalog '%s'.
-Output directory line is missing from the input dataset catalog.
-The line should be before any dataset name and should have the following format:
-# output directory: /store/group/phys_smp/AnalysisFramework/Baobab/.../ntuples.
-''' % dataset_catalog)
-                break
-            #endif not outDir
-            dataset=dataset.strip()
-            if len(dataset) == 0 or commentLine.match(dataset):
-                continue
-            if checkDataSetName(dataset):
-                submitJob = True
-                if args.clear:
-                    clearDatasetRecord(dataset)
-                    submitJob = False
-                if args.list_runs:
-                    listRuns(dataset)
-                    submitJob = False
-                if args.new_runs:
-                    runs = checkRunToProcess(dataset);
-                    print "%s: %s" % (dataset, ",".join(map(str, runs)))
-                    submitJob = False
-                if submitJob:
-                    res = insertBatch(dataset, outDir, int(time.time()))
-                    if res:
-                        batch_id, runs = res
-                        submitJobs(dataset, batch_id, runs, args.events_per_job, outDir, args.max_events)
+            f = open(args.catalog)
+            f.close()
+        except IOError:
+            sys.stderr.write("\nWarning: catalog file %s provided with --catalog option does not exist or is not readable.\n" % args.catalog)
+        dataset_catalog = os.path.realpath(args.catalog)
+        print "\nSetting catalog path to %s." % dataset_catalog
+        setDefaultCatalog(dataset_catalog)
+    #endif args.catalog
+
+    dataset_catalog = getDefaultCatalog()
+    if dataset_catalog is None:
+        sys.stderr.write("\nNo catalog file defined. You need to set first the catalog file using the --catalog option before running this command.\n")
+        return
+    try:
+        outDir, jsonFile, datasets = readCatalog(dataset_catalog)
+        if checkRunDuplicate(datasets):
+            sys.stderr.write("\nError: run overlaps found in catalog file %s betwewn two reconstruction version of the same primary dataset. It is prohibited to prevent event duplication. Please check above messages on run ovelaps.\n" % dataset_catalog)
+            return
+    except IOError, e:
+        print e
+        return
+
+    if not outDir:
+        sys.stderr.write('''\nFatal error while processing dataset catalog '%s'. Output directory line is missing from the input dataset catalog.\n''' % dataset_catalog)
+        return
+
+    for dataset_rcd in datasets:
+        dataset = dataset_rcd['dataset']
+        prim_dataset = primDataset(dataset)
+        runs    = dataset_rcd['runs']
+        if checkDataSetName(dataset):
+            if args.list_runs:
+                listRuns(dataset)
+            if args.new_runs:
+                toprocess = checkRunToProcess(dataset, runs);
+                print "/%s:\n%s" % ("/".join(dataset.split("/")[1:3]), ",".join(map(str, toprocess)))
+            if args.new_jobs:
+                res = insertTask(dataset, outDir, runs, int(time.time()))
+                if res:
+                    task_id, new_run_list, datatype = res
+                    if args.no_submit:
+                        print "Creating task %d for primary dataset %s." % (task_id, prim_dataset)
+                    else:
+                        print "Submitting task %d for primary dataset %s." % (task_id, prim_dataset)
+                    submitJobs(prim_dataset, task_id, dataset, jsonFile, datatype, new_run_list, args.events_per_job, outDir, args.max_events)
+                elif not args.submit:
+                    print "No job to submit for dataset %s." % dataset
+            if args.submit:
+                submit()
+
+def getNtupleBaseDir():
+    """Retrieves from production database the base directory of the ntuple directories and the lastest ntuple version."""
+    conn, c = getDbConn()
+    c.execute("SELECT DISTINCT ntuple_dir FROM jobs")
+    res = c.fetchall()
+    basedir = None
+    lastvers = 0
+    pat = re.compile(r'(.*)(?:/v([\d]+)/Ntuple)$')
+    for r in res:
+        m = pat.match(r[0])
+        if m:
+            (basedir_, vers_) = m.groups()
+            if not basedir:
+                basedir = basedir_
+            elif basedir != basedir_:
+                sys.stderr.write("Inconsistency in database: contains jobs for different ntuple locations. E.g. %s and %s. It is unexpected.\n" % (basedir, basedir_))
+            #endif not basedir
+            if vers_ > lastvers:
+                lastvers = vers_
+            #endif
+        #endif m
+    #next r
+    if basedir:
+        return (basedir, lastvers)
+    else:
+        return None
+    conn.close()
+#enddef getNtupleBaseDir
+
+def cleanup_eos_path(p):
+    """Remove the eos mount point from a path."""
+    f=open("/etc/mtab")
+    r = re.compile(r'^\s*eoscms(\.cern\.ch)?\s+([^\s]+)')
+    mount_points=[]
+    for l in f:
+        m = r.match(l)
+        if m and len(m.groups()) > 1:
+            mount_points.append(m.groups()[1])
+        #endif
+    #next l
+    for l in mount_points:
+        if p.find(l)==0:
+            p = p[len(l):]
+            if p.find("/cms/store/") == 0:
+                #a /store path
+                p = p[len("/cms"):]
+            else:
+                #not a /store/..... path
+                p = "root://eoscms//eos/" + p
+            #endif
+        #endif
+    #next l
+    return p
+#enddef
+
+def copy_catalog(src, dest, new_ntuple_directory):
+    """Copy a catalog file and change the output directory specified in the file."""
+    outDirLine = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
+    commentLine = re.compile(r'^\s*^#')
+    fin = open(src)
+    if not fake:
+        fout = open(dest, "w")
+    else:
+        print "\nNew catalog contents:\n"
+        fout = sys.stdout
+    outDirCopied = False
+    for line in fin:
+        m = outDirLine.match(line)
+        if m and len(m.groups()) > 0:
+            fout.write("# output directory: %s\n" % new_ntuple_directory)
+            outDirCopied = True
+        elif commentLine.match(line) or outDirCopied:
+            fout.write(line)
+        else:
+            fout.write("# output directory: %s\n" % new_ntuple_directory)
+            four.write(line)
+        #endif
+    #next line
+    fin.close()
+    if not fake:
+        fout.close()
+
+### Original version. It was getting separately the dataset catalog file and the ntuple base directory.
+### This has been simplified by using the dataset catalog file which must already contains the ntuple base
+### directory. An input dataset catalog file is mandatory for the new version, which was not the case
+### for the original one.
+### def new_version():
+###     """Creates directory structure for production output of a new ntuple version."""
+### 
+###     (basedir, last_vers_in_db) = getNtupleBaseDir()
+### 
+###     basedir = to_mounted_eos(basedir)
+### 
+###     if not basedir:
+###         sys.stderr.write("Failed to setup a new production version setup.\n")
+###         return
+### 
+###     if not os.path.isdir(basedir):
+###         sys.stderr.write("Directory %s was not found! Failed to setup a new production version setup.\n" % basedir)
+###         return
+### 
+###     dirs=os.listdir(basedir)
+###     r=re.compile("v([\d]+)")
+###     dirs_=[]
+###     last_vers=None
+###     for d in dirs:
+###         m=r.match(d)
+###         if m and len(m.groups()) > 0:
+###             dirs_.append(int(m.groups()[0]))
+### 
+###     if len(dirs_) == 0:
+###         sys.stderr.write("Warning: first version. The datasets.txt catalog file will be empty.\n")
+###         new_vers=1
+###     else:
+###         last_vers = max(dirs_)
+###         new_vers = last_vers + 1
+###         olddir=basedir + "/v" + str(last_vers)
+### 
+###         datasets_oldfile = getDefaultCatalog()
+### 
+###         if not datasets_oldfile or not os.path.isfile(datasets_oldfile):
+###             datasets_oldfile_ = datasets_oldfile
+###             datasets_oldfile = olddir + "/Catalogs/datasets.txt"
+###             if os.path.isfile(datasets_oldfile):
+###                 if datasets_oldfile_:
+###                     sys.stderr.write("Warning: default catalog, %s,was not found or is not readable. Catalog %s will be used\n\n" % (datasets_oldfile_, datasets_oldfile))
+###                 else:
+###                     sys.stderr.write("Warning: catalog not configured, Catalog %s will be used\n\n" % datasets_oldfile)
+###                 #endif dataset_oldfile_
+###             else:
+###                 sys.stderr.write("Warning: no catalog file was found. An empty catalog will be created.\n\n")
+###                 datasets_oldfile = None
+###             #endif
+###         #endif
+###     #endif
+### 
+###     newdir = basedir + "/v" + str(new_vers)
+###     ntuple_newdir = cleanup_eos_path(newdir + "/Ntuple")
+###     datasets_newfile = newdir + "/Catalogs/datasets.txt"
+###     if ntuple_newdir.find("/store/") > 1 and ntuple_newdir.find('root:') !=0:
+###         sys.stderr.write("Warning: Ntuple directory path,\n\n%s\n\ncontains a directory named store, suggesting a path on a locally EOS mounted point.\n\nIf it is indeed the case, we recommend to edit the path indicated in file,\n\n%s\n\nto use a /store/.. path. The path will then be independent of the EOS mount point.\n\n" % (ntuple_newdir, datasets_newfile))
+### 
+###     if fake:
+###         print "New directory: %s"  % newdir
+###     else:
+###         os.makedirs(newdir + "/Catalogs")
+###         os.mkdir(newdir + "/Ntuple")
+###         
+###     datasets_file_copied = False
+###     if datasets_oldfile is None:
+###         if fake or args.verbosity > 0:
+###             print "An empty catalog will be produced."
+###         else:
+###             f = open(newdir + "/Catalogs/datasets.txt", "w")
+###             f.write("# output directory: %s\n\n#Add below the list of datasets to be processed\n" % ntuple_newdir)
+###             f.close()
+###         #endif fake
+###     else:
+###         if fake or args.verbosity > 0:
+###             print "Catalog copied from %s." % datasets_oldfile
+###         #endif fake
+###         copy_catalog(datasets_oldfile, datasets_newfile, ntuple_newdir)
+###         #endif fake
+###         datasets_file_copied = True
+###     #endif datasets_oldfile is None
+###     if not fake:
+###         setDefaultCatalog(datasets_newfile)
+###     print "\nNew production directory %s created successfully. Catalog file changed to %s.\n" % (newdir, datasets_newfile)
+### #enddef
+
+
+def new_version():
+    """Creates directory structure for production output of a new ntuple version."""
+
+    datasets = getDefaultCatalog()
+
+    if not datasets:
+        sys.stderr.write("A dataset catalog must be set with --catalog command in order to run the --new-version command\n\n")
+        return
+
+    basedir = os.path.dirname(os.path.dirname(getOutDir(datasets)))
+    
+    if not datasets:
+        sys.stderr.write("The parameter 'output directory' was not found in the dataset catalog %s. This parameter is mandatorry for the --new-version command.\n" % datasets)
+        return
+    
+    basedir = to_mounted_eos(basedir)
+
+    if not basedir:
+        sys.stderr.write("Failed to setup a new production version setup.\n")
+        return
+
+    if not os.path.isdir(basedir):
+        sys.stderr.write("Directory %s was not found! Failed to setup a new production version setup.\n" % basedir)
+        return
+
+    dirs=os.listdir(basedir)
+    r=re.compile("v([\d]+)")
+    dirs_=[]
+    last_vers=None
+
+    for d in dirs:
+        m=r.match(d)
+        if m and len(m.groups()) > 0:
+            dirs_.append(int(m.groups()[0]))
+
+    if len(dirs_) == 0:
+        new_vers=1
+    else:
+        last_vers = max(dirs_)
+        new_vers = last_vers + 1
+
+        olddir=basedir + "/v" + str(last_vers)
+
+    newdir = basedir + "/v" + str(new_vers)
+
+    ntuple_newdir_local = newdir + "/Ntuple"
+    ntuple_newdir = cleanup_eos_path(newdir + "/Ntuple")
+
+    datasets_newfile = newdir + "/Catalogs/datasets.txt"
+    if ntuple_newdir.find("/store/") > 1 and ntuple_newdir.find('root:') !=0:
+        sys.stderr.write("Warning: Ntuple directory path,\n\n%s\n\ncontains a directory named store, suggesting a path on a locally EOS mounted point.\n\nIf it is indeed the case, we recommend to edit the path indicated in file,\n\n%s\n\nto use a /store/.. path. The path will then be independent of the EOS mount point.\n\n" % (ntuple_newdir, datasets_newfile))
+
+    if fake:
+        print "New directory: %s"  % newdir
+    else:
+        os.makedirs(newdir + "/Catalogs")
+        with open(newdir + "/Catalogs/README") as fout:
+            fout.write('''Shears Babaob production. Catalogs of input datasets and output ntuples
+-----------------------------------------------------------------------
+
+datasets.txt
+
+This file contains the list of datasets (MINIAOD or MINIAODSIM) 
+together with some production parameters (output directory and
+json file). The files is filled before the production starts and
+can therefore list dataset whose production is not completed yet.
+
+<primary_dataset>-all.txt
+
+These files contain the list of ntuple file paths produced for
+every primary dataset.
+
+<primary_dataset>-<task id>.txt
+
+These files contain the list of ntuple file paths produced by
+every task (job task). The task id is a sequential number
+starting at one for each primary dataset. These file contains
+the same as the <primary_dataset>-all.txt file but split per
+task.
+
+The description of the format of the file contents can be found in 
+https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
+
+''')
+        #endwith
+        os.mkdir(newdir + "/Ntuple")
+        os.system("ln -sf %s output" % ntuple_newdir_local)
+        
+    if fake or args.verbosity > 0:
+        print "Catalog copied from %s." % datasets
+    #endif fake
+    
+    copy_catalog(datasets, datasets_newfile, ntuple_newdir)
+    #endif fake
+    
+    if not fake:
+        setDefaultCatalog(datasets_newfile)
+        if last_vers:
+            #moves previous production files to a separate subdirectory:
+            os.mkdir("v%d" % last_vers)
+            print "\nMoving previous production to v%d directory..." % last_vers
+            os.system("mv crab_* v%d/" % last_vers)
+            os.system("mv baobab_prod.sqlite3 v%d/" % last_vers)
+            #sets up database and sets catalog file for the new production:
+            createDatabase()
+            setDefaultCatalog(datasets_newfile)
+    print "\nNew production directory %s created successfully. Catalog file changed to %s.\n" % (newdir, datasets_newfile)
+#enddef
+
+@contextmanager
+def eos_mount():
+    """Looks for EOS mount point and creates one if none was found."""
+    myusername = pwd.getpwuid(os.getuid())[0]
+
+    mountpoint = None
+    mymount = True
+    with open("/etc/mtab") as f:
+        pat = re.compile(r'eoscms.cern.ch ([^\s]+) fuse (?:[^\s]+,)*user=([^\s]+)')
+        for l in f:
+            m = pat.match(l)
+            if m:
+                (mountpoint_, user) = m.groups()
+                if user == myusername:
+                    mymount = False
+                    mountpoint = mountpoint_
+                    break;
+                #endif user
+             #endif m
+        #next l
+    #endwith
+    try:
+        if mymount:
+            mountpoint = mkdtemp(prefix='grow_baobabs')
+            os.system(eos_cmd + " -b fuse mount " + mountpoint + "> /dev/null")
+        #endif
+        yield mountpoint
+    finally:
+        if mymount:
+            os.system("fusermount -u " + mountpoint)
+            os.rmdir(mountpoint)
+        #endif
+     #endtry
+#enddef
+
+def to_mounted_eos(path):
+    myusername = pwd.getpwuid(os.getuid())[0]
+    if path.find("/store/") == 0: #path: /store/...
+        return eos_mount_point.rstrip("/") + "/cms" + path
+    elif path.find("/eos/") == 0: #path: /eos/...
+        #not an eos path
+        return eos_mount_point.rstrip("/") + path
+    else:
+        #not recognised as an eos path
+        return path
+    #endif
+#enddef
+
+#        with open("/etc/mtab") as f:
+#            pat = re.compile(r'eoscms.cern.ch ([^\s]+) fuse (?:[^\s]+,)*user=([^\s]+)')
+#            for l in f:
+#                m = pat.match(l)
+#                if m:
+#                    (mountpoint, user) = m.groups()
+#                    if user == myusername:
+#                        return mountpoint + "/cms" + path
+#                    #endif user
+#                #endif m
+#            #next l
+#        #endwith
+#    #endif path.find
+#    return None
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
 
-    parser.add_argument('dataset_catalogs', nargs='*',
-                        help='Catalog files containing the list of CMS datasets to process')
+#    parser.add_argument('dataset_catalogs', nargs='*',
+#                        help='Catalog files containing the list of CMS datasets to process')
 
-    parser.add_argument('--force-close', action='store', metavar='DATASET', default=None,
-                        help='Close a failed job batch for a dataset.')
+    parser.add_argument('--catalog', action='store', default=None,
+                        help='Sets the catalog file path. If combined with other option specifying an action to take, the action will be processed already with this new catalog.')
+
+    parser.add_argument('--description', action='store', default=None,
+                        help='Sets description of the ntuple production.')
+
+    parser.add_argument('--show-description', action='store_true', default=None,
+                        help='Displays description of the ntuple production.')
+
+    parser.add_argument('--task', nargs=2, action='store', metavar=['DATASET', 'TASK_ID'], default=[None, None],
+                        help='Restricts the --check and --submit commands to the task TASK-ID of primary dataset DATASET.')
+
+    parser.add_argument('--show-catalog', action='store_true',
+                        help='Display the file path of the catalog file. Add the option -v to display the file contents')
+
+    parser.add_argument('--force-close', action='store', nargs=2, metavar=['DATASET', 'TASK_ID'], default=None,
+                        help='Closes a task that failed completion.')
+
+    parser.add_argument('--force-close-from', action='store', metavar='FILE', default=None,
+                        help='Closes tasks that failed completion. The list of tasks is specified in file FILE, one task by line made of the dataset name followed by the bach id. Values can be sepated by spaces or a comma. Text tables in a similar format to the --list output are also supported, columns beyond the second one will be ignored.')
 
     parser.add_argument('--max-events', type=int, action='store', default=-1,
-                        help='Specify maximum number of events to process for each dataset. The default is to process to full dataset.')
+                        help='Specifies maximum number of events to process for each dataset. The default is to process to full dataset.')
 
     parser.add_argument('--max-run-num', type=int, action='store', default=None,
                         help='Specifies a maximum run number above which runs are ignored new job submissions. This maximum applies also for the result returned by --new-runs option.')
@@ -584,16 +1865,17 @@ if __name__ == '__main__':
     parser.add_argument('--events-per-job', type=int, action='store', default = 250000,
                         help='Specify the number of events each job should process')
 
-#    parser.add_argument('--check',  action='append', nargs='?', metavar='DATASET',
-#                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs. If an argument is provided, limit the check to the specified dataset. Repeat the --check DATASET options to specify several datasets.')
     parser.add_argument('--check',  action='store_true',
-                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs.')
+                        help='Check mode. Check dataset database, submit not yet submitted jobs, check status and produces reports of finished jobs. The option --task can be used to limit the action to a single task. With the option -v, details on task failure is provided (option --verboseErrors of crab status activated)')
 
     parser.add_argument('--new-runs', action='store_true',
                         help='Checks and displays for each dataset the list of new runs not yet submitted. For real data.')
 
-    parser.add_argument('--clear', action='store_true',
-                        help='Clear from the database datasets listed in the dataset catalogs. To be used with care.')
+    parser.add_argument('--clear', action='store', nargs=2, metavar=['DATASET', 'TASK_ID'], default=None,
+                        help='Deletes a record from the production local database. The record is specified by the dataset name (DATASET) and the task id (TASK_ID). To be used with care.')
+
+    parser.add_argument('--clear-from', action='store', metavar='FILE', default=None,
+                        help='Deletes from the production local database the list of record listed in FILE. The file must contain one record by line specified by the dataset name followed by the bach id. Values can be sepated by spaces or a comma. Text table is a similar format to the --list output is also supported. Command to be used with care.')
 
     parser.add_argument('--list', action='store_true',
                         help="Display contents of database.")
@@ -607,7 +1889,36 @@ if __name__ == '__main__':
     parser.add_argument('-v', action='count', dest='verbosity',
                         help="Increase verbosity")
 
+    parser.add_argument('--no-submit', action='store_true',
+                        help="Option to disable job submission. With this option active, the crab configuration files will be generated, but the crab submit command will not be called")
+
+    parser.add_argument('--submit', action='store_true',
+                       help="Submits tasks created with --no-submit option and not yet submitted. The option --task can be used to limit the action to a single task,")
+
+    parser.add_argument('--resubmit', action='store_true',
+                       help="Submits tasks with FAILED status. The option --task can be used to limit the action to a single task,")
+
+    parser.add_argument('--new-jobs', action='store_true',
+                        help="Creates and submits jobs to process new datasets")
+    
+    parser.add_argument('--new-version', action='store_true',
+                        help="Sets a new production version up. A production description an be entered with the --description option. It can be entered or changed later using the same option.")
+
+    parser.add_argument('--report', action='store', default=None,
+                        help="Option for the --check command. Reports newly available ntuples in the REPORT file. The reports are appended to the file. This option is used by the warden tool to send email advertisement of new ntuples.")
+
     args = parser.parse_args()
 
-    main()
+
+    try:
+        with get_lock():
+            with eos_mount() as eos_mount_point:
+                main()
+            #endwith
+    except KeyboardInterrupt, e:
+        print "\nBye!"
+        pass
+    #endtry
+
+
 

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+myself="`readlink -f "$0"`"
+mybasename="`basename "$myself"`"
+
+if [ "$1" = -h -o "$1" = --help -o $# != 1 ]; then
+    cat<<EOF
+Usage $mybasename log_file|tarball
+
+Extract list of input files used in a CMSSW run from logs. The script looks in the log for "Initiating request to open file file:///cms/data..." string and extracts the file names from them. In case of tarball the string is looked for in all the files contained in the tarball. The tarball must contain only ascii files.
+EOF
+fi
+
+if echo "$1" | grep -q tar\\.gz\$; then
+    cmd="tar -O -xzf"
+elif echo "$1" | grep -q \\.gz\$; then
+    cmd=zcat
+else
+    cmd=cat
+fi
+
+$cmd "$1" | awk -F : 'BEGIN{c=""}
+/Initiating request to open file/{gsub("///cms/data", "", $4); printf "%s\"%s\"", c, $4; c=",\n" } END{if(c!="") print ""}'

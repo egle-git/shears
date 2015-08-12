@@ -31,12 +31,12 @@ Quick start
 ----------
 
 * Download and build the code (`make clean all`)
-* Find a dimuon Baobab file catalog on EOS under `/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/Data/<version>/Catalogs/`. In this example we will use `/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/Data/v7/Catalogs/Boababs-DoubleMuon-001.txt`, but it is better to take the lastest Boabab version.
+* Find a dimuon Baobab file catalog on EOS under `/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/Data/<version>/Catalogs/`. In this example we will use `/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/Data/v7/Catalogs/Boababs-DoubleMuon-001.txt`, but it is better to take the latest Boabab version.
 * Runs:
 
 `./pruner -o myskim.root --max-events 10000  --selection VJetPruner --subselection DMu -c Boababs-DoubleMuon-001.txt`
 
-You can drop the `--max-events 10000` to process the all events. It will produced a signal Bonzai of real data events for the Z+jet analysis.  The `--selection VJetPruner` indicates to use the VJetPruner filter (developped for the Z+jet and W+jet analyses) with subselection DMu.
+You can drop the `--max-events 10000` to process the all events. It will produce a signal Bonzai of real data events for the Z+jet analysis.  The `--selection VJetPruner` indicates to use the VJetPruner filter (developed for the Z+jet and W+jet analyses) with subselection DMu.
 
 A list of available selections can be obtained with the command:
 
@@ -45,7 +45,7 @@ A list of available selections can be obtained with the command:
 Implementing a new selection
 ----------------------------
 
-Implementing an event and event content selection is relatively easy. You need to write a C++ class, where you wil code the event and event content selection. The descripion of the class to write follows:
+Implementing an event and event content selection is relatively easy. You need to write a C++ class, where you wil code the event and event content selection. The description of the class to write follows:
 
 ```c++
 //The four following lines are needed to import
@@ -106,7 +106,7 @@ subselection should be used. Example:
          ...
    }
 
-The filterBranch can be overidden for a custom branch selection. The default one
+The filterBranch can be overridden for a custom branch selection. The default one
 read the list of branches to copy from a text file. This default branch filter
 covers most of the needs. A template of the branch list file can be produced
 with the command:
@@ -117,9 +117,9 @@ Instead of `-c CATALOG` you can specify one input ntuple file. Then you can edit
 the branch_list.txt file and delete the branches you don't what to copy.
 
 The new Pruner can then be used from the pruner application using the
---selection option. Note that the pruner applicatio will need to be recompiled,
+--selection option. Note that the pruner application will need to be recompiled,
 which is done automatically when the make command is run in the Pruner
-folder. The new Pruner should appears in the selection list displayed with the
+folder. The new Pruner should appear in the selection list displayed with the
 command,
 
 `./pruner --list-selections` .
@@ -143,7 +143,7 @@ To get the most up-to-date list of options, run the `./pruner --help` command.
 * -v 
 
    increase verbosity. Add more v for more verbosity, 
-   e.g. -vv.
+   e.g. -CV.
 
 * --catalog CATALOG, -c CATALOG
 
@@ -156,11 +156,11 @@ To get the most up-to-date list of options, run the `./pruner --help` command.
 
 * --branches-from FILE, -b FILE
 
-   includes the branches listed in FILE in the ouput tree. Format is one branch
+   includes the branches listed in FILE in the output tree. Format is one branch
    per line. Line starting with a '#' sign are considered as comments and are
    ignored.  --ouput-file FILE Specifies the file name to write the ouput to. If
    -o FILE the output is text (see make-*-list options), then - sign can be used
-   in place of a filename to display the result on screeen.
+   in place of a file name to display the result on screen.
 
 
 ### Event selection options
@@ -168,7 +168,7 @@ To get the most up-to-date list of options, run the `./pruner --help` command.
 Event can be selected either by providing a list of events identified by their
 run number and event id or by an event filter. The list of registered filter can
 be obtained with the --list-selections. The command line options related to
-event seleciton are listed below.
+event selection are listed below.
 
 * --list-selections   
 
@@ -178,7 +178,7 @@ event seleciton are listed below.
 
    specifies the name of the class to use for the event selection.
 
-*--subselection SUBSELECTION
+* --subselection SUBSELECTION
 
    a selection class can support several selection flavours chosen by this
    parameter
@@ -191,3 +191,13 @@ event seleciton are listed below.
    considered as comments and are ignored.
 
 
+Future features
+---------------
+
+Following features are under development and will be available soon:
+
+* Recording the integrated luminosity in the Bonzai file. For the simulation sample it will be the cross-section divided by the sum of the event weights. For unweighted events, it will really corresponds to an integrated luminosity, while for weighted events, the value will depend on the weight normalisation and should be considered as a scale factor to normalise histograms.  Histograms in unit of pb/(bin width) will be obtained by filling the histogram using the EventWeight[0] weight, dividing each bin content by the bin width and by the "integrated luminosity" value stored in the file.
+
+* Recording the cross section computed with higher-order calculation and used to compute the simulation sample integrated luminosity value.
+
+* Recording an acceptance flow histogram in the Bonzai ntuple.

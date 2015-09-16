@@ -54,14 +54,14 @@ public :
    vector<float>   *GLepDr01Eta;
    vector<float>   *GLepDr01Phi;
    vector<float>   *GLepDr01E;
-   vector<unsigned int> *GLepDr01Id;
+   vector<int>     *GLepDr01Id;
    vector<int>     *GLepDr01St;
    vector<int>     *GLepDr01MomId;
    vector<float>   *GLepBarePt;
    vector<float>   *GLepBareEta;
    vector<float>   *GLepBarePhi;
    vector<float>   *GLepBareE;
-   vector<unsigned int> *GLepBareId;
+   vector<int>     *GLepBareId;
    vector<int>     *GLepBareSt;
    vector<int>     *GLepBareMomId;
    vector<float>   *GLepSt3Pt;

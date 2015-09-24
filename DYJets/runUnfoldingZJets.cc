@@ -15,8 +15,8 @@ int main(int argc, char **argv)
     TString algo       = cfg.getS("algo");
     int jetPtMin       = cfg.getI("jetPtMin");
     int jetEtaMax      = cfg.getI("jetEtaMax");
-    TString generator1 = cfg.getS("generator1", "sherpa2");
-    TString generator2 = cfg.getS("generator2", "amcatnlo");
+    //TString generator1 = cfg.getS("generator1", "sherpa2");
+    //TString generator2 = cfg.getS("generator2", "amcatnlo");
 
     TString variable = "";
     bool doNormalized(false);
@@ -40,12 +40,12 @@ int main(int argc, char **argv)
             else if (currentArg.BeginsWith("algo=")) {
                 getArg(currentArg, algo);
             }
-            else if (currentArg.BeginsWith("generator1=")) {
+            /*else if (currentArg.BeginsWith("generator1=")) {
                 getArg(currentArg, generator1);
             }
             else if (currentArg.BeginsWith("generator2=")) {
                 getArg(currentArg, generator2);
-            }
+            }*/
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
             }
@@ -80,7 +80,8 @@ int main(int argc, char **argv)
     std::cout << "\n executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", &argc, argv);" << std::endl;
     //-----------------------------------------------------------------------------
 
-    UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, generator1, generator2, variable, doNormalized);
+    //UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, generator1, generator2, variable, doNormalized);
+    UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized);
 
     return 0;
 }

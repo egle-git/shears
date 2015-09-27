@@ -971,19 +971,21 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
     except OSError:
         pass
 
-    catalogs = os.listdir(cat_dir_path)
-    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
-    latest_cat = None
-    latest_cat_num = 0
-    #look for latest catalog file:
-    for f in catalogs:
-        m = catname.match(f)
-        if not m:
-            continue
-        catnum  = int(m.groups()[0])
-        if (not latest_cat) or (catnum > latest_cat_num):
-            latest_cat_num = catnum
-            latest_cat  = f
+#    catalogs = os.listdir(cat_dir_path)
+#    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
+#    latest_cat = None
+#    latest_cat_num = 0
+#    #look for latest catalog file:
+#    for f in catalogs:
+#        m = catname.match(f)
+#        if not m:
+#            continue
+#        catnum  = int(m.groups()[0])
+#        if (not latest_cat) or (catnum > latest_cat_num):
+#            latest_cat_num = catnum
+#            latest_cat  = f
+#    #next f
+
 
     def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
         fout.write('''# primary dataset: %s
@@ -995,94 +997,117 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
 ''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
     #enddef
 
-    new_cat_num = latest_cat_num +  1
-    new_cat_file = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, new_cat_num)
+    cat_alltasks = cat_dir_path + "/Boababs-%s-all.txt" % prim_dataset
+    cat_thistask = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, task_id)
     file_deleted = False
 
+    fout_thistask = open(cat_thistask, "w")
+    write_file_header(fout_thistask, prim_dataset, datatype, nevents, nfiles, lumi)
     try:
-        fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(new_cat_file), delete=False)
+        fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(cat_thistask), delete=False)
         #file header processing
+        task_section_warn = False
         try:
-            with open(latest_cat) as fin:
-                pds_line     = re.compile('^\s*#\s*primary dataset[:\s=]+([^\s]+)')
-                dtype_line   = re.compile('^\s*#\s*data type[:\s=]+([^\s]+)')
-                nevents_line = re.compile('^\s*#\s*processed events[:\s=]+([^\s]+)')
-                nfiles_line = re.compile('^\s*#\s*processed files[:\s=]+([^\s]+)')
-                lumi_line        = re.compile('^\s*#\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?)')
-                task_block_start = re.compile('^\s*#\s*task id[:\s=]+.*')
-                comment_line = re.compile('^\s*#')
-                no_comment_line = re.compile('^\s*[^#]')
-                tot_evts = None
-                tot_files = None
-                 
-                readHeader = True
+            pds_line     = re.compile('^\s*#\s*primary dataset[:\s=]+([^\s]+)')
+            dtype_line   = re.compile('^\s*#\s*data type[:\s=]+([^\s]+)')
+            nevents_line = re.compile('^\s*#\s*processed events[:\s=]+([^\s]+)')
+            nfiles_line  = re.compile('^\s*#\s*processed files[:\s=]+([^\s]+)')
+            lumi_line        = re.compile('^\s*#\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?).*')
+            task_block_start = re.compile('^\s*#\s*task id[:\s=]+([\d]*).*')
+            task_nevents_line = re.compile(r'^\s*#\s*task.?\s*nevents[:\s=]+([^\s]+)')
+            task_nfiles_line = re.compile(r'^\s*#\s*task.?\s*nfiles[:\s=]+([^\s]+)')
+            task_lumi_line = re.compile('^\s*#\s*task.?\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?).*')
+            comment_line = re.compile('^\s*#')
+            no_comment_line = re.compile('^\s*[^#]')
+            tot_events = nevents
+            tot_files = nfiles
+            tot_lumi = lumi
+
+            with open(cat_alltasks) as fin:
+                #read a first time the file to sum the integrated lumi
+                #over the tasks, excluding this task
+                file_section_task_id = -1
                 for l in fin:
-                    l = l.strip()
-                    if readHeader:
-                        m = pds_line.match(l)
-                        if m:
-                            pds = m.groups()[0]
-                            if pds != prim_dataset:
-                                sys.stderr.write("Error: the catalog file %s does not contain the expected primary dataset parameter: %s instead of %s. The catalog files will not be updated for primary dataset %s" % (latest_cat, pds, prim_dataset))
-                            #endif
+                    l.strip()
+
+                    m = pds_line.match(l)
+                    if m and task_block_start < 0:
+                        pds = m.groups()[0]
+                        if pds != prim_dataset:
+                            sys.stderr.write("Error: the catalog file %s does not contain the expected primary dataset parameter: %s instead of %s. The catalog files will not be updated for primary dataset %s" % (cat_alltasks, pds, prim_dataset))
                             break
                         #endif
-                        m = dtype_line.match(l)
-                        if m:
-                            if m.groups()[0] != datatype:
-                                sys.stderr.write("Warning: the catalog file %s does not contain the expected data type parameter: %s instead of %s." % (latest_cat, m.groups()[0], datatype, prim_dataset))
-                            continue
-                        m = nevents_line.match(l)
-                        if m:
-                            tot_evts = int(m.groups()[0]) + nevents
-                            continue
-                        m = nfiles_line.match(l)
-                        if m:
-                            tot_files = int(m.groups()[0]) + nfiles
-                            continue
-                        m = lumi_line.match(l)
-                        if m and lumi >= 0:
-                            tot_lumi = int(m.groups()[0]) + lumi
-                            continue
+                    #endif
 
-                    if no_comment_line.match(l) or start_block_line.match(l):
-                        #The header must be at beginning of the file, a no comment line
-                        #signs the end of the header
-                        write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
+
+                    m = task_block_start.match(l)
+                    if m and len(m.groups()[0]) > 0:
+                        file_section_task_id = int(m.groups()[0])
+                    if file_section_task_id > 0 and file_section_task_id != task_id:
+                        m = task_lumi_line.match(l)
+                        if m:
+                            tot_lumi += float(m.groups()[0])
+                        m = task_nevents_line.match(l)
+                        if m:
+                            tot_events += int(m.groups()[0])
+                        m = task_nfiles_line.match(l)                        
+                        if m:
+                            tot_files += int(m.groups()[0])
+                    #endif file_section_task_id > ...
+                #next l
+                
+                write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
+                
+
+                #read a second time the file to copy its content
+                file_section_task_id = -1
+                fin.seek(0)
+                this_task_section_written = False
+                for l in fin:
+                    l = l.strip()
+                    m = task_block_start.match(l)
+                    if m and len(m.groups()[0]) > 0:
+                        file_section_task_id = int(m.groups()[0])
+                            #The header must be at beginning of the file, a no comment line
+                            #signs the end of the header
                         readHeader = False
-                    
-                    #when this point is reached, the header has been processed and the
-                    #rest of the file will be copied verbatim
-                    fout.write(l)
+                    #endif
+                    if file_section_task_id >= 0 and file_section_task_id != task_id:
+                        fout.write(l + "\n")
         except IOError:
             write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
-        except TypeError: #TypeError in case latest_cat is None
-            if latest_cat is None: #expected exception
+        except TypeError: #TypeError in case cat_alltasks is None
+            if cat_alltasks is None: #expected exception
                 write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
             else:
                 #unexpected exception, rethrow it:
                 raise
         #File header written and list of previous ntuple files written
-        fout.write('''
+
+        for f in [fout, fout_thistask]:
+            f.write('''
 # task id: %d
 # task submission date: %s
 # reco dataset: %s
 # task nevents: %d
 # task lumi: %s /pb
 '''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
+        #next f
 #        print '>>> list content of %s' % (ntuple_dir_path + "/*/ntuple_*.root")
         for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
             statinfo = os.stat(ntf)
             eos_path = eos_to_eos_path(ntf)
 #            print '>>> %s' % eos_path
             fout.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
+            fout_thistask.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
         #next cf
         #atomic copy of the temporary file (hardlink):
         try:
+            fout_thistask.close()
             fout.close()
-            os.rename(fout.name, new_cat_file)            
+            os.rename(fout.name, cat_alltasks)
             file_deleted = True
-            sys.stdout.write("\nNtuple catalog file written to %s\n" % new_cat_file)
+            sys.stdout.write("\nNtuple catalog file written to %s\n" % cat_thistask)
         except IOError, e:
             sys.stderr.write("\nError. Failed to write new catalog file for primary dataset %s to include ntuples of task %d.\n" % (prim_dataset, task_id))
             conn.close()
@@ -1092,7 +1117,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
             fout.close()
             os.unlink(fout.name)
     conn.close()
-    return eos_to_eos_path(new_cat_file)
+    return eos_to_eos_path(cat_thistask)
 #enddef
 
 # End of file catalog functions
@@ -1799,11 +1824,10 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
         os.system("rm output; ln -sf %s output" % ntuple_newdir_local)
         
     if fake or args.verbosity > 0:
-        print "Catalog copied from %s." % datasets
+        print "Catalog copied from %s to %s." % (datasets, datasets_newfile)
     #endif fake
     
     catalog_copy(datasets, datasets_newfile, ntuple_newdir)
-    #endif fake
     
     if not fake:
         catalog_set_default(datasets_newfile)
@@ -2014,6 +2038,9 @@ def parse_command_line():
     parser.add_argument('--make-close-report', action='store_true', default=False,
                         help="To be used with --report REPORT_FILE and --task PRIM_DATASET TASK_ID options. Write a task closure report in REPORT_FILE for task TASK_ID. If the file exists the report is appended to its content.")
 
+    parser.add_argument('--make-ntuple-catalog', action='store_true', default=False,
+                        help="Makes the nutple catalag of task specified by --task option. The catalog is already produce by the --check command once the task is finished. Therefore, it is normally not needed to call this --make-ntuple-catalog command. If the catalog already exists, it will be overwritten")
+
     return parser.parse_args()
 
 
@@ -2082,6 +2109,11 @@ def run():
         if not args.report:
             sys.stderr.write("Option --report is mandatory to use the --make-close-report command.")
         prod_report_close_datasets(*args.task)
+    elif args.make_ntuple_catalog:
+        if args.task != [None, None]:
+            catalog_make_ntuple_catalog(args.task[0], args.task[1])
+        else:
+            sys.stderr.write("\nA task needs to be specified with the --task option to run the --make-ntuple-catalog command\n")
     else:
         prod_process_ds_catalogs()
     print

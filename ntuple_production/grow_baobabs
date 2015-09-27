@@ -575,6 +575,10 @@ lumi_file_md5sum TEXT,
 run_spec    TEXT,
 ntuple_cat  TEXT,
 notified    INTEGER DEFAULT 0,
+running INTEGER,
+finished INTEGER,
+failed INTEGER,
+other INTEGER,
 PRIMARY KEY(prim_dataset, task_id)
 )''')
     conn.execute('''CREATE TABLE IF NOT EXISTS runs (
@@ -624,11 +628,12 @@ description TEXT)
 def db_print_jobs():
     """Displays the content of the job database"""
     conn, c = db_get_conn()
-    c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
+    c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
     table = []
-    header = ["Prim. dataset", "Task", "Status", "Reco tag", "Runs", "Submission time"]
+    header = ["Prim. dataset", "Task", "Status C/R/F/O", "Reco tag", "Runs", "Submission time"]
     for x in c:
-        prim_dataset, dataset, task_id, submit_ts, status, run_spec, requestname = x
+        prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname = x
+        status += " " + "/".join(map(lambda x: str(x) if x is not None else '', (finished, running, failed, other)))
         toks = dataset.split("/")
         if len(toks) != 4:
             system.stderr.write("Internal error: found an invalid dataset name, %s, in the local production database." % dataset)
@@ -640,6 +645,7 @@ def db_print_jobs():
         table.append([ prim_dataset, task_id, status, processed_dataset, run_spec, time2str(submit_ts)])
 
     print_table(table, header)
+    print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, O: other statuses"
     conn.close()
 
 def db_get_task_status(prim_dataset, task_id):
@@ -738,6 +744,31 @@ def db_clear_task_record(prim_dataset, task_id):
 #    else:
 #        return None
 #    conn.close()
+
+
+def db_update_processing_stat(prim_dataset, task_id, jobList):
+    """Update job processing statistics of a task. jobList is list of two-element lists. The first element is the job status, the second is the job id. This list is returned by the crab status command."""
+    finished = 0
+    running = 0
+    failed = 0
+    other = 0
+    for r in jobList:
+        if r[0] == 'finished':
+            finished += 1
+        elif r[0] == 'running':
+            running += 1
+        elif r[0] == 'failed':
+            failed += 1
+        else:
+            other += 1
+    return db_update_task_record(prim_dataset, task_id, 
+                                 {"finished": finished, 
+                                 "running": running, 
+                                 "failed": failed, 
+                                 "other": other})
+#enddef
+
+
 
 #
 # End of database access tools
@@ -908,6 +939,161 @@ def catalog_get_out_dir(catalog):
             #endif
         #next l
     return outDir
+
+def catalog_make_ntuple_catalog(prim_dataset, task_id):
+    conn, c = db_get_conn()
+    c.execute("SELECT dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, n_events, n_files, lumi_file, lumi_file_md5sum, lumi, submit_ts FROM jobs WHERE prim_dataset='%s' AND task_id='%s'" % (prim_dataset, task_id))
+    r = c.fetchone()
+    if not r:
+        conn.close()
+        return None
+
+    dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, nevents, nfiles, lumi_file, lumi_file_md5sum, lumi, submit_ts = r
+
+    reco_dataset = dataset.split("/")[2]
+
+    if lumi < 0:
+        lumi = None
+
+    ntuple_dir_path = eos_to_local_path(ntuple_dir)
+
+    if not ntuple_dir_path:
+        sys.stderr("\nNot EOS mount point found. A mount point is needed to access the %d directory\n" % dirpath)
+        conn.close()
+        return None
+    
+    cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs"
+    ntuple_dir_path += "/" + ntuple_subdir
+
+    #creates directory if it does not exist as it should
+    try:
+        os.mkdir(cat_dir_path)
+    except OSError:
+        pass
+
+    catalogs = os.listdir(cat_dir_path)
+    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
+    latest_cat = None
+    latest_cat_num = 0
+    #look for latest catalog file:
+    for f in catalogs:
+        m = catname.match(f)
+        if not m:
+            continue
+        catnum  = int(m.groups()[0])
+        if (not latest_cat) or (catnum > latest_cat_num):
+            latest_cat_num = catnum
+            latest_cat  = f
+
+    def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
+        fout.write('''# primary dataset: %s
+# data type: %s
+# processed events: %s
+# processed files: %s
+# lumi: %s
+
+''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
+    #enddef
+
+    new_cat_num = latest_cat_num +  1
+    new_cat_file = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, new_cat_num)
+    file_deleted = False
+
+    try:
+        fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(new_cat_file), delete=False)
+        #file header processing
+        try:
+            with open(latest_cat) as fin:
+                pds_line     = re.compile('^\s*#\s*primary dataset[:\s=]+([^\s]+)')
+                dtype_line   = re.compile('^\s*#\s*data type[:\s=]+([^\s]+)')
+                nevents_line = re.compile('^\s*#\s*processed events[:\s=]+([^\s]+)')
+                nfiles_line = re.compile('^\s*#\s*processed files[:\s=]+([^\s]+)')
+                lumi_line        = re.compile('^\s*#\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?)')
+                task_block_start = re.compile('^\s*#\s*task id[:\s=]+.*')
+                comment_line = re.compile('^\s*#')
+                no_comment_line = re.compile('^\s*[^#]')
+                tot_evts = None
+                tot_files = None
+                 
+                readHeader = True
+                for l in fin:
+                    l = l.strip()
+                    if readHeader:
+                        m = pds_line.match(l)
+                        if m:
+                            pds = m.groups()[0]
+                            if pds != prim_dataset:
+                                sys.stderr.write("Error: the catalog file %s does not contain the expected primary dataset parameter: %s instead of %s. The catalog files will not be updated for primary dataset %s" % (latest_cat, pds, prim_dataset))
+                            #endif
+                            break
+                        #endif
+                        m = dtype_line.match(l)
+                        if m:
+                            if m.groups()[0] != datatype:
+                                sys.stderr.write("Warning: the catalog file %s does not contain the expected data type parameter: %s instead of %s." % (latest_cat, m.groups()[0], datatype, prim_dataset))
+                            continue
+                        m = nevents_line.match(l)
+                        if m:
+                            tot_evts = int(m.groups()[0]) + nevents
+                            continue
+                        m = nfiles_line.match(l)
+                        if m:
+                            tot_files = int(m.groups()[0]) + nfiles
+                            continue
+                        m = lumi_line.match(l)
+                        if m and lumi >= 0:
+                            tot_lumi = int(m.groups()[0]) + lumi
+                            continue
+
+                    if no_comment_line.match(l) or start_block_line.match(l):
+                        #The header must be at beginning of the file, a no comment line
+                        #signs the end of the header
+                        write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
+                        readHeader = False
+                    
+                    #when this point is reached, the header has been processed and the
+                    #rest of the file will be copied verbatim
+                    fout.write(l)
+        except IOError:
+            write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+        except TypeError: #TypeError in case latest_cat is None
+            if latest_cat is None: #expected exception
+                write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+            else:
+                #unexpected exception, rethrow it:
+                raise
+        #File header written and list of previous ntuple files written
+        fout.write('''
+# task id: %d
+# task submission date: %s
+# reco dataset: %s
+# task nevents: %d
+# task lumi: %s /pb
+'''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
+#        print '>>> list content of %s' % (ntuple_dir_path + "/*/ntuple_*.root")
+        for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
+            statinfo = os.stat(ntf)
+            eos_path = eos_to_eos_path(ntf)
+#            print '>>> %s' % eos_path
+            fout.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
+        #next cf
+        #atomic copy of the temporary file (hardlink):
+        try:
+            fout.close()
+            os.rename(fout.name, new_cat_file)            
+            file_deleted = True
+            sys.stdout.write("\nNtuple catalog file written to %s\n" % new_cat_file)
+        except IOError, e:
+            sys.stderr.write("\nError. Failed to write new catalog file for primary dataset %s to include ntuples of task %d.\n" % (prim_dataset, task_id))
+            conn.close()
+            return None
+    finally:
+        if not file_deleted:
+            fout.close()
+            os.unlink(fout.name)
+    conn.close()
+    return eos_to_eos_path(new_cat_file)
+#enddef
 
 # End of file catalog functions
 ######################################################################
@@ -1264,7 +1450,9 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             res = crabCommand("status", "-d", requestname, '--verboseErrors')
                         else:
                             res = crabCommand("status", "-d", requestname)
-                        #print "Status of request %s: " % requestname, res
+#                        print "Status of request %s: " % requestname, res
+#                        print "Job Statuses for request %s: " % requestname, res["jobList"]
+                        db_update_processing_stat(prim_dataset, task_id, res["jobList"]);
                         break
                     except HTTPException, e:
                         delay=3
@@ -1301,7 +1489,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                     lumiSummaryFileEosCpyShort = ""
                     res = {}
                     lumi = -1
-                    if not args.no_crab_report:
+                    if not (datatype == 'mc' and args.no_crab_report_for_mc):
                         sys.stdout.write('Retrieving job report from CRAB... ')
                         sys.stdout.flush()
                         res = crabCommand("report", "-d", requestname)
@@ -1346,7 +1534,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                         res['eventsRead'] = -1
                     #endif
                         
-                    catalog = makeNtupleCatalog(prim_dataset, task_id)
+                    catalog = catalog_make_ntuple_catalog(prim_dataset, task_id)
 
                     if catalog:
                         db_update_task_record(prim_dataset, task_id, {"ntuple_cat": catalog, "status": target_status})
@@ -1359,170 +1547,6 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                       sys.stderr.write("%s\n" % str(e))
             #endif status
 
-
-
-
-def makeNtupleCatalog(prim_dataset, task_id):
-    conn, c = db_get_conn()
-    c.execute("SELECT dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, n_events, n_files, lumi_file, lumi_file_md5sum, lumi, submit_ts FROM jobs WHERE prim_dataset='%s' AND task_id='%s'" % (prim_dataset, task_id))
-    r = c.fetchone()
-    if not r:
-        conn.close()
-        return None
-
-    dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, nevents, nfiles, lumi_file, lumi_file_md5sum, lumi, submit_ts = r
-
-    reco_dataset = dataset.split("/")[2]
-
-    if lumi < 0:
-        lumi = None
-
-    ntuple_dir_path = eos_to_local_path(ntuple_dir)
-
-    if not ntuple_dir_path:
-        sys.stderr("\nNot EOS mount point found. A mount point is needed to access the %d directory\n" % dirpath)
-        conn.close()
-        return None
-    
-    cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs"
-    ntuple_dir_path += "/" + ntuple_subdir
-
-    #creates directory if it does not exist as it should
-    try:
-        os.mkdir(cat_dir_path)
-    except OSError:
-        pass
-
-    catalogs = os.listdir(cat_dir_path)
-    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
-    latest_cat = None
-    latest_cat_num = 0
-    #look for latest catalog file:
-    for f in catalogs:
-        m = catname.match(f)
-        if not m:
-            continue
-        catnum  = int(m.groups()[0])
-        if (not latest_cat) or (catnum > latest_cat_num):
-            latest_cat_num = catnum
-            latest_cat  = f
-
-    def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
-        fout.write('''# primary dataset: %s
-# data type: %s
-# processed events: %s
-# processed files: %s
-# lumi: %s
-
-''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
-    #enddef
-
-    new_cat_num = latest_cat_num +  1
-    new_cat_file = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, new_cat_num)
-    file_deleted = False
-
-    try:
-        fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(new_cat_file), delete=False)
-        #file header processing
-        try:
-            with open(latest_cat) as fin:
-                pds_line     = re.compile('^\s*#\s*primary dataset[:\s=]+([^\s]+)')
-                dtype_line   = re.compile('^\s*#\s*data type[:\s=]+([^\s]+)')
-                nevents_line = re.compile('^\s*#\s*processed events[:\s=]+([^\s]+)')
-                nfiles_line = re.compile('^\s*#\s*processed files[:\s=]+([^\s]+)')
-                lumi_line        = re.compile('^\s*#\s*lumi[:\s=]+([\d]*.[\d]+|[\d]+.?)')
-                task_block_start = re.compile('^\s*#\s*task id[:\s=]+.*')
-                comment_line = re.compile('^\s*#')
-                no_comment_line = re.compile('^\s*[^#]')
-                tot_evts = None
-                tot_files = None
-                 
-                readHeader = True
-                for l in fin:
-                    l = l.strip()
-                    if readHeader:
-                        m = pds_line.match(l)
-                        if m:
-                            pds = m.groups()[0]
-                            if pds != prim_dataset:
-                                sys.stderr.write("Error: the catalog file %s does not contain the expected primary dataset parameter: %s instead of %s. The catalog files will not be updated for primary dataset %s" % (latest_cat, pds, prim_dataset))
-                            #endif
-                            break
-                        #endif
-                        m = dtype_line.match(l)
-                        if m:
-                            if m.groups()[0] != datatype:
-                                sys.stderr.write("Warning: the catalog file %s does not contain the expected data type parameter: %s instead of %s." % (latest_cat, m.groups()[0], datatype, prim_dataset))
-                            continue
-                        m = nevents_line.match(l)
-                        if m:
-                            tot_evts = int(m.groups()[0]) + nevents
-                            continue
-                        m = nfiles_line.match(l)
-                        if m:
-                            tot_files = int(m.groups()[0]) + nfiles
-                            continue
-                        m = lumi_line.match(l)
-                        if m and lumi >= 0:
-                            tot_lumi = int(m.groups()[0]) + lumi
-                            continue
-
-                    if no_comment_line.match(l) or start_block_line.match(l):
-                        #The header must be at beginning of the file, a no comment line
-                        #signs the end of the header
-                        write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
-                        readHeader = False
-                    
-                    #when this point is reached, the header has been processed and the
-                    #rest of the file will be copied verbatim
-                    fout.write(l)
-        except IOError:
-            write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
-        except TypeError: #TypeError in case latest_cat is None
-            if latest_cat is None: #expected exception
-                write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
-            else:
-                #unexpected exception, rethrow it:
-                raise
-        #File header written and list of previous ntuple files written
-        fout.write('''
-# task id: %d
-# task submission date: %s
-# reco dataset: %s
-# task nevents: %d
-# task lumi: %s /pb
-'''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
-#        print '>>> list content of %s' % (ntuple_dir_path + "/*/ntuple_*.root")
-        for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
-            statinfo = os.stat(ntf)
-            eos_path = eos_to_eos_path(ntf)
-#            print '>>> %s' % eos_path
-            fout.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
-        #next cf
-        #atomic copy of the temporary file (hardlink):
-        try:
-            fout.close()
-            os.rename(fout.name, new_cat_file)            
-            file_deleted = True
-            sys.stdout.write("\nNtuple catalog file written to %s\n" % new_cat_file)
-        except IOError, e:
-            sys.stderr.write("\nError. Failed to write new catalog file for primary dataset %s to include ntuples of task %d.\n" % (prim_dataset, task_id))
-            conn.close()
-            return None
-    finally:
-        if not file_deleted:
-            fout.close()
-            os.unlink(fout.name)
-    conn.close()
-    return eos_to_eos_path(new_cat_file)
-#enddef
-
-
-
-
-######################################################################
-# Task submission
-#
 def tasks_submit_pending_tasks(prim_dataset = None, task_id = None):
     """Submits tasks in the to_submit status"""
     conn, c = db_get_conn()
@@ -1539,7 +1563,7 @@ def tasks_submit_pending_tasks(prim_dataset = None, task_id = None):
         tasks_submit_task(prim_dataset, task_id)
 
 def tasks_resubmit(prim_dataset = None, task_id = None):
-    """Resubmit task in FAILED status"""
+    """Resubmits task in FAILED status"""
     conn, c = db_get_conn()
     sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED'"
     if prim_dataset:
@@ -1619,6 +1643,7 @@ inserts the task in the database. Return the task_id or None."""
         sys.stderr.write("\nUnexpected error when processing dataset %s. %s." % (dataset, e.message))
         return None
     return (task_id, runs, datatype)
+
 
 # End of task submission tools
 ######################################################################
@@ -1770,7 +1795,8 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
 ''')
         #endwith
         os.mkdir(newdir + "/Ntuple")
-        os.system("ln -sf %s output" % ntuple_newdir_local)
+        print ">>> rm output; ln -sf %s output" % ntuple_newdir_local
+        os.system("rm output; ln -sf %s output" % ntuple_newdir_local)
         
     if fake or args.verbosity > 0:
         print "Catalog copied from %s." % datasets
@@ -1790,6 +1816,8 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
             #sets up database and sets catalog file for the new production:
             db_create_database()
             catalog_set_default(datasets_newfile)
+            if args.description:
+                prod_set_description(args.description)
     print "\nNew production directory %s created successfully. Catalog file changed to %s.\n" % (newdir, datasets_newfile)
 #enddef
 
@@ -1980,8 +2008,8 @@ def parse_command_line():
     parser.add_argument('--report', action='store', default=None,
                         help="Option for the --check command. Reports newly available ntuples in the REPORT file. The reports are appended to the file. This option is used by the warden tool to send email advertisement of new ntuples.")
 
-    parser.add_argument('--no-crab-report', action='store_true', default=False,
-                        help="Disable crab report retrieval. Beware that for data, without the report the intergrated luminosity cannot be calculated.")
+    parser.add_argument('--no-crab-report-for-mc', action='store_true', default=False,
+                        help="To be used with --check command. Disable crab report retrieval for MC. Retrieving crab report for MC can be very long. This option allows to skip this step. Statistics on the number of processed events will be missing when this option is used.")
 
     parser.add_argument('--make-close-report', action='store_true', default=False,
                         help="To be used with --report REPORT_FILE and --task PRIM_DATASET TASK_ID options. Write a task closure report in REPORT_FILE for task TASK_ID. If the file exists the report is appended to its content.")
@@ -2019,7 +2047,10 @@ def main():
 
 def run():
 
-    if args.description:
+    if args.description and not args.new_version:
+        #note: if a new version is create, description
+        #will be set in the prod_new_version function
+        #for the new production database
         prod_set_description(args.description)
 
     if args.check:
@@ -2054,6 +2085,8 @@ def run():
     else:
         prod_process_ds_catalogs()
     print
+
+
 
 if __name__ == '__main__':
     main()

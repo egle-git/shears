@@ -144,6 +144,7 @@ def lock_acquire():
             raise
     if rc:
         t = start_lock_update()
+        pass
     yield rc
     if rc:
         t.cancel()
@@ -202,12 +203,12 @@ def eos_to_local_path(path):
     myusername = pwd.getpwuid(os.getuid())[0]
     if path.find("/store/") == 0: #path: /store/...
         if not eos_mount_point:
-            raise Runtime("Error: cannot proceed because of the EOS file system mounting failure.")
+            raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
         return eos_mount_point.rstrip("/") + "/cms" + path
     elif path.find("/eos/") == 0: #path: /eos/...
         #an eos path
         if not eos_mount_point:
-            raise Runtime("Error: cannot proceed because of the EOS file system mounting failure.")
+            raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
         return eos_mount_point.rstrip("/") + path
     else:
         #not recognised as an eos path
@@ -249,7 +250,7 @@ def eos_to_eos_path(p):
 #
 def time2str(t):
     """Convert unix time to human-readable text."""
-    return time.strftime("%Y-%M-%d-%T-%Z", time.localtime(t))
+    return time.strftime("%Y-%m-%d-%T-%Z", time.localtime(t))
 
 def hashfile(afile, hasher = hashlib.md5(), blocksize=65536):
     """Produce a hash code  of a file content."""
@@ -467,7 +468,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 #----------------------------------------------------------------------
 
 #A list of sites where the jobs should not run.
-    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_Demokritos', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP']
+    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_Demokritos', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T1_US_FNAL']
     
 #Site where the output should be copied. 
 # See https://cmsweb.cern.ch/sitedb/prod/sites/ for the list of site names
@@ -572,6 +573,8 @@ lumi        REAL,
 lumi_file   TEXT,
 lumi_file_md5sum TEXT,
 run_spec    TEXT,
+ntuple_cat  TEXT,
+notified    INTEGER DEFAULT 0,
 PRIMARY KEY(prim_dataset, task_id)
 )''')
     conn.execute('''CREATE TABLE IF NOT EXISTS runs (
@@ -642,7 +645,7 @@ def db_print_jobs():
 def db_get_task_status(prim_dataset, task_id):
     """Retrieves from job management database the status of a task"""
     conn, c = db_get_conn()
-    c.execute("SELECT status FROM jobs WHERE prim_dataset='%s' AND task_id=%d" % (prim_dataset, task_id))
+    c.execute("SELECT status FROM jobs WHERE prim_dataset='%s' AND task_id=%s" % (prim_dataset, str(task_id)))
     r = c.fetchone()
     conn.close()
     if r:
@@ -652,9 +655,12 @@ def db_get_task_status(prim_dataset, task_id):
 
 def db_get_data_type(prim_dataset):
     """Retrieves the datatype (mc or data) from the job management database."""
+
+
     conn, c = db_get_conn()
     c.execute("SELECT DISTINCT datatype FROM jobs WHERE prim_dataset='%s'" % prim_dataset)
     r = c.fetchall()
+
     conn.close()
     if len(r) > 1:
         raise error.Runtime("Inconsistency found in job management database!")
@@ -751,10 +757,10 @@ def catalog_set_default(catalog_path):
         c.execute("INSERT INTO production(dataset_catalog) VALUES('%s')" % canonized_path)
 
     catalog_link = 'datasets.txt'
-    if os.path.isfile(catalog_link):
+    if os.path.exists(catalog_link) or os.path.islink(catalog_link):
         if os.path.islink(catalog_link):
             old_link = os.readlink(catalog_link)
-            if old_link != catalog_path:
+            if old_link != local_path:
                 print "\nUpdating the file link %s to point to %s instead of %s." % (catalog_link, catalog_path, old_link)
                 os.remove(catalog_link)
                 os.symlink(local_path, catalog_link)
@@ -763,8 +769,11 @@ def catalog_set_default(catalog_path):
             sys.stderr.write("\nWarning: a file other than an older symbolic link is on the way, the symbolic link dataset.txt will not be created. This link is for user convenience and is not use by grow_baobabs.\n")
         #endif
     else:
-        print '\nCreating a symbolic link %s to %s.' % (catalog_link, catalog_path)
-        os.symlink(catalog_path, catalog_link)
+        print '\nCreating a symbolic link %s to %s.' % (catalog_link, local_path)
+        try:
+            os.symlink(local_path, catalog_link)
+        except OSError, e:
+            sys.stderr.write('Symbolic link creation failed. %s' % str(e))
     #endif
 
     conn.commit()
@@ -781,7 +790,7 @@ def catalog_get(local_path = True):
     if not r or len(r) == 0:
         return None
     elif local_path:
-        return eos_to_local_path(local_path)
+        return eos_to_local_path(r[0])
     else:
         return r[0]
 
@@ -1141,32 +1150,34 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
     """Submit a task to CRAB"""
 
     crab_config_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
+    crab_dir         = "crab_" + prim_dataset + ("-%04d" % task_id)
 
     try:
         globs = {}
         locs = {}
         execfile(crab_config_file, globs, locs)
         if resubmission:
-            cmd = 'resubmit'
+            print "Resubmitting dataset %s task %d..." % (prim_dataset, task_id)
+            res = crabCommand('resubmit', '-d', crab_dir)
         else:
-            cmd='submit'
-        res = crabCommand('resubmit', config=locs['config'])
-        taskname = res['uniquerequestname']
-        print "Task name:", taskname
+            res = crabCommand('submit', config=locs['config'])
+            taskname = res['uniquerequestname']
+            print "Task name:", taskname
 
-        print "Glidemon monitoring URL: http://glidemon.web.cern.ch/glidemon/jobs.php?taskname=%s" % urllib.quote_plus(taskname)
-        print "Dashboard monitoring URL:http://dashb-cms-job.cern.ch/dashboard/templates/task-analysis/#user=crab&refresh=0&table=Jobs&p=1&records=25&activemenu=2&status=&site=&tid=%s" % urllib.quote_plus(taskname)
+            print "Glidemon monitoring URL: http://glidemon.web.cern.ch/glidemon/jobs.php?taskname=%s" % urllib.quote_plus(taskname)
+            print "Dashboard monitoring URL:http://dashb-cms-job.cern.ch/dashboard/templates/task-analysis/#user=crab&refresh=0&table=Jobs&p=1&records=25&activemenu=2&status=&site=&tid=%s" % urllib.quote_plus(taskname)
 
 
         try:
 #            props = { k: res[k] for k in ["uniquerequestname", "requestname"] }
+            props = {}
             for k in "uniquerequestname", "requestname":
                 props[k] = res[k]
             props["status"] = "submitted"
             props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
             db_update_task_record(prim_dataset, task_id, props)
         except KeyError:
-            sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % dataset)
+            sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
             db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
     except HTTPException, e:
         db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
@@ -1180,8 +1191,8 @@ def tasks_forced_close(prim_dataset, task_id):
     if not db_get_task_status(prim_dataset, task_id):
         sys.stderr.write("\nNo task found for primary dataset %s. Please check the dataset name.\n" % prim_dataset)
         return
-    print "\nChecking the status of the jobs for dataset %s..." % dataset
-    tasks_babby_sitting(prim_dataset, task_id)
+    print "\nChecking the status of the jobs for dataset %s..." % prim_dataset
+    tasks_baby_sitting(prim_dataset, task_id)
     status =  db_get_task_status(prim_dataset, task_id)
     if not status:
         sys.stderr.write("\nCould not find the job status for primary dataset %s. Check dataset name.\n" % prim_dataset)
@@ -1191,26 +1202,48 @@ def tasks_forced_close(prim_dataset, task_id):
         sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED can be closed with this command.\n" % (prim_dataset, status))
     else:
         if db_update_task_record(prim_dataset, task_id, {"status": "CLOSED_WITH_FAILURES"}):
-            print "\nThe task for dataset %s has closed." % dataset
+            print "\nThe task for dataset %s has closed." % prim_dataset
         else:
             sys.stderr.write("\nFailed to close task for primary dataset %s\n" % prim_dataset)
-    print "\nObtaining the crab report..."
-    #call check() again to produce the crab report
-    tasks_babby_sitting(prim_dataset, task_id)
+    #call check() again to produce the crab report and the ntuple file catalog
+    tasks_baby_sitting(prim_dataset, task_id)
 
 
 #TODO: when .requestname is not found, perform automatic cleanup
-def tasks_babby_sitting(prim_dataset = None, task_id = None):
+def tasks_baby_sitting(prim_dataset = None, task_id = None):
     conn, c = db_get_conn()
-    sql = "SELECT prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir FROM jobs ORDER BY dataset, task_id";
+    sql = "SELECT prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir FROM jobs";
+    where = False
     if prim_dataset:
-        sql += " AND prim_dataset='%s'" % prim_dataset
+        if where:
+            sql += " AND"
+        else:
+            sql += " WHERE"
+        sql += " prim_dataset='%s'" % prim_dataset
+        where = True
     if task_id:
-        sql += " AND task_id=%d" % task_id
+        if where:
+            sql += " AND"
+        else:
+            sql += " WHERE"
+        sql += " task_id=%d" % task_id
+        where = True
+    sql += " ORDER BY dataset, task_id";
     c = tuple(conn.execute(sql))
     conn.close()
     for i, r in enumerate(c):
         (prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir) = r
+#        print '>>>'
+#        res = crabCommand("status", "-d", requestname)
+#        print res
+#        print '<<<<'
+        if status == 'to_submit':
+            continue
+        if not ntuple_subdir:
+            sys.stderr.write("Ntuple subdirectory path (ntuple_subdir) is not set for task #%d of primary dataset %s. This can happen if the job was submitted directly with the crab command. The ntuple_subdir must be set by hand with sqlite3 command (for expert). Check directory %s.\n" % (task_id, prim_dataset, ntuple_dir)) 
+            continue
+        #endif
+
         if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES', 'CAT_WRITTEN', 'CAT_WRITTEN_WITH_FAILURES']:
             if status == 'CLOSED_WITH_FAILURES':
                 target_status="REPORT_DONE_WITH_FAILURES"
@@ -1262,12 +1295,31 @@ def tasks_babby_sitting(prim_dataset = None, task_id = None):
                     #endif dt_hours
                 #endif res["status"]
             #endif status == CLOSED_WITH_FAILURE
-         
+
             if status in ["COMPLETED", "CLOSED_WITH_FAILURES"]:
                 try:
-                    time.sleep(1)
-                    res = crabCommand("report", "-d", requestname)
-                    lumiSummaryFile = requestname + "/results/lumiSummary.json"
+                    lumiSummaryFileEosCpyShort = ""
+                    res = {}
+                    lumi = -1
+                    if not args.no_crab_report:
+                        sys.stdout.write('Retrieving job report from CRAB... ')
+                        sys.stdout.flush()
+                        res = crabCommand("report", "-d", requestname)
+                        print " Done."
+                        lumiSummaryFile = requestname + "/results/lumiSummary.json"
+                        lumiSummaryFileEosCpyShort =  ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
+                        lumiSummaryFileEosCpy = "/eos/cms/" + lumiSummaryFileEosCpyShort
+                        lumiFileEosCpy = "/eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumi"
+                        with open(lumiSummaryFile) as f:
+                            md5sum = hashfile(f, hashlib.md5())
+                        try:
+                            print "Saving json file of processed data into %s." % lumiSummaryFileEosCpy
+                            rc = os.system(eos_cmd + " cp -s " + lumiSummaryFile + " " +  lumiSummaryFileEosCpy)
+                            if rc != 0:
+                                sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
+                        except IOError, e:
+                            sys.stderr.write("%s\n" % str(e))
+                            
                     if datatype != 'mc':
                         lumiFile = requestname + "/results/lumi"
                         os.system(getlumi + " -r " + lumiSummaryFile + " > " + lumiFile)
@@ -1277,40 +1329,41 @@ def tasks_babby_sitting(prim_dataset = None, task_id = None):
                         #endwith
                         except:
                             sys.stderr.write("\nError: failed to compute luminosity for CRAB request %s.\n" % requestname)
+
+                        try:
+                            #copy lumi file to result directory on EOS
+                            print "Saving lumi file into %s." %  lumiFileEosCpy
+                            rc = os.system(eos_cmd + " cp -s " + lumiFile + " " +  lumiFileEosCpy)
+                            if rc!=0:
+                                sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
+                        except IOError, e:
+                            sys.stderr.write("%s\n" % str(e))
+                            
+
+                        db_update_task_record(prim_dataset, task_id, {"n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
                     else:
-                        lumi = -1
+                        db_update_task_record(prim_dataset, task_id, {"n_events": -1, "n_files": -1, "lumi_file": "", "lumi_file_md5sum": -1, "lumi": -1})
+                        res['eventsRead'] = -1
                     #endif
-                    lumiSummaryFileEosCpyShort =  ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
-                    lumiSummaryFileEosCpy = "/eos/cms/" + lumiSummaryFileEosCpyShort
-                    lumiFileEosCpy = "/eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumi"
+                        
+                    catalog = makeNtupleCatalog(prim_dataset, task_id)
 
-                    try:
-                        with open(lumiSummaryFile) as f:
-                            md5sum = hashfile(f, hashlib.md5())
-                        #copy lumi file to result directory on EOS
-                        print "Saving lumi summary into %s and %s." %  (lumiSummaryFileEosCpy, lumiFileEosCpy)
-                        rc = os.system(eos_cmd + " cp -s " + lumiSummaryFile + " " +  lumiSummaryFileEosCpy)
-                        if datatype != 'mc':
-                            rc |= os.system(eos_cmd + " cp -s " + lumiFile + " " +  lumiFileEosCpy)
-                        if rc!=0:
-                            sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
-                        else:
-                            db_update_task_record(prim_dataset, task_id, {"n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
-                            catalog = makeNtupleCatalog(prim_dataset, task_id)
-                            if catalog:
-                                db_update_task_record(prim_dataset, task_id, {"status": target_status})
-                                prod_report_close_datasets(prod_get_description() or '', dataset, task_id, catalog, lumiSummaryFileEosCpyShort, res['eventsRead'], target_status, submit_ts)
+                    if catalog:
+                        db_update_task_record(prim_dataset, task_id, {"ntuple_cat": catalog, "status": target_status})
+                        if args.report:
+                            prod_report_close_datasets(prim_dataset, task_id)
+                        #endif
+                    #endif
 
-                    except IOError, e:
-                        sys.stderr.write("%s\n" % str(e))
                 except ClientException, e:
                       sys.stderr.write("%s\n" % str(e))
             #endif status
 
 
 
+
 def makeNtupleCatalog(prim_dataset, task_id):
-    conn, c = db_get_conn();
+    conn, c = db_get_conn()
     c.execute("SELECT dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, n_events, n_files, lumi_file, lumi_file_md5sum, lumi, submit_ts FROM jobs WHERE prim_dataset='%s' AND task_id='%s'" % (prim_dataset, task_id))
     r = c.fetchone()
     if not r:
@@ -1352,7 +1405,7 @@ def makeNtupleCatalog(prim_dataset, task_id):
         catnum  = int(m.groups()[0])
         if (not latest_cat) or (catnum > latest_cat_num):
             latest_cat_num = catnum
-            latest_cat    = f
+            latest_cat  = f
 
     def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
         fout.write('''# primary dataset: %s
@@ -1439,9 +1492,11 @@ def makeNtupleCatalog(prim_dataset, task_id):
 # task nevents: %d
 # task lumi: %s /pb
 '''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
+#        print '>>> list content of %s' % (ntuple_dir_path + "/*/ntuple_*.root")
         for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
             statinfo = os.stat(ntf)
             eos_path = eos_to_eos_path(ntf)
+#            print '>>> %s' % eos_path
             fout.write("%s %d %s\n" % (eos_path, statinfo.st_size, time2str(statinfo.st_mtime)))
         #next cf
         #atomic copy of the temporary file (hardlink):
@@ -1501,8 +1556,16 @@ def tasks_resubmit(prim_dataset = None, task_id = None):
 def tasks_check_for_new_tasks(dataset, ntuple_dir, runs, ts):
     """Checks if a dataset needs to be processed and if it does
 inserts the task in the database. Return the task_id or None."""
-    datatype = db_get_data_type(dataset)
-    if datatype:
+
+    toks = dataset.split("/")
+    if len(toks) > 1:
+        prim_dataset = toks[1]
+    else:
+        sys.stderr.write("\nInvalid dataset name %s.\n" % dataset)
+        return None
+
+    datatype = db_get_data_type(prim_dataset)
+    if datatype is not None:
         newDataset = False
     else:
         newDataset = True
@@ -1517,6 +1580,13 @@ inserts the task in the database. Return the task_id or None."""
             sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
             return None
     #endif datatype
+    if (not newDataset) and datatype == 'mc':
+        if args.verbosity > 0:
+            sys.stderr.write("\nDataset %s in MC and has already been processed.\n" % dataset)
+        #endif
+        return None
+    #endif
+
     prim_dataset = ds_primary_dataset(dataset)
     runs_in_str = runspec_prettify(runs)
     runs =  db_get_list_of_new_runs(dataset, runs)
@@ -1670,7 +1740,7 @@ def prod_new_version():
         print "New directory: %s"  % newdir
     else:
         os.makedirs(newdir + "/Catalogs")
-        with open(newdir + "/Catalogs/README") as fout:
+        with open(newdir + "/Catalogs/README", "w") as fout:
             fout.write('''Shears Babaob production. Catalogs of input datasets and output ntuples
 -----------------------------------------------------------------------
 
@@ -1678,7 +1748,7 @@ datasets.txt
 
 This file contains the list of datasets (MINIAOD or MINIAODSIM) 
 together with some production parameters (output directory and
-json file). The files is filled before the production starts and
+json file). The file is filled before the production starts and
 can therefore list dataset whose production is not completed yet.
 
 <primary_dataset>-all.txt
@@ -1736,6 +1806,7 @@ def prod_get_description():
     (conn, c) = db_get_conn()
     c.execute("SELECT description FROM production")
     r = c.fetchone()
+    conn.close()
     if not r or len(r) == 0 or not r[0]:
         return None
     else:
@@ -1751,27 +1822,76 @@ def prod_display_description():
 #enddef
 
 
-def prod_report_close_datasets(prod_desc, dataset, task_id, catalog, json_file, nevents, status, submit_ts):
-    prim_dataset, reco = dataset.split("/")[1:3]
+def prod_report_close_datasets(prim_dataset = None, task_id = None):
     if not args.report:
         return
+
+    sql = "SELECT prim_dataset, task_id, status, notified, dataset, ntuple_cat, lumi_file, n_events, status, submit_ts FROM jobs"
+    
+    where = False
+    if prim_dataset:
+        if where:
+            sql += " AND"
+        else:
+            sql += " WHERE"
+        sql += " prim_dataset='%s'" % prim_dataset
+        where = True
+    if task_id:
+        if where:
+            sql += " AND"
+        else:
+            sql += " WHERE"
+        sql += " task_id=%d" % task_id
+        where = True
+    sql += " ORDER BY dataset, task_id";
+
+    conn, c = db_get_conn()
+    c = tuple(conn.execute(sql))
+    conn.close()
+
+    if len(c) == 0:
+        sys.stderr.write("\nNo task found.\n")
+        return
+
     try:
         f = open(os.path.expanduser(args.report), "a")
-        f.write('''
-New bobab ntuple:
-----------------
+        for i, r in enumerate(c):        
+            (prim_dataset, task_id, status, notified, dataset, catalog, json_file, nevents, status, submit_ts) = r
 
-Production description: %s
-Primary dataset: %s
-Reconstruction tag: %s
-Task id: %s
-Number of processed events: %d
-Ntuple catalog location: %s
-Json file: %s
-Submission time: %s
-Task ended with status: %s
+            if status not in ["REPORT_DONE", "REPORT_DONE_WITH_FAILURES"]:
+                sys.stderr.write("\nTask #%d for primary dataset %s has status %s. Report are written only for statuses REPORT_DONE and REPORT_DONE_WITH_FAILURES." % (task_id, prim_dataset, status))
+                return
 
-''' % (prod_desc, prim_dataset, reco, task_id, nevents, catalog, json_file, time2str(submit_ts), status))
+            if notified != 0:
+                sys.stderr.write("\nReport for task #%d for primary dataset %s has already be written. Task skipped." % (task_id, prim_dataset))
+                return
+
+            prod_desc = prod_get_description()
+
+            toks = dataset.split("/")
+            if len(toks) > 2:
+                reco = toks[2]
+            else:
+                reco = "Not specified"
+
+            f.write('''
+    New bobab ntuple:
+    ----------------
+
+    Production description: %s
+    Primary dataset: %s
+    Reconstruction tag: %s
+    Task id: %s
+    Number of processed events: %d
+    Ntuple catalog location: %s
+    Json file: %s
+    Submission time: %s
+    Task ended with status: %s
+
+    ''' % (prod_desc, prim_dataset, reco, task_id, nevents, catalog, json_file, time2str(submit_ts), status))
+
+            db_update_task_record(prim_dataset, task_id, {"notified": 1})
+        #next (i,r)
     except IOError,e:
         sys.stderr.write(str(e))
     finally:
@@ -1860,6 +1980,12 @@ def parse_command_line():
     parser.add_argument('--report', action='store', default=None,
                         help="Option for the --check command. Reports newly available ntuples in the REPORT file. The reports are appended to the file. This option is used by the warden tool to send email advertisement of new ntuples.")
 
+    parser.add_argument('--no-crab-report', action='store_true', default=False,
+                        help="Disable crab report retrieval. Beware that for data, without the report the intergrated luminosity cannot be calculated.")
+
+    parser.add_argument('--make-close-report', action='store_true', default=False,
+                        help="To be used with --report REPORT_FILE and --task PRIM_DATASET TASK_ID options. Write a task closure report in REPORT_FILE for task TASK_ID. If the file exists the report is appended to its content.")
+
     return parser.parse_args()
 
 
@@ -1877,14 +2003,15 @@ def main():
         return 1
 
     try:
-        with lock_acquire() as lock_ok:
-            if lock_ok:
-                with eos_mount() as eos_mount_point:
-                    if not eos_mount_point:
-                        sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
-                    run()
-                #endwith
-            #endif
+#FIXME: lock is deadlocking. Disabled until the issue is fixed.
+#        with lock_acquire() as lock_ok:
+#            if lock_ok:
+              with eos_mount() as eos_mount_point:
+                  if not eos_mount_point:
+                      sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
+                  run()
+              #endwith
+#            #endif
     except KeyboardInterrupt, e:
         print "\nBye!"
         pass
@@ -1896,9 +2023,9 @@ def run():
         prod_set_description(args.description)
 
     if args.check:
-        check(*args.task)
+        tasks_baby_sitting(*args.task)
     elif args.force_close:
-        tasks_forced_close(args.force_close[0], args.force_close[1])
+        tasks_forced_close(args.force_close[0], int(args.force_close[1]))
     elif args.force_close_from:
         exec_on(tasks_forced_close, 2, args.force_close_from)
     elif args.clear:
@@ -1915,11 +2042,15 @@ def run():
     elif args.show_catalog:
         catalog_show()
     elif args.submit and args.task != [None, None]:
-        submit(*args)
+        tasks_submit_task(*args.task)
     elif args.resubmit:
-        tasks_resubmit(*args)
+        tasks_resubmit(*args.task)
     elif args.show_description:
         prod_display_description()
+    elif args.make_close_report:
+        if not args.report:
+            sys.stderr.write("Option --report is mandatory to use the --make-close-report command.")
+        prod_report_close_datasets(*args.task)
     else:
         prod_process_ds_catalogs()
     print

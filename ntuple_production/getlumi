@@ -17,11 +17,21 @@ fi
 
 filter(){
     if [ "$recorded_only" = y ]; then
-	awk '/Integrated Lumi/{if($7=="recorded=") print $8}'
+	tail -n 2 | head -n 1 | awk -F \| '{print $7/1.e6}'
     else
 	cat
     fi
 }
 
 
-python /afs/cern.ch/user/m/marlow/public/lcr2/lcr2.py -i  "$1" | filter
+#python /afs/cern.ch/user/m/marlow/public/lcr2/lcr2.py -i  "$1" | filter
+
+export PATH=$HOME/.local/bin:/afs/cern.ch/cms/lumi/brilconda-1.0.3/bin:$PATH
+
+if [ ! -x $HOME/.local/bin/brilcalc ]; then
+    pip install --install-option="--prefix=$HOME/.local" brilws
+fi
+
+brilcalc lumi -i "$1" -n 0.962 | filter
+
+#pip uninstall brilws

@@ -1370,6 +1370,9 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
         if resubmission:
             print "Resubmitting dataset %s task %d..." % (prim_dataset, task_id)
             res = crabCommand('resubmit', '-d', crab_dir)
+            print "Resubmission status: ", res['status']
+            if res['status'] == 'SUCCESS':
+                db_update_task_record(prim_dataset, task_id, {'status': 'resubmitted'})
         else:
             res = crabCommand('submit', config=locs['config'])
             taskname = res['uniquerequestname']
@@ -1379,17 +1382,16 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
             print "Dashboard monitoring URL:http://dashb-cms-job.cern.ch/dashboard/templates/task-analysis/#user=crab&refresh=0&table=Jobs&p=1&records=25&activemenu=2&status=&site=&tid=%s" % urllib.quote_plus(taskname)
 
 
-        try:
-#            props = { k: res[k] for k in ["uniquerequestname", "requestname"] }
-            props = {}
-            for k in "uniquerequestname", "requestname":
-                props[k] = res[k]
-            props["status"] = "submitted"
-            props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
-            db_update_task_record(prim_dataset, task_id, props)
-        except KeyError:
-            sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
-            db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
+            try:
+                props = {}
+                for k in "uniquerequestname", "requestname":
+                    props[k] = res[k]
+                    props["status"] = "submitted"
+                    props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
+                    db_update_task_record(prim_dataset, task_id, props)
+            except KeyError:
+                sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
+                db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
     except HTTPException, e:
         db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
         print e.headers
@@ -1590,7 +1592,7 @@ def tasks_submit_pending_tasks(prim_dataset = None, task_id = None):
 def tasks_resubmit(prim_dataset = None, task_id = None):
     """Resubmits task in FAILED status"""
     conn, c = db_get_conn()
-    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED'"
+    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED' OR status='submission_error'"
     if prim_dataset:
         sql += " AND prim_dataset='%s'" % prim_dataset
     if task_id:

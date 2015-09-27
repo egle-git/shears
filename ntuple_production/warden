@@ -1,13 +1,10 @@
 #!/bin/bash
 
 myself="`readlink -f "$0"`"
+mybasename="`basename "$myself"`"
 mydir="`dirname "$myself"`"
 
-#dirs="/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_25ns/MC \
-#/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data \
-#/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/MC"
-
-dirs="/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data"
+source "$mydir/prodrc"
 
 mailbox="~shearsop/work/.shears-mailbox"
 
@@ -26,16 +23,33 @@ eval "$tmp"
 
 echo CMSSW_BASE: $CMSSW_BASE
 
-which python
-
 [ $? = 0 ] || die "Failed to set CMSSW runtime environment."
 
 function run(){
     for d in $dirs; do
-	echo $d
-	(cd "$d" && "$mydir/grow_baobabs" --check --report "$mailbox")
+	cat <<EOF | tee -a .warden_summary
+$d
+----------------------------------------------------------------------
+
+EOF
+	echo "Checking status of running tasks..."
+	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox") 
+	echo "Checking if some tasks need to be submitted..."
+	(cd "$d" && "$mydir/grow_baobabs" --new-jobs)
+	echo "Task summary:"
+	(cd "$d" && "$mydir/grow_baobabs" --list) | tee -a .warden_summary
+cat<<EOF | tee -a .warden_summary
+======================================================================
+
+
+EOF
     done	
 
+}
+
+#retrieves the name of the user running this script:
+function user_name(){
+    phonebook --uid `id -u` --terse firstname --terse surname | tr ';' ' '
 }
 
 function to_min(){
@@ -46,7 +60,7 @@ s/m/+/g
 s/[[:digit:]]*s//g
 s/+$//g'`
     res="`echo "$exp" | bc -l`"
-    if [ $res = 0 ]; then
+    if [ "$res" = 0 ]; then
 	echo "Bad time expression" 2>&1
 	echo 1440
     else
@@ -57,21 +71,21 @@ s/+$//g'`
 
 function help(){
     fmt -w ${COLUMNS:-80} <<EOF
-Usage: warden [--loop CYCLE_TIME] [--prompt-report] [--report EVERY_CYCLE]
+Usage: warden [--loop CYCLE_TIME] [--report EVERY_CYCLE]
 
 Shears framework [1]. Checks the status of Boabab production and takes the required actions: submission for new data or dataset, closing ending tasks, reporting new ntuple sets.
 
 With the --loop option, the command runs every CYCLE_TIME. CYCLE_TIME default unit is minutes, w (week), d (day), h (hour) can be used and units can be combined, as 3d12h for 3 days 12 hours.
 
-The --promt-report and --report allows email notification. With the first option email notifications are sent immediatly, while with the second option they are grouped and send only at EVERY_CYCLE iterations of the loop.
+The --report allows email notification. The notifications are sent at EVERY_CYCLE iterations of the loop, use the value 1 for a promt notification.
 
 Note: the command needs the grid authentication proxy to run and is not able to renew it on its own.
 
 EOF
 }
 
-temp=`getopt -o hl:pr: --long help,loop:,prompt-notification,report: \
-     -n 'ffind' -- "$@"`
+temp=`getopt -o hl:pr: --long help,loop:,report: \
+     -n "$mybasename" -- "$@"`
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -79,13 +93,11 @@ if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 eval set -- "$temp"
 
 unset loop
-unset prompt_reco
 unset report_every
 while true ; do
     case "$1" in
         -h|--help) help; exit 0;; 
         -l|--loop) loop="$2"; shift 2;;
-        -p|--prompt-notification) prompt_report=y; shift;;
 	-r|--report) report_every="$2"; shift 2;;
         --) shift ; break ;; #end of options. It remains only the args.
         *) echo "Internal error!" ; exit 1 ;;
@@ -103,38 +115,61 @@ echo "$report_every" | grep -q '^[[:digit:]]*$' || { help; exit 1; }
 
 trap "makeitnow=1" SIGHUP
 
-if [ -z "$loop"  ]; then
-    #one shot run
-    run
-    if [ "$prompt_report" = y ]; then
-	"$mydir/send_shears_emails"
-    fi
-else
+[ -n "$loop" ] && cycle="`to_min $loop`"
+i=0
+do_run=y
+
+while true; do
     
-    cycle="`to_min $loop`"
+    [ -z "$loop" ] && do_run=n
+    
+    t=`date +%s`
+    makeitnow=0
+    
+    cat > .warden_last_log <<EOF
+File generated automatically by the warden command. The is ovewritten at each run cycle.
 
-    i=0
-    while true; do
-	t=`date +%s`
-	makeitnow=0
-	
-	run
+EOF
+    cat > .warden_summary <<EOF
+ ======================================================================
+| Warden from the Shears framework                                     |
+|                                                                      |
+|       Summary of the current Boabab productions                      |
+|                                                                      |
+ ======================================================================
 
-	i=$((i+1))
+Productions monitored by warden:
 
-	if [ "$i" = "$report_every" ]; then
-	    echo "Checking for notifications to send."
-	    "$mydir/send_shears_emails"
-	    i=0
-	fi
+`echo $dirs | tr ' ' '\n'`
 
-	t1=`date +%s`
-	dt=$((60*cycle+t-t1))
-	echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up..."
-	while [ $dt -gt 0 -a $makeitnow != 1 ]; do
-            sleep 10
-            t1=`date +%s`
-            dt=$((60*cycle+t-t1))
-	done
+Last update: `date`
+
+Operator: `user_name`
+
+EOF
+    
+    run | tee -a .warden_last_log
+    mv .warden_last_log warden_last_log
+    mv .warden_summary warden_summary
+
+    cp -a warden_last_log /afs/cern.ch/user/s/shearsop/www/boabab_current_prod_log.txt
+    cp -a  warden_summary /afs/cern.ch/user/s/shearsop/www/boabab_current_prod_summary.txt
+    i=$((i+1))
+
+    if [ "$i" = "$report_every" ]; then
+	echo "Checking for notifications to send."
+	"$mydir/send_shears_emails"
+	i=0
+    fi
+    
+    [ -z "$loop" ] && break
+
+    t1=`date +%s`
+    dt=$((60*cycle+t-t1))
+    echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up..."
+    while [ $dt -gt 0 -a $makeitnow != 1 ]; do
+        sleep 10
+        t1=`date +%s`
+        dt=$((60*cycle+t-t1))
     done
-fi
+done

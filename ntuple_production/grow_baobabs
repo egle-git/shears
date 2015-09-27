@@ -1058,7 +1058,6 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
                 
                 write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
                 
-
                 #read a second time the file to copy its content
                 file_section_task_id = -1
                 fin.seek(0)
@@ -1090,8 +1089,9 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
 # task submission date: %s
 # reco dataset: %s
 # task nevents: %d
+# task nfiles: %d
 # task lumi: %s /pb
-'''     % (task_id, submit_ts, reco_dataset, nevents, str(lumi)))
+'''     % (task_id, time2str(submit_ts), reco_dataset, nevents, nfiles, str(lumi)))
         #next f
 #        print '>>> list content of %s' % (ntuple_dir_path + "/*/ntuple_*.root")
         for ntf in glob.glob(ntuple_dir_path + "/*/ntuple_*.root"):
@@ -1107,7 +1107,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
             fout.close()
             os.rename(fout.name, cat_alltasks)
             file_deleted = True
-            sys.stdout.write("\nNtuple catalog file written to %s\n" % cat_thistask)
+            sys.stdout.write("\nNtuple catalog written to %s and %s\n" % (cat_thistask, cat_alltasks))
         except IOError, e:
             sys.stderr.write("\nError. Failed to write new catalog file for primary dataset %s to include ntuples of task %d.\n" % (prim_dataset, task_id))
             conn.close()
@@ -1118,7 +1118,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
             os.unlink(fout.name)
     conn.close()
     return eos_to_eos_path(cat_thistask)
-#enddef
+#enddef catalog_make_ntuple_catalog
 
 # End of file catalog functions
 ######################################################################

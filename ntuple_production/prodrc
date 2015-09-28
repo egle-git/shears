@@ -3,9 +3,9 @@
 #scripts.
 
 #List of production directories to act on
-dirs="/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_25ns/Data \
+dirs="\
+/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_25ns/Data \
 /afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_25ns/MC \
 /afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data \
-/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/Data \
-/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/MC"
+/afs/cern.ch/user/s/shearsop/work/baobab-prod/13TeV_50ns/MC "
 

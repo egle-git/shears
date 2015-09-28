@@ -21,17 +21,18 @@ tmp="`cd /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSSW && scram runtime -s
 
 eval "$tmp"
 
-echo CMSSW_BASE: $CMSSW_BASE
+#echo CMSSW_BASE: $CMSSW_BASE
 
 [ $? = 0 ] || die "Failed to set CMSSW runtime environment."
 
+function underline(){
+    sed 'p
+s/./-/g'
+}
+
 function run(){
     for d in $dirs; do
-	cat <<EOF | tee -a .warden_summary
-$d
-----------------------------------------------------------------------
-
-EOF
+	{ echo $d | underline; echo; } | tee -a .warden_summary
 	echo "Checking status of running tasks..."
 	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox") 
 	echo "Checking if some tasks need to be submitted..."
@@ -140,7 +141,14 @@ EOF
 
 Productions monitored by warden:
 
-`echo $dirs | tr ' ' '\n'`
+EOF
+
+for d in $dirs; do
+    echo -n "$d " >> .warden_summary
+    (cd $d && ./grow_baobabs --show-catalog | awk -F / '{f=NF-2; if(f>0) print $f}') >> .warden_summary
+done
+
+cat >> .warden_summary <<EOF
 
 Last update: `date`
 

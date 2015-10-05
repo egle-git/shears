@@ -1,0 +1,4 @@
+MC/v3/Ntuple/WWTo2L2Nu_13TeV-powheg/crab_WWTo2L2Nu_13TeV-powheg-0001/150723_000133/0000/ntuple_1.root
+MC/v3/Ntuple/WWTo2L2Nu_13TeV-powheg/crab_WWTo2L2Nu_13TeV-powheg-0001/150723_000133/0000/ntuple_2.root
+MC/v3/Ntuple/WWTo2L2Nu_13TeV-powheg/crab_WWTo2L2Nu_13TeV-powheg-0001/150723_000133/0000/ntuple_3.root
+

@@ -46,6 +46,7 @@ public :
    Float_t         EvtFastJetRho;
    UInt_t          TrigHlt;
    ULong64_t       TrigHltMu;
+   ULong64_t       TrigHltDiMu;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -236,6 +237,7 @@ public :
    TBranch        *b_EvtFastJetRho;   //!
    TBranch        *b_TrigHlt;   //!
    TBranch        *b_TrigHltMu;   //!
+   TBranch        *b_TrigHltDiMu;   //!
    TBranch        *b_METPt;   //!
    TBranch        *b_METPx;   //!
    TBranch        *b_METPy;   //!

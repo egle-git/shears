@@ -21,7 +21,12 @@ string doWhat;
 string storageElement;
 
 
-    storageElement = "root://eoscms//eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/";
+     storageElement = "root://eoscms//eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/";
+    // 25 ns
+    //  storageElement = "root://eoscms//eos/cms/store/group/phys_smp/WPlusJets/ntuples/test/zjets/";
+    //  storageElement = "root://eoscms//eos/cms/store/group/phys_smp";
+    //  storageElement = "/afs/cern.ch/work/b/bhawan/public/WZJets/res/";
+
 
     string dirPath = "/tupel";
     string treeName = "/EventTree";
@@ -74,7 +79,8 @@ void BonzaiMaker::Loop()
  
    if(cfg_.getS("doWhat")!="DATA"){
     hasGenInfo = "true";
-   }
+   } 
+
 
    // before writing output on eos one has to mount eos first:  eosmount ~/eos 
  
@@ -86,8 +92,8 @@ void BonzaiMaker::Loop()
    
    TFile *outputFile = new TFile(outFileRoot.c_str(), "recreate");   
    if(cfg_.getS("outputDir") == "eos"){
-           string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/"+cfg_.getS("lepSel")+"_"+ strNew + "_fullstat_" + cfg_.getS("CMEnergy")+".root" ;
-          outputFile = new TFile(outFileRoot.c_str(), "recreate");
+            string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/50ns/"+cfg_.getS("lepSel")+"_"+ strNew + "_fullstat_" + cfg_.getS("CMEnergy")+".root" ;  
+          outputFile = new TFile(outFileRoot.c_str(), "recreate");  
     }
 
     //-- output tree --
@@ -111,7 +117,7 @@ void BonzaiMaker::Loop()
     //-- output tree containt --
     // boson vector id. This is overwritten according to leptonIdSum
     // 23: Z boson; 24: W boson
-    int doVector = 24;
+    int doVector = 23; 
 
     // lepton id. This is overwritten according to leptonIdSum
     int lepID = 11; 
@@ -138,7 +144,7 @@ void BonzaiMaker::Loop()
         lepID = 24;
     }
 
-    cout << " leptons are " << lepID << " leptonIdSum " << leptonIdSum << " doVector " << doVector << endl;
+    cout << " leptons are " << lepID << " leptonIdSum " << leptonIdSum << endl;
 
 
     Double_t EvtPuCnt_out(0);
@@ -160,6 +166,7 @@ void BonzaiMaker::Loop()
     vector<double> GLepSt1and3E_out;
     vector<double> GLepSt1and3Phi_out;
     vector<double> GLepSt1and3Id_out;
+    vector<double> GLepSt1and3MomId_out;
     vector<double> GLepSt1and3Q_out;
     vector<double> GLepSt1and3St_out;
 
@@ -185,6 +192,7 @@ void BonzaiMaker::Loop()
     vector<double>  MuCh_out;
     vector<int>     MuId_out;
     vector<double>  patMuonTrig_;
+    vector<double>  patDiMuonTrig_;
     vector<double>  MuPfIso_out;
     vector<double>  MuVtxZ_out;
     vector<double>  MuDxy_out;
@@ -249,6 +257,7 @@ void BonzaiMaker::Loop()
 
         // -- bare gen leptons (status 1 = post FSR)-- In Alex code genLep: st1 +st3
         outputTree->Branch("genLepId_", &GLepSt1and3Id_out);
+        outputTree->Branch("genLepMomId_", &GLepSt1and3MomId_out);
         outputTree->Branch("genLepQ_", &GLepSt1and3Q_out);
         outputTree->Branch("genLepPt_", &GLepSt1and3Pt_out);
         outputTree->Branch("genLepEta_", &GLepSt1and3Eta_out);
@@ -294,6 +303,7 @@ void BonzaiMaker::Loop()
     outputTree->Branch("patMuonDxy_", &MuDxy_out);
     outputTree->Branch("patMuonCombId_", &MuId_out);
     outputTree->Branch("patMuonTrig_", &patMuonTrig_);
+    outputTree->Branch("patDiMuonTrig_", &patDiMuonTrig_);
     outputTree->Branch("patMuonPfIsoDbeta_", &MuPfIso_out);
 
     //  jets 
@@ -341,10 +351,11 @@ void BonzaiMaker::Loop()
 
        if (jentry % 10000 == 0) cout << jentry << " of " << nentries << endl; 
        if (DEBUG) cout << " EvtNum : " << EvtNum << endl;
-        
-       if (!EvtIsRealData) weight_amcNLO_sum += EvtWeights->at(0);
-        
-        
+
+       if (!EvtIsRealData ) 
+           weight_amcNLO_sum += EvtWeights->at(0); 
+     // cout << weight_amcNLO_sum << "\n";
+
        EvtVtxCnt_out = -111;
        EvtRunNum_out = -111;
        EvtLumiNum_out = -111;
@@ -382,6 +393,7 @@ void BonzaiMaker::Loop()
        GLepSt1and3E_out.clear();
        GLepSt1and3Phi_out.clear();
        GLepSt1and3Id_out.clear();
+       GLepSt1and3MomId_out.clear();
        GLepSt1and3Q_out.clear();
        GLepSt1and3St_out.clear();
    
@@ -417,6 +429,7 @@ void BonzaiMaker::Loop()
        MuCh_out.clear();
       // patMuonCombId_out.clear();
        patMuonTrig_.clear();
+       patDiMuonTrig_.clear();
        MuPfIso_out.clear();
        MuVtxZ_out.clear();
        MuDxy_out.clear();
@@ -454,13 +467,16 @@ void BonzaiMaker::Loop()
              
 //--------------- filling gen particles branches --
             // -- fill gen leptons with status 3 (pre FSR) ----
+            ///cout << GLepSt3Pt->size() << "\n";
             int GenLepSt03Size(GLepSt3Pt->size());
             for (int i(0); i < GenLepSt03Size; ++i){ 
                 // Id of leptons: 11,12,13,14,15,16 
                 if ((abs(GLepSt3Id->at(i)) >= 11 &&  abs(GLepSt3Id->at(i)) <= 16) || (abs(GLepSt3Id->at(i)) < 7)) {
                     if (leptonIdSum != 24 && abs(GLepSt3Id->at(i)) == lepID) genLep++; 
                 }
-                //    double sign = GLepSt3Id->at(i) > 0 ? 1 : -1;
+                  //  double sign = GLepSt3Id->at(i) > 0 ? 1 : -1;
+
+                  // cout << GLepSt3Mother0Id->at(i) << " , cnt:  " << GLepSt3MotherCnt->at(i) << "\n";
 /*
                     // cout << "sign = " << sign << "\n";
                     GLepSt1and3Id_out.push_back((int) GLepSt3Id->at(i)); 
@@ -477,13 +493,22 @@ void BonzaiMaker::Loop()
             int GenLepBare01Size(GLepBarePt->size());   
             for (int i(0); i < GenLepBare01Size; ++i){         
            
-                //cout << GLepBareId->at(i) << "\n";
-                 if( abs(GLepBareId->at(i)) >= 11 && (abs(GLepBareId->at(i)) <= 16 || abs(GLepBareId->at(i)) <= 7 )){      
-                 double sign = GLepBareId->at(i) > 0 ? 1 : -1;
-                     if (fabs(GLepBareMomId->at(i)) != lepID && fabs(GLepBareMomId->at(i)) != 12 && lepID && fabs(GLepBareMomId->at(i)) != 14 && fabs(GLepBareMomId->at(i)) != 16 && fabs(GLepBareMomId->at(i)) != 23 && fabs(GLepBareMomId->at(i)) != 24) continue;  //  leave 6 entries from 26
+
+               // cout << GLepBareId->at(i) << "\n";
+              //  cout << GLepBareMomId->at(i) << "\n";
+          //       if( fabs(GLepBareId->at(i)) >= 11 && (fabs(GLepBareId->at(i)) <= 16 || fabs(GLepBareId->at(i)) <= 7 )){      
+                // double sign = GLepBareId->at(i) > 0 ? 1 : -1;
+                   int sign = GLepBareMomId->at(i) > 0 ? 1 : -1;
+                 //   cout << sign<< "\n"; 
+
+                  // cout << fabs(GLepBareMomId->at(i)) << "\n"; 
+
+                 //    if (fabs(GLepBareMomId->at(i)) != lepID && fabs(GLepBareMomId->at(i)) != 12 && lepID && fabs(GLepBareMomId->at(i)) != 14 && fabs(GLepBareMomId->at(i)) != 16 && fabs(GLepBareMomId->at(i)) != 23 && fabs(GLepBareMomId->at(i)) != 24) continue;  //  leave 6 entries from 26
                     // CommentAG: need to check line above
                     // cout <<  "fabs(GLepBareMomId->at(i))  : " << fabs(GLepBareMomId->at(i))  << "\n";
    
+                 // cout << GLepBareId->at(i) << "\n";
+                    GLepSt1and3MomId_out.push_back((int) GLepBareMomId->at(i)); 
                     GLepSt1and3Id_out.push_back((int) GLepBareId->at(i)); 
                     GLepSt1and3Q_out.push_back((double) sign);
                     GLepSt1and3Pt_out.push_back((float) GLepBarePt->at(i));
@@ -491,9 +516,9 @@ void BonzaiMaker::Loop()
                     GLepSt1and3Phi_out.push_back((float) GLepBarePhi->at(i));
                     GLepSt1and3E_out.push_back((float) GLepBareE->at(i));
                     GLepSt1and3St_out.push_back((int) GLepBareSt->at(i));
-             
+                 
 
-                  }
+                //  }
 
             } // end gen leptons loop
 
@@ -529,21 +554,21 @@ void BonzaiMaker::Loop()
        if(hasRecoInfo == "true"){
 
             eventMuonTrig = 0;
-            if (leptonIdSum == 13 && TrigHltMu & 1<<17) eventMuonTrig += 1; // single muon HLT_IsoMu24_eta2p1_v2 ??
-            if (leptonIdSum == 26 && TrigHlt & 1<<2) eventMuonTrig += 4; // HLT_Mu17_TkMu8_v muon ??
-            if (leptonIdSum == 26 && TrigHlt & 1<<1) eventMuonTrig += 8; // HLT_Mu17_Mu8_v muon ??
+            //   if (leptonIdSum == 13 && t_bits[6]) eventMuonTrig += 1; // single muon HLT_IsoMu24_eta2p1_v ?? 
+            if (leptonIdSum == 26 && TrigHlt & 2 ) eventMuonTrig += 4; // HLT_Mu17_TkMu8_v muon ?? 
+            if (leptonIdSum == 26 && TrigHlt & 1) eventMuonTrig += 8; // HLT_Mu17_Mu8_v muon ?? 
             //   if (leptonIdSum == 24 && t_bits[4]) eventMuonTrig += 16;
             //   if (leptonIdSum == 24 && t_bits[5]) eventMuonTrig += 32;
 
             eventElecTrig = 0 ;
             //  if (leptonIdSum == 11 && t_bits[13]) eventElecTrig += 1; // HLT_Ele27_WP80_v
-            if (leptonIdSum == 22 && TrigHlt & 1<<0) eventElecTrig += 2; //  Ele17_Ele8
+            if (leptonIdSum == 22 && TrigHlt & 0) eventElecTrig += 2; //  Ele17_Ele8  
             //  if (leptonIdSum == 24 && t_bits[4]) eventElecTrig += 16; 
             //  if (leptonIdSum == 24 && t_bits[5]) eventElecTrig += 32; 
 
-           // -- fill reco electrons ----
-           int recoElecSize(ElPt->size());
-           for (int i(0); i < recoElecSize; ++i) {
+            // -- fill reco electrons ----
+            int recoElecSize(ElPt->size());
+            for (int i(0); i < recoElecSize; ++i) {
                 
                 if(ElPt->at(i) < 5.) continue;
                 if (doVector == 23 && !(ElId->at(i) & 4)) continue;   // electron medium id not passed, Alex code: !bits[5]
@@ -555,12 +580,11 @@ void BonzaiMaker::Loop()
                 ElCh_out.push_back((int)ElCh->at(i));
 
                 double elecID = 0 ;
-               // cout << ElId->at(i) << "\n"
-                //cout << "jentry " << jentry  << " ith lep " << i << " ElId " << ElId->at(i) << endl;
-                if (ElId->at(i) & 1<<0) elecID += 1 ; // Veto ??
-                if (ElId->at(i) & 1<<1) elecID += 2 ;  // Loose ?
-                if (ElId->at(i) & 1<<2) elecID += 4 ; // Medium ??
-                if (ElId->at(i) & 1<<3) elecID += 8 ; // Tight ??
+                // cout << ElId->at(i) << "\n"
+                if (ElId->at(i) & 0) elecID += 1 ; // Veto ??
+                if (ElId->at(i) & 1) elecID += 2 ;  // Loose ?
+                if (ElId->at(i) & 2) elecID += 4 ; // Medium ??
+                if (ElId->at(i) & 3) elecID += 8 ; // Tight ??
                 //if ( bits[9]) muonID += 16 ; // HEEP Tight ??
                 ElId_out.push_back(elecID);
 
@@ -609,8 +633,6 @@ void BonzaiMaker::Loop()
               //  MuId_out.push_back((int)MuId->at(i));
 
                 int  muonID = 0.;
-                //cout << "jentry " << jentry  << " ith lep " << i << " MuIdTight " << MuIdTight->at(i) << endl;
-               
                  if((MuIdTight->at(i) & 1)) muonID += 1 ;
                  else muonID += 2 ;
                  MuId_out.push_back(muonID);
@@ -620,23 +642,30 @@ void BonzaiMaker::Loop()
                     else invIsoCountMuon++;
                 }
 
-
+ 
                double muonTrig = 0 ;
+               double DimuonTrig = 0 ;
                //cout << TrigHlt << "\n";
-               /*
-                if (leptonIdSum == 13 && TrigHlt & 8 ) muonTrig += 8 ;  // single HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v2
-                if (leptonIdSum == 13 && TrigHlt & 14 ) muonTrig += 14 ; // HLT_IsoMu24_eta2p1_CentralPFJet30_BTagCSV07_v2
-                if (leptonIdSum == 13 && TrigHlt & 15 ) muonTrig += 15 ; // HLT_IsoMu24_eta2p1_TriCentralPFJet30_v2
-                if (leptonIdSum == 13 && TrigHlt & 16 ) muonTrig += 16 ;  //  HLT_IsoMu24_eta2p1_TriCentralPFJet50_40_30_v2
-                if (leptonIdSum == 13 && TrigHlt & 17 ) muonTrig += 17 ;  // HLT_IsoMu24_eta2p1_v2
-                */
-               if (leptonIdSum == 13 && TrigHltMu & 1<<17) muonTrig += 1 ; // single muon HLT_IsoMu24_eta2p1_v ??
-               if (leptonIdSum == 26 && TrigHlt & 1<<2) muonTrig += 4 ; // HLT_Mu17_TkMu8_v muon ??
-               //if (leptonIdSum == 26 && TrigHlt & 1<<1) muonTrig += 8 ; // HLT_Mu17_Mu8_v muon ??
+/*
+               if (leptonIdSum == 13 && TrigHlt & 8 ) muonTrig += 8 ;  // single HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v2 
+               if (leptonIdSum == 13 && TrigHlt & 14 ) muonTrig += 14 ; // HLT_IsoMu24_eta2p1_CentralPFJet30_BTagCSV07_v2 
+               if (leptonIdSum == 13 && TrigHlt & 15 ) muonTrig += 15 ; // HLT_IsoMu24_eta2p1_TriCentralPFJet30_v2
+               if (leptonIdSum == 13 && TrigHlt & 16 ) muonTrig += 16 ;  //  HLT_IsoMu24_eta2p1_TriCentralPFJet50_40_30_v2
+               if (leptonIdSum == 13 && TrigHlt & 17 ) muonTrig += 17 ;  // HLT_IsoMu24_eta2p1_v2
+*/
+               if (leptonIdSum == 13 && TrigHlt & 14) muonTrig += 1 ; 
+               if (leptonIdSum == 26 && TrigHlt & 2) muonTrig += 4 ; // HLT_Mu17_TkMu8_v muon ?? 
+             //  if (leptonIdSum == 26 && TrigHlt & 1) muonTrig += 1 ; // HLT_Mu17_Mu8_v muon ?? 
+
+               if (leptonIdSum == 26 && TrigHltDiMu & (1 <<19) 524288) DimuonTrig += 4 ;
+              //  if (leptonIdSum == 26 && TrigHltDiMu & 524288 ) DimuonTrig += 3 ;
+
                // if (leptonIdSum == 24 && TRIGbits[4]) muonTrig += 16 ; // MuEle ?? 
                // if (leptonIdSum == 24 && TRIGbits[5]) muonTrig += 32 ; // EleMu ?? 
                // cout << muonTrig << "\n";
+                // cout << DimuonTrig << "\n";
                 patMuonTrig_.push_back(muonTrig);
+                patDiMuonTrig_.push_back(DimuonTrig);
                 MuVtxZ_out.push_back((float)MuVtxZ->at(i));
              
            } // end reco muons loop 
@@ -691,19 +720,19 @@ void BonzaiMaker::Loop()
           //cout << MuPt_out.size() << " , " << GLepSt1and3Pt_out.size() << "\n";
          //-- fill the output tree --
           if (cfg_.getS("doUnfold") == "false" && leptonIdSum == 24 && ElPt_out.size() < 1 && MuPt_out.size() < 1) continue;// at least one letons on RECO
-          if (cfg_.getS("doUnfold") == "false" && ((leptonIdSum == 13 && MuPt_out.size() < 1) || (leptonIdSum == 11 && ElPt_out.size() < 1) || ((leptonIdSum == 11 || leptonIdSum == 13) && ( countElec + countMuon) > 1) ) )  continue ; //running on single electrons
-          if ( cfg_.getS("doUnfold") == "false" && leptonIdSum == 24 && (ElPt_out.size() < 1 || MuPt_out.size() < 1) ) continue ;
+          if (cfg_.getS("doUnfold") == "false" && ((leptonIdSum == 13 && MuPt_out.size() < 1) || (leptonIdSum == 0 && ElPt_out.size() < 1) || ((leptonIdSum == 11 || leptonIdSum == 13) && ( countElec + countMuon) > 1) ) )  continue ; //running on single electrons
+          if (cfg_.getS("doUnfold") == "false" && leptonIdSum == 24 && (ElPt_out.size() < 1 || MuPt_out.size() < 1) ) continue ;
           if ( cfg_.getS("doUnfold") == "false" && leptonIdSum == 22 && ElPt_out.size() < 2 ) continue ;
           if ( cfg_.getS("doUnfold") == "false" && leptonIdSum == 26 && MuPt_out.size() < 2 ) continue ;
-        
+
           //cout  << genLep << "\n";
    
           if ((leptonIdSum == 11 || leptonIdSum == 13) && cfg_.getS("doUnfold") == "true" && recoLep < 1 && genLep < 1) continue;
           if ((leptonIdSum == 22 || leptonIdSum == 26) && cfg_.getS("doUnfold") == "true" && recoLep < 2 && genLep < 2) continue;
 
-          // cout << "muon size" << MuEta_out.size() << "\n";
-          //cout << "muon pt" << MuPt_out << "\n";
-          //cout << "EvtVtxCnt_out " << EvtVtxCnt_out << "\n";
+         // cout << "muon size" << MuEta_out.size() << "\n";
+         //cout << "muon pt" << MuPt_out << "\n";
+         //cout << "EvtVtxCnt_out " << EvtVtxCnt_out << "\n";
           //cout << "EvtNum_out " << EvtNum_out << "\n";
 
          // cout << "GLepSt1and3Eta_out : " << GLepSt1and3Eta_out.size() << "\n";
@@ -952,7 +981,8 @@ void BonzaiMaker::Init(TChain *fChain)
    fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);
 
    fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
-   fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
+  // fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
+   fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
 /*
    fChain->SetBranchAddress("GLepDr01Pt", &GLepDr01Pt, &b_GLepDr01Pt);
    fChain->SetBranchAddress("GLepDr01Eta", &GLepDr01Eta, &b_GLepDr01Eta);
@@ -1034,6 +1064,10 @@ void BonzaiMaker::Init(TChain *fChain)
    fChain->SetBranchAddress("JetAk04BDiscCisvV2", &JetAk04BDiscCisvV2, &b_JetAk04BDiscCisvV2);
 
    fChain->SetBranchAddress("JetAk04PartFlav", &JetAk04PartFlav, &b_JetAk04PartFlav);
+
+ 
+   fChain->SetBranchAddress("GLepSt3Mother0Id", &GLepSt3Mother0Id, &b_GLepSt3Mother0Id);
+   fChain->SetBranchAddress("GLepSt3MotherCnt", &GLepSt3MotherCnt, &b_GLepSt3MotherCnt);
 //------ no need-----------------------------------
 
 /*
@@ -1047,9 +1081,7 @@ void BonzaiMaker::Init(TChain *fChain)
    fChain->SetBranchAddress("GLepDr01St", &GLepDr01St, &b_GLepDr01St);
 
 
- 
-   fChain->SetBranchAddress("GLepSt3Mother0Id", &GLepSt3Mother0Id, &b_GLepSt3Mother0Id);
-   fChain->SetBranchAddress("GLepSt3MotherCnt", &GLepSt3MotherCnt, &b_GLepSt3MotherCnt);
+
 
    fChain->SetBranchAddress("GLepClosePhotE", &GLepClosePhotE, &b_GLepClosePhotE);
    fChain->SetBranchAddress("GLepClosePhotId", &GLepClosePhotId, &b_GLepClosePhotId);

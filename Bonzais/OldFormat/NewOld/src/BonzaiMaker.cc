@@ -657,7 +657,7 @@ void BonzaiMaker::Loop()
                if (leptonIdSum == 26 && TrigHlt & 2) muonTrig += 4 ; // HLT_Mu17_TkMu8_v muon ?? 
              //  if (leptonIdSum == 26 && TrigHlt & 1) muonTrig += 1 ; // HLT_Mu17_Mu8_v muon ?? 
 
-               if (leptonIdSum == 26 && TrigHltDiMu & (1 <<19) 524288) DimuonTrig += 4 ;
+               if (leptonIdSum == 26 && TrigHltDiMu & (1 <<19)) DimuonTrig += 4 ;
               //  if (leptonIdSum == 26 && TrigHltDiMu & 524288 ) DimuonTrig += 3 ;
 
                // if (leptonIdSum == 24 && TRIGbits[4]) muonTrig += 16 ; // MuEle ?? 

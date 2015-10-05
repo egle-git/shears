@@ -4,7 +4,7 @@
 #include <TString.h>
 
 //-- directory of input root files --------------------
-const TString FILESDIRECTORY("HistoFiles/");
+const TString FILESDIRECTORY("HistoFilesSep/");
 //---------- lets add basic information on samples inot common struct -------------------------------------------
 struct processInfoStruct{
     TString name;
@@ -14,8 +14,7 @@ struct processInfoStruct{
 };
 
 const int DATA(0);
-//const int DYJETS(11); // Exclusive files
-const int DYJETS(7); // Exclusive files
+const int DYJETS(11); // Exclusive files
 const processInfoStruct Samples[] = {
     //--  Name  ------------------------------- #events -- xsec - branch - xsec error (%) - colorAN - colorPAS - name on legend
     {"Data_dR",                                  1,          1.,      1,         1,             kBlack,    kBlack,    " Data", " Data"},
@@ -48,8 +47,7 @@ const processInfoStruct Samples[] = {
 const unsigned int NFILESDYJETS(8); // (4)
 const unsigned int NBGDYJETS(NFILESDYJETS-2);
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 10, 4, 9, 3, 5, 8, 7, 6, 2, 11};
-//const unsigned int FilesDYJets[NFILESDYJETS] = {0, 4, 9, 3, 5, 8, 7, 11};
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2, 3, 4, 5, 6, 7};
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 4, 9, 3, 5, 8, 7, 11};
 
 
 //AG

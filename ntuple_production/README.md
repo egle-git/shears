@@ -75,18 +75,18 @@ Note: when the warden command is run, it creates two files, warden_summary and w
 The getlumi command
 -------------------
 
-This command will retrieve the integrated luminosity corresponding to a list of luminosity section provided in a json file. It is wrapper to CMS standard commands and is used by the grow\_boababs command.  It will be updated to follow latest recommendation for integrated luminosity calculation. Online help can be obtained by running `./warden --help`.
+This command will retrieve the integrated luminosity corresponding to a list of luminosity section provided in a json file. It is wrapper to CMS standard commands and is used by the grow\_boababs command.  It will be updated to follow latest recommendation for integrated luminosity calculation. Online help can be obtained by running `./getlumi --help`.
 
 The new-era command
 -------------------
 
-This command is used to set up work space on AFS and EOS for SMP Shears ntuple production. Online help can be obtained by running `./warden --help`.
+This command is used to set up work space on AFS and EOS for SMP Shears ntuple production. Online help can be obtained by running `./new-era --help`.
 
 
 The cmslog-inputfiles command
 ----------------------------
 
-This is a utility to retrieve the list of input files used by a crab job from its log file.  Online help can be obtained by running `./warden --help`.
+This is a utility to retrieve the list of input files used by a crab job from its log file.  Online help can be obtained by running `./cmslog-inputfile --help`.
 
 Other files
 ----------

@@ -13,7 +13,7 @@ die(){
 
 if [ -z "$1" -o "$1" = -h -o "$1" = --help ]; then
     cat <<EOF
-Runs the grow_baobab commands in each directory defined in $myfir/prodrc under dirs."
+Runs the grow_baobab commands in each directory defined in $mydir/prodrc under dirs."
 
 EOF
 exit 0

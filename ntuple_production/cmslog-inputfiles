@@ -19,5 +19,7 @@ else
     cmd=cat
 fi
 
-$cmd "$1" | awk -F : 'BEGIN{c=""}
-/Initiating request to open file/{gsub("///cms/data", "", $4); printf "%s\"%s\"", c, $4; c=",\n" } END{if(c!="") print ""}'
+#note: the awk command add a comma at end of each line except the last one.
+$cmd "$1" | grep 'Initiating request to open file' | sed 's@.*\(/store/[^[:space:]]*]*\).*@"\1"@' | awk '{l=$0; if(a) {printf "%s,\n", l;} ; a=1} END{print l}'
+
+

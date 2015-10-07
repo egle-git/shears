@@ -1,0 +1,11 @@
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_10.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_1.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_2.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_3.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_4.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_5.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_6.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_7.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_8.root
+MC/v5/Ntuple/ZZ_TuneCUETP8M1_13TeV-pythia8/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-0001/150927_180606/0000/ntuple_9.root
+

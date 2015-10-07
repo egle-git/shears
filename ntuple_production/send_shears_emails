@@ -18,7 +18,8 @@ def main():
 		os.rename(mailbox_, mailbox_tmp)
 	except OSError, e:
 		if not os.path.isfile(mailbox_):
-			sys.stdout.write("No mail to send. %s\n")
+			sys.stdout.write("No mail to send.\n")
+			return
 		else:
 			raise
 	try:

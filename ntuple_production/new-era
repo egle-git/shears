@@ -9,11 +9,16 @@ fi
 
 era="$1"
 
+eos_space=/store/group/phys_smp/AnalysisFramework
+workdir=/afs/cern.ch/user/s/shearsop/work
+
 if [ -z "$era" -o "$era" = -h -o "$era" = --help ]; then
    cat <<EOF
 Usage: new-era [-f] era-name
 
-Description: set up Shears ntuple production file directories for a new era (new beam conditions).
+Description: set up SMP Shears ntuple production file directories for a new era (new beam conditions).
+
+Beware: this command will create directories and files in the SMP group EOS area, $eos_space and in the common AFS space $workdir.
 
 Option:
 
@@ -61,9 +66,9 @@ mklocaldir(){
 }
 
 
-mkeosdir /store/group/phys_smp/AnalysisFramework/{Baobab,Bonzai}/"$era"/MC/v1/{Catalogs,Ntuple}
-mkeosdir /store/group/phys_smp/AnalysisFramework/{Baobab,Bonzai}/"$era"/Data/v1/{Catalogs,Ntuple}
-mklocaldir /afs/cern.ch/user/s/shearsop/work/{baobab-prod,bonzai-prod}/"$era"/{MC,Data}
+mkeosdir /"$eos_space"/{Baobab,Bonzai}/"$era"/MC/v1/{Catalogs,Ntuple}
+mkeosdir /"$eos_space"/{Baobab,Bonzai}/"$era"/Data/v1/{Catalogs,Ntuple}
+mklocaldir "$workdir"/{baobab-prod,bonzai-prod}/"$era"/{MC,Data}
 
 unset TMPFILE
 
@@ -80,7 +85,7 @@ TMPFILE=`mktemp`
     ln -s ../../shears/ntuple_production/grow_baobabs_cfg.py .
     ln -s ../../shears/ntuple_production/grow_baobabs .
     cat > "$TMPFILE" <<EOF
-# output directory: /store/group/phys_smp/AnalysisFramework/Baobab/$era/MC/v1/Ntuple
+# output directory: /$eos_space/Baobab/$era/MC/v1/Ntuple
 # json file: <put here the path to the json file, /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/...>
 
 # List here the dataset to process, one dataset per line, optionnally followed by a run specification
@@ -89,8 +94,8 @@ TMPFILE=`mktemp`
 #  /SinglePhoton/Run2015C-PromptReco-v1/MINIAOD -256464
 #  /SinglePhoton/Run2015D-PromptReco-v3/MINIAOD 25663-
 EOF
-    eos cp "$TMPFILE" /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/$era/$typ/v1/Catalogs/datasets.txt
-    ./grow_baobabs --catalog /store/group/phys_smp/AnalysisFramework/Baobab/$era/$typ/v1/Catalogs/datasets.txt 
+    eos cp "$TMPFILE" /eos/cms/"$eos_space"/Baobab/$era/$typ/v1/Catalogs/datasets.txt
+    ./grow_baobabs --catalog /"$eos_space"/Baobab/$era/$typ/v1/Catalogs/datasets.txt 
     done
 )
 
@@ -100,13 +105,13 @@ cat <<EOF
 
 The four following working areas have been created on AFS:
 
-- /afs/cern.ch/user/s/shearsop/work/{baobab-prod,bonzai-prod}/$era/MC
+- $workdir/{baobab-prod,bonzai-prod}/$era/MC
 
-- /afs/cern.ch/user/s/shearsop/work/{baobab-prod,bonzai-prod}/$era/Data
+- $workdir/{baobab-prod,bonzai-prod}/$era/Data
 
 The two following area have been created on EOS:
 
-- /store/group/phys_smp/AnalysisFramework/Baobab/$era
+- /$eos_space/Baobab/$era
 
 **********************************************************************
 

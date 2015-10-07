@@ -366,13 +366,22 @@ def exec_on(func, nargs, filename):
     #next arg
 
 def check_task_args():
-    if len(args.task) < 2 or args.task[0][0] ==  '-' or args.task[1][0] == '-':
+    if len(args.task) < 2 or args.task[0][0] ==  '-' or (len(args.task[1])> 1 and args.task[1][0] == '-'):
         sys.stderr.write("\nThe --task option takes two argument.\n")
         return False
     try:
-        args.task[1]= int(args.task[1])
-    except TypeError:
-        sys.stderr.write("\nThe second parameter of --task option must be an integer number.\n")
+        if args.task[1] == '-':
+            pattern = re.compile(r'crab_(.*)-([\d]*)$')
+            m = pattern.match(args.task[0])
+            if m:
+                args.task[0] = m.groups()[0]
+                args.task[1] = m.groups()[1]
+            else:
+                raise RuntimeError
+        #endif
+        args.task[1] = int(args.task[1])
+    except TypeError, RuntimeError:
+        sys.stderr.write("\nThe --task option  must be following by two arguments, the task name followed by the task id (an integer number) or crab_TASK_NAME-TASK_ID followed by the - sign.\n")
         return False
     #endtry
     return True
@@ -1271,6 +1280,7 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
     #next r_range
     #removes None values from r_range:
     r_ranges = [r for r in r_ranges if r]
+    print '>> ', r_ranges
     return r_ranges
 
 def runspec_validate_shears_runspec(runs):
@@ -1387,12 +1397,16 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
                 props = {}
                 for k in "uniquerequestname", "requestname":
                     props[k] = res[k]
-                    props["status"] = "submitted"
-                    props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
                     db_update_task_record(prim_dataset, task_id, props)
+                #next k
+                props["status"] = "submitted"
+                props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
             except KeyError:
                 sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
+                sys.stderr.write("Submission result: %s\n\n" % str(res)) 
                 db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
+
+
     except HTTPException, e:
         db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
         print e.headers
@@ -1445,6 +1459,11 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
     sql += " ORDER BY dataset, task_id";
     c = tuple(conn.execute(sql))
     conn.close()
+    if len(c) == 0 and prim_dataset is not None:
+        if task_id is not None:
+            print "No task with id %d for primary dataset %s found!" %  (prim_dataset, task_id)
+        else:
+            print "No task for primary dataset %s found!" % prim_dataset
     for i, r in enumerate(c):
         (prim_dataset, task_id, dataset, datatype, status, status_ts, submit_ts, requestname, ntuple_dir, ntuple_subdir) = r
 #        print '>>>'
@@ -1452,11 +1471,13 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
 #        print res
 #        print '<<<<'
         if status == 'to_submit':
-            continue
-        if not ntuple_subdir:
-            sys.stderr.write("Ntuple subdirectory path (ntuple_subdir) is not set for task #%d of primary dataset %s. This can happen if the job was submitted directly with the crab command. The ntuple_subdir must be set by hand with sqlite3 command (for expert). Check directory %s.\n" % (task_id, prim_dataset, ntuple_dir)) 
-            continue
-        #endif
+            crab_dir = "crab_%s-%04d" % (prim_dataset, task_id)
+            if not os.path.isfile(crab_dir + "/.requestcache"):
+                continue
+#        if not ntuple_subdir:
+#            sys.stderr.write("Ntuple subdirectory path (ntuple_subdir) is not set for task #%d of primary dataset %s. This can happen if the job was submitted directly with the crab command. The ntuple_subdir must be set by hand with sqlite3 command (for expert). Check directory %s.\n" % (task_id, prim_dataset, ntuple_dir)) 
+#            continue
+#        #endif
 
         if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES', 'CAT_WRITTEN', 'CAT_WRITTEN_WITH_FAILURES']:
             if status == 'CLOSED_WITH_FAILURES':
@@ -1471,15 +1492,26 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             #between two calls?
                             time.sleep(1)
                         if not requestname:
-                            sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'\n" % (dataset, task_id))
                             requestname = "crab_" + dataset.split('/')[1] + ("-%04d" % task_id)
+                            sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'. Database will be fixed by setting it to %s.\n" % (dataset, task_id, requestname))
                         print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
                         if args.verbosity > 0:
                             res = crabCommand("status", "-d", requestname, '--verboseErrors')
                         else:
                             res = crabCommand("status", "-d", requestname)
 #                        print "Status of request %s: " % requestname, res
-#                        print "Job Statuses for request %s: " % requestname, res["jobList"]
+                        if not ntuple_subdir and res['jobSetID']:
+                            #jobSetID example: 150930_085838:pgras_crab_DoubleMuon-0001
+                            # ->  ntuple dir: crab_DoubleMuon-0001/150930_085838
+                            jobsetid_re = re.compile(r'([^:]+):[^_]*_(.*)')
+                            m = jobsetid_re.match(res['jobSetID'])
+                            if m:
+                                ntuple_subdir = prim_dataset + '/' + m.groups()[1] + '/' + m.groups()[0]
+                                print "Nutple subdir was missing in database. It will be set to %s." % ntuple_subdir
+                                db_update_task_record(prim_dataset, task_id, {'ntuple_subdir': ntuple_subdir});
+                        if not ntuple_subdir:
+                            print "Nutple subdir was missing in database and we failed to fix it."
+                            continue
                         db_update_processing_stat(prim_dataset, task_id, res["jobList"]);
                         break
                     except HTTPException, e:
@@ -1687,10 +1719,10 @@ def prod_process_ds_catalogs():
     
     if args.catalog:
         try:
-            f = open(args.catalog)
+            f = open(eos_to_local_path(args.catalog))
             f.close()
         except IOError:
-            sys.stderr.write("\nWarning: catalog file %s provided with --catalog option does not exist or is not readable.\n" % args.catalog)
+            sys.stderr.write("\nWarning: the catalog file %s provided with --catalog option does not exist or is not readable.\n" % args.catalog)
         dataset_catalog = os.path.realpath(args.catalog)
         print "\nSetting catalog path to %s." % dataset_catalog
         catalog_set_default(dataset_catalog)

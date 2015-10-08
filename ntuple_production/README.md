@@ -86,7 +86,12 @@ This command is used to set up work space on AFS and EOS for SMP Shears ntuple p
 The cmslog-inputfiles command
 ----------------------------
 
-This is a utility to retrieve the list of input files used by a crab job from its log file.  Online help can be obtained by running `./cmslog-inputfile --help`.
+This is a utility to retrieve the list of input files used by a crab job from its log file. Online help can be obtained by running `./cmslog-inputfile --help`.
+
+The dumpPSetpkl command
+-----------------------
+
+This is a utility to dump the CMSSW configuration store by Crab in  input/PSet.pkl. Online help can be obtained by running `./dumpPSetpkl --help`.
 
 Other files
 ----------

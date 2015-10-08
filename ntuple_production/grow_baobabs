@@ -1280,7 +1280,6 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
     #next r_range
     #removes None values from r_range:
     r_ranges = [r for r in r_ranges if r]
-    print '>> ', r_ranges
     return r_ranges
 
 def runspec_validate_shears_runspec(runs):
@@ -1494,6 +1493,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                         if not requestname:
                             requestname = "crab_" + dataset.split('/')[1] + ("-%04d" % task_id)
                             sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'. Database will be fixed by setting it to %s.\n" % (dataset, task_id, requestname))
+                            db_update_task_record(prim_dataset, task_id, {'requestname': requestname});
                         print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
                         if args.verbosity > 0:
                             res = crabCommand("status", "-d", requestname, '--verboseErrors')
@@ -1855,7 +1855,6 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
 ''')
         #endwith
         os.mkdir(newdir + "/Ntuple")
-        print ">>> rm output; ln -sf %s output" % ntuple_newdir_local
         os.system("rm output; ln -sf %s output" % ntuple_newdir_local)
         
     if fake or args.verbosity > 0:

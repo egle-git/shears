@@ -1,4 +1,5 @@
 import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.VarParsing as VarParsing
 
 process = cms.Process("GrowBoababs")
 
@@ -12,22 +13,65 @@ process.TFileService = cms.Service("TFileService",
                                    fileName = cms.string('ntuple.root' )
 )
 
-reapply_jec=False
-isMC=False
-mcGlobalTag='74X_mcRun2_asymptotic_v2'
-dataGlobalTag='74X_dataRun2_v2'
+# setup 'analysis'  options
+opt = VarParsing.VarParsing ('analysis')
+# Addition options.
+# Note: if you add an option, update the code which write the values 
+# in the configuration dump, you can find at the end of this file.
+opt.register('minRun', 1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Gives an indication on the minimum run number included in the input samples.')
+opt.register('maxRun', 999999, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Gives an indication on the maximum run number include in the input samples.')
+opt.register('prodEra', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Production run era. Label used to identify a run period whose data are processed together.')
+opt.register('recoTag', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Tag of the recontruction.')
+opt.register('isMC',    0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
+
+
+opt.parseArguments()
+
+if opt.prodEra == '13TeV_25ns':
+  reapply_jec=True
+  jec_file='Summer15_25nsV5_DATA.db'
+  jec_file_tag = 'JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK4PFchs'
+  mcGlobalTag='74X_mcRun2_asymptotic_v2'
+elif opt.prodEra == '13TeV_50ns':
+  reapply_jec=True
+  jec_file = None
+  mcGlobalTag='74X_mcRun2_startup_v2'
+  dataGlobalTag='74X_dataRun2_v2'
+else:
+  reapply_jec = False
+#endif
 
 #--------------------------------------
 #JEC
 #
 if reapply_jec:
-  process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-  from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-  if isMC:
-    process.GlobalTag = GlobalTag(process.GlobalTag, mcGlobalTag, '')
+  if jec_file:
+    process.load("CondCore.DBCommon.CondDBCommon_cfi")
+    from CondCore.DBCommon.CondDBSetup_cfi import *
+    process.jec = cms.ESSource("PoolDBESSource",
+          DBParameters = cms.PSet(
+            messageLevel = cms.untracked.int32(0)
+            ),
+          timetype = cms.string('runnumber'),
+          toGet = cms.VPSet(
+          cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string(jec_file_tag),
+                label  = cms.untracked.string('AK4PFchs')
+                ),
+          ), 
+          connect = cms.string('sqlite:' + jec_file)
+    )
+    process.es_prefer_jec = cms.ESPrefer('PoolDBESSource','jec')
   else:
-    process.GlobalTag = GlobalTag(process.GlobalTag, dataGlobalTag, '')
-  #endif iMC
+    process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+    from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
+    if isMC:
+      process.GlobalTag = GlobalTag(process.GlobalTag, mcGlobalTag, '')
+    else:
+      process.GlobalTag = GlobalTag(process.GlobalTag, dataGlobalTag, '')
+    #endif iMC
+  #endif jec_file
 
   from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
   process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
@@ -42,7 +86,6 @@ if reapply_jec:
     jetSource = cms.InputTag("slimmedJets"),
     jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
     )
-
   jetSrc = "patJetsReapplyJEC"
 else:
   jetSrc = "slimmedJets"
@@ -93,7 +136,14 @@ process.options.allowUnscheduled = cms.untracked.bool(True)
 #
 #process.outpath = cms.EndPath(process.out)
 
-#iFileName = "fileNameDump_cfg.py"
-#file = open(iFileName,'w')
-#file.write(str(process.dumpPython()))
-#file.close()
+iFileName = "configDump_cfg.py"
+file = open(iFileName,'w')
+file.write(str(process.dumpPython()))
+file.write('''
+opt.minRun   = %d
+opt.maxRun   = %d
+opt.prodEra  = %s
+opt.recoTag  = %s
+opt.isMC     = %d
+''' % (opt.minRun, opt.maxRun, opt.prodEra, opt.recoTag, opt.isMC))
+file.close()

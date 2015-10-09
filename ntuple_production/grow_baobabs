@@ -28,6 +28,7 @@ import urllib
 import urllib2
 import platform
 import atexit
+import json
 from sets import Set
 from contextlib import contextmanager
 from threading import Timer
@@ -386,9 +387,9 @@ def check_task_args():
     #endtry
     return True
 
-def get_lumi_mask_json_file(jsonFile):
+def get_lumi_mask_json_file(jsonFilePattern):
     """Gets the input json file indicating the certified luminosity section which can be processed."""
-    candidates = glob.glob(jsonFile)
+    candidates = glob.glob(jsonFilePattern)
     latest_ts = 0
     latest_file = None
     for f in candidates:
@@ -399,6 +400,17 @@ def get_lumi_mask_json_file(jsonFile):
     if not latest_file:
         raise RuntimeError("JSON file required to process real data was not found. We have looked for files named %s" % input_json_file)
     return latest_file
+
+def get_runs_from_json_file(jsonFile):
+    """Gets list of runs included in a luminosity section json file"""
+    try:
+        r = json.load(open(jsonFile))
+        r = map(int, r.keys())
+    except (IOError, ValueError):
+        system.stderr.write("\nFailed to read run list from json file %s.\n\n" % jsonFile)
+        return None
+    return r
+#enddef
 
 # End of miscellaneous functions
 ######################################################################
@@ -415,8 +427,17 @@ def get_lumi_mask_json_file(jsonFile):
 #        sys.stderr.write("\n%s\n" % e.message)
 #        return None
 
-def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents):
+def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag):
     """Builds the crab configuration file."""
+
+#CMSSW arguments:
+    minRun = min(runs)
+    maxRun = max(runs)
+    if datatype == 'mc':
+        isMC = 0
+    else:
+        isMC = 1
+
     config = Configuration()
 
     config.section_('General')
@@ -438,9 +459,17 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     config.JobType.psetName = 'grow_baobabs_cfg.py'
 #    config.JobType.psetName = 'pset.py'
 
-# Output files that need to be collected, besides default CMSSW outputs
-#    config.JobType.outputFiles = [ ]
+# List of private input files needed by the job
+    if os.path.lexists('Summer15_25nsV5_DATA.db') :
+        config.JobType.inputFiles = ['Summer15_25nsV5_DATA.db']
+    #endif
 
+# Output files that need to be collected, besides default CMSSW outputs
+    config.JobType.outputFiles = [ 'configDump_cfg.py' ]
+
+# List of parameters to pass to the CMSSW configuration file
+    config.JobType.pyCfgParams = [ 'minRun=%d' % minRun, 'maxRun=%d' % maxRun, 'prodEra=%s' % prodEra, 'recoTag=%s' % recoTag, 'isMC=%d' % isMC ]
+    
     config.section_('Data')
 #----------------------------------------------------------------------
 # Name of the dataset to analyze
@@ -458,7 +487,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     config.Data.runRange = ",".join(map(str,runs))
 
     if datatype != 'mc':
-        config.Data.lumiMask = get_lumi_mask_json_file(json_file)
+        config.Data.lumiMask = json_file
 
 # Number of units to produce or process
     if maxEvents and maxEvents > 0:
@@ -542,19 +571,19 @@ def db_das_query_rint(query):
     res = db_das_query(query)
     print "\n".join(res)
 
-def db_das_get_runs(dataset):
-    """Retrieves from the DAS database the list of available runs for a given dataset."""
-    return db_das_query('run dataset=' + dataset);
+#def db_das_get_runs(dataset):
+#    """Retrieves from the DAS database the list of available runs for a given dataset."""
+#    return db_das_query('run dataset=' + dataset);
 
-def db_das_list_runs(dataset):
-    print "\nAsking DAS database. This operation can take some time..."
-    try:
-        sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, sorted(db_das_get_runs(dataset))))))
-    except urllib2.HTTPError, e:
-        if e.code == 403:
-            sys.stderr.write("\nError: problem with DAS. Access refused (HTTP error 403).\n\n")
-        else:
-            raise
+#def db_das_list_runs(dataset):
+#    print "\nAsking DAS database. This operation can take some time..."
+#    try:
+#        sys.stdout.write("%s: %s\n\n" % (dataset, ", ".join(map(str, sorted(db_das_get_runs(dataset))))))
+#    except urllib2.HTTPError, e:
+#        if e.code == 403:
+#            sys.stderr.write("\nError: problem with DAS. Access refused (HTTP error 403).\n\n")
+#        else:
+#            raise
 
 def db_get_conn():
     """Gets job management connection and cursor."""
@@ -1171,9 +1200,29 @@ def runspec_compactify(run_spec):
             lbound = r[0]
             ubound = r[1]
         #endif
-
     return new_spec
 
+def runspec_truncate(run_spec, min_run, max_run):
+    """Limits run_spec to runs within [min_run,max_run]"""
+    new_run_spec = []
+    for r in run_spec:
+        rr =  []
+        if isinstance(r, list):
+            rr = r
+        else:
+            rr[0] = r
+            rr[1] = r
+        rr[0] = max(min_run, rr[0])
+        rr[1] = min(max_run, rr[1])
+        if rr[0] < rr[1]:
+            new_run_spec.append(rr)
+        elif rr[0] == rr[1]:
+            new_run_space.append(rr[0])
+        #endif
+    #next r
+    return new_run_spec
+#enddef
+            
 
 def runspec_prettify(run_spec):
     """Converts a run specification (list of runs) to a string suitable to display."""
@@ -1261,7 +1310,7 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
             #endif not run.match
         #next bound
             
-        # Appies runMin and runMax requirement and resolves open intervals:
+        # Applies runMin and runMax requirement and resolves open intervals:
         if len(bounds) == 1:
             r_ranges[i] = int(bounds[0])
             if r_ranges[i] < runMin or r_ranges[i] > runMax:
@@ -1312,18 +1361,24 @@ def ds_check_dataset_name(dataset):
         return False
     return True
 
-def db_get_list_of_new_runs(dataset, runs = None):
+def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
     """Checks for new run to consider for a primary dataset. Applies to real data only."""
-    available = sorted(db_das_get_runs(dataset))
+    #    available = sorted(db_das_get_runs(dataset))
+    print '>>>> run_spec =', run_spec
+    available = get_runs_from_json_file(jsonFile)
+    if available is None:
+        return []
+    available = sorted(available)
+    print '>>> available = ', available
     prim_dataset = ds_primary_dataset(dataset)
     known = sorted(db_get_runs(prim_dataset))
     toprocess = sorted(tuple(set(available) - set(known)))
     if args.max_run_num:
-        toprocess = [ x for x in toprocess if x < args.max_run_num]
-    if runs:
+        toprocess = [ x for x in toprocess if x < args.max_run_num ]
+    if run_spec:
         toprocess_ = set()
         for x in toprocess:
-            for r in runs:
+            for r in run_spec:
                 if len(r) == 1:
                     if x == r:
                         toprocess_.add(x)
@@ -1336,7 +1391,7 @@ def db_get_list_of_new_runs(dataset, runs = None):
             #next r
         #next x
         toprocess = list(toprocess_)
-    #endif runs
+    #endif run_spec
     return toprocess
 
 # End of dataset name manipulation tools
@@ -1352,7 +1407,12 @@ def tasks_prepare_and_submit(prim_dataset, task_id, dataset, json_file, datatype
     if ds_primary_dataset(dataset) != prim_dataset:
         raise RuntimeError("\nInternal error. Inconsistency in primary dataset name.")
 
-    crab_config = crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents)
+    #FIXME: defines prod era by another mean than current directory name? A parameter in datasets.txt file?
+    prodEra = os.path.basename(os.getcwd())
+
+    recoTag = dataset.split('/')[2]
+
+    crab_config = crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag)
 
     crab_config_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
 
@@ -1637,7 +1697,7 @@ def tasks_resubmit(prim_dataset = None, task_id = None):
         crab_cfg_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
         tasks_submit_task(prim_dataset, task_id, resubmission=True)
 
-def tasks_check_for_new_tasks(dataset, ntuple_dir, runs, ts):
+def tasks_check_for_new_tasks(dataset, jsonFile, ntuple_dir, run_spec, ts):
     """Checks if a dataset needs to be processed and if it does
 inserts the task in the database. Return the task_id or None."""
 
@@ -1672,9 +1732,18 @@ inserts the task in the database. Return the task_id or None."""
     #endif
 
     prim_dataset = ds_primary_dataset(dataset)
-    runs_in_str = runspec_prettify(runs)
-    runs =  db_get_list_of_new_runs(dataset, runs)
+#    runs_in_str = runspec_prettify(run_spec)
+
+    if datatype != 'mc' and not jsonFile:
+        system.stderr.write("\nDataset %s is from real data, which requires a json file. Please check that the json file path is set in the input dataset catalog file.\n\n")
+        return None
+    if datatype == 'mc':
+        runs = [1, 999999]
+    else:    
+        runs =  db_get_list_of_new_runs(dataset, jsonFile, run_spec)
+
     if len(runs) > 0:
+        runs_in_str = runspec_prettify(runspec_truncate(run_spec, min(runs), max(runs)))
         if args.verbosity > 0:
             sys.stderr.write("\nPrepare task for primary dataset %s, runs %s\n" % (prim_dataset, ",".join(map(str, runs))))
         task_id = db_last_task_id(prim_dataset)
@@ -1733,7 +1802,7 @@ def prod_process_ds_catalogs():
         sys.stderr.write("\nNo catalog file defined. You need to set first the catalog file using the --catalog option before running this command.\n")
         return
     try:
-        outDir, jsonFile, datasets = catalog_read(dataset_catalog)
+        outDir, jsonFilePattern, datasets = catalog_read(dataset_catalog)
         if runspec_run_duplicates(datasets):
             sys.stderr.write("\nError: run overlaps found in catalog file %s between two reconstruction version of the same primary dataset. It is prohibited to prevent event duplication. Please check above messages on run ovelaps.\n" % dataset_catalog)
             return
@@ -1745,29 +1814,52 @@ def prod_process_ds_catalogs():
         sys.stderr.write('''\nFatal error while processing dataset catalog '%s'. Output directory line is missing from the input dataset catalog.\n''' % dataset_catalog)
         return
 
+    if args.list_runs:
+        if not jsonFilePattern:
+            system.err.write("\nNo luminosity section mask JSON file found in the %s. Run can be listed only with a real datast dataset catalog and the specification of a JSON file is required for such catalogs.\n")
+        else:
+            jsonFile = get_lumi_mask_json_file(jsonFilePattern)
+            print "Json file: %s" % jsonFile
+            r = get_runs_from_json_file(jsonFile)
+            print "\nRuns: %s" % ",".join(map(str, r))
+        #endif
+    #endif
+
+    n_new_jobs = 0
     for dataset_rcd in datasets:
         dataset = dataset_rcd['dataset']
         prim_dataset = ds_primary_dataset(dataset)
-        runs    = dataset_rcd['runs']
-        if ds_check_dataset_name(dataset):
-            if args.list_runs:
-                db_das_list_runs(dataset)
-            if args.new_runs:
-                toprocess = db_get_list_of_new_runs(dataset, runs);
+        run_spec     = dataset_rcd['runs']
+        if not ds_check_dataset_name(dataset):
+            continue
+        if args.new_runs or args.new_jobs:
+            jsonFile = None
+            if jsonFilePattern:
+                jsonFile = get_lumi_mask_json_file(jsonFilePattern)
+            #endif
+        #endif
+        if args.new_runs:
+            toprocess = db_get_list_of_new_runs(dataset, jsonFile, run_spec)
+            if len(toprocess) > 0:
                 print "/%s:\n%s" % ("/".join(dataset.split("/")[1:3]), ",".join(map(str, toprocess)))
-            if args.new_jobs:
-                res = tasks_check_for_new_tasks(dataset, outDir, runs, int(time.time()))
-                if res:
-                    task_id, new_run_list, datatype = res
-                    if args.no_submit:
-                        print "Creating task %d for primary dataset %s." % (task_id, prim_dataset)
-                    else:
-                        print "Submitting task %d for primary dataset %s." % (task_id, prim_dataset)
-                    tasks_prepare_and_submit(prim_dataset, task_id, dataset, jsonFile, datatype, new_run_list, args.events_per_job, outDir, args.max_events)
-                elif not args.submit:
-                    print "No job to submit for dataset %s." % dataset
-            if args.submit:
-                tasks_submit_pending_tasks()
+        if args.new_jobs:
+            res = tasks_check_for_new_tasks(dataset, jsonFile, outDir, run_spec, int(time.time()))
+            if res:
+                task_id, new_run_list, datatype = res
+                n_new_jobs += 1
+                if args.no_submit:
+                    print "Creating task %d for primary dataset %s." % (task_id, prim_dataset)
+                else:
+                    print "Submitting task %d for primary dataset %s." % (task_id, prim_dataset)
+                tasks_prepare_and_submit(prim_dataset, task_id, dataset, jsonFile, datatype, new_run_list, args.events_per_job, outDir, args.max_events)
+            elif not args.submit and args.verbosity >0:
+                print "No new task to create for dataset %s." % dataset
+        if args.submit:
+            tasks_submit_pending_tasks()
+        #endif
+    #next dataset_rc
+    if args.new_jobs and n_new_jobs == 0:
+        print "No new task to create."
 
 def prod_new_version():
     """Creates directory structure for production output of a new ntuple version."""
@@ -2040,7 +2132,7 @@ def parse_command_line():
                         help="Display contents of database.")
 
     parser.add_argument('--list-runs', action='store_true',
-                        help="List available runs for the datasets list in the catalogs.")
+                        help="Display the list of runs contained in the json file.")
 
     parser.add_argument('--list-run2-datasets', action='store_true',
                        help="List avaialble run 2 datasets.")
@@ -2087,6 +2179,10 @@ def main():
     args = parse_command_line()
 
     db_create_database()
+
+    if args.task != [None, None] and not (args.submit or args.check):
+        sys.stderr.write("\nOnly commands --check and  --submit supports the --task option. Command ignored.\n")
+        return 1
 
     if args.task != [None, None] and not check_task_args():
         return 1

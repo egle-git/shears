@@ -39,7 +39,7 @@ public :
    UInt_t          EvtRunNum;
    Int_t           EvtLumiNum;
    Int_t           EvtBxNum;
-   Float_t         EvtVtxCnt;
+   Int_t           EvtVtxCnt;
    Int_t           EvtPuCnt;
    Int_t           EvtPuCntTruth;
    vector<double>  *EvtWeights;

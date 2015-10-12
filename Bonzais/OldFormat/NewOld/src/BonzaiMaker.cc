@@ -21,7 +21,7 @@ string doWhat;
 string storageElement;
 
 
-     storageElement = "root://eoscms//eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_50ns/";
+     storageElement = "root://eoscms//eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_25ns/";
     // 25 ns
     //  storageElement = "root://eoscms//eos/cms/store/group/phys_smp/WPlusJets/ntuples/test/zjets/";
     //  storageElement = "root://eoscms//eos/cms/store/group/phys_smp";
@@ -92,7 +92,7 @@ void BonzaiMaker::Loop()
    
    TFile *outputFile = new TFile(outFileRoot.c_str(), "recreate");   
    if(cfg_.getS("outputDir") == "eos"){
-            string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/50ns/"+cfg_.getS("lepSel")+"_"+ strNew + "_fullstat_" + cfg_.getS("CMEnergy")+".root" ;  
+            string outFileRoot = "/afs/cern.ch/user/a/agrebeny/eos/cms/store/group/phys_smp/VJets/Bonzai13TeVoutput/25ns/"+cfg_.getS("lepSel")+"_"+ strNew + "_fullstat_" + cfg_.getS("CMEnergy")+".root" ;  
           outputFile = new TFile(outFileRoot.c_str(), "recreate");  
     }
 
@@ -193,6 +193,7 @@ void BonzaiMaker::Loop()
     vector<int>     MuId_out;
     vector<double>  patMuonTrig_;
     vector<double>  patDiMuonTrig_;
+   // vector<double>  patDiElectronTrig_;
     vector<double>  MuPfIso_out;
     vector<double>  MuVtxZ_out;
     vector<double>  MuDxy_out;
@@ -304,6 +305,7 @@ void BonzaiMaker::Loop()
     outputTree->Branch("patMuonCombId_", &MuId_out);
     outputTree->Branch("patMuonTrig_", &patMuonTrig_);
     outputTree->Branch("patDiMuonTrig_", &patDiMuonTrig_);
+   // outputTree->Branch("patDiElTrig_", &patDiElectronTrig_);
     outputTree->Branch("patMuonPfIsoDbeta_", &MuPfIso_out);
 
     //  jets 
@@ -364,7 +366,9 @@ void BonzaiMaker::Loop()
        eventElecTrig = 0 ;
   
        //-- Event info --------------
+       // cout << EvtVtxCnt << "\n";
        EvtVtxCnt_out = EvtVtxCnt;
+      
        EvtRunNum_out = EvtRunNum;
        EvtLumiNum_out = EvtLumiNum;
        EvtNum_out = EvtNum;
@@ -430,6 +434,7 @@ void BonzaiMaker::Loop()
       // patMuonCombId_out.clear();
        patMuonTrig_.clear();
        patDiMuonTrig_.clear();
+      // patDiElectronTrig_.clear();
        MuPfIso_out.clear();
        MuVtxZ_out.clear();
        MuDxy_out.clear();
@@ -603,11 +608,14 @@ void BonzaiMaker::Loop()
                         else invIsoCountElec++;
                  }
                  
+                double DiElectronTrig = 0 ;
                // if (leptonIdSum == 11 && TRIGbits[13])  singleElecTrig += 1;  // HLT_Ele27_WP80_v
-                if (leptonIdSum == 22 && TrigHlt & 0)   singleElecTrig += 2;  //  // Elec17_Elec8 
+                if (leptonIdSum == 22 && TrigHltDiEl & 4)   DiElectronTrig += 2; //HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v2); 
                // if (leptonIdSum == 24 && TRIGbits[4])   singleElecTrig += 16; // MuEle ?? 
                // if (leptonIdSum == 24 && TRIGbits[5])   singleElecTrig += 32; // EleMu ?? 
-                patElecTrig_.push_back((double) singleElecTrig);
+
+               // cout << DiElectronTrig << "\n";
+                patElecTrig_.push_back((double) DiElectronTrig);
              
                 ElEtaSc_out.push_back((float)ElEtaSc->at(i));
              
@@ -645,25 +653,21 @@ void BonzaiMaker::Loop()
  
                double muonTrig = 0 ;
                double DimuonTrig = 0 ;
-               //cout << TrigHlt << "\n";
-/*
-               if (leptonIdSum == 13 && TrigHlt & 8 ) muonTrig += 8 ;  // single HLT_IsoMu24_eta2p1_LooseIsoPFTau20_v2 
-               if (leptonIdSum == 13 && TrigHlt & 14 ) muonTrig += 14 ; // HLT_IsoMu24_eta2p1_CentralPFJet30_BTagCSV07_v2 
-               if (leptonIdSum == 13 && TrigHlt & 15 ) muonTrig += 15 ; // HLT_IsoMu24_eta2p1_TriCentralPFJet30_v2
-               if (leptonIdSum == 13 && TrigHlt & 16 ) muonTrig += 16 ;  //  HLT_IsoMu24_eta2p1_TriCentralPFJet50_40_30_v2
-               if (leptonIdSum == 13 && TrigHlt & 17 ) muonTrig += 17 ;  // HLT_IsoMu24_eta2p1_v2
-*/
+      
                if (leptonIdSum == 13 && TrigHlt & 14) muonTrig += 1 ; 
                if (leptonIdSum == 26 && TrigHlt & 2) muonTrig += 4 ; // HLT_Mu17_TkMu8_v muon ?? 
-             //  if (leptonIdSum == 26 && TrigHlt & 1) muonTrig += 1 ; // HLT_Mu17_Mu8_v muon ?? 
+    
+               if (EvtIsRealData ){  if (leptonIdSum == 26 && TrigHltDiMu & (1 <<19)) DimuonTrig += 4 ;}
+               else  {if (leptonIdSum == 26 && TrigHltDiMu & (1 <<25)) DimuonTrig += 4 ;}
 
-               if (leptonIdSum == 26 && TrigHltDiMu & (1 <<19)) DimuonTrig += 4 ;
-              //  if (leptonIdSum == 26 && TrigHltDiMu & 524288 ) DimuonTrig += 3 ;
 
-               // if (leptonIdSum == 24 && TRIGbits[4]) muonTrig += 16 ; // MuEle ?? 
+              //  if (leptonIdSum == 26 && TrigHltDiMu & 524288   ) DimuonTrig += 3 ;
+              //  if (leptonIdSum == 24 && TRIGbits[4]) muonTrig += 16 ; // MuEle ?? 
                // if (leptonIdSum == 24 && TRIGbits[5]) muonTrig += 32 ; // EleMu ?? 
                // cout << muonTrig << "\n";
-                // cout << DimuonTrig << "\n";
+               // cout << DimuonTrig << "\n";
+
+
                 patMuonTrig_.push_back(muonTrig);
                 patDiMuonTrig_.push_back(DimuonTrig);
                 MuVtxZ_out.push_back((float)MuVtxZ->at(i));
@@ -731,9 +735,9 @@ void BonzaiMaker::Loop()
           if ((leptonIdSum == 22 || leptonIdSum == 26) && cfg_.getS("doUnfold") == "true" && recoLep < 2 && genLep < 2) continue;
 
          // cout << "muon size" << MuEta_out.size() << "\n";
-         //cout << "muon pt" << MuPt_out << "\n";
-         //cout << "EvtVtxCnt_out " << EvtVtxCnt_out << "\n";
-          //cout << "EvtNum_out " << EvtNum_out << "\n";
+//cout << "muon pt" << MuPt_out << "\n";
+//cout << "EvtVtxCnt_out " << EvtVtxCnt_out << "\n";
+//cout << "EvtNum_out " << EvtNum_out << "\n";
 
          // cout << "GLepSt1and3Eta_out : " << GLepSt1and3Eta_out.size() << "\n";
 
@@ -980,9 +984,12 @@ void BonzaiMaker::Init(TChain *fChain)
    fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
    fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);
 
+
    fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
   // fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
    fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
+ //  fChain->SetBranchAddress("TrigHltEl", &TrigHltEl, &b_TrigHltEl);
+   fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
 /*
    fChain->SetBranchAddress("GLepDr01Pt", &GLepDr01Pt, &b_GLepDr01Pt);
    fChain->SetBranchAddress("GLepDr01Eta", &GLepDr01Eta, &b_GLepDr01Eta);

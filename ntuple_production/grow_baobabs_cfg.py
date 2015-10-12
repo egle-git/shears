@@ -68,18 +68,25 @@ if reapply_jec:
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
     if isMC:
       process.GlobalTag = GlobalTag(process.GlobalTag, mcGlobalTag, '')
-    else:
+      process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
+      src = cms.InputTag("slimmedJets"),
+      levels = ['L1FastJet', 
+                'L2Relative',
+                 'L3Absolute'],
+      payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
+    else: #real data
       process.GlobalTag = GlobalTag(process.GlobalTag, dataGlobalTag, '')
-    #endif iMC
+      process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
+      src = cms.InputTag("slimmedJets"),
+      levels = ['L1FastJet', 
+                'L2Relative',
+                'L3Absolute',
+                'L2L3Residual'],
+      payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
+    #endif isMC
   #endif jec_file
 
   from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
-  process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
-    src = cms.InputTag("slimmedJets"),
-    levels = ['L1FastJet', 
-              'L2Relative',
-              'L3Absolute'],
-    payload = 'AK4PFchs' ) # Make sure to choose the appropriate levels and payload here!
 
   from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
   process.patJetsReapplyJEC = patJetsUpdated.clone(

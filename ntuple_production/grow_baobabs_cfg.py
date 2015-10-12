@@ -24,22 +24,9 @@ opt.register('prodEra', '', VarParsing.VarParsing.multiplicity.singleton, VarPar
 opt.register('recoTag', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Tag of the recontruction.')
 opt.register('isMC',    0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
 
-
 opt.parseArguments()
 
-if opt.prodEra == '13TeV_25ns':
-  reapply_jec=True
-  jec_file='Summer15_25nsV5_DATA.db'
-  jec_file_tag = 'JetCorrectorParametersCollection_Summer15_25nsV5_DATA_AK4PFchs'
-  mcGlobalTag='74X_mcRun2_asymptotic_v2'
-elif opt.prodEra == '13TeV_50ns':
-  reapply_jec=True
-  jec_file = None
-  mcGlobalTag='74X_mcRun2_startup_v2'
-  dataGlobalTag='74X_dataRun2_v2'
-else:
-  reapply_jec = False
-#endif
+reapply_jec = False
 
 #--------------------------------------
 #JEC

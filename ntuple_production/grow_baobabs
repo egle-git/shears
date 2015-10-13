@@ -427,7 +427,7 @@ def get_runs_from_json_file(jsonFile):
 #        sys.stderr.write("\n%s\n" % e.message)
 #        return None
 
-def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag):
+def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag, dataTier):
     """Builds the crab configuration file."""
 
 #CMSSW arguments:
@@ -465,10 +465,10 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     #endif
 
 # Output files that need to be collected, besides default CMSSW outputs
-    config.JobType.outputFiles = [ 'configDump_cfg.py' ]
+#    config.JobType.outputFiles = [ 'configDump_cfg.py' ]
 
 # List of parameters to pass to the CMSSW configuration file
-    config.JobType.pyCfgParams = [ 'minRun=%d' % minRun, 'maxRun=%d' % maxRun, 'prodEra=%s' % prodEra, 'recoTag=%s' % recoTag, 'isMC=%d' % isMC ]
+    config.JobType.pyCfgParams = [ 'minRun=%d' % minRun, 'maxRun=%d' % maxRun, 'prodEra=%s' % prodEra, 'recoTag=%s' % recoTag, 'isMC=%d' % isMC, 'dataTier=%s' % dataTier ]
     
     config.section_('Data')
 #----------------------------------------------------------------------
@@ -565,6 +565,39 @@ def db_das_query2(query, att):
                     res.append(x[item])
                     break
     return res
+
+def db_das_query3(query, att_list):
+    """Performs a query to the DAQ database"""
+    host='https://cmsweb.cern.ch'
+    idx=0
+    limit=0
+    debug=False
+    fields = []
+    for att in att_list:
+        obj, item = att.split(".")
+        fields.append([obj, item])
+
+    if args.verbosity > 0:
+        sys.stderr.write("\nDAS query: %s\n" % query)  
+    das_res=das_client.get_data(host, query, idx, limit, debug)
+    res = {}
+    
+    if not das_res.has_key('data'):
+        sys.stderr.write("\nWarning: das query '%s% failed." % query)
+        return res
+
+    data = das_res['data']
+    for f in fields:
+        obj, item = f
+        for r in data:
+            if obj in r:
+                load = r[obj]
+                for x in load:
+                    if item in x:
+                        res["%s.%s" %  (obj, item)] =  x[item]
+                        break
+    return res
+
 
 def db_das_query_rint(query):
     """Makes a DAS database query and displays the result"""
@@ -1169,16 +1202,19 @@ def runspec_compactify(run_spec):
     """Compactify a run list specification. The run specification run_spec must be a list of run number and pair of run numbers. Pairs of run number are list of two run numbers reprensenting a run range. The methods return a new run specification in the most compact form"""
     lbound = None
     ubound = None
+
     #sort intervals/run number in increasing lower bound/run number.
     #Assert also that run_spec does not contain empty ranges, which
     #is import for the 'for; loop below
-    run_spec = sorted(run_spec, key = lambda x: x[0])
+    run_spec = sorted(run_spec, key = lambda x: x[0] if isinstance(x, list) else x)
     new_spec = []
 
     for r in run_spec + [[]]:    #Empty range iteration used to insert the last range
 
         #replace individual run number by a range:
-        if len(r) == 1:
+        if not isinstance(r, list):
+            r = [r, r]
+        elif len(r) == 1:
             r.append(r[0])
 
         if len(r) > 1 and not ubound:
@@ -1217,7 +1253,7 @@ def runspec_truncate(run_spec, min_run, max_run):
         if rr[0] < rr[1]:
             new_run_spec.append(rr)
         elif rr[0] == rr[1]:
-            new_run_space.append(rr[0])
+            new_run_spec.append(rr[0])
         #endif
     #next r
     return new_run_spec
@@ -1231,6 +1267,8 @@ def runspec_prettify(run_spec):
     c = ""
     all_runs = False
     for r in run_spec:
+        if not isinstance(r, list):
+            r = [r, r]
         if len(r) == 1:
             res = res + c + r[0]
         elif len(r) == 2:
@@ -1364,12 +1402,10 @@ def ds_check_dataset_name(dataset):
 def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
     """Checks for new run to consider for a primary dataset. Applies to real data only."""
     #    available = sorted(db_das_get_runs(dataset))
-    print '>>>> run_spec =', run_spec
     available = get_runs_from_json_file(jsonFile)
     if available is None:
         return []
     available = sorted(available)
-    print '>>> available = ', available
     prim_dataset = ds_primary_dataset(dataset)
     known = sorted(db_get_runs(prim_dataset))
     toprocess = sorted(tuple(set(available) - set(known)))
@@ -1410,9 +1446,11 @@ def tasks_prepare_and_submit(prim_dataset, task_id, dataset, json_file, datatype
     #FIXME: defines prod era by another mean than current directory name? A parameter in datasets.txt file?
     prodEra = os.path.basename(os.getcwd())
 
-    recoTag = dataset.split('/')[2]
+    toks = dataset.split('/')
+    recoTag = toks[2]
+    dataTier = toks[3]
 
-    crab_config = crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag)
+    crab_config = crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag, dataTier)
 
     crab_config_file = "crab_" + prim_dataset + ("-%04d" % task_id) + ".py"
 
@@ -1456,10 +1494,10 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
                 props = {}
                 for k in "uniquerequestname", "requestname":
                     props[k] = res[k]
-                    db_update_task_record(prim_dataset, task_id, props)
                 #next k
                 props["status"] = "submitted"
                 props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
+                db_update_task_record(prim_dataset, task_id, props)                
             except KeyError:
                 sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
                 sys.stderr.write("Submission result: %s\n\n" % str(res)) 
@@ -1714,12 +1752,15 @@ inserts the task in the database. Return the task_id or None."""
     else:
         newDataset = True
         sys.stdout.write("\nChecking if dataset %s is in the DAS database. This operation can take some time..." % dataset)
-        res = db_das_query2("dataset dataset=%s" % dataset, "dataset.datatype")
+#        res = db_das_query2("dataset dataset=%s" % dataset, "dataset.datatype")
+        res = db_das_query3("dataset dataset=%s" % dataset, ["dataset.datatype", "dataset.status"])
         sys.stdout.write(" Done.\n")
-        if len(res) == 0:
+        if not (res.has_key('dataset.datatype') and res.has_key('dataset.status')):
             sys.stderr.write("\nDataset %s was not found in DAS. This dataset will be skipped.\n" % dataset)
             return None
-        datatype = str(res[0])
+        elif res['dataset.status'] != 'VALID':
+            sys.stderr.write("\nDataset %s in status %s was skipped. Only VALID dataset are considered. Status will be checked again at next --check call.\n" % (dataset, res['dataset.status']))
+        datatype = str(res['dataset.datatype'])
         if datatype not in ["mc", "data"]:
             sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
             return None

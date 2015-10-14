@@ -1760,6 +1760,7 @@ inserts the task in the database. Return the task_id or None."""
             return None
         elif res['dataset.status'] != 'VALID':
             sys.stderr.write("\nDataset %s in status %s was skipped. Only VALID dataset are considered. Status will be checked again at next --check call.\n" % (dataset, res['dataset.status']))
+            return None
         datatype = str(res['dataset.datatype'])
         if datatype not in ["mc", "data"]:
             sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 

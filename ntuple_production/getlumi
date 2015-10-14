@@ -32,6 +32,7 @@ if [ ! -x $HOME/.local/bin/brilcalc ]; then
     pip install --install-option="--prefix=$HOME/.local" brilws
 fi
 
-brilcalc lumi -i "$1" -n 0.962 | filter
+#brilcalc lumi -i "$1" -n 0.962 | filter
+brilcalc lumi --normtag /afs/cern.ch/user/c/cmsbril/public/normtag_json/OfflineNormtagV1.json -i "$1"  | filter
 
 #pip uninstall brilws

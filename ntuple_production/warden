@@ -154,6 +154,8 @@ Last update: `date`
 
 Operator: `user_name`
 
+Report produced from: `hostname`
+
 EOF
     
     run | tee -a .warden_last_log

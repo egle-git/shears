@@ -3,13 +3,15 @@
 myself="`readlink -f "$0"`"
 mybasename="`basename "$myself"`"
 mydir="`dirname "$myself"`"
+warden_lock="$mydir/.warden.lock"
+warden_stop="$mydir/.stop-warden"
 
 source "$mydir/prodrc"
 
 mailbox="~shearsop/work/.shears-mailbox"
 
 die(){
-    echo "$@" 1>&2
+    echo -e "$@" 1>&2
     exit 2
 }
 
@@ -32,6 +34,7 @@ s/./-/g'
 
 function run(){
     for d in $dirs; do
+	check_warden_stop && return
 	{ echo $d | underline; echo; } | tee -a .warden_summary
 	echo "Checking status of running tasks..."
 	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox") 
@@ -48,10 +51,26 @@ EOF
 
 }
 
+function check_warden_stop(){
+    if [ -f "$warden_stop" ]; then
+	eval "killer=`stat -c '(%u %U)' "$warden_stop"`"
+	echo "Stop requested by `id_to_user_name ${killer[0]}` (${killer[1]}). Exiting." 
+	do_run=n
+	return 0
+    fi
+    return 1
+}
+
 #retrieves the name of the user running this script:
 function user_name(){
-    phonebook --uid `id -u` --terse firstname --terse surname | tr ';' ' '
+#    phonebook --uid `id -u` --terse firstname --terse surname | tr ';' ' '
+    id_to_user_name `id -u`
 }
+
+function id_to_user_name(){
+    phonebook --uid "$1" --terse firstname --terse surname | tr ';' ' '
+}
+
 
 function to_min(){
     exp=`echo "$1" | sed 's/w/10080/g
@@ -85,7 +104,7 @@ Note: the command needs the grid authentication proxy to run and is not able to 
 EOF
 }
 
-temp=`getopt -o hl:pr: --long help,loop:,report: \
+temp=`getopt -o hl:pr:s --long help,loop:,report:,stop \
      -n "$mybasename" -- "$@"`
 
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
@@ -95,32 +114,67 @@ eval set -- "$temp"
 
 unset loop
 unset report_every
+unset stop_request
 while true ; do
     case "$1" in
         -h|--help) help; exit 0;; 
         -l|--loop) loop="$2"; shift 2;;
 	-r|--report) report_every="$2"; shift 2;;
+	-s|--stop) stop_request=1; shift;;
         --) shift ; break ;; #end of options. It remains only the args.
         *) echo "Internal error!" ; exit 1 ;;
     esac
 done
 
 
-
-if [ "$1" = -h -a "$1" = --help ]; then
-    help
-    exit 0
+if [ "$stop_request" = 1 ]; then
+    [ -f "$warden_lock" ] || die "No lock file found. Cannot stop warden. Is warden running?"
+    read h pid < "$warden_lock"
+    tmp="`ssh "$h" ps -p "$pid" -o comm h`"
+    [ $? = 0 ] || die "Failed to check if warden is running."
+    echo "$tmp" |  grep -q warden
+    [ $? = 0 ] || { echo "Warden is not running."; exit 1; }
+    touch "$warden_stop"
+    echo -n "Stop request sent."
+    i=0
+    imax=300
+    while [ $i -lt $imax ] ; do
+	[ -f $warden_lock ] || { echo " Done"; exit 0;}
+	sleep 1
+	echo -n "."
+    done
+    echo "Failed to stop warden."
+exit 0
 fi
 
 echo "$report_every" | grep -q '^[[:digit:]]*$' || { help; exit 1; }
 
+
+if [ -f "$warden_lock" ]; then
+    read h pid < "$warden_lock"
+    echo "Found a warden lock file. Checking if warden is running on host $h with pid $pid..."
+    tmp="`ssh "$h" ps -p "$pid" -o comm h`"
+    [ $? = 0 ] || die "Failed to check if warden is running."
+    echo "$tmp" |  grep -q warden
+    [ $? = 0 ] && die "\nWarden is already running on host $h under pid $pid using same configuration file $mydir/prodrc. You should first stop the first instance.\n\nNote if warden is working in loop mode under another username, you can still stop it with the command warden --stop. "
+fi
+
+(hostname | tr '\n' ' '; echo $$) > "$warden_lock"
+
 trap "makeitnow=1" SIGHUP
+
+function onexit(){
+    rm "$warden_lock"
+    rm "$warden_stop"
+}
+
+trap onexit EXIT
 
 [ -n "$loop" ] && cycle="`to_min $loop`"
 i=0
 do_run=y
 
-while true; do
+while [ "$do_run" = y ]; do
     
     [ -z "$loop" ] && do_run=n
     
@@ -177,9 +231,12 @@ EOF
     t1=`date +%s`
     dt=$((60*cycle+t-t1))
     echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up..."
-    while [ $dt -gt 0 -a $makeitnow != 1 ]; do
-        sleep 10
+    while [ "$dt" -gt 0 -a "$makeitnow" != 1 ]; do
+        sleep 1
+	check_warden_stop && break
         t1=`date +%s`
         dt=$((60*cycle+t-t1))
     done
 done
+
+

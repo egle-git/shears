@@ -2126,6 +2126,9 @@ def parse_command_line():
     parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
 
     parser.add_argument('--catalog', action='store', default=None,
+                        help='Deprecated. Replaced by --set-catalog-path.')
+
+    parser.add_argument('--set-catalog-path', action='store', default=None,
                         help='Sets the catalog file path. If combined with other option specifying an action to take, the action will be processed already with this new catalog.')
 
     parser.add_argument('--one-shot-catalog', metavar='CATALOG', action='store', default=None,
@@ -2219,6 +2222,9 @@ def main():
     global eos_mount_point
 
     args = parse_command_line()
+
+    if args.set_catalog_path:
+        args.catalog = args.set_catalog_path
 
     db_create_database()
 

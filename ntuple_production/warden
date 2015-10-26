@@ -168,7 +168,7 @@ trap "makeitnow=1" SIGHUP
 
 function onexit(){
     rm "$warden_lock"
-    rm "$warden_stop"
+    rm "$warden_stop" 2> /dev/null
 }
 
 trap onexit EXIT

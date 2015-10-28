@@ -178,6 +178,7 @@ int main(int argc, char* argv[]){
 
   if(o.output_file == 0){
     cerr << "An output file must be specified using the option -o." << endl;
+    return 1;
   }
 
   if(o.catalog){

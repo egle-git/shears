@@ -92,12 +92,15 @@ s/+$//g'`
 function help(){
     fmt -w ${COLUMNS:-80} <<EOF
 Usage: warden [--loop CYCLE_TIME] [--report EVERY_CYCLE]
+       warden --stop
 
-Shears framework [1]. Checks the status of Boabab production and takes the required actions: submission for new data or dataset, closing ending tasks, reporting new ntuple sets.
+Shears framework [1]. Checks the status of Boabab production and takes the required actions: submission for new data or dataset, closing ending tasks, reporting new ntuple sets. The command uses the prodrc configuration file located in the same directory that contains the command. In this file must be defined the dirs shell variable containing a whitespace-separated of the direcroty to monitor.
 
 With the --loop option, the command runs every CYCLE_TIME. CYCLE_TIME default unit is minutes, w (week), d (day), h (hour) can be used and units can be combined, as 3d12h for 3 days 12 hours.
 
 The --report allows email notification. The notifications are sent at EVERY_CYCLE iterations of the loop, use the value 1 for a promt notification.
+
+The second usage form (--stop option) stops a running warden commands. The command will work on two conditions: the warden command is located in the same directory that when it was started and you have write access to this directory.
 
 Note: the command needs the grid authentication proxy to run and is not able to renew it on its own.
 
@@ -165,7 +168,7 @@ trap "makeitnow=1" SIGHUP
 
 function onexit(){
     rm "$warden_lock"
-    rm "$warden_stop"
+    rm "$warden_stop" 2> /dev/null
 }
 
 trap onexit EXIT

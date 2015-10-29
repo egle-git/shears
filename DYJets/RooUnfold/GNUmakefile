@@ -123,6 +123,10 @@ ifeq ($(MAKE_RESTARTS),)
 $(info Use ROOT $(shell $(RC) --version) for $(ARCH) from $(shell $(RC) --prefix))
 endif
 
+#CXXFLAGS += -std=c++11
+#LDFLAGS += -std=c++11
+CPPFLAGS += -std=c++11
+
 # === RooUnfold directories ========================================
 
 PACKAGE       = RooUnfold
@@ -428,7 +432,8 @@ $(SHLIBFILE) : $(OLIST) $(CINTOBJ)
 # Useful build targets
 include: $(DLIST)
 lib: $(LIBFILE)
-shlib: $(SHLIBFILE) $(ROOTMAP) $(CLINGDICT)
+#shlib: $(SHLIBFILE) $(ROOTMAP) $(CLINGDICT)
+shlib: $(SHLIBFILE) $(CLINGDICT)
 bin: shlib $(MAINEXE)
 
 commands :

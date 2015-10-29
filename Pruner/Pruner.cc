@@ -177,6 +177,7 @@ void Pruner::run(){
   }
 
   timeval t;
+  time_t smoothed_eat = 0.;
   for(Long64_t i = 1; i <= nevts; ++i){
     nextEvent();
     if(filterEvent()){
@@ -185,9 +186,10 @@ void Pruner::run(){
     }
     const static int step = 100;
     if(i%step==0 || i == nevts){
-      cout << "\rNumber of events. Read: " << std::setw(8) << i << " Copied "
+      cout << "\rRead: " << std::setw(8) << i << " Copied: "
 	   << std::setw(8) << nCopied_
-	   << " Remaining: " << std::setw(8) << (nevts-i)
+	   << " Acc.: " << std::setw(5) << int(10000*(nCopied_ / double(i)))/100. << "%"
+	   << " Rem.: " << std::setw(8) << (nevts-i)
 	   << " Total: " << std::setw(8) << nevts; // << std::flush;
       timeval t0;
       if(i==step) gettimeofday(&t0, 0);
@@ -196,8 +198,10 @@ void Pruner::run(){
 	double remaining = double(nevts - step) / (i - step)
 	  * ((t.tv_sec - t0.tv_sec) + 1.e-6 * (t.tv_usec - t0.tv_usec));
 	time_t eat = int(t0.tv_sec +  1.e-6 * t0.tv_usec + remaining + 0.5);
+	if(smoothed_eat == 0) smoothed_eat = eat;
+	if(abs(smoothed_eat - eat) > 0.1 * remaining) smoothed_eat = 0.5 * (smoothed_eat + eat);
 	char buf[256];
-	strftime(buf, sizeof(buf),  "%a, %d %b %Y %T", localtime(&eat));
+	strftime(buf, sizeof(buf),  "%a, %d %b %Y %T", localtime(&smoothed_eat));
 	cout << " ETA: " << std::setw(16) << buf;
       }
       cout << std::flush;
@@ -369,7 +373,14 @@ void Pruner::setInput(const char* catalog){
 
 bool Pruner::setOutput(const char* outputDataFile){
   if(outputDataFile){
-    fout_ = std::auto_ptr<TFile>(new TFile(outputDataFile, "RECREATE"));
+    std::string filePath;
+    if(strncmp(outputDataFile, "/store/", strlen("/store/"))==0){
+      filePath = std::string("root://eoscms.cern.ch//eos/cms") + outputDataFile;
+    } else{
+      filePath = outputDataFile;
+    }
+
+    fout_ = std::auto_ptr<TFile>(TFile::Open(filePath.c_str(), "RECREATE"));
 
     if(fout_->IsZombie()){
       cout << "Failed to open output ntuple file " << outputDataFile << endl;

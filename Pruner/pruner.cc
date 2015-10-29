@@ -114,6 +114,15 @@ int main(int argc, char* argv[]){
   }
 
   Pruner* cat = Pruner::create(o.selection, o.subselection, o.primary_dataset);
+
+  if(!cat){
+    std::cerr << "Failed to create pruner for selection " << o.selection
+	      << ", subselection " << o.subselection 
+	      << ", and output file " << o.primary_dataset
+	      << ". Available selections can be listed with the --selection option.\n";
+    exit(1);
+  }
+
   cat->verbose_ = o.verbose;
   cat->setMaxEvents(o.max_events);
 

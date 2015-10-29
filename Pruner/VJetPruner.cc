@@ -16,7 +16,7 @@ void EventTree::Loop(){} //To make the compiler/linker happy.
 
 static float minGJetPt = 10;
 
-static float minLepPt = 5;
+static float minLepPt = 15;
 
 static float minJetAk04Pt = 15;
 
@@ -40,8 +40,7 @@ protected:
   void skimCollections();
   bool eventSelection();
 
-  enum { DMu, DMuUnf, DE, DEUnf, EMu, SE, SEUnf, SMu, SMuUnf, NSubSels
-  } subsel_;
+  enum { DMu, DMuUnf, DE, DEUnf, EMu, SE, SEUnf, SMu, SMuUnf, NSubSels};
 
   static const int kEl = 11;
   static const int kMu = 13;
@@ -178,11 +177,11 @@ bool VJetPruner::eventSelection(){
   int GMuCnt = 0;
   for(unsigned i = 0; i < GLepDr01Id->size(); ++i){
     if(fabs((*GLepDr01Id)[i]) == kEl) ++GElCnt;
-       if(fabs((*GLepDr01Id)[i]) == kMu) ++GMuCnt;
+    if(fabs((*GLepDr01Id)[i]) == kMu) ++GMuCnt;
   }  
 
   
-  switch(subsel_){
+  switch(iSubSelection_){
   case DMu:
     return MuPt->size() > 1;
     break;
@@ -226,7 +225,7 @@ bool VJetPruner::filterGJet(int iGenLep){
 }
 
 bool VJetPruner::filterMu(int iMu){
-  return (*MuPt)[iMu] > minLepPt;
+  return ((*MuPt)[iMu] > minLepPt);
 }
 
 bool VJetPruner::filterEl(int iEl){

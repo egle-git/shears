@@ -9,11 +9,12 @@
 #include <algorithm>
 #include <iomanip>
 #include <memory>
+#include <iostream>
 
 #include "TObject.h"
 #include "TChain.h"
 
-#define DECLARE_PRUNER(Class, description) \
+#define DECLARE_PRUNER(Class, description)				\
   static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description);
 
 class TFile;
@@ -78,8 +79,8 @@ class TFile;
  * To support subselections, the method declareSubSelection() should be
  * overridden and the vector subSelections must be filled with the name and
  * description of the offered subselections. The filerEvent() method can then
- * use the subselection tag stored in subSelection_ to determine which
- * subselection should be used. Example:
+ * use the iSubselection_ index to determine which subselection should be used. 
+ * Example:
  *
  *    void MyPruner:declareSubSelections(){
  *       subSeletions_.push_bach(SubSelection("Signal", "Signal selection"));
@@ -151,11 +152,11 @@ protected:
   std::string primaryDataset_;
 
   /** Type of selection. A same filter (Pruner class daughter)
-   * can support several selection flavours. This tag, which
-   * is passed as constructor or create() method argument
-   * can be used to choose the selection flavour.
+   * can support several selection flavours, whose list must be
+   * declared by the declareSubSelections() hook function. 
+   * This index refers to the subSelections_ list.
    */
-  std::string subSelection_;
+  size_t iSubSelection_;
   
   /** Pointer the run number of last read event
    */
@@ -200,7 +201,7 @@ public:
 
   int verbose_;
     
-   virtual ~Pruner(){
+  virtual ~Pruner(){
   }
 
   /** Constructor
@@ -215,7 +216,7 @@ public:
     chain_.SetDirectory(0);
     
     if(subSelection){
-      subSelection_ = subSelection;
+      setSubSelection(subSelection);
     }
     
     if(primary_dataset){
@@ -244,11 +245,17 @@ public:
     } else{
       std::map<std::string, Pruner::ClassRecord>::iterator res = daughters_.find(className);
       if(res != daughters_.end()) pruner = res->second.instance;
+      else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
     }
 
     if(pruner){
       pruner->declareSubSelections();
-      if(subSelection) pruner->subSelection_ = subSelection;
+      if(subSelection){
+	if(!pruner->setSubSelection(subSelection)){
+	  std::cerr << "Subselection " << subSelection << " was not found. Available subselections can be listed with the option --list-selections\n";
+	  pruner = 0;
+	}
+      }
       if(primary_dataset) pruner->primaryDataset_ = primary_dataset;
     }
     return pruner;
@@ -331,6 +338,22 @@ public:
    */
   void readBranchList(const char* fileName);
 
+
+  /** Sets subselection.
+   * @param subselection subselection name
+   * @return true iff the subselection was found
+   */
+  virtual bool setSubSelection(const char* subSelection){
+    size_t i = 0;
+    for(size_t i; i < subSelections_.size(); ++i){
+      if(subSelections_[i].tag == subSelection){
+	iSubSelection_ = i;
+	break;
+      }
+    }
+    return i  < subSelections_.size();
+  }
+  
   struct ClassRecord{
     ClassRecord(): instance(0){}
     std::string className;
@@ -359,9 +382,9 @@ protected:
   ///@{
   
   /** Hook function, where a derived class supporting subselections
-   * should fill the subSelection_ field with the list of offered
-   * subselections. There is not need to overridden if the class does
-   * not provide subselections.
+   * should fill the subSelections_ field with the list of offered
+   * subselections. There is not need to override this method
+   * if the class does not provide subselections.
    */
   virtual void declareSubSelections() { /*NOOP*/ }
   
@@ -444,10 +467,10 @@ private:
    */
   void setEventSummaryTree();
 
-//  /** Initialize input and output files and trees
-//   */
-//  bool init(size_t nInputDataFiles, const char* const inputDataFiles[],
-//	    const char* outputDataFile = 0);
+  //  /** Initialize input and output files and trees
+  //   */
+  //  bool init(size_t nInputDataFiles, const char* const inputDataFiles[],
+  //	    const char* outputDataFile = 0);
 
 
   /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
@@ -495,7 +518,7 @@ private:
    * @param o output stream to write the list.
    */
   void listEvents(std::ostream& o);
-
+  
 };
 
 #endif //COPYANATUPLE_H not defined

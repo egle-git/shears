@@ -18,8 +18,11 @@
 #include "functions.h"
 #include "standalone_LumiReWeighting.h"
 #include "HistoSetZJets.h"
-#include "ZJets.h"
+#include "ZJets_newformat.h"
 #include <sys/time.h>
+#include <sys/types.h>
+#include <regex.h>
+
 //#include "rochcor.h"
 
 
@@ -27,8 +30,6 @@ using namespace std;
 
 void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMember, double muR, double muF)
 {
-
-    cout << "lepSel = " << lepSel << "  , " << "\n";
 
     //--- Random generator necessary for BTagging ---
     TRandom3* RandGen = new TRandom3();
@@ -110,8 +111,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     int lepscale(0);
     if (systematics == 5) lepscale = direction;
 
-    int smearlepton(0);
-    if (systematics == 6) smearlepton = direction;
+    //    int smearlepton(0);
+    //if (systematics == 6) smearlepton = direction;
     //==========================================================================================================//
 
 
@@ -154,9 +155,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //------------------------------------
 
     struct timeval t0;
-    gettimeofday(&t0, 0);
-    int mess_every_n =  std::min(10000LL, nentries/10);
-
+    int mess_every_n =  std::min(1000LL, nentries/10);
     double weight_amcNLO_sum = 0;
 
 
@@ -164,31 +163,36 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //TRandom* RamMu = new TRandom(10);
     //TRandom* RamEle = new TRandom(20);
     // --------------------------------
-
+    
+    double prev_rate = 0;
     for (Long64_t jentry(0); jentry < nentries; jentry += 1) {
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
         //cout << "---------------------------------------------------------------------" << endl;
-
-        if (jentry % mess_every_n == 0 && jentry > 0){
+	
+	if(jentry == mess_every_n) gettimeofday(&t0, 0);
+        if (jentry % mess_every_n == 0 && jentry > mess_every_n){
             timeval t1;
             gettimeofday(&t1, 0);
-            double dt = (t1.tv_sec - t0.tv_sec) + 1.e-6*(t1.tv_usec - t0.tv_usec);
-            dt *= double(nentries  - jentry) / mess_every_n;
-            int dt_s = int(dt + 0.5);
-            int dt_h = int(dt_s) / 3600; 
-            dt_s -= dt_h * 3600;
-            int dt_m = dt_s / 60;
-            dt_s -= dt_m *60;
-            cout << TString::Format("%4.1f%%", (100. * jentry) / nentries)
-                << "\t" << std::setw(11) << jentry << " / " << nentries
-                << "\t " << std::setw(4) << int(dt / mess_every_n * 1.e6 + 0.5) << " us/event"
-                << "\t Remaining time for this dataset loop: " 
-                << std::setw(2) << dt_h << " h "
-                << std::setw(2) << dt_m << " min "
-                << std::setw(2) << dt_s << " s"
-                << "\r" << std::flush;
-            t0 = t1;
+            double rate = ((t1.tv_sec - t0.tv_sec) + 1.e-6*(t1.tv_usec - t0.tv_usec)) 
+		/ (jentry - mess_every_n);
+	    if(fabs(rate / prev_rate - 1.) > 0.1){
+		prev_rate = 0.5*(prev_rate + rate);
+	    }
+            double rem = prev_rate * (nentries - jentry);
+            int rem_s = int(rem + 0.5);
+            int rem_h = int(rem_s) / 3600; 
+            rem_s -= rem_h * 3600;
+            int rem_m = rem_s / 60;
+            rem_s -= rem_m *60;
+            cout << "\r" << TString::Format("%4.1f%%", (100. * jentry) / nentries)
+		 << " " << std::setw(11) << jentry << " / " << nentries
+		 << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/event"
+		 << " Remaining time for this dataset: " 
+		 << std::setw(2) << rem_h << " h "
+		 << std::setw(2) << rem_m << " min "
+		 << std::setw(2) << rem_s << " s"
+		 << std::flush;
         }
 
         fChain->GetEntry(jentry);  
@@ -270,7 +274,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
         //=======================================================================================================//
         //         Retrieving leptons          //
         //====================================//
-        bool passesLeptonCut(0), passesLeptonChargeCut(0), passesLeptonMassCut(0), passesTauCut(1);
+        bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1);
+	//	bool passesLeptonMassCut(0);
         unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
         vector<leptonStruct> leptons;
         vector<leptonStruct> vetoMuons;
@@ -295,12 +300,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
             }
 
             //--- get MET --- 
- /*  // CommentAG: METPhi is not stored
             if (lepSel == "SMu" || lepSel == "SE") {
-                int whichMET(2); //  0 - pfMETPFlow, 1 - pfMet, 2 - pfType1CorrectedMet, 3 - pfType1p2CorrectedMet
-                MET.SetPtEtaPhiM(METPt->at(whichMET), 0, METPhi->at(whichMET), 0);
+                int whichMET(0); //0 - slimmedMETs  1- slimmedMETsNoHF 2- slimmedMETsPuppi
+                MET.SetXYZM(METPx->at(whichMET), METPy->at(whichMET), 0, 0);
             }
-*/
+
             //--- get the size of the collections ---
             nLeptons = leptons.size();
             nVetoMuons = vetoMuons.size();
@@ -314,9 +318,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
             sort(vetoElectrons.begin(), vetoElectrons.end(), LepDescendingOrder);
 
             //-- determine if the event passes the leptons requirements for EWKBoson = Z Boson
-            // cout <<  "nLeptons = " << nLeptons << "\n"; 
-
            // cout << " nLeptons " << nLeptons << "\n";
+
             if ((lepSel == "DMu" || lepSel == "DE") && nLeptons >= 2) {
                 nEventsWithTwoGoodLeptons++;
 
@@ -357,7 +360,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
                         if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh && leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
                             nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
                             passesLeptonCut = 1;
-                            passesLeptonMassCut = 1;
+			    //                            passesLeptonMassCut = 1;
                         }
                     }
                  //}
@@ -2408,7 +2411,7 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
     //--- get the number of Muon candidates from the vector size ---
     unsigned short nTotLeptons(MuEta->size());
 
-    bool eventTrigger = false;
+    //    bool eventTrigger = false;
     // we also have event trigger variables --> we should at least match one of the leptons to trigger
 /* // CommentAG: check patMuonTrig
     for (unsigned short i(0); i < nTotLeptons; i++) {
@@ -2418,7 +2421,7 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
   */        
 
     for (unsigned short i(0); i < nTotLeptons; i++) {
-        double muonId = 0;
+	//        double muonId = 0;
 
        //CommentAG: don't have patMuonCombId
 /*
@@ -2440,7 +2443,7 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
                 0);  // CommentAG
 
 
-        float qter = 1.0;
+	//        float qter = 1.0;
         /*        if (doRochester) {
                   if (!EvtIsRealData) {
                   rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
@@ -2458,10 +2461,12 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
         bool muPassesIsoCut(0);
         if (lepSel == "DMu" && mu.iso < 0.2) muPassesIsoCut = 1;  
         else if (lepSel == "SMu" && mu.iso < 0.12) muPassesIsoCut = 1;  
-        bool muPassesTrig(0);
+        bool muPassesTrig(1); //no matching with leptons offtrigger
        // if (lepSel == "DMu" && (mu.trigger & 0x4)) muPassesTrig = 1;       // HLT_Mu17_Mu8 !!!! changed from 0x8 to 0x4
-        if (lepSel == "DMu" && (TrigHlt & 2)) muPassesTrig = 1; 
-         else if (lepSel == "SMu" && (mu.trigger & 0x1)) muPassesTrig = 1;  // HLT_IsoMu24_eta2p1_v
+//	const Long64_t dimutrigmask = 19 | 21;
+//	const Long64_t mutrigmask = 18 | 22;
+//        if (lepSel == "DMu" && (TrigHltDiMu  & dimutrigmask)) muPassesTrig = 1; 
+//	else if (lepSel == "SMu" && (mu.trigger & mutrigmask)) muPassesTrig = 1;  // HLT_IsoMu24_eta2p1_v
 
         //--- veto muons ---
         bool muPassesVetoPtCut(mu.v.Pt() >= 15);
@@ -2511,21 +2516,22 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
     for (unsigned short i(0); i < nTotLeptons; i++){
 
         leptonStruct ele(ElPt->at(i), 
-                ElEta->at(i), 
-                ElPhi->at(i), 
-                ElE->at(i), 
-                ElCh->at(i), 
-                ElId->at(i), 
-                ElPfIsoRho->at(i), 
-                ElEtaSc->at(i), 
-                0.); // CommentAG patElecTrig_->at(i)
-
+			 ElEta->at(i), 
+			 ElPhi->at(i), 
+			 ElE->at(i), 
+			 ElCh->at(i), 
+			 ElId->at(i), 
+			 ElPfIsoRho->at(i), 
+			 ElEtaSc->at(i), 
+			 0.); // CommentAG patElecTrig_->at(i)
+	
         //--- good electrons ---
         bool elePassesPtCut(ele.v.Pt() >= (lepPtCutMin*0.8));
         bool elePassesEtaCut(fabs(ele.scEta) <= min(1.4442, 0.1*lepEtaCutMax) || (fabs(ele.scEta) >= 1.566 && fabs(ele.scEta) <= 0.1*lepEtaCutMax));
         bool elePassesIdCut(ele.id >= 4); /// 4 is medium ID, 2 is Loose ID
         bool elePassesIsoCut(ele.iso < 0.15);
-        bool elePassesAnyTrig(ele.trigger & 0x2);
+        //bool elePassesAnyTrig(ele.trigger & 0x2);
+	bool elePassesAnyTrig(true); //no matching with lepton from trigger.
         if (fileName.Index("Sherpa_Bugra_1_13_UNFOLDING") > 0) elePassesAnyTrig = true;
 
         //--- veto electrons ---
@@ -2547,14 +2553,14 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
 }
 
 
-ZJets::ZJets(TString fileName_, float lumiScale_, bool useTriggerCorrection_,
-        int systematics_, int direction_, float xsecfactor_, int lepPtCutMin_, int lepEtaCutMax_, 
-        int jetPtCutMin_, int jetEtaCutMax_,  Long_t maxEvents_, TString outDir_, TString bonzaiDir): 
+ZJets::ZJets(const TString& lepSel_, TString fileName_, float lumiScale_, bool useTriggerCorrection_,
+	     int systematics_, int direction_, float xsecfactor_, int lepPtCutMin_, int lepEtaCutMax_, 
+	     int jetPtCutMin_, int jetEtaCutMax_,  Long_t maxEvents_, TString outDir_, TString bonzaiDir): 
     HistoSetZJets(fileName_(0, fileName_.Index("_"))), outputDirectory(outDir_),
     fileName(fileName_), lumiScale(lumiScale_), useTriggerCorrection(useTriggerCorrection_), 
     systematics(systematics_), direction(direction_), xsecfactor(xsecfactor_), 
     lepPtCutMin(lepPtCutMin_), lepEtaCutMax(lepEtaCutMax_), jetPtCutMin(jetPtCutMin_), jetEtaCutMax(jetEtaCutMax_),
-    nMaxEvents(maxEvents_)
+    nMaxEvents(maxEvents_), lepSel(lepSel_), lumi_(0.)
 {
 
     //--- Create output directory if necessary ---
@@ -2570,38 +2576,124 @@ ZJets::ZJets(TString fileName_, float lumiScale_, bool useTriggerCorrection_,
 
     TChain *chain = new TChain("", "");
 
-    EvtIsRealData = (fileName.Index("Data") >= 0); 
-    TString fullFileName = bonzaiDir + fileName;
+    EvtIsRealData = (fileName.Index("Data") >= 0);
 
+    TString fullFileName;
 
-    if (fileName.BeginsWith("DMu_")) lepSel = "DMu";
-    else if (fileName.BeginsWith("DE_"))  lepSel = "DE"; 
-    else if (fileName.BeginsWith("SE_"))  lepSel = "SE"; 
-    else if (fileName.BeginsWith("SMu_"))  lepSel = "SMu"; 
+    if(fileName.BeginsWith("/")){//absolute path
+	fullFileName = fileName;
+	fileName = gSystem->BaseName(fileName);
+    } else{
+	fullFileName = bonzaiDir + "/" + fileName;
+    }
+    //fileName is expected to contain only the basename,
+    //remove the .root, .txt extensions:
+    if(fileName.EndsWith(".root")){
+	fileName.Remove(fileName.Length()-5, 5);
+    }
+    if(fileName.EndsWith(".txt")){
+	fileName.Remove(fileName.Length() - 4, 4);
+    }
+
 
     rejectBTagEvents = lepSel.BeginsWith("S"); 
 
-    if (fileName.Index("List") < 0){
-        fullFileName += ".root";
+
+    regex_t normLine;
+    int rc =  regcomp(&normLine,"[#*][[:space:]]*norm[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
+    if(rc){
+	char buffer[256];
+	regerror(rc, &normLine, buffer, sizeof(buffer));
+	buffer[sizeof(buffer)-1] = 0;
+	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
+    }
+
+    regex_t lumiLine;
+    rc =  regcomp(&lumiLine,"[#*][[:space:]]*lumi[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
+    if(rc){
+	char buffer[256];
+	regerror(rc, &lumiLine, buffer, sizeof(buffer));
+	buffer[sizeof(buffer)-1] = 0;
+	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
+    }
+
+
+    if(fullFileName.BeginsWith("/store/")){
+	fullFileName.Insert(0, "root://eoscms.cern.ch//eos/cms");
+    }
+    
+    if (isRootFile(fullFileName)){
         TString treePath = fullFileName + "/tupel/EventTree";
         if (fileName.Index("mcatnlo") >= 0) treePath = fullFileName + "/tupel/EventTree";
         if (fileName.Index("MG-MLM") >= 0) treePath = fullFileName + "/tupel/EventTree";
         if (fileName.Index("Sherpa") >= 0) treePath = fullFileName + "/tupel/EventTree";
         cout << "Loading file: " << fullFileName << endl;
         chain->Add(treePath);
-    }
-    else {
-        fullFileName += ".txt";
-        ifstream infile(fullFileName.Data());
-        string line; 
-        int countFiles(0);
-        while (getline(infile, line)){
-            countFiles++;
-            TString treePath = line + "/tupel/EventTree";
-            if (fileName.Index("Sherpa") >= 0) treePath = line + "/tupel/EventTree";
-            chain->Add(treePath);       
-        }
-    }
+    } else {
+	int (*closeFunc)(FILE*);
+	FILE* f = eosOpen(fullFileName, &closeFunc);
+	if(!f){
+	    std::cerr << "Failed to  open file " << fullFileName << ".\n";
+	} else{
+	    std::cout << "Reading input files from catalog file " << fullFileName << "\n";
+	    string line; 
+	    int countFiles(0);
+	    char* buffer = 0;
+	    size_t buffer_size = 0;
+	    while (!feof(f)){
+		ssize_t len = getline(&buffer, &buffer_size, f);
+		if(len  < 0) break;
+		char* line = buffer;
+		size_t n = len - 1;
+		//trim white spaces:
+		while(line[0] == ' ' || line[0] == '\t') ++line;
+		while(n!=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
+		    line[n] = 0; --n;
+		}
+		
+		regmatch_t pmatch[2];
+		if(!regexec(&normLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+		    line[pmatch[1].rm_eo] = 0;
+		    double norm = strtod(line + pmatch[1].rm_so, 0);
+		    if(norm == 0){
+			std::cerr << "Normalisation parameter value, " << line + pmatch[1].rm_so
+				  << " found in file " << fullFileName << " is not valid.\n";
+		    } else{
+			std::cout << "Parameter norm found in file " << fullFileName
+				  << ". This normalisation factor will be  "
+				  << lumiScale << "*" << norm << " = " << lumiScale*norm << std::endl;
+			lumiScale *= norm;
+		    }
+		} else if(!regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+		    line[pmatch[1].rm_eo] = 0;
+		    lumi_ = strtod(line + pmatch[1].rm_so, 0);
+		    if(lumi_ == 0){
+			std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
+				  << " found in file " << fullFileName << " is not valid.\n";
+		    }
+		}
+
+		//skip empty lines,  comment lines and metadata lines:
+		if (line[0] == 0 || line[0] == '#' || line[0] == '*') continue;
+		
+		countFiles++;
+		TString treePath = TString(line) + "/tupel/EventTree";
+		if(treePath[0]!='/'){
+		    treePath.Insert(0, TString(bonzaiDir) + "/");
+		}
+		if(treePath.BeginsWith("/store/")){
+		    treePath.Insert(0, "root://eoscms.cern.ch//eos/cms");
+		}
+		std::cout << "Adding path " << treePath << " to the tree chain.\n";
+		chain->Add(treePath);       
+	    }//next line
+	    std::cout << "Closing catalog file " << fullFileName << "\n";
+	    if(buffer) free(buffer);
+	    closeFunc(f);
+	} //file opening succeeded
+    }//is root file
+    regfree(&normLine);
+    regfree(&lumiLine);
     fChain = chain;
 }
 
@@ -2707,12 +2799,20 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
     JetAk04PartFlav = 0;
 
     METPt = 0;
-   // METPhi = 0;
+    METPx = 0;
+    METPy = 0;
     METsig = 0;
     //mcSherpaWeights_ = 0; 
     //weight_amcNLO_ = 0; 
     //weight_amcNLO_sum_ = 0; 
     EvtWeights = 0;
+    
+    TrigHlt = 0;
+    TrigHltPhot = 0;
+    TrigHltMu = 0;
+    TrigHltDiMu = 0;
+    TrigHltEl = 0;
+    TrigHltDiEl = 0;
 
     // Set branch addresses and branch pointers
     fCurrent = -1;
@@ -2734,15 +2834,20 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
         fChain->SetBranchAddress("JetAk04BDiscCisvV2", &JetAk04BDiscCisvV2, &b_JetAk04BDiscCisvV2);
         //fChain->SetBranchAddress("JetAk04PartFlav", &JetAk04PartFlav, &b_JetAk04PartFlav);
         fChain->SetBranchAddress("METPt", &METPt, &b_METPt);
-       // fChain->SetBranchAddress("METPhi", &METPhi, &b_METPhi);
+	fChain->SetBranchAddress("METPx", &METPx, &b_METPx);
+	fChain->SetBranchAddress("METPy", &METPy, &b_METPy);
         //fChain->SetBranchAddress("METsig", &METsig, &b_METsig); // not used
         fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
+        fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
+        fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
+        fChain->SetBranchAddress("TrigHltEl",   &TrigHltEl,   &b_TrigHltEl);
+        fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
 
         if (lepSel == "DE" || lepSel == "SE"){
             fChain->SetBranchAddress("ElPt", &ElPt, &b_ElPt);
             fChain->SetBranchAddress("ElEta", &ElEta, &b_ElEta);
             fChain->SetBranchAddress("ElPhi", &ElPhi, &b_ElPhi);
-            fChain->SetBranchAddress("patElecEnergy_", &ElE, &b_ElE);
+            fChain->SetBranchAddress("ElE", &ElE, &b_ElE);
             fChain->SetBranchAddress("ElCh", &ElCh, &b_ElCh);
             fChain->SetBranchAddress("ElId", &ElId, &b_ElId);
            // fChain->SetBranchAddress("patElecTrig_", &patElecTrig_, &b_patElecTrig_);

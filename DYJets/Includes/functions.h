@@ -90,4 +90,23 @@ void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVec
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
 
+/** Open in read mode a file on eos or a local file. For EOS file,
+ * performance might be limited and it should be kept to small file:
+ * it executes the "xrdfs cat" command (see man xrdfs).
+ * @param path file path. It is assumes an EOS file if it starts with
+ * root:// string.
+ * @param closeFunc pointer where to store the function to call for close
+ * the file instead of fclose.
+ * @return pointer to the file stream.
+ */
+FILE* eosOpen(const char* path, int (**closeFunc)(FILE*));
+
+/** Test if a file is a root file. The test is based on the "magic number" 
+ * contained in the file which identifies its type. A ROOT file starts with
+ * the sequence r,o,o,t,\0
+ * @param path path of the file to test.
+ * @return true iff the file is a ROOT file.
+ */
+bool isRootFile(const char* path);
+
 #endif

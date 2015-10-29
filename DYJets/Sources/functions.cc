@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdarg>
 #include "functions.h"
+#include <cstring>
 
 using namespace std;
 
@@ -485,4 +486,37 @@ void BTagModification(double randNumber, double pt, double eta, int jetFlavour, 
         if (!passBJets_SFB_sys_down && SFlight>1.0 && randNumber<f_down) passBJets_SFB_sys_down = true; // for sytematic_down
 
     }   ////////flavour lop                     
+}
+
+FILE* eosOpen(const char* path, int (**closeFunc)(FILE*)){
+ TString tspath(path);
+ if(tspath.BeginsWith("root://")){
+   *closeFunc = pclose;
+   tspath.Remove(0, strlen("root://"));
+   Ssiz_t p = tspath.First("/");
+   if(p==TString::kNPOS) return 0;
+   TString server(tspath(0, p));
+   TString filepath(tspath(p + 1, tspath.Length() - p));
+   //   std::cout << ">>> server: " << server << ", path: " << filepath << "\n";
+   return popen(TString::Format("xrdfs %s cat %s", server.Data(), filepath.Data()), "r");
+ } else{
+   *closeFunc = fclose;
+   return fopen(path, "r");
+ }
+}
+
+bool isRootFile(const char* path){
+  int (*funcClose)(FILE*);
+  FILE* f = eosOpen(path, &funcClose);
+
+  char buffer[5];
+  if(f){
+    bool rc = (fread(buffer, 5, 1, f)==1) && (memcmp(buffer, "root\0", 5)==0);
+    funcClose(f);
+    return rc; 
+  } else{
+    std::cerr << "Warning: failed to read file " << path
+	      << ". File type determined from its extension.\n";
+    return TString(path).EndsWith(".root");
+  }
 }

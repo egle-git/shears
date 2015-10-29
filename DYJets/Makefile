@@ -3,16 +3,11 @@
 # =============================== 
 
 # Determine if working at CERN on lxplus machine or at IIHE on m machines
-HOST = $(shell hostname | grep lxplus)
-
-ifeq ($(HOST),)
-  HOST = $(shell hostname | grep iihe)
-  ifeq ($(HOST),)
-  else
-    HOST = "iihe"
-  endif
+HOST = $(shell hostname -f | grep cern)
+ifneq ($(HOST),)
+    HOST = "lxplus"
 else
-  HOST = "lxplus"
+    HOST = "iihe"
 endif
 
 # define LHAPDF library Path accroding to the host 
@@ -52,12 +47,15 @@ SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc roc
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
 
+OBJLIST_NEWFORMAT = $(patsubst Sources/ZJets.o, Sources/ZJets_newformat.o, $(OBJLIST))
+
 .PHONY: all clean
 
 all: runCombination \
 runRecoComparison \
 runVJets \
 runZJets \
+runZJets_newformat \
 runUnfoldingZJets \
 runMakeStatisticsTable \
 dispatcher
@@ -78,6 +76,12 @@ runZJets: $(OBJLIST) runZJets.o RooUnfold/libRooUnfold.so
 runZJets.o: runZJets.cc
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
 
+runZJets_newformat: $(OBJLIST_NEWFORMAT) runZJets_newformat.o RooUnfold/libRooUnfold.so
+	$(CXX) -o runZJets_newformat $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runZJets_newformat.o: runZJets_newformat.cc
+	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
+
 runRecoComparison: $(OBJLIST) runRecoComparison.o  RooUnfold/libRooUnfold.so
 	$(CXX) -o runRecoComparison $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
@@ -93,7 +97,7 @@ runUnfoldingZJets.o: runUnfoldingZJets.cc RooUnfold/libRooUnfold.so
 runCombination: $(OBJLIST) runCombination.o
 	$(CXX) -o runCombination $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runCombination.o: runCombination.cc
+runCombination.o: runCombination.cc RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
 
 runMakeStatisticsTable: $(OBJLIST) runMakeStatisticsTable.o
@@ -115,5 +119,5 @@ RooUnfold/libRooUnfold.so:
 clean: 
 	rm -f *.o Sources/*.o 
 
-
-
+echo_%:
+	@echo $* = $($*)

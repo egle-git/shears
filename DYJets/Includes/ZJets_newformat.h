@@ -53,6 +53,11 @@ class ZJets: public HistoSetZJets {
    vector<double>  *EvtWeights;
    Float_t         EvtFastJetRho;
    UInt_t          TrigHlt;
+   ULong64_t       TrigHltPhot;
+   ULong64_t       TrigHltMu;
+   ULong64_t       TrigHltDiMu;
+   ULong64_t       TrigHltEl;
+   ULong64_t       TrigHltDiEl;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -242,6 +247,11 @@ class ZJets: public HistoSetZJets {
    TBranch        *b_EvtWeights;   //!
    TBranch        *b_EvtFastJetRho;   //!
    TBranch        *b_TrigHlt;   //!
+   TBranch        *b_TrigHltPhot;   //!
+   TBranch        *b_TrigHltMu;   //!
+   TBranch        *b_TrigHltDiMu;   //!
+   TBranch        *b_TrigHltEl;   //!
+   TBranch        *b_TrigHltDiEl;   //!
    TBranch        *b_METPt;   //!
    TBranch        *b_METPx;   //!
    TBranch        *b_METPy;   //!
@@ -422,7 +432,7 @@ class ZJets: public HistoSetZJets {
 
 
 
-        ZJets(TString fileName_, float lumiScale_ = 1., bool useTriggerCorrection_ = 0, int systematics_ = 0, int direction_ = 0, float xsecfactor_ = 1., 
+        ZJets(const TString& lepSel, TString fileName_, float lumiScale_ = 1., bool useTriggerCorrection_ = 0, int systematics_ = 0, int direction_ = 0, float xsecfactor_ = 1., 
                 int lepPtCutMin_ = 20, int lepEtaCutMax_ = 24, int jetPtCutMin_ = 30, int jetEtaCutMax_ = 24, Long_t nEvents_ = 0, TString outDir_ = "TEST", 
                 TString bonzaiDir = "/afs/cern.ch/work/a/aleonard/public/ZJetsFiles/");
         ~ZJets();
@@ -439,6 +449,10 @@ class ZJets: public HistoSetZJets {
         Bool_t   Notify();
         void     Show(Long64_t entry = -1);
 
+	/** Gets integrated luminosity read from lumi parameter of catalog file.
+	 */
+	double getLumi(){ return lumi_;}
+	
         TString outputDirectory;
         TString fileName; 
         float lumiScale;
@@ -456,6 +470,7 @@ class ZJets: public HistoSetZJets {
         bool rejectBTagEvents;
 
         ConfigVJets cfg_;
+	float lumi_;
 };
 #endif
 

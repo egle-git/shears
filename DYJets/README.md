@@ -1,14 +1,23 @@
 Quick start
 ============
 
+Set up a CMSSW environment:
+
+```
+   $ cmsrel CMSSW_7_4_11
+   $ cd CMSSW_7_4_11
+   $ cmsenv
+   $ cd ..
+```
+
 Clone the shears project to your working directory:
 
     git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 
-Once you have cloned the repository, you should move to the DYJets directory and build the code:
+Once you have cloned the repository, you should move to the `shears/DYJets` directory and build the code:
 
 ```
-    $ cd DYJets
+    $ cd shears/DYJets
     $ make clean
     $ make
 ```
@@ -16,10 +25,10 @@ Once you have cloned the repository, you should move to the DYJets directory and
 Unless you have already your own configuration file, copy the example:
 
 ```
-cp example.cfg vjet.cfg
+cp example.cfg vjets.cfg
 ```
 
-(vjet.cfg stored on git is not guaranteed to work out-of-the box and we recommend to use example.cfg).
+(vjets.cfg stored on git is not guaranteed to work out-of-the box and we recommend to use example.cfg).
 
 To run the Z+jet analysis, execute:
 
@@ -34,6 +43,9 @@ To use as input ntuple in the Run I format, run `runZJets` instead of `runZJets_
 ```
     $ ./runZJets
 ```
+
+Note: you can specify limit the number of events to analyze by adding to the above command line the 
+option maxEvents=XXXX.
 
 Configuration file
 ==================

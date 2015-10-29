@@ -117,7 +117,8 @@ RooUnfold/libRooUnfold.so:
 
 # =========================================================================== 
 clean: 
-	rm -f *.o Sources/*.o 
+	rm -f *.o Sources/*.o
+	$(MAKE) -C RooUnfold clean
 
 echo_%:
 	@echo $* = $($*)

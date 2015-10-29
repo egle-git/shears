@@ -68,7 +68,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //==========================================================================================================//
     //       Load efficiency tables        //
     //====================================//
-    table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
+    //table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
+    table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
     table LeptIso, LeptID, LeptTrig, Ele_Rec;
     // electron SF
     table Ele_Rec_8TeV("EfficiencyTables/Ele_SF_Reconstruction_2012.txt");
@@ -540,7 +541,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
                 // apply transver mass and MET cut
                 if (genMT > MTCutLow && genMET.Pt() > METCutLow) passesgenLeptonCut = 1;
                 //--- if there are taus we don't want the gen level
-                if (countTauS3 > 0) passesgenLeptonCut = 0;
+                if (countTauS3 > 0) { cout << "we found tau" << "\n"; passesgenLeptonCut = 0; }
 
  
             }
@@ -622,10 +623,11 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                 jetEnergyCorr = TableJESunc.getEfficiency(jet.v.Pt(), jet.v.Eta());
 
                 jet.v.SetPtEtaPhiE(jet.v.Pt() * (1 + scale * jetEnergyCorr), jet.v.Eta(), jet.v.Phi(), jet.v.E() * (1 + scale * jetEnergyCorr));
+               // jet.v.SetPtEtaPhiE(jet.v.Pt(), jet.v.Eta(), jet.v.Phi(), jet.v.E());
 
                 bool jetPassesEtaCut(fabs(jet.v.Rapidity()) <= 0.1*jetEtaCutMax); 
                 bool jetPassesIdCut(patJetPfAk05LooseId_->at(i) > 0);
-                bool jetPassesMVACut(patJetPfAk05jetpuMVA_->at(i) > 0);
+                bool jetPassesMVACut(patJetPfAk05jetpuMVA_->at(i) > -0.3);
 
                 bool jetPassesdRCut(1);
                 unsigned short nRemovedLep = min(int(nLeptons), 2);
@@ -634,6 +636,10 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                         jetPassesdRCut = 0;
                     }
                 }
+
+                //CAG
+                if (passesLeptonCut && jet.v.Pt() >= 30 && jetPassesEtaCut && jetPassesIdCut && jetPassesdRCut)  // no MVA cut
+                puMVA -> Fill(patJetPfAk05jetpuMVA_->at(i), weight);
 
                 if (jetPassesPtCut && jetPassesEtaCut && jetPassesIdCut && jetPassesMVACut && jetPassesdRCut) {
                     jets.push_back(jet);
@@ -1299,6 +1305,15 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
         double tau_c_sum(0), tau_c_max(0);
         double tau_cm_sum(0), tau_cm_max(0);
         double tau_c_cm_sum(0), tau_c_cm_max(0); 
+ 
+        // Comment AG
+       if (fileName.Index("ZJets_13TeV_amcatnlo") >= 0){
+       // cout << "we are here" << "\n";
+      //  if(EvtInfo_NumVtx >=0. && EvtInfo_NumVtx< 46.) weight *= (1./(1.-(4.77771e-02-1.40536e-02*EvtInfo_NumVtx+1.83023e-03*EvtInfo_NumVtx*EvtInfo_NumVtx-3.11233e-05*EvtInfo_NumVtx*EvtInfo_NumVtx*EvtInfo_NumVtx)*(14.-EvtInfo_NumVtx))) ;
+
+         if(EvtInfo_NumVtx >=0. && EvtInfo_NumVtx< 46.) weight *=(1./(1.-(7.22426e-02-1.34244e-02*EvtInfo_NumVtx+4.75987e-03*EvtInfo_NumVtx*EvtInfo_NumVtx-4.49683e-04*EvtInfo_NumVtx*EvtInfo_NumVtx*EvtInfo_NumVtx+1.96517e-05*EvtInfo_NumVtx*EvtInfo_NumVtx*EvtInfo_NumVtx*EvtInfo_NumVtx)*(12.-EvtInfo_NumVtx))  );
+
+      }
 
         if (hasRecoInfo && passesLeptonChargeCut && passesTauCut) {
             ZMassFrom60_Zinc0jet->Fill((leptons[0].v + leptons[1].v).M(), weight);
@@ -1311,9 +1326,10 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
             if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             //=======================================================================================================//
             //      Start filling histograms      //
-            //====================================//
+            //====================================// 
 
             //cout << "Selected at reco level" << endl;
+            //cout << EvtInfo_NumVtx << "\n";
             NVtx->Fill(EvtInfo_NumVtx, weight);
 /*  // CAG
             double weightNoPUweight(1);
@@ -1324,8 +1340,27 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
          //   cout << "weight = " << weight << "\n";
             nEventsVInc0Jets++;
             ZNGoodJetsNVtx_Zexc->Fill(nGoodJets, EvtInfo_NumVtx  , weight);
-            ZNGoodJets_Zinc->Fill(0., weight);
+           ZNGoodJets_Zinc->Fill(0., weight);
             ZNGoodJets_Zexc->Fill(nGoodJets, weight);
+
+           // if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)  
+          //  ZNGoodJets_test->Fill(0., weight);
+ 
+      /*   
+            if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(0., weight);
+            if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(0., weight);
+            if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(0., weight);
+            if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(0., weight);
+            if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(0., weight);
+            if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(0., weight);
+    */    
+ 
+            //  cout <<    nLeptons << "\n";
+            for (unsigned short i(0); i < nLeptons; i++) {             
+              MuPFIsoDBetaCorr->Fill(patMuonPfIsoDbeta_->at(i),weight);
+             //cout << patMuonPfIsoDbeta_->at(i) << "\n";
+          
+             }  
             ZNGoodJets_Zinc_NoWeight->Fill(0.);
             ZMass_Zinc0jet->Fill(EWKBoson.M(), weight);
             ZPt_Zinc0jet->Fill(EWKBoson.Pt(), weight);
@@ -1343,6 +1378,9 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
             dRLeptons_Zinc0jet->Fill(deltaR(leptons[0].v, leptons[1].v), weight);
             SpTLeptons_Zinc0jet->Fill(SpTsub(leptons[0].v, leptons[1].v), weight);
 
+
+
+
             if (nGoodJets == 0){
                 //TruePU_0->Fill(PU_npT, weight);
                 //PU_0->Fill(PU_npIT, weight);
@@ -1358,6 +1396,7 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                 dPhiLeptons_Zexc0jet->Fill(deltaPhi(leptons[0].v, leptons[1].v), weight);
                 dEtaLeptons_Zexc0jet->Fill(leptons[0].v.Eta() - leptons[1].v.Eta(), weight);
                 SpTLeptons_Zexc0jet->Fill(SpTsub(leptons[0].v, leptons[0].v), weight);
+                ZNGoodJetsNVtx_Zexc->Fill(0., EvtInfo_NumVtx, weight);
             }
 
             if (nGoodJets_20 >= 1) {
@@ -1426,9 +1465,18 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     SumZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity())/2.0,weight);
                     DifZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(EWKBoson.Rapidity()-jets[0].v.Rapidity())/2.0,weight);
                 }
-
-                ZNGoodJets_Zinc->Fill(1., weight);
+ 
+               ZNGoodJets_Zinc->Fill(1., weight);
                 ZNGoodJets_Zinc_NoWeight->Fill(1.);
+
+      //          if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     cout << "we are here" << "\n";
+/*
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(1., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(1., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(1., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(1., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(1., weight);
+*/
                 ZPt_Zinc1jet->Fill(EWKBoson.Pt(), weight);
                 ZRapidity_Zinc1jet->Fill(EWKBoson.Rapidity(), weight);
                 ZAbsRapidity_Zinc1jet->Fill(fabs(EWKBoson.Rapidity()), weight);
@@ -1494,6 +1542,7 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     AbsJetRapidity_Zexc1jet->Fill(fabs(jets[0].v.Rapidity()), weight);
                     SumZJetRapidity_Zexc1jet->Fill(fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity())/2.0,weight);
                     DifZJetRapidity_Zexc1jet->Fill(fabs(EWKBoson.Rapidity()-jets[0].v.Rapidity())/2.0,weight);
+                    ZNGoodJetsNVtx_Zexc->Fill(1., EvtInfo_NumVtx, weight);
 
                     if(EWKBoson.Pt()>100.)
                     {
@@ -1584,8 +1633,16 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
 
 
                 TLorentzVector jet1Plus2PlusZ = jet1Plus2 + EWKBoson;
-                ZNGoodJets_Zinc->Fill(2., weight);
+               ZNGoodJets_Zinc->Fill(2., weight);
                 ZNGoodJets_Zinc_NoWeight->Fill(2.);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(2., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(2., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(2., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(2., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(2., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(2., weight);
+*/
                 TwoJetsPtDiff_Zinc2jet->Fill(jet1Minus2.Pt(), weight);
                 BestTwoJetsPtDiff_Zinc2jet->Fill(bestJet1Minus2.Pt(), weight);
                 JetsMass_Zinc2jet->Fill(jet1Plus2.M(), weight);
@@ -1714,6 +1771,7 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     AbsSecondJetRapidity_Zexc2jet->Fill(fabs(jets[1].v.Rapidity()),weight);
                     SumZSecondJetRapidity_Zexc2jet->Fill(fabs(EWKBoson.Rapidity()+jets[1].v.Rapidity())/2.0,weight);
                     DifZSecondJetRapidity_Zexc2jet->Fill(fabs(EWKBoson.Rapidity()-jets[1].v.Rapidity())/2.0,weight);
+                    ZNGoodJetsNVtx_Zexc->Fill(2., EvtInfo_NumVtx, weight);
 
                     if(EWKBoson.Pt()>100.)
                     {
@@ -1824,8 +1882,16 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
             if (nGoodJets_20 >= 3) ThirdJetPt_Zinc3jet->Fill(jets_20[2].v.Pt(), weight);
             if (nGoodJets >= 3) {
                 nEventsVInc3Jets++;
-                ZNGoodJets_Zinc->Fill(3., weight);
+                 ZNGoodJets_Zinc->Fill(3., weight);
                 ZNGoodJets_Zinc_NoWeight->Fill(3.);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(3., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(3., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(3., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(3., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(3., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(3., weight);
+*/
                 ThirdJetEta_Zinc3jet->Fill(fabs(jets[2].v.Eta()), weight);
                 ThirdJetAbsRapidity_Zinc3jet->Fill(fabs(jets[2].v.Rapidity()), weight);
                 ThirdJetEtaHigh_Zinc3jet->Fill(fabs(jets[2].v.Eta()), weight);
@@ -1875,12 +1941,21 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     //PU_3->Fill(PU_npIT, weight);
                     PU_3->Fill(EvtInfo_NumVtx, weight);
                     ZNGoodJets_Zexc_NoWeight->Fill(3.);
+                    ZNGoodJetsNVtx_Zexc->Fill(3., EvtInfo_NumVtx, weight);
                 }
             }
             if (nGoodJets_20 >= 4) FourthJetPt_Zinc4jet->Fill(jets_20[3].v.Pt(), weight);
             if (nGoodJets >= 4){
-                ZNGoodJets_Zinc->Fill(4., weight);
+               ZNGoodJets_Zinc->Fill(4., weight);
                 ZNGoodJets_Zinc_NoWeight->Fill(4.);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(4., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(4., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(4., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(4., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(4., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(4., weight);
+*/
                 FourthJetEta_Zinc4jet->Fill(fabs(jets[3].v.Eta()), weight);
                 FourthJetAbsRapidity_Zinc4jet->Fill(fabs(jets[3].v.Rapidity()), weight);
                 FourthJetEtaHigh_Zinc4jet->Fill(fabs(jets[3].v.Eta()), weight);
@@ -1893,12 +1968,21 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     //PU_4->Fill(PU_npIT, weight);
                     PU_4->Fill(EvtInfo_NumVtx, weight);
                     ZNGoodJets_Zexc_NoWeight->Fill(4.);
+                    ZNGoodJetsNVtx_Zexc->Fill(4., EvtInfo_NumVtx, weight);
                 }
             }    
             if (nGoodJets_20 >= 5) FifthJetPt_Zinc5jet->Fill(jets_20[4].v.Pt(), weight);
             if (nGoodJets >= 5){
-                ZNGoodJets_Zinc->Fill(5., weight);
-                ZNGoodJets_Zinc_NoWeight->Fill(5.);
+               ZNGoodJets_Zinc->Fill(5., weight); 
+                ZNGoodJets_Zinc_NoWeight->Fill(5.); 
+/* 
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(5., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(5., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(5., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(5., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(5., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(5., weight);
+*/ 
                 FifthJetEta_Zinc5jet->Fill(fabs(jets[4].v.Eta()), weight);
                 FifthJetAbsRapidity_Zinc5jet->Fill(fabs(jets[4].v.Rapidity()), weight);
                 FifthJetEtaHigh_Zinc5jet->Fill(fabs(jets[4].v.Eta()), weight);
@@ -1911,12 +1995,21 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     //PU_5->Fill(PU_npIT, weight);
                     PU_5->Fill(EvtInfo_NumVtx, weight);
                     ZNGoodJets_Zexc_NoWeight->Fill(5.);
+                    ZNGoodJetsNVtx_Zexc->Fill(5., EvtInfo_NumVtx, weight);
                 }
             }    
             if (nGoodJets_20 >= 6) SixthJetPt_Zinc6jet->Fill(jets_20[5].v.Pt(), weight);
             if (nGoodJets >= 6){
-                ZNGoodJets_Zinc->Fill(6., weight);
+               ZNGoodJets_Zinc->Fill(6., weight);
                 ZNGoodJets_Zinc_NoWeight->Fill(6.);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(6., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(6., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(6., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(6., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(6., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(6., weight);
+*/
                 SixthJetEta_Zinc6jet->Fill(fabs(jets[5].v.Eta()), weight);
                 SixthJetEtaHigh_Zinc6jet->Fill(fabs(jets[5].v.Eta()), weight);
                 SixthJetRapidityHigh_Zinc6jet->Fill(fabs(jets[5].v.Rapidity()), weight);
@@ -1928,18 +2021,36 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                     //PU_6->Fill(PU_npIT, weight);
                     PU_6->Fill(EvtInfo_NumVtx, weight);
                     ZNGoodJets_Zexc_NoWeight->Fill(6.);
+                    ZNGoodJetsNVtx_Zexc->Fill(6., EvtInfo_NumVtx, weight);
                 }
             }
             if (nGoodJets >= 7){
-                ZNGoodJets_Zinc->Fill(7., weight);
+               ZNGoodJets_Zinc->Fill(7., weight);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(7., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(7., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(7., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(7., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(7., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(7., weight);
+*/
                 if (nGoodJets == 7 ){
                     //TruePU_7->Fill(PU_npT, weight);
                     //PU_7->Fill(PU_npIT, weight);
                     PU_7->Fill(EvtInfo_NumVtx, weight);
+                    ZNGoodJetsNVtx_Zexc->Fill(7., EvtInfo_NumVtx, weight);
                 }
             }
             if (nGoodJets >= 8){
-                ZNGoodJets_Zinc->Fill(8., weight);
+               ZNGoodJets_Zinc->Fill(8., weight);
+/*
+                if(0 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 4)     ZNGoodJets_Zinc_0->Fill(8., weight);
+                if(5 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 9)     ZNGoodJets_Zinc_5->Fill(8., weight);
+                if(10 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 14)   ZNGoodJets_Zinc_10->Fill(8., weight);
+                if(15 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 19)   ZNGoodJets_Zinc_15->Fill(8., weight);
+                if(20 <= EvtInfo_NumVtx && EvtInfo_NumVtx  <= 24)   ZNGoodJets_Zinc_20->Fill(8., weight);
+                if(25 <= EvtInfo_NumVtx      )   ZNGoodJets_Zinc_25->Fill(8., weight);
+*/
             }
 
             //=======================================================================================================//
@@ -2456,10 +2567,10 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
         if (lepSel == "DMu" && mu.iso < 0.2) muPassesIsoCut = 1;  
         else if (lepSel == "SMu" && mu.iso < 0.12) muPassesIsoCut = 1;  
         bool muPassesTrig(0);
-        if (lepSel == "DMu" && (mu.trigger & 0x4)) muPassesTrig = 1;       /// TrigHltDiMu & 19  // HLT_Mu17_Mu8 !!!! changed from 0x8 to 0x4
+        if (lepSel == "DMu" && (mu.trigger==3 || mu.trigger==4) ) muPassesTrig = 1;       /// TrigHltDiMu & 19  // HLT_Mu17_Mu8 !!!! changed from 0x8 to 0x4
         else if (lepSel == "SMu" && (mu.trigger & 0x1)) muPassesTrig = 1;  // HLT_IsoMu24_eta2p1_v
 
-      // cout << muPassesTrig << "\n";
+       //cout << muPassesTrig << "\n";
 
         //--- veto muons ---
         bool muPassesVetoPtCut(mu.v.Pt() >= 15);
@@ -2486,12 +2597,14 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
             vetoMuons.push_back(mu); 
         }
 */
+       
+
 
        if(isData){         // CommentAG: require muPassesTrig only in the data 
            if (muPassesPtCut && muPassesEtaCut && muPassesIsoCut && muPassesTrig )   leptons.push_back(mu);              
         }
         else  
-           if (muPassesPtCut && muPassesEtaCut && muPassesIsoCut )   leptons.push_back(mu);  
+           if (muPassesPtCut && muPassesEtaCut && muPassesIsoCut && muPassesTrig )   leptons.push_back(mu);  
         // select the veto muons
         else if (lepSel == "SMu" && muPassesVetoPtCut && muPassesVetoEtaCut) {    //CommentAG:  need to check muPassesVetoIdCut! 
             vetoMuons.push_back(mu); 

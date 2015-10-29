@@ -45,7 +45,8 @@ To use as input ntuple in the Run I format, run `runZJets` instead of `runZJets_
 ```
 
 Note: you can specify limit the number of events to analyze by adding to the above command line the 
-option maxEvents=XXXX.
+option maxEvents=XXXX. In such case the histogram directory will be named HistoFiles_XXXXevts instead
+of HistoFiles.
 
 Configuration file
 ==================

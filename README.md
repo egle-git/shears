@@ -10,9 +10,13 @@ Repository organisation
 
 **Bonzais** Tools to make small ROOT trees ("skims") from genuine trees (so called Boababs)
 
-**DYJets** Analysis code. Currently for W+jet and Z+jet analysis
+**DYJets** Analysis code. Currently for W+jet and Z+jet analysis.
+
+**WJets** W+jet analysis code.
 
 **ntuple_production** Tools to produce the Boabab ROOT ntuple.
+
+*Documentation can be found in the respective directories (README.md file displayed when browsing the directory with gitlab as for the one you are reading).*
 
 *The code that produces the ntuple (Boabab) from CMS EDM dataset (MINIAOD) and used by the tools in ntuple\_production folder can be found in the [Tuple repository](https://github.com/UGent/Tupel/tree/Tupel_MiniAOD), under the git branch Tuple_MiniAOD.*
 

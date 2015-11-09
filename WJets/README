@@ -1,57 +1,55 @@
-The 2012 instructions below work for the 13 TeV effort for now. 
+The instructions for running the W+jets analysis code on baobab data and MC ntuples produced at 13 TeV.
+Kadir Ocalan (29.10.2015)
 
-TreeAnalysis
+-- Clone shears from the gitlab (can be found here https://gitlab.cern.ch/shears/shears/tree/master)
+git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 
-Clone this file to either TreeAnalysis2012 or TreeAnalysis2011
+-- Once cloned, go to the directory 
+cd shears/WJets
 
-For 2012 data analysis do: git clone git@github.com:iihe-cms-sw/TreeAnalysis.git TreeAnalysis2012
+-- Compile RooUnfold
+cd RooUnfold-1.1.1
+make clean
+make
+cd -
 
-For 2011 data analysis do: git clone git@github.com:iihe-cms-sw/TreeAnalysis.git TreeAnalysis2011
+-- Make LHAPDF work with quick hacks
+sed -i 's#/user/aleonard/LHAPDF/lib/libLHAPDF.so#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/lib/libLHAPDF.so#g' runDYJets.cc
+sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/#g' rootlogon.C
+sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc
+sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
 
-if you want to run on: 1) WJets: move DYJets directory to WJets 2) TTbar to emu : move DYJets directory to TTbarEMu
+-- Test the code over a single ntuple file (such as the one produced at 8 TeV first):
+cmsStage /store/group/phys_smp/WPlusJets/NtuplesTomislavNEW/SMu_8TeV_T_s_channel_dR_5311.root DataW/SMu_8TeV_T_s_channel_dR_5311.root
+cd WJets
+root -b runDYJets.cc  
 
-Be aware that a rootlogon.C is provided. This is needed to load ROoUnfold automatically.
+-- If everything works fine, run over complete set of ntuples:
 
-Once you have cloned the repository, you just have to build the RooUnfold-1.1.1 that is provided. This RooUnfold is a sloghtly modified version of the one you can download at CERN. That is why it is provided here.
+mkdir ~/eos
+eosmount ~/eos
+ln -s  ~/eos/cms/store/group/phys_smp/WPlusJets/NtuplesTomislavNEW  DataW
 
-To build it, nothing hard:
+-- Note: You need to go to /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/ and find the ntuples unmerged after crab -get, then use your eos directory to merge the files and run over them like described for 8 TeV above. In future, we will have ntuples merged and we will update this part of instructions.
 
-$ cd DYJets/RooUnfold-1.1.1 $ make
+-- Ready to run the code!!!Before running it, change (line 27) int doQCD=0 in WJets/runDYJets.cc.
 
-Bravo ! You have compiled the RooUnfold classes and you are ready to use it.
+-- Run the code
+cd WJets
+root -b runDYJets.cc  
 
-You can also create some directories that will be needed later:
+-- For QCD Background go to WJets/runDYJets.cc change int doQCD = 1
+root -b -q runDYJets.cc
+# Change it 1-3 and run every time. 
 
-$ mkdir HistoFiles PNGFiles
+-- Output root files are available in the directory HistoFiles.
+-- Merge single top and DYJets root files:
+root -b -q MergeTop_BVeto.cc++
 
-These first directory will contain the .root files created by runDYJets and co. and containing the histograms used during the whole process up to cross section measurements. The second will contain the .png and .pdf plots for all kind of comparison at several different levels.
+-- Merge QCD Background:
+root -b -q runQCD_BVeto.cc++
 
-These directories are however not considered by git (as can be seen in the .gitignore file).
+-- Plotting:
+root -b -q runTest_BVeto.cc
 
-Next you need to have the data to run on. For this, if your running on m-machine, a simple symbolic link will be enough. You can also opy the full directory.
-
-Go to the racine directory TreeAnalysis2012 $ ln -s /user/tseva/analysis/TreeAnalysis2012/Data_Z_5311 Data_Z_5311
-
-$ ln -s /user/aleonard/../tseva/analysis/TreeAnalysis2012/DataTTbarEMu DataTTbarEMu
-
-$ ln -s /user/aleonard/../tseva/analysis/TreeAnalysis2012/DataW DataW
-########## quick fix for lxplus from Darin
-Set up CMSSW ( for root )
-
-cmsrel CMSSW_5_3_0 cd CMSSW_5_3_0/src cmsenv
-Get Git Repository
-
-git clone git@github.com:iihe-cms-sw/TreeAnalysis.git TreeAnalysis2012
-Setup W+Jets directory
-
-cd TreeAnalysis2012 mkdir WJets mkdir WJets/DataW cp -r DYJets/* WJets/ cd WJets
-
---- Get example file cmsStage /store/group/phys_smp/WPlusJets/NtuplesTomislav/SMu_8TeV_T_s_channel_dR_5311.root DataW/SMu_8TeV_T_s_channel_dR_5311.root
-
---- Output directories mkdir HistoFiles PNGFiles
-
----- Compile RooUnfold cd RooUnfold-1.1.1 make cd -
-
---- Quick hacks for making LHAPDF work sed -i 's#/user/aleonard/LHAPDF/lib/libLHAPDF.so#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/lib/libLHAPDF.so#g' runDYJets.cc sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/#g' rootlogon.C sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
-
---- Run the root file maker root -b runDYJets.cc
+--Congratulations! Output PDF files will be in the directory PNGFiles

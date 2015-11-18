@@ -217,11 +217,11 @@ bool VJetPruner::eventSelection(){
 
 
 bool VJetPruner::filterGLep(int iGenLep){
-  return true;
+  return ((*GLepDr01Pt)[iGenLep] > minLepPt);
 }
 
-bool VJetPruner::filterGJet(int iGenLep){
-  return (*GJetAk04Pt)[iGenLep] > minGJetPt;
+bool VJetPruner::filterGJet(int iGenJ){
+  return (*GJetAk04Pt)[iGenJ] > minGJetPt;
 }
 
 bool VJetPruner::filterMu(int iMu){
@@ -229,7 +229,7 @@ bool VJetPruner::filterMu(int iMu){
 }
 
 bool VJetPruner::filterEl(int iEl){
-  return (*ElPt)[iEl] > minLepPt;
+  return (*ElPt)[iEl] > minLepPt && ((*ElId)[iEl] & (1 <<20));
 }
 
 bool VJetPruner::filterJetAk04(int iJetAk04){

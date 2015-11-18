@@ -12,7 +12,7 @@
 #include <iostream>
 
 #include "TObject.h"
-#include "TChain.h"
+#include "ShearsTChain.h"
 
 #define DECLARE_PRUNER(Class, description)				\
   static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description);
@@ -135,13 +135,14 @@ protected:
   ///@}
 
   
-  TChain chain_;
+  ShearsTChain chain_;
   std::auto_ptr<TFile> fout_;
   TDirectory* foutDir_;
 
   //  TreeRcd eventTree_;
 
   Int_t maxEvents_;
+  Int_t skipEvents_;
 
   Int_t ievent_;
 
@@ -166,6 +167,19 @@ protected:
    */
   UInt_t* eventNum_;
 
+  /** Pointer to the event weight vector
+   */
+  std::auto_ptr<std::vector<Double_t> > evtWeights_;
+
+  /** Sums of input event weights
+   */
+  std::vector<Double_t> evtWeightSums_;
+
+  /** Sums of output event weights
+   */
+  std::vector<Double_t> passedEvtWeightSums_;
+
+  
   /** Current input file base name
    */
   std::string fileBaseName_;
@@ -197,6 +211,9 @@ protected:
   //number of copied events:
   int nCopied_;
 
+  //number of processed events:
+  int nRead_;
+  
 public:
 
   int verbose_;
@@ -210,7 +227,7 @@ public:
 	 const char* primary_dataset =0): treeNum_(-1), outEventTree_(0), outHeaderTree_(0),
 					  outDescriptionTree_(0), outBitFieldsTree_(0),
 					  chain_("tupel/EventTree"),
-					  foutDir_(0), maxEvents_(-1),
+					  foutDir_(0), maxEvents_(-1), skipEvents_(0),
 					  ievent_(-1), runNum_(0), eventNum_(0),
 					  allEvent_(true), nCopied_(0), verbose_(0){
     chain_.SetDirectory(0);
@@ -261,10 +278,15 @@ public:
     return pruner;
   }
   
-  /** Limits the number of events to copy.
-   * @param val maximum number of events
-   */
-  void setMaxEvents(int val) { maxEvents_ = val; }
+//  /** Limits the number of events to copy.
+//   * @param val maximum number of events
+//   */
+//  void setMaxEvents(int val) { maxEvents_ = val; }
+//
+//  /** Sets the number of events to skip.
+//   * @param val number of event to skip.
+//   */
+//  void setSkipEvents(int val) { skipEvents_ = val; }
 
   /** List the events in the format which can be read back
    * the specify the list of events to copy.
@@ -304,20 +326,35 @@ public:
    */
   void listSelections(std::ostream& o);
   
-  void fillRunSummary();
+  void fillPerInputSummary();
 
+  void fillGlobalSummary();
+  
   /** Perform the event copy from multiple files.
    * @param nInputs number of input files.
    * @param inputDataFiles input files the events must be read from.
    * @param outputDataFile ouput file the events must be written to.
+   * @maxEvents maximum number of events to process. The value -1 indicates
+   * to process all events.
+   * @skipEvents number of events to skip. Processing will start from
+   * (skipEvents + 1) th event.
    */  
-  void run(size_t nInputs, const char* const inputDataFiles[], const char* outputDataFile);
+  void run(size_t nInputs, const char* const inputDataFiles[], const char* outputDataFile,
+	   int maxEvents = -1, int skipEvents = 0);
 
   /** Perform the event copy from multiple files.
    * @param catalogFile catalog containing the list of files to process.
    * @param outputDataFile ouput file the events must be written to.
+   * @maxEvents maximum number of events to process. The value -1 indicates
+   * to process all events.
+   * @skipEvents number of events to skip in addition to the events of the
+   * first skipFiles files.
+   * @maxFiles maximum number of files to process.
+   * @skipFiles number of files to skip.
    */
-  void run(const char* catalogFile, const char* outputDataFile);
+  void run(const char* catalogFile, const char* outputDataFile,
+	   int maxEvents = -1, int skipEvents = 0,
+	   int maxFiles = -1, int skipFiles = 0);
   
   /** Perform the event copy.
    * @param inputDataFile input file the events must be read from.
@@ -353,6 +390,11 @@ public:
     }
     return i  < subSelections_.size();
   }
+
+  /** Sets message verbosity level
+   * @param val verbosity level, 0 for the quiest mode
+   */
+  void setVerbosity(int val){ verbose_ = val; chain_.setVerbosity(val);}
   
   struct ClassRecord{
     ClassRecord(): instance(0){}
@@ -417,6 +459,7 @@ protected:
    * default implementation is typically sufficient.
    */
   virtual bool filterBranch( const char* branchName){
+    if(branchList_.size() == 0) return true;
     return std::find(branchList_.begin(), branchList_.end(),
 		     std::string(branchName))
       != branchList_.end();
@@ -476,19 +519,27 @@ private:
   /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
    * @param nInputFiles number of input files
    * @param inputDataFiles list of input files
+   * @return false in case of failure
    */
-  void setInput(size_t nInputFiles, const char* const inputDataFiles[]);
+  bool setInput(size_t nInputFiles, const char* const inputDataFiles[]);
 
   /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
    * @param catalog input file catalog
+   * @param maxFiles maximum number of files to process
+   * @param skipFiles number of files to skip. Processing will start from the (skipFiles+1) th file
+   * of the catalog
+   * @return false in case of failure
    */
-  void setInput(const char* catalog);
+  bool setInput(const char* catalog, int maxFiles = -1, int skipFiles = 0);
 
   /** Sets output file. Called by run(...) methods. Seed also setInput(const char* catalog)
    * @return true in case of success, false otherwise
    */
   bool setOutput(const char* outputDataFile);
 
+  /** Links variables to the branches we need to access
+   */
+  void setBranchAdd();
   
   /** Copy an event.
    */

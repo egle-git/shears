@@ -56,6 +56,9 @@ void help(){
     "-c        CATALOG\n"
     "--max-events NEVENTS         limit processing to the first NEVENTS events of the\n"
     "                             INPUT_FILE file.\n"
+    "--skip-events NEVENTS        skip NEVENTS first events.\n"
+    "--max-files NFILES           limit processing to NFILES of the CATALOG.\n"
+    "--skip-files NFILES          skip NFILES from the CATALOG.\n"
     "--branches-from FILE         includes the branches listed in FILE in the ouput\n"
     "-b              FILE         tree. Format is one branch per line. Line starting\n"
     "                             with a '#' sign are considered as comments and are\n"
@@ -72,13 +75,13 @@ void help(){
 }
 
 struct Options{
-  Options(): verbose(0), help(0), max_events(-1), list_events(false), output_file(0),
+  Options(): verbose(0), help(0), list_events(false), output_file(0),
 	     make_event_list(false), make_branch_list(false),
 	     event_list_from(0),  branches_from(0), selection(0),
-	     subselection(0), primary_dataset(0), list_selections(false), catalog(0){}
+	     subselection(0), primary_dataset(0), list_selections(false), catalog(0),
+	     max_events(-1), skip_events(0), max_files(-1), skip_files(0){}
   int verbose;
   int help;
-  int max_events;
   bool list_events;
   char* output_file;
   bool make_event_list;
@@ -90,6 +93,10 @@ struct Options{
   const char* primary_dataset;
   bool list_selections;
   const char* catalog;
+  int max_events;
+  int skip_events;
+  int max_files;
+  int skip_files;
 };
 
 int parse_cmd_line(Options& cat, int argc, char* argv[]);
@@ -123,8 +130,7 @@ int main(int argc, char* argv[]){
     exit(1);
   }
 
-  cat->verbose_ = o.verbose;
-  cat->setMaxEvents(o.max_events);
+  cat->setVerbosity(o.verbose);
 
   if(o.make_event_list){
     if((argc < 1 && o.catalog == 0) || (o.catalog != 0 && argc > 0)){
@@ -191,9 +197,9 @@ int main(int argc, char* argv[]){
   }
 
   if(o.catalog){
-    cat->run(o.catalog, o.output_file);
+    cat->run(o.catalog, o.output_file, o.max_events, o.skip_events, o.max_files, o.skip_files);
   } else{
-    cat->run(argc, argv, o.output_file);
+    cat->run(argc, argv, o.output_file, o.max_events, o.skip_events);
   }
   
   return 0;
@@ -203,12 +209,16 @@ int main(int argc, char* argv[]){
 int parse_cmd_line(Options& o, int argc, char* argv[]){
   typedef enum {no_arg=0, required_arg, optional_arg} has_arg_t;
   enum { make_event_list = 300, make_branch_list, event_list_from,
-	 selection, subselection };
+	 selection, subselection, max_events, skip_events, max_files, skip_files
+  };
   static struct option options[] = {
     {"verbose", no_arg, NULL, 'v'},
     {"output", required_arg, NULL, 'o'}, 
     {"help", no_arg, NULL, 'h'},
     {"max-events", required_arg, NULL, 'n'},
+    {"skip-events", required_arg, NULL, skip_events},
+    {"max-files", required_arg, NULL, max_files},
+    {"skip-files", required_arg, NULL, skip_files}, 
     {"make-event-list", no_arg, NULL, make_event_list},
     {"make-branch-list", no_arg, NULL, make_branch_list},
     {"event-list-from", required_arg, NULL, event_list_from},
@@ -260,6 +270,15 @@ int parse_cmd_line(Options& o, int argc, char* argv[]){
       break;
     case 'n':
       o.max_events = strtol(optarg, 0, 0);
+      break;
+    case skip_events:
+      o.skip_events = strtol(optarg, 0, 0);
+      break;
+    case max_files:
+      o.max_files = strtol(optarg, 0, 0);
+      break;
+    case skip_files:
+      o.skip_files = strtol(optarg, 0, 0);
       break;
     case 'd':
       o.primary_dataset = optarg;

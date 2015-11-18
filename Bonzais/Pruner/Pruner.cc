@@ -19,6 +19,8 @@
 
 #include "Pruner.h"
 
+#include <stdio.h>
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -26,13 +28,15 @@ using std::endl;
 std::map<std::string, Pruner::ClassRecord> Pruner::daughters_;
 
 void Pruner::listEvents(std::ostream& o, const char* const catalog){
-  setInput(catalog);
-  listEvents(o);
+  if(setInput(catalog)){
+    listEvents(o);
+  }
 }
 
 void Pruner::listEvents(std::ostream& o, size_t nInputFiles, const char* const inputFiles[]){
- setInput(nInputFiles, inputFiles);
- listEvents(o);
+  if(setInput(nInputFiles, inputFiles)){
+    listEvents(o);
+  }
 }
 
 void Pruner::listEvents(std::ostream& o){
@@ -63,12 +67,14 @@ void Pruner::listEvents(std::ostream& o){
 }
 
 void Pruner::listBranchesFromCat(std::ostream& o, const char* catalog){
-  setInput(catalog);
-  listBranches(o);
+  if(setInput(catalog)){
+    listBranches(o);
+  }
 }
 void Pruner::listBranches(std::ostream& o, const char* inputDataFile){
-  setInput(1, &inputDataFile);
-  listBranches(o);
+  if(setInput(1, &inputDataFile)){
+    listBranches(o);
+  }
 }
 void Pruner::listBranches(std::ostream& o){
   TObjArray* ls = chain_.GetListOfLeaves();
@@ -76,18 +82,18 @@ void Pruner::listBranches(std::ostream& o){
   while(it.Next()) o << (*it)->GetName() << endl;
 }
 
-void Pruner::fillRunSummary(){
+void Pruner::fillPerInputSummary(){
 
-  std::cerr << "Pruner::fillRunSummary(), event " << ievent_
-	    << "\tfile " << chain_.GetFile()->GetName() << "\n";
+  //  std::cerr << "Pruner::fillPerInputSummary(), event " << ievent_
+  //<< "\tfile " << chain_.GetFile()->GetName() << "\n";
 
   struct {
     const char* name;
     TTree** ppTree;
     bool singleEntry;
   } outTrees [] = {{"Header", &outHeaderTree_, false},
-		      {"Description", &outDescriptionTree_, true},
-		      {"BitFields", &outBitFieldsTree_, true}};
+		   {"Description", &outDescriptionTree_, true},
+		   {"BitFields", &outBitFieldsTree_, true}};
 
   TFile* fin = chain_.GetFile();
   fin->cd();
@@ -134,8 +140,23 @@ void Pruner::fillRunSummary(){
   }
 }
 
-void Pruner::run(const char* inputCatalog, const char* outputDataFile){
-  setInput(inputCatalog);
+void Pruner::fillGlobalSummary(){
+  fout_->cd();
+  TDirectory::CurrentDirectory()->cd("tupel");
+  TTree* t = new TTree("BonzaiHeader", "BonzaiHeader");
+  t->Branch("InEvtCount", &nRead_);
+  t->Branch("InEvtWeightSums", &evtWeightSums_);
+  t->Branch("EvtWeightSums", &passedEvtWeightSums_);
+  t->Fill();
+  t->Write();
+}
+
+void Pruner::run(const char* inputCatalog, const char* outputDataFile,
+		 int maxEvents, int skipEvents,
+		 int maxFiles, int skipFiles){
+  maxEvents_ = maxEvents;
+  skipEvents_ = skipEvents;
+  if(!setInput(inputCatalog, maxFiles, skipFiles)) return;
   if(!init((TChain*) &chain_)){
     std::cerr << "Failed to initialize the event filter. Method "
 	      << (className_.size() > 0 ? className_ + "::" : "")
@@ -143,21 +164,32 @@ void Pruner::run(const char* inputCatalog, const char* outputDataFile){
     return;
   }
   if(!setOutput(outputDataFile)) return;
+  setBranchAdd();
   run();
 }
 
-void Pruner::run(size_t nInputFiles, const char* const inputDataFiles[], const char* outputDataFile){
-  setInput(nInputFiles, inputDataFiles);
+void Pruner::run(size_t nInputFiles, const char* const inputDataFiles[],
+		 const char* outputDataFile, int maxEvents, int skipEvents){
+  maxEvents_ = maxEvents;
+  skipEvents_ = skipEvents;
+  if(!setInput(nInputFiles, inputDataFiles)) return;
   if(!init((TChain*) &chain_)){
     std::cerr << "Failed to initialize the event filter. Method "
 	      << className_ << "::init(TChain*) returned code false.\n";
     return;
   }
   if(!setOutput(outputDataFile)) return;
+  setBranchAdd();
   run();
 }
 
 void Pruner::run(){
+
+  bool interactive = isatty(fileno(stdout)) ? true : false;
+
+  if(interactive) std::cout << "Interactive mode" << std::endl;
+  else std::cout << "Batch mode" << std::endl;
+    
   timeval start;
 
   gettimeofday(&start, 0);
@@ -168,9 +200,9 @@ void Pruner::run(){
 
   Long64_t nevts;
 
-  nevts = chain_.GetEntries();
+  nevts = chain_.GetEntries() - skipEvents_;
 
-  if(maxEvents_ >=0 && nevts > maxEvents_) nevts = maxEvents_;
+  if(maxEvents_ >= 0 && nevts > maxEvents_) nevts = maxEvents_;
 
   if(verbose_ > 0){
     std::cout << "Number of events to read: " << nevts << "\n";
@@ -178,15 +210,41 @@ void Pruner::run(){
 
   timeval t;
   time_t smoothed_eat = 0.;
+
+  if(skipEvents_ > 0) ievent_ = skipEvents_ - 1;
+  else ievent_ = -1;
+
+  nCopied_ = 0;
+  nRead_ = 0;
   for(Long64_t i = 1; i <= nevts; ++i){
+    ++nRead_;
     nextEvent();
-    if(filterEvent()){
+
+    if(i==1 && evtWeights_.get()){
+      evtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
+      passedEvtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
+    }
+    
+    bool passed = filterEvent();
+    if(passed){
       copyEvent();
       ++nCopied_;
     }
-    const static int step = 100;
+    
+    if(evtWeights_.get()){
+      for(unsigned i = 0; i < evtWeights_->size(); ++i){
+	evtWeightSums_[i] += (*evtWeights_)[i];
+	if(passed) passedEvtWeightSums_[i] += (*evtWeights_)[i];
+      }
+    }
+    
+    const static int step = interactive ? 100 : 100000;
+    //begin-of-line character: in interactive we stay on same line,
+    //when stdout is a file we go to next line
+    const static char bol = interactive ? '\r' : '\n';
+    
     if(i%step==0 || i == nevts){
-      cout << "\rRead: " << std::setw(8) << i << " Copied: "
+      cout << bol << "Read: " << std::setw(8) << i << " Copied: "
 	   << std::setw(8) << nCopied_
 	   << " Acc.: " << std::setw(5) << int(10000*(nCopied_ / double(i)))/100. << "%"
 	   << " Rem.: " << std::setw(8) << (nevts-i)
@@ -209,8 +267,8 @@ void Pruner::run(){
   } //next event
   cout << "\n";
 
-  //  fillRunSummary();
-
+  fillGlobalSummary();
+  
   if(outEventTree_) outEventTree_->AutoSave();
   fout_->Close();
 
@@ -288,11 +346,15 @@ void Pruner::readBranchList(const char* fileName){
 
 /** Initialize input and output files and trees
  */
-void Pruner::setInput(size_t nInputFiles, const char* const inputDataFiles[]){
+bool Pruner::setInput(size_t nInputFiles, const char* const inputDataFiles[]){
   for(unsigned i = 0; i < nInputFiles; ++i){
     chain_.Add(TString(inputDataFiles[i]));
   }
+  //  setBranchAdd();
+  return true;
+}
 
+void Pruner::setBranchAdd(){
   //sets runNum_ and eventNum_ pointers
   TBranch* br = chain_.GetBranch("EvtNum");
   TLeaf* leaf;
@@ -304,72 +366,93 @@ void Pruner::setInput(size_t nInputFiles, const char* const inputDataFiles[]){
     runNum_ = (UInt_t*) leaf->GetValuePointer();
   }
 
-}
-
-void Pruner::setInput(const char* catalog){
-  std::ifstream f(catalog);
-  if(!f.good()){
-    std::cerr << "Failed to open file "<< catalog << "!\n";
-    return;
-  }
-
-  int iline = 0;
-  while(f.good()){
-    ++iline;
-    std::string l;
-    std::string::size_type p;
-
-    std::getline(f, l);
-
-    //trim white spaces:
-    p = l.find_first_not_of(" \t");
-    if(p!=std::string::npos) l.erase(0, p);
-    p = l.find_last_not_of(" \t\n\r");
-    if(p!=std::string::npos) l.erase(p + 1);
-    else l.clear();
-
-    //skip empty lines and comment lines:
-    if (!l.size() || l[0] == '#') continue;
-
-    //extract first column (file name):
-    p = l.find_first_of(" \t");
-    if(p!=std::string::npos) l.erase(p);
-
-    //sanity check:
-    const char ext[] = ".root";
-
-    if(l.size() < sizeof(ext) || l.substr(l.size() - sizeof(ext) + 1) != ext){
-      std::cerr << "Line " << iline << " of catalog file " << catalog << " was skipped.\n";
-      continue;
-    }
-
-    //Solves EOS paths:
-    if(l.substr(0,7) == "/store/"){
-      //A CMS EOS path
-      l.insert(0, "root://eoscms//eos/cms");
-    }
-
-    //Adds path to tree within the ROOT file structure:
-    //l.append("/tupel/EventTree");
-
-    if(verbose_>0){
-      std::cout << "Add file " << l.c_str() << " to the list of input files.\n";
-    }
-
-    chain_.Add(l.c_str());
-  }
-
-  //sets runNum_ and eventNum_ pointers
-  TBranch* br = chain_.GetBranch("EvtNum");
-  TLeaf* leaf;
-  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
-    eventNum_ = (UInt_t*) leaf->GetValuePointer();
-  }
-  br = chain_.GetBranch("EvtRunNum");
-  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
-    runNum_ = (UInt_t*) leaf->GetValuePointer();
+  br = chain_.GetBranch("EvtWeights");
+  if(br){
+    std::vector<double>* evtWeights = new std::vector<double>;
+    evtWeights_ = std::auto_ptr<std::vector<double> > (evtWeights);
+    br->SetAddress(&evtWeights);
   }
 }
+
+bool Pruner::setInput(const char* catalog, int maxFiles, int skipFiles){
+  bool rc = chain_.setCatalog(catalog, maxFiles, skipFiles);
+  //  setBranchAdd();
+  return rc;
+}
+
+//bool Pruner::setInput(const char* catalog, int maxFiles, int skipFiles){
+//  std::ifstream f(catalog);
+//  if(!f.good()){
+//    std::cerr << "Failed to open file "<< catalog << "!\n";
+//    return false;
+//  }
+//
+//  int iline = 0;
+//  int nfiles = 0;
+//  while(f.good()){
+//    ++iline;
+//    std::string l;
+//    std::string::size_type p;
+//
+//    std::getline(f, l);
+//
+//    //trim white spaces:
+//    p = l.find_first_not_of(" \t");
+//    if(p!=std::string::npos) l.erase(0, p);
+//    p = l.find_last_not_of(" \t\n\r");
+//    if(p!=std::string::npos) l.erase(p + 1);
+//    else l.clear();
+//
+//    //skip empty lines and comment lines:
+//    if (!l.size() || l[0] == '#') continue;
+//
+//    //extract first column (file name):
+//    p = l.find_first_of(" \t");
+//    if(p!=std::string::npos) l.erase(p);
+//
+//    //sanity check:
+//    const char ext[] = ".root";
+//
+//    if(l.size() < sizeof(ext) || l.substr(l.size() - sizeof(ext) + 1) != ext){
+//      std::cerr << "Line " << iline << " of catalog file " << catalog << " was skipped.\n";
+//      continue;
+//    }
+//
+//    //Solves EOS paths:
+//    if(l.substr(0,7) == "/store/"){
+//      //A CMS EOS path
+//      l.insert(0, "root://eoscms.cern.ch//eos/cms");
+//    }
+//
+//    //Adds path to tree within the ROOT file structure:
+//    //l.append("/tupel/EventTree");
+//
+//    if(verbosity_>0){
+//      std::cout << "Add file " << l.c_str() << " to the list of input files.\n";
+//    }
+//    
+//    if(skipFiles <= 0){
+//      ++nfiles;
+//      if(maxFiles > 0 &&  nfiles > maxFiles) break;
+//      chain_.Add(l.c_str());
+//    } else{
+//      --skipFiles;
+//    }
+//  }
+//
+//  //sets runNum_ and eventNum_ pointers
+//  TBranch* br = chain_.GetBranch("EvtNum");
+//  TLeaf* leaf;
+//  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+//    eventNum_ = (UInt_t*) leaf->GetValuePointer();
+//  }
+//  br = chain_.GetBranch("EvtRunNum");
+//  if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
+//    runNum_ = (UInt_t*) leaf->GetValuePointer();
+//  }
+//
+//  return true;
+//}
 
 bool Pruner::setOutput(const char* outputDataFile){
   if(outputDataFile){
@@ -401,10 +484,11 @@ bool Pruner::setOutput(const char* outputDataFile){
   TIter itBranches(bs);
   while(itBranches.Next()){
     TBranch* b = (TBranch*)(*itBranches);
-    if(strcmp(b->GetName(), "EvtNum") == 0)
+    //    if(strcmp(b->GetName(), "EvtNum") == 0)
     //disable copy of filered-out branches:
     if(strcmp(b->GetName(), "EvtNum") != 0
        && strcmp(b->GetName(), "EvtRunNum") != 0
+       && strcmp(b->GetName(), "EvtWeights") != 0
        && !filterBranch(b->GetName())){
       if(verbose_) cout << "Disable branch " << b->GetName() << "\n";
       //      treeRcd->tree->SetBranchStatus(b->GetName(), 0);
@@ -418,7 +502,6 @@ bool Pruner::setOutput(const char* outputDataFile){
     outEventTree_ = chain_.CloneTree(0);
     chain_.GetFile()->cd(); //Is this cd needed?
   }
-
 
   return true;
 }
@@ -450,6 +533,8 @@ bool Pruner::nextEvent(){
     return false;
   }
 
+  //  std::cerr << ">>>>> chain_.GetTreeNumber()" << chain_.GetTreeNumber() << std::endl;
+
   if (chain_.GetTreeNumber() != treeNum_) {
     treeNum_ = chain_.GetTreeNumber();
     char* f = strdup(chain_.GetFile()->GetName());
@@ -459,8 +544,7 @@ bool Pruner::nextEvent(){
     } else{
       fileBaseName_ = "";
     }
-
-    fillRunSummary();
+    fillPerInputSummary();
   }
 
   return chain_.GetEntry(ievent_);

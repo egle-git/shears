@@ -3,8 +3,8 @@
 // Jan. 3, 11. Squeezer code for AnaNaS framework
 // Jul. 24, 15. Cloned Squeezer and adapted to the Shears framework
 
-#ifndef COPYANATUPLE_H
-#define COPYANATUPLE_H
+#ifndef PRUNER_H
+#define PRUNER_H
 
 #include <algorithm>
 #include <iomanip>
@@ -169,7 +169,7 @@ protected:
 
   /** Pointer to the event weight vector
    */
-  std::auto_ptr<std::vector<Double_t> > evtWeights_;
+  std::vector<Double_t>* evtWeights_;
 
   /** Sums of input event weights
    */
@@ -572,4 +572,4 @@ private:
   
 };
 
-#endif //COPYANATUPLE_H not defined
+#endif //PRUNER_H not defined

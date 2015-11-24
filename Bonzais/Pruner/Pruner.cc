@@ -10,7 +10,7 @@
 #include <sys/time.h>
 
 #include "TObjArray.h"
-#include "TBranch.h"
+#include "TBranchElement.h"
 #include "TFile.h"
 #include "TKey.h"
 #include "TChain.h"
@@ -220,7 +220,7 @@ void Pruner::run(){
     ++nRead_;
     nextEvent();
 
-    if(i==1 && evtWeights_.get()){
+    if(i==1 && evtWeights_){
       evtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
       passedEvtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
     }
@@ -231,7 +231,7 @@ void Pruner::run(){
       ++nCopied_;
     }
     
-    if(evtWeights_.get()){
+    if(evtWeights_){
       for(unsigned i = 0; i < evtWeights_->size(); ++i){
 	evtWeightSums_[i] += (*evtWeights_)[i];
 	if(passed) passedEvtWeightSums_[i] += (*evtWeights_)[i];
@@ -356,21 +356,19 @@ bool Pruner::setInput(size_t nInputFiles, const char* const inputDataFiles[]){
 
 void Pruner::setBranchAdd(){
   //sets runNum_ and eventNum_ pointers
-  TBranch* br = chain_.GetBranch("EvtNum");
+  TBranch* br = (TBranch*)chain_.GetBranch("EvtNum");
   TLeaf* leaf;
   if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
     eventNum_ = (UInt_t*) leaf->GetValuePointer();
   }
-  br = chain_.GetBranch("EvtRunNum");
+  br = (TBranch*)chain_.GetBranch("EvtRunNum");
   if(br && (leaf = (TLeaf*)br->GetListOfLeaves()->At(0))){
     runNum_ = (UInt_t*) leaf->GetValuePointer();
   }
 
-  br = chain_.GetBranch("EvtWeights");
-  if(br){
-    std::vector<double>* evtWeights = new std::vector<double>;
-    evtWeights_ = std::auto_ptr<std::vector<double> > (evtWeights);
-    br->SetAddress(&evtWeights);
+  evtWeights_ = 0;    
+  if(chain_.GetBranch("EvtWeights")){
+    chain_.SetBranchAddress("EvtWeights", &evtWeights_);
   }
 }
 

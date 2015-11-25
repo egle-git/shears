@@ -241,7 +241,7 @@ TH1D* getHisto(TFile *File, const TString variable)
 void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
-    bool isData = (fileName.Index("Data") >= 0 || (fileName.Index("data") >= 0) || (fileName.Index("DATA") >= 0);
+    bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 
@@ -324,7 +324,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
-    bool isData = (fileName.Index("Data") >= 0 || (fileName.Index("data") >= 0) || (fileName.Index("DATA") >= 0);
+    bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 

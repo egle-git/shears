@@ -55,7 +55,6 @@ all: runCombination \
 runRecoComparison \
 runVJets \
 runZJets \
-runZJets_newformat \
 runUnfoldingZJets \
 runMakeStatisticsTable \
 dispatcher
@@ -74,12 +73,6 @@ runZJets: $(OBJLIST) runZJets.o RooUnfold/libRooUnfold.so
 	$(CXX) -o runZJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runZJets.o: runZJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
-
-runZJets_newformat: $(OBJLIST_NEWFORMAT) runZJets_newformat.o RooUnfold/libRooUnfold.so
-	$(CXX) -o runZJets_newformat $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runZJets_newformat.o: runZJets_newformat.cc
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
 
 runRecoComparison: $(OBJLIST) runRecoComparison.o  RooUnfold/libRooUnfold.so

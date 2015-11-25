@@ -42,7 +42,7 @@ CXXFLAGS      += $(ROOTCFLAGS)
 # list of all source files
 SOURCES = ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc ConfigVJets.cc HistoSetZJets.cc ZJets.cc functions.cc
 SOURCES += MergeTop.cc standalone_LumiReWeighting.cc UnfoldingZJets.cc RecoComparison.cc
-SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc rochcor.cc
+SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc muresolution_run2.cc rochcor2015.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)

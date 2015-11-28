@@ -95,7 +95,7 @@ def lock_remove_orphans():
                         try:
                             os.kill(int(pid), 0)
                         except OSError: #process does not exist
-                            print "Warning: cleared the lock created by grow_boababs instance from host %s with pid %s as this instance seems to have terminated." % (host, pid)
+                            print "Warning: cleared the lock created by grow_baobabs instance from host %s with pid %s as this instance seems to have terminated." % (host, pid)
                             os.remove(lock_file)
                         #endtry
                     #endif host
@@ -1069,8 +1069,8 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
 ''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
     #enddef
 
-    cat_alltasks = cat_dir_path + "/Boababs-%s-all.txt" % prim_dataset
-    cat_thistask = cat_dir_path + "/Boababs-%s-%03d.txt" % (prim_dataset, task_id)
+    cat_alltasks = cat_dir_path + "/Baobabs-%s-all.txt" % prim_dataset
+    cat_thistask = cat_dir_path + "/Baobabs-%s-%03d.txt" % (prim_dataset, task_id)
     file_deleted = False
 
     fout_thistask = open(cat_thistask, "w")
@@ -1523,8 +1523,8 @@ def tasks_forced_close(prim_dataset, task_id):
         sys.stderr.write("\nCould not find the job status for primary dataset %s. Check dataset name.\n" % prim_dataset)
     elif status in ['CLOSED_WITH_FAILURES', 'report_done']:
         sys.stderr.write("\ntask for primary dataset %s is already closed.\n" % prim_dataset)
-    elif status != 'FAILED':
-        sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED can be closed with this command.\n" % (prim_dataset, status))
+    elif status not in ['FAILED', 'RESUBMITFAILED', 'KILLED']:
+        sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED or RESUBMITFAILED can be closed with this command.\n" % (prim_dataset, status))
     else:
         if db_update_task_record(prim_dataset, task_id, {"status": "CLOSED_WITH_FAILURES"}):
             print "\nThe task for dataset %s has closed." % prim_dataset
@@ -1723,7 +1723,7 @@ def tasks_submit_pending_tasks(prim_dataset = None, task_id = None):
 def tasks_resubmit(prim_dataset = None, task_id = None):
     """Resubmits task in FAILED status"""
     conn, c = db_get_conn()
-    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED' OR status='submission_error'"
+    sql = "SELECT prim_dataset, task_id FROM jobs WHERE status='FAILED' OR status='submission_error' OR STATUS='RESUBMITFAILED'"
     if prim_dataset:
         sql += " AND prim_dataset='%s'" % prim_dataset
     if task_id:
@@ -2210,7 +2210,11 @@ def parse_command_line():
                         help="To be used with --report REPORT_FILE and --task PRIM_DATASET TASK_ID options. Write a task closure report in REPORT_FILE for task TASK_ID. If the file exists the report is appended to its content.")
 
     parser.add_argument('--make-ntuple-catalog', action='store_true', default=False,
-                        help="Makes the nutple catalag of task specified by --task option. The catalog is already produce by the --check command once the task is finished. Therefore, it is normally not needed to call this --make-ntuple-catalog command. If the catalog already exists, it will be overwritten")
+                        help="Makes the nutple catalag of task specified by --task option. The catalog is already produced by the --check command once the task is finished. Therefore, it is normally not needed to call this --make-ntuple-catalog command. If the catalog already exists, it will be overwritten")
+
+    parser.add_argument('--make-ntuple-catalog-from', metavar='FILE', action='store',
+                        help="Makes the nutple catalag of task specified in FILE. See --clear-from for the FILE format. The catalogs are already produced by the --check command once the task is finished. Therefore, it is normally not needed to call this --make-ntuple-catalog command. If the catalog already exists, it will be overwritten")
+
 
     return parser.parse_args()
 
@@ -2228,8 +2232,8 @@ def main():
 
     db_create_database()
 
-    if args.task != [None, None] and not (args.submit or args.check):
-        sys.stderr.write("\nOnly commands --check and  --submit supports the --task option. Command ignored.\n")
+    if args.task != [None, None] and not (args.submit or args.check or args.make_ntuple_catalog or args.resubmit):
+        sys.stderr.write("\nOnly commands --check, --make-ntuple-catalog, --submit and --resubmit support the --task option. Command ignored.\n")
         return 1
 
     if args.task != [None, None] and not check_task_args():
@@ -2292,6 +2296,8 @@ def run():
             catalog_make_ntuple_catalog(args.task[0], args.task[1])
         else:
             sys.stderr.write("\nA task needs to be specified with the --task option to run the --make-ntuple-catalog command\n")
+    elif args.make_ntuple_catalog_from:
+        exec_on(catalog_make_ntuple_catalog, 2, args.make_ntuple_catalog_from)
     else:
         prod_process_ds_catalogs()
     print

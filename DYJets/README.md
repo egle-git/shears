@@ -1,88 +1,104 @@
-TreeAnalysis
+Quick start
 ============
+
+Set up a CMSSW environment:
+
+```
+   $ cmsrel CMSSW_7_4_11
+   $ cd CMSSW_7_4_11
+   $ cmsenv
+   $ cd ..
+```
 
 Clone the shears project to your working directory:
 
     git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 
-Once you have cloned the repository, you should move to the DYJets directory.
+Once you have cloned the repository, you should move to the `shears/DYJets` directory and build the code:
 
-First build the RooUnfold that is provided. This RooUnfold is a slightly
-modified version of the one you can download at CERN. That is why it is provided
-here.
-
-To build it, nothing hard:
-
-    $ cd DYJets/RooUnfold
-    $ make clean
-    $ make 
-
-Bravo ! You have compiled the RooUnfold classes and you are ready to use it.
-
-A Makefile is provided for the rest of the framework. So just do this:
-
-    $ cd DYJets
+```
+    $ cd shears/DYJets
     $ make clean
     $ make
+```
 
-Now you should have everything setup and you can try to run the executables.
-But for your information, you need to know that the source code is contained
-in the Sources directory and some other directly in the DYJets. The code in
-Sources will only be compiled into .o files while the code in DYJets, meanly
-some runBlaBla.cc code are dedicated to user executables and therefore contain
-the int main(int argc, char **argv) function. For example, after
-compilation you have access to
+Unless you have already your own configuration file, copy the example:
 
+```
+cp example.cfg vjets.cfg
+```
+
+(vjets.cfg stored on git is not guaranteed to work out-of-the box and we recommend to use example.cfg).
+
+To run the Z+jet analysis, execute:
+
+```
+    $ ./runZJets_newformat
+```
+
+With the default configuration file, the histograms will be store in the HistoFiles directory.
+
+To use as input ntuple in the Run I format, run `runZJets` instead of `runZJets_newformat`.
+
+```
     $ ./runZJets
+```
 
-The executables come with some options. You can use the command line option -help
-to know more about what it is possible to do.
+Note: you can specify limit the number of events to analyze by adding to the above command line the 
+option maxEvents=XXXX. In such case the histogram directory will be named HistoFiles_XXXXevts instead
+of HistoFiles.
 
-Next you need to have the data to run on. For this, if you are running on m-machine, 
-a simple symbolic link will be enough. You can also opy the full directory.
+Configuration file
+==================
 
-Go to the root directory TreeAnalysis2012
-    
-    $ ln -s /THIS_is_wehre_I_store_data/Data_Z_5311 Data_Z_5311
-    $ ln -s /THIS_is_wehre_I_store_data/DataTTbarEMu DataTTbarEMu
-    $ ln -s /THIS_is_wehre_I_store_data/DataW DataW
+Configuration is stored in vjet.cfg. A commented example can be found in example.cfg
 
-#############################
-################  quick fix for lxplus from Darin
-#############################
 
-# Set up CMSSW ( for root ) 
-    cmsrel CMSSW_5_3_0
-    cd CMSSW_5_3_0/src
-    cmsenv
+Code organization
+=================
 
-# Get Git Repository
-    git clone git@github.com:iihe-cms-sw/TreeAnalysis.git TreeAnalysis2012
+The DYJets directory contains several runXXX.cc files, which have been compiles in executable called runXXX. Each of these executable runs the code implemented in the class XXX with the corresponding name and defined in Includes/XXX.h and Sources/XXX.cc.  The list of runXXX applications is provided below.
 
-# Setup W+Jets directory
-    cd TreeAnalysis2012
-    mkdir WJets
-    mkdir WJets/DataW
-    cp -r DYJets/* WJets/
-    cd WJets
 
---- Get example file
-    cmsStage /store/group/phys_smp/WPlusJets/NtuplesTomislav/SMu_8TeV_T_s_channel_dR_5311.root DataW/SMu_8TeV_T_s_channel_dR_5311.root
+List of applications
+--------------------
 
---- Output directories
-    mkdir HistoFiles PNGFiles
+. Analysis up to reco-level distributions
 
----- Compile RooUnfold
-    cd RooUnfold-1.1.1
-    make
-    cd -
+| runDYJets.cc             | Runs W + jet analysis and Z+jet analysis. Replaced by runZJets for Z+jets. |
+| runZJets.cc              | Runs Z+jet analysis 13TeV           |
+| runZJets_original.cc     | Runs Z+jet analysis 8TeV            |
+| runVJets.cc              | Similar to runZJets.cc. Deprecated. |
 
---- Quick hacks for making LHAPDF work
-    sed -i 's#/user/aleonard/LHAPDF/lib/libLHAPDF.so#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/lib/libLHAPDF.so#g' runDYJets.cc
-    sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/#g' rootlogon.C
-    sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc
-    sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
+. Unfolding and channel combination
 
---- Run the root file maker
-    root -b runDYJets.cc
+| runUnfoldingZJets.cc     | Runs unfolding for Z + jet analysis |
+| runFinalUnfold.cc        | Performs data distributions unfolding. Deprecated for Z+jets? Used by W+jets? |
+| runCombination.cc        | Combination of electron and muon channels. Produce final plots and tables |
+| runMergeChannels.cc      | Perform electron and muon channel combination. Deprecated? |
+
+| runFinalUnfoldAndCombination.cc | Performs simultaneous unfolding and combination of both electron and muon channels. Was not used for 8TeV. Unresolved problems with this method. Deprecated. |
+
+. Validation plots and supporting studies
+
+| runCompareUnfolding.cc   | Code missing from the repository. Deprecated?  |
+| runFSRStudy.cc           | Runs study of effect of FSR of leptons and recovery of FSR with the lepton dressing. |
+
+. Drawing plots and tables
+
+| runFastPlots.cc          | To draw few plots. Requires editing runFastPlots.cc and Sources/FastPlots. Differences with runMyFastPlots.cc |
+| runMyFastPlots.cc        | Another runFastPlot.cc. Differences with runFastPlot.cc? |
+
+| runIndividual.cc | Produces final plots using runPlotting3RatiosCommon. Differences with runPlotter.cc, runPlotting.c, and runPlotting3Ratios.cc? |
+| runPlotter.cc            | Makes final plots. Difference with runPlotting.cc, runIndividual.cc, and runPlotting3Ratios.cc? |
+| runPlotting.cc           | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting3Ratios.cc? Deprecated? | 
+| runPlotting3Ratios.cc    | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting? |
+
+| runMakeStatisticsTable.cc | Produces a latex table with the list of samples and their size. Difference with runStatistics.cc? |
+| runStatistics.cc         | Produces a latex table with the list of samples and their size. Difference with runMakeStatisticsTable.cc |
+
+| runRecoComparison.cc     | Produces reco-level comparison plots |
+
+| runSystPlots.cc          | Produces SystematicsPlots_* plots | 
+
 

@@ -111,7 +111,7 @@ int main(int argc, char **argv)
     double lumi; 
     if      (lepSel == "DE")  lumi = 19.618;
     else if (lepSel == "DMu") lumi = 18.747;  // 13 TeV data v7
-    else if (lepSel == "DMu") lumi = 21.468;   // 13 TeV data v7_1
+    else if (lepSel == "DMu") lumi = 1263.886;   // 13 TeV data v7_1
     else if (lepSel == "SMu") lumi = 19.244;
     else if (lepSel == "SE")  lumi = 19.174;
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
     unsigned int NSystMC(7);
     unsigned int NSystSig(9);
 
-    short dataSyst[3] = {0, 2, 2};
+    short dataSyst[3] = {0, 2, 2};   // 2 = JEC unc
     short dataDir[3]  = {0,-1, 1};
 
     short ttSyst[7]   = {0, 1, 1,    3,    3, 5, 5};
@@ -131,15 +131,16 @@ int main(int argc, char **argv)
 
     short tauSyst[7]  = {0, 1, 1,    3,    3, 5, 5};
     short tauDir[7]   = {0,-1, 1,   -1,    1,-1, 1};
-    float tauScale[7] = {1, 1, 1, 0.03, 0.03, 1, 1};
-
+    float tauScale[7] = {1, 1, 1, 0.00, 0.00, 1, 1};  // {1, 1, 1, 0.03, 0.03, 1, 1};
+ 
     short wjSyst[7]   = {0, 1, 1,    3,    3, 5, 5};
     short wjDir[7]    = {0,-1, 1,   -1,    1,-1, 1};
-    float wjScale[7]  = {1, 1, 1, 0.03, 0.03, 1, 1};
+    float wjScale[7]  = {1, 1, 1, 0.00, 0.00, 1, 1}; // {1, 1, 1, 0.03, 0.03, 1, 1};
 
     short bgSyst[7]   = {0, 1, 1,    3,    3, 5, 5};
     short bgDir[7]    = {0,-1, 1,   -1,    1,-1, 1};
-    float bgScale[7]  = {1, 1, 1, 0.03, 0.03, 1, 1};
+    float bgScale[7]  = {1, 1, 1, 0.00, 0.00, 1, 1}; // {1, 1, 1, 0.03, 0.03, 1, 1};
+                        // cen, PUUp, PUDown, XsecU, XsecD, LetESUp, LetED
 
     short dySyst[9]   = {0, 1, 1, 4, 4, 5, 5, 6, 6};
     short dyDir[9]    = {0,-1, 1,-1, 1,-1, 1,-1, 1};
@@ -164,8 +165,16 @@ int main(int argc, char **argv)
         hasGenInfo = false;
         for (unsigned int i(start); i < NSystData; i++) {
             if (i == 0 && !doCentral && whichSyst < 0) continue;
- 
-           ZJets Data(lepSel + "_DYJetsToLL_data_v7_1_fullstat_13TeV", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+          //  ZJets Data(lepSel + "_DYJetsToLL_data_v7_fullstat_13TeV", 1./18.747, 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+           ZJets Data(lepSel + "_DYJetsToLL_dataD_v11_25ns_fullstat_13TeV", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+           
+          // ZJets Data(lepSel + "_DYJetsToLL_dataD_v8_25ns_fullstat_13TeV", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+        //   ZJets Data(lepSel + "_data_tot", 1000.*19.6/(1263.886*1.8), 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+       //  ZJets Data(lepSel + "_data_tot", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+       //    ZJets Data(lepSel + "_bonzai", 1., 1, dataSyst[i], dataDir[i], 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
 
             Data.Loop(hasRecoInfo, hasGenInfo);
    
@@ -174,43 +183,54 @@ int main(int argc, char **argv)
 
     if (doWhat == "BACKGROUND" || doWhat == "ALL") {
         hasRecoInfo = true;
-        hasGenInfo = false;
+        hasGenInfo = true;
 
         for (unsigned int i(start); i < NSystMC; i++) { 
             if (i == 0 && !doCentral && whichSyst < 0) continue;
 
-            ZJets T(lepSel + "_ST_tW_top_fullstat_13TeV",       lumi  *35.6/(9.33656e+10),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+          //  ZJets T(lepSel + "_ST_tW_top_25ns_fullstat_13TeV",       1263.886  *35.6/(1.4058e+06),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets T(lepSel + "_ST_tW_top_25ns_v11_fullstat_13TeV",       1263.886  *35.6/(995600),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             T.Loop(hasRecoInfo, hasGenInfo);
             
-            ZJets T1(lepSel + "_ST_t-chan_fullstat_13TeV",  lumi  *216.99/(816316), 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+          //  ZJets T1(lepSel + "_ST_t-chan_amcatnlo_25ns_fullstat_13TeV",  1263.886  *216.99/(811160), 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets T1(lepSel + "_ST_s-chan_amcatnlo_25ns_v11_fullstat_13TeV",  1263.886  *10.32/(3.3187e+06), 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             T1.Loop(hasRecoInfo, hasGenInfo);
-            
-            ZJets Tbar(lepSel + "_ST_tW_ant_fullstat_13TeV",   lumi    *35.6/(998400),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+  
+          
+           // ZJets Tbar(lepSel + "_ST_tW_ant_25ns_fullstat_13TeV",   1263.886    *35.6/(1e+06),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets Tbar(lepSel + "_ST_tW_ant_25ns_v11_fullstat_13TeV",   1263.886    *35.6/(988500),  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             Tbar.Loop(hasRecoInfo, hasGenInfo);             
 
-            ZJets TT(lepSel + "_TT_TuneCU_fullstat_13TeV",     lumi    *831.76/(1.96652e+07), 1, ttSyst[i], ttDir[i], ttScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+        //    ZJets TT(lepSel + "_TT_TuneCU_25ns_fullstat_13TeV",     1263.886    *831.76/(1.98995e+07), 1, ttSyst[i], ttDir[i], ttScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+        ZJets TT(lepSel + "_TT_TuneCU_25ns_v11_fullstat_13TeV",     1263.886    *831.76/(3.32461e+07), 1, ttSyst[i], ttDir[i], ttScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             TT.Loop(hasRecoInfo, hasGenInfo);
 
-            ZJets ZZ(lepSel + "_ZZ_TuneCU_fullstat_13TeV",     lumi * 15.4 /998848.,  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+
+            ZJets ZZ(lepSel + "_ZZ_TuneCU_25ns_v11_fullstat_13TeV",     1263.886 * 15.4 /996944.,  1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
            ZZ.Loop(hasRecoInfo, hasGenInfo);
 
-            ZJets WW(lepSel + "_WWTo2L2Nu_fullstat_13TeV",     lumi * 12.21 /498326., 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+
+            ZJets WW(lepSel + "_WWTo2L2Nu_25ns_v11_fullstat_13TeV",     1263.886 * 12.21 /1.9652e+06, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             WW.Loop(hasRecoInfo, hasGenInfo);
 
-            ZJets WZ(lepSel + "_WZJets_powheg_fullstat_13TeV",     lumi * 4.4 /1.968e+06, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets WZ(lepSel + "_WZJets_Tu_amcatnlo_25ns_fullstat_13TeV",     1263.886 * 4.4 /1.08895e+08, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             WZ.Loop(hasRecoInfo, hasGenInfo);
 
-            ZJets Wjets(lepSel + "_WJetsToLN_fullstat_13TeV",    lumi * 61526.7 /3.7219e+12, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+            ZJets Wjets(lepSel + "_WJetsToLN_amcatnlo_25ns_v11_fullstat_13TeV",    1263.886 * 61526.7 /3.73654e+12, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
             Wjets.Loop(hasRecoInfo, hasGenInfo);
 
 
+        //    ZJets GJet(lepSel + "_GJet_Pt-1_fullstat_13TeV",     1263.886 * ???  /53589.5, 1, bgSyst[i], bgDir[i], bgScale[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+        //    GJet.Loop(hasRecoInfo, hasGenInfo);
 
             // Additionaly merge the top samples
            // runMergeTop(lepSel, bgSyst[i]*bgDir[i], lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir);
         }
     }
 
-    if (doWhat == "TAU" || doWhat == "ALL") {
+    if (doWhat == "TAU") {
         hasRecoInfo = true; 
         hasGenInfo = true;
 
@@ -221,7 +241,7 @@ int main(int argc, char **argv)
         }
     }
 
-    if (doWhat == "DYJETS" || doWhat == "ALL") {
+    if (doWhat == "DYJETS" ) {
         hasRecoInfo = true; 
         hasGenInfo = true;
 
@@ -236,7 +256,7 @@ int main(int argc, char **argv)
 //            DYMixPDF.Loop(hasRecoInfo, hasGenInfo, "CT10.LHgrid", 0, 0, 0);
     }
 
-    if (doWhat == "WJETS" || doWhat == "ALL") {
+    if (doWhat == "WJETS" ) {
         hasRecoInfo = true; 
         hasGenInfo = (lepSel == "DMu" || lepSel == "DE") ? false : true;
 
@@ -252,13 +272,13 @@ int main(int argc, char **argv)
         DYShe.Loop(1, 1);
     }
 
-//cout << "lepSel " << lepSel << "\n";
-    if (doWhat == "AMCATNLO") {
+
+    if (doWhat == "AMCATNLO" || doWhat == "ALL") {
       //  cout << "we are here" << "\n";
         hasRecoInfo = true; 
         hasGenInfo = true;
 
-           ZJets DYamcatNLO(lepSel + "_DYJetsToLL_v3_amcatnlo_fullstat_13TeV_bef", lumi*2008.*3 /(3.12994e+11), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
+   ZJets DYamcatNLO(lepSel +"_ZJets_13TeV_amcatnlo_25ns_v11_fullstat_13TeV", 1263.886*2008.*3/(4.51499e+11), 1, 0, 0, 1, lepPtMin, lepEtaMax, jetPtMin, jetEtaMax, maxEvents, histoDir, bonzaiDir);
 
 
         DYamcatNLO.Loop(hasRecoInfo, hasGenInfo, "", -1, muR, muF);  // AG: original: DYamcatNLO.Loop(0, 1, "", -1, muR, muF

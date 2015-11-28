@@ -47,6 +47,7 @@ public :
    UInt_t          TrigHlt;
    ULong64_t       TrigHltMu;
    ULong64_t       TrigHltDiMu;
+   ULong64_t       TrigHltDiEl;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -238,6 +239,7 @@ public :
    TBranch        *b_TrigHlt;   //!
    TBranch        *b_TrigHltMu;   //!
    TBranch        *b_TrigHltDiMu;   //!
+   TBranch        *b_TrigHltDiEl;   //!
    TBranch        *b_METPt;   //!
    TBranch        *b_METPx;   //!
    TBranch        *b_METPy;   //!

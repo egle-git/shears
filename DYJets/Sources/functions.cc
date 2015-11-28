@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdarg>
 #include "functions.h"
+#include <cstring>
 
 using namespace std;
 
@@ -218,37 +219,37 @@ double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFact
 }
 
 double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){
-    // summer 2011 resolution scale factor
+    // Fall 2015 resolution scale factor
     // twiki.cern.ch/twiki/bin/view/CMS/JetResolution
     double centralSF(1.00);
-    if      (fabs(eta) < 0.5) centralSF = 1.079;
-    else if (fabs(eta) < 1.1) centralSF = 1.099;
-    else if (fabs(eta) < 1.7) centralSF = 1.121;
-    else if (fabs(eta) < 2.3) centralSF = 1.208;
-    else if (fabs(eta) < 2.8) centralSF = 1.254;
-    else if (fabs(eta) < 3.2) centralSF = 1.395;
-    else if (fabs(eta) < 5.0) centralSF = 1.056;
-    else centralSF = 1.056;
+    if      (fabs(eta) < 0.8) centralSF = 1.061;
+    else if (fabs(eta) < 1.3) centralSF = 1.088;
+    else if (fabs(eta) < 1.9) centralSF = 1.106;
+    else if (fabs(eta) < 2.5) centralSF = 1.126;
+    else if (fabs(eta) < 3.0) centralSF = 1.343;
+    else if (fabs(eta) < 3.2) centralSF = 1.303;
+    else if (fabs(eta) < 5.0) centralSF = 1.320;
+    else centralSF = 1.320;
 
     double upSF(1.00);
-    if      (fabs(eta) < 0.5) upSF = 1.105;
-    else if (fabs(eta) < 1.1) upSF = 1.127;
-    else if (fabs(eta) < 1.7) upSF = 1.150;
-    else if (fabs(eta) < 2.3) upSF = 1.254;
-    else if (fabs(eta) < 2.8) upSF = 1.316;
-    else if (fabs(eta) < 3.2) upSF = 1.458;
-    else if (fabs(eta) < 5.0) upSF = 1.247;
-    else upSF = 1.247;
+    if      (fabs(eta) < 0.8) upSF = 1.084;
+    else if (fabs(eta) < 1.3) upSF = 1.117;
+    else if (fabs(eta) < 1.9) upSF = 1.136;
+    else if (fabs(eta) < 2.5) upSF = 1.220;
+    else if (fabs(eta) < 3.0) upSF = 1.466;
+    else if (fabs(eta) < 3.2) upSF = 1.414;
+    else if (fabs(eta) < 5.0) upSF = 1.606;
+    else upSF = 1.606;
 
     double downSF(1.00);
-    if      (fabs(eta) < 0.5) downSF = 1.053;
-    else if (fabs(eta) < 1.1) downSF = 1.071;
-    else if (fabs(eta) < 1.7) downSF = 1.092;
-    else if (fabs(eta) < 2.3) downSF = 1.162;
-    else if (fabs(eta) < 2.8) downSF = 1.192;
-    else if (fabs(eta) < 3.2) downSF = 1.332;
-    else if (fabs(eta) < 5.0) downSF = 0.865;
-    else downSF = 0.865;
+    if      (fabs(eta) < 0.8) downSF = 1.038;
+    else if (fabs(eta) < 1.3) downSF = 1.059;
+    else if (fabs(eta) < 1.9) downSF = 1.076;
+    else if (fabs(eta) < 2.5) downSF = 1.032;
+    else if (fabs(eta) < 3.0) downSF = 1.220;
+    else if (fabs(eta) < 3.2) downSF = 1.192;
+    else if (fabs(eta) < 5.0) downSF = 1.034;
+    else downSF = 1.034;
 
     double smearedPt(0);
 
@@ -485,4 +486,37 @@ void BTagModification(double randNumber, double pt, double eta, int jetFlavour, 
         if (!passBJets_SFB_sys_down && SFlight>1.0 && randNumber<f_down) passBJets_SFB_sys_down = true; // for sytematic_down
 
     }   ////////flavour lop                     
+}
+
+FILE* eosOpen(const char* path, int (**closeFunc)(FILE*)){
+ TString tspath(path);
+ if(tspath.BeginsWith("root://")){
+   *closeFunc = pclose;
+   tspath.Remove(0, strlen("root://"));
+   Ssiz_t p = tspath.First("/");
+   if(p==TString::kNPOS) return 0;
+   TString server(tspath(0, p));
+   TString filepath(tspath(p + 1, tspath.Length() - p));
+   //   std::cout << ">>> server: " << server << ", path: " << filepath << "\n";
+   return popen(TString::Format("xrdfs %s cat %s", server.Data(), filepath.Data()), "r");
+ } else{
+   *closeFunc = fclose;
+   return fopen(path, "r");
+ }
+}
+
+bool isRootFile(const char* path){
+  int (*funcClose)(FILE*);
+  FILE* f = eosOpen(path, &funcClose);
+
+  char buffer[5];
+  if(f){
+    bool rc = (fread(buffer, 5, 1, f)==1) && (memcmp(buffer, "root\0", 5)==0);
+    funcClose(f);
+    return rc; 
+  } else{
+    std::cerr << "Warning: failed to read file " << path
+	      << ". File type determined from its extension.\n";
+    return TString(path).EndsWith(".root");
+  }
 }

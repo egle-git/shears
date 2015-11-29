@@ -1,15 +1,20 @@
+#include "functions.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <algorithm>
-#include <TH1.h>
-#include <TH2.h>
-#include <TRandom.h>
-#include <TLorentzVector.h>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include <cstdarg>
-#include "functions.h"
 #include <cstring>
+#include "TH1.h"
+#include "TH2.h"
+#include "TRandom.h"
+#include "TLorentzVector.h"
+#include "TFile.h"
+#include "TKey.h"
+#include "RooUnfoldResponse.h"
+
 
 using namespace std;
 
@@ -489,34 +494,83 @@ void BTagModification(double randNumber, double pt, double eta, int jetFlavour, 
 }
 
 FILE* eosOpen(const char* path, int (**closeFunc)(FILE*)){
- TString tspath(path);
- if(tspath.BeginsWith("root://")){
-   *closeFunc = pclose;
-   tspath.Remove(0, strlen("root://"));
-   Ssiz_t p = tspath.First("/");
-   if(p==TString::kNPOS) return 0;
-   TString server(tspath(0, p));
-   TString filepath(tspath(p + 1, tspath.Length() - p));
-   //   std::cout << ">>> server: " << server << ", path: " << filepath << "\n";
-   return popen(TString::Format("xrdfs %s cat %s", server.Data(), filepath.Data()), "r");
- } else{
-   *closeFunc = fclose;
-   return fopen(path, "r");
- }
+    TString tspath(path);
+    if(tspath.BeginsWith("root://")){
+	*closeFunc = pclose;
+	tspath.Remove(0, strlen("root://"));
+	Ssiz_t p = tspath.First("/");
+	if(p==TString::kNPOS) return 0;
+	TString server(tspath(0, p));
+	TString filepath(tspath(p + 1, tspath.Length() - p));
+	//   std::cout << ">>> server: " << server << ", path: " << filepath << "\n";
+	return popen(TString::Format("xrdfs %s cat %s", server.Data(), filepath.Data()), "r");
+    } else{
+	*closeFunc = fclose;
+	return fopen(path, "r");
+    }
 }
 
 bool isRootFile(const char* path){
-  int (*funcClose)(FILE*);
-  FILE* f = eosOpen(path, &funcClose);
+    int (*funcClose)(FILE*);
+    FILE* f = eosOpen(path, &funcClose);
 
-  char buffer[5];
-  if(f){
-    bool rc = (fread(buffer, 5, 1, f)==1) && (memcmp(buffer, "root\0", 5)==0);
-    funcClose(f);
-    return rc; 
-  } else{
-    std::cerr << "Warning: failed to read file " << path
-	      << ". File type determined from its extension.\n";
-    return TString(path).EndsWith(".root");
-  }
+    char buffer[5];
+    if(f){
+	bool rc = (fread(buffer, 5, 1, f)==1) && (memcmp(buffer, "root\0", 5)==0);
+	funcClose(f);
+	return rc; 
+    } else{
+	std::cerr << "Warning: failed to read file " << path
+		  << ". File type determined from its extension.\n";
+	return TString(path).EndsWith(".root");
+    }
+}
+
+bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest)
+{
+    TH1::SetDefaultSumw2();
+
+    std::cerr << "Creating file " << dest << std::endl;
+    TFile fout(dest.c_str(), "RECREATE");
+    if(fout.IsZombie()){
+	std::cerr << "Error: failed to create file " << dest 
+		  << " (" << __FILE__ << ":" << __LINE__ << ").\n\n";
+	return false;
+    }
+
+    union u { TObject* o; TH1* h; RooUnfoldResponse* r; } obj;
+    std::map<std::string,u> objs;
+    for(unsigned iFile = 0; iFile < src.size(); ++iFile){
+	TFile in(src[iFile].c_str());
+	if(in.IsZombie()) continue;
+	TIter next(in.GetListOfKeys());
+	TKey* key;
+	while((key = (TKey*) next())){
+	    obj.o = key->ReadObj();
+	    enum {kHist, kResp, kOther} type = kOther;
+	    if(obj.o->InheritsFrom("TH1")) type = kHist;
+	    if(obj.o->InheritsFrom("RooUnfoldResponse")) type = kResp;
+	    if(type == kOther) continue;
+	    if(iFile == 0){
+		if(type==kHist) obj.h->SetDirectory(0);
+		objs[obj.o->GetName()].o = obj.o;
+	    } else{
+		std::map<std::string,u>::iterator it = objs.find(obj.o->GetName());
+		if(it!=objs.end()){
+		    if(type==kHist) (*it).second.h->Add(obj.h);
+		    if(type==kResp) (*it).second.r->Add(*(obj.r));
+		}
+	    }
+	} //next Object
+	in.Close();
+    }//next File
+
+    fout.cd();
+    for(std::map<std::string,u>::iterator it = objs.begin();
+	it != objs.end(); ++it){
+	it->second.o->Write();
+	delete it->second.o;
+    }
+    fout.Close();
+    return true;
 }

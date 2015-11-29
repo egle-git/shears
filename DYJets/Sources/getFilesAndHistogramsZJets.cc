@@ -6,6 +6,7 @@
 #include <TSystem.h>
 #include <algorithm>
 #include "getFilesAndHistogramsZJets.h"
+#include "ConfigVJets.h"
 using namespace std;
 
 //------------------------------------------------------------
@@ -15,25 +16,15 @@ using namespace std;
 //------------------------------------------------------------
 TString getEnergy()
 {
-    TString energy = "";
-    TString fileBeingProcessed = __FILE__;
-    if (fileBeingProcessed.Index("2012") >= 0) {
-        energy = "8TeV";
-    }
-    else if (fileBeingProcessed.Index("2011") >= 0) {
-        energy = "7TeV";
-    }
-    else 
-    {
-        std::cout << "WARNING ! Impossible to retrieve te energy from the current location !" << std::endl;
-        energy = "Unknown";
-    }
 
-    return energy;
+    ConfigVJets cfg;
+    double s = cfg.getI("energy", 13);
+    return TString::Format("%fTeV", s);
 }
 //------------------------------------------------------------
 
-TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name, int jetPtMin, int jetEtaMax, TString closureTest, TString syst)
+TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name, 
+	       int jetPtMin, int jetEtaMax, TString closureTest, TString syst)
 {
 
     TString fileName = histoDir; // TString to contain the name of the file
@@ -49,7 +40,7 @@ TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name, i
 
     //--- deal with efficiency correction applied or not ---
     TString trigCorr = "0";
-    if (Name.Index("Data") == 0 || energy == "8TeV") trigCorr = "1"; // trigger correction is applied to data and MC at 8TeV but only to data at 7TeV 
+    if (Name.Index("Data") == 0 || energy == "8TeV" || energy == "13TeV") trigCorr = "1"; // trigger correction is applied to data and MC at 8TeV but only to data at 7TeV 
 
     //--- special case for the generator comparison ---
     if (Name.Index("Powheg") >= 0 || Name.Index("Sherpa") >= 0) trigCorr = "0"; 
@@ -71,11 +62,12 @@ TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name, i
     //--- fileName is complete: just add the extension and open it ---
     fileName += ".root";
     TFile *File = new TFile(fileName, "READ");
-    std::cout << "Opening: " << fileName << "   --->   Opened ? " << File->IsOpen() << std::endl;
+    std::cout << "Opening " << fileName << "." << std::endl; //<< "   --->   Opened ? " << File->IsOpen() << std::endl;
     if (!File->IsOpen()) {
-        std::cerr << "Please check that you produced the following file. I was not able to open it." << std::endl;
-        std::cerr << "\t\033[031m " << fileName << "\033[0m " << std::endl;
-        return NULL;
+      std::cerr << "Please check that you produced the following file. I was not able to open it." << std::endl;
+      std::cerr << "\t\033[031m " << fileName << "\033[0m " << std::endl;
+      abort();
+      return NULL;
     }
     else return File;
     //----------------------------------------------------------------
@@ -189,10 +181,10 @@ void closeFiles(TFile *Files[])
     if (Files[0]) {
         TString fileName = Files[0]->GetName();
         int nFiles;
-        if (fileName.Index("Data") >= 0) {
+	if (fileName.Index("Data") >= 0) {
             nFiles = 3; 
         }
-        else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
+	else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
             nFiles = 9;
         }
         else nFiles = 7; 
@@ -228,13 +220,13 @@ void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg)
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
         closeFiles(fBg[iBg]);
     }
-    //------------------------------------------------------------------------------------------ 
+    //----------------------------------l-------------------------------------------------------- 
 }
 
 TH1D* getHisto(TFile *File, const TString variable)
 {
     TH1D *histo = (TH1D*) File->Get(variable);
-    histo->SetDirectory(0);
+    if(histo) histo->SetDirectory(0);
     return histo;
 }
 
@@ -258,14 +250,14 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         histograms[i] = (TH1D*) Files[i]->Get(variable);
     } 
 
+    ConfigVJets cfg;
+    
     if (!isData) {
         Files[0]->cd();
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing
-        //    since it is a global effect. The error is estimated to
-        //    2.6%
-
-        double lumiErr = 0.026;
+        //    since it is a global effect. 
+        double lumiErr = cfg.getD("lumiUnc");
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH1D*) histograms[0]->Clone();
@@ -295,7 +287,9 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         //    That is why errSF = 0 when variable contains "gen"
         TString lepSel = (fileName.Index("DMu") >= 0) ? "DMu" : "DE";
         //double errSF = (lepSel == "DMu") ? 0.025 : 0.005;
-        double errSF = (lepSel == "DMu") ? 0.025 : 0.005;
+	double elEffUnc = cfg.getD("elEffUnc");
+	double muEffUnc = cfg.getD("muEffUnc");
+        double errSF = (lepSel == "DMu") ? muEffUnc : elEffUnc;
         if (variable.Index("gen") < 0) {
             if (isSignal) {
                 //--- SF up ---
@@ -320,7 +314,6 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
     }
 }
 
-
 void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
@@ -328,6 +321,8 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 
+    ConfigVJets cfg;
+    
     if (fileName.Index("Data") >= 0) {
         nFiles = 3; 
     }
@@ -345,9 +340,9 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing
         //    since it is a global effect. The error is estimated to
-        //    2.6%
+        //    2.6% for 8 TeV.
 
-        double lumiErr = 0.026;
+      double lumiErr = cfg.getD("lumiUnc");
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH2D*) histograms[0]->Clone();
@@ -372,11 +367,14 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
         //    for scale factors up and down systematics. It is just 
         //    a rescaliinga since the errors are global. The error 
         //    is different for the two channels and are estimated to
-        //    2.5% for muons and 0.5% for electron.
+        //    2.5% for muons and 0.5% for electron for 8 TeV
         //    This should not be applied to gen histograms however.
         TString lepSel = (fileName.Index("DMu") >= 0) ? "DMu" : "DE";
         //double errSF = (lepSel == "DMu") ? 0.025 : 0.005;
-        double errSF = (lepSel == "DMu") ? 0.005 : 0.005;
+	double elEffUnc = cfg.getD("elEffUnc");
+	double muEffUnc = cfg.getD("muEffUnc");
+        double errSF = (lepSel == "DMu") ? muEffUnc : elEffUnc;
+
         if (variable.Index("gen") < 0) {
             if (isSignal) {
                 //--- SF up ---

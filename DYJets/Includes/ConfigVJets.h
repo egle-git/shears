@@ -69,11 +69,11 @@ class ConfigVJets{
     private:
 
         template<typename T>
-            void convert(const T& x, std::string& s) const;
+	void convert(const T& x, std::string& s) const;
 
         template<typename T>
-            void convert(const std::vector<T>& x, std::string& s) const;
-
+	void convert(const std::vector<T>& x, std::string& s) const;
+  
         void convert(const std::string& str, float& x) const;
 
         void convert(const std::string& str, double& x) const;
@@ -104,6 +104,5 @@ class ConfigVJets{
         std::map<std::string, std::string > table_;
 
 };
-
 
 #endif //CONFIGVJETS_H not defined

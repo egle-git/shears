@@ -48,7 +48,6 @@ const processInfoStruct ProcessInfo[] = {
 
 //--- first element must point to the data
 //--- last element must point to the MC Signal
-const int NFilesFull(28); 
 const int NFILESWJETS(14); 
 const int NFILESDYJETS(12);
 const int FilesDYJets[NFILESDYJETS] = {0, 1, 21, 15, 20, 14, 16, 19, 18, 17, 11, 13};

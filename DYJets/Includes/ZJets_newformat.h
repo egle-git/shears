@@ -24,8 +24,6 @@
 #include "functions.h"
 #include "getFilesAndHistogramsZJets.h"
 #include "HistoSetZJets.h"
-
-#include "ConfigVJets.h"
 #include "rochcor.h"
 
 
@@ -38,6 +36,7 @@ class ZJets: public HistoSetZJets {
         rochcor2012 *rmcor;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
+	TChain          fBonzaiHeaderChain;
         //TTree          *tree;
         Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -71,14 +70,14 @@ class ZJets: public HistoSetZJets {
    vector<float>   *GLepDr01Eta;
    vector<float>   *GLepDr01Phi;
    vector<float>   *GLepDr01E;
-   vector<unsigned int> *GLepDr01Id;
+   vector<int>     *GLepDr01Id;
    vector<int>     *GLepDr01St;
    vector<int>     *GLepDr01MomId;
    vector<float>   *GLepBarePt;
    vector<float>   *GLepBareEta;
    vector<float>   *GLepBarePhi;
    vector<float>   *GLepBareE;
-   vector<unsigned int> *GLepBareId;
+   vector<int>     *GLepBareId;
    vector<int>     *GLepBareSt;
    vector<int>     *GLepBareMomId;
    vector<float>   *GLepSt3Pt;
@@ -432,35 +431,66 @@ class ZJets: public HistoSetZJets {
 
 
 
-        ZJets(const TString& lepSel, TString fileName_, float lumiScale_ = 1., bool useTriggerCorrection_ = 0, int systematics_ = 0, int direction_ = 0, float xsecfactor_ = 1., 
-                int lepPtCutMin_ = 20, int lepEtaCutMax_ = 24, int jetPtCutMin_ = 30, int jetEtaCutMax_ = 24, Long_t nEvents_ = 0, TString outDir_ = "TEST", 
-                TString bonzaiDir = "/afs/cern.ch/work/a/aleonard/public/ZJetsFiles/");
+        ZJets(const TString& lepSel, TString sampleName, TString fileName_, float lumi_ = 1.,
+	      bool useTriggerCorrection_ = 0, int systematics_ = 0, int direction_ = 0, float xsecfactor_ = 1., 
+	      int lepPtCutMin_ = 20, int lepEtaCutMax_ = 24, int jetPtCutMin_ = 30, 
+	      int jetEtaCutMax_ = 24, Long_t nEvents_ = 0, TString outDir_ = "TEST", 
+	      TString bonzaiDir = "/afs/cern.ch/work/a/aleonard/public/ZJetsFiles/",
+	      int maxFiles = -1);
         ~ZJets();
-        string   CreateOutputFileName(TString pdfSet = "", int pdfMember = -1, double muR = 0, double muF = 0);
+	
+	/** Build the name of output file
+	 * @param pdfSet
+	 * @param pdfMember
+	 * @param muR scale factor applied on the renormalisation scale. 0 is equivalent to 1.
+	 * @param muF scale factor applied on the factorisation scale. 0 is equivalent to 1.
+	 * @param iJob job number in case the running is split in several job, 0 otherwise.
+	 */
+        void CreateOutputFileName(const TString& pdfSet = "", int pdfMember = -1,
+				      double muR = 0, double muF = 0, int iJob = 0);
+	static std::string
+	CreateOutputFileName(const TString& pdfSet, int pdfMember, double muR, double muF, int iJob,
+			     const TString& lepSel, const TString& sampleLabel_,
+			     bool useTriggerCorrection_, int systematics_, int direction,
+			     int jetPtCutMin_, int jetEtaCutMax_ , TString outDir_);
         Int_t    Cut(Long64_t entry);
         Int_t    GetEntry(Long64_t entry);
         Long64_t LoadTree(Long64_t entry);
         void     Init(bool hasRecoInfo, bool hasGenInfo);
         void     initLHAPDF(TString pdfSet, int pdfMember);
         double   computePDFWeight();
-        void     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, TString pdfSet = "", int pdfMember = -1, double muR = 0, double muF = 0);
+        void     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, int jobNum = 1, int nJobs = 1,
+		      TString pdfSet = "", int pdfMember = -1, double muR = 0, double muF = 0,
+		      double yieldScale = 1.);
         void     getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons);
         void     getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoElectrons);
         Bool_t   Notify();
         void     Show(Long64_t entry = -1);
+	static void readCatalog(const TString& fileName, const TString& bonzaiDir, int maxFiles = -1,
+				double* pLumi = 0, double* pXsec = 0, TChain* pChain = 0,
+				TChain* pBonzaiHeaderChain = 0);
+	static void canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
+					  TString* fullFileName, TString* baseName = 0,
+					  TString* ext = 0);
+
+
 
 	/** Gets integrated luminosity read from lumi parameter of catalog file.
 	 */
 	double getLumi(){ return lumi_;}
 	
-        TString outputDirectory;
+
+	void getMcNorm();
+	
+	TString outputDirectory;
+	TString outputFileName;
         TString fileName; 
-        float lumiScale;
+        double lumi_;
         bool useTriggerCorrection;
         bool isData;
         int systematics;
         int direction;
-        float xsecfactor;
+        float xsecUnc;
         int lepPtCutMin;
         int lepEtaCutMax;
         int jetPtCutMin;
@@ -469,8 +499,20 @@ class ZJets: public HistoSetZJets {
         TString lepSel;
         bool rejectBTagEvents;
 
-        ConfigVJets cfg_;
-	float lumi_;
+	std::vector<Double_t> InEvtWeightSums_;
+	std::vector<Double_t> EvtWeightSums_;
+	/** Baobab->Bonzai acceptance
+	 */
+	std::vector<Double_t> skimAccep_;
+	Int_t InEvtCount_;
+	Int_t EvtCount_;
+	double norm_;
+	double xsec_;
+	double xsecFactor_;
+	TString sampleLabel_;
+	int maxFiles_;
+	
+	double processedEventMcWeightSum_;
 };
 #endif
 

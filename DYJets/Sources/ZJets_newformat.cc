@@ -17,18 +17,21 @@
 #include "LHAPDF/LHAPDF.h"
 #include "functions.h"
 #include "standalone_LumiReWeighting.h"
-#include "HistoSetZJets.h"
 #include "ZJets_newformat.h"
 #include <sys/time.h>
 #include <sys/types.h>
 #include <regex.h>
+#include "ConfigVJets.h"
+
+extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
 //#include "rochcor.h"
 
 
 using namespace std;
 
-void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMember, double muR, double muF)
+void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
+		 TString pdfSet, int pdfMember, double muR, double muF, double yieldScale)
 {
 
     //--- Random generator necessary for BTagging ---
@@ -42,7 +45,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //--------------------------------------------
 
     //--- Counters to check the yields ---
-    unsigned int nEvents(0);
+    Long64_t nEvents(0);
     unsigned int nEventsVInc0Jets(0), nEventsVInc1Jets(0), nEventsVInc2Jets(0), nEventsVInc3Jets(0);
     unsigned int nGenEventsVInc0Jets(0), nGenEventsVInc1Jets(0), nGenEventsVInc2Jets(0), nGenEventsVInc3Jets(0);
     unsigned int nEventsWithTwoGoodLeptons(0), nEventsWithTwoGoodLeptonsWithOppCharge(0), nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass(0);
@@ -61,7 +64,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //==========================================================================================================//
     //         Output file name           //
     //===================================//
-    TString outputFileName = CreateOutputFileName(pdfSet, pdfMember, muR, muF);
+    CreateOutputFileName(pdfSet, pdfMember, muR, muF, nJobs == 1 ? 0 : jobNum);
+    std::cerr << "Histogram file name " << outputFileName << " for sample " << sampleLabel_ << "\n";
     TFile *outputFile = new TFile(outputFileName, "RECREATE");
     //==========================================================================================================//
 
@@ -102,8 +106,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
     if (systematics == 2) scale =  direction;
 
-    double xsec(1.);
-    if (systematics == 3) xsec = 1. + direction * xsecfactor;
+    xsecFactor_ = 1.;
+    if (systematics == 3) xsecFactor_ = 1. + direction * xsecUnc;
 
     int smearJet(0);
     if (systematics == 4) smearJet = direction;
@@ -111,8 +115,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     int lepscale(0);
     if (systematics == 5) lepscale = direction;
 
-    //    int smearlepton(0);
-    //if (systematics == 6) smearlepton = direction;
+    int smearlepton(0);
+    if (systematics == 6) smearlepton = direction;
     //==========================================================================================================//
 
 
@@ -124,7 +128,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     //======================================================================
     //additionnal PU weights
     TH1* addPuWeights = 0;
-    string addPuFile = cfg_.getS("additionalPuWeightFile");
+    string addPuFile = cfg.getS("additionalPuWeightFile");
     if(addPuFile.size() > 0){
         TFile f(addPuFile.c_str());
         if(f.IsZombie()){
@@ -143,50 +147,75 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     // Start looping over all the events //
     //===================================//
     cout << endl;
-    cout << "\nProcessing : " << fileName << "    -->  " << outputFileName << endl;
-
+    stringstream s;
+    cout << "\nProcessing : " << fileName << "\n";
+    s <<"\t--> " << outputFileName << "\n";
+    cout << s.str();
+    for(unsigned i = 0 ; i < s.str().size(); ++i) cout << "-";
+    cout << "\n\n" << flush;
+    
     //--- Initialize the tree branches ---
     Init(hasRecoInfo, hasGenInfo);
     if (fChain == 0) return;
     Long64_t nentries = fChain->GetEntries();
-    if (0 <= nMaxEvents && nMaxEvents  < nentries) nentries = nMaxEvents;
 
-    cout << "We will run on " << nentries << " events" << endl;
     //------------------------------------
 
     struct timeval t0;
     int mess_every_n =  std::min(1000LL, nentries/10);
-    double weight_amcNLO_sum = 0;
-
 
     // ------ Random number for lepton energy resolution smearing -----
     //TRandom* RamMu = new TRandom(10);
     //TRandom* RamEle = new TRandom(20);
     // --------------------------------
-    
+
+    //event yield normalisation for MC
+    norm_ = yieldScale;
     double prev_rate = 0;
-    for (Long64_t jentry(0); jentry < nentries; jentry += 1) {
-        Long64_t ientry = LoadTree(jentry);
+
+    Long64_t entry_start = 0;
+    Long64_t entry_stop = nentries;
+    if(nJobs > 1){
+	Long64_t eventsPerJob = nentries / nJobs;
+	entry_start = eventsPerJob * (jobNum - 1);
+	if(jobNum < nJobs)  entry_stop = entry_start + eventsPerJob;
+	else entry_stop = nentries;
+    }
+
+    int nEventsToProcess = entry_stop - entry_start;
+    if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
+    cout << "We will run on " << nEventsToProcess << " events" << endl;
+    
+    //store integrated luminosity in Lumi histogram:
+    Lumi->SetBit(TH1::kIsAverage); //to prevent hadd to sum-up the numbers
+    Lumi->Fill(0., lumi_);
+
+    processedEventMcWeightSum_ = 0.;
+    nEvents = 0;
+    for (Long64_t jentry = entry_start; jentry < entry_stop; jentry += 1) {
+	if (0 <= nMaxEvents && nMaxEvents  <= nEvents) break;
+	
+	Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
         //cout << "---------------------------------------------------------------------" << endl;
 	
-	if(jentry == mess_every_n) gettimeofday(&t0, 0);
-        if (jentry % mess_every_n == 0 && jentry > mess_every_n){
+	if(nEvents == mess_every_n) gettimeofday(&t0, 0);
+        if (nEvents % mess_every_n == 0 && nEvents > mess_every_n){
             timeval t1;
             gettimeofday(&t1, 0);
             double rate = ((t1.tv_sec - t0.tv_sec) + 1.e-6*(t1.tv_usec - t0.tv_usec)) 
-		/ (jentry - mess_every_n);
+		/ (nEvents - mess_every_n);
 	    if(fabs(rate / prev_rate - 1.) > 0.1){
 		prev_rate = 0.5*(prev_rate + rate);
 	    }
-            double rem = prev_rate * (nentries - jentry);
+            double rem = prev_rate * (nEventsToProcess - nEvents);
             int rem_s = int(rem + 0.5);
             int rem_h = int(rem_s) / 3600; 
             rem_s -= rem_h * 3600;
             int rem_m = rem_s / 60;
             rem_s -= rem_m *60;
-            cout << "\r" << TString::Format("%4.1f%%", (100. * jentry) / nentries)
-		 << " " << std::setw(11) << jentry << " / " << nentries
+            cout << "\r" << TString::Format("%4.1f%%", (100. * nEvents) / nEventsToProcess)
+		 << " " << std::setw(11) << nEvents << " / " << nEventsToProcess
 		 << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/event"
 		 << " Remaining time for this dataset: " 
 		 << std::setw(2) << rem_h << " h "
@@ -195,30 +224,37 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
 		 << std::flush;
         }
 
-        fChain->GetEntry(jentry);  
-        nEvents++;
+        if(fChain->GetEntry(jentry) == 0){
+	    std::cerr << "Failed to read Tree entry " << jentry << "!\n";
+	    continue;
+	}
 
+	if(nEvents == 0 && !EvtIsRealData){
+	    norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
+	    if(norm_ == 0){
+		std::cerr << "Error: normaliation factor for sample " << fileName
+			  << " is null! Abort." << std::endl;
+		abort();
+	    }
+	}
+	
         //=======================================================================================================//
         //         Continue Statements        //
         //====================================//
-        //if (jentry % 2 == 0) continue;
+        //if (nEvents % 2 == 0) continue;
         //if (EvtVtxCnt <= 14) continue;
 
         //=======================================================================================================//
+
+	nEvents++;
 
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //=======================================================================================================//
         //         Computing weight            //
         //====================================//
-        double weight(1);
-        // line below is to see distributions as provided with default MC PU distribution
-         
-    
-
-       // if (hasRecoInfo && !EvtIsRealData) weight *= puWeight.weight(int(EvtPuCntTruth));
-        //cout << lumiScale << " , " << xsec << "\n";
-        weight *= lumiScale * xsec;
+        double weight = norm_;
+	
 /*//CAG
         if(addPuWeights){
             double add_w_ = addPuWeights->GetBinContent(addPuWeights->GetXaxis()->FindBin(EvtVtxCnt));
@@ -231,31 +267,42 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
        // if (fileName.Index("Sherpa") >= 0 && fileName.Index("UNFOLDING") >= 0) {
        //     weight *= mcSherpaWeights_->at(0) / 43597515.;
        // }
-        if (fileName.Index("Sherpa2") >= 0) {
-            weight *= EvtWeights->at(0);
-            weight_amcNLO_sum += EvtWeights->at(1);
-        }
-        if (fileName.Index("mcatnlo") >= 0) {
-            weight *= EvtWeights->at(0);
-         //  cout << EvtWeights->at(0) << "  , " << EvtWeights->at(0) << "\n";
 
-            //if (muR == 0.0 && muF == 0.0 && pdfMember == -1) weight *= EvtWeights->at(0);
-            //if (muR == 1.0 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(0);
-            // CommentAG: only at(0) available for EvtWeights
-/*
-            if (muR == 1.0 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(2);
-            if (muR == 1.0 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(3);
-            if (muR == 2.0 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(4);
-            if (muR == 2.0 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(5);
-            if (muR == 2.0 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(6);
-            if (muR == 0.5 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(7);
-            if (muR == 0.5 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(8);
-            if (muR == 0.5 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(9);
-            if (muR == 0.0 && muF == 0.0 && pdfMember != -1) weight *= EvtWeights->at(pdfMember+10);
-            weight_amcNLO_sum += EvtWeights->at(1);
-*/
-            weight_amcNLO_sum += EvtWeights->at(0); 
-        }
+	if(!EvtIsRealData){
+	    if(EvtWeights->size() > 0){
+		weight *= (*EvtWeights)[0];
+		processedEventMcWeightSum_ += (*EvtWeights)[0];
+	    } else{
+		processedEventMcWeightSum_ += 1.;
+	    }
+	}
+	
+//        if (fileName.Index("Sherpa2") >= 0) {
+//            weight *= EvtWeights->at(0);
+//            weight_amcNLO_sum += EvtWeights->at(1);
+//        }
+//	
+//        if (fileName.Index("mcatnlo") >= 0) {
+//            weight *= EvtWeights->at(0);
+//         //  cout << EvtWeights->at(0) << "  , " << EvtWeights->at(0) << "\n";
+//
+//            //if (muR == 0.0 && muF == 0.0 && pdfMember == -1) weight *= EvtWeights->at(0);
+//            //if (muR == 1.0 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(0);
+//            // CommentAG: only at(0) available for EvtWeights
+//         /*
+//            if (muR == 1.0 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(2);
+//            if (muR == 1.0 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(3);
+//            if (muR == 2.0 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(4);
+//            if (muR == 2.0 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(5);
+//            if (muR == 2.0 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(6);
+//            if (muR == 0.5 && muF == 1.0 && pdfMember == -1) weight *= EvtWeights->at(7);
+//            if (muR == 0.5 && muF == 2.0 && pdfMember == -1) weight *= EvtWeights->at(8);
+//            if (muR == 0.5 && muF == 0.5 && pdfMember == -1) weight *= EvtWeights->at(9);
+//            if (muR == 0.0 && muF == 0.0 && pdfMember != -1) weight *= EvtWeights->at(pdfMember+10);
+//            weight_amcNLO_sum += EvtWeights->at(1);
+//	 */
+//            weight_amcNLO_sum += EvtWeights->at(0); 
+//        }
 
        // cout << weight << "\n";
         //==========================================================================================================//
@@ -275,7 +322,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
         //         Retrieving leptons          //
         //====================================//
         bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1);
-	//	bool passesLeptonMassCut(0);
+	//bool passesLeptonMassCut(0);
         unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
         vector<leptonStruct> leptons;
         vector<leptonStruct> vetoMuons;
@@ -360,7 +407,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
                         if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh && leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
                             nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
                             passesLeptonCut = 1;
-			    //                            passesLeptonMassCut = 1;
+			    //passesLeptonMassCut = 1;
                         }
                     }
                  //}
@@ -373,8 +420,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
  
 
                     if (lepSel == "DMu") {
- //cout <<  "we are here 7.1 " << nLeptons << "\n";
-
                         effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
                         effWeight *= LeptID.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
                         effWeight *= LeptIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta())); 
@@ -445,11 +490,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
             // if (hasRecoInfo) countTauS3 = (lepSel == "DMu" || lepSel == "DE") ? 2 : 1; // AG
             nTotGenPhotons = GLepClosePhotEta->size();
             nTotgenLeptons = GLepBareEta->size();
-            // cout << "nTotgenLeptons " << nTotgenLeptons << "\n";
-            // cout << "--------------------AG: nTotgenLeptons (1) "  << nTotgenLeptons << "\n";
             //-- retriveing generated leptons with status 1
             for (unsigned short i(0); i < nTotgenLeptons; i++) {
-                bool lepToBeConsidered(false); 
+                bool lepToBeConsidered(false);
                 if ((lepSel == "DMu" || lepSel == "DE") && abs(GLepBareId->at(i)) == LeptonID) lepToBeConsidered = true; 
                 else if ((lepSel == "SMu" || lepSel == "SE") && (abs(GLepBareId->at(i)) == LeptonID || abs(GLepBareId->at(i)) == 12 || abs(GLepBareId->at(i)) == 14)) lepToBeConsidered = true;
                 // following two lines should give the same result
@@ -458,13 +501,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
 
                 if (GLepBareSt->at(i) == 3 && abs(GLepBareId->at(i)) == 15) nTauWithStatus3++;
 
-                if (!lepToBeConsidered) continue;
-
                 int charge;
                 if (abs(GLepBareId->at(i)) == 12 || abs(GLepBareId->at(i)) == 14 || abs(GLepBareId->at(i)) == 16) charge = 0;
                 else if (GLepBareId->at(i) < 0) charge = -1;
                 else charge = 1;
-                leptonStruct genLep(GLepBarePt->at(i), GLepBareEta->at(i), GLepBarePhi->at(i), GLepBareE->at(i), charge, 0, 0, 0, 0);
+
+		leptonStruct genLep(GLepBarePt->at(i), GLepBareEta->at(i), GLepBarePhi->at(i), GLepBareE->at(i), charge, 0, 0, 0, 0);
                 leptonStruct genLepNoFSR(GLepBarePt->at(i), GLepBareEta->at(i), GLepBarePhi->at(i), GLepBareE->at(i), charge, 0, 0, 0, 0);
 
                 //-- dress the leptons with photon (cone size = 0.1). Only for status 1 leptons (after FSR)
@@ -491,7 +533,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
             }
 
             ngenLeptons = genLeptons.size();
-   
+
             // sort leptons by descending pt
             sort(genLeptons.begin(), genLeptons.end(), LepDescendingOrder);
 
@@ -550,12 +592,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
         //   ------- lepton energy smearing ------
         //==========================================//
         // CommentAG: we don't enter this block since ngenLeptons < 2
-/*
+	
         if (hasRecoInfo && hasGenInfo){
-cout << nLeptons << " , " <<  ngenLeptons << "\n";
             if((lepSel == "DMu" || lepSel == "DE") && nLeptons >= 2 && ngenLeptons >= 2){  
 
-                cout << "we  are here" << "\n";
                 double oldLeptonPt;
                 double genLeptonPt;
                 double newLeptonPt;
@@ -565,7 +605,7 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
 
                 oldLeptonPt = leptons[0].v.Pt();
                 genLeptonPt = genLeptons[0].v.Pt();
-                newLeptonPt = SmearLepPt(oldLeptonPt,genLeptonPt,smearlepton,smearFactor);
+                newLeptonPt = SmearLepPt(oldLeptonPt, genLeptonPt, smearlepton, smearFactor);
                 leptons[0].v.SetPtEtaPhiE(newLeptonPt, leptons[0].v.Eta(), leptons[0].v.Phi(), leptons[0].v.E()*newLeptonPt/oldLeptonPt);
 
                 oldLeptonPt = leptons[1].v.Pt();
@@ -584,14 +624,13 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                         nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
                        // cout <<  "AndGoodMass" << "\n";
                         passesLeptonCut = 1;
-                        passesLeptonMassCut = 1;
+                        //passesLeptonMassCut = 1;
                     }
                 } // end if re-selection of leptons
 
             } // end if DMu/DE channel
 
         } // end of hasRecoInfo and hasGenInfo
-*/
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //=======================================================================================================//
@@ -1305,7 +1344,6 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
         }
        //  cout << passesLeptonCut << " , " << (!bTagJetFound || !rejectBTagEvents)  << "\n";
         if (hasRecoInfo && passesLeptonCut && (!bTagJetFound || !rejectBTagEvents)) { 
-        //cout << "we are here 1" << "\n";
             //=======================================================================================================//
 
             if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -1320,7 +1358,6 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
             if (hasRecoInfo && !EvtIsRealData) weightNoPUweight = weight/puWeight.weight(int(EvtPuCntTruth));
             NVtx_NoPUweight->Fill(EvtVtxCnt, weightNoPUweight);
 */
-         //  cout << weight << "\n";
             nEventsVInc0Jets++;
             ZNGoodJetsNVtx_Zexc->Fill(nGoodJets, EvtVtxCnt  , weight);
             ZNGoodJets_Zinc->Fill(0., weight);
@@ -1947,8 +1984,8 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
         //=======================================================================================================//
         //             Unfolding               //
         //====================================//
-        if (hasRecoInfo && hasGenInfo && (!bTagJetFound || !rejectBTagEvents)) {
 
+	if (hasRecoInfo && hasGenInfo && (!bTagJetFound || !rejectBTagEvents)) {
             if (nGoodJets_20 >= 1 && nGoodGenJets_20 >= 1) {
                 //looks for matching gen jet:
                 int igen = 0;
@@ -2332,6 +2369,11 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
     for (unsigned short i(0); i < numbOfHistograms; i++){
         string hName = listOfHistograms[i]->GetName();
         if ((!hasGenInfo && hName.find("gen") != string::npos) || (!hasRecoInfo && hName.find("gen") == string::npos)) continue; 
+	//finalize normalisation of MC histograms:
+	double a = 1./processedEventMcWeightSum_;
+	if(!EvtIsRealData){
+	    listOfHistograms[i]->Scale(a);
+	}
         listOfHistograms[i]->Write();        
     }
 
@@ -2347,6 +2389,10 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
 
 
     cout << "Number of processed events                                : " << nEvents << endl;
+    if(maxFiles_ < 0){
+	cout << "Fraction of processed events from dataset                 : " << nEvents << "/" << EvtCount_
+	     << " = " << (nEvents/double(EvtCount_)) << endl;
+    }
     cout << "Number with two good leptons                              : " << nEventsWithTwoGoodLeptons << endl;
     cout << "Number with two good leptons of opp. charge               : " << nEventsWithTwoGoodLeptonsWithOppCharge << endl;
     cout << "Number with two good leptons of opp. charge and good mass : " << nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass << endl;
@@ -2358,7 +2404,13 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
     cout << "Number GEN Inclusif V + 1 jets                            : " << nGenEventsVInc1Jets << endl;
     cout << "Number GEN Inclusif V + 2 jets                            : " << nGenEventsVInc2Jets << endl;
     cout << "Number GEN Inclusif V + 3 jets                            : " << nGenEventsVInc3Jets << endl;
-    cout << "Rescal for amcNLO                                         : " << weight_amcNLO_sum << endl;
+    cout << "Sum of MC event weights                                   : " << processedEventMcWeightSum_ << endl;
+    if(!EvtIsRealData){
+    cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
+	     << yieldScale << "*" << lumi_ << "*" << xsec_ << "*"
+	     << skimAccep_[0] << "/" << processedEventMcWeightSum_
+	     << "*" << xsecFactor_ << " = " << norm_ / processedEventMcWeightSum_ << endl;
+    }
 }
 
 void ZJets::initLHAPDF(TString pdfSet, int pdfMember)
@@ -2553,82 +2605,98 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
 }
 
 
-ZJets::ZJets(const TString& lepSel_, TString fileName_, float lumiScale_, bool useTriggerCorrection_,
-	     int systematics_, int direction_, float xsecfactor_, int lepPtCutMin_, int lepEtaCutMax_, 
-	     int jetPtCutMin_, int jetEtaCutMax_,  Long_t maxEvents_, TString outDir_, TString bonzaiDir): 
-    HistoSetZJets(fileName_(0, fileName_.Index("_"))), outputDirectory(outDir_),
-    fileName(fileName_), lumiScale(lumiScale_), useTriggerCorrection(useTriggerCorrection_), 
-    systematics(systematics_), direction(direction_), xsecfactor(xsecfactor_), 
+ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
+	     float lumi, bool useTriggerCorrection_, int systematics_,
+	     int direction_, float xsecUnc_, int lepPtCutMin_, int lepEtaCutMax_, 
+	     int jetPtCutMin_, int jetEtaCutMax_,  Long_t maxEvents_,
+	     TString outDir_, TString bonzaiDir, int maxFiles): 
+    HistoSetZJets(lepSel_), outputDirectory(outDir_),
+    fileName(fileName_), lumi_(lumi), useTriggerCorrection(useTriggerCorrection_), 
+    systematics(systematics_), direction(direction_), xsecUnc(xsecUnc_), 
     lepPtCutMin(lepPtCutMin_), lepEtaCutMax(lepEtaCutMax_), jetPtCutMin(jetPtCutMin_), jetEtaCutMax(jetEtaCutMax_),
-    nMaxEvents(maxEvents_), lepSel(lepSel_), lumi_(0.)
+    nMaxEvents(maxEvents_), lepSel(lepSel_), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles)
 {
-
     //--- Create output directory if necessary ---
-    if (nMaxEvents > 0) {
-        outputDirectory.Remove(TString::kTrailing, '/');
-        outputDirectory += TString::Format("_%ldevts/", nMaxEvents);
-        cout << "Output directory has been changed to " << outputDirectory << endl;
-    }
-
     TString command = "mkdir -p " + outputDirectory;
     system(command);
+
     //--------------------------------------------
 
-    TChain *chain = new TChain("", "");
-
-    EvtIsRealData = (fileName.Index("Data") >= 0);
+    rejectBTagEvents = lepSel.BeginsWith("S"); 
+    
+    fChain = new TChain("", "");
 
     TString fullFileName;
+    TString baseName;
 
+    canonizeInputFilePath(bonzaiDir, fileName,
+			  &fullFileName, &baseName);
+
+    fileName = baseName;
+
+    readCatalog(fullFileName, bonzaiDir, maxFiles, &lumi_, &xsec_,
+		fChain, &fBonzaiHeaderChain);
+    
+    getMcNorm();
+}
+
+void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
+				  TString* fullFileName, TString* baseName,
+				  TString* ext){
+    
     if(fileName.BeginsWith("/")){//absolute path
-	fullFileName = fileName;
-	fileName = gSystem->BaseName(fileName);
+	*fullFileName = fileName;
     } else{
-	fullFileName = bonzaiDir + "/" + fileName;
+	*fullFileName = bonzaiDir + "/" + fileName;
     }
-    //fileName is expected to contain only the basename,
+    
+    if(fullFileName->BeginsWith("/store/")){
+	fullFileName->Insert(0, "root://eoscms.cern.ch//eos/cms");
+    }
+    
+    //fileName is expected to contain only the basename without extension
     //remove the .root, .txt extensions:
-    if(fileName.EndsWith(".root")){
-	fileName.Remove(fileName.Length()-5, 5);
+    if(baseName){
+	*baseName = gSystem->BaseName(fileName);	
+	if(baseName->EndsWith(".root")){
+	    baseName->Remove(baseName->Length()-5, 5);
+	    if(ext) *ext = ".root";
+	}
+	if(baseName->EndsWith(".txt")){
+	    baseName->Remove(baseName->Length() - 4, 4);
+	    if(ext) *ext = ".txt";
+	}
     }
-    if(fileName.EndsWith(".txt")){
-	fileName.Remove(fileName.Length() - 4, 4);
-    }
+}
 
-
-    rejectBTagEvents = lepSel.BeginsWith("S"); 
-
-
-    regex_t normLine;
-    int rc =  regcomp(&normLine,"[#*][[:space:]]*norm[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
+void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, int maxFiles,
+			double* pLumi, double* pXsec,
+			TChain* pEventTreeChain, TChain* pBonzaiHeaderChain){
+    regex_t xsecLine;
+    int rc =  regcomp(&xsecLine,"[#*][[:space:]]*sample xsec[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
     if(rc){
 	char buffer[256];
-	regerror(rc, &normLine, buffer, sizeof(buffer));
+	regerror(rc, &xsecLine, buffer, sizeof(buffer));
 	buffer[sizeof(buffer)-1] = 0;
 	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
     }
-
+    
     regex_t lumiLine;
     rc =  regcomp(&lumiLine,"[#*][[:space:]]*lumi[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
     if(rc){
-	char buffer[256];
-	regerror(rc, &lumiLine, buffer, sizeof(buffer));
-	buffer[sizeof(buffer)-1] = 0;
-	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
+    	char buffer[256];
+    	regerror(rc, &lumiLine, buffer, sizeof(buffer));
+    	buffer[sizeof(buffer)-1] = 0;
+    	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
     }
-
-
-    if(fullFileName.BeginsWith("/store/")){
-	fullFileName.Insert(0, "root://eoscms.cern.ch//eos/cms");
-    }
+    
     
     if (isRootFile(fullFileName)){
         TString treePath = fullFileName + "/tupel/EventTree";
-        if (fileName.Index("mcatnlo") >= 0) treePath = fullFileName + "/tupel/EventTree";
-        if (fileName.Index("MG-MLM") >= 0) treePath = fullFileName + "/tupel/EventTree";
-        if (fileName.Index("Sherpa") >= 0) treePath = fullFileName + "/tupel/EventTree";
+	TString bonzaiHeaderPath = fullFileName + "/tupel/BonzaiHeader";
         cout << "Loading file: " << fullFileName << endl;
-        chain->Add(treePath);
+        if(pEventTreeChain) pEventTreeChain->Add(treePath);
+	if(pBonzaiHeaderChain) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
     } else {
 	int (*closeFunc)(FILE*);
 	FILE* f = eosOpen(fullFileName, &closeFunc);
@@ -2637,83 +2705,176 @@ ZJets::ZJets(const TString& lepSel_, TString fileName_, float lumiScale_, bool u
 	} else{
 	    std::cout << "Reading input files from catalog file " << fullFileName << "\n";
 	    string line; 
-	    int countFiles(0);
 	    char* buffer = 0;
 	    size_t buffer_size = 0;
+	    int ifile = 0;
+	    //if maxFiles = 0 only catalog header is read.
 	    while (!feof(f)){
 		ssize_t len = getline(&buffer, &buffer_size, f);
 		if(len  < 0) break;
 		char* line = buffer;
 		size_t n = len - 1;
 		//trim white spaces:
-		while(line[0] == ' ' || line[0] == '\t') ++line;
-		while(n!=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
+		while(line[0] == ' ' || line[0] == '\t') {++line; --n;}
+		while(n >=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
 		    line[n] = 0; --n;
 		}
-		
+
 		regmatch_t pmatch[2];
-		if(!regexec(&normLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+		if(pXsec && !regexec(&xsecLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
 		    line[pmatch[1].rm_eo] = 0;
-		    double norm = strtod(line + pmatch[1].rm_so, 0);
-		    if(norm == 0){
-			std::cerr << "Normalisation parameter value, " << line + pmatch[1].rm_so
+		    *pXsec = strtod(line + pmatch[1].rm_so, 0);
+		    if(*pXsec == 0){
+			std::cerr << "Value of parameter 'sample xsec', " << line + pmatch[1].rm_so
 				  << " found in file " << fullFileName << " is not valid.\n";
-		    } else{
-			std::cout << "Parameter norm found in file " << fullFileName
-				  << ". This normalisation factor will be  "
-				  << lumiScale << "*" << norm << " = " << lumiScale*norm << std::endl;
-			lumiScale *= norm;
 		    }
-		} else if(!regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+		}
+		else if(pLumi && !regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
 		    line[pmatch[1].rm_eo] = 0;
-		    lumi_ = strtod(line + pmatch[1].rm_so, 0);
-		    if(lumi_ == 0){
+		    *pLumi = strtod(line + pmatch[1].rm_so, 0);
+		    if(*pLumi == 0){
 			std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
 				  << " found in file " << fullFileName << " is not valid.\n";
 		    }
 		}
-
+		
 		//skip empty lines,  comment lines and metadata lines:
 		if (line[0] == 0 || line[0] == '#' || line[0] == '*') continue;
 		
-		countFiles++;
-		TString treePath = TString(line) + "/tupel/EventTree";
+		if(maxFiles == 0 || (pEventTreeChain == 0 && pEventTreeChain ==0)) break;
+		
+		//keep content of first column only:
+		char* p = line;
+		while(*p != 0 && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') ++p;
+		*p = 0;
+
+		//following check is done having read the header
+		//such that maxFiles = 0 can be used to read only
+		//the header.
+		if(maxFiles >= 0 && ifile >= maxFiles) break;
+		
+		TString treePath = TString(line) + "/tupel";
 		if(treePath[0]!='/'){
 		    treePath.Insert(0, TString(bonzaiDir) + "/");
 		}
 		if(treePath.BeginsWith("/store/")){
 		    treePath.Insert(0, "root://eoscms.cern.ch//eos/cms");
 		}
+		TString bonzaiHeaderPath = treePath + "/BonzaiHeader";
+		treePath += "/EventTree";
 		std::cout << "Adding path " << treePath << " to the tree chain.\n";
-		chain->Add(treePath);       
+		if(pEventTreeChain) pEventTreeChain->Add(treePath);
+		if(pBonzaiHeaderChain) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
+		++ifile;
 	    }//next line
 	    std::cout << "Closing catalog file " << fullFileName << "\n";
 	    if(buffer) free(buffer);
 	    closeFunc(f);
 	} //file opening succeeded
     }//is root file
-    regfree(&normLine);
+    regfree(&xsecLine);
     regfree(&lumiLine);
-    fChain = chain;
 }
+
+//#define weight_bug //to read bonzai version 2.
+
+void ZJets::getMcNorm(){
+    Int_t InEvtCount = 0;
+//#ifdef weight_bug
+//    std::vector<Double_t> InEvtWeightSums(1,0);
+//    std::vector<Double_t> EvtWeightSums(1,0);
+//    fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums[0]);
+//    fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums[0]);
+//#else
+    std::vector<Double_t>* InEvtWeightSums  = 0;
+    std::vector<Double_t>* EvtWeightSums = 0;
+    fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
+    fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
+    //#endif
+    //for(Long64_t i = 0; i < nfiles; ++ i){
+    int nheaders = fBonzaiHeaderChain.GetEntries(); //can be several in case files were merged with haddd
+    for(int ientry = 0; ientry < nheaders; ++ientry){
+	fBonzaiHeaderChain.GetEntry(ientry);
+	if(ientry == 0){
+	    InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+	    EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
+	    if(InEvtWeightSums->size() != EvtWeightSums->size()){
+		std::cerr << "InEvtWeightSums and EvtWeightSums branches "
+		    "of input BonzaiHeader tree have different size ("
+		    "resp. " << InEvtWeightSums->size() << " and "
+			  << EvtWeightSums->size() << ")\n";
+		abort();
+	    }
+	} 
+	if(InEvtWeightSums->size() != InEvtWeightSums_.size()){
+	    std::cerr << "Inconsistency in number of elements of "
+		      << " InEvtWeightSums branch of input files!\n";
+	    abort();
+	}
+	if(EvtWeightSums->size() != EvtWeightSums_.size()){
+	    std::cerr << "Inconsistency in number of elements of EvtWeightSums branch of input files!\n";
+	    abort();
+	}
+	for(size_t i = 0; i < InEvtWeightSums_.size(); ++i){
+	    InEvtWeightSums_[i] += (*InEvtWeightSums)[i];
+	}
+	for(size_t i = 0; i < EvtWeightSums_.size(); ++i){
+	    EvtWeightSums_[i] += (*EvtWeightSums)[i];
+	}
+	InEvtCount_ += InEvtCount;
+    }
+    //}
+
+    EvtCount_ = fChain->GetEntries();
+
+    if(InEvtWeightSums_.size() > 0){
+	std::cerr << "InEvtWeightSums_[0] = " <<	InEvtWeightSums_[0] << "\n";
+    }
+
+    if(EvtWeightSums_.size() == 0 || InEvtWeightSums_.size() == 0 || InEvtWeightSums_[0] == 0 ){
+	if(InEvtCount_){
+	    skimAccep_ = std::vector<double>(1, EvtCount_/InEvtCount_);
+	} else{
+	    std::cout << "Warning: InEvtCount is equal to 0. Event yield normalization might be wrong!" << std::endl;
+	}
+    } else{
+	skimAccep_ = std::vector<double>(InEvtWeightSums_.size());
+	for(unsigned i = 0; i < InEvtWeightSums_.size() && i < EvtWeightSums_.size(); ++i){
+	    skimAccep_[i] = EvtWeightSums_[i]/InEvtWeightSums_[i];
+	}
+    }
+    //    delete InEvtWeightSums;
+    //    delete EvtWeightSums;
+} 
 
 ZJets::~ZJets(){
     if (!fChain) return;
     delete fChain->GetCurrentFile();
 }
 
-string ZJets::CreateOutputFileName(TString pdfSet, int pdfMember, double muR, double muF)
+void ZJets::CreateOutputFileName(const TString& pdfSet, int pdfMember, double muR, double muF, int iJob){
+    outputFileName =  CreateOutputFileName(pdfSet, pdfMember, muR, muF, iJob,
+					   lepSel, sampleLabel_, useTriggerCorrection, systematics, direction,
+					   jetPtCutMin, jetEtaCutMax, outputDirectory);
+}
+
+string ZJets::CreateOutputFileName(const TString& pdfSet, int pdfMember, double muR, double muF, int iJob,
+				   const TString& lepSel, const TString& sampleLabel_,
+				   bool useTriggerCorrection, int systematics, int direction,
+				   int jetPtCutMin, int jetEtaCutMax, TString outputDirectory)
 {
     ostringstream result;
-    result << outputDirectory << fileName;
+    //    result << outputDirectory << fileName;
+    result << outputDirectory << lepSel << "_" << "13TeV" << "_" << sampleLabel_;
     result << "_TrigCorr_" << useTriggerCorrection;
     result << "_Syst_" << systematics;
     if (direction == 1) result << "_Up";
     else if (direction == -1) result << "_Down";
     result << "_JetPtMin_" << jetPtCutMin;
     result << "_JetEtaMax_" << jetEtaCutMax;
+    if(iJob > 0) result << "_" << iJob;
 
-    if (muR != 0 && muF != 0) result << "_muR_" << muR << "_muF_" << muF;
+    if (muR != 0 && muF != 0 && muR != 1 && muF != 1) result << "_muR_" << muR << "_muF_" << muF;
     if (pdfSet != "") result << "_PDF_" << pdfSet << "_" << pdfMember;
     if (pdfSet == "" && pdfMember != -1) result << "_NNPDF_" << pdfMember;
     //--- Add your test names here ---
@@ -2817,10 +2978,11 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
     // Set branch addresses and branch pointers
     fCurrent = -1;
     fChain->SetMakeClass(1);
-    if (fileName.Index("Data") < 0) {
-        fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
-        fChain->SetBranchAddress("EvtPuCnt", &EvtPuCnt, &b_EvtPuCnt);
-    }
+    fChain->SetBranchAddress("EvtIsRealData", &EvtIsRealData, &b_EvtIsRealData);
+    //    if (fileName.Index("Data") < 0) {
+    fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
+    fChain->SetBranchAddress("EvtPuCnt", &EvtPuCnt, &b_EvtPuCnt);
+    // }
     if (hasRecoInfo){
         fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);
         fChain->SetBranchAddress("EvtRunNum", &EvtRunNum, &b_EvtRunNum); 
@@ -2891,20 +3053,23 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
            // fChain->SetBranchAddress("pdfInfo_", &pdfInfo_, &b_pdfInfo_);
             fChain->SetBranchAddress("GNup", &GNup, &b_GNup);
         }
-      //  if (fileName.Index("Sherpa") >= 0 && fileName.Index("UNFOLDING") >= 0) {
-      //      fChain->SetBranchAddress("mcSherpaWeights_", &mcSherpaWeights_, &b_mcSherpaWeights_);
-      //  }
-        if (fileName.Index("mcatnlo") >= 0) {
-            fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
-        }
-        if(fileName.Index("Sherpa2") >= 0){
-            fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
-        }
+	//  if (fileName.Index("Sherpa") >= 0 && fileName.Index("UNFOLDING") >= 0) {
+	//      fChain->SetBranchAddress("mcSherpaWeights_", &mcSherpaWeights_, &b_mcSherpaWeights_);
+	//  }
+        //if (fileName.Index("mcatnlo") >= 0) {
+        //    fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
+        //}
+        //if(fileName.Index("Sherpa2") >= 0){
+        //    fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
+        //}
         //if((fileName.Index("Sherpa") >= 0 && fileName.Index("UNFOLDING") >= 0) || fileName.Index("mcatnlo") >= 0) {
         //    fChain->SetBranchAddress("weight_amcNLO_", &weight_amcNLO_, &b_weight_amcNLO_);
         //    fChain->SetBranchAddress("weight_amcNLO_sum_", &weight_amcNLO_sum_, &b_weight_amcNLO_sum_);
         //}
     }
+
+    fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
+
     Notify();
     cout << "Branches are properly initialized." << endl;
 }

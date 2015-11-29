@@ -37,7 +37,7 @@ function run(){
 	check_warden_stop && return
 	{ echo $d | underline; echo; } | tee -a .warden_summary
 	echo "Checking status of running tasks..."
-	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox") 
+	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox")
 	echo "Checking if some tasks need to be submitted..."
 	(cd "$d" && "$mydir/grow_baobabs" --new-jobs)
 	echo "Task summary:"
@@ -133,7 +133,7 @@ done
 if [ "$stop_request" = 1 ]; then
     [ -f "$warden_lock" ] || die "No lock file found. Cannot stop warden. Is warden running?"
     read h pid < "$warden_lock"
-    tmp="`ssh "$h" ps -p "$pid" -o comm h`"
+    tmp="`ssh "$h" ps -p "$pid" -o comm`"
     [ $? = 0 ] || die "Failed to check if warden is running."
     echo "$tmp" |  grep -q warden
     [ $? = 0 ] || { echo "Warden is not running."; exit 1; }
@@ -233,7 +233,7 @@ EOF
 
     t1=`date +%s`
     dt=$((60*cycle+t-t1))
-    echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up..."
+    echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up (my pid is $$)..."
     while [ "$dt" -gt 0 -a "$makeitnow" != 1 ]; do
         sleep 1
 	check_warden_stop && break

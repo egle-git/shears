@@ -29,6 +29,16 @@ opt.parseArguments()
 
 reapply_jec = False
 
+
+#Special settings depending on reco/era
+if opt.recoTag in [ "Run2015D-05Oct2015-v1", "Run2015D-PromptReco-v4" ]:
+  #JEC is not up-to-date with this miniaod version
+  dataGlobalTag = "74X_dataRun2_v5"
+  mcGlobalTag = '74X_mcRun2_asymptotic_v4'
+  reapply_jec = True
+  jec_file = False
+#endif recoTag
+
 #--------------------------------------
 #JEC
 #
@@ -54,7 +64,8 @@ if reapply_jec:
   else:
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    if isMC:
+    from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
+    if opt.isMC == 1:
       process.GlobalTag = GlobalTag(process.GlobalTag, mcGlobalTag, '')
       process.patJetCorrFactorsReapplyJEC = patJetCorrFactorsUpdated.clone(
       src = cms.InputTag("slimmedJets"),
@@ -74,8 +85,6 @@ if reapply_jec:
     #endif isMC
   #endif jec_file
 
-  from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetCorrFactorsUpdated
-
   from PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff import patJetsUpdated
   process.patJetsReapplyJEC = patJetsUpdated.clone(
     jetSource = cms.InputTag("slimmedJets"),
@@ -90,20 +99,21 @@ else:
 
 process.tupel = cms.EDAnalyzer("Tupel",
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
-  photonSrc   = cms.untracked.InputTag("slimmedPhotons"),
-  electronSrc = cms.untracked.InputTag("slimmedElectrons"),
-  muonSrc     = cms.untracked.InputTag("slimmedMuons"),
-  jetSrc      = cms.untracked.InputTag(jetSrc),
-  metSrc      = cms.untracked.InputTag("patMETsPF"),
-  genSrc      = cms.untracked.InputTag("prunedGenParticles"),
-  gjetSrc       = cms.untracked.InputTag('slimmedGenJets'),
+  photonSrc    = cms.untracked.InputTag("slimmedPhotons"),
+  electronSrc  = cms.untracked.InputTag("slimmedElectrons"),
+  muonSrc      = cms.untracked.InputTag("slimmedMuons"),
+  jetSrc       = cms.untracked.InputTag(jetSrc),
+  metSrc       = cms.untracked.InputTag("patMETsPF"),
+  genSrc       = cms.untracked.InputTag("prunedGenParticles"),
+  gjetSrc      = cms.untracked.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
-  muonMatch2    = cms.string( 'muonTriggerMatchHLTMuons2' ),
+  muonMatch2   = cms.string( 'muonTriggerMatchHLTMuons2' ),
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
   mSrcRho      = cms.untracked.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.untracked.InputTag('slimmedJets'), #same collection now BB 
-  metSource = cms.VInputTag("slimmedMETs","slimmedMETs","slimmedMETs","slimmedMETs"), #no MET corr yet
-  lheSource=cms.untracked.InputTag('source')
+  metSource    = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
+  lheSource    = cms.untracked.InputTag('source'),
+  puSrc        = cms.untracked.InputTag('slimmedAddPileupInfo')
 )
 
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector

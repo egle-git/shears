@@ -26,7 +26,8 @@
 #include "HistoSetZJets.h"
 
 #include "ConfigVJets.h"
-#include "rochcor.h"
+#include "rochcor2015.h"
+//#include "rochcor.h"
 
 
 using namespace std;
@@ -35,7 +36,7 @@ using namespace std;
 class ZJets: public HistoSetZJets {
     public :
         bool doRochester;
-        rochcor2012 *rmcor;
+        rochcor2015 *rmcor;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
         //TTree          *tree;

@@ -47,7 +47,7 @@ CXXFLAGS      += -MD -Wall
 # list of all source files
 SOURCES = ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc ConfigVJets.cc HistoSetZJets.cc ZJets.cc functions.cc
 SOURCES += MergeTop.cc standalone_LumiReWeighting.cc UnfoldingZJets.cc RecoComparison.cc
-SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc rochcor.cc
+SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc muresolution_run2.cc rochcor2015.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -62,7 +62,6 @@ all: runCombination \
 runRecoComparison \
 runVJets \
 runZJets \
-runZJets_newformat \
 runUnfoldingZJets \
 runMakeStatisticsTable \
 dispatcher
@@ -81,12 +80,6 @@ runZJets: $(OBJLIST) runZJets.o RooUnfold/libRooUnfold.so
 	$(CXX) -o runZJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runZJets.o: runZJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
-
-runZJets_newformat: $(OBJLIST_NEWFORMAT) runZJets_newformat.o RooUnfold/libRooUnfold.so
-	$(CXX) -o runZJets_newformat $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runZJets_newformat.o: runZJets_newformat.cc
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
 
 runRecoComparison: $(OBJLIST) runRecoComparison.o  RooUnfold/libRooUnfold.so

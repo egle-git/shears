@@ -623,7 +623,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     customizeLegend(legend, numbOfGenerator);
     //------------------
 
-    customizeCentral(grCentralSyst, legend, "Data");
+    customizeCentral(grCentralSyst, legend, "Data (25ns)");
     customizeCentral(grCentralStat, false);
     customizeCentral(grCentralSystRatio, true);
     customizeCentral(grCentralStatRatio, true);
@@ -684,8 +684,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetTextFont(52);
     latexLabel->DrawLatex(0.20,0.95,"Preliminary");
     latexLabel->SetTextFont(42);
-    latexLabel->DrawLatex(0.13,0.95-0.045,"19.6 fb^{-1} (8 TeV)");
-    latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.5) Jets");
+    latexLabel->DrawLatex(0.13,0.95-0.045,"1.26 fb^{-1} (13 TeV)");
+    latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
 
     if (canvasName.Contains("FirstJetPt50")){
         latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");

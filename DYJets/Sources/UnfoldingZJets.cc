@@ -50,7 +50,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         }
     }
 
-    double integratedLumi = (lepSel == "DMu") ? 21.468 : 21.468;
+    double integratedLumi = (lepSel == "DMu") ? 1263.886 : 1263.886;
     // Here we declare the different arrays of TFiles. 
     // fData is for the three data files: 
     // 0 - central, 1 - JES up, 2 - JES down
@@ -109,7 +109,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//fGen2 = new TFile(gen2File);
     }      
     //----------------------------------------------------------------------------------------- 
-    
+
     //----------------------------------------------------------------------------------------- 
     //--- Now run on the different variables ---
     for (int i = start; i < end; ++i) {
@@ -557,8 +557,8 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 
     int start = 1;
     if (title.Index("multiplicity", 0, TString::ECaseCompare::kIgnoreCase) >= 0) {
-	start = 2; 
-	//nBins--;
+        start = 1; 
+        //nBins--;
     }
     if (title.Index("jet $p_{\\text{T}}$", 0, TString::ECaseCompare::kIgnoreCase) >= 0) start = 3; 
 
@@ -716,8 +716,8 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     }
 
     nIter = min(nIter, 20);
-    //nIter = max(nIter, 2);
-    nIter = 4;
+    nIter = max(nIter, 2);
+   // nIter = 4;
 
     std::cout << "\n---------------------------------------------------------------------------------------------------------------\n-" << std::endl;
     std::cout << nIter << std::endl;
@@ -739,6 +739,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     line->Draw();
     hchi2->Write();
     chchi2->Write();
+    chchi2->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
     RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
     TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
     hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
@@ -827,6 +828,17 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     //    hUnfDataStatCov->Scale(1./(0.974*0.974));
     //    hUnfMCStatCov->Scale(1./(0.974*0.974));
     //}
+    if ("LumiUp" == name) {
+        hUnfData->Scale(1./1.12);
+        hUnfDataStatCov->Scale(1./(1.12*1.12));
+        hUnfMCStatCov->Scale(1./(1.12*1.12));
+    }
+    else if ("LumiDown" == name) {
+        hUnfData->Scale(1./0.88);
+        hUnfDataStatCov->Scale(1./(0.88*0.88));
+        hUnfMCStatCov->Scale(1./(0.88*0.88));
+    }
+
 
     //--- divide by bin width to get cross section ---
     int nBins = hUnfData->GetNbinsX();

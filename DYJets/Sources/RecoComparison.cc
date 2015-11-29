@@ -3,13 +3,13 @@
 #include <vector>
 #include <TFile.h>
 #include <TStyle.h>
-#include <TH1.h>
+#include <TH1.h> 
 #include <TH2.h>
 #include <THStack.h>
 #include <TCanvas.h>
 #include <TPad.h>
 #include <TPaveStats.h>
-#include <TLatex.h>
+#include <TLatex.h>   
 #include <TLegend.h>
 #include "getFilesAndHistogramsZJets.h"
 #include "ConfigVJets.h"
@@ -248,8 +248,8 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         // first pad plots
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
-        cmsColl->DrawLatex(0.13,0.82, "CMS");
-        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
+        cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
+	//        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
 	//        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
 	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
 	if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
@@ -257,13 +257,13 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
             if (!doPASPlots) {
                 ostringstream ptLegend;
                 if (vhNames[i].Index("JetPt_Zinc") > 0) {
-                    ptLegend << "p_{T}^{jet} > 20GeV,  |#eta^{jet}| < " << (0.1*jetEtaMax);
+                    ptLegend << "p_{T}^{jet} > 20 GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
                 }
                 else {
-                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |#eta^{jet}| < " << (0.1*jetEtaMax);
+                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
                 }
-                jetAlgo->DrawLatex(0.13,0.74, "anti-k_{t} jets,  R = 0.4");
-                jetCuts->DrawLatex(0.13,0.70, ptLegend.str().c_str());
+                jetAlgo->DrawLatex(0.13,0.68, "anti-k_{t} jets,  R = 0.4");
+                jetCuts->DrawLatex(0.13,0.63, ptLegend.str().c_str());
             }
             pad1->Draw();
         }

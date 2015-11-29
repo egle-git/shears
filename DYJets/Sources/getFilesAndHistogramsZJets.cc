@@ -82,7 +82,7 @@ void getFiles(TString histoDir, TFile *Files[], TString lepSel, TString energy, 
     //-----------------------------------------------
 
     vector<TString> Syst;
-    if (Name.Index("Data") >= 0) { // for data we have:
+    if (Name.Index("Data") >= 0 || Name.Index("data") >= 0 || Name.Index("DATA") >= 0) { // for data we have:
         Syst.push_back("0");                 //   0: central
         Syst.push_back("2_Up");              //   2 up: JES up
         Syst.push_back("2_Down");            //   2 down: JES down
@@ -181,7 +181,7 @@ void closeFiles(TFile *Files[])
     if (Files[0]) {
         TString fileName = Files[0]->GetName();
         int nFiles;
-	if (fileName.Index("Data") >= 0) {
+        if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
             nFiles = 3; 
         }
 	else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
@@ -233,11 +233,11 @@ TH1D* getHisto(TFile *File, const TString variable)
 void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
-    bool isData = (fileName.Index("Data") >= 0);
+    bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 
-    if (fileName.Index("Data") >= 0) {
+    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
         nFiles = 3; 
     }
     else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
@@ -317,13 +317,12 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
-    bool isData = (fileName.Index("Data") >= 0);
+    bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 
     ConfigVJets cfg;
-    
-    if (fileName.Index("Data") >= 0) {
+    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
         nFiles = 3; 
     }
     else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0){
@@ -342,7 +341,7 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
         //    since it is a global effect. The error is estimated to
         //    2.6% for 8 TeV.
 
-      double lumiErr = cfg.getD("lumiUnc");
+        double lumiErr = cfg.getD("lumiUnc");
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH2D*) histograms[0]->Clone();
@@ -431,7 +430,7 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 {
     TString fileName = Files[0]->GetName();
     int nFiles;
-    if (fileName.Index("Data") >= 0) nFiles = 3;
+    if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3;
     else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;
     else nFiles = 7;
 

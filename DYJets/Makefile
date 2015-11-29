@@ -12,7 +12,11 @@ endif
 
 # define LHAPDF library Path accroding to the host 
 ifeq ($(HOST), "lxplus")
-  LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
+  ifeq ($(LHAPDF_DATA_PATH),)
+    LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
+  else
+    LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
+  endif
 else
   ifeq ($(HOST), "iihe")
     LHAPDFPATH = /user/aleonard/LHAPDF/
@@ -36,8 +40,9 @@ SRCDIR = Sources/
 INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
 
 CXX           = g++ -std=c++0x
-CXXFLAGS      = -g -Wall -fPIC   	
-CXXFLAGS      += $(ROOTCFLAGS) 
+CXXFLAGS      = -g -fPIC -O0   	
+CXXFLAGS      += $(ROOTCFLAGS)
+CXXFLAGS      += -MD -Wall
 
 # list of all source files
 SOURCES = ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc ConfigVJets.cc HistoSetZJets.cc ZJets.cc functions.cc
@@ -46,6 +51,8 @@ SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc roc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
+DEPS    = $(SRCLIST:.cc=.d)
+
 
 OBJLIST_NEWFORMAT = $(patsubst Sources/ZJets.o, Sources/ZJets_newformat.o, $(OBJLIST))
 
@@ -122,3 +129,5 @@ clean:
 
 echo_%:
 	@echo $* = $($*)
+
+-include $(DEPS)

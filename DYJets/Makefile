@@ -1,6 +1,6 @@
-# =============================== 
-# Makefile for ZJets Analysis 
-# =============================== 
+# ===============================
+# Makefile for ZJets Analysis
+# ===============================
 
 # Determine if working at CERN on lxplus machine or at IIHE on m machines
 HOST = $(shell hostname -f | grep cern)
@@ -10,7 +10,7 @@ else
     HOST = "iihe"
 endif
 
-# define LHAPDF library Path accroding to the host 
+# define LHAPDF library Path accroding to the host
 ifeq ($(HOST), "lxplus")
   ifeq ($(LHAPDF_DATA_PATH),)
     LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
@@ -25,7 +25,7 @@ endif
 
 # get Root compiler flags
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
-ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags) 
+ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags)
 
 LIB = RooUnfold LHAPDF
 LIBLIST = $(addprefix -l, $(LIB))
@@ -40,7 +40,7 @@ SRCDIR = Sources/
 INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
 
 CXX           = g++ -std=c++0x
-CXXFLAGS      = -g -fPIC -O0   	
+CXXFLAGS      = -g -fPIC -O0
 CXXFLAGS      += $(ROOTCFLAGS)
 CXXFLAGS      += -MD -Wall
 
@@ -62,6 +62,7 @@ all: runCombination \
 runRecoComparison \
 runVJets \
 runZJets \
+runZJets_newformat \
 runUnfoldingZJets \
 runMakeStatisticsTable \
 dispatcher
@@ -74,13 +75,19 @@ runVJets: $(OBJLIST) runVJets.o RooUnfold/libRooUnfold.so
 	$(CXX) -o runVJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runVJets.o: runVJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
+	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
 
 runZJets: $(OBJLIST) runZJets.o RooUnfold/libRooUnfold.so
 	$(CXX) -o runZJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runZJets.o: runZJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
+	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
+
+runZJets_newformat: $(OBJLIST_NEWFORMAT) runZJets_newformat.o RooUnfold/libRooUnfold.so
+	$(CXX) -o runZJets_newformat $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runZJets_newformat.o: runZJets_newformat.cc
+	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
 
 runRecoComparison: $(OBJLIST) runRecoComparison.o  RooUnfold/libRooUnfold.so
 	$(CXX) -o runRecoComparison $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
@@ -115,8 +122,8 @@ dispatcher.o: dispatcher.cc
 RooUnfold/libRooUnfold.so:
 	$(MAKE) -C RooUnfold
 
-# =========================================================================== 
-clean: 
+# ===========================================================================
+clean:
 	rm -f *.o Sources/*.o
 	$(MAKE) -C RooUnfold clean
 

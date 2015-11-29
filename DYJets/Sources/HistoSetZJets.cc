@@ -192,6 +192,8 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
     int nJetsMass_Zinc2jet(19);
     double jetsMass_Zinc2jet[20] = {0, 25, 52, 81, 112, 145, 180, 217, 256, 297, 340, 385, 432, 481, 532, 585, 640, 700, 830, 1000}; 
 
+    Lumi                                = newTH1D("Lumi", "Integrated luminosity (fb^{-1})", "", 1, 0, 1); 
+
     NumberPFcandidates                  = newTH1D("NumberPFcandidates",                  "NumberPFcandidates",           "Number of lepton PF candidates",    20, -0.5, 19.5);
 
     ZMass_lowDeltaR                     = newTH1D("ZMass_lowDeltaR",                     "ZMass_lowDeltaR",                             Mll,    120, 50, 169);

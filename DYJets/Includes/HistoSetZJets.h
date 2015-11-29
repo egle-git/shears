@@ -29,6 +29,7 @@ class HistoSetZJets {
         TH2D* newTH2D(string, string, int, double, double, int, double*);
         TH2D* newTH2D(string, string, int, double, double, int, double, double);
 
+	TH1D *Lumi;
         TH1D *NumberPFcandidates;
         TH1D *ZMass_lowDeltaR;
         TH1D *ZMass_Zinc0jet;

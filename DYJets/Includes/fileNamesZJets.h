@@ -1,53 +1,56 @@
+//-*- c-basic-offset: 4; -*-
 #ifndef _FILENAMESZJETS_h_
 #define _FILENAMESZJETS_h_
 
 #include <TString.h>
 
 //-- directory of input root files --------------------
-const TString FILESDIRECTORY("HistoFilesSep/");
+const TString FILESDIRECTORY("HistoFiles/");
 //---------- lets add basic information on samples inot common struct -------------------------------------------
 struct processInfoStruct{
     TString name;
+    char    merge; //'+' indicates the sample be merged to the next one
+                   //until '=' is found. Line with '=' refers to the sample
+                   //resulting from the merge.
     double NEvents, xsec, xsecFrac, xsecError;
     int colorAN, colorPAS;
     TString legendAN, legendPAS;
 };
 
-const int DATA(0);
-const int DYJETS(11); // Exclusive files
-const processInfoStruct Samples[] = {
-    //--  Name  ------------------------------- #events -- xsec - branch - xsec error (%) - colorAN - colorPAS - name on legend
-    {"Data_dR",                                  1,          1.,      1,         1,             kBlack,    kBlack,    " Data", " Data"},
-/* 
-   {"DYJetsToLL_FromTau_50toInf_UNFOLDING_dR",  30459503.,  3531.8,  1,         0.033,         kRed+1,    kRed+1,    " DYtautau", " Z/#gamma^{*} #rightarrow #tau#tau and W"},
-    {"WJetsALL_MIX_UNFOLDING_dR",                76102995.,  36864.,  1,         0.03,          kGreen+3,  kRed+1,    " WJets", ""},
-*/
-    {"TTJets_dR",		                     6923652.,   234.,    1,         0.10,          kBlue,   kBlue,   " TTJets", " t#bar{t} and single top"},  
-    {"Top_dR",		                             1.,         1,       1,         0.04,          kMagenta,  kMagenta,  " Single Top", ""},
-    {"ZZ_TuneCU",		                     1.,         1,       1,         0.04,          kOrange,   kOrange,   " ZZ", ""},
-    {"WWTo2L2Nu",		                     1.,         1,       1,         0.04,          kViolet+5, kViolet+5,   " WW", ""},
-    {"WJetsToLN",		                     1.,         1,       1,         0.04,          kAzure+10, kAzure+10,   " WJets", ""},
-    {"WZJets",		                             1.,         1,       1,         0.04,          kRed+1,  kRed+1,   " WZ", ""},
-/*
-    {"ZZJets2L2Nu_dR",		                     954911.,    17.654,  0.04039,   0.04,          kAzure+4,  kAzure+4,  " ZZJets2L2Nu", " WW, WZ, ZZ"},
-    {"ZZJets4L_dR",		                         4807893.,   17.654,  0.010196,  0.04,          kAzure+1,  kAzure+4,  " ZZJets4L", ""},
-    {"ZZJets2L2Q_dR",		                     1936727.,   17.654,  0.14118,   0.04,          kAzure-2,  kAzure+4,  " ZZJets2L2Q", ""},
-    {"WZJets3LNu_dR",		                     1995334.,   33.21,   0.032887,  0.04,          kBlue,     kAzure+4,  " WZJets3LNu", ""},
-    {"WZJets2L2Q_dR",		                     3215990.,   33.21,   0.068258,  0.04,          kBlue-4,   kAzure+4,  " WZJets2L2Q", ""},
-    {"WWJets2L2Nu_dR",		                     1933235.,   54.838,  0.10608 ,  0.04,          kBlue-6,   kAzure+4,  " WWJets2L2Nu", ""},
-*/  
- //   {"Test",          100000.,    2008.4,  1,         0.04,          kPink, kPink, " DYJets", ""}
-  {"DYJetsToLL_MIX_50toInf_UNFOLDING_dR",          100000.,    2008.4,  1,         0.04,          kPink, kPink, " DYJets", " Z/#gamma^{*} #rightarrow"}, 
-////    {"DYJetsToLL_50toInf_UNFOLDING_dR",          30459503.,  3531.8,  1,         0.04,          kAzure+10, kOrange-3,  " DYJets"}, 
-};
-
 //--- first element must point to the data
 //--- last element must point to the MC Signal
-//AG
-const unsigned int NFILESDYJETS(8); // (4)
-const unsigned int NBGDYJETS(NFILESDYJETS-2);
-//const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 10, 4, 9, 3, 5, 8, 7, 6, 2, 11};
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 4, 9, 3, 5, 8, 7, 11};
+const processInfoStruct Samples[] = {
+    //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorAN - colorPAS - name on legend
+    /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data", " Data"},
+    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.10,     kBlue,     kBlue,     " TT",   " t#bar{t}"},  
+    /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},
+    /* 3*/{"ST_tch",    '+',     1.,       1.,      1,  0.06,     kBlue+4,   kBlue+4,   " Single Top t-ch", " Single Top t-ch"},
+    /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W", " #bar{t}W"},
+    /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW", " t#bar{t}"},  
+    /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single Top", "Single top"},
+    /* 7*/{"ZZ",        ' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ", " ZZ"},
+    /* 8*/{"WWTo2L2Nu", ' ',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
+    /* 9*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kAzure+10, kAzure+10, " WJets", " W"},
+    /*10*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
+    /*11*/{"DYJets_UNFOLDING", ' ',     1.,       1.,      1,  0.06,     kPink,     kPink,     " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
+};
+
+const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
+const int DATA(0);
+const int DYJETS(NSamples - 1); // Signal MC is the last sample of the list.
+
+/** Total number of samples after sample grouping, including real data, background MC, and signal MC
+ */
+const unsigned int NFILESDYJETS = 8;
+
+/** Number of background MC samples: all minus data and signal MC
+ */
+const unsigned int NBGDYJETS = NFILESDYJETS - 2;
+
+/** List of indices of samples from Samples to be used for ZJets analysis
+ * When samples are grouped, only the merged sample is included in this list.
+ */
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 8, 9, 10, 11};
 
 
 //AG
@@ -56,7 +59,13 @@ const unsigned int FilesDYJets[NFILESDYJETS] = {0, 4, 9, 3, 5, 8, 7, 11};
 //const TString DYAMCATNLOLEGEND("MG5_aMC + PY8 (#leq 2j NLO + PS)");
 //const TString DYSHERPA2FILENAME("DYJets_Sherpa2_0_16000");
 //const TString DYSHERPA2LEGEND("SHERPA 2 (#leq 2j NLO 3,4j LO + PS)");
-const TString DYSHERPA14FILENAME("DYJets_Sherpa_Bugra_1_13_UNFOLDING");
+
+//DYSHERPA14FILENAME: alternate signal sample to use to estimate
+//unfolding systematic uncertainties. Use empty string to disable
+//the calculaiton
+const TString DYSHERPA14FILENAME("");
+//const TString DYSHERPA14FILENAME("DYJets_Sherpa_Bugra_1_13_UNFOLDING");
+
 const TString DYSHERPA14LEGEND("Sherpa1.4 LO");
 //const TString DYMGPYTHIA8FILENAME("DYJetsToLL_M-50_TuneCUETP8M1_8TeV-MG-MLM-Bonzai");
 //const TString DYMGPYTHIA8LEGEND("MG+PYthia8 legend");

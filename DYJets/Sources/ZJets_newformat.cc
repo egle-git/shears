@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <regex.h>
 #include "ConfigVJets.h"
+#include "rochcor2015.h"
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
@@ -37,8 +38,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //--- Random generator necessary for BTagging ---
     TRandom3* RandGen = new TRandom3();
     //--------------------------------------------
-    doRochester = false;
-    //    rmcor = new rochcor2012();
+    doRochester = true;
+    rmcor = new rochcor2015();
 
     //--- Initialize PDF from LHAPDF if needed ---
     if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
@@ -102,7 +103,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
   /*  standalone_LumiReWeighting puWeight(lepSel, 2013);
     if (systematics == 1) puWeight = standalone_LumiReWeighting(lepSel, 2013, direction);
-*/
+  */
     int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
     if (systematics == 2) scale =  direction;
 
@@ -525,7 +526,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         }
                     }   
 
-                    if ((genLep.v.Pt() >= lepPtCutMin && fabs(genLep.v.Eta()) <= 0.1*lepEtaCutMax && abs(genLep.charge) > 0)  
+                    if ((genLep.v.Pt() >= lepPtCutMin && fabs(genLep.v.Eta()) <= 0.1*lepEtaCutMax && genLep.charge != 0)  
                            || ((lepSel == "SMu" || lepSel == "SE") && genLep.charge == 0)) {   
                           genLeptons.push_back(genLep);
                     }
@@ -556,14 +557,13 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 genEWKBoson = genLeptons[0].v + genLeptons[1].v;
 
                 // apply charge, mass and eta cut
-               //CommentAG: we don't pass the line below since genLeptons[i].charge is always > 0  
                 if (genLeptons[0].charge * genLeptons[1].charge < 0 && genEWKBoson.M() > ZMCutLow && genEWKBoson.M() < ZMCutHigh) {
                     passesgenLeptonCut = 1;
                 }
                 //--- if there are taus we don't want the gen level
                 if (countTauS3 > 0 && fileName.Index("Bugra") < 0 && fileName.Index("MG5") < 0) passesgenLeptonCut = 0;
-            }
-            else if ((lepSel == "SMu" || lepSel == "SE") && (ngenLeptons >= 2)) {
+	     }
+	     else if ((lepSel == "SMu" || lepSel == "SE") && (ngenLeptons >= 2)) {
 
 
                 if (abs(genLeptons[0].charge) > 0 && genLeptons[1].charge == 0) {
@@ -579,7 +579,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 genMT = sqrt(2 * genLeptons[0].v.Pt() * genMET.Pt() * (1 - cos(genLeptons[0].v.Phi() - genMET.Phi())));
 
 
-                // apply transver mass and MET cut
+                // apply transverse mass and MET cut
                 if (genMT > MTCutLow && genMET.Pt() > METCutLow) passesgenLeptonCut = 1;
                 //--- if there are taus we don't want the gen level
                 if (countTauS3 > 0) passesgenLeptonCut = 0;
@@ -588,11 +588,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
         } // end of hasGenInfo
 
-        //=======================================================================================================//
+
+	//=======================================================================================================//
         //   ------- lepton energy smearing ------
         //==========================================//
-        // CommentAG: we don't enter this block since ngenLeptons < 2
-	
         if (hasRecoInfo && hasGenInfo){
             if((lepSel == "DMu" || lepSel == "DE") && nLeptons >= 2 && ngenLeptons >= 2){  
 
@@ -877,7 +876,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 }
                 if (nGoodGenJets >= 1){
                     nGenEventsVInc1Jets++;
-                    genAbsZRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
                     genAbsFirstJetRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
                     genSumZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
                     genDifZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
@@ -975,9 +973,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     genZAbsRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()), genWeight);
                     genZEta_Zinc1jet->Fill(genEWKBoson.Eta(), genWeight);
                     genFirstJetEta_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), genWeight);
+                    genAbsZRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
+		    
                     genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight);
                     genFirstJetEtaHigh_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), genWeight);
-                    genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight);
                     genFirstJetRapidityHigh_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight);
                     genJetsHT_Zinc1jet->Fill(genJetsHT, genWeight);
                     genSumZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), genWeight);
@@ -1474,7 +1473,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 FirstJetEta_Zinc1jet->Fill(fabs(jets[0].v.Eta()), weight);
                 FirstJetAbsRapidity_Zinc1jet->Fill(fabs(jets[0].v.Rapidity()), weight);
                 FirstJetEtaHigh_Zinc1jet->Fill(fabs(jets[0].v.Eta()), weight);
-                FirstJetAbsRapidity_Zinc1jet->Fill(fabs(jets[0].v.Rapidity()), weight);
                 FirstJetRapidityHigh_Zinc1jet->Fill(fabs(jets[0].v.Rapidity()), weight);
                 FirstJetEtaFull_Zinc1jet->Fill(jets[0].v.Eta(), weight);
                 FirstJetPhi_Zinc1jet->Fill(jets[0].v.Phi(), weight);
@@ -2495,15 +2493,15 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
                 0);  // CommentAG
 
 
-	//        float qter = 1.0;
-        /*        if (doRochester) {
-                  if (!EvtIsRealData) {
-                  rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
-                  }
-                  else {
-                  rmcor->momcor_data(mu.v, (float)mu.charge, 0, qter);
-                  }
-                  } */
+	float qter = 1.0;
+	if (doRochester) {
+	    if (!EvtIsRealData) {
+		rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
+	    }
+	    else {
+		rmcor->momcor_data(mu.v, (float)mu.charge, 0, qter);
+	    }
+	}
 
         bool muPassesPtCut(mu.v.Pt() >= (lepPtCutMin*0.8));
         bool muPassesEtaCut(fabs(mu.v.Eta()) <= 0.1*lepEtaCutMax);

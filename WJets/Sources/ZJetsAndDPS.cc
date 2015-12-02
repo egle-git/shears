@@ -24,8 +24,6 @@
 #include "HistoSet.h"
 #include "ZJetsAndDPS.h"
 
-// Original code by Apichart Hortiangtham
-// Modified for 13 TeV by Kadir Ocalan
 
 using namespace std;
 
@@ -50,7 +48,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     }
     //--------------------------------------------
 
-    //--- Check weither it is 7 TeV or 13 TeV ---
+    //--- Check weither it is 8 TeV or 13 TeV ---
     string energy = getEnergy();
     //--------------------------------------
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -106,7 +104,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //====================================//
     table LeptIso, LeptID, LeptTrig, Ele_Rec;
     table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
-    if (energy == "8TeV"){
+    if (energy == "13TeV"){
         if (leptonFlavor == "Electrons" || leptonFlavor == "SingleElectron"){
             /// electron SF
             table Ele_Rec_8TeV("EfficiencyTables/Ele_SF_Reconstruction_2012.txt");
@@ -116,14 +114,15 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             LeptID = SC_Ele_2012EA;
         }
         if (leptonFlavor == "SingleMuon")  {
-            // Single Muon SF for 2012 data (Rereco on Jan2013)
-            table SF_Muon_IDTight_Rereco("EfficiencyTables2012/Muon_IDTight_Efficiencies_ReReco2012_Eta_Pt.txt");
-            table SF_Muon_ISOTight_ReReco("EfficiencyTables2012/Muon_ISOTight_forTight_Efficiencies_ReReco2012_Eta_Pt.txt");
-            table SF_TrigIsoMu24eta2p1_ReReco("EfficiencyTables2012/Efficiency_SF_ReReco2012_IsoMu24_eta2p1.txt");
+            // Single Muon SFs measured using 13 TeV 25 ns samples (run 2015D golden JSON, 1280 /pb)
+
+            table SF_Muon_TightID_ReReco("EfficiencyTables/SMu_SFs_TightId_13TeV_EtaPt.txt");
+            table SF_Muon_TightISO_ReReco("EfficiencyTables/SMu_SFs_TightISO_13TeV_EtaPt.txt");
+            table SF_Muon_HLTIsoMu20IsoTkMu20_ReReco("EfficiencyTables/SMu_SFs_HLTIsoMu20IsoTkMu20_13TeV_EtaPt.txt");
             
-            LeptID = SF_Muon_IDTight_Rereco;
-            LeptIso = SF_Muon_ISOTight_ReReco;
-            LeptTrig = SF_TrigIsoMu24eta2p1_ReReco;
+            LeptID = SF_Muon_TightID_ReReco;
+            LeptIso = SF_Muon_TightISO_ReReco;
+            LeptTrig = SF_Muon_HLTIsoMu20IsoTkMu20_ReReco;
         }
     }
     //==========================================================================================================//
@@ -226,8 +225,6 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //double mixingWeightsDY_DE[4] = {0.1929798803, 0.07896770167, 0.04960555955, 0.03619125322}; // here we match only those partons that pass the gen cuts
     double mixingWeightsWJ_SMu[4] ={0.366713,  0.1119323,  0.07641136,  0.03803325};
     double mixingWeightsWJ_SE[4] ={0.3667127984048746, 0.111932213229137, 0.076411344088767, 0.0380331330318}; // this need to be updated
-    // Bugras weights: The weights: {2.4630522,0.473822,1.091304,0.121762,0.092715}
-    //                  Events:      9566350,  2820770 ,969224   ,307529  ,133303
 
     //==========================================================================================================//
     // Start looping over all the events //
@@ -436,7 +433,6 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     //KObool muPassesEMuAndWJetsTrig( whichTrigger == 1 || whichTrigger == 16 || whichTrigger == 17 || whichTrigger == 32 || whichTrigger == 33 || whichTrigger == 48 || whichTrigger ==  49  ) ;
                     //KObool muPassesAnyTrig((doZ && ((energy == "7TeV" && whichTrigger > 0) || (energy == "8TeV" && whichTrigger > 7 && !muPassesEMuAndWJetsTrig))) ||
                            //KO (doW && whichTrigger % 2 == 1) || (doTT && whichTrigger >= 16)); // 8TeV comment: Mu17Mu8Tk = 4; Mu17Mu8 = 8 
-                    /// for files obtained form bugra
                    //KO if (fileName.find("DYJets_Sherpa_UNFOLDING_dR_5311") != string::npos && whichTrigger > 0) muPassesAnyTrig = 1; 
 
                     // select the good muons only

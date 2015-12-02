@@ -28,7 +28,7 @@ void runMakeTable()
 
 void makeEfficiencyTable(string workingPoint)
 {
-   TFile *effFile = new TFile("Muon_ID_iso_Efficiencies_Run_2012ABCD_53X.root", "READ");
+   TFile *effFile = new TFile("SingleMuonTrigger_Z_RunD_Reco74X_Nov20.root", "READ");
    string endName = "_2012ABCD";
    string absetaBins[3] = {"<0.9", "0.9-1.2", "1.2-2.1"};
   

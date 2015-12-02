@@ -24,7 +24,7 @@
 #include "functions.h"
 #include "getFilesAndHistogramsZJets.h"
 #include "HistoSetZJets.h"
-#include "rochcor.h"
+#include "rochcor2015.h"
 
 
 using namespace std;
@@ -33,10 +33,11 @@ using namespace std;
 class ZJets: public HistoSetZJets {
     public :
         bool doRochester;
-        rochcor2012 *rmcor;
+        rochcor2015 *rmcor;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 	TChain          fBonzaiHeaderChain;
+	TChain          fBonzaiBitFieldsChain;
         //TTree          *tree;
         Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -57,6 +58,7 @@ class ZJets: public HistoSetZJets {
    ULong64_t       TrigHltDiMu;
    ULong64_t       TrigHltEl;
    ULong64_t       TrigHltDiEl;
+   ULong64_t*      ourTrig_;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -78,6 +80,7 @@ class ZJets: public HistoSetZJets {
    vector<float>   *GLepBarePhi;
    vector<float>   *GLepBareE;
    vector<int>     *GLepBareId;
+   vector<bool>    *GLepBarePrompt;
    vector<int>     *GLepBareSt;
    vector<int>     *GLepBareMomId;
    vector<float>   *GLepSt3Pt;
@@ -272,6 +275,7 @@ class ZJets: public HistoSetZJets {
    TBranch        *b_GLepBarePhi;   //!
    TBranch        *b_GLepBareE;   //!
    TBranch        *b_GLepBareId;   //!
+   TBranch        *b_GLepBarePrompt;   //!
    TBranch        *b_GLepBareSt;   //!
    TBranch        *b_GLepBareMomId;   //!
    TBranch        *b_GLepSt3Pt;   //!
@@ -468,7 +472,7 @@ class ZJets: public HistoSetZJets {
         void     Show(Long64_t entry = -1);
 	static void readCatalog(const TString& fileName, const TString& bonzaiDir, int maxFiles = -1,
 				double* pLumi = 0, double* pXsec = 0, TChain* pChain = 0,
-				TChain* pBonzaiHeaderChain = 0);
+				TChain* pBonzaiHeaderChain = 0, TChain* pBonzaiBitFieldsChain = 0);
 	static void canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
 					  TString* fullFileName, TString* baseName = 0,
 					  TString* ext = 0);
@@ -481,6 +485,12 @@ class ZJets: public HistoSetZJets {
 	
 
 	void getMcNorm();
+
+	/** Sets the trigger mask based on triggers parameter read
+	 * from the configuration file.
+	 * @return true if succesful false otherwise
+	 */
+	bool setTriggerMask();
 	
 	TString outputDirectory;
 	TString outputFileName;
@@ -513,6 +523,10 @@ class ZJets: public HistoSetZJets {
 	int maxFiles_;
 	
 	double processedEventMcWeightSum_;
+	ULong64_t triggerMask_;
+	bool triggerMaskSet_;
+	double muIso_;
+	double eIso_;
 };
 #endif
 

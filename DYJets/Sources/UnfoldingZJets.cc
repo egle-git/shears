@@ -17,6 +17,7 @@
 #include "variablesOfInterestZJets.h"
 #include "UnfoldingZJets.h"
 #include "PlotSettings.h"
+#include "fixYscale.C"
 
 using namespace std;
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
@@ -50,7 +51,6 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
         }
     }
 
-    double integratedLumi = (lepSel == "DMu") ? 1263.886 : 1263.886;
     // Here we declare the different arrays of TFiles. 
     // fData is for the three data files: 
     // 0 - central, 1 - JES up, 2 - JES down
@@ -65,6 +65,16 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     //--- Open all files ---------------------------------------------------------------------- 
     getAllFiles(histoDir, lepSel, "13TeV", jetPtMin, jetEtaMax, fData, fDYJets, fBg, NBGDYJETS);
     //----------------------------------------------------------------------------------------- 
+
+    //reads integrated luminosity
+    double integratedLumi = -1;
+    TH1* Lumi = 0;
+    if(fData[0]) fData[0]->GetObject("Lumi", Lumi);
+    if(Lumi) integratedLumi = Lumi->GetBinContent(1);
+    else {
+      cerr << "Error: Lumi histogram was not found.\n";
+      return;
+    }
 
     TFile *fSheUnf = 0;
     if (DYSHERPA14FILENAME.Length() > 0 ){
@@ -206,6 +216,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	return;
       }
 
+      bool logy = VAROFINTERESTZJETS[i].log;
+
       int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
 
 
@@ -225,12 +237,19 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	hRecDataMinusFakes->Add(hFakDYJets[iSyst], -1);
 
 	if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
+	std::cout << "Starting unfolding of " << variable << " "
+		  << name[iSyst] << " for  "<< lepSel << " channel." << "\n";
+	if(hRecDataMinusFakes->GetEntries() == 0){
+	  std::cerr << "Warning: histogram " << hRecDataMinusFakes->GetName()
+		    << " has no entries. Its unfolding will be skipped.\n";
+	  continue;
+	}
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
-				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi);
+				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy);
 
 	//--- save the unfolded histograms ---
 	outputRootFile->cd(); 
-	hUnfData[iSyst]->Write();
+	if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
       }
       //----------------------------------------------------------------------------------------- 
 
@@ -286,11 +305,12 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       crossSectionPlot->SaveAs(outputFileName + ".eps");
       crossSectionPlot->SaveAs(outputFileName + ".ps");
       crossSectionPlot->SaveAs(outputFileName + ".C");
+      crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
 
-      createSystPlots(outputFileName, variable, lepSel, hUnfData);
+      createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
 
       //--- print out break down of errors ---
-      for (int i = 2; i <= 11; ++i) {
+      for (int i = 2; i <= nCovs; ++i) {
 	cout << hUnfData[0]->GetBinContent(i);
 	for (int j = 0; j <= 11; ++j) {
 	  if(hCov[j]){
@@ -344,7 +364,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
 }
 
-void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[])
+void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[], bool logy)
 {
 
   // 0 - Central, 
@@ -386,7 +406,7 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 	pad1->SetRightMargin(0.03);
 	pad1->SetLeftMargin(0.15);
 	pad1->SetTicks();
-	pad1->SetLogy();
+	pad1->SetLogy(logy ? kTRUE : kFALSE);
 	pad1->Draw();
 	pad1->cd();
 
@@ -401,6 +421,7 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 	leg->AddEntry(hDown, syst[i/2] + " Down", "l");
 	leg->Draw();
 	pad1->Draw();
+	fixYscale();
 	c->cd();
 
 	TPad *pad2 = new TPad("pad2", "pad2", 0, 0, 1, 0.3);
@@ -434,7 +455,8 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 	hCent->GetYaxis()->SetLabelSize(0.08);
 	hCent->GetYaxis()->SetLabelOffset(0.014);
 	hCent->GetXaxis()->SetTitleSize(0.13);
-	hCent->GetXaxis()->SetLabelSize(0.13);
+	//hCent->GetXaxis()->SetLabelSize(0.13);
+	hCent->GetXaxis()->SetLabelSize(0.08);
 	hCent->GetXaxis()->SetLabelOffset(0.012);
 
 	hCent->DrawCopy("e");
@@ -446,6 +468,7 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 
 	TString systStr = syst[i/2];
 	if (systStr == "S.F.") systStr = "SF";
+	system("mkdir SystPlot");
 	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".png");
 	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".ps");
 	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".eps");
@@ -523,6 +546,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     crossSectionPlot->SaveAs(outputFileName + ".eps");
     crossSectionPlot->SaveAs(outputFileName + ".ps");
     crossSectionPlot->SaveAs(outputFileName + ".C");
+    crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
     createTable(outputFileName, lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc);
 }
 
@@ -629,7 +653,7 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 
 int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecDataMinusFakes, 
 	       TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, 
-	       double integratedLumi)
+	       double integratedLumi, bool logy)
 {
     //--- make sure we use OverFlow (should already be set to true) ---
     resp->UseOverflow();
@@ -650,8 +674,6 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
     std::cout << "-----------------------" << std::endl;
     TString variable = TString(hRecDataMinusFakes->GetName());
-
-
     TFile *f = new TFile("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE"); 
     f->cd();
     int finalNIter = -1;
@@ -670,6 +692,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 	RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
+	//	RObjectForDataTmp->UseFlatPrior(true);
 	int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
 	RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	std::cout << "niter = " << i << std::endl;
@@ -703,6 +726,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	hmes->Write();
 
 	double mychi2 = MyChi2Test(hfoldUnfData, hRecDataMinusFakesBis, nBinsToSkip);
+	std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
 	hchi2->SetBinContent(i, mychi2);
 	if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0"); 
 	hUnfDataBis->Write();
@@ -710,9 +734,10 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	if (mychi2 < 1./sqrt(2) && finalNIter < 0) {
 	    nIter = i;
 	    finalNIter = i;
-	    std::cout << "Will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
+	    std::cout << "We will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
 	    //break;
 	}
+	if(finalNIter > 0 && nIter > 3) break;
     }
 
     nIter = min(nIter, 20);
@@ -781,7 +806,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     TCanvas *chmodD = new TCanvas("chmodD", "chmodD", 600, 600);
     chmodD->cd();
     chmodD->SetGrid();
-    chmodD->SetLogy();
+    chmodD->SetLogy(logy ? kTRUE : kFALSE);
     hmodD->DrawCopy();
     arrowSvd->Draw();
     chmodD->Write();

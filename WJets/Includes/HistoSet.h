@@ -264,38 +264,116 @@ public:
     TH2D *hresponsedRapidityJetsFB_2_Zinc3jet;
     TH2D *hresponsedRapidityJetsFB_2_Zinc4jet;
 
-    //--- dijet Rapidity 13, 2,3
+    //--- dijet Rapidity 1,3
     TH1D *dRapidityJets_First_Third_Zinc3jet;
-    TH1D *dRapidityJets_Second_Third_Zinc3jet;
+    TH1D *dRapidityJets_First_Third_Zinc4jet;
     TH1D *dRapidityJets_2_First_Third_Zinc3jet;
-    TH1D *dRapidityJets_2_Second_Third_Zinc3jet;
+    TH1D *dRapidityJets_2_First_Third_Zinc4jet;
 
     TH1D *gendRapidityJets_First_Third_Zinc3jet;
-    TH1D *gendRapidityJets_Second_Third_Zinc3jet;
+    TH1D *gendRapidityJets_First_Third_Zinc4jet;
     TH1D *gendRapidityJets_2_First_Third_Zinc3jet;
-    TH1D *gendRapidityJets_2_Second_Third_Zinc3jet;
-
+    TH1D *gendRapidityJets_2_First_Third_Zinc4jet;
+    
     TH2D *hresponsedRapidityJets_First_Third_Zinc3jet;
-    TH2D *hresponsedRapidityJets_Second_Third_Zinc3jet;
+    TH2D *hresponsedRapidityJets_First_Third_Zinc4jet;
     TH2D *hresponsedRapidityJets_2_First_Third_Zinc3jet;
+    TH2D *hresponsedRapidityJets_2_First_Third_Zinc4jet;
+    
+    //--- dijet Rapidity 2,3
+    TH1D *dRapidityJets_Second_Third_Zinc3jet;
+    TH1D *dRapidityJets_Second_Third_Zinc4jet;
+    TH1D *dRapidityJets_2_Second_Third_Zinc3jet;
+    TH1D *dRapidityJets_2_Second_Third_Zinc4jet;
+    
+    TH1D *gendRapidityJets_Second_Third_Zinc3jet;
+    TH1D *gendRapidityJets_Second_Third_Zinc4jet;
+    TH1D *gendRapidityJets_2_Second_Third_Zinc3jet;
+    TH1D *gendRapidityJets_2_Second_Third_Zinc4jet;
+
+    TH2D *hresponsedRapidityJets_Second_Third_Zinc3jet;
+    TH2D *hresponsedRapidityJets_Second_Third_Zinc4jet;
     TH2D *hresponsedRapidityJets_2_Second_Third_Zinc3jet;
+    TH2D *hresponsedRapidityJets_2_Second_Third_Zinc4jet;
 
     //--- dPhi dijet
     TH1D *dPhiJets_Zinc2jet;
-    TH1D *dPhiJetsFB_Zinc2jet;
+    TH1D *dPhiJets_Zinc3jet;
+    TH1D *dPhiJets_Zinc4jet;
     TH1D *dPhiJets_2_Zinc2jet;
-    TH1D *dPhiJetsFB_2_Zinc2jet;
+    TH1D *dPhiJets_2_Zinc3jet;
+    TH1D *dPhiJets_2_Zinc4jet;
     
     TH1D *gendPhiJets_Zinc2jet;
-    TH1D *gendPhiJetsFB_Zinc2jet;
+    TH1D *gendPhiJets_Zinc3jet;
+    TH1D *gendPhiJets_Zinc4jet;
     TH1D *gendPhiJets_2_Zinc2jet;
-    TH1D *gendPhiJetsFB_2_Zinc2jet;
-
+    TH1D *gendPhiJets_2_Zinc3jet;
+    TH1D *gendPhiJets_2_Zinc4jet;
+    
     TH2D *hresponsedPhiJets_Zinc2jet;
-    TH2D *hresponsedPhiJetsFB_Zinc2jet;
+    TH2D *hresponsedPhiJets_Zinc3jet;
+    TH2D *hresponsedPhiJets_Zinc4jet;
     TH2D *hresponsedPhiJets_2_Zinc2jet;
-    TH2D *hresponsedPhiJetsFB_2_Zinc2jet;
+    TH2D *hresponsedPhiJets_2_Zinc3jet;
+    TH2D *hresponsedPhiJets_2_Zinc4jet;
+    
+    //--- dPhi dijet FB
+    TH1D *dPhiJetsFB_Zinc2jet;
+    TH1D *dPhiJetsFB_Zinc3jet;
+    TH1D *dPhiJetsFB_Zinc4jet;
+    TH1D *dPhiJetsFB_2_Zinc2jet;
+    TH1D *dPhiJetsFB_2_Zinc3jet;
+    TH1D *dPhiJetsFB_2_Zinc4jet;
+    
+    TH1D *gendPhiJetsFB_Zinc2jet;
+    TH1D *gendPhiJetsFB_Zinc3jet;
+    TH1D *gendPhiJetsFB_Zinc4jet;
+    TH1D *gendPhiJetsFB_2_Zinc2jet;
+    TH1D *gendPhiJetsFB_2_Zinc3jet;
+    TH1D *gendPhiJetsFB_2_Zinc4jet;
 
+    TH2D *hresponsedPhiJetsFB_Zinc2jet;
+    TH2D *hresponsedPhiJetsFB_Zinc3jet;
+    TH2D *hresponsedPhiJetsFB_Zinc4jet;
+    TH2D *hresponsedPhiJetsFB_2_Zinc2jet;
+    TH2D *hresponsedPhiJetsFB_2_Zinc3jet;
+    TH2D *hresponsedPhiJetsFB_2_Zinc4jet;
+    
+    //--- dPhi (nth_jet, muon)
+    TH1D *dPhiLepJet1_Zinc1jet;
+    TH1D *dPhiLepJet2_Zinc2jet;
+    TH1D *dPhiLepJet3_Zinc3jet;
+    TH1D *dPhiLepJet4_Zinc4jet;
+    TH1D *dPhiLepJet5_Zinc5jet;
+    TH1D *dPhiLepJet1_2_Zinc1jet;
+    TH1D *dPhiLepJet2_2_Zinc2jet;
+    TH1D *dPhiLepJet3_2_Zinc3jet;
+    TH1D *dPhiLepJet4_2_Zinc4jet;
+    TH1D *dPhiLepJet5_2_Zinc5jet;
+    
+    TH1D *gendPhiLepJet1_Zinc1jet;
+    TH1D *gendPhiLepJet2_Zinc2jet;
+    TH1D *gendPhiLepJet3_Zinc3jet;
+    TH1D *gendPhiLepJet4_Zinc4jet;
+    TH1D *gendPhiLepJet5_Zinc5jet;
+    TH1D *gendPhiLepJet1_2_Zinc1jet;
+    TH1D *gendPhiLepJet2_2_Zinc2jet;
+    TH1D *gendPhiLepJet3_2_Zinc3jet;
+    TH1D *gendPhiLepJet4_2_Zinc4jet;
+    TH1D *gendPhiLepJet5_2_Zinc5jet;
+    
+    TH2D *hresponsedPhiLepJet1_Zinc1jet;
+    TH2D *hresponsedPhiLepJet2_Zinc2jet;
+    TH2D *hresponsedPhiLepJet3_Zinc3jet;
+    TH2D *hresponsedPhiLepJet4_Zinc4jet;
+    TH2D *hresponsedPhiLepJet5_Zinc5jet;
+    TH2D *hresponsedPhiLepJet1_2_Zinc1jet;
+    TH2D *hresponsedPhiLepJet2_2_Zinc2jet;
+    TH2D *hresponsedPhiLepJet3_2_Zinc3jet;
+    TH2D *hresponsedPhiLepJet4_2_Zinc4jet;
+    TH2D *hresponsedPhiLepJet5_2_Zinc5jet;
+    
     //--- dR dijet
     TH1D *dRJets_Zinc2jet;
     TH1D *dRJets_2_Zinc2jet;
@@ -521,9 +599,9 @@ public:
     TH1D *lepPhi_Zexc5jet;
     TH1D *lepPhi_Zinc0jet;
     TH1D *lepPhi_Zinc1jet;
-    TH1D *genlepEta_Zinc0jet;
-    TH1D *genlepEta_Zinc1jet;
-    TH1D *genlepEta_Zinc2jet;
+    TH1D *GLepBareEtaZinc0jet;
+    TH1D *GLepBareEtaZinc1jet;
+    TH1D *GLepBareEtaZinc2jet;
     TH1D *lepEta_Zexc0jet;
     TH1D *lepEta_Zexc1jet;
     TH1D *lepEta_Zexc2jet;
@@ -566,9 +644,9 @@ public:
     TH1D *lepPt_Zinc3jet;
     TH1D *lepPt_Zinc4jet;
     TH1D *lepPt_Zinc5jet;
-    TH1D *genlepPt_Zinc0jet;
-    TH1D *genlepPt_Zinc1jet;
-    TH1D *genlepPt_Zinc2jet;
+    TH1D *GLepBarePtZinc0jet;
+    TH1D *GLepBarePtZinc1jet;
+    TH1D *GLepBarePtZinc2jet;
     TH1D *lepPt_Zexc0jet;
     TH1D *lepPt_Zexc1jet;
     TH1D *lepPt_Zexc2jet;

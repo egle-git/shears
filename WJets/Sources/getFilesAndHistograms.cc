@@ -9,7 +9,7 @@
 using namespace std;
 
 //------------------------------------------------------------
-// getEnergy() returns a string, either "7TeV" or "8TeV"
+// getEnergy() returns a string, either "7TeV" or "13TeV"
 // according to the name of the directory from which the 
 // code is being executed.
 //------------------------------------------------------------
@@ -18,7 +18,7 @@ string getEnergy()
     string energy = "";
     ostringstream fileBeingProcessed; fileBeingProcessed << __FILE__;
     if (fileBeingProcessed.str().find("Analysis2012") != string::npos) {
-        energy = "8TeV";
+        energy = "13TeV";
     }
     else if (fileBeingProcessed.str().find("Analysis2011") != string::npos) {
         energy = "7TeV";
@@ -59,7 +59,7 @@ TFile* getFile(string histoFilesDirectory, string leptonFlavor, string energy, s
 
     //--- deal with efficiency correction applied or not ---
     string effiCorr = "1", trigCorr = "0";
-    if (Name.find("Data") == 0 || energy == "8TeV") trigCorr = "1"; // trigger correction is applied to data and MC at 8TeV but only to data at 7TeV 
+    if (Name.find("Data") == 0 || energy == "13TeV") trigCorr = "1"; // trigger correction is applied to data and MC at 13TeV but only to data at 7TeV 
     if (useUnfoldingFiles) { // for cross-section measurement: correct data for efficiencies difference wrt MC
         if (Name.find("Data") == 0) effiCorr = "1";
         else effiCorr = "0";

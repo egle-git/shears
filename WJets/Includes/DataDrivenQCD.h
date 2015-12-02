@@ -7,11 +7,11 @@ using namespace std;
 
 void DataDrivenQCD( string leptonFlavor = "SMu", int METcut = 0,  int doBJets = 0);
 
-void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][14], string leptonFlavor = "SMu",  int METcut = 0, bool doFlat = false, bool doVarWidth = true , int doBJets = 0 );
+void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][9], string leptonFlavor = "SMu",  int METcut = 0, bool doFlat = false, bool doVarWidth = true , int doBJets = 0 );
 
 vector<string> getVectorOfHistoNames(TFile *fData[]);
 
-void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][14], TFile*);
+void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][9], TFile*);
 
 #endif
 

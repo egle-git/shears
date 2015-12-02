@@ -418,7 +418,8 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
         hSyst->GetYaxis()->SetTitleOffset(0.8);
         if (numbOfGenerator == 2) hSyst->GetYaxis()->SetTitleOffset(0.63);
         if (numbOfGenerator == 3) hSyst->GetYaxis()->SetTitleOffset(0.60);
-        hSyst->GetXaxis()->SetLabelSize(0.14);
+        //hSyst->GetXaxis()->SetLabelSize(0.14);
+	hSyst->GetXaxis()->SetLabelSize(0.08);
         hSyst->GetXaxis()->SetTitleSize(0.12);
         hSyst->GetXaxis()->SetTitleOffset(1.0);
     }

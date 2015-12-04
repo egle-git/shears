@@ -48,6 +48,60 @@ Note: you can specify limit the number of events to analyze by adding to the abo
 option maxEvents=XXXX. In such case the histogram directory will be named HistoFiles_XXXXevts instead
 of HistoFiles.
 
+Producing Data/MC comparison
+============================
+
+To produce data/MC comparison plot, you need to run on data, DY+jet and background simulation samples. This can be achieved by runnning the following commads within the DYJets directory. See Quick start to set up the code.
+
+```
+cd DYJets
+make
+./runZJets_newformat doWhat=data
+./runZJets_newformat doWhat=dyjets
+./runZJets_newformat doWhat=background
+./runRecoComparison
+```
+
+The plots can then be found in RecoComparison.
+
+The directory will contain a long list of file. The files can be reorganized in subdirectories with the organise_vjets_dir script:
+
+```
+cd RecoComparison/PAS_Comparison_DE_13TeV_Data_All_MC_JetPtMin_30_JetEtaMax_24
+../../organise_vjets_dir.
+```
+
+The script will display errors which can be ignored.
+
+If you are impatient you can run on a subset of events. This can be done by replacing the steps 5 to 8 by the following ones:
+
+  ./runZJets_newformat doWhat=data maxEvents=10000
+  ./runZJets_newformat doWhat=dyjets maxEvents=10000 mcYieldScale=0.0131348
+  ./runZJets_newformat doWhat=background maxEvents=10000 mcYieldScale=0.0131348
+  ./runRecoComparison histoDir=HistoFiles_10000evts/
+
+Note 1: the mcYieldScale=0.0131348 is required to get the proper normalizations of the MC sample. It is the fraction of data events which has been processed. This value is displayed during the first step when you run with the doWhat=data and maxEvent=XXXX option. The histoDir=HistoFiles_10000evts/ is required because when limiting the number of events, the histogram are stored in a different directory than the default HistoFiles: it is to prevent to delete histograms produced from a long run, when running a short test.
+
+Note 2: the first time you run make, do not use the parallel running option, -j N.  There is a problem when doing it the first time, when the RooUnfold library is not yet compiled. The following times you can use it without problem. Anyway compiling the code is fast enough to not require the -j N option.
+
+Run the unfolding
+=================
+
+Before running the unfolding you need to produce the histogran for all the variations of the systematic sources. This can be achived by setting doSysRunning option to 1 either in the vjet.cfg configuration file or on the command line and runing runZJets_newformat:
+
+```
+./runZJets_newformat doSysRunning=1
+```
+
+Once this stop done the unfolding can be ran with the following command:
+
+```
+./runUnfoldingZJets
+```
+
+The unfolded result can then be found in the UnfoldedFiles directory and the control plots in the UnfoldingCheck.
+
+
 Configuration file
 ==================
 

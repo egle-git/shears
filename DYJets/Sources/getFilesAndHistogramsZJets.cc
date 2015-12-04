@@ -154,7 +154,16 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
         getHistos(hRecBg[iBg], fBg[iBg], variable);
         for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) { 
             if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
-            else hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+            else{
+	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+		std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
+			  << "Histogram " << hRecSumBg[iSyst]->GetName()
+			  << "for systematic index " << iSyst
+			  << " and background index " << iBg
+			  << " has a different bining than the background #0.\n";
+	      }
+	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+	    }
         }
     }
 
@@ -226,6 +235,11 @@ void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg)
 TH1D* getHisto(TFile *File, const TString variable)
 {
     TH1D *histo = (TH1D*) File->Get(variable);
+    //We had for an unknown reason some histo with the CanExtendAxis option active,
+    //which causes troubles for the unfolding code: setting the overflow bin of
+    //fake histogram was doubling the number of bins. Following line ensures
+    //that the option is disabled:
+    if(histo) histo->SetCanExtend(kFALSE);
     if(histo) histo->SetDirectory(0);
     return histo;
 }
@@ -248,6 +262,12 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
     for (int i(0); i < nFiles; i++){
         Files[i]->cd();
         histograms[i] = (TH1D*) Files[i]->Get(variable);
+	//We had for an unknown reason some histo with the CanExtendAxis option active,
+	//which causes troubles for the unfolding code: setting the overflow bin of
+	//fake histogram was doubling the number of bins. Following line ensures
+	//that the option is disabled:
+	if(histograms[i]) histograms[i]->SetCanExtend(kFALSE);
+
     } 
 
     ConfigVJets cfg;
@@ -451,7 +471,7 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
-
+    
     int sm= hRecDYJets->GetSumw2N();
     int s = hResDYJets->GetSumw2N();
     int nm = hResDYJets->GetNbinsX() + 2;
@@ -462,19 +482,19 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
     for (int i= 0; i<nm; i++) {
         double nmes= 0.0, wmes= 0.0;
-        for (int j= 0; j<nt; j++) {
-            nmes += hResDYJets->GetBinContent(i, j);
-            if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
-        }
+	for (int j= 0; j<nt; j++) {
+	  nmes += hResDYJets->GetBinContent(i, j);
+	  if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
+	}
         double fake = hRecDYJets->GetBinContent(i) - nmes;
         double factor = dyIntegral;
         if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
         if (!s) wmes= nmes;
-        hFakDYJets->SetBinContent (i, factor*fake);
-        hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
+        hFakDYJets->SetBinContent(i, factor*fake);
+	hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
     }
     hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
-
+    
     return hFakDYJets;
 
 }

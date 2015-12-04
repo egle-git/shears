@@ -18,6 +18,11 @@
 #include "UnfoldingZJets.h"
 #include "PlotSettings.h"
 #include "fixYscale.C"
+#include "ConfigVJets.h"
+
+ConfigVJets cfg1;
+
+const static bool isdatabug = false;
 
 using namespace std;
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
@@ -233,6 +238,22 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
 
 	TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
+
+//	std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
+//		  << hRecDataMinusFakes->GetEntries()
+//		  << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
+//		  <<"\n"
+//		  << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = "
+//		  << hRecSumBg[iData]->GetEntries()
+//		  << ", nbins: " << hRecSumBg[iData]->GetNbinsX()
+//		  <<"\n"
+//		  << "DEBUG: hFakDYJets[" << iData << "]->GetEntries() = "
+//		  << hFakDYJets[iData]->GetEntries()
+//		  << ", nbins: " << hFakDYJets[iData]->GetNbinsX()
+//		  <<"\n"
+//		  << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX()
+//		  << std::endl;
+	
 	hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
 	hRecDataMinusFakes->Add(hFakDYJets[iSyst], -1);
 
@@ -256,6 +277,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       if (doNormalized) {
 	for(int i = 0; i < nSysts; i++)
 	  {
+	    if(!hUnfData[i]) continue;
 	    double totUnfData = hUnfData[i]->Integral("width"); // normalize to central or itself? 
 	    hUnfData[i]->Scale(1.0/totUnfData);
 	    if (i == 0) {
@@ -267,23 +289,22 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
 	outputRootFile->cd(); 
-	hUnfData[iSyst]->Write();
+	if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
       }
       //--- Now create the covariance matrices ---
-      TH2D *hCov[12] = {NULL};
+      TH2D *hCov[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
       int nCovs = nSysts > 17 ? 11 : 10;
       hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
       hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
-      hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
-      hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
-      hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
-      hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovXSec");
-      hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLES");
-      hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovLER");
-      hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
-      hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
-      if(nCovs > 10) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovSherpaUnf");
-      else hCov[10] = 0;
+      if(hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
+      if(hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
+      if(hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
+      if(hUnfData[7])  hCov[5] = makeCovFromUpAndDown(hUnfData[0], hUnfData[7], hUnfData[8], "CovXSec");
+      if(hUnfData[9])  hCov[6] = makeCovFromUpAndDown(hUnfData[0], hUnfData[9], hUnfData[10], "CovLES");
+      if(hUnfData[11]) hCov[7] = makeCovFromUpAndDown(hUnfData[0], hUnfData[11], hUnfData[12], "CovLER");
+      if(hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
+      if(hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
+      if(hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovSherpaUnf");
       hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
       
       for (int i = 2; i < nCovs; ++i) hCov[11]->Add(hCov[i]);
@@ -521,7 +542,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	    //binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
 	    //binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
 	    for (int k = 0; k < 12; k++) {
-		binCov[k] += hCovInc[k]->GetBinContent(j, j);
+	      if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
 	    }
 	}
 	hInc->SetBinContent(i, binSum);
@@ -533,7 +554,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	//hIncShe->SetBinError(i, sqrt(binStatSheError2));
 	//hIncPow->SetBinError(i, sqrt(binStatPowError2));
 	for (int k = 0; k < 12; k++) {
-	    hCovInc[k]->SetBinContent(i, i, binCov[k]);
+	  if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
 	}
     }
 
@@ -679,6 +700,11 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     int finalNIter = -1;
     int nIter = 99;
     int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
+
+    bool svd_unfold = cfg1.getB("svdUnfold", false);
+    bool tsvd_unfold = cfg1.getB("tsvdUnfold", false);    
+
+
     TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp, 0.5, nBinsTmp+0.5);
     hchi2->SetTitle("#chi^{2}/ndf for reco vs folded-unfolded for " + TString(hRecDataMinusFakes->GetTitle()));
     hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
@@ -692,7 +718,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 	RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
-	//	RObjectForDataTmp->UseFlatPrior(true);
+       //	RObjectForDataTmp->UseFlatPrior(true);
 	int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
 	RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	std::cout << "niter = " << i << std::endl;
@@ -773,44 +799,48 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     TH1D *hUnfDataBayes = (TH1D*) RObjectForDataBayes->Hreco(RooUnfold::kCovariance);
     hUnfDataBayes->SetName("UnfDataBayes" + name);
     hUnfDataBayes->Write();
-
-    for (int i(1); i <= nBinsTmp; i++) {
+    
+    if(svd_unfold){
+      for (int i(1); i <= nBinsTmp; i++) {
 	RooUnfold *RObjectForDataSVD = RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, i);
 	TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
 	hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", i) + "_" + name);
 	hUnfDataSVD->Write();
+      }
     }
 
-    TSVDUnfold *unfoldTSVD = new TSVDUnfold(hRecDataMinusFakes, (TH1D*)resp->Htruth(), (TH1D*)resp->Hmeasured(), (TH2D*)resp->Hresponse());
-    TH1D *unfresult = (TH1D*) unfoldTSVD->Unfold(1);
-    TH1D *hmodDOriginal = (TH1D*) unfoldTSVD->GetD();
-    TH1D *hSV       = (TH1D*) unfoldTSVD->GetSV();
-
-    TH1D *hmodD = new TH1D("hmodD", "hmodD", nBinsTmp, 0.5, nBinsTmp+0.5);
-    for (int i(0); i <= nBinsTmp+1; i++) {
+    if(tsvd_unfold){
+      TSVDUnfold *unfoldTSVD = new TSVDUnfold(hRecDataMinusFakes, (TH1D*)resp->Htruth(), (TH1D*)resp->Hmeasured(), (TH2D*)resp->Hresponse());
+      TH1D *unfresult = (TH1D*) unfoldTSVD->Unfold(1);
+      TH1D *hmodDOriginal = (TH1D*) unfoldTSVD->GetD();
+      TH1D *hSV       = (TH1D*) unfoldTSVD->GetSV();
+      
+      TH1D *hmodD = new TH1D("hmodD", "hmodD", nBinsTmp, 0.5, nBinsTmp+0.5);
+      for (int i(0); i <= nBinsTmp+1; i++) {
 	hmodD->SetBinContent(i, hmodDOriginal->GetBinContent(i));
+      }
+      hmodD->SetTitle(hmodDOriginal->GetTitle() + TString(" for ") + TString(hRecDataMinusFakes->GetTitle()));
+      hmodD->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
+      hmodD->GetXaxis()->SetLabelSize(0.03);
+      hmodD->GetYaxis()->SetTitle("|d_{i}|");
+      hmodD->GetYaxis()->SetTitleOffset(1.40);
+      hmodD->GetXaxis()->SetTitle("regularization parameter of the SVD method");
+      hmodD->GetXaxis()->CenterTitle();
+      TArrow *arrowSvd = new TArrow(svdKterm, 20, svdKterm, 1.1*hmodD->GetBinContent(svdKterm), 0.02, "|>");
+      arrowSvd->SetLineColor(kRed);
+      arrowSvd->SetFillColor(kRed);
+      arrowSvd->SetLineWidth(2);
+      
+      hmodD->SetName("modD" + name);
+      TCanvas *chmodD = new TCanvas("chmodD", "chmodD", 600, 600);
+      chmodD->cd();
+      chmodD->SetGrid();
+      chmodD->SetLogy(logy ? kTRUE : kFALSE);
+      hmodD->DrawCopy();
+      arrowSvd->Draw();
+      chmodD->Write();
+      hmodD->Write();
     }
-    hmodD->SetTitle(hmodDOriginal->GetTitle() + TString(" for ") + TString(hRecDataMinusFakes->GetTitle()));
-    hmodD->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
-    hmodD->GetXaxis()->SetLabelSize(0.03);
-    hmodD->GetYaxis()->SetTitle("|d_{i}|");
-    hmodD->GetYaxis()->SetTitleOffset(1.40);
-    hmodD->GetXaxis()->SetTitle("regularization parameter of the SVD method");
-    hmodD->GetXaxis()->CenterTitle();
-    TArrow *arrowSvd = new TArrow(svdKterm, 20, svdKterm, 1.1*hmodD->GetBinContent(svdKterm), 0.02, "|>");
-    arrowSvd->SetLineColor(kRed);
-    arrowSvd->SetFillColor(kRed);
-    arrowSvd->SetLineWidth(2);
-
-    hmodD->SetName("modD" + name);
-    TCanvas *chmodD = new TCanvas("chmodD", "chmodD", 600, 600);
-    chmodD->cd();
-    chmodD->SetGrid();
-    chmodD->SetLogy(logy ? kTRUE : kFALSE);
-    hmodD->DrawCopy();
-    arrowSvd->Draw();
-    chmodD->Write();
-    hmodD->Write();
 
     f->Close();
 

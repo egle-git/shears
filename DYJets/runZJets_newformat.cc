@@ -209,11 +209,14 @@ int main(int argc, char **argv)
     TString bonzaiDir;
     double yieldScale = 1.;
     std::vector<std::string> tomerge;
-    for (unsigned int iSyst = 0; iSyst < NSystMax; iSyst++) { 
-	if (iSyst == kNominal && !doCentral) continue;
-	if (iSyst != kNominal && !doSysRunning) continue;
-	if (iSyst > 0 && whichSyst > 0 && iSyst != (unsigned)whichSyst) continue;
-      
+    for (unsigned int iSyst = 0; iSyst < NSystMax; iSyst++) {
+	if (whichSyst < 0){
+	    if (iSyst == kNominal && !doCentral) continue;
+	    if (iSyst != kNominal && !doSysRunning) continue;
+	} else{
+	    if (iSyst != (unsigned)whichSyst) continue;
+	}
+
 	for(unsigned iSample = 0; iSample < NSamples; ++iSample){
 	    if(iSample==DATA){
 		if (doWhat != "DATA" && doWhat != "ALL") continue;

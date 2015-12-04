@@ -151,7 +151,7 @@ int main(int argc, char **argv)
         //Join the data threads with the main thread
 	for(int iLep = 0; iLep < 2 ; ++iLep){
 	  if (!checkLepSel(iLep, lepSel)) continue;
-	  for (int iSys = iSys; iSys < 3; ++iSys) {
+	  for (int iSys = 0; iSys < 3; ++iSys) {
 	    DataThread[iLep*3 + iSys].join();
 	  }
         }
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
         //Join the threads with the main thread
 	for(int iLep = 0; iLep < 2 ; ++iLep){
 	  if (!checkLepSel(iLep, lepSel)) continue;
-	  for (int iSys = iSys; iSys < 9; ++iSys) {
+	  for (int iSys = 0; iSys < 9; ++iSys) {
 	    DYJetsThread[iLep*9+iSys].join();
 	    BGThread[iLep*9+iSys].join();
 	    //TAUThread[iLep*9+iSys].join();

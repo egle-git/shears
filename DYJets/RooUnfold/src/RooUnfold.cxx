@@ -232,6 +232,7 @@ void RooUnfold::Init()
   _dosys= _unfolded= _haveCov= _haveCovMes= _fail= _have_err_mat= _haveErrors= _haveWgt= false;
   _withError= kDefault;
   _NToys=50;
+  _flatPrior = false;
   GetSettings();
 }
 

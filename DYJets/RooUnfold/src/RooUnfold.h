@@ -111,6 +111,8 @@ public:
   static void PrintTable (std::ostream& o, const TVectorD& vTrainTrue, const TVectorD& vTrain,
                           const TVectorD& vMeas, const TVectorD& vReco, Int_t nm, Int_t nt);
 
+  void UseFlatPrior(bool fp){_flatPrior = fp;}
+
 protected:
   void Assign (const RooUnfold& rhs); // implementation of assignment operator
   virtual void SetNameTitleDefault();
@@ -167,6 +169,8 @@ protected:
   mutable TMatrixD* _covMes;       // Measurement covariance matrix
   mutable TMatrixD* _covL; //! Cached lower triangular matrix for which _covMes = _covL * _covL^T.
   ErrorTreatment _withError; // type of error last calulcated
+
+  bool _flatPrior; //Switch to enable flat prior mode
 
 public:
 

@@ -181,8 +181,13 @@ void RooUnfoldBayes::setup()
   // Initial distribution
   _N0C= _nCi.Sum();
   if (_N0C!=0.0) {
-    _P0C= _nCi;
-    _P0C *= 1.0/_N0C;
+    if(_flatPrior){
+      std::cout << "RooUnfoldBayes: using a flat prior.\n";
+      for(int i = 0; i < _P0C.GetNrows(); ++i) _P0C[i] = 1. / _P0C.GetNrows();
+    } else{
+      _P0C= _nCi;
+      _P0C *= 1.0/_N0C;
+    }
   }
 }
 

@@ -26,9 +26,6 @@
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
-//#include "rochcor.h"
-
-
 using namespace std;
 
 void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
@@ -92,26 +89,35 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //====================================//
     //table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
     table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
-    table LeptIso, LeptID, LeptIdIso, LeptTrig, Ele_Rec;
-    // electron SF
-    table Ele_Rec_8TeV("EfficiencyTables/Ele_SF_Reconstruction_2012.txt");
-    table SC_Ele_2012EA("EfficiencyTables/Ele_SF_EA2012.txt");
+    //table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV6_AK4PF.txt");
+
+    table LeptIdIso, LeptTrig;
+
     // muon SF
     table TrigMu17Mu8SF("EfficiencyTables/Efficiency_SF_Mu17Mu8.txt");
-    table SC_RunABCD_TightID("EfficiencyTables/Muon_IDTight_Efficiencies_Run_2012ABCD_53X_Eta_Pt.txt");
-    table SC_RunABCD_LooseIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_Run_2012ABCD_53X_Eta_Pt.txt");
+
+    //8TeV
+    //table LeptIso, LeptID;
+    //table SC_RunABCD_TightID("EfficiencyTables/Muon_IDTight_Efficiencies_Run_2012ABCD_53X_Eta_Pt.txt");
+    //table SC_RunABCD_LooseIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_Run_2012ABCD_53X_Eta_Pt.txt");
+    //LeptID = SC_RunABCD_TightID;
+    //LeptIso = SC_RunABCD_LooseIso;
+
+    // electron SF
+    //table Ele_Rec;
+    //table Ele_Rec_8TeV("EfficiencyTables/Ele_SF_Reconstruction_2012.txt");
+    //table SC_Ele_2012EA("EfficiencyTables/Ele_SF_EA2012.txt");
+
     // new for 13 TeV SF for Id+Iso
     table Iso_TightID13TeV("EfficiencyTables/ratios.txt"); 
-
     table TrigIsoMu24SF("EfficiencyTables/Efficiency_SF_IsoMu24_eta2p1.txt");
 
-    LeptID = SC_RunABCD_TightID;
-    LeptIso = SC_RunABCD_LooseIso;
     LeptIdIso = Iso_TightID13TeV;
     LeptTrig = TrigMu17Mu8SF;
-    Ele_Rec = Ele_Rec_8TeV;
-    if (lepSel == "DE" || lepSel == "SE") LeptID = SC_Ele_2012EA;
-    else if (lepSel == "SMu") LeptTrig = TrigIsoMu24SF;
+    
+    //Ele_Rec = Ele_Rec_8TeV;
+    //if (lepSel == "DE" || lepSel == "SE") LeptID = SC_Ele_2012EA;
+    // else if (lepSel == "SMu") LeptTrig = TrigIsoMu24SF;
     //==========================================================================================================//
   
 
@@ -121,9 +127,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //====================================//
     cout << "Lepton Flavor: " << lepSel << "  systematics: " << systematics << "  direction: " << direction << endl;
 
-  /*  standalone_LumiReWeighting puWeight(lepSel, 2013);
-    if (systematics == 1) puWeight = standalone_LumiReWeighting(lepSel, 2013, direction);
-  */
+    int mode = (systematics == 1) ? direction : 0;
+    standalone_LumiReWeighting puWeight(2015250, mode);
+
     int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
     if (systematics == 2) scale =  direction;
 
@@ -192,6 +198,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     //event yield normalisation for MC
     norm_ = yieldScale;
+
     double prev_rate = 0;
 
     Long64_t entry_start = 0;
@@ -286,12 +293,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         //====================================//
         double weight = norm_;
 	//	std::cout << "---> " <<  nEvents << "\n";
-/*//CAG
+
+	if (hasRecoInfo && !EvtIsRealData) {
+	    //cout << "PU weight: " << PU_npT << " , " << puWeight.weight(int(PU_npT)) << "\n";
+	    weight *= puWeight.weight(EvtPuCntTruth);
+	}
+
         if(addPuWeights){
             double add_w_ = addPuWeights->GetBinContent(addPuWeights->GetXaxis()->FindBin(EvtVtxCnt));
             if(add_w_ > 0) weight *= add_w_;
         }
-*/
 
         if (fileName.Index("DYJets") >= 0 && fileName.Index("MIX") >= 0 && GNup > 5) weight *= mixingWeightsDY[GNup - 6]; 
         if (fileName.Index("SMu_8TeV_WJets") >= 0 && fileName.Index("MIX") >= 0 && GNup > 5) weight *= mixingWeightsWJ_SMu[GNup - 6]; 
@@ -442,10 +453,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (!EvtIsRealData) {
                     double effWeight = 1.;
                     if (lepSel == "DMu") {
-                        effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-                        effWeight *= LeptID.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
-			//effWeight *= LeptIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta())); 
-                        //effWeight *= LeptIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta())); 
+                        effWeight *= LeptIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+                        effWeight *= LeptIdIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
                         if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     }
                     //else if (lepSel == "DE") {
@@ -500,13 +509,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (!EvtIsRealData) {
                     double effWeight = 1.;
                     if (lepSel == "SMu") {
-                        effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-                        effWeight *= LeptIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta())); 
+                        effWeight *= LeptIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
                         if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Pt()), fabs(leptons[0].v.Eta()));
                     }
                     else if (lepSel == "SE") {
-                        effWeight *= Ele_Rec.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                        effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        //effWeight *= Ele_Rec.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        //effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
                     }
                     weight *= effWeight;
                 }
@@ -584,7 +592,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             // sort leptons by descending pt
             sort(genLeptons.begin(), genLeptons.end(), LepDescendingOrder);
 	    
-	    assert(genLeptons.size() < 2 || genLeptons[0].v.Pt() > genLeptons[1].v.Pt());
+	    //assert(genLeptons.size() < 2 || genLeptons[0].v.Pt() >= genLeptons[1].v.Pt());
+	    if(genLeptons.size() > 1 &&  genLeptons[0].v.Pt() < genLeptons[1].v.Pt()){
+		std::cerr << "Problem in Gen jet ordering!\n";
+	    }
 
             if (countTauS3 == 0 && fileName.Index("UNFOLDING") >= 0 && fileName.Index("Sherpa") < 0) {
                 partonsN->Fill(GNup-5);
@@ -1420,11 +1431,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
             //cout << "Selected at reco level" << endl;
             NVtx->Fill(EvtVtxCnt, weight);
-/*  // CAG
-            double weightNoPUweight(1);
-            if (hasRecoInfo && !EvtIsRealData) weightNoPUweight = weight/puWeight.weight(int(EvtPuCntTruth));
+
+            double weightNoPUweight(weight);
+            if (hasRecoInfo && !EvtIsRealData) weightNoPUweight /= puWeight.weight(int(EvtPuCntTruth));
             NVtx_NoPUweight->Fill(EvtVtxCnt, weightNoPUweight);
-*/
+
             nEventsVInc0Jets++;
             nEffEventsVInc0Jets += weight;
             ZNGoodJetsNVtx_Zexc->Fill(nGoodJets, EvtVtxCnt  , weight);
@@ -2049,7 +2060,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets >= 8){
                 ZNGoodJets_Zinc->Fill(8., weight);
             }
-
+	    
             //=======================================================================================================//
         }
 
@@ -2447,7 +2458,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 //			  << (genLeptons[1].charge ? '+' : '-');
 //	    }
 //	}
-	
     } //End of loop over all the events
     cout << endl;
     //==========================================================================================================//
@@ -2537,9 +2547,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     cout << "Eff. number GEN Inclusif V + 1 jets                            : " << nEffGenEventsVInc1Jets << endl;
     cout << "Eff. number GEN Inclusif V + 2 jets                            : " << nEffGenEventsVInc2Jets << endl;
     cout << "Eff. number GEN Inclusif V + 3 jets                            : " << nEffGenEventsVInc3Jets << endl;
-
-
-    cout << "Sum of MC event weights                                   : " << processedEventMcWeightSum_ << endl;
+    cout << "Sum of MC event weights                                        : " << processedEventMcWeightSum_ << endl;
     if(!EvtIsRealData){
     cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
 	     << yieldScale << "*" << lumi_ << "*" << xsec_ << "*"

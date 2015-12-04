@@ -46,7 +46,7 @@ CXXFLAGS      += -MD -Wall
 
 # list of all source files
 SOURCES = ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc ConfigVJets.cc HistoSetZJets.cc ZJets.cc functions.cc
-SOURCES += MergeTop.cc standalone_LumiReWeighting.cc UnfoldingZJets.cc RecoComparison.cc
+SOURCES += MergeTop.cc UnfoldingZJets.cc RecoComparison.cc
 SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc muresolution_run2.cc rochcor2015.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
@@ -114,7 +114,7 @@ runMakeStatisticsTable.o: runMakeStatisticsTable.cc RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
 
 dispatcher: $(OBJLIST) dispatcher.o  RooUnfold/libRooUnfold.so
-	$(CXX) -o dispatcher $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 dispatcher.o: dispatcher.cc
 	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)

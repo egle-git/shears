@@ -15,14 +15,30 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc++").c_str());
         }
         
+        /*
+        // plot all distributions without NPTB SF
         PlottingEdit(0, 1);
-        PlottingEdit(46, 47); //inc jetmultiplicity
-        
         PlottingEdit(1, 6);
         PlottingEdit(11, 16);
         PlottingEdit(21, 26);
         PlottingEdit(26, 43);
+        PlottingEdit(43, 48);
+        */
         
+        // plot some distributions with NPTB SF
+        PlottingEdit( 0,  1, true);
+        
+        PlottingEdit( 1,  4, true);
+        PlottingEdit( 4,  6);
+        
+        PlottingEdit(11, 13, true);
+        PlottingEdit(13, 16);
+        
+        PlottingEdit(21, 23, true);
+        PlottingEdit(23, 26);
+        
+        PlottingEdit(26, 43);
+        PlottingEdit(43, 48);
         
         
         //--- clean the *_cc.d and *_cc.so files ---

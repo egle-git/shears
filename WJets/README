@@ -1,14 +1,19 @@
 The instructions for running the W+jets analysis code on baobab data and MC ntuples produced at 13 TeV.
 Kadir Ocalan (29.10.2015)
 
+-- For now use CMSSW_5_3_11, migrating to CMSSW 75X
+cmsrel CMSSW_5_3_11  
+cd CMSSW_5_3_111/src
+cmsenv 
+
 -- Clone shears from the gitlab (can be found here https://gitlab.cern.ch/shears/shears/tree/master)
 git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 
--- Once cloned, go to the directory 
+-- Go to the directory 
 cd shears/WJets
 
 -- Compile RooUnfold
-cd RooUnfold-1.1.1
+cd RooUnfold
 make clean
 make
 cd -
@@ -19,23 +24,15 @@ sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc43
 sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc
 sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
 
--- Test the code over a single ntuple file (such as the one produced at 8 TeV first):
-cmsStage /store/group/phys_smp/WPlusJets/NtuplesTomislavNEW/SMu_8TeV_T_s_channel_dR_5311.root DataW/SMu_8TeV_T_s_channel_dR_5311.root
-cd WJets
-root -b runDYJets.cc  
-
--- If everything works fine, run over complete set of ntuples:
-
+-- Can use 13 TeV v10 Baobab data and MC 25ns samples that are merged from here /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/
+mkdir DataW
 mkdir ~/eos
 eosmount ~/eos
-ln -s  ~/eos/cms/store/group/phys_smp/WPlusJets/NtuplesTomislavNEW  DataW
+ln -s  ~/eos/cms/store/user/ocalan/13TeV_25ns   DataW
 
--- Note: You need to go to /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/ and find the ntuples unmerged after crab -get, then use your eos directory to merge the files and run over them like described for 8 TeV above. In future, we will have ntuples merged and we will update this part of instructions.
+-- Ready to run the code!!!Before running it, change doQCD to 0 (int doQCD=0) in WJets/runDYJets.cc.
 
--- Ready to run the code!!!Before running it, change (line 27) int doQCD=0 in WJets/runDYJets.cc.
-
--- Run the code
-cd WJets
+-- Run the code under /WJets
 root -b runDYJets.cc  
 
 -- For QCD Background go to WJets/runDYJets.cc change int doQCD = 1

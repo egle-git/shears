@@ -45,6 +45,7 @@ using namespace std;
 #include "variablesOfInterestVarWidth.h"
 
 const int NQCD = 4 ;
+const int NMC = 9 ;
 
 string energy = getEnergy();
 int JetPtMin(30);
@@ -56,7 +57,7 @@ void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
     TH1::SetDefaultSumw2();
     
     TFile *fData[NQCD] = {NULL};
-    TFile *fMC[NQCD][NFILESWJETS] = {{NULL}};
+    TFile *fMC[NQCD][NMC] = {{NULL}};
     
     FuncOpenAllFiles(fData, fMC, leptonFlavor, METcut, false, true, doBJets);
     vector<string> histoNameRun = getVectorOfHistoNames(fData);
@@ -67,6 +68,7 @@ void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
     
     
     for (int i(0); i < int(histoNameRun.size()) ; i++){
+    //for (int i(2); i < 3 ; i++){
         cout << endl; cout << endl;
         cout << " --- processing histogram: " << i << " : " << histoNameRun[i] << endl;
         FuncDataDrivenQCD(histoNameRun[i], fData, fMC, fOut);
@@ -76,7 +78,7 @@ void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
     cout << "I m closing the files" << endl;
     for (int i(0); i < NQCD; i++) {
         closeFile(fData[i]);
-        for (int j(0); j < NFILESWJETS; j++){
+        for (int j(0); j < NMC; j++){
             closeFile(fMC[i][j]);
         }
     }
@@ -89,7 +91,7 @@ void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][14], string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
+void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][9], string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
     // Get data files
     for ( int i = 0 ; i < NQCD ; i++){
         fData[i] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[DATAFILENAME].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i, 0, 0, METcut, doBJets, "", "0");
@@ -97,13 +99,25 @@ void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][14], string leptonFlavor,int 
     /// get MC files
     for ( int i=0 ; i < NQCD ; i++){
         cout << endl;
-        for ( int j = 1 ; j < NFILESWJETS ; j++){
-            int sel = j ;
-            if ( j == 1 ) sel = 24 ;
+        for ( int j = 0 ; j < NMC ; j++){
+            
             cout << endl;
-            fMC[i][j] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[sel].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i , 0, 0, METcut, doBJets, "", "0");
+            
+            string FilenameTemp;
+            if (j == 0) FilenameTemp = "WJetsALL_MIX_UNFOLDING_dR_5311";
+            if (j == 1) FilenameTemp = "DYJets50toInf_dR_5311";
+            if (j == 2) FilenameTemp = "TTJets_dR_5311";
+            if (j == 3) FilenameTemp = "ST_s_channel_dR_5311";
+            if (j == 4) FilenameTemp = "ST_tW_top_channel_dR_5311";
+            if (j == 5) FilenameTemp = "ST_tW_antitop_channel_dR_5311";
+            if (j == 6) FilenameTemp = "WW_dR_5311";
+            if (j == 7) FilenameTemp = "WZ_dR_5311";
+            if (j == 8) FilenameTemp = "ZZ_dR_5311";
+            
+            
+            fMC[i][j] = getFile(FILESDIRECTORY,  leptonFlavor, energy, FilenameTemp, JetPtMin, JetPtMax, doFlat, doVarWidth, i , 0, 0, METcut, doBJets, "", "0");
             TH1D *hTemp2 = getHisto(fMC[i][j], "ZNGoodJets_Zexc");
-            cout << " going to fetch " << ProcessInfo[sel].filename << "   " << hTemp2 ->Integral()<<endl;
+            cout << " going to fetch " << FilenameTemp << "   " << hTemp2 ->Integral()<<endl;
         }
     }
     cout << endl;
@@ -135,7 +149,7 @@ vector<string> getVectorOfHistoNames(TFile *fData[]){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][14], TFile *fOut){
+void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][NMC], TFile *fOut){
     cout << " test" << endl;
     cout << " --- now opening histograms from Data files ---" << endl;
     TH1D  *hData[NQCD], *hSignal[NQCD], *hBack[NQCD];
@@ -156,18 +170,28 @@ void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][14], TFile 
     cout << " --- now opening histograms from all the MC files ---" << endl;
     for ( int i=0 ; i < NQCD ; i++){
         //cout << "QCD " << i << endl;
-        for ( int j = 1 ; j < NFILESWJETS ; j++){
-            int sel = j ;
-            if ( j == 1 ) sel = 24 ;
+        for ( int j = 0 ; j < NMC ; j++){
+            
+            string FilenameTemp;
+            if (j == 0) FilenameTemp = "WJetsALL_MIX_UNFOLDING_dR_5311";
+            if (j == 1) FilenameTemp = "DYJets50toInf_dR_5311";
+            if (j == 2) FilenameTemp = "TTJets_dR_5311";
+            if (j == 3) FilenameTemp = "ST_s_channel_dR_5311";
+            if (j == 4) FilenameTemp = "ST_tW_top_channel_dR_5311";
+            if (j == 5) FilenameTemp = "ST_tW_antitop_channel_dR_5311";
+            if (j == 6) FilenameTemp = "WW_dR_5311";
+            if (j == 7) FilenameTemp = "WZ_dR_5311";
+            if (j == 8) FilenameTemp = "ZZ_dR_5311";
+            
             //cout << endl;
             TH1D *hTemp1 = getHisto(fMC[i][j], variable);
-            cout << " going to fetch " << ProcessInfo[sel].filename << "   integral: " << hTemp1 ->Integral()<<endl;
-            if ( ProcessInfo[sel].filename.find("WJetsALL") != string::npos ) {
-                cout << " This is signal: " << ProcessInfo[sel].filename << endl;
+            cout << " going to fetch " << FilenameTemp << "   integral: " << hTemp1 ->Integral()<<endl;
+            if ( FilenameTemp.find("WJetsALL") != string::npos ) {
+                cout << " This is signal: " << FilenameTemp << endl;
                 hSignal[i] = (TH1D *) hTemp1->Clone();
             }
             else{
-                if ( j == 2 ) {
+                if ( j == 1 ) {
                     cout << " This is background ..." << endl;
                     hBack[i] = (TH1D *) hTemp1->Clone();
                 }

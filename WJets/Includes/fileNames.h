@@ -11,7 +11,7 @@ struct processInfoStruct{
     string legend;
 };
 
-const int NFILESWJETS(14); 
+const int NFILESWJETS(10); 
 const int NFilesFull(28); 
 const processInfoStruct ProcessInfo[] = {
     //--  Name  ---------------------------- #events ---- xsec - branch - xsec error (%) -- color for plot -- name on legend
@@ -21,16 +21,17 @@ const processInfoStruct ProcessInfo[] = {
     {"WZ_dR_5311",	                          10000283.,  33.21,   1,         0.05,          kRed+1,      " WZ"},	
     {"WW_dR_5311",	                          10000431.,  54.838,  1,         0.05,          kViolet+5,   " WW"},
 
-    {"T_s_channel_dR_5311",	                  259961.,    3.79,    1,         0.10,          kMagenta,    " Ts"},     // 5
-    {"T_t_channel_dR_5311",	                  3758227.,   56.4,    1,         0.10,          kMagenta,    " Tt"},
-    {"T_tW_channel_dR_5311",	              497658.,    11.1,    1,         0.10,          kMagenta,    " Ttw"},
+    {"ST_s_channel_dR_5311",	                  259961.,    3.79,    1,         0.10,          kMagenta,    " STs"},     // 5
+    {"ST_tW_top_channel_dR_5311",	                  3758227.,   56.4,    1,         0.10,          kMagenta,    " STtWtop"},
+    {"ST_tW_antitop_channel_dR_5311",	              497658.,    11.1,    1,         0.10,          kMagenta,    " STtWantitop"},
+    {"TTJets_dR_5311",		                  6923652.,   234.,    1,         0.10,          kBlue,       " TTJets"}, // 11
+    {"DYJets50toInf_dR_5311",     30459503.,  3531.8,  1,         0.04,          kAzure+10,   " DYJets"}, // 13 /// up to this line files are set for W+jet s and TTbar
     {"Tbar_s_channel_dR_5311",                139974.,    1.76,    1,         0.10,          kMagenta,    " Tbars"},
     {"Tbar_t_channel_dR_5311",                1903681.,   30.7,    1,         0.10,          kMagenta,    " Tbart"},
     {"Tbar_tW_channel_dR_5311",               493460.,    11.1,    1,         0.10,          kMagenta,    " TbartW"},
-
-    {"TTJets_dR_5311",		                  6923652.,   234.,    1,         0.10,          kBlue,       " TTJets"}, // 11
+  
     {"DYJets10to50_dR_5311",	              11707222.,  860.5,   1,         0.04,          kAzure-4,    " DY"},
-    {"DYJets_MIX_UNFOLDING_dR_5311_Inf3",     30459503.,  3531.8,  1,         0.04,          kAzure+10,   " DYJets"}, // 13 /// up to this line files are set for W+jet s and TTbar
+    
     {"ZZJets2L2Nu_dR_5311",		              954911.,    17.654,  0.04039,   0.04,          kSpring+5,   " ZZJets2L2Nu"},
     {"ZZJets4L_dR_5311",		              4807893.,   17.654,  0.010196,  0.04,          kOrange,     " ZZJets4L"},
     {"ZZJets2L2Q_dR_5311",		              1936727.,   17.654,  0.14118,   0.04,          kOrange-3,   " ZZJets2L2Q"},
@@ -54,8 +55,8 @@ const int NFILESDYJETS(12);
 //const int FilesDYJets[NFILESDYJETS] = {0, 1, 21, 15, 20, 14, 16, 19, 18, 17, 11, 13};
 const int FilesDYJets[NFILESDYJETS] = {0, 1, 21, 15, 20, 14, 16, 19, 18, 17, 11, 27};
 const int NFILESTTBAR(9);
-const int FilesTTbarWJets[NFILESTTBAR] = {0, 4, 3, 2, 23, 20, 22, 11, 24};
-const int FilesTTbar[NFILESTTBAR] = {0, 4, 3, 2, 23, 20, 22, 11, 24};
+const int FilesTTbarWJets[NFILESTTBAR] = {0, 4, 3, 2, 23, 20, 9, 8, 24};
+const int FilesTTbar[NFILESTTBAR] = {0, 4, 3, 2, 23, 20, 9, 8, 24};
 const int NFILESWJETS_M(15);
 const int FilesWJets_M[NFILESWJETS_M] = {0, 2, 3, 4, 23, 5, 6, 7, 8, 9, 10, 11, 12, 13, 24};
 const int DATAFILENAME(0);
@@ -135,4 +136,5 @@ const string DYPOWHEGZjjFILENAME = GenMCFILENAMES[4];
 const string DYSHERPAZjFILENAME("DYJets_Sherpa_UNFOLDING_dR_5311_Inf");
 
 #endif
+
 

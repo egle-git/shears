@@ -18,13 +18,14 @@
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc+").c_str());
     }
         
-    myFinalUnfoldEdit(0, 1,);
-    myFinalUnfoldEdit(46, 47); //inc jetmultiplicity
+    myFinalUnfoldEdit(0, 1);
+    
     
     myFinalUnfoldEdit(1, 6);
     myFinalUnfoldEdit(11, 16);
     myFinalUnfoldEdit(21, 26);
     myFinalUnfoldEdit(26, 43);
+    myFinalUnfoldEdit(43, 48);
         
         
 }

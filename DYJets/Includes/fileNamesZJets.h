@@ -19,6 +19,7 @@ struct processInfoStruct{
 
 //--- first element must point to the data
 //--- last element must point to the MC Signal
+//8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
     //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorAN - colorPAS - name on legend
     /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data", " Data"},
@@ -32,7 +33,8 @@ const processInfoStruct Samples[] = {
     /* 8*/{"WWTo2L2Nu", ' ',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
     /* 9*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kAzure+10, kAzure+10, " WJets", " W"},
     /*10*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
-    /*11*/{"DYJets_UNFOLDING", ' ',     1.,       1.,      1,  0.06,     kPink,     kPink,     " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
+    //    /*11*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
+    /*11*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
@@ -43,7 +45,7 @@ const int DYJETS(NSamples - 1); // Signal MC is the last sample of the list.
  */
 const unsigned int NFILESDYJETS = 8;
 
-/** Number of background MC samples: all minus data and signal MC
+/** Number of background MC samples: all minus data and the signal MC
  */
 const unsigned int NBGDYJETS = NFILESDYJETS - 2;
 

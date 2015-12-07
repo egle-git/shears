@@ -75,7 +75,7 @@ public:
 
   virtual const RooUnfoldResponse* response() const;
   virtual const TH1* Hmeasured() const;
-  virtual       TH1* Hreco (ErrorTreatment withError=kErrors);
+  virtual       TH1* Hreco (ErrorTreatment withError=kErrors, std::vector<TH1*>* hUnf_i = 0);
   const    TVectorD& Vmeasured() const;   // Measured distribution as a TVectorD
   const    TVectorD& Emeasured() const;   // Measured distribution errors as a TVectorD
   const    TMatrixD& GetMeasuredCov() const;   // Measured distribution covariance matrix
@@ -116,13 +116,13 @@ public:
 protected:
   void Assign (const RooUnfold& rhs); // implementation of assignment operator
   virtual void SetNameTitleDefault();
-  virtual void Unfold();
+  virtual void Unfold(std::vector<TH1*>* hUnf_i = 0);
   virtual void GetErrors();
   virtual void GetCov(); // Get covariance matrix using errors on measured distribution
   virtual void GetErrMat(); // Get covariance matrix using errors from residuals on reconstructed distribution
   virtual void GetWgt(); // Get weight matrix using errors on measured distribution
   virtual void GetSettings();
-  virtual Bool_t UnfoldWithErrors (ErrorTreatment withError, bool getWeights=false);
+  virtual Bool_t UnfoldWithErrors (ErrorTreatment withError, bool getWeights=false, std::vector<TH1*>* hUnf_i = 0);
 
   static TMatrixD CutZeros     (const TMatrixD& ereco);
   static TH1D*    HistNoOverflow (const TH1* h, Bool_t overflow);

@@ -7,8 +7,8 @@ TString cwd;
 void executeInThread(std::string executable, std::string option, std::string machine) 
 {
     std::string command = executable + " " + option;
-    if (machine != "") command = "ssh -o StrictHostKeyChecking=no " + machine + " \'source .bash_profile; cd " + cwd + "; " + command + "\'";  
-    //if (machine != "") command = "ssh -x -o StrictHostKeyChecking=no " + machine + " bash " + cwd + "/wrapper.sh " + command;  
+    //if (machine != "") command = "ssh -o StrictHostKeyChecking=no " + machine + " \'source .bash_profile; cd " + cwd + "; " + command + "\'";  
+    if (machine != "") command = "ssh -x -o StrictHostKeyChecking=no " + machine + " bash " + cwd + "/wrapper.sh " + command;  
     std::cout << command << std::endl;
     system(command.c_str());
 }

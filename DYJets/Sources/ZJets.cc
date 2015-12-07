@@ -45,7 +45,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
     unsigned int nGenEventsVInc0Jets(0), nGenEventsVInc1Jets(0), nGenEventsVInc2Jets(0), nGenEventsVInc3Jets(0);
     unsigned int nEventsWithTwoGoodLeptons(0), nEventsWithTwoGoodLeptonsWithOppCharge(0), nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass(0);
    
-    unsigned int test(0), test1(0), test2(0), test3(0);
+    //    unsigned int test(0), test1(0), test2(0), test3(0);
  //------------------------------------
 
     //==========================================================================================================//
@@ -118,9 +118,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
 
     int lepscale(0);
     if (systematics == 5) lepscale = direction;
-
-    int smearlepton(0);
-    if (systematics == 6) smearlepton = direction;
+    
+    //int smearlepton(0);
+    //if (systematics == 6) smearlepton = direction;
     //==========================================================================================================//
 
 
@@ -145,7 +145,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
         }
     }
     //======================================================================
-    double RewWeight;
+    //double RewWeight;
     TFile *fratio = new TFile("ptjet1_ratio.root");
     TH1D *hist_ptjet1_ratio =  (TH1D*) fratio->Get("ptjet1_ratio");
 
@@ -286,7 +286,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, TString pdfSet, int pdfMembe
         //=======================================================================================================//
         //         Retrieving leptons          //
         //====================================//
-        bool passesLeptonCut(0), passesLeptonChargeCut(0), passesLeptonMassCut(0), passesTauCut(1);
+        bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1);
+	bool passesLeptonMassCut(0);
         unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
         vector<leptonStruct> leptons;
         vector<leptonStruct> vetoMuons;
@@ -870,7 +871,7 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
 
                 if (nGoodGenJets_20 >= 1) {
 
-                   double RatioValue;
+		    double RatioValue;
                    if(nGoodJets_20 >= 1){
                    double binNumber = hist_ptjet1_ratio->GetXaxis()->FindBin(jets_20[0].v.Pt());
                    RatioValue =  hist_ptjet1_ratio->GetBinContent(binNumber);
@@ -2652,24 +2653,25 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
     //--- get the number of Muon candidates from the vector size ---
     unsigned short nTotLeptons(patMuonEta_->size());
 
-    bool eventTrigger = false;
+    //bool eventTrigger = false;
     // we also have event trigger variables --> we should at least match one of the leptons to trigger
-    for (unsigned short i(0); i < nTotLeptons; i++) {
-        int whichTrigger(patMuonTrig_->at(i));
-        if (lepSel == "SMu" && (whichTrigger & 0x1)) eventTrigger = true;
-    }
+    //for (unsigned short i(0); i < nTotLeptons; i++) {
+    //    int whichTrigger(patMuonTrig_->at(i));
+    //    if (lepSel == "SMu" && (whichTrigger & 0x1)) eventTrigger = true;
+    //}
           
 
     for (unsigned short i(0); i < nTotLeptons; i++) {
-        double muonId = 0;
 
        //CommentAG: don't have patMuonCombId
 /*
-        if(fileName.Index("mcatnlo") >= 0 || fileName.Index("MG-MLM") >= 0) {
-            muonId = (double) patMuonCombId_Int->at(i);
+        double muonId = 0;
+	
+	if(fileName.Index("mcatnlo") >= 0 || fileName.Index("MG-MLM") >= 0) {
+	muonId = (double) patMuonCombId_Int->at(i);
         }
         else { 
-            muonId = (double) patMuonCombId_Double->at(i);
+	muonId = (double) patMuonCombId_Double->at(i);
         }
 */
         leptonStruct mu(patMuonPt_->at(i), 

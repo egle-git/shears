@@ -12,6 +12,8 @@
 
 using namespace std;
 
+//#define FAKE_IS_PURITY
+
 TString getEnergy();
 
 

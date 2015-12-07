@@ -329,7 +329,7 @@ void RooUnfold::SetResponse (RooUnfoldResponse* res, Bool_t takeOwnership)
   if (takeOwnership) _resmine= res;
 }
 
-void RooUnfold::Unfold()
+void RooUnfold::Unfold(std::vector<TH1*>* hUnf_i)
 {
   // Dummy unfolding - just copies input
   cout << "********************** " << ClassName() << ": dummy unfolding - just copy input **********************" << endl;
@@ -401,7 +401,7 @@ void RooUnfold::GetErrMat()
   _have_err_mat=true;
 }
 
-Bool_t RooUnfold::UnfoldWithErrors (ErrorTreatment withError, bool getWeights)
+Bool_t RooUnfold::UnfoldWithErrors (ErrorTreatment withError, bool getWeights, std::vector<TH1*>* hUnf_i)
 {
   if (!_unfolded) {
     if (_fail) return false;
@@ -418,7 +418,7 @@ Bool_t RooUnfold::UnfoldWithErrors (ErrorTreatment withError, bool getWeights)
       if (rmeas->GetDimension()>=3) cerr << "x" << rmeas->GetNbinsZ();
       cerr << "-bin measured histogram from RooUnfoldResponse" << endl;
     }
-    Unfold();
+    Unfold(hUnf_i);
     if (!_unfolded) {
       _fail= true;
       return false;
@@ -660,7 +660,7 @@ void RooUnfold::SetNameTitleDefault()
   }
 }
 
-TH1* RooUnfold::Hreco (ErrorTreatment withError)
+TH1* RooUnfold::Hreco (ErrorTreatment withError, std::vector<TH1*>* hUnf_i)
 {
     /*Creates reconstructed distribution. Error calculation varies by withError:
     0: No errors
@@ -671,7 +671,7 @@ TH1* RooUnfold::Hreco (ErrorTreatment withError)
   TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());
   reco->Reset();
   reco->SetTitle (GetTitle());
-  if (!UnfoldWithErrors (withError)) withError= kNoError;
+  if (!UnfoldWithErrors (withError, false, hUnf_i)) withError= kNoError;
   if (!_unfolded) return reco;
 
   for (Int_t i= 0; i < _nt; i++) {

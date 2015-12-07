@@ -581,6 +581,7 @@ double standalone_LumiReWeighting::weight( int npv ) {
   return weights_->GetBinContent( bin );
 }
 
+#if 0
 void standalone_LumiReWeighting::weightOOT_init() {
 
   // The following are poisson distributions with different means, where the maximum
@@ -1301,7 +1302,6 @@ void standalone_LumiReWeighting::weightOOT_init() {
     0
   };
 
-
   double* WeightPtr = 0;
 
   for(int iint = 0; iint<25; ++iint){
@@ -1332,7 +1332,7 @@ void standalone_LumiReWeighting::weightOOT_init() {
     if(iint ==24) WeightPtr = weight_24;
 
   }
-
 }
+#endif
 
 #endif

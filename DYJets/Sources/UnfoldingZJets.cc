@@ -2,6 +2,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <memory>
 #include <math.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -20,9 +21,14 @@
 #include "fixYscale.C"
 #include "ConfigVJets.h"
 
+#define FAST_BAYES
+#define NEW_CHI2
+
 ConfigVJets cfg1;
 
 const static bool isdatabug = false;
+
+static int verbosity = 1;
 
 using namespace std;
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
@@ -31,7 +37,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 //void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
 //        int jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable, bool doNormalized)
 void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
-		    int jetPtMin, int jetEtaMax, TString variable, bool doNormalized)
+		    int jetPtMin, int jetEtaMax, TString variable, bool doNormalized,
+		    int whichSyst)
 {
     gStyle->SetOptStat(0);
     //--- create output directory if does not exist ---
@@ -145,6 +152,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	
       //--- rec Data histograms ---
       TH1D *hRecData[3] = {NULL};
+      TH1D* hRecDataOdd = 0;
+      TH1D* hRecDataEven = 0;
+      
       //--- rec DYJets histograms ---
       TH1D *hRecDYJets[13] = {NULL};
       //--- fake DYJets histograms ---
@@ -159,7 +169,17 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       TH1D *hRecSumBg[11] = {NULL};
       //--- response DYJets objects ---
       RooUnfoldResponse *respDYJets[18] = {NULL};
-	
+
+      //Get split histogram of data used for cross-validation
+      TString variable_odd = variable + "_Odd";
+      TString variable_even = variable + "_Even";
+
+      if(fData[0]){
+	fData[0]->cd();
+	hRecDataOdd = (TH1D*) fData[0]->Get(variable_odd);
+	hRecDataEven = (TH1D*) fData[0]->Get(variable_even);
+      }
+      
       //--- Get all histograms ---
       getAllHistos(variable, hRecData, fData, 
 		   hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
@@ -173,6 +193,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//----------------------------------------------------------------------------------------- 
       }
 
+      
       TH1D *hMadGenCrossSection = makeCrossSectionHist(hGenDYJets[0], integratedLumi);
       hMadGenCrossSection->SetZTitle("AMCATNLO + PY8 (#leq 2j NLO + PS)");
       //TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
@@ -205,9 +226,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "JERUp", "JERDown", 
 			"XSECUp", "XSECDown", "LESUp", "LESDown", "LERUp", "LERDown",
 			"LumiUp", "LumiDown", "SFUp", "SFDown", "SherpaUnf"};
-      TH1D *hUnfData[18] = {NULL};
-      TH2D *hUnfDataStatCov[18] = {NULL};
-      TH2D *hUnfMCStatCov[18] = {NULL};
+      TH1D *hUnfData[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+      TH2D *hUnfDataStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+      TH2D *hUnfMCStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
 
       int nIter[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
       int svdKterm(0);
@@ -228,6 +249,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       //--- Unfold the Data histograms for each systematic ---
       for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
+
+	if(iSyst != 0 && whichSyst > 0 && iSyst != whichSyst) continue;
 	
 	//--- only JES up and down (iSyst = 1 and 2) is applied on data ---
 	unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
@@ -238,7 +261,12 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	else if (iSyst == 13 || iSyst == 14 || iSyst == 15 || iSyst == 16) iBg = iSyst - 6;  // Lumi, SF
 
 	TH1D *hRecDataMinusFakes = (TH1D*) hRecData[iData]->Clone();
-
+	if(hRecDataMinusFakes->GetBinContent(1) > 0){
+	  std::cout <<  __FILE__ << __LINE__ << ": "
+		    << "hRec: " << hRecDataMinusFakes->GetName()
+		    <<  " " << hRecDataMinusFakes->GetBinError(1)
+	    / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
+	}
 //	std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
 //		  << hRecDataMinusFakes->GetEntries()
 //		  << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
@@ -255,8 +283,86 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //		  << std::endl;
 	
 	hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
-	hRecDataMinusFakes->Add(hFakDYJets[iSyst], -1);
+	if(hRecDataMinusFakes->GetBinContent(1) > 0){
+	  std::cout <<  __FILE__ << __LINE__ << ": "
+		    << "hRecMinusBg: " << hRecDataMinusFakes->GetName()
+		    << " " <<  hRecDataMinusFakes->GetBinError(1)
+	    / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
+	}
 
+#ifdef FAKE_IS_PURITY
+	std::cout << "Fix of fakes active! " << "\n";
+      	for(int ibin = 0; ibin <= hRecDataMinusFakes->GetNbinsX(); ++ibin){
+	  double c = hRecDataMinusFakes->GetBinContent(ibin);
+	  double e = hRecDataMinusFakes->GetBinError(ibin);
+	  double p = hFakDYJets[iSyst]->GetBinContent(ibin);
+	  if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
+			       << ") = " << p << "\n";
+	  hRecDataMinusFakes->SetBinContent(ibin, c * p);
+	  hRecDataMinusFakes->SetBinError(ibin, e * p);
+	}
+
+	//FIXME: use independent samples for subtraction
+	TH1D *hRecDataMinusFakesOdd;
+	TH1D *hRecDataMinusFakesEven;
+	if(iData==0 && hRecDataOdd && hRecDataEven){
+	  hRecDataMinusFakesOdd = (TH1D*) hRecDataOdd->Clone();
+//	  hRecDataMinusFakesOdd->Add(hRecSumBg[iBg], -0.5);
+//	  for(int ibin = 0; ibin <= hRecDataMinusFakesOdd->GetNbinsX(); ++ibin){
+//	    double c = hRecDataMinusFakesOdd->GetBinContent(ibin);
+//	    double e = hRecDataMinusFakesOdd->GetBinError(ibin);
+//	    double p = hFakDYJets[iSyst]->GetBinContent(ibin);
+//	    if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
+//				 << ") = " << p << "\n";
+//	    hRecDataMinusFakesOdd->SetBinContent(ibin, c * p);
+//	    hRecDataMinusFakesOdd->SetBinError(ibin, e * p);
+//	  }
+	  
+     	  hRecDataMinusFakesEven = (TH1D*) hRecDataEven->Clone();
+	  hRecDataMinusFakesEven->Add(hRecSumBg[iBg], -0.5);
+	  for(int ibin = 0; ibin <= hRecDataMinusFakesEven->GetNbinsX(); ++ibin){
+	    double c = hRecDataMinusFakesEven->GetBinContent(ibin);
+	    double e = hRecDataMinusFakesEven->GetBinError(ibin);
+	    double p = hFakDYJets[iSyst]->GetBinContent(ibin);
+	    if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
+				 << ") = " << p << "\n";
+	    hRecDataMinusFakesEven->SetBinContent(ibin, c * p);
+	    hRecDataMinusFakesEven->SetBinError(ibin, e * p);
+	  }
+	} else{
+	  hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
+	}
+#else
+	hRecDataMinusFakes->Add(hFakDYJets[iSyst], -1);	
+	//FIXME: use independent samples for subtraction
+	TH1D *hRecDataMinusFakesOdd;
+	TH1D *hRecDataMinusFakesEven;
+	if(iData==0){
+	  hRecDataMinusFakesOdd = (TH1D*) hRecDataOdd->Clone();
+	  hRecDataMinusFakesOdd->Add(hRecSumBg[iBg], -0.5);
+	  hRecDataMinusFakesOdd->Add(hFakDYJets[iSyst], -0.5);
+	
+	  hRecDataMinusFakesEven = (TH1D*) hRecDataEven->Clone();
+	  hRecDataMinusFakesEven->Add(hRecSumBg[iBg], -0.5);
+	  hRecDataMinusFakesEven->Add(hFakDYJets[iSyst], -0.5);
+	} else{
+	  hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
+	}	
+#endif
+
+	if(hRecDataMinusFakes->GetBinContent(1) > 0){
+	  std::cout <<  __FILE__ << __LINE__ << ": "
+		    << "hRecMinusBgMinusFake: " << hRecDataMinusFakes->GetName()
+		    << " " << hRecDataMinusFakes->GetBinError(1)
+	    / sqrt(hRecDataMinusFakes->GetBinContent(1))
+		    << "\t" << hRecDataMinusFakes->GetBinContent(1) /  hRecData[iData]->GetBinContent(1)
+	    	    << "\t" << hRecDataMinusFakes->GetBinError(3)
+	    / sqrt(hRecDataMinusFakes->GetBinContent(3))
+		    << "\t" << hRecDataMinusFakes->GetBinContent(3) /  hRecData[iData]->GetBinContent(3)
+		    << "\n";
+	}
+
+	
 	if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
 	std::cout << "Starting unfolding of " << variable << " "
 		  << name[iSyst] << " for  "<< lepSel << " channel." << "\n";
@@ -266,7 +372,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	  continue;
 	}
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
-				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy);
+				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy,
+				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
 
 	//--- save the unfolded histograms ---
 	outputRootFile->cd(); 
@@ -294,8 +401,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //--- Now create the covariance matrices ---
       TH2D *hCov[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
       int nCovs = nSysts > 17 ? 11 : 10;
-      hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
-      hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
+      if(hUnfDataStatCov[0]) hCov[0] = (TH2D*) hUnfDataStatCov[0]->Clone("CovDataStat");
+      if(hUnfMCStatCov[0]) hCov[1] = (TH2D*) hUnfMCStatCov[0]->Clone("CovMCStat");
       if(hUnfData[1])  hCov[2] = makeCovFromUpAndDown(hUnfData[0], hUnfData[1], hUnfData[2], "CovJES");
       if(hUnfData[3])  hCov[3] = makeCovFromUpAndDown(hUnfData[0], hUnfData[3], hUnfData[4], "CovPU");
       if(hUnfData[5])  hCov[4] = makeCovFromUpAndDown(hUnfData[0], hUnfData[5], hUnfData[6], "CovJER");
@@ -305,9 +412,13 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       if(hUnfData[13]) hCov[8] = makeCovFromUpAndDown(hUnfData[0], hUnfData[13], hUnfData[14], "CovLumi");
       if(hUnfData[15]) hCov[9] = makeCovFromUpAndDown(hUnfData[0], hUnfData[15], hUnfData[16], "CovSF");
       if(hUnfData[17]) hCov[10] = makeCovFromUpAndDown(hUnfData[0], hUnfData[17], hUnfData[0], "CovSherpaUnf");
-      hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
+      if(hUnfMCStatCov[0]) hCov[11] = (TH2D*) hUnfMCStatCov[0]->Clone("CovTotSyst");
       
-      for (int i = 2; i < nCovs; ++i) hCov[11]->Add(hCov[i]);
+      if(hCov[11]){
+	for (int i = 2; i < nCovs; ++i){
+	  if(hCov[i]) hCov[11]->Add(hCov[i]);
+	}
+      }
 
       if (doNormalized) {
 	double Madtot = hMadGenCrossSection->Integral("width");
@@ -331,18 +442,20 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
 
       //--- print out break down of errors ---
-      for (int i = 2; i <= nCovs; ++i) {
-	cout << hUnfData[0]->GetBinContent(i);
-	for (int j = 0; j <= 11; ++j) {
-	  if(hCov[j]){
-	    cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
-	  }
+      if(whichSyst < 0){
+	for (int i = 2; i <= nCovs; ++i) {
+	  cout << hUnfData[0]->GetBinContent(i);
+	  for (int j = 0; j <= 11; ++j) {
+	    if(hCov[j]){
+	      cout << " +/- " << sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+	    }
 	}
-	cout << endl;
+	  cout << endl;
+	}
+
+	createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
       }
-
-      createTable(outputFileName, lepSel, variable, doNormalized, hUnfData[0], hCov);
-
+      
       if (variable.Index("ZNGoodJets_Zexc") >= 0) {
 	//createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
 	createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection);
@@ -525,8 +638,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     for (int i = 1; i <= nBins; i++) {
 	double binSum = 0;
 	double binSumMad = 0;
-	double binSumShe = 0;
-	double binSumPow = 0;
+	//double binSumShe = 0;
+	//double binSumPow = 0;
 	double binStatError2 = 0;
 	double binStatMadError2 = 0;
 	//double binStatSheError2 = 0;
@@ -668,13 +781,16 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
     ofstream out(outputFileName + ".tex");
     out << table;
     out.close();
-    cout << table << endl;
+    if(verbosity > 0) cout << table << endl;
 }
 
 
-int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecDataMinusFakes, 
+int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp,
+	       TH1D* hRecDataMinusFakes,
 	       TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, 
-	       double integratedLumi, bool logy)
+	       double integratedLumi, bool logy,
+	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven
+	       )
 {
     //--- make sure we use OverFlow (should already be set to true) ---
     resp->UseOverflow();
@@ -695,30 +811,216 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
     std::cout << "-----------------------" << std::endl;
     TString variable = TString(hRecDataMinusFakes->GetName());
-    TFile *f = new TFile("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE"); 
+    TFile *f = new TFile("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
     f->cd();
+
+    TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable.Data(), name.Data()));
+    hresp->Write();
+    
     int finalNIter = -1;
     int nIter = 99;
-    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
+    int finalNIterXval = -1;
+    int nIterXval = 99;
+
+    //    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
+    int nBinsTmp = 50;
 
     bool svd_unfold = cfg1.getB("svdUnfold", false);
-    bool tsvd_unfold = cfg1.getB("tsvdUnfold", false);    
+    bool tsvd_unfold = cfg1.getB("tsvdUnfold", false);
+    bool binByBin_unfold = cfg1.getB("binByBinUnfold", false);    
+    verbosity = 0; //cfg1.getI("unfoldingVerbosity", 1);
 
-
-    TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp, 0.5, nBinsTmp+0.5);
-    hchi2->SetTitle("#chi^{2}/ndf for reco vs folded-unfolded for " + TString(hRecDataMinusFakes->GetTitle()));
+    TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp + 1, -0.5, nBinsTmp + .5);
+    hchi2->SetTitle(TString::Format("#chi^{2}/ndf of reco vs folded-unfolded for %s %s",
+				    variable.Data(), name.Data()));
     hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
     hchi2->GetYaxis()->SetTitleOffset(1.40);
     hchi2->GetXaxis()->SetTitle("number of iterations of the Bayes method");
     hchi2->GetXaxis()->CenterTitle();
     hchi2->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
     hchi2->GetXaxis()->SetLabelSize(0.03);
-    hchi2->SetLineWidth(2);
+    hchi2->SetLineWidth(2);    
+    TH1D* hchi2Xval = 0;
+    
+#ifdef FAST_BAYES
+    
+    RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
+    TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
+    
+    RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, nBinsTmp);
+    RObjectForDataTmp->SetVerbose(verbosity);
+    RObjectForDataTmp->UseFlatPrior(true);
+    //    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
+    int nBinsToSkip = 0;
+    RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
+    std::auto_ptr<std::vector<TH1*> > hUnfs (new std::vector<TH1*>);
+
+    //Unfolds the data:
+    //TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
+    RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
+    
+    TString tmpStr2 = TString::Format("%s residuals;Iter;Residual", name.Data());
+    TH1* hResMax = new TH1D("hResMax", TString::Format("Max(res) %s %s;Iter;max(res)", variable.Data(), name.Data()),
+			    hUnfs->size(), -.5, hUnfs->size() - 0.5);
+    
+    for (unsigned i = 0; i < hUnfs->size(); ++i) {
+      (*hUnfs)[i]->SetName(TString::Format("hUnf%d", i));
+      if(i==0){
+	(*hUnfs)[i]->SetTitle(TString::Format("Prior for %s %s %d iters", variable.Data(), name.Data(), i));
+      } else {
+	(*hUnfs)[i]->SetTitle(TString::Format("Unfolded %s %s %d iters", variable.Data(), name.Data(), i));
+      }
+      (*hUnfs)[i]->Write();
+      TH1* hfoldUnfData = foldUnfData((*hUnfs)[i], respBis);
+      hfoldUnfData->SetName(TString::Format("datafoldedBack%s_%d", name.Data(), i));
+      hfoldUnfData->SetTitle(TString::Format("dataFoldedBack%s_%d", name.Data(), i));
+      hfoldUnfData->Write();
+
+      TH1* hRes = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hRes%s_%d", name.Data(), i+1));
+      hRes->Reset();
+      hRes->SetTitle(TString::Format("%s %s residuals - iteration %d",
+				     variable.Data(), name.Data(), i+1));
+      hRes->GetYaxis()->SetTitle("Residuals");
+      const int nRes = hfoldUnfData->GetXaxis()->GetLast() - hfoldUnfData->GetXaxis()->GetFirst() + 1;
+      Double_t res[nRes];
+      double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nBinsToSkip, res);
+      if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
+      if(i > 0) hchi2->SetBinContent(i + 1, mychi2);
+      if (mychi2 < 1./sqrt(2) && finalNIter < 0) {
+	nIter = i;
+	finalNIter = i;
+	std::cout << "We will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
+      }      
+      double maxRes = -1.;
+      for(int j = 0; j < nRes; ++j){
+	double x = fabs(res[j]);
+	  hRes->SetBinContent(hfoldUnfData->GetXaxis()->GetFirst() + j, x);
+	  if(x > maxRes) maxRes = x;
+      }
+      hRes->Write();
+      if(i>0) hResMax->Fill(i + 1, maxRes);
+    }
+    hResMax->Write();
+    TH1D *hgen = (TH1D*) respBis->Htruth();
+    TString tmpName = "mcGen" + name;
+    hgen->SetName(tmpName);
+    hgen->SetTitle(tmpName);
+    hgen->Write();
+    
+    TH1D *hfoldgen = foldUnfData(hgen, respBis);
+    tmpName = "mcGenFolded" + name;
+    hfoldgen->SetName(tmpName);
+    hfoldgen->SetTitle(tmpName);
+    hfoldgen->Write();
+
+    TH1D *hmes = (TH1D*) respBis->Hmeasured();
+    tmpName = "mcReco" + name;
+    hmes->SetName(tmpName);
+    hmes->SetTitle(tmpName);
+    hmes->Write();
+    
+    hRecDataMinusFakes->Write("Unf" + name + "_0");
+
+    if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
+
+      hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
+      hchi2Xval->Reset();
+      
+      RooUnfoldResponse *respBis2 = (RooUnfoldResponse*) resp->Clone();
+      TH1D *hRecDataMinusFakesBisOdd = (TH1D*) hRecDataMinusFakesOdd->Clone();
+      TH1D *hRecDataMinusFakesBisEven = (TH1D*) hRecDataMinusFakesEven->Clone();
+
+      //std::cout << "Chi2/ndf odd/even: " << MyChi2Test(hRecDataMinusFakesOdd, hRecDataMinusFakesEven) << "\n";
+      //      std::cout << "ROOT Chi2/ndf odd/even: "
+      //		<< hRecDataMinusFakesOdd->Chi2Test(hRecDataMinusFakesEven, "WW,P,CHI2/NDF") << "\n";
+      
+      RooUnfold *RObjectForDataTmp2 = RooUnfold::New(alg, respBis2, hRecDataMinusFakesBisOdd, nBinsTmp);
+      RObjectForDataTmp2->SetVerbose(verbosity);
+      RObjectForDataTmp2->UseFlatPrior(true);
+      //    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
+      int nBinsToSkip = 0;
+      RObjectForDataTmp2->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
+      std::auto_ptr<std::vector<TH1*> > hUnfs2 (new std::vector<TH1*>);
+      
+      //Unfolds the data:
+      //TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
+      RObjectForDataTmp2->Hreco(RooUnfold::kCovariance, hUnfs2.get());
+      
+      TH1* hResMaxXval = new TH1D("hResMaxXval",
+				  TString::Format("Max(res) %s %s;Iter;max(res) cross-validation",
+						  variable.Data(), name.Data()),
+				  hUnfs->size(), -.5, hUnfs->size() - 0.5);
+      
+      for (unsigned i = 0; i < hUnfs2->size(); ++i) {
+	(*hUnfs2)[i]->SetName(TString::Format("hUnfXval%d", i));
+	if(i==0){
+	  (*hUnfs2)[i]->SetTitle(TString::Format("Prior for %s %s", variable.Data(), name.Data()));
+	} else {
+	  (*hUnfs2)[i]->SetTitle(TString::Format("Unfolded %s %s %d iters, cross-validation", variable.Data(), name.Data(), i));
+	}
+	(*hUnfs2)[i]->Write();
+	TH1* hfoldUnfDataOdd = foldUnfData((*hUnfs2)[i], respBis);
+	hfoldUnfDataOdd->SetName(TString::Format("dataOddfoldedBack%s_%d", name.Data(), i));
+	hfoldUnfDataOdd->SetTitle(TString::Format("dataOddFoldedBack%s_%d", name.Data(), i));
+	hfoldUnfDataOdd->Write();
+	
+	TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i+1));
+	hResXval->Reset();
+	hResXval->SetTitle(TString::Format("%s %s residuals - iteration %d, cross validation",
+				       variable.Data(), name.Data(), i+1));
+	hResXval->GetYaxis()->SetTitle("Residuals");
+	
+	const int nRes = hfoldUnfDataOdd->GetXaxis()->GetLast() - hfoldUnfDataOdd->GetXaxis()->GetFirst() + 1;
+	Double_t resXval[nRes];
+	double mychi2 = MyChi2Test(hfoldUnfDataOdd, hRecDataMinusFakesBisEven, nBinsToSkip, resXval);
+	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
+
+	if(i > 0) hchi2Xval->SetBinContent(i + 1, mychi2);
+	
+	if (mychi2 < 1. && finalNIterXval < 0) {
+	  nIterXval = i;
+	  finalNIterXval = i;
+	  std::cout << "We will use " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
+	}      
+	double maxRes = -1.;
+	for(int j = 0; j < nRes; ++j){
+	  double x = fabs(resXval[j]);
+	  hResXval->SetBinContent(hfoldUnfDataOdd->GetXaxis()->GetFirst() + j, x);
+	  if(x > maxRes) maxRes = x;
+	}
+	hResXval->Write();
+	if(i > 0) hResMaxXval->Fill(i+1, maxRes);
+      } //next hUnfs2
+      
+      hResMaxXval->Write();
+      TH1D *hgen = (TH1D*) respBis->Htruth();
+      TString tmpName = "mcGen" + name;
+      hgen->SetName(tmpName);
+      hgen->SetTitle(tmpName);
+      hgen->Write();
+      
+      TH1D *hfoldgen = foldUnfData(hgen, respBis);
+      tmpName = "mcGenFolded" + name;
+      hfoldgen->SetName(tmpName);
+      hfoldgen->SetTitle(tmpName);
+      hfoldgen->Write();
+      
+      TH1D *hmes = (TH1D*) respBis->Hmeasured();
+      tmpName = "mcReco" + name;
+      hmes->SetName(tmpName);
+      hmes->SetTitle(tmpName);
+      hmes->Write();
+      hRecDataMinusFakesOdd->Write("UnfOdd" + name + "_0");
+      hRecDataMinusFakesEven->Write("UnfEven" + name + "_0");
+    }//cross-validation
+    
+#else
     for (int i = 1; i <= nBinsTmp; ++i) {
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 	RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
-       //	RObjectForDataTmp->UseFlatPrior(true);
+	RObjectForDataTmp->SetVerbose(verbosity);
+	RObjectForDataTmp->UseFlatPrior(true);
 	int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
 	RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	std::cout << "niter = " << i << std::endl;
@@ -751,8 +1053,8 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	hmes->SetTitle(tmpName);
 	hmes->Write();
 
-	double mychi2 = MyChi2Test(hfoldUnfData, hRecDataMinusFakesBis, nBinsToSkip);
-	std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
+	double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nBinsToSkip);
+	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
 	hchi2->SetBinContent(i, mychi2);
 	if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0"); 
 	hUnfDataBis->Write();
@@ -765,7 +1067,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	}
 	if(finalNIter > 0 && nIter > 3) break;
     }
-
+#endif
     nIter = min(nIter, 20);
     nIter = max(nIter, 2);
    // nIter = 4;
@@ -790,19 +1092,46 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     line->Draw();
     hchi2->Write();
     chchi2->Write();
-    chchi2->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
-    RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
-    TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
-    hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
-    hUnfDataBinByBin->Write();
-    RooUnfold *RObjectForDataBayes = RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, nIter);
-    TH1D *hUnfDataBayes = (TH1D*) RObjectForDataBayes->Hreco(RooUnfold::kCovariance);
-    hUnfDataBayes->SetName("UnfDataBayes" + name);
-    hUnfDataBayes->Write();
+    //    chchi2->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
+
+    if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
+      hchi2Xval->GetYaxis()->SetRangeUser(0, max(1.3, 1.1*hchi2Xval->GetMaximum()));
+      TArrow *arrowChi2Xval = new TArrow(nIterXval, min(1.2, hchi2Xval->GetMaximum()), nIterXval, 0.8, 0.02, "|>");
+      arrowChi2Xval->SetLineColor(kRed);
+      arrowChi2Xval->SetFillColor(kRed);
+      arrowChi2Xval->SetLineWidth(2);
+      TLine *line = new TLine(0.5, 0.7, nBinsTmp + 0.5, 0.7);
+      line->SetLineColor(kBlack);
+      line->SetLineStyle(kDashed);
+      line->SetLineWidth(2);
+      TCanvas *chchi2Xval = new TCanvas("chchi2Xval", "chchi2Xval", 600, 600);
+      chchi2Xval->cd();
+      chchi2Xval->SetGrid();
+      hchi2Xval->DrawCopy();
+      arrowChi2Xval->Draw();
+      line->Draw();
+      hchi2Xval->Write();
+      chchi2Xval->Write();
+      chchi2Xval->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.pdf");
+    }
+      
+    if(binByBin_unfold){
+      RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
+      RObjectForDataBinByBin->SetVerbose(verbosity);
+      TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+      hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
+      hUnfDataBinByBin->Write();
+      RooUnfold *RObjectForDataBayes = RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, nIter);
+      RObjectForDataBayes->SetVerbose(verbosity);
+      TH1D *hUnfDataBayes = (TH1D*) RObjectForDataBayes->Hreco(RooUnfold::kCovariance);
+      hUnfDataBayes->SetName("UnfDataBayes" + name);
+      hUnfDataBayes->Write();
+    }
     
     if(svd_unfold){
       for (int i(1); i <= nBinsTmp; i++) {
 	RooUnfold *RObjectForDataSVD = RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, i);
+	RObjectForDataSVD->SetVerbose(verbosity);
 	TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
 	hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", i) + "_" + name);
 	hUnfDataSVD->Write();
@@ -840,6 +1169,8 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
       arrowSvd->Draw();
       chmodD->Write();
       hmodD->Write();
+      unfresult->Write();
+      hSV->Write();
     }
 
     f->Close();
@@ -848,6 +1179,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
     //--- Unfold data minus background ---
     RooUnfold *RObjectForData = RooUnfold::New(alg, resp, hRecDataMinusFakes, nIter);
+    RObjectForData->SetVerbose(verbosity);
 
     //--- get the unfolded result ---
     RObjectForData->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
@@ -863,6 +1195,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
 	//--- get covariance from MC stat ---
 	RooUnfold *RObjectForMC = RooUnfold::New(alg, resp, hRecDataMinusFakes, nIter);
+	RObjectForMC->SetVerbose(verbosity);
 	RObjectForMC->IncludeSystematics(2); // new version of RooUnfold: will compute Cov based on MC Statistics only
 	hUnfMCStatCov = M2H(RObjectForMC->Ereco(RooUnfold::kCovariance)); // new version of RooUnfold
 	hUnfMCStatCov->SetName("UnfMCStatCov" + name);
@@ -979,7 +1312,7 @@ TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi)
     return hGenCrossSection;
 }
 
-TH1D* foldUnfData(TH1D *hUnfData, RooUnfoldResponse *hresp)
+TH1D* foldUnfData(TH1 *hUnfData, RooUnfoldResponse *hresp)
 {
     TH1D *hfoldUnfData = (TH1D*) hUnfData->Clone();
     RooUnfoldResponse *resp = (RooUnfoldResponse*) hresp->Clone();
@@ -1053,15 +1386,38 @@ void test()
     std::cout << "fol : " << hfoldUnfData->GetBinContent(1) << "   " << hfoldUnfData->GetBinContent(2) << std::endl; 
 }
 
-double MyChi2Test(TH1D *h1, TH1D *h2, int nBinsToSkip)
+#ifdef NEW_CHI2
+double MyChi2Test(TH1 *h1, TH1 *h2, int nBinsToSkip, Double_t* res)
 {
-    TH1D *h1Copy = (TH1D*) h1->Clone();
-    TH1D *h2Copy = (TH1D*) h2->Clone();
-
+    TH1 *h1Copy = (TH1*) h1->Clone();
+    TH1 *h2Copy = (TH1*) h2->Clone();
+    int nbins = h1->GetNbinsX();
+    double chi2 = 0;
+    int j = 0;
+    for (int i = nBinsToSkip + 1; i <= nbins; ++i) {
+      double n1 = h1Copy->GetBinContent(i);
+      double n2 = h2Copy->GetBinContent(i);
+      double s2 = h2Copy->GetBinError(i);
+      if(n1 > 0 and n2 > 0){
+	res[j] = (n2-n1) / s2;
+	chi2 += res[j]*res[j];
+      } else{
+	res[j] = 0.;
+      }
+      ++j;
+    }
+    return chi2 / nbins;
+}
+#else
+double MyChi2Test(TH1 *h1, TH1 *h2, int nBinsToSkip, Double_t* res)
+{
+    TH1 *h1Copy = (TH1*) h1->Clone();
+    TH1 *h2Copy = (TH1*) h2->Clone();
+    
     for (int i = 0; i <= nBinsToSkip; ++i) {
 	h1Copy->SetBinContent(i, 0.0);
 	h2Copy->SetBinContent(i, 0.0);
     }
-    return h1Copy->Chi2Test(h2Copy, "WW,P,CHI2/NDF");
-
+    return h1Copy->Chi2Test(h2Copy, "WW,P,CHI2/NDF", res);
 }
+#endif

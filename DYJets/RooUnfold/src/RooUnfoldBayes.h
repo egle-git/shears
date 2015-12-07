@@ -54,12 +54,12 @@ public:
 
 protected:
   void Assign (const RooUnfoldBayes& rhs); // implementation of assignment operator
-  virtual void Unfold();
+  virtual void Unfold(std::vector<TH1*>* hUnf_i = 0);
   virtual void GetCov();
   virtual void GetSettings();
 
   void setup();
-  void unfold();
+  void unfold(std::vector<TH1*>* hUnf_i = 0);
   void getCovariance();
 
   void smooth(TVectorD& PbarCi) const;

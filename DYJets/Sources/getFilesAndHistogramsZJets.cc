@@ -467,9 +467,121 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
     } 
 }
 
-
+#if defined(FAKE_IS_PURITY)
+//Use purity (1- fake rate).
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
+  std::cout << __FILE__ <<  ":" << __LINE__ << ". getFakes(): return purity...\n";
+  
+    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
+    
+    int nm = hResDYJets->GetNbinsX() + 2;
+    int nt = hResDYJets->GetNbinsY() + 2;
+    
+    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
+    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
+    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
+
+    std::cout << __FILE__ <<  ":" << __LINE__
+	      << "dyIntegral, dataIntegral, bgIntegral: "
+	      << dyIntegral << ", " << dataIntegral << ", " << bgIntegral << "\n";
+    
+    std::cout << __FILE__ <<  ":" << __LINE__
+	      << " Correction was: " << (dataIntegral - bgIntegral) / dyIntegral << "\n";
+    
+    dyIntegral = hRecDYJets->Integral(1, hRecDYJets->GetNbinsX()+1);
+    dataIntegral = hRecData->Integral(1, hRecData->GetNbinsX()+1);
+    bgIntegral = hRecSumBg->Integral(1, hRecSumBg->GetNbinsX()+1);
+
+    std::cout << __FILE__ <<  ":" << __LINE__
+	      << " Correction with no underflow: " << (dataIntegral - bgIntegral) / dyIntegral << "\n";
+    
+
+    for (int i= 0; i<nm; i++) {
+        double sum= 0.0, sum2= 0.0;
+	for (int j= 0; j<nt; j++) {
+	  sum += hResDYJets->GetBinContent(i, j);
+	  sum2 += pow(hResDYJets->GetBinError(i, j), 2);
+	}
+        double fake = 1.;
+	if(hRecDYJets->GetBinContent(i) > 0.){
+	  fake = sum / hRecDYJets->GetBinContent(i);
+	  //	  std::cout << __FILE__ <<  ":" << __LINE__ << ". fake = " << fake << "\n";
+	} else{
+	  std::cout << __FILE__ <<  ":" << __LINE__ << ". hRecDYJets->GetBinContent(" << i << ") = "
+		    << hRecDYJets->GetBinContent(i) << "\n";
+	}
+	//TODO: check correctness of the formula below.
+	//	double fake_err2 = fake*(1-fake) * pow(hRecDYJets->GetBinError(i), 2)
+	//  / pow(hRecDYJets->GetBinContent(i), 2);
+	hFakDYJets->SetBinContent(i, fake);
+	hFakDYJets->SetBinError(i, 0);
+	//	hFakDYJets->SetBinError(i, fake_err2);
+    }
+    return hFakDYJets;
+}
+#elif defined(FAKE_HALF_FIX)
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
+{
+  
+  std::cout << __FILE__ <<  ":" << __LINE__ << ". getFakes() with error fix...\n";
+      
+    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
+    
+    //int sm= hRecDYJets->GetSumw2N();
+    //int s = hResDYJets->GetSumw2N();
+    int nm = hResDYJets->GetNbinsX() + 2;
+    int nt = hResDYJets->GetNbinsY() + 2;
+
+    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
+    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
+    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
+    for (int i= 0; i<nm; i++) {
+        double nmes= 0.0, wmes= 0.0;
+	for (int j= 0; j<nt; j++) {
+	  nmes += hResDYJets->GetBinContent(i, j);
+	  // if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
+	  wmes += pow(hResDYJets->GetBinError(i, j), 2);
+	}
+        double fake = hRecDYJets->GetBinContent(i) - nmes;
+        //if (!s) wmes= nmes;
+        //hFakDYJets->SetBinContent(i, factor*fake);
+	//hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
+	hFakDYJets->SetBinContent(i, fake);
+	if(wmes > pow(hRecDYJets->GetBinError(i),2)){
+	  std::cerr << __FILE__ << ":"  << __LINE__ << ". "
+		    << "Problem found with the response matrix " << hResDYJets->GetName()
+		    << ". Error on sum of events of column " <<  i
+		    << " is larger than one of the corresponding bin of " << hRecDYJets->GetName()
+		    << ": "
+		    << sqrt(wmes) << " > " << hRecDYJets->GetBinError(i) << "\n";
+	  exit(1);
+	}
+	hFakDYJets->SetBinError(i, sqrt(pow(hRecDYJets->GetBinError(i),2) - wmes));
+	std::cout << "bin i " << hRecDYJets->GetBinContent(i) << "\t" << pow(hRecDYJets->GetBinError(i),2) << "\n"
+		  << nmes << "\t" << wmes << "\n"
+		  << hFakDYJets->GetBinContent(i) << "\t" << pow(hFakDYJets->GetBinError(i),2) << "\n";
+    }
+    if (dyIntegral != 0){
+      double factor = (dataIntegral - bgIntegral) / dyIntegral;
+      hFakDYJets->Scale(factor);
+    } else{
+      std::cerr << __FILE__ << ":"  << __LINE__ << ". "
+		<< "Error: the integral of the DY histogram " << hRecDYJets->GetName()
+		<< " content is null!\n";
+      exit(1);
+    }
+    
+    hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
+    
+    return hFakDYJets;
+
+}
+#else //original code
+TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
+{
+  std::cout << __FILE__ << ":" <<  __LINE__ << ". Original getFakes code\n";
+  
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
     
     int sm= hRecDYJets->GetSumw2N();
@@ -498,6 +610,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     return hFakDYJets;
 
 }
+#endif
 
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {

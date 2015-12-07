@@ -38,11 +38,11 @@ def dispacher(lepton = "DE", PT = 30, doSyst = 0):
         cmdSetJob += " runDYJets.cc > " + tmpCCFile
 
         print cmdSetJob
-        os.system(cmdSetJob)
+#        os.system(cmdSetJob)
 
         cmdExecJob = "nohup root -b -q " + tmpCCFile + "++ &> " + tmpLogFile + " &"
         print cmdExecJob
-        os.system(cmdExecJob)
+#        os.system(cmdExecJob)
 
         # Wait one second to be sure the log file has been created
         time.sleep(1)

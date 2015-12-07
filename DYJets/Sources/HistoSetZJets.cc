@@ -360,11 +360,22 @@ int nZPt_Zinc0jet(22);
     FifthJetEtaHigh_Zinc5jet            = newTH1D("FifthJetEtaHigh_Zinc5jet",            "5th jet |#eta| (N_{jets} #geq 5)",           "|#eta(j_{5})|",   6, 0., 4.7);  
     SixthJetEtaHigh_Zinc6jet            = newTH1D("SixthJetEtaHigh_Zinc6jet",            "6th jet |#eta| (N_{jets} #geq 6)",           "|#eta(j_{6})|",   6, 0., 4.7);  
 
-    FirstJetAbsRapidity_Zinc1jet        = newTH1D("FirstJetAbsRapidity_Zinc1jet",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  32, 0, 2.4);  
-    FirstJetRapidityHigh_Zinc1jet       = newTH1D("FirstJetRapidityHigh_Zinc1jet",       "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  47, 0, 4.7);  
-    SecondJetAbsRapidity_Zinc2jet       = newTH1D("SecondJetAbsRapidity_Zinc2jet",       "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  32, 0, 2.4);  
-    SecondJetRapidityHigh_Zinc2jet      = newTH1D("SecondJetRapidityHigh_Zinc2jet",      "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  47, 0, 4.7);  
-    ThirdJetAbsRapidity_Zinc3jet        = newTH1D("ThirdJetAbsRapidity_Zinc3jet",        "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 2.4);  
+    FirstJetAbsRapidity_Zinc1jet        = newTH1D("FirstJetAbsRapidity_Zinc1jet",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  32, 0, 2.4);
+    FirstJetAbsRapidity_Zinc1jet_Odd    = newTH1D("FirstJetAbsRapidity_Zinc1jet_Odd",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  32, 0, 2.4);
+    FirstJetAbsRapidity_Zinc1jet_Even   = newTH1D("FirstJetAbsRapidity_Zinc1jet_Even",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  32, 0, 2.4);
+	    
+    FirstJetRapidityHigh_Zinc1jet       = newTH1D("FirstJetRapidityHigh_Zinc1jet",       "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  47, 0, 4.7);
+    
+    SecondJetAbsRapidity_Zinc2jet       = newTH1D("SecondJetAbsRapidity_Zinc2jet",       "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  32, 0, 2.4);
+    SecondJetAbsRapidity_Zinc2jet_Odd   = newTH1D("SecondJetAbsRapidity_Zinc2jet_Odd",   "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  32, 0, 2.4);
+    SecondJetAbsRapidity_Zinc2jet_Even  = newTH1D("SecondJetAbsRapidity_Zinc2jet_Even",  "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  32, 0, 2.4);  
+
+    SecondJetRapidityHigh_Zinc2jet      = newTH1D("SecondJetRapidityHigh_Zinc2jet",      "2nd jet |y| (N_{jets} #geq 2)",              "|y(j_{2})|",  47, 0, 4.7);
+    
+    ThirdJetAbsRapidity_Zinc3jet        = newTH1D("ThirdJetAbsRapidity_Zinc3jet",        "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 2.4);
+    ThirdJetAbsRapidity_Zinc3jet_Odd    = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Odd",     "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 2.4);
+    ThirdJetAbsRapidity_Zinc3jet_Even   = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Even",    "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 2.4);
+    
     ThirdJetRapidityHigh_Zinc3jet       = newTH1D("ThirdJetRapidityHigh_Zinc3jet",       "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 4.7);  
     FourthJetAbsRapidity_Zinc4jet       = newTH1D("FourthJetAbsRapidity_Zinc4jet",       "4th jet |y| (N_{jets} #geq 4)",              "|y(j_{4})|",  12, 0., 2.4);  
     FourthJetRapidityHigh_Zinc4jet      = newTH1D("FourthJetRapidityHigh_Zinc4jet",      "4th jet |y| (N_{jets} #geq 4)",              "|y(j_{4})|",  12, 0., 4.7);  
@@ -484,20 +495,26 @@ int nZPt_Zinc0jet(22);
             45, 0.5, 45.5); //y-axis
 
 
-    FirstJetPt_Zinc1jet               = newTH1D("FirstJetPt_Zinc1jet",                 "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); 
+    FirstJetPt_Zinc1jet               = newTH1D("FirstJetPt_Zinc1jet",                 "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet);
+    FirstJetPt_Zinc1jet_Odd           = newTH1D("FirstJetPt_Zinc1jet_Odd",             "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet);
+    FirstJetPt_Zinc1jet_Even          = newTH1D("FirstJetPt_Zinc1jet_Even",           "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); 
     //FirstJetPt_2_Zinc1jet               = newTH1D("FirstJetPt_2_Zinc1jet",                 "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); 
     FirstJetPt_2_Zinc1jet             = newTH1D("FirstJetPt_2_Zinc1jet",               "1st jet p_{T} (N_{jets} #geq 1)2",            "p_{T}(j_{1}) [GeV]",     jetPt_2_Zinc1jet); 
 
-    SecondJetPt_Zinc2jet              = newTH1D("SecondJetPt_Zinc2jet",                "2nd jet p_{T} (N_{jets} #geq 2)",             "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet); 
+    SecondJetPt_Zinc2jet              = newTH1D("SecondJetPt_Zinc2jet",                "2nd jet p_{T} (N_{jets} #geq 2)",             "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    SecondJetPt_Zinc2jet_Odd          = newTH1D("SecondJetPt_Zinc2jet_Odd",                "2nd jet p_{T} (N_{jets} #geq 2)",             "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    SecondJetPt_Zinc2jet_Even         = newTH1D("SecondJetPt_Zinc2jet_Even",                "2nd jet p_{T} (N_{jets} #geq 2)",             "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet); 
 
     SecondJetPt_2_Zinc2jet              = newTH1D("SecondJetPt_2_Zinc2jet",            "2nd jet p_{T} (N_{jets} #geq 2)2",             "p_{T}(j_{2}) [GeV]",     jetPt_2_Zinc2jet); 
 
-    ThirdJetPt_Zinc3jet               = newTH1D("ThirdJetPt_Zinc3jet",                 "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet); 
-
+    ThirdJetPt_Zinc3jet               = newTH1D("ThirdJetPt_Zinc3jet",                 "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    ThirdJetPt_Zinc3jet_Odd           = newTH1D("ThirdJetPt_Zinc3jet_Odd",             "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet); 
+    ThirdJetPt_Zinc3jet_Even          = newTH1D("ThirdJetPt_Zinc3jet_Eve",             "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    
    ThirdJetPt_2_Zinc3jet               = newTH1D("ThirdJetPt_2_Zinc3jet",             "3rd jet p_{T} (N_{jets} #geq 3)2",             "p_{T}(j_{3}) [GeV]",      jetPt_2_Zinc3jet); 
-    FourthJetPt_Zinc4jet              = newTH1D("FourthJetPt_Zinc4jet",                "4th jet p_{T} (N_{jets} #geq 4)",             "p_{T}(j_{4}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet); 
-    FifthJetPt_Zinc5jet               = newTH1D("FifthJetPt_Zinc5jet",                 "5th jet p_{T} (N_{jets} #geq 5)",             "p_{T}(j_{5}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet); 
-    SixthJetPt_Zinc6jet               = newTH1D("SixthJetPt_Zinc6jet",                 "6th jet p_{T} (N_{jets} #geq 6)",             "p_{T}(j_{6}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet); 
+   FourthJetPt_Zinc4jet              = newTH1D("FourthJetPt_Zinc4jet",                "4th jet p_{T} (N_{jets} #geq 4)",             "p_{T}(j_{4}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet); 
+   FifthJetPt_Zinc5jet               = newTH1D("FifthJetPt_Zinc5jet",                 "5th jet p_{T} (N_{jets} #geq 5)",             "p_{T}(j_{5}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet); 
+   SixthJetPt_Zinc6jet               = newTH1D("SixthJetPt_Zinc6jet",                 "6th jet p_{T} (N_{jets} #geq 6)",             "p_{T}(j_{6}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet); 
 
     FirstJetPtEta_Zinc1jet = newTH2D("FirstJetPtEta_Zinc1jet", "FirstJetPtEta_Zinc1jet", 10, 20, 420, 6, 0, 2.4); 
     genFirstJetPtEta_Zinc1jet = newTH2D("genFirstJetPtEta_Zinc1jet", "genFirstJetPtEta_Zinc1jet", 10, 20, 420, 6, 0, 2.4); 
@@ -1065,7 +1082,11 @@ jetPt_2_Zinc3jet);
     //Additional sum and difference of Z+jet rapidity
     AbsZRapidity_Zinc1jet = newTH1D("AbsZRapidity_Zinc1jet","AbsZRapidity_Zinc1jet","|y_{Z}|",12,0,2.4);
     genAbsZRapidity_Zinc1jet = newTH1D("genAbsZRapidity_Zinc1jet","genAbsZRapidity_Zinc1jet","|y_{Z}|",12,0,2.4);
+
     AbsFirstJetRapidity_Zinc1jet = newTH1D("AbsFirstJetRapidity_Zinc1jet","AbsFirstJetRapidity_Zinc1jet","|y_{jet1}|",12,0,2.4);
+    AbsFirstJetRapidity_Zinc1jet_Odd = newTH1D("AbsFirstJetRapidity_Zinc1jet_Odd","AbsFirstJetRapidity_Zinc1jet_Odd","|y_{jet1}|",12,0,2.4);
+    AbsFirstJetRapidity_Zinc1jet_Even= newTH1D("AbsFirstJetRapidity_Zinc1jet_Even","AbsFirstJetRapidity_Zinc1jet_Even","|y_{jet1}|",12,0,2.4);
+    
     genAbsFirstJetRapidity_Zinc1jet = newTH1D("genAbsFirstJetRapidity_Zinc1jet","genAbsFirstJetRapidity_Zinc1jet","|y_{jet1}|",12,0,2.4);
     SumZFirstJetRapidity_Zinc1jet = newTH1D("SumZFirstJetRapidity_Zinc1jet","SumZFirstJetRapidity_Zinc1jet","y_{sum(Z,jet1)}",12,0,2.4);
     genSumZFirstJetRapidity_Zinc1jet = newTH1D("genSumZFirstJetRapidity_Zinc1jet","genSumZFirstJetRapidity_Zinc1jet","y_{sum(Z,jet1)}",12,0,2.4);
@@ -1100,7 +1121,11 @@ jetPt_2_Zinc3jet);
 
     AbsZRapidity_Zinc2jet = newTH1D("AbsZRapidity_Zinc2jet","AbsZRapidity_Zinc2jet","|y_{Z}|",12,0,2.4);
     genAbsZRapidity_Zinc2jet = newTH1D("genAbsZRapidity_Zinc2jet","genAbsZRapidity_Zinc2jet","|y_{Z}|",12,0,2.4);
+
     AbsSecondJetRapidity_Zinc2jet = newTH1D("AbsSecondJetRapidity_Zinc2jet","AbsSecondJetRapidity_Zinc2jet","|y_{jet2}|",12,0,2.4);
+    AbsSecondJetRapidity_Zinc2jet_Odd = newTH1D("AbsSecondJetRapidity_Zinc2jet_Odd","AbsSecondJetRapidity_Zinc2jet_Odd","|y_{jet2}|",12,0,2.4);
+    AbsSecondJetRapidity_Zinc2jet_Even = newTH1D("AbsSecondJetRapidity_Zinc2jet_Odd","AbsSecondJetRapidity_Zinc2jet_Even","|y_{jet2}|",12,0,2.4);
+    
     genAbsSecondJetRapidity_Zinc2jet = newTH1D("genAbsSecondJetRapidity_Zinc2jet","genAbsSecondJetRapidity_Zinc2jet","|y_{jet2}|",12,0,2.4);
     SumZSecondJetRapidity_Zinc2jet = newTH1D("SumZSecondJetRapidity_Zinc2jet","SumZSecondJetRapidity_Zinc2jet","y_{sum(Z,jet2)}",12,0,2.4);
     genSumZSecondJetRapidity_Zinc2jet = newTH1D("genSumZSecondJetRapidity_Zinc2jet","genSumZSecondJetRapidity_Zinc2jet","y_{sum(Z,jet2)}",12,0,2.4);

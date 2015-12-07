@@ -147,8 +147,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       TH1D *hRecData[3] = {NULL};
       //--- rec DYJets histograms ---
       TH1D *hRecDYJets[13] = {NULL};
-      //--- fake DYJets histograms ---
-      TH1D *hFakDYJets[18] = {NULL};
+      //--- purity DYJets histograms ---
+      TH1D *hPurity[18] = {NULL};
       //--- gen DYJets histograms ---
       TH1D *hGenDYJets[11] = {NULL};
       //--- res DYJets histograms ---
@@ -163,7 +163,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //--- Get all histograms ---
       getAllHistos(variable, hRecData, fData, 
 		   hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
-		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets);
+		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hPurity);
       if (DYSHERPA14FILENAME.Length() > 0 ){
 	//--- Get Sherpa Unfolding response ---
 	
@@ -247,15 +247,26 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 //		  << hRecSumBg[iData]->GetEntries()
 //		  << ", nbins: " << hRecSumBg[iData]->GetNbinsX()
 //		  <<"\n"
-//		  << "DEBUG: hFakDYJets[" << iData << "]->GetEntries() = "
-//		  << hFakDYJets[iData]->GetEntries()
-//		  << ", nbins: " << hFakDYJets[iData]->GetNbinsX()
+//		  << "DEBUG: hPurity[" << iData << "]->GetEntries() = "
+//		  << hPurity[iData]->GetEntries()
+//		  << ", nbins: " << hPurity[iData]->GetNbinsX()
 //		  <<"\n"
 //		  << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX()
 //		  << std::endl;
 	
 	hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
-	hRecDataMinusFakes->Add(hFakDYJets[iSyst], -1);
+
+	//Applies purity corrections (aka fake corrections):
+	for(int ibin = 0; ibin <= hRecDataMinusFakes->GetNbinsX(); ++ibin){
+	  double c = hRecDataMinusFakes->GetBinContent(ibin);
+	  double e = hRecDataMinusFakes->GetBinError(ibin);
+	  double p = hPurity[iSyst]->GetBinContent(ibin);
+	  if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
+			       << ") = " << p << "\n";
+	  hRecDataMinusFakes->SetBinContent(ibin, c * p);
+	  hRecDataMinusFakes->SetBinError(ibin, e * p);
+	}
+
 
 	if (iSyst == 17) cout << "SHERPAUNFOLDING" << endl;
 	std::cout << "Starting unfolding of " << variable << " "

@@ -5,12 +5,12 @@
 #include "ConfigVJets.h"
 #include "makeStatisticsTable.h"
 
+ConfigVJets cfg;
+
 int main(int argc, char **argv)
 {
 
     //--- Loads configuration -----------------------------------------------------
-    ConfigVJets cfg;
-
     TString histoDir    = cfg.getS("histoDir");
     TString recoCompDir = cfg.getS("recoCompDir");
     TString lepSel      = cfg.getS("lepSel");

@@ -1471,12 +1471,11 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                 // now replace your ptjet1_ratio with hist_ptjet1_ratio
                 double binNumber = hist_ptjet1_ratio->GetXaxis()->FindBin(jets_20[0].v.Pt());
                 double RatioValue =  hist_ptjet1_ratio->GetBinContent(binNumber);
-              //  cout << RatioValue << " , " << jets_20[0].v.Pt() << "\n";                 
+		//  cout << RatioValue << " , " << jets_20[0].v.Pt() << "\n";                 
+		
+		//   cout << weight << " , "  << weight*RatioValue << "n";     
 
-            //   cout << weight << " , "  << weight*RatioValue << "n";     
-
-               // FirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), weight*RatioValue);
-                FirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), weight);
+		FirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), weight*RatioValue);
                 FirstJetPt_2_Zinc1jet->Fill(jets_20[0].v.Pt(), weight);
                 FirstJetPt_Zinc1jet_NVtx->Fill(jets_20[0].v.Pt(), EvtInfo_NumVtx, weight);
                 FirstJetPtEta_Zinc1jet->Fill(jets_20[0].v.Pt(), fabs(jets[0].v.Eta()), weight);
@@ -2296,8 +2295,8 @@ cout << nLeptons << " , " <<  ngenLeptons << "\n";
                 double binNumber = hist_ptjet1_ratio->GetXaxis()->FindBin(jets_20[0].v.Pt());
                 double RatioValue =  hist_ptjet1_ratio->GetBinContent(binNumber);               
 
-               // hresponseFirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight*RatioValue);  
-                hresponseFirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight);     
+		hresponseFirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight*RatioValue);  
+                //hresponseFirstJetPt_Zinc1jet->Fill(jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight);     
                 hresponseFirstJetPt_2_Zinc1jet->Fill(jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight); 
  
                 hresponseFirstJetPtEta_Zinc1jet->Fill(0.5 + FirstJetPtEta_Zinc1jet->FindBin(jets_20[0].v.Pt(), fabs(jets_20[0].v.Eta())), 

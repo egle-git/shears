@@ -2,6 +2,9 @@
 #include <thread>
 #include <unistd.h>
 #include "ArgParser.h"
+#include "ConfigVJets.h"
+
+ConfigVJets cfg;
 
 TString cwd;
 void executeInThread(std::string executable, std::string option, std::string machine) 

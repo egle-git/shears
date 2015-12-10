@@ -48,6 +48,8 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     for (unsigned short i = 0; i < NFILESDYJETS; ++i){
 
 	int iSample = FilesDYJets[i];
+
+	if(iSample < 0) continue;
 	
         //--- get the file ---
         TString syst = "0";

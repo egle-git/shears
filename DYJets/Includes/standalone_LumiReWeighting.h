@@ -556,6 +556,14 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
   }
 
   weights_->Divide( den );  // so now the average weight should be 1.0    
+
+  double inte = 0;
+  for(int ibin = 1; ibin < NBins+1; ++ibin){
+    inte += weights_->GetBinContent(ibin) * MC_distr[ibin-1];
+  }
+
+  std::cout << "PU weight normalisation: " << inte << "\n";
+
 //  weights_->Scale(1/weights_->Integral());//Bugra Bilin, added this to normalize weigts.
 
   //std::cout << "Reweighting: Computed Weights per In-Time Nint " << std::endl;

@@ -562,7 +562,7 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1)
 TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi)
 {
 
-    gStyle->SetOptStat(0);
+  //gStyle->SetOptStat(0);
     //--- Determine how many comparison we have ---
     int numbOfGenerator = 1;
     if (hGen2) numbOfGenerator = 2;

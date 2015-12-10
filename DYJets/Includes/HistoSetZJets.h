@@ -35,6 +35,7 @@ class HistoSetZJets {
         TH1D *NumberPFcandidates;
         TH1D *ZMass_lowDeltaR;
         TH1D *ZMass_Zinc0jet;
+        TH1D *ZMass_Zinc1jet;
         TH1D *ZMassFrom60_Zinc0jet;
         TH1D *genZMass_Zinc0jet;
         TH1D *ZPt_Zinc0jet;
@@ -74,6 +75,7 @@ class HistoSetZJets {
         TH1D *ZEta_Zexc2jet;
 
         TH1D *lepEta_Zinc0jet;
+        TH1D *lepEta_Zinc1jet;
         TH1D *lepEtaUpTo4_Zinc0jet;
         TH1D *genlepEta_Zinc0jet;
 
@@ -178,14 +180,18 @@ class HistoSetZJets {
         TH1D *FirstJetPhi_Zexc1jet;
         TH1D *SecondJetPhi_Zexc2jet;
         TH1D *lepPt_Zinc0jet;
+        TH1D *lepPt_Zinc1jet;
         TH1D *lepPtFrom15_Zinc0jet;
         TH1D *genlepPt_Zinc0jet;
         TH1D *lepPt_Zexc0jet;
         TH1D *dPhiLeptons_Zexc0jet;
         TH1D *dPhiLeptons_Zinc0jet;
+        TH1D *dPhiLeptons_Zinc1jet;
         TH1D *dEtaLeptons_Zexc0jet;
         TH1D *dEtaLeptons_Zinc0jet;
+        TH1D *dEtaLeptons_Zinc1jet;
         TH1D *dRLeptons_Zinc0jet;
+        TH1D *dRLeptons_Zinc1jet;
         TH1D *SpTLeptons_Zexc0jet;
         TH1D *SpTLeptons_Zexc1jet;
         TH1D *SpTLeptons_Zexc2jet;
@@ -641,10 +647,7 @@ class HistoSetZJets {
         //Additional Histograms
         TH1D *AbsZRapidity_Zinc1jet;
         TH1D *genAbsZRapidity_Zinc1jet;
-        TH1D *AbsFirstJetRapidity_Zinc1jet;
-	TH1D *AbsFirstJetRapidity_Zinc1jet_Odd;
-	TH1D *AbsFirstJetRapidity_Zinc1jet_Even;
-	
+        TH1D *AbsFirstJetRapidity_Zinc1jet;	
         TH1D *genAbsFirstJetRapidity_Zinc1jet;
         TH1D *SumZFirstJetRapidity_Zinc1jet;
         TH1D *genSumZFirstJetRapidity_Zinc1jet;
@@ -681,9 +684,7 @@ class HistoSetZJets {
 
         TH1D *AbsZRapidity_Zinc2jet;
         TH1D *genAbsZRapidity_Zinc2jet;
-        TH1D *AbsSecondJetRapidity_Zinc2jet;
-	TH1D *AbsSecondJetRapidity_Zinc2jet_Odd;
-	TH1D *AbsSecondJetRapidity_Zinc2jet_Even;	
+        TH1D *AbsSecondJetRapidity_Zinc2jet;	
         TH1D *genAbsSecondJetRapidity_Zinc2jet;
         TH1D *SumZSecondJetRapidity_Zinc2jet;
         TH1D *genSumZSecondJetRapidity_Zinc2jet;

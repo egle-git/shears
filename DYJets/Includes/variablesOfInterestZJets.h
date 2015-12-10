@@ -13,7 +13,6 @@ struct variableStruct{
 
 //--- Z Jets ------------------------------------
 
-const unsigned int NVAROFINTERESTZJETS(78);
 const variableStruct VAROFINTERESTZJETS[] = {
     //--  Name  ------------------ log - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm  - E Bayes kterm COMBINE
     //-- jet Pt distribution
@@ -139,6 +138,8 @@ const variableStruct VAROFINTERESTZJETS[] = {
 //    {"DifZFirstJetRapidity_DifJetRapiditys2_Zinc2jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1
     {"ZNGoodJets_Zexc",             1,      1,           7,              4,             3,            3 ,               3    }, // 0
 }; 
+
+const unsigned int NVAROFINTERESTZJETS = sizeof(VAROFINTERESTZJETS)/sizeof(VAROFINTERESTZJETS[0]);
 
 int findVariable(const TString &variable);
 #endif

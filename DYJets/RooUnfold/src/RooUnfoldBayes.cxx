@@ -225,7 +225,7 @@ void RooUnfoldBayes::unfold(std::vector<TH1*>* hUnf_i)
     for (Int_t ii= 0; ii < _nt; ii++) {
 	Int_t jj = RooUnfoldResponse::GetBin (reco, ii, _overflow);
 	reco->SetBinContent (jj, _P0C(ii) * _N0C);
-	std::cerr << __FILE__ << "prior[ " << jj << "] = " << reco->GetBinContent(jj) << "\n";
+	reco->SetBinError (jj, sqrt (fabs (_variances(ii))));
     }
     hUnf_i->push_back(reco);
   }

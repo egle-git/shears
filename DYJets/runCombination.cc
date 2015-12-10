@@ -3,12 +3,13 @@
 #include "ConfigVJets.h"
 #include "Combination.h"
 
+//--- Load configuration ---
+ConfigVJets cfg;
+
 
 int main(int argc, char **argv)
 {
     
-    //--- Load configuration ---
-    ConfigVJets cfg;
     //-----------------------------------------------------------------------
 
     //--- Settings ---

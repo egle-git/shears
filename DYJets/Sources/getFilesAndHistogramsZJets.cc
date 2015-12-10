@@ -5,10 +5,13 @@
 #include <TString.h>
 #include <TSystem.h>
 #include <algorithm>
+#include <iostream>
 #include "getFilesAndHistogramsZJets.h"
 #include "ConfigVJets.h"
 using namespace std;
 
+extern ConfigVJets cfg;
+    
 //------------------------------------------------------------
 // getEnergy() returns a TString, either "7TeV" or "8TeV"
 // according to the name of the directory from which the 
@@ -19,7 +22,7 @@ TString getEnergy()
 
     ConfigVJets cfg;
     double s = cfg.getI("energy", 13);
-    return TString::Format("%fTeV", s);
+    return TString::Format("%gTeV", s);
 }
 //------------------------------------------------------------
 
@@ -134,7 +137,7 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
     //------------------------------------------------------------------------------------------ 
 }
 
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D *hFakDYJets[18])
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D *hPurityDYJets[18])
 {
 
     //--- get rec Data histograms ---
@@ -151,6 +154,8 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 
     //--- get rec Bg histograms ---
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
+      std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
+		<< " file = " << fBg[iBg][0]->GetName() << std::endl;
         getHistos(hRecBg[iBg], fBg[iBg], variable);
         for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) { 
             if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
@@ -171,7 +176,7 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
 
     //--- get fakes DYJets ---
-    getFakes(hFakDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
+    getPurities(hPurityDYJets, hRecData, hRecSumBg, hRecDYJets, hResDYJets);
 }
 
 //------------------------------------------------------------
@@ -246,6 +251,9 @@ TH1D* getHisto(TFile *File, const TString variable)
 
 void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 {
+
+  std::cerr << "getHistos(,," << variable << ")" << std::endl;
+
     TString fileName = Files[0]->GetName();
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
@@ -260,6 +268,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
     else nFiles = 7; 
 
     for (int i(0); i < nFiles; i++){
+      if(Files[i] == 0) abort();
         Files[i]->cd();
         histograms[i] = (TH1D*) Files[i]->Get(variable);
 	//We had for an unknown reason some histo with the CanExtendAxis option active,
@@ -270,9 +279,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
     } 
 
-    ConfigVJets cfg;
-    
-    if (!isData) {
+    if (!isData && histograms[0]) {
         Files[0]->cd();
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing
@@ -467,176 +474,52 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
     } 
 }
 
-#if defined(FAKE_IS_PURITY)
-//Use purity (1- fake rate).
-TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
-{
-  std::cout << __FILE__ <<  ":" << __LINE__ << ". getFakes(): return purity...\n";
-  
-    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
-    
-    int nm = hResDYJets->GetNbinsX() + 2;
-    int nt = hResDYJets->GetNbinsY() + 2;
-    
-    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
-    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
-    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
 
-    std::cout << __FILE__ <<  ":" << __LINE__
-	      << "dyIntegral, dataIntegral, bgIntegral: "
-	      << dyIntegral << ", " << dataIntegral << ", " << bgIntegral << "\n";
-    
-    std::cout << __FILE__ <<  ":" << __LINE__
-	      << " Correction was: " << (dataIntegral - bgIntegral) / dyIntegral << "\n";
-    
-    dyIntegral = hRecDYJets->Integral(1, hRecDYJets->GetNbinsX()+1);
-    dataIntegral = hRecData->Integral(1, hRecData->GetNbinsX()+1);
-    bgIntegral = hRecSumBg->Integral(1, hRecSumBg->GetNbinsX()+1);
+TH1D* getPurities(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
+{ 
+    TH1D* hSignal = (TH1D*) hResDYJets->ProjectionY("hSignal", 0, -1, "e");
+    hSignal->SetDirectory(0);
+    TH1D* hPurity = (TH1D*) hRecDYJets->Clone(TString("purity") + hRecDYJets->GetName());
+    hPurity->Reset();
 
-    std::cout << __FILE__ <<  ":" << __LINE__
-	      << " Correction with no underflow: " << (dataIntegral - bgIntegral) / dyIntegral << "\n";
+    //hRecDYJets contains all events passing the selection cuts including "fakes"
+    hPurity->Divide(hSignal, hRecDYJets, 1., 1., "B");
     
-
-    for (int i= 0; i<nm; i++) {
-        double sum= 0.0, sum2= 0.0;
-	for (int j= 0; j<nt; j++) {
-	  sum += hResDYJets->GetBinContent(i, j);
-	  sum2 += pow(hResDYJets->GetBinError(i, j), 2);
-	}
-        double fake = 1.;
-	if(hRecDYJets->GetBinContent(i) > 0.){
-	  fake = sum / hRecDYJets->GetBinContent(i);
-	  //	  std::cout << __FILE__ <<  ":" << __LINE__ << ". fake = " << fake << "\n";
-	} else{
-	  std::cout << __FILE__ <<  ":" << __LINE__ << ". hRecDYJets->GetBinContent(" << i << ") = "
-		    << hRecDYJets->GetBinContent(i) << "\n";
-	}
-	//TODO: check correctness of the formula below.
-	//	double fake_err2 = fake*(1-fake) * pow(hRecDYJets->GetBinError(i), 2)
-	//  / pow(hRecDYJets->GetBinContent(i), 2);
-	hFakDYJets->SetBinContent(i, fake);
-	hFakDYJets->SetBinError(i, 0);
-	//	hFakDYJets->SetBinError(i, fake_err2);
-    }
-    return hFakDYJets;
+    return hPurity;
 }
-#elif defined(FAKE_HALF_FIX)
-TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
-{
-  
-  std::cout << __FILE__ <<  ":" << __LINE__ << ". getFakes() with error fix...\n";
-      
-    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
-    
-    //int sm= hRecDYJets->GetSumw2N();
-    //int s = hResDYJets->GetSumw2N();
-    int nm = hResDYJets->GetNbinsX() + 2;
-    int nt = hResDYJets->GetNbinsY() + 2;
 
-    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
-    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
-    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
-    for (int i= 0; i<nm; i++) {
-        double nmes= 0.0, wmes= 0.0;
-	for (int j= 0; j<nt; j++) {
-	  nmes += hResDYJets->GetBinContent(i, j);
-	  // if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
-	  wmes += pow(hResDYJets->GetBinError(i, j), 2);
-	}
-        double fake = hRecDYJets->GetBinContent(i) - nmes;
-        //if (!s) wmes= nmes;
-        //hFakDYJets->SetBinContent(i, factor*fake);
-	//hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
-	hFakDYJets->SetBinContent(i, fake);
-	if(wmes > pow(hRecDYJets->GetBinError(i),2)){
-	  std::cerr << __FILE__ << ":"  << __LINE__ << ". "
-		    << "Problem found with the response matrix " << hResDYJets->GetName()
-		    << ". Error on sum of events of column " <<  i
-		    << " is larger than one of the corresponding bin of " << hRecDYJets->GetName()
-		    << ": "
-		    << sqrt(wmes) << " > " << hRecDYJets->GetBinError(i) << "\n";
-	  exit(1);
-	}
-	hFakDYJets->SetBinError(i, sqrt(pow(hRecDYJets->GetBinError(i),2) - wmes));
-	std::cout << "bin i " << hRecDYJets->GetBinContent(i) << "\t" << pow(hRecDYJets->GetBinError(i),2) << "\n"
-		  << nmes << "\t" << wmes << "\n"
-		  << hFakDYJets->GetBinContent(i) << "\t" << pow(hFakDYJets->GetBinError(i),2) << "\n";
-    }
-    if (dyIntegral != 0){
-      double factor = (dataIntegral - bgIntegral) / dyIntegral;
-      hFakDYJets->Scale(factor);
-    } else{
-      std::cerr << __FILE__ << ":"  << __LINE__ << ". "
-		<< "Error: the integral of the DY histogram " << hRecDYJets->GetName()
-		<< " content is null!\n";
-      exit(1);
-    }
-    
-    hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
-    
-    return hFakDYJets;
 
-}
-#else //original code
-TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
-{
-  std::cout << __FILE__ << ":" <<  __LINE__ << ". Original getFakes code\n";
-  
-    TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
-    
-    int sm= hRecDYJets->GetSumw2N();
-    int s = hResDYJets->GetSumw2N();
-    int nm = hResDYJets->GetNbinsX() + 2;
-    int nt = hResDYJets->GetNbinsY() + 2;
 
-    double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
-    double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
-    double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
-    for (int i= 0; i<nm; i++) {
-        double nmes= 0.0, wmes= 0.0;
-	for (int j= 0; j<nt; j++) {
-	  nmes += hResDYJets->GetBinContent(i, j);
-	  if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
-	}
-        double fake = hRecDYJets->GetBinContent(i) - nmes;
-        double factor = dyIntegral;
-        if (factor != 0) factor = (dataIntegral - bgIntegral) / factor;
-        if (!s) wmes= nmes;
-        hFakDYJets->SetBinContent(i, factor*fake);
-	hFakDYJets->SetBinError   (i, sqrt (wmes + (sm ? pow(hRecDYJets->GetBinError(i),2) : hRecDYJets->GetBinContent(i))));
-    }
-    hFakDYJets->SetEntries (hFakDYJets->GetEffectiveEntries());  // 0 entries if 0 fakes
-    
-    return hFakDYJets;
-
-}
-#endif
-
-void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
+void getPurities(TH1D *hPurityDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {
 
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
-    hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
+    hPurityDYJets[0] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
+    hPurityDYJets[1] = getPurities(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
+    hPurityDYJets[2] = getPurities(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
+    hPurityDYJets[3] = getPurities(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
+    hPurityDYJets[4] = getPurities(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
+    hPurityDYJets[5] = getPurities(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
+    hPurityDYJets[6] = getPurities(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
+    hPurityDYJets[7] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
+    hPurityDYJets[8] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
+    hPurityDYJets[9] = getPurities(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
+    hPurityDYJets[10] = getPurities(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
+    hPurityDYJets[11] = getPurities(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
+    hPurityDYJets[12] = getPurities(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
+    hPurityDYJets[13] = getPurities(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
+    hPurityDYJets[14] = getPurities(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
+    hPurityDYJets[15] = getPurities(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
+    hPurityDYJets[16] = getPurities(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
+    hPurityDYJets[17] = getPurities(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
 }
 
 void getResps(RooUnfoldResponse *responses[], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13])
 {
+  if(hGenDYJets[0]==0){
+    std::cerr << "\n" << __FILE__ << ":" << __LINE__ << ". Error. Generator histogram pointer is null\n\n";
+    return;
+  }
+
     TH1D *hRec = (TH1D*) hRecDYJets[0]->Clone();
     hRec->Reset();
     //--- build response object for central ---
@@ -710,9 +593,8 @@ void getResps(RooUnfoldResponse *responses[], TH1D *hRecDYJets[13], TH1D *hGenDY
 }
 
 
-void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax)
+void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& variable)
 {
-    TString variable = "ZNGoodJets_Zexc";
     TString energy = getEnergy();
 
     //--- make sure lepSel is short version ---
@@ -732,21 +614,28 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax)
         int sel = FilesDYJets[i];
 
         fData = getFile(FILESDIRECTORY,  lepSel, energy, Samples[sel].name, jetPtMin, jetEtaMax);
-        TH1D *hTemp = getHisto(fData, variable);
+	if(!fData) continue;
 
-        for (int j = 1 ; j < NBins + 1 ; j++ ){
+        TH1D *hTemp = getHisto(fData, variable);
+	
+	if(hTemp){
+	  for (int j = 1 ; j < NBins + 1 ; j++ ){
             Double_t binContent = hTemp->GetBinContent(j);
             DataEv[i][j] = binContent;
             if ( i > 0 ) DataEv[usedFiles][j]+=int(binContent);
-        }
+	  }
+	}
         // close all input root files
         fData->Close();
     }
 
     cout << "Closed all files" << endl;
 
+    system("mkdir Statistics");
+    
     ostringstream nameStr;
-    nameStr << "outputTable_" << lepSel << "_JetPtMin_" << jetPtMin << "_JetEtaMax_" << jetEtaMax;
+    nameStr << "Statistics/outputTable_" << lepSel << "_" << variable << "_JetPtMin_"
+	    << jetPtMin << "_JetEtaMax_" << jetEtaMax;
     nameStr << ".tex";
 
     FILE *outFile = fopen(nameStr.str().c_str(),"w");

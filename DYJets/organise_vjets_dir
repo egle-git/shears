@@ -13,7 +13,7 @@ ckdir(){
     [ -d "$1" ] || mkdir "$1"
 }
 
-for f in *; do d=`echo $f | awk -F _ '{print $1}'`; [ -d $d ] || mkdir $d; [ -f $f ] && mv "$f" "$d"; done
+for f in *; do d=`echo $f | awk -F _ '{print $1}'`; [ -d $d ] || mkdir $d; [ -f $f ] && cp -a "$f" "$d"; done
 
 
 ckdir Observables
@@ -42,4 +42,5 @@ mv -i NVtx Observables/
 
 rm -r Lumi.pdf Lumi
 [ -f puMVA.pdf -a -f puMVA ] && mv -i puMVA.pdf  puMVA/
+[ -f puMVA_Lin.pdf -a -f puMVA ] && mv -i puMVA_Lin.pdf  puMVA/
 [ -d Observables/ZNGoodJets/ZNGoodJets ] && { mv -i Observables/ZNGoodJets/ZNGoodJets/* Observables/ZNGoodJets/ && rmdir Observables/ZNGoodJets/ZNGoodJets; }

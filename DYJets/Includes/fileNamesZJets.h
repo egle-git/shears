@@ -18,7 +18,7 @@ struct processInfoStruct{
 };
 
 //--- first element must point to the data
-//--- last element must point to the MC Signal
+//--- last element must point to the MC Signal(s)
 //8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
     //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorAN - colorPAS - name on legend
@@ -35,15 +35,17 @@ const processInfoStruct Samples[] = {
     /*10*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
     //    /*11*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
     /*11*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
+    //    /*12*/{"DYJets_MLM",  ' ',    1.,       1.,      1,   0.05,   kBlue-10, kBlue-10, " DYJets MLM", " Z/#gamma^{*} #rightarrow ll"}
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
 const int DATA(0);
-const int DYJETS(NSamples - 1); // Signal MC is the last sample of the list.
+const int DYJETS(NSamples - 2); // Signal MC is the seconf from the last sample of the list.
 
 /** Total number of samples after sample grouping, including real data, background MC, and signal MC
  */
 const unsigned int NFILESDYJETS = 8;
+//const unsigned int NFILESDYJETS = 3;
 
 /** Number of background MC samples: all minus data and the signal MC
  */
@@ -53,6 +55,7 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
  * When samples are grouped, only the merged sample is included in this list.
  */
 const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 8, 9, 10, 11};
+//const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2};
 
 
 //AG

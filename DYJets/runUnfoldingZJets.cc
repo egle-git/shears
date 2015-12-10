@@ -4,10 +4,11 @@
 #include "ConfigVJets.h"
 #include "UnfoldingZJets.h"
 
+ConfigVJets cfg;
+
 int main(int argc, char **argv)
 {
     //--- Loads configuration -----------------------------------------------------
-    ConfigVJets cfg;
 
     TString histoDir   = cfg.getS("histoDir");
     TString unfoldDir  = cfg.getS("unfoldDir");

@@ -2,6 +2,7 @@
 #define __variablesOfInterest__
 
 #include <TObject.h>
+#include <TObjString.h>
 #include <TList.h>
 
 struct variableStruct{
@@ -11,13 +12,13 @@ struct variableStruct{
 };
 
 variableStruct VAROFINTEREST[] = {
-   //--  Name  ------------------ log - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm
-   {"ZNGoodJets_Zexc",             1,      1,           4,              4,             4,            4},
-
-   //-- jet Pt distribution
-   {"FirstJetPt_Zinc1jet",         1,      1,          15,              4,            15,            4}, 
-   {"SecondJetPt_Zinc2jet",        1,      1,          12,              4,            12,            5}, 
-   {"ThirdJetPt_Zinc3jet",         1,      1,           8,              4,             6,            3}, 
+  //--  Name  ------------------ log - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm
+  {"ZNGoodJets_Zexc",             1,      1,           4,              4,             4,            4},
+  
+  //-- jet Pt distribution
+  {"FirstJetPt_Zinc1jet",         1,      1,          15,              4,            15,            4}, 
+  {"SecondJetPt_Zinc2jet",        1,      1,          12,              4,            12,            5}, 
+  {"ThirdJetPt_Zinc3jet",         1,      1,           8,              4,             6,            3}, 
    //{"FourthJetPt_Zinc4jet",        1,      1,           5,              3,             3,            4}, 
    //{"FifthJetPt_Zinc5jet",         1,      1,           4,              2,             3,            4},
 
@@ -26,7 +27,7 @@ variableStruct VAROFINTEREST[] = {
    //{"FirstHighestJetPt_Zinc3jet",  1,      1,           5,              4,             8,           10},
    //{"FirstHighestJetPt_Zinc4jet",  1,      0,           3,              5,             2,            6},
    //{"FirstHighestJetPt_Zinc5jet",  1,      0,           3,              1,             3,            4},
-
+  
    {"SecondHighestJetPt_Zinc2jet", 1,      1,          12,              4,            12,            5},
    //{"SecondHighestJetPt_Zinc3jet", 1,      1,           9,              7,             8,            5},
    //{"SecondHighestJetPt_Zinc4jet", 1,      1,           3,              4,             5,            5},

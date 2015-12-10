@@ -236,7 +236,7 @@ int main(int argc, char **argv)
 		yieldScale = mcYieldScale;
 		if (doWhat != "DYJETS" && doWhat != "ALL") continue;
 		if(iSyst >= NSystMCSignal) continue;				
-	    } else{                   //background MC
+	    } else if(iSample < DYJETS){ //background MC
 		hasRecoInfo = true;
 		hasGenInfo   = false;
 		syst    = bgSyst;
@@ -245,6 +245,16 @@ int main(int argc, char **argv)
 		yieldScale = mcYieldScale;
 		if (doWhat != "BACKGROUND" && doWhat != "ALL") continue;
 		if(iSyst >= NSystMC) continue;
+	    } else {//alternative DY
+		hasRecoInfo = true;
+		if (doWhat != "MG_MLM" && doWhat != "ALL") continue;
+		hasGenInfo  = true;
+		syst = mcSignalSyst;
+		systDir = mcSignalDir;
+		bonzaiDir = mcBonzaiDir;
+		yieldScale = mcYieldScale;
+		if (doWhat != "DYJETS" && doWhat != "ALL") continue;
+		if(iSyst != 0) continue;
 	    }
 	
 	    if(Samples[iSample].merge == '='){//sample is a merge of previous one

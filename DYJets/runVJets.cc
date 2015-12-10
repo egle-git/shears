@@ -6,10 +6,11 @@
 #include "MergeTop.h"
 #include "ZJets.h"
 
+ConfigVJets cfg;
+
 int main(int argc, char **argv)
 {
     //--- Load configuration ---
-    ConfigVJets cfg;
     //-----------------------------------------------------------------------
 
     //--- Settings ---

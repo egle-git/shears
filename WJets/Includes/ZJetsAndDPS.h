@@ -101,9 +101,10 @@ class ZJetsAndDPS: public HistoSet {
     vector<float>  *MuE;
     vector<float>  *MuCh;
     vector<float>  *MuDxy;
-    // APICHART vector<double>  *MuIdTight;
     vector<unsigned int> *MuIdTight;
-    //vector<double>  *MuTrig;
+  
+    ULong64_t      *TrigHltMu;
+
     vector<float>  *MuPfIso;
 
     // -- JET ---
@@ -114,6 +115,7 @@ class ZJetsAndDPS: public HistoSet {
     vector<float>  *JetAk04Id;
     vector<float>  *JetAk04PuMva;
     vector<float>  *JetAk04BTagCsv;
+    vector<float>  *JetAk04BDiscCisvV2;
     vector<float>  *JetAk04PartFlav;
     vector<float>  *JetAk04JetBeta;
     vector<float>  *JetAk04JetBetaStar;
@@ -184,7 +186,7 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_MuCh;   //!
     TBranch        *b_MuDxy;   //!
     TBranch        *b_MuIdTight;   //!
-    TBranch        *b_MuTrig;   //!
+    TBranch        *b_TrigHltMu;   //!
     TBranch        *b_MuPfIso;   //!
 
     TBranch        *b_JetAk04Pt;   //!
@@ -194,6 +196,7 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_JetAk04Id;   //!
     TBranch        *b_JetAk04PuMva;   //!
     TBranch        *b_JetAk04BTagCsv;   //!
+    TBranch        *b_JetAk04BDiscCisvV2;   //!
     TBranch        *b_JetAk04PartFlav;   //!
     TBranch        *b_JetAk04JetBeta;   //!
     TBranch        *b_JetAk04JetBetaStar;   //!

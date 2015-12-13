@@ -126,7 +126,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         }
     }
     //==========================================================================================================//
-    cout << "Phase space cuts -- jet pt:" << jetPtCutMin <<"  " << jetPtCutMax<<"  -- jet eta : " << jetEtaCutMin<< "  " << jetEtaCutMax<< "  " << "  -- Z eta: " << ZEtaCutMin<<"   " << ZEtaCutMax<< "  -- MET cut: " << METcut << "    "   << endl;
+    cout << "Phase space cuts -- jet pt:" << jetPtCutMin <<"  " << jetPtCutMax<<"  -- jet rapidity : " << jetEtaCutMin / 10.0<< "  " << jetEtaCutMax / 10.0<< "  " << "  -- Z eta: " << ZEtaCutMin<<"   " << ZEtaCutMax<< "  -- MET cut: " << METcut << "    "   << endl;
     cout << " other selections:  " <<endl;
     cout << " doQCD: " << doQCD <<"  do SS: " << doSSign <<" inv. mass cut: " << doInvMassCut <<"  use MET cut: " << METcut<<"  use B jets: " << doBJets <<" do PU study: " << doPUStudy << endl;
 
@@ -265,7 +265,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     cout << " run on " << nentries << "events" << endl;
     //--- Begin Loop All Entries --
     //KOfor (Long64_t jentry(0); jentry < nentries; jentry++){
-    for (Long64_t jentry(0); jentry < 500000000000; jentry++){
+    for (Long64_t jentry(0); jentry < 500000; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -401,39 +401,35 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             //--- DO MUONS ---
             if (doMuons){
                 nTotLeptons = MuEta->size();
-                // test if any of the leptons is atached to trigger
-                // if we don't really care to match both leptons to trigger
-                // we also have event trigger variables --> we should at least match one of the leptons to trigger
-              /*  for (unsigned short i(0); i < nTotLeptons; i++) {
-                    int whichTrigger(MuTrig->at(i));
-                    if (energy == "7TeV" && whichTrigger > 0) eventTrigger = true;
-                    //if (energy == "8TeV" && (whichTrigger % 2) == 1 && doW) eventTrigger = true;
-                    if (energy == "8TeV" && (whichTrigger & 0x1) && doW) eventTrigger = true;
-                    if (energy == "8TeV" && doTT && whichTrigger >= 16) eventTrigger = true; // for TT background
-                }*/ //KO
-
+                /* Kadirfor (unsigned short i(0); i < nTotLeptons; i++) {
+                    //Kadir int whichTrigger(TrigHltMu->at(i));
+                    //if (energy == "8TeV" && (whichTrigger & 0x1) && doW) eventTrigger = true;
+                    //if (energy == "8TeV" && doTT && whichTrigger >= 16) eventTrigger = true; // for TT background
+                    //if (energy == "13TeV" && ((whichTrigger & 12) || (whichTrigger & 19)) && doW) eventTrigger = true;
+                    if (energy == "13TeV" && doW && ((TrigHltMu && 1LL<<12) || (TrigHltMu && 1LL<<19))) eventTrigger = true;
+                } */
+                    if (energy == "13TeV" && doW && ((TrigHltMu && 1LL<<12) || (TrigHltMu && 1LL<<19))) eventTrigger = true;
                 for (unsigned short i(0); i < nTotLeptons; i++) {
                     if (doMer) merUncer = Rand_MER_Gen->Gaus(0, (MuPt->at(i) * 0.006));
                     leptonStruct mu = {(MuPt->at(i) * muScale) + merUncer, MuEta->at(i), MuPhi->at(i), MuE->at(i), MuCh->at(i), MuPfIso->at(i), 0};
-                    //KOint whichTrigger(MuTrig->at(i));
+                    //Kadir int whichTrigger(TrigHltMu->at(i));
                     bool muPassesPtCut(( (doZ || doTT) && mu.pt >= 20.) || (doW && mu.pt >= 25.));
-                    //bool muPassesPtCut(( (doZ || doTT) && mu.pt >= 20.) || (doW && mu.pt >= 30.));
-                    
+     
                     bool muPassesEtaLooseCut(fabs(mu.eta) <= 2.4);
                     bool muPassesEtaCut( ((doZ || doTT) && muPassesEtaLooseCut) || (doW && fabs(mu.eta) <= 2.4) );
-                    
-                    // We use Tight muon, only for tight the patMuonCombId_ is odd
-                    //kobool muPassesIdCut(int(MuIdTight->at(i)) % 2 == 1); // this is for tight ID --> odd number
+                  
                     bool muPassesIdCut((MuIdTight->at(i) & 1)); // this is for tight ID --> odd number
                     //bool muPassesIdCut(int(patMuonCombId_->at(i)) >= 1 ); // this is for Loose ID
 
-                    //kobool muPassesDxyCut(MuDxy->at(i) < 0.2);
-                    bool muPassesIsoCut((!doW && MuPfIso->at(i) < 0.2) || (doW && MuPfIso->at(i) < 0.12));  
+                    //Kadir bool muPassesDxyCut(MuDxy->at(i) < 0.2);
+                    bool muPassesIsoCut((!doW && MuPfIso->at(i) < 0.2) || (doW && MuPfIso->at(i) < 0.15));  
                     bool muPassesQCDIsoCut(doW && MuPfIso->at(i) >= 0.2); // use 0.12 if you want to cover full Iso space
-                    //KObool muPassesEMuAndWJetsTrig( whichTrigger == 1 || whichTrigger == 16 || whichTrigger == 17 || whichTrigger == 32 || whichTrigger == 33 || whichTrigger == 48 || whichTrigger ==  49  ) ;
-                    //KObool muPassesAnyTrig((doZ && ((energy == "7TeV" && whichTrigger > 0) || (energy == "8TeV" && whichTrigger > 7 && !muPassesEMuAndWJetsTrig))) ||
-                           //KO (doW && whichTrigger % 2 == 1) || (doTT && whichTrigger >= 16)); // 8TeV comment: Mu17Mu8Tk = 4; Mu17Mu8 = 8 
-                   //KO if (fileName.find("DYJets_Sherpa_UNFOLDING_dR_5311") != string::npos && whichTrigger > 0) muPassesAnyTrig = 1; 
+                    //Kadir bool muPassesEMuAndWJetsTrig( whichTrigger == 1 || whichTrigger == 16 || whichTrigger == 17 || whichTrigger == 32 || whichTrigger == 33 || whichTrigger == 48 || whichTrigger ==  49  ) ;
+                    //Kadir bool muPassesAnyTrig((doZ && ((energy == "8TeV" && whichTrigger > 0) || (energy == "13TeV" && whichTrigger > 7))) ||
+                     //Kadir       (doW && ((energy == "8TeV" && whichTrigger % 2 == 1) || (energy == "13TeV" && ((whichTrigger & 12) || (whichTrigger & 19)))))); // 13TeV comment: Single muon: HLT_IsoMu20 || HLT_IsoTkMu20
+                   //Kadir bool muPassesAnyTrig(doW && (energy == "13TeV" && ((TrigHltMu && 1LL<<12) || (TrigHltMu && 1LL<<19)))); // 13TeV comment: Single muon: HLT_IsoMu20 || HLT_IsoTkMu20
+
+                   //Kadir if (fileName.find("DYJets_Sherpa_UNFOLDING_dR_5311") != string::npos && whichTrigger > 0) muPassesAnyTrig = 1; 
 
                     // select the good muons only
                     //-- no Isolation Cut
@@ -443,8 +439,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     //koif (doW && fabs(mu.eta) > 2.1) muPassesEtaCut = false;
                     //koif (doTT && fabs(mu.eta) > 2.4) muPassesEtaCut = false;
                     
-                    //KOif (muPassesPtCut && muPassesEtaCut && muPassesIdCut && muPassesDxyCut && (!useTriggerCorrection || muPassesAnyTrig || eventTrigger)){
-                    if (muPassesPtCut && muPassesEtaCut && muPassesIdCut){
+                    //Kadir if (muPassesPtCut && muPassesEtaCut && muPassesIdCut && muPassesDxyCut && (!useTriggerCorrection || muPassesAnyTrig || eventTrigger)){
+                    if (muPassesPtCut && muPassesEtaCut && muPassesIdCut && (!useTriggerCorrection || eventTrigger)){
                         // fill isolation histograms for control    
                         //koMuDetIsoRhoCorr->Fill(MuPfIso->at(i), weight);
                         //koMuPFIsoDBetaCorr->Fill(MuPfIso->at(i), weight);
@@ -510,14 +506,14 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             }
 
             nElectrons = electrons.size();
-            int diLepCharge(0);
+            //Kadir int diLepCharge(0);
             nLeptons = leptons.size();
             vector<leptonStruct> tempVec;
             for ( int iLep = 0 ; iLep < nLeptons ; iLep++){
                 tempVec.push_back(leptons[iLep]);
             }
             selLeptons = tempVec ;
-            if (nLeptons == 2) diLepCharge = abs(leptons[0].charge) + abs(leptons[1].charge);
+            //Kadir if (nLeptons == 2) diLepCharge = abs(leptons[0].charge) + abs(leptons[1].charge);
 
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             //=======================================================================================================//
@@ -788,8 +784,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 double jetPtTemp(0.); // for calculating METscale
                 bool passBJets(0);
                 // APICHART if (JetAk04BTagCsv->at(i) >= 0.679) passBJets = true;
-                if (JetAk04BTagCsv->at(i) >= 0.890) passBJets = true;
-                
+                //if (JetAk04BTagCsv->at(i) >= 0.890) passBJets = true;
+                if (JetAk04BDiscCisvV2->at(i) >= 0.890) passBJets = true; //for 13 TeV Btag recommended discriminator with medium wp cut
                 
 
                 //************************* B-tag Veto Correcction *******************************//
@@ -1038,9 +1034,15 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
                 jetPtTemp = jet.pt; // for calculating METscale
                 jet.pt *= (1 + scale * jetEnergyCorr);
-                jet.energy *= (1 + scale * jetEnergyCorr);
+                jet.energy *= (1 + scale * jetEnergyCorr);  
 
-                bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); 
+                //vector<double> rapidity;
+                
+                /*KadirTLorentzVector jetr;
+                jetr.SetPtEtaPhiE(jets[i].pt, jets[i].eta, jets[i].phi, jets[i].energy);
+                   */ 
+                //Kadir bool jetPassesEtaCut((jetr.Rapidity() >= jetEtaCutMin / 10.) && (jetr.Rapidity() <= jetEtaCutMax / 10.)); 
+                bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); //we no longer cut on jet eta but rapididty above
                 bool jetPassesIdCut(JetAk04Id->at(i) > 0);
                 //KObool jetPassesBetaCut(JetAk04JetBeta->at(i) > 0.1 * doPUStudy);
                 //KObool jetPassesBetaStarCut(JetAk04JetBetaStar->at(i) < 1);
@@ -3335,7 +3337,7 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
     MuCh = 0;
     MuDxy = 0;
     MuIdTight = 0;
-    //MuTrig = 0;
+    TrigHltMu = 0;
     MuPfIso = 0;
 
     JetAk04Pt = 0;   
@@ -3345,6 +3347,7 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
     JetAk04Id = 0;   
     JetAk04PuMva = 0;   
     JetAk04BTagCsv = 0;   
+    JetAk04BDiscCisvV2 = 0;
     JetAk04PartFlav = 0;   
     JetAk04JetBeta = 0;   
     JetAk04JetBetaStar = 0;   
@@ -3374,6 +3377,7 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
         fChain->SetBranchAddress("JetAk04Id", &JetAk04Id, &b_JetAk04Id);
         fChain->SetBranchAddress("JetAk04PuMva", &JetAk04PuMva, &b_JetAk04PuMva);
         fChain->SetBranchAddress("JetAk04BTagCsv", &JetAk04BTagCsv, &b_JetAk04BTagCsv);
+        fChain->SetBranchAddress("JetAk04BDiscCisvV2", &JetAk04BDiscCisvV2, &b_JetAk04BDiscCisvV2);
         fChain->SetBranchAddress("JetAk04PartFlav", &JetAk04PartFlav, &b_JetAk04PartFlav);
         fChain->SetBranchAddress("JetAk04JetBeta", &JetAk04JetBeta, &b_JetAk04JetBeta);
         fChain->SetBranchAddress("JetAk04JetBetaStar", &JetAk04JetBetaStar, &b_JetAk04JetBetaStar);
@@ -3412,7 +3416,7 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
             fChain->SetBranchAddress("MuCh", &MuCh, &b_MuCh);
             fChain->SetBranchAddress("MuDxy", &MuDxy, &b_MuDxy);
             fChain->SetBranchAddress("MuIdTight", &MuIdTight, &b_MuIdTight);
-          //  fChain->SetBranchAddress("MuTrig", &MuTrig, &b_MuTrig);
+            fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
             fChain->SetBranchAddress("MuPfIso", &MuPfIso, &b_MuPfIso);
             fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
         }

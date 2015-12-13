@@ -549,8 +549,9 @@ int nZPt_Zinc0jet(22);
 
     genFirstJetPt_Zexc1jet            = newTH1D("genFirstJetPt_Zexc1jet",              "gen 1st jet p_{T} (N_{jets} = 1)",            "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet);
     genSecondJetPt_Zexc2jet           = newTH1D("genSecondJetPt_Zexc2jet",             "gen 2nd jet p_{T} (N_{jets} = 2)",            "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
-
-    ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 8, -0.5, 7.5);
+    
+    //    ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 8, -0.5, 7.5);
+    ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 7, -0.5, 6.5);
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
@@ -558,7 +559,7 @@ int nZPt_Zinc0jet(22);
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+    //    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
 
     SumZJetRapidity_Zinc1jet = newTH1D("SumZJetRapidity_Zinc1jet", "SumZJetRapidity_Zinc1jet", "y_{sum}", 12, 0, 2.4);
     genSumZJetRapidity_Zinc1jet = newTH1D("genSumZJetRapidity_Zinc1jet", "genSumZJetRapidity_Zinc1jet", "y_{sum}", 12, 0, 2.4);

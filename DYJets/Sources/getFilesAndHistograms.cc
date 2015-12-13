@@ -147,7 +147,7 @@ void getFiles(string histoFilesDirectory, TFile *Files[], string leptonFlavor, s
     //--- determnie how many files we have and open them all ---
     int nSyst(Syst.size());
     for (int i(0); i < nSyst; i++) {
-        Files[i] = getFile(histoFilesDirectory, leptonFlavor, energy, Name, JetPtMin, JetPtMax, doFlat, doVarWidth, doQCD, doSSign, doInvMassCut, MET, doBJets, "", Syst[i], false, useUnfoldingFiles);
+      Files[i] = getFile(histoFilesDirectory, leptonFlavor, energy, Name, JetPtMin, JetPtMax, doFlat, doVarWidth, doQCD, doSSign, doInvMassCut, MET, doBJets, "", Syst[i], false, useUnfoldingFiles);
     }
     //----------------------------------------------------------
 }

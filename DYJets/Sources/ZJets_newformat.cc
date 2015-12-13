@@ -59,7 +59,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     double nEffEventsPassingTrigger(0);
          
     //bool UnfoldUnc = true;
-    bool UnfoldUnc = cfg.getB("unfolUnc", false);
+    bool UnfoldUnc = cfg.getB("unfoldUnc", false);
 
     //------------------------------------
 

@@ -35,12 +35,12 @@ const processInfoStruct Samples[] = {
     /*10*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
     //    /*11*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
     /*11*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
-    //    /*12*/{"DYJets_MLM",  ' ',    1.,       1.,      1,   0.05,   kBlue-10, kBlue-10, " DYJets MLM", " Z/#gamma^{*} #rightarrow ll"}
+    //   /*12*/{"DYJets_MLM_UNFOLDING",  ' ',    1.,       1.,      1,   0.05,   kBlue-10, kBlue-10, " DYJets MLM", " Z/#gamma^{*} #rightarrow ll"}
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
 const int DATA(0);
-const int DYJETS(NSamples - 2); // Signal MC is the seconf from the last sample of the list.
+const int DYJETS(NSamples - 1); // Signal MC is the seconf from the last sample of the list.
 
 /** Total number of samples after sample grouping, including real data, background MC, and signal MC
  */
@@ -68,6 +68,7 @@ const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 8, 9, 10, 11};
 //DYSHERPA14FILENAME: alternate signal sample to use to estimate
 //unfolding systematic uncertainties. Use empty string to disable
 //the calculaiton
+//const TString DYSHERPA14FILENAME("DYJets_UnfUnc_UNFOLDING");
 const TString DYSHERPA14FILENAME("");
 //const TString DYSHERPA14FILENAME("DYJets_Sherpa_Bugra_1_13_UNFOLDING");
 

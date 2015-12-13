@@ -488,27 +488,33 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
     //minX -= grCentralSyst->GetErrorXlow(firstBin); 
     //maxX += grCentralSyst->GetErrorXhigh(grCentralSyst->GetN()-1);
     if (variable.Index("ZNGoodJets_Zexc") >= 0) {
-        //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
         grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
-        grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
-        grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
-        grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
-        grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
+        //grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
+        //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
+	//     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
         grCentralSyst->GetXaxis()->SetLabelSize(0.18);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }
     else if (variable.Index("ZNGoodJets_Zinc") >= 0) {
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "#geq 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "#geq 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "#geq 3");
-        grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
-        grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
-        grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
-        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
+	grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
         grCentralSyst->GetXaxis()->SetLabelSize(0.14);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }

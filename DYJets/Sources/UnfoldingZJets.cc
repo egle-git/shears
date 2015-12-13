@@ -583,24 +583,27 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection)
 void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
 {
+    //    std::cerr << "createInclusivePlots disabled!" << __FILE__ << __LINE__ << "\n\n";
+    //return;
+
     TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
     TH1D *hIncMad = (TH1D*) hMadGenCrossSection->Clone("ZNGoodJets_Zinc_Mad");
     //TH1D *hIncShe = (TH1D*) hSheGenCrossSection->Clone("ZNGoodJets_Zinc_She");
     //TH1D *hIncPow = (TH1D*) hPowGenCrossSection->Clone("ZNGoodJets_Zinc_Pow");
     TH2D *hCovInc[12] = {NULL};
-    hCovInc[0] = (TH2D*) hCov[0]->Clone("CovDataStat");
-    hCovInc[1] = (TH2D*) hCov[1]->Clone("CovMCStat");
-    hCovInc[2] = (TH2D*) hCov[2]->Clone("CovJES");
-    hCovInc[3] = (TH2D*) hCov[3]->Clone("CovPU");
-    hCovInc[4] = (TH2D*) hCov[4]->Clone("CovJER");
-    hCovInc[5] = (TH2D*) hCov[5]->Clone("CovXSec");
-    hCovInc[6] = (TH2D*) hCov[6]->Clone("CovLES");
-    hCovInc[7] = (TH2D*) hCov[7]->Clone("CovLER");
-    hCovInc[8] = (TH2D*) hCov[8]->Clone("CovLumi");
-    hCovInc[9] = (TH2D*) hCov[9]->Clone("CovSF");
+    if(hCov[0]) hCovInc[0] = (TH2D*) hCov[0]->Clone("CovDataStat");
+    if(hCov[1]) hCovInc[1] = (TH2D*) hCov[1]->Clone("CovMCStat");
+    if(hCov[2]) hCovInc[2] = (TH2D*) hCov[2]->Clone("CovJES");
+    if(hCov[3]) hCovInc[3] = (TH2D*) hCov[3]->Clone("CovPU");
+    if(hCov[4]) hCovInc[4] = (TH2D*) hCov[4]->Clone("CovJER");
+    if(hCov[5]) hCovInc[5] = (TH2D*) hCov[5]->Clone("CovXSec");
+    if(hCov[6]) hCovInc[6] = (TH2D*) hCov[6]->Clone("CovLES");
+    if(hCov[7]) hCovInc[7] = (TH2D*) hCov[7]->Clone("CovLER");
+    if(hCov[8]) hCovInc[8] = (TH2D*) hCov[8]->Clone("CovLumi");
+    if(hCov[9]) hCovInc[9] = (TH2D*) hCov[9]->Clone("CovSF");
     if(hCov[10]) hCovInc[10] = (TH2D*) hCov[10]->Clone("CovSherpaUnf");
     else hCovInc[10] = 0;
-    hCovInc[11] = (TH2D*) hCov[11]->Clone("CovTotSyst");
+    if(hCov[11]) hCovInc[11] = (TH2D*) hCov[11]->Clone("CovTotSyst");
 
     int nBins = hInc->GetNbinsX();
     for (int i = 1; i <= nBins; i++) {
@@ -704,34 +707,44 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	numbers.Form("%#.3g", xs);
 	table += numbers + " & ";
 	// total uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i))*100./xs);
+	if(hCov[11]) numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// stat uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i))*100./xs);
+	if(hCov[0]) numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// MC stat uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[1]->GetBinContent(i,i))*100./xs);
+	if(hCov[1]) numbers.Form("%#.2g", sqrt(hCov[1]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// JES uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[2]->GetBinContent(i,i))*100./xs);
+	if(hCov[2]) numbers.Form("%#.2g", sqrt(hCov[2]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// JER uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[4]->GetBinContent(i,i))*100./xs);
+	if(hCov[4]) numbers.Form("%#.2g", sqrt(hCov[4]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// PU uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
+	if(hCov[3]) numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// XSec uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[5]->GetBinContent(i,i))*100./xs);
+	if(hCov[5]) numbers.Form("%#.2g", sqrt(hCov[5]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// Lumi uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[8]->GetBinContent(i,i))*100./xs);
+	if(hCov[8]) numbers.Form("%#.2g", sqrt(hCov[8]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// LES uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[6]->GetBinContent(i,i))*100./xs);
+	if(hCov[6]) numbers.Form("%#.2g", sqrt(hCov[6]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	// LER uncertainty
-	numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
+	if(hCov[7]) numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " & ";
 	if (hCov[10]){
 	  // Unf uncertainty
@@ -739,7 +752,8 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	  table += numbers + " & ";
 	}
 	// SF uncertinaty
-	numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
+	if(hCov[9]) numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
 	table += numbers + " \\\\\n";
     }
 
@@ -801,6 +815,8 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     bool minIter = cfg1.getI("minIter", 2);
     int maxIter = cfg1.getI("maxIter", 20);
     int nSkipFirstJetPtBins = cfg1.getI("nSkipFirstJetPtBins", 2);
+    bool useFlatPrior = cfg1.getB("useFlatPrior", false);
+    double lumiUnc = cfg1.getD("lumiUnc", 0.046);
     verbosity = 0; //cfg1.getI("unfoldingVerbosity", 1);
 
     TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp + 1, -0.5, nBinsTmp + .5);
@@ -1017,7 +1033,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 	RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
 	RObjectForDataTmp->SetVerbose(verbosity);
-	RObjectForDataTmp->UseFlatPrior(true);
+	RObjectForDataTmp->UseFlatPrior(useFlatPrior);
 	RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	std::cout << "niter = " << i << std::endl;
 	TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance);
@@ -1124,6 +1140,9 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     }
     hResMax->Write();
     if(hResMaxXval) hResMaxXval->Write();
+    if(hRecDataMinusFakesOdd) hRecDataMinusFakesOdd->Write("UnfOdd" + name + "_0");
+    if(hRecDataMinusFakesEven) hRecDataMinusFakesEven->Write("UnfEven" + name + "_0");
+
        
 
 #endif
@@ -1307,14 +1326,14 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     //    hUnfMCStatCov->Scale(1./(0.974*0.974));
     //}
     if ("LumiUp" == name) {
-        hUnfData->Scale(1./1.12);
-        hUnfDataStatCov->Scale(1./(1.12*1.12));
-        hUnfMCStatCov->Scale(1./(1.12*1.12));
+        hUnfData->Scale(1./(1+lumiUnc));
+        hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
+        hUnfMCStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
     }
     else if ("LumiDown" == name) {
-        hUnfData->Scale(1./0.88);
-        hUnfDataStatCov->Scale(1./(0.88*0.88));
-        hUnfMCStatCov->Scale(1./(0.88*0.88));
+        hUnfData->Scale(1./(1-lumiUnc));
+        hUnfDataStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
+        hUnfMCStatCov->Scale(1./((1-lumiUnc)*(1-lumiUnc)));
     }
 
 

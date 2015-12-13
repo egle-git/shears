@@ -285,6 +285,9 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         //    for lumi up and down systematics. It is just a rescaliing
         //    since it is a global effect. 
         double lumiErr = cfg.getD("lumiUnc");
+
+	std::cerr << "***** > lumi = " << lumiErr << " < **** " << __FILE__ << "\n";
+	
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH1D*) histograms[0]->Clone();
@@ -440,8 +443,16 @@ void getResp(RooUnfoldResponse *response, TFile *File, TString variable)
 }
 
 RooUnfoldResponse* getResp(TFile *File, TString variable)
-{
-    TH1D *hRec = (TH1D*) File->Get(variable)->Clone();
+  {
+    TObject* o = File->Get(variable);
+    if(!o){
+      std::cerr << __FILE__ << ":" << __LINE__
+		<< ". Variable " << variable << " was not found in file "
+		<< File->GetName() << "\n";
+      return 0;
+    }
+
+  TH1D *hRec = (TH1D*) o->Clone();
     hRec->Reset();
 
     RooUnfoldResponse *response = new RooUnfoldResponse(

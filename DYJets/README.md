@@ -107,6 +107,17 @@ Once this stop done the unfolding can be ran with the following command:
 
 The unfolded result can then be found in the UnfoldedFiles directory and the control plots in the UnfoldingCheck.
 
+Running on the grid
+===================
+
+An example of script and configuration file to run the analysis can be found in the directory:
+. `job_crab.sh`
+. `crabConfig.py`
+
+You need to set the config.Data.outLFNDirBase and config.Site.storageSite to indicate where to store the job output. With the script example, the output of each job is stored as a tarball.
+
+In order to run runZJets_newformat on the grid, you will need to pack the EfficiencyTables directory in a tarball:
+```tar czf EfficiencyTables.tgz EfficiencyTables```
 
 Configuration file
 ==================
@@ -119,9 +130,8 @@ Code organization
 
 The DYJets directory contains several runXXX.cc files, which have been compiles in executable called runXXX. Each of these executable runs the code implemented in the class XXX with the corresponding name and defined in Includes/XXX.h and Sources/XXX.cc.  The list of runXXX applications is provided below.
 
-
 List of applications
---------------------
+====================
 
 . Analysis up to reco-level distributions
 

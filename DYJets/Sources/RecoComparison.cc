@@ -162,7 +162,6 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     intLumi->SetTextAlign(31);
 
     for (unsigned int i = 0; i < NFILESDYJETS; ++i) {
-	
         for (int j = 0; j < nHist; ++j) {
             hist[i][j] = getHisto(fSamples[i], vhNames[j]);
 	    if(!hist[i][j]) {
@@ -185,21 +184,28 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
                     legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
                     legend[j]->SetTextSize(0.042);
                 }
-                legend[j]->SetFillStyle(0);
-                legend[j]->SetBorderSize(0);
-                legend[j]->SetTextFont(42);
-                legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
+		legend[j]->SetFillStyle(0);
+		legend[j]->SetBorderSize(0);
+		legend[j]->SetTextFont(42);
             }
             else {
-                hist[i][j]->SetFillColor(Colors[i]);
+	        hist[i][j]->SetFillStyle(1001);
+	        hist[i][j]->SetFillColor(Colors[i]);
                 hist[i][j]->SetLineColor(Colors[i]);
                 hSumMC[j]->Add(hist[i][j]);
                 //if (!doPASPlots || i == 1 || i == 3 || i == 5 || i == 11) legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
-		legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
             }
-        }
-    }
+        } //next histo j
+    } //next file i
 
+    //Fill the legend in reverse order of drawing in order
+    //that the legend lines order matches with stacked histogram one.
+    for (int j = 0; j < nHist; ++j) {
+      if(NFILESDYJETS > 0) legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
+      for (int i = NFILESDYJETS - 1; i > 0; --i) {
+	legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
+      }
+    }
     //reads integrated luminosity
     double lumi = -1;
     TH1* Lumi;
@@ -310,6 +316,10 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         canvas->Print(outputFilePDF);
         outputFile->cd();
         canvas->Write();
+	
+        TString outputFileBase = outputFileName + "/" + vhNames[i];
+	canvas->SaveAs(outputFileBase + ".root");
+	canvas->SaveAs(outputFileBase + ".C");
 
         hSumMC[i]->SetMaximum(1.5*hSumMC[i]->GetMaximum());
         TCanvas *tmpCanvas = (TCanvas*) canvas->Clone();
@@ -325,6 +335,11 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         tmpCanvas->Print(outputFileLinPDF);
         outputFile->cd();
         tmpCanvas->Write();
+
+	TString outputFileLinBase = outputFileName + "/" + vhNames[i];
+	tmpCanvas->SaveAs(outputFileLinBase + ".root");
+	tmpCanvas->SaveAs(outputFileLinBase + ".C");
+
     }
 
     outputFile->cd();

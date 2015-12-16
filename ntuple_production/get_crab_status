@@ -1,0 +1,13 @@
+#!/bin/bash
+for d in  crab_*; do
+    [ -d "$d" ] || continue
+    grep -q "\b$d\b" jobs_ok && continue 
+    echo "Checking status of $d..."
+    crab status -d "$d" --verboseErrors
+    echo "OK? (y/n)"
+    read p
+    if [ "$p" = y -o "$p" = Y ]; then
+	echo $d >> jobs_ok
+    fi
+done
+    

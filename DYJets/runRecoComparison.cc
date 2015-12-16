@@ -31,21 +31,27 @@ int main(int argc, char **argv)
             //--- possible options ---
             if (currentArg.BeginsWith("histoDir=")) {
                 getArg(currentArg, histoDir);
+		cfg.set("histoDir", histoDir);
             }
             else if (currentArg.BeginsWith("recoCompDir=")) {
                 getArg(currentArg, recoCompDir);
+		cfg.set("recoCompDir", recoCompDir);
             }
             else if (currentArg.BeginsWith("lepSel=")) {
                 getArg(currentArg, lepSel);
+		cfg.set("lepSel", lepSel);
             }
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
+		cfg.set("jetPtMin", jetPtMin);
             }
             else if (currentArg.BeginsWith("jetEtaMax=")) {
                 getArg(currentArg, jetEtaMax);
+		cfg.set("jetEtaMax", jetEtaMax);
             }
             else if (currentArg.BeginsWith("doPASPlots=")) {
                 getArg(currentArg, doPASPlots);
+		cfg.set("doPASPlots", doPASPlots);
             }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {

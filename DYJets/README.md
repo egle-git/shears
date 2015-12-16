@@ -133,11 +133,15 @@ The DYJets directory contains several runXXX.cc files, which have been compiles 
 List of applications
 ====================
 
+Mots of the applications are not only in the untested branch. The master branch contains the application fully validatated for the run 2 format. These applications are runZJets_newformat, runRecoComparison and runUnfoldingZJets.
+
+
 . Analysis up to reco-level distributions
 
 | runDYJets.cc             | Runs W + jet analysis and Z+jet analysis. Replaced by runZJets for Z+jets. |
-| runZJets.cc              | Runs Z+jet analysis 13TeV           |
-| runZJets_original.cc     | Runs Z+jet analysis 8TeV            |
+| runZJets_newformat.cc    | Runs Z+jet analysis 13TeV with run 2 format |
+| runZJets.cc              | Runs Z+jet analysis 13TeV with run 1 format |
+| runZJets_original.cc     | Runs Z+jet analysis 8TeV                    |
 | runVJets.cc              | Similar to runZJets.cc. Deprecated. |
 
 . Unfolding and channel combination

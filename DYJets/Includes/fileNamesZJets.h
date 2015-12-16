@@ -5,7 +5,8 @@
 #include <TString.h>
 
 //-- directory of input root files --------------------
-const TString FILESDIRECTORY("HistoFiles/");
+//Commented out, as it should be obtained from the configuration parameter histoDir
+//const TString FILESDIRECTORY("HistoFiles/");
 //---------- lets add basic information on samples inot common struct -------------------------------------------
 struct processInfoStruct{
     TString name;

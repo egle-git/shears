@@ -690,11 +690,13 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
     //-- fetch the data files and histograms --------------
     int usedFiles = NFILESDYJETS; 
 
+    TString histoDir = cfg.getS("histoDir");
+
     for (int i(0); i < usedFiles; i++) {
         TFile *fData;
         int sel = FilesDYJets[i];
 
-        fData = getFile(FILESDIRECTORY,  lepSel, energy, Samples[sel].name, jetPtMin, jetEtaMax);
+        fData = getFile(histoDir,  lepSel, energy, Samples[sel].name, jetPtMin, jetEtaMax);
 	if(!fData) continue;
 
         TH1D *hTemp = getHisto(fData, variable);

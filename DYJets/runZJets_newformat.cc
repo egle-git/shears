@@ -4,7 +4,6 @@
 #include <TString.h>
 #include "ArgParser.h"
 #include "ConfigVJets.h"
-#include "MergeTop.h"
 #include "ZJets_newformat.h"
 
 //--- Load configuration ---
@@ -32,8 +31,8 @@ int main(int argc, char **argv)
     double muF         = cfg.getD("muF", 0);
     bool doSysRunning  = cfg.getB("doSysRunning", 0);
     bool doCentral     = cfg.getB("doCentral", 1);
-    Long_t maxEvents   = cfg.getL("maxEvents", -1);
-    Long_t maxFiles    = cfg.getL("maxFiles", -1);
+    Int_t maxEvents   = cfg.getL("maxEvents", -1);
+    Int_t maxFiles    = cfg.getL("maxFiles", -1);
     int jobNum         = cfg.getI("jobNum", 1);
     int nJobs          = cfg.getI("nJobs", 1);
     double mcYieldScale = cfg.getD("mcYieldScale", 1.);
@@ -73,60 +72,79 @@ int main(int argc, char **argv)
             //--- possible options ---
             if (currentArg.BeginsWith("dataBonzaiDir=")) {
                 getArg(currentArg, dataBonzaiDir);
+		cfg.set("dataBonzaiDir", dataBonzaiDir);
             }
             else if (currentArg.BeginsWith("mcBonzaiDir=")) {
                 getArg(currentArg, mcBonzaiDir);
+		cfg.set("mcBonzaiDir", mcBonzaiDir);
             }
             else if (currentArg.BeginsWith("histoDir")) {
                 getArg(currentArg, histoDir);
+		cfg.set("histoDir", histoDir);
             }
             else if (currentArg.BeginsWith("lepSel=")) {
                 getArg(currentArg, lepSel);
+		cfg.set("lepSel", lepSel);
             }
             else if (currentArg.BeginsWith("doWhat=")) {
                 getArg(currentArg, doWhat);
+		cfg.set("doWhat", doWhat);
             }
             else if (currentArg.BeginsWith("whichSyst=")) {
                 getArg(currentArg, whichSyst);
+		cfg.set("whichSyst", whichSyst);
             }
             else if (currentArg.BeginsWith("lepPtMin=")) {
                 getArg(currentArg, lepPtMin);
+		cfg.set("lepPtMin", lepPtMin);
             }
             else if (currentArg.BeginsWith("lepEtaMax=")) {
                 getArg(currentArg, lepEtaMax);
+		cfg.set("lepEtaMax", lepEtaMax);
             }
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
+		cfg.set("jetPtMin", jetPtMin);
             }
             else if (currentArg.BeginsWith("jetEtaMax=")) {
                 getArg(currentArg, jetEtaMax);
+		cfg.set("jetEtaMax", jetEtaMax);
             }
             else if (currentArg.BeginsWith("muR=")) {
                 getArg(currentArg, muR);
+		cfg.set("muR", muR);
             }
             else if (currentArg.BeginsWith("muF=")) {
                 getArg(currentArg, muF);
+		cfg.set("muF", muF);
             }
             else if (currentArg.BeginsWith("doSysRunning=")) {
                 getArg(currentArg, doSysRunning);
+		cfg.set("doSysRunning", doSysRunning);
             }
             else if (currentArg.BeginsWith("doCentral=")) {
                 getArg(currentArg, doCentral);
+		cfg.set("doCentral", doCentral);
             }
             else if (currentArg.BeginsWith("maxEvents=")) {
                 getArg(currentArg, maxEvents);
+		cfg.set("maxEvents", maxEvents);
             }
 	    else if (currentArg.BeginsWith("maxFiles=")) {
                 getArg(currentArg, maxFiles);
+		cfg.set("maxFiles", maxFiles);
             }
 	    else if (currentArg.BeginsWith("jobNum=")) {
                 getArg(currentArg, jobNum);
+		cfg.set("jobNum", jobNum);
             }
 	    else if (currentArg.BeginsWith("nJobs=")) {
                 getArg(currentArg, nJobs);
+		cfg.set("nJobs", nJobs);
             }
 	    else if (currentArg.BeginsWith("mcYieldScale=")) {
                 getArg(currentArg, mcYieldScale);
+		cfg.set("mcYieldScale", mcYieldScale);
             }
             //--- asking for help ---
 
@@ -149,7 +167,7 @@ int main(int argc, char **argv)
 
     if (maxEvents > 0) {
         histoDir.Remove(TString::kTrailing, '/');
-        histoDir += TString::Format("_%ldevts/", maxEvents);
+        histoDir += TString::Format("_%devts/", maxEvents);
         cout << "Output directory (histoDir) has been changed to " << histoDir << endl;
     }
     

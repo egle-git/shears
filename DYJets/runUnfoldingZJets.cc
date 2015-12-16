@@ -32,36 +32,47 @@ int main(int argc, char **argv)
             //--- possible options ---
             if (currentArg.BeginsWith("histoDir=")) {
                 getArg(currentArg, histoDir);
+		cfg.set("histoDir", histoDir);
             }
             else if (currentArg.BeginsWith("unfoldDir=")) {
                 getArg(currentArg, unfoldDir);
+		cfg.set("unfoldDir", unfoldDir);
             }
             else if (currentArg.BeginsWith("lepSel=")) {
                 getArg(currentArg, lepSel);
+		cfg.set("lepSel", lepSel);
             }
             else if (currentArg.BeginsWith("algo=")) {
                 getArg(currentArg, algo);
+		cfg.set("algo", algo);
             }
             /*else if (currentArg.BeginsWith("generator1=")) {
                 getArg(currentArg, generator1);
+		cfg.set("generator1", generator1);
             }
             else if (currentArg.BeginsWith("generator2=")) {
                 getArg(currentArg, generator2);
+		cfg.set("generator2", generator2);
             }*/
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
+		cfg.set("jetPtMin", jetPtMin);
             }
             else if (currentArg.BeginsWith("jetEtaMax=")) {
                 getArg(currentArg, jetEtaMax);
+		cfg.set("jetEtaMax", jetEtaMax);
             }
             else if (currentArg.BeginsWith("variable=")) {
                 getArg(currentArg, variable);
+		cfg.set("variable", variable);
             }
             else if (currentArg.BeginsWith("doNormalized=")) {
                 getArg(currentArg, doNormalized);
+		cfg.set("doNormalized", doNormalized);
             }
 	    else if (currentArg.BeginsWith("whichSyst=")) {
                 getArg(currentArg, whichSyst);
+		cfg.set("whichSyst", whichSyst);
             }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {

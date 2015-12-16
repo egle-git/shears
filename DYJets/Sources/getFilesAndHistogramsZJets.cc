@@ -20,8 +20,6 @@ extern ConfigVJets cfg;
 //------------------------------------------------------------
 TString getEnergy()
 {
-
-    ConfigVJets cfg;
     double s = cfg.getI("energy", 13);
     return TString::Format("%gTeV", s);
 }
@@ -161,22 +159,28 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
       std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
 		<< " file = " << fBg[iBg][0]->GetName() << std::endl;
-        getHistos(hRecBg[iBg], fBg[iBg], variable);
-        for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) { 
-            if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
-            else{
+      getHistos(hRecBg[iBg], fBg[iBg], variable);
+      for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+	  if(hRecBg[iBg][iSyst] == 0){
+	      std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
+			<< ", systematic id " << iSyst << " for process with central value file " 
+			<< fBg[iBg][0]->GetName() << ". Exiting.\n";
+	      exit(1);
+	  }	  
+	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  else{
 	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
-		std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
-			  << "Histogram " << hRecSumBg[iSyst]->GetName()
-			  << "for systematic index " << iSyst
-			  << " and background index " << iBg
-			  << " has a different bining than the background #0.\n";
+		  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
+			    << "Histogram " << hRecSumBg[iSyst]->GetName()
+			    << "for systematic index " << iSyst
+			    << " and background index " << iBg
+			    << " has a different bining than the background #0.\n";
 	      }
 	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
-	    }
-        }
+	  }
+      }
     }
-
+    
     //--- get response DYJets objects ---
     getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
 
@@ -201,7 +205,7 @@ void closeFile(TFile *File)
 void closeFiles(TFile *Files[])
 {
     if (Files[0]) {
-        TString fileName = Files[0]->GetName();
+        TString fileName = gSystem->BaseName(Files[0]->GetName());
         int nFiles;
         if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
             nFiles = 3; 
@@ -220,7 +224,7 @@ void closeFiles(TFile *Files[])
 
 void closeFiles(TFile *Files[], int nFiles)
 {
-    TString fileName = Files[0]->GetName();
+    TString fileName = gSystem->BaseName(Files[0]->GetName());
     for (int i(0); i < nFiles; i++){
         Files[i]->cd();
         closeFile(Files[i]);
@@ -260,9 +264,9 @@ TH1D* getHisto(TFile *File, const TString variable)
 void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 {
 
-  std::cerr << "getHistos(,," << variable << ")" << std::endl;
+    std::cerr << "getHistos(" << histograms<< ", {" << Files[0]->GetName() << ",...}, " << variable << ")" << std::endl;
 
-    TString fileName = Files[0]->GetName();
+    TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
@@ -294,8 +298,6 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         //    since it is a global effect. 
         double lumiErr = cfg.getD("lumiUnc");
 
-	std::cerr << "***** > lumi = " << lumiErr << " < **** " << __FILE__ << "\n";
-	
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH1D*) histograms[0]->Clone();
@@ -354,12 +356,11 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
 void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
 {
-    TString fileName = Files[0]->GetName();
+    TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
     int nFiles = 0;
 
-    ConfigVJets cfg;
     if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) {
         nFiles = 3; 
     }
@@ -474,7 +475,7 @@ RooUnfoldResponse* getResp(TFile *File, TString variable)
 
 void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 {
-    TString fileName = Files[0]->GetName();
+    TString fileName = gSystem->BaseName(Files[0]->GetName());
     int nFiles;
     if (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0) nFiles = 3;
     else if (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0) nFiles = 9;

@@ -135,47 +135,71 @@ List of applications
 
 Mots of the applications are not only in the untested branch. The master branch contains the application fully validatated for the run 2 format. These applications are runZJets_newformat, runRecoComparison and runUnfoldingZJets.
 
-
 * Analysis up to reco-level distributions
 
-| runDYJets.cc             | Runs W + jet analysis and Z+jet analysis. Replaced by runZJets for Z+jets. |
-| runZJets_newformat.cc    | Runs Z+jet analysis 13TeV with run 2 format |
-| runZJets.cc              | Runs Z+jet analysis 13TeV with run 1 format |
-| runZJets_original.cc     | Runs Z+jet analysis 8TeV                    |
-| runVJets.cc              | Similar to runZJets.cc. Deprecated. |
+<table>
+<tr><td> runDYJets.cc          </td><td> Runs W + jet analysis and Z+jet analysis. Replaced by runZJets for Z+jets. </td></tr>
+<tr><td> runZJets_newformat.cc </td><td> Runs Z+jet analysis 13TeV with run 2 format </td></tr>
+<tr><td> runZJets.cc           </td><td> Runs Z+jet analysis 13TeV with run 1 format </td></tr>
+<tr><td> runZJets_original.cc  </td><td> Runs Z+jet analysis 8TeV                    </td></tr>
+<tr><td> runVJets.cc           </td><td> Similar to runZJets.cc. Deprecated. </td></tr>
+</table>
 
 * Unfolding and channel combination
 
-| runUnfoldingZJets.cc     | Runs unfolding for Z + jet analysis |
-| runFinalUnfold.cc        | Performs data distributions unfolding. Deprecated for Z+jets? Used by W+jets? |
-| runCombination.cc        | Combination of electron and muon channels. Produce final plots and tables |
-| runMergeChannels.cc      | Perform electron and muon channel combination. Deprecated? |
+<table>
+<tr><td> runUnfoldingZJets.cc     </td><td> Runs unfolding for Z + jet analysis </td></tr>
+<tr><td> runFinalUnfold.cc        </td><td> Performs data distributions unfolding. Deprecated for Z+jets? Used by W+jets? </td></tr>
+<tr><td> runCombination.cc        </td><td> Combination of electron and muon channels. Produce final plots and tables </td></tr>
+<tr><td> runMergeChannels.cc      </td><td> Perform electron and muon channel combination. Deprecated? </td></tr>
+</table>
 
-| runFinalUnfoldAndCombination.cc | Performs simultaneous unfolding and combination of both electron and muon channels. Was not used for 8TeV. Unresolved problems with this method. Deprecated. |
+<br>
+<table>
+<tr><td> runFinalUnfoldAndCombination.cc </td><td> Performs simultaneous unfolding and combination of both electron and muon channels. Was not used for 8TeV. Unresolved problems with this method. Deprecated. </td></tr>
+</table>
 
 * Validation plots and supporting studies
 
-| runCompareUnfolding.cc   | Code missing from the repository. Deprecated?                                        |
-| runFSRStudy.cc           | Runs study of effect of FSR of leptons and recovery of FSR with the lepton dressing. |
+<table>
+<tr><td> runCompareUnfolding.cc   </td><td> Code missing from the repository. Deprecated?                                        </td></tr>
+<tr><td> runFSRStudy.cc           </td><td> Runs study of effect of FSR of leptons and recovery of FSR with the lepton dressing. </td></tr>
+</table>
 
 * Drawing plots and tables
 
-| runFastPlots.cc          | To draw few plots. Requires editing runFastPlots.cc and Sources/FastPlots. Differences with runMyFastPlots.cc |
-| runMyFastPlots.cc        | Another runFastPlot.cc. Differences with runFastPlot.cc?                             |
+<table>
+<tr><td> runFastPlots.cc          </td><td> To draw few plots. Requires editing runFastPlots.cc and Sources/FastPlots. Differences with runMyFastPlots.cc </td></tr>
+<tr><td> runMyFastPlots.cc        </td><td> Another runFastPlot.cc. Differences with runFastPlot.cc?                             </td></tr>
+</table>
 
-| runIndividual.cc | Produces final plots using runPlotting3RatiosCommon. Differences with runPlotter.cc, runPlotting.c, and runPlotting3Ratios.cc? |
-| runPlotter.cc            | Makes final plots. Difference with runPlotting.cc, runIndividual.cc, and runPlotting3Ratios.cc? |
-| runPlotting.cc           | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting3Ratios.cc? Deprecated? |
-| runPlotting3Ratios.cc    | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting? |
+<br>
+<table>
+<tr><td> runIndividual.cc         </td><td> Produces final plots using runPlotting3RatiosCommon. Differences with runPlotter.cc, runPlotting.c, and runPlotting3Ratios.cc? </td></tr>
+<tr><td> runPlotter.cc            </td><td> Makes final plots. Difference with runPlotting.cc, runIndividual.cc, and runPlotting3Ratios.cc? </td></tr>
+<tr><td> runPlotting.cc           </td><td> Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting3Ratios.cc? Deprecated? </td></tr>
+<tr><td> runPlotting3Ratios.cc    </td><td> Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting? </td></tr>
+</table>
 
-| runMakeStatisticsTable.cc | Produces a latex table with the list of samples and their size. Difference with runStatistics.cc? |
-| runStatistics.cc         | Produces a latex table with the list of samples and their size. Difference with runMakeStatisticsTable.cc |
+<br>
+<table>
+<tr><td> runMakeStatisticsTable.cc </td><td> Produces a latex table with the list of samples and their size. Difference with runStatistics.cc? </td></tr>
+<tr><td> runStatistics.cc          </td><td> Produces a latex table with the list of samples and their size. Difference with runMakeStatisticsTable.cc </td></tr>
+</table>
 
-| runRecoComparison.cc     | Produces reco-level comparison plots |
+<br>
+<table>
+<tr><td> runRecoComparison.cc     </td><td> Produces reco-level comparison plots </td></tr>
+</table>
 
-| runSystPlots.cc          | Produces SystematicsPlots_* plots |
+<br>
+<table>
+<tr><td> runSystPlots.cc          </td><td> Produces SystematicsPlots_* plots </td></tr>
+</table>
 
 * Utilities
 
-| organise_vjets_dir       | Script to organize files in ReoComparison/XXX in a directory tree |
-| dispatcher.cc            | Program to launch the analysis using several machine and ssh      |
+<table>
+<tr><td> organise_vjets_dir       </td><td> Script to organize files in ReoComparison/XXX in a directory tree </td></tr>
+<tr><td> dispatcher.cc            </td><td> Program to launch the analysis using several machine and ssh      </td></tr>
+</table>

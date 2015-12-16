@@ -18,5 +18,5 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 void test();
 void createSystPlots(TString outputFileName, TString lepSel, TString variable, TH1D* hUnf[], bool logy = false);
 double MyChi2Test(TH1 *h1, TH1 *h2, int nBinsToSkip = 0, Double_t* res = 0);
-void CorrForPurity(TH1* hRecData, TH1* hPurity);
+void RemoveFakes(TH1* hRecData, TH1* hFakes, TH1* hPurity);
 #endif

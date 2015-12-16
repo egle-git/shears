@@ -25,7 +25,7 @@
 //#define FAST_BAYES
 //#define NEW_CHI2
 
-ConfigVJets cfg1;
+extern ConfigVJets cfg;
 
 const static bool isdatabug = false;
 
@@ -159,6 +159,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       //--- rec DYJets histograms ---
       TH1D *hRecDYJets[13] = {NULL};
       //--- fake DYJets histograms ---
+      TH1D *hFakDYJets[18] = {NULL};
+      //--- purity "histograms" ---
       TH1D *hPurity[18] = {NULL};
       //--- gen DYJets histograms ---
       TH1D *hGenDYJets[11] = {NULL};
@@ -185,7 +187,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       std::cerr << __FILE__ << ":"  << __LINE__ << ". " << variable << "\n";
       getAllHistos(variable, hRecData, fData, 
 		   hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
-		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hPurity);
+		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
       if (DYSHERPA14FILENAME.Length() > 0 ){
 	//--- Get Sherpa Unfolding response ---
 	
@@ -293,16 +295,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	}
 
 	//Applies purity corrections (aka fake corrections):
-      	//for(int ibin = 0; ibin <= hRecDataMinusFakes->GetNbinsX(); ++ibin){
-	//  double c = hRecDataMinusFakes->GetBinContent(ibin);
-	//  double e = hRecDataMinusFakes->GetBinError(ibin);
-	//  double p = hPurity[iSyst]->GetBinContent(ibin);
-	//  if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
-	//		       << ") = " << p << "\n";
-	//  hRecDataMinusFakes->SetBinContent(ibin, c * p);
-	//  hRecDataMinusFakes->SetBinError(ibin, e * p);
-	//}
-	CorrForPurity(hRecDataMinusFakes, hPurity[iSyst]);
+	RemoveFakes(hRecDataMinusFakes, hFakDYJets[iSyst], hPurity[iSyst]);
 
 	//FIXME: use independent samples for subtraction
 	TH1D *hRecDataMinusFakesOdd;
@@ -310,11 +303,11 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	if(iData==0 && hRecDataOdd && hRecDataEven){
 	  hRecDataMinusFakesOdd = (TH1D*) hRecDataOdd->Clone();
 	  hRecDataMinusFakesOdd->Add(hRecSumBg[iBg], -0.5);
-	  CorrForPurity(hRecDataMinusFakesOdd, hPurity[iSyst]);
+	  RemoveFakes(hRecDataMinusFakesOdd, hFakDYJets[iSyst], hPurity[iSyst]);
 	  
      	  hRecDataMinusFakesEven = (TH1D*) hRecDataEven->Clone();
 	  hRecDataMinusFakesEven->Add(hRecSumBg[iBg], -0.5);
-	  CorrForPurity(hRecDataMinusFakesEven, hPurity[iSyst]);
+	  RemoveFakes(hRecDataMinusFakesEven, hFakDYJets[iSyst], hPurity[iSyst]);
 	} else{
 	  hRecDataMinusFakesEven = hRecDataMinusFakesOdd = 0;
 	}
@@ -771,8 +764,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	       TH1D* hRecDataMinusFakes,
 	       TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, 
 	       double integratedLumi, bool logy,
-	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven
-	       )
+	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
 {
     //--- make sure we use OverFlow (should already be set to true) ---
     resp->UseOverflow();
@@ -805,20 +797,20 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     int finalNIterXval = -1;
     int nIterXval = 99;
 
-    //    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
-    int nBinsTmp = 50;
+    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
+    //int nBinsTmp = 50;
 
-    bool svd_unfold = cfg1.getB("svdUnfold", false);
-    bool tsvd_unfold = cfg1.getB("tsvdUnfold", false);
-    bool binByBin_unfold = cfg1.getB("binByBinUnfold", false);
-    bool xvalIter = cfg1.getB("xvalIter", false);
-    bool minIter = cfg1.getI("minIter", 2);
-    int maxIter = cfg1.getI("maxIter", 20);
-    int nSkipFirstJetPtBins = cfg1.getI("nSkipFirstJetPtBins", 2);
-    bool useFlatPrior = cfg1.getB("useFlatPrior", false);
-    double lumiUnc = cfg1.getD("lumiUnc", 0.046);
-    verbosity = 0; //cfg1.getI("unfoldingVerbosity", 1);
-
+    bool svd_unfold = cfg.getB("svdUnfold", false);
+    bool tsvd_unfold = cfg.getB("tsvdUnfold", false);
+    bool binByBin_unfold = cfg.getB("binByBinUnfold", false);
+    bool xvalIter = cfg.getB("xvalIter", false);
+    bool minIter = cfg.getI("minIter", 2);
+    int maxIter = cfg.getI("maxIter", 20);
+    int nSkipFirstJetPtBins = cfg.getI("nSkipFirstJetPtBins", 2);
+    bool useFlatPrior = cfg.getB("useFlatPrior", false);
+    double lumiUnc = cfg.getD("lumiUnc", 0.046);
+    verbosity = cfg.getI("unfoldingVerbosity", 1);
+        
     TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp + 1, -0.5, nBinsTmp + .5);
     hchi2->SetTitle(TString::Format("#chi^{2}/ndf of reco vs folded-unfolded for %s %s",
 				    variable.Data(), name.Data()));
@@ -1535,14 +1527,31 @@ double MyChi2Test(TH1 *h1, TH1 *h2, int nBinsToSkip, Double_t* res)
  * @param hRecData histogram to correct
  * @param hPurity histogram containing the signal purities
  */
-void CorrForPurity(TH1* hRecData, TH1* hPurity){
-    for(int ibin = 0; ibin <= hRecData->GetNbinsX(); ++ibin){
-	double c = hRecData->GetBinContent(ibin);
-	double e = hRecData->GetBinError(ibin);
-	double p = hPurity->GetBinContent(ibin);
-	//	if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
-	//		     << ") = " << p << "\n";
-	hRecData->SetBinContent(ibin, c * p);
-	hRecData->SetBinError(ibin, e * p);
+void RemoveFakes(TH1* hRecData, TH1* hFakes, TH1* hPurity){
+    int fakeMethod = cfg.getI("fakeMethod");
+    static bool emitMess = true;
+    if(emitMess){
+	std::cout << "Fake subtraction method id: " << fakeMethod << "\n";
+	emitMess = false;
     }
+    switch(fakeMethod){
+	case 0: //global rescale to data
+            hRecData->Add(hFakes, -1);
+	    return;
+	case 1: //bin-by-bin purity method
+	    for(int ibin = 0; ibin <= hRecData->GetNbinsX(); ++ibin){
+		double c = hRecData->GetBinContent(ibin);
+		double e = hRecData->GetBinError(ibin);
+		double p = hPurity->GetBinContent(ibin);
+		//	if(ibin<4) std::cout <<  __FILE__ << __LINE__ << ": p(" << ibin
+		//		     << ") = " << p << "\n";
+		hRecData->SetBinContent(ibin, c * p);
+		hRecData->SetBinError(ibin, e * p);
+	    }
+	    return;
+	default:
+	    std::cerr << __FILE__ <<  ":" << __LINE__ << ". Value " << fakeMethod
+		      << " for parameter fakeMethod " << " is not supported. Exists.\n";
+	    exit(1);
+	}
 }

@@ -58,8 +58,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     unsigned int nEventsPassingTrigger(0);
     double nEffEventsPassingTrigger(0);
          
-    //bool UnfoldUnc = true;
     bool UnfoldUnc = cfg.getB("unfoldUnc", false);
+    if(UnfoldUnc){
+	std::cout << "Reweighting mode. MC will be reweighted to compute an alternative response matrix to be used for the estimation of the model dependency.\n";
+    }
 
     //------------------------------------
 

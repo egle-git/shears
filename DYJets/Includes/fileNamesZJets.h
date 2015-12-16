@@ -29,13 +29,12 @@ const processInfoStruct Samples[] = {
     /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W", " #bar{t}W"},
     /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW", " t#bar{t}"},  
     /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single Top", "Single top"},
-    /* 7*/{"ZZ",        ' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ", " ZZ"},
-    /* 8*/{"WWTo2L2Nu", ' ',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
-    /* 9*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kAzure+10, kAzure+10, " WJets", " W"},
-    /*10*/{"WZ",    	' ',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
-    //    /*11*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
-    /*11*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
-    //   /*12*/{"DYJets_MLM_UNFOLDING",  ' ',    1.,       1.,      1,   0.05,   kBlue-10, kBlue-10, " DYJets MLM", " Z/#gamma^{*} #rightarrow ll"}
+    /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange, kOrange, " WJets", " W"},
+    /* 8*/{"ZZ",        '+',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ", " ZZ"},
+    /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
+    /*10*/{"WZ",    	'+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
+    /*11*/{"VV",    	'=',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " VV", "VV"},              
+    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
@@ -44,8 +43,7 @@ const int DYJETS(NSamples - 1); // Signal MC is the seconf from the last sample 
 
 /** Total number of samples after sample grouping, including real data, background MC, and signal MC
  */
-const unsigned int NFILESDYJETS = 8;
-//const unsigned int NFILESDYJETS = 3;
+const unsigned int NFILESDYJETS = 6;
 
 /** Number of background MC samples: all minus data and the signal MC
  */
@@ -54,7 +52,7 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
 /** List of indices of samples from Samples to be used for ZJets analysis
  * When samples are grouped, only the merged sample is included in this list.
  */
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 8, 9, 10, 11};
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2};
 
 

@@ -40,7 +40,7 @@ With the default configuration file, the histograms will be store in the HistoFi
 
 Note: if you have many "Warning: parameter XYZ was not found in configuration file!", it is most probably that you missed to copy the example.cfg file to vjets.cfg, made a typo in vjets.cfg when you copied it, or used an old version of vjets.cfg file.
 
-To use as input ntuple in the Run 1 format, run `runZJets` instead of `runZJets_newformat`. To use Run 1 format you should use the code from the Run1_format branch, as the Run 1 format is not maintained on the master branch. 
+To use as input ntuple in the Run 1 format, run `runZJets` instead of `runZJets_newformat`. To use Run 1 format you should use the code from the Run1_format branch, as the Run 1 format is not maintained on the master branch.
 
 ```
     $ ./runZJets
@@ -48,7 +48,7 @@ To use as input ntuple in the Run 1 format, run `runZJets` instead of `runZJets_
 
 Important: we recommand to use Run 2 format. The instructions has been tested with this format.
 
-Note: you can specify limit the number of events to analyze by adding to the above command line the 
+Note: you can specify limit the number of events to analyze by adding to the above command line the
 option maxEvents=XXXX. In such case the histogram directory will be named HistoFiles_XXXXevts instead
 of HistoFiles.
 
@@ -136,7 +136,7 @@ List of applications
 Mots of the applications are not only in the untested branch. The master branch contains the application fully validatated for the run 2 format. These applications are runZJets_newformat, runRecoComparison and runUnfoldingZJets.
 
 
-. Analysis up to reco-level distributions
+* Analysis up to reco-level distributions
 
 | runDYJets.cc             | Runs W + jet analysis and Z+jet analysis. Replaced by runZJets for Z+jets. |
 | runZJets_newformat.cc    | Runs Z+jet analysis 13TeV with run 2 format |
@@ -144,7 +144,7 @@ Mots of the applications are not only in the untested branch. The master branch 
 | runZJets_original.cc     | Runs Z+jet analysis 8TeV                    |
 | runVJets.cc              | Similar to runZJets.cc. Deprecated. |
 
-. Unfolding and channel combination
+* Unfolding and channel combination
 
 | runUnfoldingZJets.cc     | Runs unfolding for Z + jet analysis |
 | runFinalUnfold.cc        | Performs data distributions unfolding. Deprecated for Z+jets? Used by W+jets? |
@@ -153,19 +153,19 @@ Mots of the applications are not only in the untested branch. The master branch 
 
 | runFinalUnfoldAndCombination.cc | Performs simultaneous unfolding and combination of both electron and muon channels. Was not used for 8TeV. Unresolved problems with this method. Deprecated. |
 
-. Validation plots and supporting studies
+* Validation plots and supporting studies
 
-| runCompareUnfolding.cc   | Code missing from the repository. Deprecated?  |
+| runCompareUnfolding.cc   | Code missing from the repository. Deprecated?                                        |
 | runFSRStudy.cc           | Runs study of effect of FSR of leptons and recovery of FSR with the lepton dressing. |
 
-. Drawing plots and tables
+* Drawing plots and tables
 
 | runFastPlots.cc          | To draw few plots. Requires editing runFastPlots.cc and Sources/FastPlots. Differences with runMyFastPlots.cc |
-| runMyFastPlots.cc        | Another runFastPlot.cc. Differences with runFastPlot.cc? |
+| runMyFastPlots.cc        | Another runFastPlot.cc. Differences with runFastPlot.cc?                             |
 
 | runIndividual.cc | Produces final plots using runPlotting3RatiosCommon. Differences with runPlotter.cc, runPlotting.c, and runPlotting3Ratios.cc? |
 | runPlotter.cc            | Makes final plots. Difference with runPlotting.cc, runIndividual.cc, and runPlotting3Ratios.cc? |
-| runPlotting.cc           | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting3Ratios.cc? Deprecated? | 
+| runPlotting.cc           | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting3Ratios.cc? Deprecated? |
 | runPlotting3Ratios.cc    | Makes final plots. Difference with runPlotter.cc, runIndividual.cc, and runPlotting? |
 
 | runMakeStatisticsTable.cc | Produces a latex table with the list of samples and their size. Difference with runStatistics.cc? |
@@ -173,9 +173,9 @@ Mots of the applications are not only in the untested branch. The master branch 
 
 | runRecoComparison.cc     | Produces reco-level comparison plots |
 
-| runSystPlots.cc          | Produces SystematicsPlots_* plots | 
+| runSystPlots.cc          | Produces SystematicsPlots_* plots |
 
-. Utilities
+* Utilities
 
 | organise_vjets_dir       | Script to organize files in ReoComparison/XXX in a directory tree |
-| dispatcher.cc            | Program to launch the analysis using several machine and ssh      |               
+| dispatcher.cc            | Program to launch the analysis using several machine and ssh      |

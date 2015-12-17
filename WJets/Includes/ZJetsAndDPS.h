@@ -40,36 +40,53 @@ class ZJetsAndDPS: public HistoSet {
   public :
     //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
     TChain          *fChain;   //!pointer to the analyzed TTree or TChain
+    TChain          *fBonzaiHeaderChain;
     //TTree          *tree;
     Int_t           fCurrent; //!current Tree number in a TChain
 
     // Declaration of leaf types
-    Double_t        PU_npT;
+    //Double_t        PU_npT;
+    Int_t           EvtPuCntTruth;
+    
     Double_t        mcEveWeight_;
     Double_t        mcSherpaSumWeight3_ ;
 
     Int_t           EvtVtxCnt;
     Int_t           EvtRunNum;
     Int_t           EvtNum;
-    Int_t	          nup_;
+    
+    //Int_t	        nup_;
+    Int_t           GNup;
+    
 
     vector<double>  *EvtWeights;
     vector<double>  *mcSherpaWeights_;
-    vector<double>  *pdfInfo_;
-    vector<double>  *GLepBarePt;
-    vector<double>  *GLepBareEta;
-    vector<double>  *GLepBarePhi;
-    vector<double>  *GLepBareE;
-    vector<double>  *genLepQ_;
-    vector<double>  *GLepBareId;
-    vector<double>  *GLepBareSt;
-    vector<double>  *GPhotPt;
-    vector<double>  *GPhotEta;
-    vector<double>  *GPhotPhi;
-    vector<double>  *GJetAk04Pt;
-    vector<double>  *GJetAk04Eta;
-    vector<double>  *GJetAk04Phi;
-    vector<double>  *GJetAk04E;
+    //vector<double>  *pdfInfo_;
+    vector<float>  *GLepBarePt;
+    vector<float>  *GLepBareEta;
+    vector<float>  *GLepBarePhi;
+    vector<float>  *GLepBareE;
+    //vector<double>  *genLepQ_;
+    vector<int>  *GLepBareId;
+    vector<int>  *GLepBareSt;
+    
+//    vector<double>  *GPhotPt;
+//    vector<double>  *GPhotEta;
+//    vector<double>  *GPhotPhi;
+    
+    vector<float>   *GLepClosePhotPt;
+    vector<float>   *GLepClosePhotEta;
+    vector<float>   *GLepClosePhotPhi;
+    vector<float>   *GLepClosePhotE;
+    vector<int>     *GLepClosePhotId;
+    vector<int>     *GLepClosePhotMother0Id;
+    vector<int>     *GLepClosePhotMotherCnt;
+    vector<int>     *GLepClosePhotSt;
+
+    vector<float>  *GJetAk04Pt;
+    vector<float>  *GJetAk04Eta;
+    vector<float>  *GJetAk04Phi;
+    vector<float>  *GJetAk04E;
     
     vector<double>  *dpsParton_Pt;
     vector<double>  *dpsParton_Eta;
@@ -103,7 +120,7 @@ class ZJetsAndDPS: public HistoSet {
     vector<float>  *MuDxy;
     vector<unsigned int> *MuIdTight;
   
-    ULong64_t      *TrigHltMu;
+    ULong64_t      TrigHltMu;
 
     vector<float>  *MuPfIso;
 
@@ -136,9 +153,15 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_mcSherpaSumWeight3_;   //!
     TBranch        *b_EvtWeights;   //!
     TBranch        *b_mcSherpaWeights_;   //!
-    TBranch        *b_nup_;   //!
-    TBranch        *b_pdfInfo_;   //!
-    TBranch        *b_PU_npT;   //!
+    
+    //TBranch        *b_nup_;   //!
+    TBranch        *b_GNup;   //!
+    
+    //TBranch        *b_pdfInfo_;   //!
+    
+    //TBranch        *b_PU_npT;   //!
+    TBranch        *b_EvtPuCntTruth;   //!
+    
     TBranch        *b_EvtVtxCnt;   //!
     TBranch        *b_EvtRunNum;   //!
     TBranch        *b_EvtNum;   //!
@@ -149,9 +172,19 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_genLepQ_;   //!
     TBranch        *b_GLepBareId;   //!
     TBranch        *b_GLepBareSt;   //!
-    TBranch        *b_GPhotPt;   //!
-    TBranch        *b_GPhotEta;   //!
-    TBranch        *b_GPhotPhi;   //!
+//    TBranch        *b_GPhotPt;   //!
+//    TBranch        *b_GPhotEta;   //!
+//    TBranch        *b_GPhotPhi;   //!
+    
+    TBranch        *b_GLepClosePhotPt;   //!
+    TBranch        *b_GLepClosePhotEta;   //!
+    TBranch        *b_GLepClosePhotPhi;   //!
+    TBranch        *b_GLepClosePhotE;   //!
+    TBranch        *b_GLepClosePhotId;   //!
+    TBranch        *b_GLepClosePhotMother0Id;   //!
+    TBranch        *b_GLepClosePhotMotherCnt;   //!
+    TBranch        *b_GLepClosePhotSt;   //!
+    
     TBranch        *b_GJetAk04Pt;   //!
     TBranch        *b_GJetAk04Eta;   //!
     TBranch        *b_GJetAk04Phi;   //!
@@ -188,7 +221,7 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_MuIdTight;   //!
     TBranch        *b_TrigHltMu;   //!
     TBranch        *b_MuPfIso;   //!
-
+    
     TBranch        *b_JetAk04Pt;   //!
     TBranch        *b_JetAk04Eta;   //!
     TBranch        *b_JetAk04Phi;   //!
@@ -226,6 +259,16 @@ class ZJetsAndDPS: public HistoSet {
     void     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, int doQCD = 0, bool doSSign = 0, bool doInvMassCut = 1 ,   int doBJets = 0, int doPUStudy = -10,bool doFlat = 0, bool useRoch = 0, bool doVarWidth = 1, bool hasPartonInfo = 0, string pdfSet = "", int pdfMember = 0);
     Bool_t   Notify();
     void     Show(Long64_t entry = -1);
+    
+    /** Baobab->Bonzai acceptance
+     */
+    void getMcNorm();
+    std::vector<Double_t> InEvtWeightSums_;
+    std::vector<Double_t> EvtWeightSums_;
+    std::vector<Double_t> skimAccep_;
+    Int_t InEvtCount_;
+    Int_t EvtCount_;
+
 
     bool nEvents_10000;
     string outputDirectory;

@@ -50,6 +50,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
 
     //--- Check weither it is 8 TeV or 13 TeV ---
     string energy = getEnergy();
+    energy = "13TeV";
     //--------------------------------------
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
     //--- Counters to check the yields ---
@@ -136,7 +137,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //     Systematics: jec, pu, xsec     //
     //====================================//
     cout << "Lepton Flavor: " << leptonFlavor << endl;
-    int puYear(2011); 
+    int puYear(2013);
     if (energy == "8TeV") puYear = 2013;
     cout << "Pile Up Distribution: " << puYear << endl;
     standalone_LumiReWeighting puWeight(leptonFlavor, puYear), puUp(leptonFlavor, puYear, 1), puDown(leptonFlavor, puYear, -1);
@@ -237,7 +238,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     Init(hasRecoInfo, hasGenInfo, hasPartonInfo);
     if (fChain == 0) return;
     Long64_t nbytes(0), nb(0);
-    Long64_t nentries = fChain->GetEntriesFast();
+    //Long64_t nentries = fChain->GetEntriesFast();
+    Long64_t nentries = fChain->GetEntries();
     if (nEvents_10000) {
         nentries = 10000;
         std::cout << "We plane to run on 100000 events" << std::endl;
@@ -262,10 +264,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     }
     //------------------------------------
     
-    cout << " run on " << nentries << "events" << endl;
+    cout << " run on " << nentries << " events" << endl;
     //--- Begin Loop All Entries --
-    //KOfor (Long64_t jentry(0); jentry < nentries; jentry++){
-    for (Long64_t jentry(0); jentry < 500000; jentry++){
+    for (Long64_t jentry(0); jentry < nentries; jentry++){
+    //for (Long64_t jentry(0); jentry < 1000000; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -301,7 +303,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         
 /* APICHART
         if (hasRecoInfo && !isData){
-            weight *= (double)puWeight.weight(int(PU_npT));
+            weight *= (double)puWeight.weight(int(EvtPuCntTruth));
             //-- reweight again to IMPOSE FLAT #VTX DATA/MC RATIO
             if (doFlat){
                 reweighting = FlatNVtxWeight->GetBinContent(EvtVtxCnt + 1);
@@ -347,26 +349,26 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         //-- get the pdgId of the two colliding partons 
         double wPdf(1);
         if (pdfSet != "") {
-            int id1 = pdfInfo_->at(2);
-            int id2 = pdfInfo_->at(3);
-            if (id1 == 21) id1 = 0;
-            if (id2 == 21) id2 = 0;
-
-            LHAPDF::usePDFMember(2, 0);
-            double pdf1 = LHAPDF::xfx(1, pdfInfo_->at(2), pdfInfo_->at(4), id1);
-            double pdf2 = LHAPDF::xfx(1, pdfInfo_->at(3), pdfInfo_->at(4), id2);
-            double pdf01 = LHAPDF::xfx(2, pdfInfo_->at(2), pdfInfo_->at(4), id1);
-            double pdf02 = LHAPDF::xfx(2, pdfInfo_->at(3), pdfInfo_->at(4), id2);
-
-            if (pdfInfo_->at(2) * pdfInfo_->at(3) > 0) {
-                wPdf = pdf1 * pdf2;
-                if (pdf01*pdf02 <= 0 || pdf1*pdf2 <= 0) {
-                    wPdf = 1;
-                }
-                else {
-                    wPdf /= (pdf01 * pdf02);
-                }
-            }
+//            int id1 = pdfInfo_->at(2);
+//            int id2 = pdfInfo_->at(3);
+//            if (id1 == 21) id1 = 0;
+//            if (id2 == 21) id2 = 0;
+//
+//            LHAPDF::usePDFMember(2, 0);
+//            double pdf1 = LHAPDF::xfx(1, pdfInfo_->at(2), pdfInfo_->at(4), id1);
+//            double pdf2 = LHAPDF::xfx(1, pdfInfo_->at(3), pdfInfo_->at(4), id2);
+//            double pdf01 = LHAPDF::xfx(2, pdfInfo_->at(2), pdfInfo_->at(4), id1);
+//            double pdf02 = LHAPDF::xfx(2, pdfInfo_->at(3), pdfInfo_->at(4), id2);
+//
+//            if (pdfInfo_->at(2) * pdfInfo_->at(3) > 0) {
+//                wPdf = pdf1 * pdf2;
+//                if (pdf01*pdf02 <= 0 || pdf1*pdf2 <= 0) {
+//                    wPdf = 1;
+//                }
+//                else {
+//                    wPdf /= (pdf01 * pdf02);
+//                }
+//            }
         }
         //==========================================================================================================//
 
@@ -408,7 +410,9 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     //if (energy == "13TeV" && ((whichTrigger & 12) || (whichTrigger & 19)) && doW) eventTrigger = true;
                     if (energy == "13TeV" && doW && ((TrigHltMu && 1LL<<12) || (TrigHltMu && 1LL<<19))) eventTrigger = true;
                 } */
-                    if (energy == "13TeV" && doW && ((TrigHltMu && 1LL<<12) || (TrigHltMu && 1LL<<19))) eventTrigger = true;
+                
+                if (energy == "13TeV" && doW && ((TrigHltMu & 1LL<<12) || (TrigHltMu & 1LL<<19))) eventTrigger = true;
+                //cout <<  " energy " << energy << " eventTrigger " << eventTrigger << " TrigHltMu " << TrigHltMu << " (TrigHltMu & 1LL<<12) " << (TrigHltMu & 1LL<<12) << endl;
                 for (unsigned short i(0); i < nTotLeptons; i++) {
                     if (doMer) merUncer = Rand_MER_Gen->Gaus(0, (MuPt->at(i) * 0.006));
                     leptonStruct mu = {(MuPt->at(i) * muScale) + merUncer, MuEta->at(i), MuPhi->at(i), MuE->at(i), MuCh->at(i), MuPfIso->at(i), 0};
@@ -606,7 +610,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         vector<int> usedGenPho;
         TLorentzVector genLep1, genLep2, genZ;
         leptonStruct genLepton1, genLepton2;
-        int countTauS3 = 0;
+        //int countTauS3 = 0;
 
         // to use the TOP PAG TTBAR reweighting recommendation
         // line below is to check contribution from mainy tau decay : use passesLeptonCut = 0  only if you want to have RECO events that originate from tau ; countTauS3 is used in passesGenLeptonCut
@@ -614,12 +618,15 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         // ...DELETED
         /// end top reweighting
 
-        countTauS3 = 0; 
+        //countTauS3 = 0;
         if (hasGenInfo) {
-            if (hasRecoInfo) countTauS3 = 2;
-            if (hasRecoInfo && doW) countTauS3 = 1;
-            nTotGenPhotons = GPhotEta->size();
+            
+//            if (hasRecoInfo) countTauS3 = 2;
+//            if (hasRecoInfo && doW) countTauS3 = 1;
+            
+            nTotGenPhotons = GLepClosePhotEta->size();
             nTotGenLeptons = GLepBareEta->size();
+            
             //-- retriveing generated leptons with status 1
             for (unsigned short i(0); i < nTotGenLeptons; i++) {
                 // line below is to check contribution from mainy tau decay : use passesLeptonCut = 0  only if you want to have RECO events that originate from tau ; countTauS3 is used in passesGenLeptonCut
@@ -627,15 +634,21 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         (doZ && abs(GLepBareId->at(i)) == LeptonID) || 
                         (doW && (abs(GLepBareId->at(i)) == LeptonID || abs(GLepBareId->at(i)) == 12 || abs(GLepBareId->at(i)) == 14)));
                 
+//                // following two lines should give the same result
+//                if (GLepBareSt->at(i) == 3 && abs(GLepBareId->at(i)) != LeptonID && (abs(GLepBareId->at(i)) == 15 || abs(GLepBareId->at(i)) == 13 || abs(GLepBareId->at(i)) == 11)) countTauS3++;
+//                if (GLepBareSt->at(i) == 3 && abs(GLepBareId->at(i)) == LeptonID ) countTauS3--;
                 
-                // following two lines should give the same result
-                if (GLepBareSt->at(i) == 3 && abs(GLepBareId->at(i)) != LeptonID && (abs(GLepBareId->at(i)) == 15 || abs(GLepBareId->at(i)) == 13 || abs(GLepBareId->at(i)) == 11)) countTauS3++;
-                if (GLepBareSt->at(i) == 3 && abs(GLepBareId->at(i)) == LeptonID ) countTauS3--;
-                
-                
+                //cout << " GLepBareId->at(i) " <<  GLepBareId->at(i) << endl;
                 if (!lepSelector) continue ;
-                double charge(genLepQ_->at(i)); 
+                
+                
+                //double charge(genLepQ_->at(i));
+                //if (abs(GLepBareId->at(i)) == 12 || abs(GLepBareId->at(i)) == 14 || abs(GLepBareId->at(i)) == 16) charge = 0.;
+                double charge;
                 if (abs(GLepBareId->at(i)) == 12 || abs(GLepBareId->at(i)) == 14 || abs(GLepBareId->at(i)) == 16) charge = 0.;
+                else if (GLepBareId->at(i) < 0) charge = -1.;
+                else charge = 1.;
+                
                 leptonStruct genLep = {GLepBarePt->at(i), GLepBareEta->at(i), GLepBarePhi->at(i), GLepBareE->at(i), charge, 0., 0.};
                 leptonStruct genLepNoFSR = {GLepBarePt->at(i), GLepBareEta->at(i), GLepBarePhi->at(i), GLepBareE->at(i), charge, 0., 0. };
                 
@@ -648,7 +661,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                         // loop over all photons
                         for (unsigned short j(0); j < nTotGenPhotons; j++){
                             TLorentzVector tmpGenPho;
-                            tmpGenPho.SetPtEtaPhiM(GPhotPt->at(j), GPhotEta->at(j), GPhotPhi->at(j), 0.);
+                            tmpGenPho.SetPtEtaPhiM(GLepClosePhotPt->at(j), GLepClosePhotEta->at(j), GLepClosePhotPhi->at(j), 0.);
                             int used(0);
                             for (unsigned short k(0); k < usedGenPho.size(); k++){
                                 if (j == usedGenPho[k]) used = 1;
@@ -670,33 +683,35 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     }
                     
                     //if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.1)||(fabs(genLep.charge) == 0))){
-                    if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.1) || (fabs(genLep.charge) == 0 && genLep.pt >= METcut))){
+                    if (doW && ((fabs(genLep.charge) > 0 && genLep.pt >= 25 && fabs(genLep.eta) <= 2.4) || (fabs(genLep.charge) == 0 && genLep.pt >= METcut))){
                         genLeptons.push_back(genLep); 
                     }
                 }
             }
             nGenLeptons = genLeptons.size();
-
-            if (countTauS3 == 0 && fileName.find("UNFOLDING") != string::npos){
-                partonsN->Fill(nup_-5);
-                partonsNWeighted->Fill(nup_-5, genWeight);
-            }
+            //cout << " nTotGenLeptons " << nTotGenLeptons <<" nGenLeptons = genLeptons.size()  " << genLeptons.size() << endl;
+            
+//            if (countTauS3 == 0 && fileName.find("UNFOLDING") != string::npos){
+//                //partonsN->Fill(nup_-5);
+//                //partonsNWeighted->Fill(nup_-5, genWeight);
+//            }
             
             /// --- if there are taus, but we do not run on the Tau file, thus we run on the WJets file,
             //    then we don't count the event at reco.
             // APICHART if (useEfficiencyCorrection && countTauS3 > 0 && fileName.find("Tau") == string::npos  ) passesLeptonCut = 0 ;
             
             
-            if ( ( fileName.find("Tau") == string::npos &&  countTauS3 > 0  ) || ( fileName.find("Tau") != string::npos &&  countTauS3 == 0) ){
-                ZMassAllPassLep->Fill(Z.M(),weight);
-                AllPassLepID->Fill(sumLepCharge,weight);
-                if (Z.M() > 50 )  AllPassWithMassCutLepID->Fill(sumLepCharge,weight);
-            }
+//            if ( ( fileName.find("Tau") == string::npos &&  countTauS3 > 0  ) || ( fileName.find("Tau") != string::npos &&  countTauS3 == 0) ){
+//                ZMassAllPassLep->Fill(Z.M(),weight);
+//                AllPassLepID->Fill(sumLepCharge,weight);
+//                if (Z.M() > 50 )  AllPassWithMassCutLepID->Fill(sumLepCharge,weight);
+//            }
             if (passesLeptonCut)      AllPassWithMassCutLepIDCharge->Fill(sumLepCharge,weight);
             
 if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             //-- determine if the event passes the leptons requirements
             if (nGenLeptons >= 2){
+                
                 // sort leptons by descending pt
                 sort(genLeptons.begin(), genLeptons.end(), LepDescendingOrder);
                 genLepton1 = genLeptons[0];
@@ -744,8 +759,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         if (passesGenLeptonCut) {
             TotalGenWeightPassGEN += genWeightBackup; 
             TotalGenWeightPassGENPU += weight;
-            partonsNAfterGenCut->Fill(nup_ - 5);
-            partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight);
+            //partonsNAfterGenCut->Fill(nup_ - 5);
+            //partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight);
         }
         //=======================================================================================================//
 
@@ -1512,9 +1527,9 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
         //====================================//
         if (hasGenInfo){
             if (passesGenLeptonCut && passesDPSPartonCut && passesGenJetCut){
-                if (fileName.find("HepMC") == string::npos && pdfInfo_->size()>3){
-                    partonX2D->Fill(pdfInfo_->at(2),pdfInfo_->at(3),genWeight);
-                }
+//                if (fileName.find("HepMC") == string::npos && pdfInfo_->size()>3){
+//                    partonX2D->Fill(pdfInfo_->at(2),pdfInfo_->at(3),genWeight);
+//                }
                 GENnEventsIncl0Jets++;
                 genZNGoodJets_Zexc->Fill(nGoodGenJets, genWeight);
                 genZNGoodJetsFull_Zexc->Fill(nGoodGenJets, genWeight);
@@ -2009,13 +2024,13 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             NVtx->Fill(EvtVtxCnt, weight);
 
             //NVtx->Fill(EvtInfo_NumVtx + 1000 , weight);
-            if (fileName.find("Sherpa") != string::npos && fileName.find("UNFOL") == string::npos ) PUWeight->Fill(puWeight.weight(int(PU_npT)) * reweighting * mcEveWeight_, 1);
-            else PUWeight->Fill(puWeight.weight(int(PU_npT)) * reweighting, 1);
+            if (fileName.find("Sherpa") != string::npos && fileName.find("UNFOL") == string::npos ) PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting * mcEveWeight_, 1);
+            else PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
             if (nGoodJets == 0){
-                PUWeight0->Fill(puWeight.weight(int(PU_npT)) * reweighting, 1);
+                PUWeight0->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
             }
             else {
-                PUWeight1->Fill(puWeight.weight(int(PU_npT)) * reweighting, 1);
+                PUWeight1->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
             }
             
             if (lepton1.charge > 0){
@@ -3087,6 +3102,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
 
     //--- Save all the histograms ---
     unsigned short numbOfHistograms = listOfHistograms.size();
+    
+    cout << "skimAccep_[0] = " << skimAccep_[0] << "\n";
     for (unsigned short i(0); i < numbOfHistograms; i++){
         string hName = listOfHistograms[i]->GetName();
         if ( (!hasGenInfo && hName.find("gen") != string::npos ) || (!hasRecoInfo && hName.find("gen") == string::npos )) continue; 
@@ -3098,7 +3115,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             if (sumSherpaW > 0) listOfHistograms[i]->Scale(1/sumSherpaW);
         } */
         if (hasRecoInfo && !isData){
-            if (sumEventW > 0) listOfHistograms[i]->Scale(1/sumEventW);
+            if (sumEventW > 0) listOfHistograms[i]->Scale(skimAccep_[0]/sumEventW);
         }
 
         listOfHistograms[i]->Write();
@@ -3175,8 +3192,14 @@ ZJetsAndDPS::ZJetsAndDPS(string fileName_, float lumiScale_, float puScale_, boo
     // used to generate this class and read the Tree.
 
     TChain *chain = new TChain("", "");
+    TChain *BonzaiHeaderChain = new TChain("", "");
+    
     isData = false;
     string fullFileName =  "../Data_Z_5311_New/" + fileName;
+    
+    string storageElement = "root://eoscms//eos/cms";
+    string dirPath = "/tupel";
+    string treeName = "/EventTree";
 
 
     if (fileName.find("DMu_") == 0) leptonFlavor = "Muons";
@@ -3188,7 +3211,7 @@ ZJetsAndDPS::ZJetsAndDPS(string fileName_, float lumiScale_, float puScale_, boo
         fullFileName =  "../DataTTbarEMu/" + fileName;
     }
     if (fileName.find("Data") != string::npos ) isData = true;
-    if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "../DataW/13TeV_25ns/" + fileName;
+    if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "DataW/" + fileName;
     //if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "/afs/cern.ch/work/o/ocalan/" + fileName;
     //if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "/afs/cern.ch/user/o/ocalan/13TeV/CMSSW_5_3_11/src/WJETS/TreeAnalysis2012/DataW/" + fileName;
     if (fileName.find("Sherpa2") != string::npos) fullFileName =  "../DataSherpa2/" + fileName;
@@ -3213,11 +3236,20 @@ ZJetsAndDPS::ZJetsAndDPS(string fileName_, float lumiScale_, float puScale_, boo
         int countFiles(0);
         while (getline(infile, line)){
             countFiles++;
-            string treePath =  line + "/tree/tree";
-            chain->Add(treePath.c_str());       
+            //string treePath =  line + "/tree/tree";
+            string treePath = storageElement + line + dirPath + treeName;
+            chain->Add(treePath.c_str());
+            cout << "Loading file: " << line << endl;
+            
+            string bonzaiHeaderPath = storageElement + line + dirPath + "/BonzaiHeader";
+            BonzaiHeaderChain->Add(bonzaiHeaderPath.c_str());
         }
     }
     fChain = chain;
+    fBonzaiHeaderChain = BonzaiHeaderChain;
+    
+    if (!isData) getMcNorm();
+    else skimAccep_ = std::vector<double>(1, 1.);
 }
 
 ZJetsAndDPS::~ZJetsAndDPS(){
@@ -3292,7 +3324,8 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
     
     EvtWeights = 0;
     mcSherpaWeights_ = 0 ;
-    pdfInfo_ = 0;
+    
+    //pdfInfo_ = 0;
     GLepBarePt = 0;
     GLepBareEta = 0;
     GLepBarePhi = 0;
@@ -3300,9 +3333,19 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
    // genLepQ_ = 0;
     GLepBareId = 0;
     GLepBareSt = 0;
-    GPhotPt = 0;
-    GPhotEta = 0;
-    GPhotPhi = 0;
+//    GPhotPt = 0;
+//    GPhotEta = 0;
+//    GPhotPhi = 0;
+
+    GLepClosePhotPt = 0;
+    GLepClosePhotEta = 0;
+    GLepClosePhotPhi = 0;
+    GLepClosePhotE = 0;
+    GLepClosePhotId = 0;
+    GLepClosePhotMother0Id = 0;
+    GLepClosePhotMotherCnt = 0;
+    GLepClosePhotSt = 0;
+
     GJetAk04Pt = 0;
     GJetAk04Eta = 0;
     GJetAk04Phi = 0;
@@ -3363,8 +3406,14 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
     // Set branch addresses and branch pointers
     fCurrent = -1;
     fChain->SetMakeClass(1);
-    if (fileName.find("Data") == string::npos) fChain->SetBranchAddress("PU_npT", &PU_npT, &b_PU_npT);
-    if (fileName.find("UNFOLDING") != string::npos) fChain->SetBranchAddress("nup_", &nup_, &b_nup_);
+    
+    //if (fileName.find("Data") == string::npos) fChain->SetBranchAddress("PU_npT", &PU_npT, &b_PU_npT);
+    fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
+    //if (fileName.find("UNFOLDING") != string::npos) fChain->SetBranchAddress("nup_", &nup_, &b_nup_);
+    if (fileName.find("UNFOLDING") != string::npos && fileName.find("MIX") != string::npos){
+        fChain->SetBranchAddress("GNup", &GNup, &b_GNup);
+    }
+    
     if (hasRecoInfo){
         fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);
         fChain->SetBranchAddress("EvtRunNum", &EvtRunNum, &b_EvtRunNum); // not used
@@ -3439,12 +3488,16 @@ void ZJetsAndDPS::Init(bool hasRecoInfo, bool hasGenInfo, bool hasPartonInfo){
                 fileName.find("TopReweighting") != string::npos ||
                 fileName.find("Z2") != string::npos){
 
-            fChain->SetBranchAddress("pdfInfo_", &pdfInfo_, &b_pdfInfo_);
+            //fChain->SetBranchAddress("pdfInfo_", &pdfInfo_, &b_pdfInfo_);
             fChain->SetBranchAddress("GLepBareId", &GLepBareId, &b_GLepBareId);
             fChain->SetBranchAddress("GLepBareSt", &GLepBareSt, &b_GLepBareSt);
-            fChain->SetBranchAddress("GPhotPt", &GPhotPt, &b_GPhotPt);
-            fChain->SetBranchAddress("GPhotEta", &GPhotEta, &b_GPhotEta);
-            fChain->SetBranchAddress("GPhotPhi", &GPhotPhi, &b_GPhotPhi);
+//            fChain->SetBranchAddress("GPhotPt", &GPhotPt, &b_GPhotPt);
+//            fChain->SetBranchAddress("GPhotEta", &GPhotEta, &b_GPhotEta);
+//            fChain->SetBranchAddress("GPhotPhi", &GPhotPhi, &b_GPhotPhi);
+            
+            fChain->SetBranchAddress("GLepClosePhotPt", &GLepClosePhotPt, &b_GLepClosePhotPt);
+            fChain->SetBranchAddress("GLepClosePhotEta", &GLepClosePhotEta, &b_GLepClosePhotEta);
+            fChain->SetBranchAddress("GLepClosePhotPhi", &GLepClosePhotPhi, &b_GLepClosePhotPhi);
 
             if (fileName.find("MiNLO") != string::npos || 
                     fileName.find("mcEveWeight") != string::npos || 
@@ -3498,4 +3551,79 @@ Int_t ZJetsAndDPS::Cut(Long64_t entry){
     // returns -1 otherwise.
     printf("entry %lld", entry);
     return 1;
+}
+
+void ZJetsAndDPS::getMcNorm(){
+    Int_t InEvtCount = 0;
+    //#ifdef weight_bug
+    //    std::vector<Double_t> InEvtWeightSums(1,0);
+    //    std::vector<Double_t> EvtWeightSums(1,0);
+    //    fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums[0]);
+    //    fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums[0]);
+    //#else
+    std::vector<Double_t>* InEvtWeightSums  = 0;
+    std::vector<Double_t>* EvtWeightSums = 0;
+    fBonzaiHeaderChain->SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
+    fBonzaiHeaderChain->SetBranchAddress("EvtWeightSums", &EvtWeightSums);
+    //#endif
+    //for(Long64_t i = 0; i < nfiles; ++ i){
+    int nheaders = fBonzaiHeaderChain->GetEntries(); //can be several in case files were merged with haddd
+    for(int ientry = 0; ientry < nheaders; ++ientry){
+        fBonzaiHeaderChain->GetEntry(ientry);
+        
+        //cout << " InEvtWeightSums->at(0) " << InEvtWeightSums->at(0) << " EvtWeightSums->at(0) " << EvtWeightSums->at(0) << endl;
+        
+        if(ientry == 0){
+            InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+            EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
+            
+            if(InEvtWeightSums->size() != EvtWeightSums->size()){
+                std::cerr << "InEvtWeightSums and EvtWeightSums branches "
+                "of input BonzaiHeader tree have different size ("
+                "resp. " << InEvtWeightSums->size() << " and "
+                << EvtWeightSums->size() << ")\n";
+                abort();
+            }
+        }
+        if(InEvtWeightSums->size() != InEvtWeightSums_.size()){
+            std::cerr << "Inconsistency in number of elements of "
+            << " InEvtWeightSums branch of input files!\n";
+            abort();
+        }
+        if(EvtWeightSums->size() != EvtWeightSums_.size()){
+            std::cerr << "Inconsistency in number of elements of EvtWeightSums branch of input files!\n";
+            abort();
+        }
+        for(size_t i = 0; i < InEvtWeightSums_.size(); ++i){
+            InEvtWeightSums_[i] += (*InEvtWeightSums)[i];
+        }
+        for(size_t i = 0; i < EvtWeightSums_.size(); ++i){
+            EvtWeightSums_[i] += (*EvtWeightSums)[i];
+        }
+        InEvtCount_ += InEvtCount;
+    }
+    //}
+    
+    EvtCount_ = fChain->GetEntries();
+    
+    if(InEvtWeightSums_.size() > 0){
+        std::cerr << "InEvtWeightSums_[0] = " << InEvtWeightSums_[0] << " EvtWeightSums_[0] = " <<  EvtWeightSums_[0] << "\n";
+    }
+    
+    if(EvtWeightSums_.size() == 0 || InEvtWeightSums_.size() == 0 || InEvtWeightSums_[0] == 0 ){
+        if(InEvtCount_){
+            skimAccep_ = std::vector<double>(1, EvtCount_/InEvtCount_);
+        } else{
+            std::cout << "Warning: InEvtCount is equal to 0. Event yield normalization might be wrong!" << std::endl;
+        }
+    } else{
+        skimAccep_ = std::vector<double>(InEvtWeightSums_.size());
+        for(unsigned i = 0; i < InEvtWeightSums_.size() && i < EvtWeightSums_.size(); ++i){
+            skimAccep_[i] = EvtWeightSums_[i]/InEvtWeightSums_[i];
+        }
+    }
+    
+    std::cerr << "skimAccep_[0] = " << skimAccep_[0] << "\n";
+    //    delete InEvtWeightSums;
+    //    delete EvtWeightSums;
 }

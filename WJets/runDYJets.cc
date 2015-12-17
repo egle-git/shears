@@ -24,7 +24,7 @@
     }
         
     //------
-    int doWhat       = 4;
+    int doWhat       = 100;
                               // 100 - all ; 0 - data, 1 - background , 2 - tau ?, 3 - DY, 4 - W+jets,
                               // 51 - MC gen, 90 - PDF Syst., 1001 - do pull DY samples
         
@@ -142,7 +142,7 @@
         //for (unsigned int i(1); i < 3; i++) {
             if (dataSyst[i] != doSysRunning && doSysRunning != 100) continue;
             
-            ZJetsAndDPS DMudata(lepSelection+"_13TeV_Data_dR_5311", 1., 1, 1, doDataEff, dataSyst[i], dataDir[i], 1, jetPtMin, jetPtMax, ZPtMin, ZEtaMin, ZEtaMax);
+            ZJetsAndDPS DMudata(lepSelection+"_13TeV_Data_dR_5311_List", 1., 1, 1, doDataEff, dataSyst[i], dataDir[i], 1, jetPtMin, jetPtMax, ZPtMin, ZEtaMin, ZEtaMax);
             DMudata.Loop(1, 0, doQCD, doSSign, doInvMassCut, doBJets, doPUStudy);
         }
     }
@@ -243,7 +243,7 @@
             if ( ( lepSelection.find("SMu") == 0 || lepSelection.find("SE") == 0 ) && wjSyst[i] == 3) continue; // xsec -- not done for SMu ---
             if (wjSyst[i] != doSysRunning && doSysRunning != 100) continue;
             
-            ZJetsAndDPS DMuWJMix(lepSelection+"_13TeV_WJetsALL_MIX_UNFOLDING_dR_5311", muLumi* 60290.0 , 1., 1, !doDataEff, wjSyst[i], wjDir[i], wjScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
+            ZJetsAndDPS DMuWJMix(lepSelection+"_13TeV_WJetsALL_MIX_UNFOLDING_dR_5311_List", muLumi* 60290.0 , 1., 1, !doDataEff, wjSyst[i], wjDir[i], wjScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
             DMuWJMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
             
             //ZJetsAndDPS DMuWJ(lepSelection+"_8TeV_WJetsALL_UNFOLDING_dR_5311",  muLumi*36703.       *1000/76102995., 1., 1, !doDataEff, wjSyst[i], wjDir[i], wjScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);

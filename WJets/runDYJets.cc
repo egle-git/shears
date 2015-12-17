@@ -24,7 +24,7 @@
     }
         
     //------
-    int doWhat       = 100;
+    int doWhat       = 4;
                               // 100 - all ; 0 - data, 1 - background , 2 - tau ?, 3 - DY, 4 - W+jets,
                               // 51 - MC gen, 90 - PDF Syst., 1001 - do pull DY samples
         
@@ -152,20 +152,20 @@
         for (unsigned int i(0); i < NSystMC; i++){
             if (bgSyst[i] != doSysRunning && doSysRunning != 100) continue;
             
-            ZJetsAndDPS DMuTT(lepSelection+"_13TeV_TTJets_dR_5311",             muLumi * 831.7  , 1, 1, !doDataEff, ttSyst[i], ttDir[i], ttScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuTT(lepSelection+"_13TeV_TTJets_dR_5311_List",             muLumi * 831.7  , 1, 1, !doDataEff, ttSyst[i], ttDir[i], ttScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuTT.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
 
-            ZJetsAndDPS DMuZZInc(lepSelection+"_13TeV_ZZ_dR_5311",              muLumi * 15.4 ,  1, 1, !doDataEff, zzSyst[i], zzDir[i], zzScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuZZInc(lepSelection+"_13TeV_ZZ_dR_5311_List",              muLumi * 15.4 ,  1, 1, !doDataEff, zzSyst[i], zzDir[i], zzScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuZZInc.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuWZInc(lepSelection+"_13TeV_WZ_dR_5311",              muLumi * 23.5 , 1, 1, !doDataEff, wzSyst[i], wzDir[i], wzScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuWZInc(lepSelection+"_13TeV_WZ_dR_5311_List",              muLumi * 23.5 , 1, 1, !doDataEff, wzSyst[i], wzDir[i], wzScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuWZInc.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuWWInc(lepSelection+"_13TeV_WW_dR_5311",              muLumi * 12.21  , 1, 1, !doDataEff, wwSyst[i], wwDir[i], wwScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuWWInc(lepSelection+"_13TeV_WW_dR_5311_List",              muLumi * 12.21  , 1, 1, !doDataEff, wwSyst[i], wwDir[i], wwScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuWWInc.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuT(lepSelection+"_13TeV_ST_s_channel_dR_5311",         muLumi * 10.32  ,  1, 1, !doDataEff, tcsSyst[i], tcsDir[i], tcsScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuT(lepSelection+"_13TeV_ST_s_channel_dR_5311_List",         muLumi * 10.32  ,  1, 1, !doDataEff, tcsSyst[i], tcsDir[i], tcsScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuT.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuT1(lepSelection+"_13TeV_ST_tW_top_channel_dR_5311",        muLumi * 35.6  , 1, 1, !doDataEff, tctSyst[i], tctDir[i], tctScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuT1(lepSelection+"_13TeV_ST_tW_top_channel_dR_5311_List",        muLumi * 35.6  , 1, 1, !doDataEff, tctSyst[i], tctDir[i], tctScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuT1.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
-            ZJetsAndDPS DMuT2(lepSelection+"_13TeV_ST_tW_antitop_channel_dR_5311",       muLumi * 35.6 ,  1, 1, !doDataEff, tcwSyst[i], tcwDir[i], tcwScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
+            ZJetsAndDPS DMuT2(lepSelection+"_13TeV_ST_tW_antitop_channel_dR_5311_List",       muLumi * 35.6 ,  1, 1, !doDataEff, tcwSyst[i], tcwDir[i], tcwScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             DMuT2.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
             //koZJetsAndDPS DMuTbar(lepSelection+"_13TeV_Tbar_s_channel_dR_5311",   muLumi*1.76           *1000/139974.,  1, 1, !doDataEff, tcsSyst[i], tcsDir[i], tcsScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             //koDMuTbar.Loop(1, 0, doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
@@ -214,7 +214,7 @@
             if ( ( lepSelection.find("DMu") == 0 || lepSelection.find("DE") == 0 ) && dySyst[i] == 3 ) continue; // xsec -- not done for Z+jets ---
             if (dySyst[i] != doSysRunning && doSysRunning != 100) continue;
             
-            ZJetsAndDPS DMuDYMix(lepSelection+"_13TeV_DYJets50toInf_dR_5311", muLumi * 6104.0 , 1., 1, !doDataEff, dySyst[i], dyDir[i], dyScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
+            ZJetsAndDPS DMuDYMix(lepSelection+"_13TeV_DYJets50toInf_dR_5311_List", muLumi * 6104.0 , 1., 1, !doDataEff, dySyst[i], dyDir[i], dyScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax, 0);
             DMuDYMix.Loop(1, doGen,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
         }
         
@@ -296,7 +296,7 @@
     
     
     // skip this part
-    if ( doWhat == 2 || doWhat == 100 ){
+    if ( doWhat == 2  ){
         for (unsigned int i(3); i < 5; i++){
             ZJetsAndDPS DMuDYTau(lepSelection+"_13TeV_DYJets_FromTau_UNFOLDING_dR_5311_Inf3", muLumi*3531.8*1000/3045950, 1., 1,  !doDataEff, tauSyst[i], tauDir[i], tauScale[i], jetPtMin, jetPtMax, ZPtMin , ZEtaMin,    ZEtaMax);
             //	  DMuDYTau.Loop(1, 1,  doQCD,  doSSign, doInvMassCut, doBJets, doPUStudy );
@@ -360,3 +360,4 @@
     system("rm .ls_tmp.list");
 
 }
+

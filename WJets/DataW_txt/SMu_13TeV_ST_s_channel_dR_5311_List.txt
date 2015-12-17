@@ -1,0 +1,3 @@
+/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns/MC/v13.1/Ntuples/CRAB_PrivateMC/crab_ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-VJetPruner-SMu/151203_223417/0000/Bonzai-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-VJetPruner-SMu_1.root
+
+

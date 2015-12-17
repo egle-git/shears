@@ -8,3 +8,4 @@
 /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns_silver/Data/v2.1/Ntuples/CRAB_PrivateMC/crab_SingleMuon-VJetPruner-SMu/151204_231114/0000/Bonzai-SingleMuon-VJetPruner-SMu_7.root
 /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns_silver/Data/v2.1/Ntuples/CRAB_PrivateMC/crab_SingleMuon-VJetPruner-SMu/151204_231114/0000/Bonzai-SingleMuon-VJetPruner-SMu_8.root
 /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns_silver/Data/v2.1/Ntuples/CRAB_PrivateMC/crab_SingleMuon-VJetPruner-SMu/151204_231114/0000/Bonzai-SingleMuon-VJetPruner-SMu_9.root
+

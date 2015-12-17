@@ -104,7 +104,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //       Load efficiency tables        //
     //====================================//
     table LeptIso, LeptID, LeptTrig, Ele_Rec;
-    table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
+    table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV6_AK4PF.txt");
     if (energy == "13TeV"){
         if (leptonFlavor == "Electrons" || leptonFlavor == "SingleElectron"){
             /// electron SF
@@ -116,7 +116,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         }
         if (leptonFlavor == "SingleMuon")  {
             // Single Muon SFs measured using 13 TeV 25 ns samples (run 2015D golden JSON, 1280 /pb)
-
+            // Muon POG SFs: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffsRun2
             table SF_Muon_TightID_ReReco("EfficiencyTables/SMu_SFs_TightId_13TeV_EtaPt.txt");
             table SF_Muon_TightISO_ReReco("EfficiencyTables/SMu_SFs_TightISO_13TeV_EtaPt.txt");
             table SF_Muon_HLTIsoMu20IsoTkMu20_ReReco("EfficiencyTables/SMu_SFs_HLTIsoMu20IsoTkMu20_13TeV_EtaPt.txt");
@@ -137,14 +137,17 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //     Systematics: jec, pu, xsec     //
     //====================================//
     cout << "Lepton Flavor: " << leptonFlavor << endl;
-    int puYear(2013);
-    if (energy == "8TeV") puYear = 2013;
-    cout << "Pile Up Distribution: " << puYear << endl;
-    standalone_LumiReWeighting puWeight(leptonFlavor, puYear), puUp(leptonFlavor, puYear, 1), puDown(leptonFlavor, puYear, -1);
+    int puYear(2015250);
+    if (energy == "13TeV") puYear = 2015250;
+    cout << "Pile Up Distribution: " << puYear << endl; 
+    int mode = (systematics == 1) ? direction : 0;
+    standalone_LumiReWeighting puWeight(2015250, mode);
+    //Kadir standalone_LumiReWeighting puWeight(leptonFlavor, puYear), puUp(leptonFlavor, puYear, 1), puDown(leptonFlavor, puYear, -1);
     cout << "systematics: " << systematics << "  direction: " << direction << endl;
-    if (systematics == 1 && direction ==  1) puWeight = puUp;
-    if (systematics == 1 && direction == -1) puWeight = puDown;
+    //Kadir if (systematics == 1 && direction ==  1) puWeight = puUp;
+    //Kadir if (systematics == 1 && direction == -1) puWeight = puDown;
 
+   
     int scale(0);//0,+1,-1; (keep 0 for noJEC shift study)
     if (systematics == 2 && direction ==  1) scale =  1;
     if (systematics == 2 && direction == -1) scale = -1;
@@ -266,8 +269,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     
     cout << " run on " << nentries << " events" << endl;
     //--- Begin Loop All Entries --
-    for (Long64_t jentry(0); jentry < nentries; jentry++){
-    //for (Long64_t jentry(0); jentry < 1000000; jentry++){
+    //Kadir for (Long64_t jentry(0); jentry < nentries; jentry++){
+    for (Long64_t jentry(0); jentry < 500000; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -301,19 +304,19 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         // line below is to see distributions as provided with default MC PU distribution
         double reweighting(1);
         
-/* APICHART
+
         if (hasRecoInfo && !isData){
             weight *= (double)puWeight.weight(int(EvtPuCntTruth));
             //-- reweight again to IMPOSE FLAT #VTX DATA/MC RATIO
-            if (doFlat){
+           /*Kadir if (doFlat){
                 reweighting = FlatNVtxWeight->GetBinContent(EvtVtxCnt + 1);
                 //-- for safety check the value of the weight...
                 if (reweighting <= 0 || reweighting > 1000) reweighting = 1;
                 weight *= reweighting;
-            }
+            }*/ //Need to check later if the argument (EvtVtxCnt + 1) is correct
         }
         if (weight > 10000 || weight < 0) weight = 1;
-//APICHART */
+
         
         weight = weight * lumiScale * xsec;
         
@@ -569,7 +572,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 METvslepIso->Fill(METpt, lepton1.iso, weight);
                 MTvslepIso->Fill(MT, lepton1.iso, weight);
                  APICHART */
-                // APICHART double effWeight = 1.;
+                double effWeight = 1.;
                 
                 if (METpt >= METcut && (((doQCD % 2) == 0 && MT >= MTCut) || ((doQCD % 2) == 1 && MT < MTCut))) {
                     passesLeptonCut = true;
@@ -577,7 +580,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     // correct for identification and isolation efficiencies if required by useEfficiencyCorrection
                     // apply scale factors only on MC
                     
-                    /* APICHART
+                    
                     if (fabs(scale) == 0 && useEfficiencyCorrection) {
                         if (leptonFlavor == "SingleMuon") {
                             effWeight = LeptID.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
@@ -590,10 +593,10 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                             
                         }
                     }
-                    // APICHART */
+                    
                 }
-                // APICHART if (isData) weight /= effWeight;
-                // APICHART else weight *= effWeight;
+                if (isData) weight /= effWeight;
+                else weight *= effWeight;
                 
             }  // END IF RECO FOR MET AND LEPTONS
             //=======================================================================================================//
@@ -3211,7 +3214,7 @@ ZJetsAndDPS::ZJetsAndDPS(string fileName_, float lumiScale_, float puScale_, boo
         fullFileName =  "../DataTTbarEMu/" + fileName;
     }
     if (fileName.find("Data") != string::npos ) isData = true;
-    if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "DataW/" + fileName;
+    if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "DataW_txt/" + fileName;
     //if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "/afs/cern.ch/work/o/ocalan/" + fileName;
     //if ( fileName.find("SMu_") == 0 || fileName.find("SE_") == 0 ) fullFileName =  "/afs/cern.ch/user/o/ocalan/13TeV/CMSSW_5_3_11/src/WJETS/TreeAnalysis2012/DataW/" + fileName;
     if (fileName.find("Sherpa2") != string::npos) fullFileName =  "../DataSherpa2/" + fileName;
@@ -3627,3 +3630,4 @@ void ZJetsAndDPS::getMcNorm(){
     //    delete InEvtWeightSums;
     //    delete EvtWeightSums;
 }
+

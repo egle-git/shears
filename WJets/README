@@ -1,5 +1,6 @@
 The instructions for running the W+jets analysis code on baobab data and MC ntuples produced at 13 TeV.
-Kadir Ocalan (29.10.2015)
+- Kadir Ocalan (29.10.2015)
+- Update By Kadir (19.12.2015) - instructions for running on a list of Bonzai ntuples from text files 
 
 -- For now use CMSSW_5_3_11, migrating to CMSSW 75X
 cmsrel CMSSW_5_3_11  
@@ -24,11 +25,8 @@ sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc43
 sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc
 sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
 
--- Can use 13 TeV v10 Baobab data and MC 25ns samples that are merged from here /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/
-mkdir DataW
-mkdir ~/eos
-eosmount ~/eos
-ln -s  ~/eos/cms/store/user/ocalan/13TeV_25ns   DataW
+-- Now you can run directly on latest Bonzai samples from here /eos/cms/store/group/phys_smp/AnalysisFramework/Bonzai/
+-- See the text files under WJets/DataW_txt which contain names and paths of the Bonzai ntuples for Data 13TeV_25ns_silver v2.1 and MC 13TeV_25ns v13.1
 
 -- Ready to run the code!!!Before running it, change doQCD to 0 (int doQCD=0) in WJets/runDYJets.cc.
 

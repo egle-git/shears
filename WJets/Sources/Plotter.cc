@@ -295,7 +295,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
             ostringstream ptLegend;
             ptLegend << "p_{T}^{jet} > " << JetPtMin << "GeV,  |#eta^{jet}| < 2.4";
             jetCuts[i]->DrawLatex(0.16,0.72, ptLegend.str().c_str());
-            jetAlgo[i]->DrawLatex(0.16,0.77, "anti-k_{t} jets,  R = 0.5");
+            jetAlgo[i]->DrawLatex(0.16,0.77, "anti-k_{t} jets,  R = 0.4");
             pad1[i]->Draw();
         }
         canvas[i]->cd();

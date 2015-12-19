@@ -12,7 +12,7 @@ Repository organisation
 
 **DYJets** Analysis code. Currently for W+jet and Z+jet analysis.
 
-**WJets** W+jet analysis code.
+**WJets** W+jet analysis code (can run on both Baobab and Bonzai formats, currently set for Bonzai).
 
 **ntuple_production** Tools to produce the Boabab ROOT ntuple.
 

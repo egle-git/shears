@@ -269,8 +269,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     
     cout << " run on " << nentries << " events" << endl;
     //--- Begin Loop All Entries --
-    //Kadir for (Long64_t jentry(0); jentry < nentries; jentry++){
-    for (Long64_t jentry(0); jentry < 500000; jentry++){
+    for (Long64_t jentry(0); jentry < nentries; jentry++){
+    //for (Long64_t jentry(0); jentry < 500000; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -802,15 +802,14 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 double jetPtTemp(0.); // for calculating METscale
                 bool passBJets(0);
                 // APICHART if (JetAk04BTagCsv->at(i) >= 0.679) passBJets = true;
-                //if (JetAk04BTagCsv->at(i) >= 0.890) passBJets = true;
-                if (JetAk04BDiscCisvV2->at(i) >= 0.890) passBJets = true; //for 13 TeV Btag recommended discriminator with medium wp cut
+                if (JetAk04BDiscCisvV2->at(i) >= 0.890) passBJets = true; //for 13 TeV Btag POG recommended discriminator with medium wp cut
                 
 
-                //************************* B-tag Veto Correcction *******************************//
-       /*         float this_rand = RandGen->Rndm(); // Get a random number.
+                //************************* B-tag Veto Correction *******************************//
+   /*             float this_rand = RandGen->Rndm(); // Get a random number.
                 float pt= JetAk04Pt->at(i);
                 float eta= JetAk04Eta->at(i);
-                float x = 0.679;     ///discrim_cut;
+                float x = 0.890;     ///discrim_cut;
                 // --------- MC-only
                 if (isData == false){
                     
@@ -1038,9 +1037,9 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     
                     // Wb study
                     if (abs(jetflavour)==5) countWbBjets++ ;
-                } *///KO
+                } */
                 // --------- End MC-only
-                //************************* End B-tag Veto Correcction *******************************//                
+                //************************* End B-tag Veto Correction *******************************//                
                 int jetflavour = int(JetAk04PartFlav->at(i));
                
                 jetStruct jet = {JetAk04Pt->at(i), JetAk04Eta->at(i), JetAk04Phi->at(i), JetAk04E->at(i), i, passBJets};
@@ -1060,7 +1059,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 jetr.SetPtEtaPhiE(jets[i].pt, jets[i].eta, jets[i].phi, jets[i].energy);
                    */ 
                 //Kadir bool jetPassesEtaCut((jetr.Rapidity() >= jetEtaCutMin / 10.) && (jetr.Rapidity() <= jetEtaCutMax / 10.)); 
-                bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); //we no longer cut on jet eta but rapididty above
+                bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); //we no longer cut on jet eta but rapidity above
                 bool jetPassesIdCut(JetAk04Id->at(i) > 0);
                 //KObool jetPassesBetaCut(JetAk04JetBeta->at(i) > 0.1 * doPUStudy);
                 //KObool jetPassesBetaStarCut(JetAk04JetBetaStar->at(i) < 1);
@@ -1095,7 +1094,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 for (unsigned short j(0); j < nRemovedLep; j++) {
                     // determine if passes dRCut
-                    if (deltaR(jet.phi, jet.eta, selLeptons[j].phi, selLeptons[j].eta) < 0.5) {
+                    if (deltaR(jet.phi, jet.eta, selLeptons[j].phi, selLeptons[j].eta) < 0.4) {
                         if (doDR) jetPassesdRCut = 0;
                        dPtJetMuon = jet.pt-selLeptons[j].pt;
                         if (jet.pt >= jetPtCutMin && jetPassesMVACut && passesLeptonCut && jetPassesEtaCut && jetPassesIdCut) { 
@@ -1121,15 +1120,14 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 
 if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 if ( jetPassesEtaCut && jetPassesIdCut && jetPassesdRCut) {
-                //if ( jetPassesEtaCut && jetPassesIdCut) {
                     if (jetPassesPtCut){
                         if (jet.pt >= jetPtCutMin && passesLeptonCut){
-                            /* APICHART
-                            Beta->Fill(JetAk04JetBeta->at(i), weight);
-                            BetaStar->Fill(JetAk04JetBetaStar->at(i), weight);
+                            //APICHART
+                            //Beta->Fill(JetAk04JetBeta->at(i), weight);
+                            //BetaStar->Fill(JetAk04JetBetaStar->at(i), weight);
                             puMVA->Fill(JetAk04PuMva->at(i), weight);
-                            puMVAvsBeta->Fill(JetAk04PuMva->at(i),JetAk04JetBetaStar->at(i), weight);
-                             APICHART*/
+                            //puMVAvsBeta->Fill(JetAk04PuMva->at(i),JetAk04JetBetaStar->at(i), weight);
+                             //APICHART
                         }
 
                         //if ( fabs(doBJets) > 0 && patJetPfAk05OCSV_->at(i) >=  0.679 )  countBJets++ ;// count BJets, used for BVeto
@@ -1277,7 +1275,7 @@ APICHART */
                     // I need this line because for to me unknown reason I CAN NO REMOVE ELECTRONS FROM Z IN SHERPA !!!!
                     if ((genLeptons[j].charge != 0)
                         && (doDR || (leptonFlavor == "Electrons" && fileName.find("HepMC") != string::npos))
-                        && (deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < 0.5)){
+                        && (deltaR(genJet.phi, genJet.eta, genLeptons[j].phi, genLeptons[j].eta) < 0.4)){
                         genJetPassesdRCut = 0;
                     }
                 }
@@ -2028,12 +2026,15 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
 
             //NVtx->Fill(EvtInfo_NumVtx + 1000 , weight);
             if (fileName.find("Sherpa") != string::npos && fileName.find("UNFOL") == string::npos ) PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting * mcEveWeight_, 1);
-            else PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+            //Kadirelse PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+            else PUWeight->Fill(puWeight.weight(int(EvtPuCntTruth)), 1);
             if (nGoodJets == 0){
-                PUWeight0->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+                //KadirPUWeight0->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+                PUWeight0->Fill(puWeight.weight(int(EvtPuCntTruth)), 1);
             }
             else {
-                PUWeight1->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+                //KadirPUWeight1->Fill(puWeight.weight(int(EvtPuCntTruth)) * reweighting, 1);
+                PUWeight1->Fill(puWeight.weight(int(EvtPuCntTruth)), 1);
             }
             
             if (lepton1.charge > 0){

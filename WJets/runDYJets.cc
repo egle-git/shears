@@ -24,7 +24,7 @@
     }
         
     //------
-    int doWhat       = 4;
+    int doWhat       = 100;
                               // 100 - all ; 0 - data, 1 - background , 2 - tau ?, 3 - DY, 4 - W+jets,
                               // 51 - MC gen, 90 - PDF Syst., 1001 - do pull DY samples
         
@@ -55,8 +55,6 @@
     */
     
     string lepSelection = "SMu"; // default lumi is set for double muon dataset
-    //double muLumi(42.4513);
-    //double muLumi(16.9903);
     double muLumi(2503.96046);
         
     double w_sum_WJets(3.73654e+12);

@@ -3112,9 +3112,11 @@ void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, i
     if (isRootFile(fullFileName)){
         TString treePath = fullFileName + "/tupel/EventTree";
 	TString bonzaiHeaderPath = fullFileName + "/tupel/BonzaiHeader";
+	TString bonzaiBitFieldsPath = fullFileName + "/tupel/BitFields";
         cout << "Loading file: " << fullFileName << endl;
         if(pEventTreeChain) pEventTreeChain->Add(treePath);
 	if(pBonzaiHeaderChain) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
+	if(pBonzaiBitFieldsChain) pBonzaiBitFieldsChain->Add(bonzaiBitFieldsPath);
     } else {
 	int (*closeFunc)(FILE*);
 	FILE* f = eosOpen(fullFileName, &closeFunc);

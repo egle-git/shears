@@ -315,7 +315,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
 	    if(norm_ == 0){
 		std::cerr << "Error: normaliation factor for sample " << fileName
-			  << " is null! Abort." << std::endl;
+			  << " is null! Aborts at " __FILE__ ":" 
+			  << __LINE__ << "." << std::endl;
 		abort();
 	    }
 	}
@@ -3051,7 +3052,8 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     getMcNorm();
 
     if(!setTriggerMask()){
-	std::cerr << "Failed to set trigger mask" << std::endl;
+	std::cerr << "Failed to set trigger mask. Aborts at " __FILE__ ":" 
+		  << __LINE__ << "." << std::endl;
 	abort();
     }
 
@@ -3224,17 +3226,20 @@ void ZJets::getMcNorm(){
 		std::cerr << "InEvtWeightSums and EvtWeightSums branches "
 		    "of input BonzaiHeader tree have different size ("
 		    "resp. " << InEvtWeightSums->size() << " and "
-			  << EvtWeightSums->size() << ")\n";
+			  << EvtWeightSums->size() << "). Aborts at " __FILE__ ":"
+			  << __LINE__ << ".\n";
 		abort();
 	    }
 	} 
 	if(InEvtWeightSums->size() != InEvtWeightSums_.size()){
 	    std::cerr << "Inconsistency in number of elements of "
-		      << " InEvtWeightSums branch of input files!\n";
+		      << " InEvtWeightSums branch of input files! Aborts at " __FILE__ ":" 
+		      << __LINE__ << ".\n";
 	    abort();
 	}
 	if(EvtWeightSums->size() != EvtWeightSums_.size()){
-	    std::cerr << "Inconsistency in number of elements of EvtWeightSums branch of input files!\n";
+	    std::cerr << "Inconsistency in number of elements of EvtWeightSums "
+		"branch of input files! Aborts at " __FILE__ ":" << __LINE__ << ".\n";
 	    abort();
 	}
 	for(size_t i = 0; i < InEvtWeightSums_.size(); ++i){

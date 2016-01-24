@@ -112,7 +112,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   mSrcRho      = cms.untracked.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.untracked.InputTag('slimmedJets'), #same collection now BB 
   metSource    = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
-  lheSource    = cms.untracked.InputTag('source'),
+  lheSource    = cms.untracked.InputTag('externalLHEProducer'),
   puSrc        = cms.untracked.InputTag('slimmedAddPileupInfo')
 )
 

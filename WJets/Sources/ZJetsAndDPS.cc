@@ -27,8 +27,6 @@
 
 using namespace std;
 
-TRandom3* RandGen = new TRandom3();
-TRandom3* Rand_MER_Gen = new TRandom3();
 
 ClassImp(ZJetsAndDPS);
 
@@ -173,7 +171,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     if (systematics == 7 && direction == -1) muScale = 0.998;
     
     bool doMer(false); // the number used for MER : 0.006
-    double merUncer(0); Rand_MER_Gen->SetSeed(0); // set random seed; 0.006
+    double merUncer(0);
     if (systematics == 8 && direction ==  1) doMer = true;
     
     // Wb study
@@ -188,6 +186,12 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     //if ((systematics == 5 || systematics == 6) && direction ==  1) smearLepSF = 1;
     //if ((systematics == 5 || systematics == 6) && direction == -1) smearLepSF = -1;
 
+    TRandom3* RandGen = new TRandom3();
+    RandGen->SetSeed(22346);
+    if (sysBtagSF != 0) RandGen->SetSeed(333);
+    
+    TRandom3* Rand_MER_Gen = new TRandom3();
+    //Rand_MER_Gen->SetSeed(0); // set random seed; 0.006
     //==========================================================================================================//
 
 
@@ -222,11 +226,6 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
 
     // setting weight when running on MIX of exclusive DY/WJets files to match number of parton events
     double mixingWeightsDY[4] = {0.1926862,  0.07180968,  0.04943502,  0.03603373 }; // here we match all partons, and combine electron and muon side
-    //double mixingWeightsDY[4] = {  0.1927289,  0.07199641,  0.04966403,  0.03631544 }; // here we match  partons that pas gen cuts, and combine electron and muon side
-    //double mixingWeightsDY_DMu[4] = {0.1925615791, 0.07927772, 0.04974768769, 0.03640484898};// OLDDDD  here we match only those partons that pass the gen cuts
-    //double mixingWeightsDY_DMu[4] = { 0.192623 , 0.0719199 , 0.0495369 , 0.03617}; //  here we match only those partons that pass the gen    cuts
-    //double mixingWeightsDY_DE[4] = {0.192749004, 0.07880291002, 0.04933310117, 0.03589736768};// 
-    //double mixingWeightsDY_DE[4] = {0.1929798803, 0.07896770167, 0.04960555955, 0.03619125322}; // here we match only those partons that pass the gen cuts
     double mixingWeightsWJ_SMu[4] ={0.366713,  0.1119323,  0.07641136,  0.03803325};
     double mixingWeightsWJ_SE[4] ={0.3667127984048746, 0.111932213229137, 0.076411344088767, 0.0380331330318}; // this need to be updated
 
@@ -389,6 +388,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
         bool doMuons(leptonFlavor == "Muons" || doW || doTT);
         bool doElectrons(leptonFlavor == "Electrons" || doW || doTT);
         bool passesLeptonCut(0);
+        bool passesLeptonReq(0), passesLeptonAndMT(0), passesBtagReq(1), passesTau3Req(1);
         unsigned short nTotLeptons(0), nLeptons(0), nMuons(0), nElectrons(0);
         vector<leptonStruct> leptons, muons, electrons, mets, allLooseLeptons, selLeptons;
         TLorentzVector lep1, lep2, Z;
@@ -418,7 +418,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 //cout <<  " energy " << energy << " eventTrigger " << eventTrigger << " TrigHltMu " << TrigHltMu << " (TrigHltMu & 1LL<<12) " << (TrigHltMu & 1LL<<12) << endl;
                 for (unsigned short i(0); i < nTotLeptons; i++) {
                     if (doMer) merUncer = Rand_MER_Gen->Gaus(0, (MuPt->at(i) * 0.006));
-                    leptonStruct mu = {(MuPt->at(i) * muScale) + merUncer, MuEta->at(i), MuPhi->at(i), MuE->at(i), MuCh->at(i), MuPfIso->at(i), 0};
+                    leptonStruct mu = {(MuPt->at(i) * muScale) + merUncer, MuEta->at(i), MuPhi->at(i), MuE->at(i) * (((MuPt->at(i) * muScale) + merUncer)/MuPt->at(i)), MuCh->at(i), MuPfIso->at(i), 0};
                     //Kadir int whichTrigger(TrigHltMu->at(i));
                     bool muPassesPtCut(( (doZ || doTT) && mu.pt >= 20.) || (doW && mu.pt >= 25.));
      
@@ -460,7 +460,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                     }
                 }//End of loop over all the muons
             }
-            nMuons = muons.size();
+            
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             //------ DO ELECTRONS -------
             if (doElectrons) {
@@ -512,9 +512,11 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
                 }//End of loop over all the electrons
             }
 
+            nMuons = muons.size();
             nElectrons = electrons.size();
-            //Kadir int diLepCharge(0);
             nLeptons = leptons.size();
+            //Kadir int diLepCharge(0);
+            
             vector<leptonStruct> tempVec;
             for ( int iLep = 0 ; iLep < nLeptons ; iLep++){
                 tempVec.push_back(leptons[iLep]);
@@ -523,83 +525,6 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             //Kadir if (nLeptons == 2) diLepCharge = abs(leptons[0].charge) + abs(leptons[1].charge);
 
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
-            //=======================================================================================================//
-            //          Retrieving MET             //
-            //====================================//
-            //APICHART
-            //cout << "METPt->size() " << METPt->size() << endl;
-            //APICHART
-            //cout << "METPx->size() " << METPx->size() << endl;
-            
-            if (doW && !(METPt->size() > 0)) continue;
-            
-                //KOMETphi = METPhi->at(whichMet);
-            METpt = METPt->at(whichMet);
-
-            
-            //cout << " jentry: " << jentry << " nMuons: " << nMuons << " nLeptons: " << nLeptons << " nElectrons: " << nElectrons <<  endl;
-            if (doW && ((leptonFlavor == "SingleMuon" && nMuons == 1 && nLeptons == 1 && nElectrons == 0) || (leptonFlavor == "SingleElectron" && nMuons == 0 && nLeptons == 1 && nElectrons == 1))) {
-                
-                lepton1 = leptons[0];
-                
-                
-                TLorentzVector tmpVecMet;
-                tmpVecMet.SetPxPyPzE(METPx->at(whichMet), METPy->at(whichMet), METPz->at(whichMet), METE->at(whichMet));
-                METphi = tmpVecMet.Phi();
-                
-                
-                
-                // build the TLorentzVectors, the Z candidate and the kinematic
-                lep1.SetPtEtaPhiM(lepton1.pt, lepton1.eta, lepton1.phi, leptonMass);
-                lep2.SetPtEtaPhiM(METpt, 0, METphi, 0);
-                
-                Z = lep1 + lep2;
-
-                leptonStruct tempMet = {METpt, 0., METphi, METpt, 0, 0, 0};
-                lepton2 = tempMet;
-
-                MT = sqrt(2 * METpt * lepton1.pt * (1 - cos(METphi - lepton1.phi)));
-                //MT = sqrt(2 * METpt * lepton1.pt * (1 - cos(0 - lepton1.phi)));
-
-                /// 2D histograms for ABCD method to extract the QCD abckround ?
-                /* APICHART
-                fullMET->Fill(METpt, weight);
-                fullMET_pfMETPFlow->Fill(METPt->at(0), weight);
-                fullMET_pfMet->Fill(METPt->at(1), weight);
-                fullMET_pfType1CorrectedMet->Fill(METPt->at(2), weight);
-                fullMET_pfType1p2CorrectedMet->Fill(METPt->at(3), weight);
-                fullMT->Fill(MT, weight);
-                METvslepIso->Fill(METpt, lepton1.iso, weight);
-                MTvslepIso->Fill(MT, lepton1.iso, weight);
-                 APICHART */
-                double effWeight = 1.;
-                
-                if (METpt >= METcut && (((doQCD % 2) == 0 && MT >= MTCut) || ((doQCD % 2) == 1 && MT < MTCut))) {
-                    passesLeptonCut = true;
-                    if (fabs(scale) == 0) nEventsWithTwoGoodLeptons++;
-                    // correct for identification and isolation efficiencies if required by useEfficiencyCorrection
-                    // apply scale factors only on MC
-                    
-                    
-                    if (fabs(scale) == 0 && useEfficiencyCorrection) {
-                        if (leptonFlavor == "SingleMuon") {
-                            effWeight = LeptID.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
-                            effWeight *= LeptIso.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
-                            if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(lepton1.pt), fabs(lepton1.eta), sysLepSF);
-                        }
-                        else if (leptonFlavor == "SingleElectron") {
-                            effWeight *= LeptID.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
-                            effWeight *= Ele_Rec.getEfficiency(lepton1.pt, fabs(lepton1.scEta), sysLepSF);
-                            
-                        }
-                    }
-                    
-                }
-                if (isData) weight /= effWeight;
-                else weight *= effWeight;
-                
-            }  // END IF RECO FOR MET AND LEPTONS
-            //=======================================================================================================//
         }// end has reco info
 
  if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -754,16 +679,17 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     passesGenLeptonCut = 1;
                 }
                 //----- End For Z+jets -------
-                
-                //--- if there are taus we don't want the gen level
-                // APICHART if (countTauS3 > 0) passesGenLeptonCut = 0;
             }
-        }
-        if (passesGenLeptonCut) {
-            TotalGenWeightPassGEN += genWeightBackup; 
-            TotalGenWeightPassGENPU += weight;
-            //partonsNAfterGenCut->Fill(nup_ - 5);
-            //partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight);
+            
+            /// --- if there are taus, but we do not run on the Tau file, thus we run on the WJets file,
+            //    then we don't count the event at reco.
+            //if (countTauS3 > 0 && fileName.find("Tau") == string::npos) passesLeptonCut = 0 ;
+
+            //--- if there are taus we don't want the gen level
+            //if (countTauS3 > 0){
+            //    passesGenLeptonCut = 0;
+            //    passesGenLeptonReq = 0;
+            //}
         }
         //=======================================================================================================//
 
@@ -775,11 +701,11 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         bool passesJetCut(1), passesEWKJetPt(0), passesEWKJetFwdEta(0);
         unsigned short nGoodJets(0), nTotJets(0), nJetsAdd(0);
         double jetsHT(0);
-        //KOdouble METscale(0.);
-        //KOdouble XMETscale(0.), YMETscale(0.);            // for calculating METscale
-        //KOdouble TempMETpt(0.), TempMETphi(0.), XMETpt(0.), YMETpt(0.) ; // for calculating METscale
+        double METscale(0.);
+        double XMETscale(0.), YMETscale(0.);            // for calculating METscale
+        double TempMETpt(0.), TempMETphi(0.), XMETpt(0.), YMETpt(0.) ; // for calculating METscale
 
-        vector<jetStruct> jets, jetsAdditional;
+        vector<jetStruct> jets, jetsAdditional, jetsPuMva;
         TLorentzVector leadJ, secondJ, jet1Plus2, jet1Minus2;
         
         //*************************************** begin edit *************************************************************//
@@ -1102,30 +1028,35 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                           //  deltaPtjetMu->Fill(dPtJetMuon,weight);
                         }
                     }
-                    // for MET scale
-                    //KOif (fabs(scale) > 0. && jetPassesPtCut && jetPassesMVACut && jetPassesIdCut){
-                        
-                        //METscale -= scale * jetEnergyCorr * jetPtTemp ;
-                        //-------- my calculation --------
-                 //KO       XMETscale += ( scale * jetEnergyCorr * jetPtTemp * cos(jet.phi) ) ;
-                  //KO      YMETscale += ( scale * jetEnergyCorr * jetPtTemp * sin(jet.phi) ) ;
-                        //-------- end my calculation --------
-                        
-                   //KO }
+                    
                     if (jet.pt >= jetPtCutMin && jetPassesMVACut && passesLeptonCut && jetPassesEtaCut && jetPassesIdCut){
                        //KO deltaRjetMu->Fill(deltaR(jet.phi, jet.eta, selLeptons[j].phi, selLeptons[j].eta), weight);
                     }
                 }
+                
+                // for MET scale (JES uncertainty)
+                if (fabs(scale) > 0. && jetPassesPtCut && jetPassesMVACut && jetPassesIdCut){
+                    
+                    //METscale -= scale * jetEnergyCorr * jetPtTemp ;
+                    //-------- my calculation --------
+                    XMETscale += ( scale * jetEnergyCorr * jetPtTemp * cos(jet.phi) ) ;
+                    YMETscale += ( scale * jetEnergyCorr * jetPtTemp * sin(jet.phi) ) ;
+                    //-------- end my calculation --------
+                    
+                }
+
                 //cout << " jet passes  :" <<jet.pt <<"     " << jetPassesIdCut <<"  " << jetPassesEtaCut <<"   " << jetPassesdRCut <<"   " << jetPassesMVACut << "     " << tempMVA << endl;
                 
 if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                 if ( jetPassesEtaCut && jetPassesIdCut && jetPassesdRCut) {
                     if (jetPassesPtCut){
-                        if (jet.pt >= jetPtCutMin && passesLeptonCut){
+                        //if (jet.pt >= jetPtCutMin && passesLeptonCut){
+                        if (jet.pt >= jetPtCutMin){
                             //APICHART
                             //Beta->Fill(JetAk04JetBeta->at(i), weight);
                             //BetaStar->Fill(JetAk04JetBetaStar->at(i), weight);
-                            puMVA->Fill(JetAk04PuMva->at(i), weight);
+                            //puMVA->Fill(JetAk04PuMva->at(i), weight);
+                            jetsPuMva.push_back(jet);
                             //puMVAvsBeta->Fill(JetAk04PuMva->at(i),JetAk04JetBetaStar->at(i), weight);
                              //APICHART
                         }
@@ -1164,60 +1095,13 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             nGoodJets = jets.size();
             nJetsAdd = jetsAdditional.size();
             
-            // if do JES systematic variations (Data only), we recalculate MET
-/* APICHART
-            if (doW && fabs(scale) > 0. && ((leptonFlavor == "SingleMuon" && nMuons == 1 && nLeptons == 1 && nElectrons == 0) || (leptonFlavor == "SingleElectron" && nMuons == 0 && nLeptons == 1 && nElectrons == 1))){
-            
-                passesLeptonCut = false ;
-                
-                // recalculate METpt and METphi
-                    //METphi = patMetPhi_->at(whichMet);
-                    //METpt = patMetPt_->at(whichMet) + METscale;
-                
-                //-------- my calculation --------
-               // TempMETphi = METPhi->at(whichMet);
-              //KO  TempMETpt = METPt->at(whichMet);
-               //KO XMETpt = (TempMETpt * cos(TempMETphi)) - XMETscale;
-               //KO YMETpt = (TempMETpt * sin(TempMETphi)) - YMETscale;
-                
-              //KO  TVector2 METvec;
-              //KO  METvec.Set(XMETpt, YMETpt);
-              //KO  METpt  = METvec.Mod();
-               //KO METphi = METvec.Phi_mpi_pi(METvec.Phi());
-                //-------- end my calculation -------- 
-                
-                //kolep2.SetPtEtaPhiM(METpt, 0., METphi, 0.);
-                lep2.SetPtEtaPhiM(METpt, 0., 0., 0.);
-                Z = lep1 + lep2;
-                //koleptonStruct tempMet = { METpt , 0., METphi, METpt, 0 , 0, 0.};
-                leptonStruct tempMet = { METpt , 0., 0., METpt, 0 , 0, 0.};
-                lepton2 = tempMet;
-                //koMT = sqrt( 2 * METpt * lepton1.pt * (1 - cos(METphi - lepton1.phi)));
-                MT = sqrt( 2 * METpt * lepton1.pt * (1 - cos(0 - lepton1.phi)));
-                double effWeight = 1.;
-                if (METpt >= METcut && (((doQCD % 2) == 0 && MT >= MTCut) || ((doQCD % 2) == 1 && MT < MTCut))) {
-                    passesLeptonCut = true; // This is ok since we do JES for Data only. So, we do not overide passesLeptonCut determined by countTauS3 (GEN info).
-                    nEventsWithTwoGoodLeptons++;
-                    // correct for identification and isolation efficiencies are not needed since this is Data
-                    // So, lines below are not needed
-                    
-                }
-            }
-APICHART */
             
             // line below to test reco events that originate from TAU
-            
-/* APICHART
+            /* APICHART
             if (fileName.find("Tau") != string::npos && countTauS3 == 0 && hasGenInfo ){
                 passesLeptonCut = 0;
             }
-APICHART */
-            
-            if (doBJets < 0 && countBJets >= fabs(doBJets) )  { nEventsIncBJets++; 
-                passesLeptonCut = 0  ; }
-
-            if (doBJets > 0 && doBJets < 99 && countBJets < fabs(doBJets) ) passesLeptonCut = 0  ;
-            if (doBJets == 101 && countBJets != 1) passesLeptonCut = 0  ;
+            APICHART */
             
         }  // END IF HAS RECO
         //=======================================================================================================//
@@ -1298,10 +1182,10 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
         //=======================================================================================================//
         //     Matching gen and reco jets     //
         //====================================//
+        double XMetSmear(0), YMetSmear(0);
         vector<int> genJetsIndex(nGoodGenJets, 0);
         vector<vector<int> > matchingTable(nGoodJets, genJetsIndex);
         
-        /* APICHART
         if (hasRecoInfo && hasGenInfo){
             for (unsigned short i(0); i < nGoodJets; i++){
                 double mindR(0.5);
@@ -1324,15 +1208,20 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     jets[i].pt = newJetPt;
                     jets[i].energy = jets[i].energy * (newJetPt / oldJetPt);
                     //cout << "  new : " << jets[i].pt << "  " << jets[i].energy << endl;
+                    
+                    // for recalculating MET
+                    XMetSmear += (newJetPt - oldJetPt) * cos(jets[i].phi);
+                    YMetSmear += (newJetPt - oldJetPt) * sin(jets[i].phi);
+                    
                     puMVA_JetsMatchGenJets->Fill(JetAk04PuMva->at(jets[i].patIndex), weight);
-                    puBeta_JetsMatchGenJets->Fill(JetAk04JetBeta->at(jets[i].patIndex), weight);
-                    puBetaStar_JetsMatchGenJets->Fill(JetAk04JetBetaStar->at(jets[i].patIndex), weight);
+                    //puBeta_JetsMatchGenJets->Fill(JetAk04JetBeta->at(jets[i].patIndex), weight);
+                    //puBetaStar_JetsMatchGenJets->Fill(JetAk04JetBetaStar->at(jets[i].patIndex), weight);
                     jetsEta_JetsMatchGenJets->Fill(JetAk04Eta->at(jets[i].patIndex), weight);
                 }
                 else {
                     puMVA_JetsNoMatchGenJets->Fill(JetAk04PuMva->at(jets[i].patIndex), weight);
-                    puBeta_JetsNoMatchGenJets->Fill(JetAk04JetBeta->at(jets[i].patIndex), weight);
-                    puBetaStar_JetsNoMatchGenJets->Fill(JetAk04JetBetaStar->at(jets[i].patIndex), weight);
+                    //puBeta_JetsNoMatchGenJets->Fill(JetAk04JetBeta->at(jets[i].patIndex), weight);
+                    //puBetaStar_JetsNoMatchGenJets->Fill(JetAk04JetBetaStar->at(jets[i].patIndex), weight);
                     jetsEta_JetsNoMatchGenJets->Fill(JetAk04Eta->at(jets[i].patIndex), weight);
                 }
             }
@@ -1345,16 +1234,128 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             //  }
             //  cout << endl;
             //}
-
         }
-         APICHART */
+        
+        
+        //=======================================================================================================//
+        //          Retrieving MET             //
+        //====================================//
+        if (hasRecoInfo){
+            //APICHART
+            //cout << "METPt->size() " << METPt->size() << endl;
+            //APICHART
+            //cout << "METPx->size() " << METPx->size() << endl;
+            
+            if (doW && !(METPt->size() > 0)) continue;
+            
+            //KOMETphi = METPhi->at(whichMet);
+            METpt = METPt->at(whichMet);
+            TLorentzVector tmpVecMet;
+            tmpVecMet.SetPxPyPzE(METPx->at(whichMet), METPy->at(whichMet), METPz->at(whichMet), METE->at(whichMet));
+            METphi = tmpVecMet.Phi();
+
+            
+            //cout << " jentry: " << jentry << " nMuons: " << nMuons << " nLeptons: " << nLeptons << " nElectrons: " << nElectrons <<  endl;
+            if (doW && ((leptonFlavor == "SingleMuon" && nMuons == 1 && nLeptons == 1 && nElectrons == 0) || (leptonFlavor == "SingleElectron" && nMuons == 0 && nLeptons == 1 && nElectrons == 1))) {
+                
+                passesLeptonReq = true;
+                
+                // recalculate METpt and METphi
+                if ( (fabs(scale) > 0.) || (hasRecoInfo && hasGenInfo) ){
+                    //-------- my calculation --------
+                    //TempMETphi = patMetPhi_->at(whichMet);
+                    //TempMETpt = patMetPt_->at(whichMet);
+                    XMETpt = METPx->at(whichMet);
+                    YMETpt = METPy->at(whichMet);
+                    
+                    // if do JES systematic variations (Data only), we recalculate MET
+                    if (fabs(scale) > 0.){
+                        XMETpt -= XMETscale;
+                        YMETpt -= YMETscale;
+                    }
+                    
+                    // Recalculate MET because Smearing jets
+                    if (hasRecoInfo && hasGenInfo){
+                        XMETpt -= XMetSmear;
+                        YMETpt -= YMetSmear;
+                    }
+                    
+                    TVector2 METvec;
+                    METvec.Set(XMETpt, YMETpt);
+                    
+                    // assign new values for METpt and METphi
+                    METpt  = METvec.Mod();
+                    METphi = METvec.Phi_mpi_pi(METvec.Phi());
+                    //-------- end my calculation --------
+                }
+
+                
+                lepton1 = leptons[0];
+                leptonStruct tempMet = {METpt, 0., METphi, METpt, 0, 0, 0};
+                lepton2 = tempMet;
+                
+                MT = sqrt(2 * METpt * lepton1.pt * (1 - cos(METphi - lepton1.phi)));
+                //MT = sqrt(2 * METpt * lepton1.pt * (1 - cos(0 - lepton1.phi)));
+
+                // build the TLorentzVectors, the Z candidate and the kinematic
+                lep1.SetPtEtaPhiM(lepton1.pt, lepton1.eta, lepton1.phi, leptonMass);
+                lep2.SetPtEtaPhiM(METpt, 0, METphi, 0);
+                Z = lep1 + lep2;
+                
+                // correct for identification and isolation efficiencies if required by useEfficiencyCorrection
+                // apply scale factors only on MC
+                if (useEfficiencyCorrection) {
+                    double effWeight = 1.;
+                    if (leptonFlavor == "SingleMuon") {
+                        effWeight = LeptID.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
+                        effWeight *= LeptIso.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
+                        if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(lepton1.pt), fabs(lepton1.eta), sysLepSF);
+                    }
+                    else if (leptonFlavor == "SingleElectron") {
+                        effWeight *= LeptID.getEfficiency(lepton1.pt, fabs(lepton1.eta), sysLepSF);
+                        effWeight *= Ele_Rec.getEfficiency(lepton1.pt, fabs(lepton1.scEta), sysLepSF);
+                        
+                    }
+                    
+                    if (isData) weight /= effWeight;
+                    else weight *= effWeight;
+                }
+                
+                /// 2D histograms for ABCD method to extract the QCD abckround ?
+                /* APICHART
+                 fullMET->Fill(METpt, weight);
+                 fullMET_pfMETPFlow->Fill(METPt->at(0), weight);
+                 fullMET_pfMet->Fill(METPt->at(1), weight);
+                 fullMET_pfType1CorrectedMet->Fill(METPt->at(2), weight);
+                 fullMET_pfType1p2CorrectedMet->Fill(METPt->at(3), weight);
+                 fullMT->Fill(MT, weight);
+                 METvslepIso->Fill(METpt, lepton1.iso, weight);
+                 MTvslepIso->Fill(MT, lepton1.iso, weight);
+                 APICHART */
+                
+                // apply transverse mass and MET cut
+                if (METpt >= METcut && (((doQCD % 2) == 0 && MT >= MTCut) || ((doQCD % 2) == 1 && MT < MTCut))) {
+                    passesLeptonCut = true;
+                    passesLeptonAndMT = true;
+                    nEventsWithTwoGoodLeptons++;
+                }
+            }
+        } // END IF RECO FOR MET
+        
+        if (passesGenLeptonCut) {
+            TotalGenWeightPassGEN += genWeightBackup;
+            TotalGenWeightPassGENPU += weight;
+            //partonsNAfterGenCut->Fill(nup_ - 5);
+            //partonsNAfterGenCutWeighted->Fill(nup_ - 5, genWeight);
+        }
+        //=======================================================================================================//
         
         
         // Re-analyze the jets collections and Cut on the Pt
-        // we can do it only now since we needed to smear 
+        // we can do it only now since we needed to smear
         // the jet pt distribution for the MC
 
-        if (hasRecoInfo){     
+        if (hasRecoInfo){
             vector<jetStruct> tmpJets;
             for (unsigned short i(0); i < nGoodJets; i++){
                 if (jets[i].pt >= jetPtCutMin) tmpJets.push_back(jets[i]);
@@ -1521,6 +1522,46 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             weight = weight * WbSystSF;
             genWeight = genWeight * WbSystSF;
         }
+        
+        //--- Fill puMVA ---
+        if (hasRecoInfo) {
+            for (unsigned short i(0); i < jetsPuMva.size() ; i++){
+                if (passesLeptonCut) puMVA->Fill(JetAk04PuMva->at(jetsPuMva[i].patIndex), weight);
+            }
+        }
+        //---
+        
+        //======= Final Selections: =======
+        if (hasRecoInfo){
+            if (doBJets < 0 && countBJets >= fabs(doBJets)) {
+                passesLeptonCut = 0;
+                passesBtagReq = false;
+                nEventsIncBJets++;
+            }
+            if (doBJets > 0 && doBJets < 99 && countBJets < fabs(doBJets) ){
+                passesLeptonCut = 0;
+                passesBtagReq = false;
+            }
+            if (doBJets == 101 && countBJets != 1){
+                passesLeptonCut = 0;
+                passesBtagReq = false;
+            }
+            
+            // line below to test reco events that originate from TAU
+            //if (fileName.find("Tau") != string::npos && countTauS3 == 0 && hasGenInfo ){
+            //    passesLeptonCut = 0;
+            //}
+        }
+        if (hasGenInfo){
+            /// --- if there are taus, but we do not run on the Tau file, thus we run on the WJets file,
+            //    then we don't count the event at reco.
+            //if (countTauS3 > 0 && fileName.find("Tau") == string::npos){
+            //    passesLeptonCut = 0 ;
+            //    passesTau3Req =false;
+            //}
+        }
+        //=================================
+
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    gen Wgh = " << genWeight << "  pass gen cuts = " << passesGenLeptonCut <<"  nGenJets = " << nGoodGenJets <<  endl;
         //=======================================================================================================//

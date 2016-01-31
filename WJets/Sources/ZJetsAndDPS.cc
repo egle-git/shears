@@ -699,13 +699,13 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //          Retrieving jets           //
         //====================================//
         bool passesJetCut(1), passesEWKJetPt(0), passesEWKJetFwdEta(0);
-        unsigned short nGoodJets(0), nTotJets(0), nJetsAdd(0);
+        unsigned short nGoodJets(0),nGoodJets_20(0), nTotJets(0), nJetsAdd(0);
         double jetsHT(0);
         double METscale(0.);
         double XMETscale(0.), YMETscale(0.);            // for calculating METscale
         double TempMETpt(0.), TempMETphi(0.), XMETpt(0.), YMETpt(0.) ; // for calculating METscale
 
-        vector<jetStruct> jets, jetsAdditional, jetsPuMva;
+        vector<jetStruct> jets, jetsAdditional, jetsPuMva, jets_20; // additional jet collection with pt threshold of 20 GeV
         TLorentzVector leadJ, secondJ, jet1Plus2, jet1Minus2;
         
         //*************************************** begin edit *************************************************************//
@@ -727,15 +727,15 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
             for (unsigned short i(0); i < nTotJets; i++) {
                 double jetPtTemp(0.); // for calculating METscale
                 bool passBJets(0);
+                
                 // APICHART if (JetAk04BTagCsv->at(i) >= 0.679) passBJets = true;
                 if (JetAk04BDiscCisvV2->at(i) >= 0.890) passBJets = true; //for 13 TeV Btag POG recommended discriminator with medium wp cut
-                
 
                 //************************* B-tag Veto Correction *******************************//
-   /*             float this_rand = RandGen->Rndm(); // Get a random number.
+                float this_rand = RandGen->Rndm(); // Get a random number.
                 float pt= JetAk04Pt->at(i);
-                float eta= JetAk04Eta->at(i);
-                float x = 0.890;     ///discrim_cut;
+                //float eta= JetAk04Eta->at(i);
+                //float x = 0.890;     ///discrim_cut;
                 // --------- MC-only
                 if (isData == false){
                     
@@ -743,34 +743,36 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     bool passBJets_SFB_sys_down = passBJets; // Initialize the systematic_down as the central value
                     
                     int jetflavour= JetAk04PartFlav->at(i);
-                if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+                
                     if (abs(jetflavour)==5){
-                        float effb = -1.73338329789*x*x*x*x +  1.26161794785*x*x*x +  0.784721653518*x*x +  -1.03328577451*x +  1.04305075822;
-                        
-                        float SFb = (0.938887+(0.00017124*pt))+(-2.76366e-07*(pt*pt));
-                        if (pt < 20.) SFb = (0.938887+(0.00017124*20.))+(-2.76366e-07*(20.*20.));
-                        if (pt > 800.) SFb = (0.938887+(0.00017124*800.))+(-2.76366e-07*(800.*800.));
+                        float effb = 0.55745;
+                        float effb_corr = 1;
+                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effb_corr = 0.85751227141;
+                        if (pt < 30.)                effb = 0.55745  * effb_corr;
+                        if (pt >= 30. && pt < 50.)   effb = 0.55745  * effb_corr;
+                        if (pt >= 50. && pt < 70.)   effb = 0.611329 * effb_corr;
+                        if (pt >= 70. && pt < 100.)  effb = 0.637279 * effb_corr;
+                        if (pt >= 100. && pt < 140.) effb = 0.648176 * effb_corr;
+                        if (pt >= 140. && pt < 200.) effb = 0.6551   * effb_corr;
+                        if (pt >= 200. && pt < 300.) effb = 0.631987 * effb_corr;
+                        if (pt >= 300. && pt < 670.) effb = 0.567651 * effb_corr;
+                        if (pt >= 670.)              effb = 0.567651 * effb_corr;
+
+                        float SFb = -(0.0443172)+(0.00496634*(log(pt+1267.85)*(log(pt+1267.85)*(3-(-(0.110428*log(pt+1267.85)))))));
+                        if (pt < 30.) SFb = -(0.0443172)+(0.00496634*(log(30+1267.85)*(log(30+1267.85)*(3-(-(0.110428*log(30+1267.85)))))));
+                        if (pt > 670.) SFb = -(0.0443172)+(0.00496634*(log(670+1267.85)*(log(670+1267.85)*(3-(-(0.110428*log(670+1267.85)))))));
                         
                         float SFb_error = 0.0;
-                        if (pt < 20.)                SFb_error = 0.0415707*2.;
-                        if (pt >= 20. && pt < 30.)   SFb_error = 0.0415707;
-                        if (pt >= 30. && pt < 40.)   SFb_error = 0.0204209;
-                        if (pt >= 40. && pt < 50.)   SFb_error = 0.0223227;
-                        if (pt >= 50. && pt < 60.)   SFb_error = 0.0206655;
-                        if (pt >= 60. && pt < 70.)   SFb_error = 0.0199325;
-                        if (pt >= 70. && pt < 80.)   SFb_error = 0.0174121;
-                        if (pt >= 80. && pt < 100.)  SFb_error = 0.0202332;
-                        if (pt >= 100. && pt < 120.) SFb_error = 0.0182446;
-                        if (pt >= 120. && pt < 160.) SFb_error = 0.0159777;
-                        if (pt >= 160. && pt < 210.) SFb_error = 0.0218531;
-                        if (pt >= 210. && pt < 260.) SFb_error = 0.0204688;
-                        if (pt >= 260. && pt < 320.) SFb_error = 0.0265191;
-                        if (pt >= 320. && pt < 400.) SFb_error = 0.0313175;
-                        if (pt >= 400. && pt < 500.) SFb_error = 0.0415417;
-                        if (pt >= 500. && pt < 600.) SFb_error = 0.0740446;
-                        if (pt >= 600. && pt < 800.) SFb_error = 0.0596716;
-                        if (pt >= 800.)              SFb_error = 0.0596716*2.;
-                        
+                        if (pt < 30.)                SFb_error = 0.031647235155105591*2.;
+                        if (pt >= 30. && pt < 50.)   SFb_error = 0.031647235155105591;
+                        if (pt >= 50. && pt < 70.)   SFb_error = 0.021615911275148392;
+                        if (pt >= 70. && pt < 100.)  SFb_error = 0.032769639045000076;
+                        if (pt >= 100. && pt < 140.) SFb_error = 0.024189794436097145;
+                        if (pt >= 140. && pt < 200.) SFb_error = 0.043655604124069214;
+                        if (pt >= 200. && pt < 300.) SFb_error = 0.06046636775135994;
+                        if (pt >= 300. && pt < 670.) SFb_error = 0.064764265418052673;
+                        if (pt >= 670.)              SFb_error = 0.064764265418052673*2.;
+
                         float SFb_up = SFb + SFb_error;
                         float SFb_down = SFb - SFb_error;
                         
@@ -803,36 +805,36 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                         
                     }
 
-
- if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     // ---------------- For Real C-jets--------------- //
                     if (abs(jetflavour)==4){
-                        float effc = -1.5734604211*x*x*x*x +  1.52798999269*x*x*x +  0.866697059943*x*x +  -1.66657942274*x +  0.780639301724;
-                        
-                        float SFc = (0.938887+(0.00017124*pt))+(-2.76366e-07*(pt*pt));
-                        if (pt < 20.) SFc = (0.938887+(0.00017124*20.))+(-2.76366e-07*(20.*20.));
-                        if (pt > 800.) SFc = (0.938887+(0.00017124*800.))+(-2.76366e-07*(800.*800.));
-                        
+                        float effc = 0.112358;
+                        float effc_corr = 1;
+                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effc_corr = 0.90390213261;
+                        if (pt < 30.)                effc = 0.112358 * effc_corr;
+                        if (pt >= 30. && pt < 50.)   effc = 0.112358 * effc_corr;
+                        if (pt >= 50. && pt < 70.)   effc = 0.113942 * effc_corr;
+                        if (pt >= 70. && pt < 100.)  effc = 0.121779 * effc_corr;
+                        if (pt >= 100. && pt < 140.) effc = 0.129767 * effc_corr;
+                        if (pt >= 140. && pt < 200.) effc = 0.144781 * effc_corr;
+                        if (pt >= 200. && pt < 300.) effc = 0.151214 * effc_corr;
+                        if (pt >= 300. && pt < 670.) effc = 0.144039 * effc_corr;
+                        if (pt >= 670.)              effc = 0.144039 * effc_corr;
+
+                        float SFc = -(0.0443172)+(0.00496634*(log(pt+1267.85)*(log(pt+1267.85)*(3-(-(0.110428*log(pt+1267.85)))))));
+                        if (pt < 30.) SFc = -(0.0443172)+(0.00496634*(log(30+1267.85)*(log(30+1267.85)*(3-(-(0.110428*log(30+1267.85)))))));
+                        if (pt > 670.) SFc = -(0.0443172)+(0.00496634*(log(670+1267.85)*(log(670+1267.85)*(3-(-(0.110428*log(670+1267.85)))))));
+
                         float SFc_error = 0.0;
-                        if (pt < 20.)                SFc_error = 0.0415707*4.;
-                        if (pt >= 20. && pt < 30.)   SFc_error = 0.0415707*2.;
-                        if (pt >= 30. && pt < 40.)   SFc_error = 0.0204209*2.;
-                        if (pt >= 40. && pt < 50.)   SFc_error = 0.0223227*2.;
-                        if (pt >= 50. && pt < 60.)   SFc_error = 0.0206655*2.;
-                        if (pt >= 60. && pt < 70.)   SFc_error = 0.0199325*2.;
-                        if (pt >= 70. && pt < 80.)   SFc_error = 0.0174121*2.;
-                        if (pt >= 80. && pt < 100.)  SFc_error = 0.0202332*2.;
-                        if (pt >= 100. && pt < 120.) SFc_error = 0.0182446*2.;
-                        if (pt >= 120. && pt < 160.) SFc_error = 0.0159777*2.;
-                        if (pt >= 160. && pt < 210.) SFc_error = 0.0218531*2.;
-                        if (pt >= 210. && pt < 260.) SFc_error = 0.0204688*2.;
-                        if (pt >= 260. && pt < 320.) SFc_error = 0.0265191*2.;
-                        if (pt >= 320. && pt < 400.) SFc_error = 0.0313175*2.;
-                        if (pt >= 400. && pt < 500.) SFc_error = 0.0415417*2.;
-                        if (pt >= 500. && pt < 600.) SFc_error = 0.0740446*2.;
-                        if (pt >= 600. && pt < 800.) SFc_error = 0.0596716*2.;
-                        if (pt >= 800.)              SFc_error = 0.0596716*4.;
-                        
+                        if (pt < 30.)                SFc_error = 0.063294470310211182*2;
+                        if (pt >= 30. && pt < 50.)   SFc_error = 0.063294470310211182;
+                        if (pt >= 50. && pt < 70.)   SFc_error = 0.043231822550296783;
+                        if (pt >= 70. && pt < 100.)  SFc_error = 0.065539278090000153;
+                        if (pt >= 100. && pt < 140.) SFc_error = 0.04837958887219429;
+                        if (pt >= 140. && pt < 200.) SFc_error = 0.087311208248138428;
+                        if (pt >= 200. && pt < 300.) SFc_error = 0.12093273550271988;
+                        if (pt >= 300. && pt < 670.) SFc_error = 0.129528530836105347;
+                        if (pt >= 670.)              SFc_error = 0.129528530836105347*2;
+
                         float SFc_up = SFc + SFc_error;
                         float SFc_down = SFc - SFc_error;
                         
@@ -863,74 +865,36 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                         if ((passBJets_SFB_sys_down==false) && (SFc_down>1.0) && (this_rand < f_down)) passBJets_SFB_sys_down = true; // for sytematic_down
                         
                     }
- if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+ 
                     // ---------------- For REAL Light-jets --------------- //
                     if (abs(jetflavour)<4){
+                        float eff_l = 0.0118925;
+                        float eff_l_corr = 1;
+                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) eff_l_corr = 0.37420925055;
+                        if (pt < 30.)                eff_l = 0.0118925 * eff_l_corr;
+                        if (pt >= 30. && pt < 50.)   eff_l = 0.0118925 * eff_l_corr;
+                        if (pt >= 50. && pt < 70.)   eff_l = 0.0129924 * eff_l_corr;
+                        if (pt >= 70. && pt < 100.)  eff_l = 0.0153537 * eff_l_corr;
+                        if (pt >= 100. && pt < 140.) eff_l = 0.017785  * eff_l_corr;
+                        if (pt >= 140. && pt < 200.) eff_l = 0.0209816 * eff_l_corr;
+                        if (pt >= 200. && pt < 300.) eff_l = 0.0218904 * eff_l_corr;
+                        if (pt >= 300. && pt < 670.) eff_l = 0.0235292 * eff_l_corr;
+                        if (pt >= 670.)              eff_l = 0.0235292 * eff_l_corr;
+
                         float SFlight=1.0;
                         float SFlight_up=1.0;
                         float SFlight_down=1.0;
-                        float eff_l = 0.0;
-                        float pt_temp(0.0), xpt(0.0);
-                        
-                        xpt = pt;
-                        if (pt < 20. ) xpt = 20.;
-                        if (pt > 670.) xpt = 670.;
-                        
-                        if ((fabs(eta)>=0.0) && (fabs(eta)<=0.8)){
-                            eff_l = ((0.00967751+(2.54564e-05*xpt))+(-6.92256e-10*(xpt*xpt)));
-                            
-                            pt_temp = pt;
-                            if (pt < 20.) pt = 20.;
-                            if (pt > 1000.) pt = 1000.;
-                            
-                            SFlight = (((1.07541+(0.00231827*pt))+(-4.74249e-06*(pt*pt)))+(2.70862e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.18638+(0.00314148*pt))+(-6.68993e-06*(pt*pt)))+(3.89288e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.964527+(0.00149055*pt))+(-2.78338e-06*(pt*pt)))+(1.51771e-09*(pt*(pt*pt))));
-                            
-                            if (pt_temp < 20.|| pt_temp > 1000.) {
-                                SFlight_up =  SFlight + 2.0*fabs(SFlight_up - SFlight);
-                                SFlight_down = SFlight - 2.0*fabs(SFlight - SFlight_down);
-                            }
-                            pt = pt_temp;
+                        if (pt > 20. && pt < 1000.) {
+                            SFlight = 1.14022;
+                            SFlight_up = 1.34022;
+                            SFlight_down = 0.94022;
                         }
-                        if ((fabs(eta)>0.8) && (fabs(eta)<=1.6)){
-                            eff_l = ((0.00974141+(5.09503e-05*xpt))+(2.0641e-08*(xpt*xpt)));
-                            
-                            pt_temp = pt;
-                            if (pt < 20.) pt = 20.;
-                            if (pt > 1000.) pt = 1000.;
-                            
-                            SFlight = (((1.05613+(0.00114031*pt))+(-2.56066e-06*(pt*pt)))+(1.67792e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.16624+(0.00151884*pt))+(-3.59041e-06*(pt*pt)))+(2.38681e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.946051+(0.000759584*pt))+(-1.52491e-06*(pt*pt)))+(9.65822e-10*(pt*(pt*pt))));
-                            
-                            if (pt_temp < 20.|| pt_temp > 1000.) {
-                                SFlight_up =  SFlight + 2.0*fabs(SFlight_up - SFlight);
-                                SFlight_down = SFlight - 2.0*fabs(SFlight - SFlight_down);
-                            }
-                            pt = pt_temp;
+                        else{
+                            SFlight = 1.14022;
+                            SFlight_up   = 1.14022 + fabs(1.34022-1.14022)*2;
+                            SFlight_down = 1.14022 - fabs(1.14022-0.94022)*2;
                         }
-                        if ((fabs(eta)>1.6) && (fabs(eta)<=2.4)){
-                            eff_l = ((0.013595+(0.000104538*xpt))+(-1.36087e-08*(xpt*xpt)));
-                            
-                            pt_temp = pt;
-                            if (pt < 20.) pt = 20.;
-                            if (pt > 850.) pt = 850.;
-                            
-                            SFlight = (((1.05625+(0.000487231*pt))+(-2.22792e-06*(pt*pt)))+(1.70262e-09*(pt*(pt*pt))));
-                            SFlight_up = (((1.15575+(0.000693344*pt))+(-3.02661e-06*(pt*pt)))+(2.39752e-09*(pt*(pt*pt))));
-                            SFlight_down = (((0.956736+(0.000280197*pt))+(-1.42739e-06*(pt*pt)))+(1.0085e-09*(pt*(pt*pt))));
-                            
-                            if (pt_temp < 20.|| pt_temp > 850.) {
-                                SFlight_up =  SFlight + 2.0*fabs(SFlight_up - SFlight);
-                                SFlight_down = SFlight - 2.0*fabs(SFlight - SFlight_down);
-                            }
-                            pt = pt_temp;
-                        }
-                        if (fabs(eta)>2.4){
-                            eff_l = ((0.013595+(0.000104538*xpt))+(-1.36087e-08*(xpt*xpt)));
-                        }
-                        
+
                         // F values for rand comparison
                         float f = 0.0;
                         float f_up = 0.0;
@@ -963,10 +927,9 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     
                     // Wb study
                     if (abs(jetflavour)==5) countWbBjets++ ;
-                } */
+                }
                 // --------- End MC-only
-                //************************* End B-tag Veto Correction *******************************//                
-                int jetflavour = int(JetAk04PartFlav->at(i));
+                //************************* End B-tag Veto Correction *******************************//
                
                 jetStruct jet = {JetAk04Pt->at(i), JetAk04Eta->at(i), JetAk04Phi->at(i), JetAk04E->at(i), i, passBJets};
 
@@ -977,35 +940,22 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
                 jetPtTemp = jet.pt; // for calculating METscale
                 jet.pt *= (1 + scale * jetEnergyCorr);
-                jet.energy *= (1 + scale * jetEnergyCorr);  
+                jet.energy *= (1 + scale * jetEnergyCorr);
 
-                //vector<double> rapidity;
+                TLorentzVector jetr;
+                jetr.SetPtEtaPhiE(jet.pt, jet.eta, jet.phi, jet.energy);
                 
-                /*KadirTLorentzVector jetr;
-                jetr.SetPtEtaPhiE(jets[i].pt, jets[i].eta, jets[i].phi, jets[i].energy);
-                   */ 
-                //Kadir bool jetPassesEtaCut((jetr.Rapidity() >= jetEtaCutMin / 10.) && (jetr.Rapidity() <= jetEtaCutMax / 10.)); 
-                bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); //we no longer cut on jet eta but rapidity above
+                bool jetPassesEtaCut((jetr.Rapidity() >= jetEtaCutMin / 10.) && (jetr.Rapidity() <= jetEtaCutMax / 10.));
+                //bool jetPassesEtaCut((jet.eta >= jetEtaCutMin / 10.) && (jet.eta <= jetEtaCutMax / 10.)); //we no longer cut on jet eta but rapidity above
                 bool jetPassesIdCut(JetAk04Id->at(i) > 0);
                 //KObool jetPassesBetaCut(JetAk04JetBeta->at(i) > 0.1 * doPUStudy);
                 //KObool jetPassesBetaStarCut(JetAk04JetBetaStar->at(i) < 1);
                 double tempMVA = JetAk04PuMva->at(i);
                 bool jetPassesMVACut(0);
-                if (energy == "7TeV") {
-                    jetPassesMVACut = ((tempMVA > -0.9 && jet.pt <= 20) || (jet.pt > 20 && (
-                                    (tempMVA > -0.4  && fabs(jet.eta) <= 2.5) ||
-                                    (tempMVA > -0.85 && fabs(jet.eta) > 2.5  && fabs(jet.eta) <= 2.75) ||
-                                    (tempMVA > -0.7  && fabs(jet.eta) > 2.75 && fabs(jet.eta) <= 3.) ||
-                                    (tempMVA > -0.6  && fabs(jet.eta) > 3.   && fabs(jet.eta) <= 5.))));  
-                }
                 if (energy == "13TeV") {
-                    jetPassesMVACut = (
-                            (tempMVA > -0.89 && fabs(jet.eta) <= 2.5) || 
-                            (tempMVA > -0.77 && fabs(jet.eta) > 2.5  && fabs(jet.eta) <= 2.75) ||
-                            (tempMVA > -0.69 && fabs(jet.eta) > 2.75 && fabs(jet.eta) <= 3.) ||
-                            (tempMVA > -0.75 && fabs(jet.eta) > 3.   && fabs(jet.eta) <= 5.)) ;  
-                    //  new training does not work for 22Jan rereco, we use simple loose PU ID : -1  - does not pass, 1 passes
-                    if (tempMVA > 0) jetPassesMVACut = true ;
+                    //  for 22Jan rereco, we use simple loose PU ID : -1  - does not pass, 1 passes
+                    //  for 13TeV study from Z+jets, -0.2 set for the cut
+                    if (tempMVA > -0.2) jetPassesMVACut = true ;
                     else jetPassesMVACut = false ;
                 }
                 //bool jetPassesMVACut(patJetPfAk05jetpuMVA_->at(i) >= - 0.4); // -0.4 set for the cut was for 44x training. for 53x chs loose jet id is set to -0.89? 
@@ -1133,9 +1083,9 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //        Retrieving gen jets         //
         //====================================//
         bool passesGenJetCut(1), passesGenEWKJetPt(0), passesGenEWKJetFwdEta(0);
-        unsigned short nGoodGenJets(0), nGenJetsAdd(0), nTotGenJets(0);
+        unsigned short nGoodGenJets(0), nGenJetsAdd(0), nGoodGenJets_20(0), nTotGenJets(0);
         double genJetsHT(0);
-        vector<jetStruct> genJets, genJetsAdditional;
+        vector<jetStruct> genJets, genJetsAdditional, genJets_20;
         TLorentzVector genLeadJ, genSecondJ, genJet1Plus2, genJet1Minus2;
         
         //*************************************** begin edit *************************************************************//
@@ -1164,7 +1114,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     }
                 }
                 //if (genJet.pt >= 10 && genJet.pt < 1000. && fabs(genJet.eta) <= 4.7 && genJetPassesdRCut){
-                if (genJetPassesdRCut && genJet.pt >= 10 && fabs(genJet.eta) <= 4.7){
+                if (genJetPassesdRCut && genJet.pt >= 10 && fabs(genJet.eta) <= 4.7){ // Apichart Z+jets uses 5.0
                     passesGenEWKJetPt = (genJet.pt >= 50);
                     passesGenEWKJetFwdEta = (fabs(genJet.eta) > 2.4);
                     genJets.push_back(genJet);                  
@@ -1359,14 +1309,18 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             vector<jetStruct> tmpJets;
             for (unsigned short i(0); i < nGoodJets; i++){
                 if (jets[i].pt >= jetPtCutMin) tmpJets.push_back(jets[i]);
+                if (jets[i].pt >= 20) jets_20.push_back(jets[i]);
             }
             jets.clear(); 
             jets = tmpJets; 
             tmpJets.clear(); 
             nGoodJets = jets.size();
+            nGoodJets_20 = jets_20.size();
             if (nGoodJets >= 1){
                 sort(jets.begin(), jets.end(), JetDescendingOrder);
                 sort(jetsAdditional.begin(), jetsAdditional.end(), JetDescendingOrder);
+                sort(jets_20.begin(), jets_20.end(), JetDescendingOrder);
+                
                 leadJ.SetPtEtaPhiE(jets[0].pt, jets[0].eta, jets[0].phi, jets[0].energy);               
                 //*************************************** begin edit *************************************************************//
                 newLeadJ.SetPtEtaPhiE(jets[0].pt, jets[0].eta, jets[0].phi, jets[0].energy);
@@ -1410,16 +1364,21 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
         if (hasGenInfo){
             vector< jetStruct> tmpJets;
             for (unsigned short i(0); i < nGoodGenJets; i++){
-                if (genJets[i].pt >= jetPtCutMin && genJets[i].eta >= double (jetEtaCutMin/10.) && genJets[i].eta <= (double )(jetEtaCutMax/10.) ){
-                    tmpJets.push_back(genJets[i]);
-                }
+                TLorentzVector gjetr;
+                gjetr.SetPtEtaPhiE(genJets[i].pt, genJets[i].eta, genJets[i].phi, genJets[i].energy);
+                //if (genJets[i].pt >= jetPtCutMin && genJets[i].eta >= double (jetEtaCutMin/10.) && genJets[i].eta <= (double )(jetEtaCutMax/10.) ){
+                if (genJets[i].pt >= jetPtCutMin && fabs(gjetr.Rapidity()) <= 0.1*jetEtaCutMax) tmpJets.push_back(genJets[i]);
+                if (genJets[i].pt >= 20 && fabs(gjetr.Rapidity()) <= 0.1*jetEtaCutMax) genJets_20.push_back(genJets[i]);
             }
             genJets.clear();
             genJets = tmpJets; 
             tmpJets.clear(); 
             nGoodGenJets = genJets.size();
+            nGoodGenJets_20 = genJets_20.size();
             if (nGoodGenJets >= 1){
                 sort(genJets.begin(), genJets.end(), JetDescendingOrder);
+                sort(genJets_20.begin(), genJets_20.end(), JetDescendingOrder);
+
                 genLeadJ.SetPtEtaPhiE(genJets[0].pt, genJets[0].eta, genJets[0].phi, genJets[0].energy);
                 //*************************************** begin edit ***********************************************************//
                 genNewLeadJ.SetPtEtaPhiE(genJets[0].pt, genJets[0].eta, genJets[0].phi, genJets[0].energy);
@@ -1528,6 +1487,34 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             for (unsigned short i(0); i < jetsPuMva.size() ; i++){
                 if (passesLeptonCut) puMVA->Fill(JetAk04PuMva->at(jetsPuMva[i].patIndex), weight);
             }
+            
+            //--- For calculating b-tagging efficiency---
+            for (unsigned short i(0); i < nGoodJets; i++){
+                int jet_ind = jets[i].patIndex;
+                if(fabs(JetAk04PartFlav->at(jet_ind)) == 5){
+                    h_pt_eta_b->Fill(jets[i].pt, jets[i].eta, weight);
+                    h_pt_b->Fill(jets[i].pt, weight);
+                    if(JetAk04BDiscCisvV2->at(jet_ind) >= 0.890){
+                        h_pt_eta_b_tagged->Fill(jets[i].pt, jets[i].eta, weight);
+                        h_pt_b_tagged->Fill(jets[i].pt, weight);
+                    }
+                }
+                else if(fabs(JetAk04PartFlav->at(jet_ind)) == 4){
+                    h_pt_eta_c->Fill(jets[i].pt, jets[i].eta, weight);
+                    if(JetAk04BDiscCisvV2->at(jet_ind) >= 0.890){
+                        h_pt_eta_c_tagged->Fill(jets[i].pt, jets[i].eta, weight);
+                    }
+                }
+                else {
+                    h_pt_eta_udsg->Fill(jets[i].pt, jets[i].eta, weight);
+                    h_pt_udsg->Fill(jets[i].pt, weight);
+                    if(JetAk04BDiscCisvV2->at(jet_ind) >= 0.890){
+                        h_pt_eta_udsg_tagged->Fill(jets[i].pt, jets[i].eta, weight);
+                        h_pt_udsg_tagged->Fill(jets[i].pt, weight);
+                    }
+                }
+            }
+            //--- End for calculating b-tagging efficiency---
         }
         //---
         
@@ -1587,6 +1574,37 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     GLepBarePtZinc0jet->Fill(genLep2.Pt(), genWeight);
                     GLepBareEtaZinc0jet->Fill(genLep2.Eta(), genWeight);
                 }
+                
+                if (nGoodGenJets_20 >= 1){
+                    genFirstJetPt_Zinc1jet  ->Fill(genJets_20[0].pt, genWeight);
+                    genFirstJetPt_1_Zinc1jet->Fill(genJets_20[0].pt, genWeight);
+                    genFirstJetPt_2_Zinc1jet->Fill(genJets_20[0].pt, genWeight);
+                }
+                if (nGoodGenJets_20 >= 2){
+                    genSecondJetPt_Zinc2jet  ->Fill(genJets_20[1].pt, genWeight);
+                    genSecondJetPt_1_Zinc2jet->Fill(genJets_20[1].pt, genWeight);
+                    genSecondJetPt_2_Zinc2jet->Fill(genJets_20[1].pt, genWeight);
+                }
+                if (nGoodGenJets_20 >= 3){
+                    genThirdJetPt_Zinc3jet  ->Fill(genJets_20[2].pt, genWeight);
+                    genThirdJetPt_1_Zinc3jet->Fill(genJets_20[2].pt, genWeight);
+                    genThirdJetPt_2_Zinc3jet->Fill(genJets_20[2].pt, genWeight);
+                }
+                if (nGoodGenJets_20 >= 4){
+                    genFourthJetPt_Zinc4jet  ->Fill(genJets_20[3].pt, genWeight);
+                    genFourthJetPt_1_Zinc4jet->Fill(genJets_20[3].pt, genWeight);
+                    genFourthJetPt_2_Zinc4jet->Fill(genJets_20[3].pt, genWeight);
+                }
+                if (nGoodGenJets_20 >= 5){
+                    genFifthJetPt_Zinc5jet  ->Fill(genJets_20[4].pt, genWeight);
+                    genFifthJetPt_1_Zinc5jet->Fill(genJets_20[4].pt, genWeight);
+                    genFifthJetPt_2_Zinc5jet->Fill(genJets_20[4].pt, genWeight);
+                }
+                if (nGoodGenJets_20 >= 6){
+                    genSixthJetPt_Zinc6jet  ->Fill(genJets_20[5].pt, genWeight);
+                    genSixthJetPt_1_Zinc6jet->Fill(genJets_20[5].pt, genWeight);
+                }
+                
                 if (nGoodGenJets >= 1){
                     GENnEventsIncl1Jets++;
                     genZNGoodJets_Zinc->Fill(1., genWeight);
@@ -1601,14 +1619,12 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZPt_Zinc1jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc1jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc1jet->Fill(genZ.Eta(), genWeight);
-                    genFirstJetPt_Zinc1jet->Fill(genLeadJ.Pt(), genWeight);
-                    genFirstJetPt_1_Zinc1jet->Fill(genLeadJ.Pt(), genWeight);
-                    genFirstJetPt_2_Zinc1jet->Fill(genLeadJ.Pt(), genWeight);
                     
                     genFirstJetEta_Zinc1jet->Fill(fabs(genLeadJ.Eta()), genWeight);
                     genFirstJetEta_2_Zinc1jet->Fill(fabs(genLeadJ.Eta()), genWeight);
                     //*************************************** begin edit *************************************************************//
-                    genFirstJetRapidity_Zinc1jet->Fill(fabs(genNewLeadJ.Rapidity()), genWeight);
+                    genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genNewLeadJ.Rapidity()), genWeight);
+                    genFirstJetAbsRapidity_2_Zinc1jet->Fill(fabs(genNewLeadJ.Rapidity()), genWeight);
                     genFirstJetRapidityFull_Zinc1jet->Fill(genNewLeadJ.Rapidity(), genWeight);
                     genMeanNJetsHT_1D_Zinc1jet->Fill(genJetsHT, genWeight*nGoodGenJets);
                     genMeanNJetsHT_Zinc1jet->Fill(genJetsHT, nGoodGenJets, genWeight);
@@ -1620,7 +1636,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genJetsHT_2_Zinc1jet->Fill(genJetsHT, genWeight);
                     
                     for ( int i =0 ; i < NbinsEta2D - 1 ; i++){
-                        if ( fabs(genLeadJ.Eta()) >= j_Y_range[i] &&  fabs(genLeadJ.Eta()) < j_Y_range[i+1] )                                genFirstJetPt_Zinc1jet_Eta[i]->Fill(fabs(genLeadJ.Pt()), genWeight);
+                        if ( fabs(genLeadJ.Eta()) >= j_Y_range[i] &&  fabs(genLeadJ.Eta()) < j_Y_range[i+1] ) genFirstJetPt_Zinc1jet_Eta[i]->Fill(fabs(genLeadJ.Pt()), genWeight);
                     }
                     if ( doW ) gendEtaBosonJet_Zinc1jet->Fill(fabs(genLeadJ.Eta() - genLep1.Eta()), genWeight);
                     else gendEtaBosonJet_Zinc1jet->Fill(fabs(genLeadJ.Eta()-genZ.Eta()), genWeight);
@@ -1652,14 +1668,13 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZEta_Zinc2jet->Fill(genZ.Eta(), genWeight);
                     genFirstHighestJetPt_Zinc2jet->Fill(genLeadJ.Pt(), genWeight);
                     genSecondHighestJetPt_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
-                    genSecondJetPt_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
-                    genSecondJetPt_1_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
-                    genSecondJetPt_2_Zinc2jet->Fill(genSecondJ.Pt(), genWeight);
+                    
                     
                     genSecondJetEta_Zinc2jet->Fill(fabs(genSecondJ.Eta()), genWeight);
                     genSecondJetEta_2_Zinc2jet->Fill(fabs(genSecondJ.Eta()), genWeight);
                     //*************************************** begin edit *******************************************************//
-                    genSecondJetRapidity_Zinc2jet->Fill(fabs(genNewSecondJ.Rapidity()), genWeight);
+                    genSecondJetAbsRapidity_Zinc2jet->Fill(fabs(genNewSecondJ.Rapidity()), genWeight);
+                    genSecondJetAbsRapidity_2_Zinc2jet->Fill(fabs(genNewSecondJ.Rapidity()), genWeight);
                     genSecondJetRapidityFull_Zinc2jet->Fill(genNewSecondJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc2jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
                     gendRapidityJets_2_Zinc2jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
@@ -1927,14 +1942,13 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZPt_Zinc3jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc3jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc3jet->Fill(genZ.Eta(), genWeight);
-                    genThirdJetPt_Zinc3jet->Fill(genJets[2].pt, genWeight);
-                    genThirdJetPt_1_Zinc3jet->Fill(genJets[2].pt, genWeight);
-                    genThirdJetPt_2_Zinc3jet->Fill(genJets[2].pt, genWeight);
+                    
                     
                     genThirdJetEta_Zinc3jet->Fill(fabs(genJets[2].eta), genWeight);
                     genThirdJetEta_2_Zinc3jet->Fill(fabs(genJets[2].eta), genWeight);
                     //*************************************** begin edit *************************************************************//
-                    genThirdJetRapidity_Zinc3jet->Fill(fabs(genNewThirdJ.Rapidity()), genWeight);
+                    genThirdJetAbsRapidity_Zinc3jet->Fill(fabs(genNewThirdJ.Rapidity()), genWeight);
+                    genThirdJetAbsRapidity_2_Zinc3jet->Fill(fabs(genNewThirdJ.Rapidity()), genWeight);
                     genThirdJetRapidityFull_Zinc3jet->Fill(genNewThirdJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
                     gendRapidityJets_2_Zinc3jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
@@ -1971,13 +1985,12 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZPt_Zinc4jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc4jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc4jet->Fill(genZ.Eta(), genWeight);
-                    genFourthJetPt_Zinc4jet->Fill(genJets[3].pt, genWeight);
-                    genFourthJetPt_1_Zinc4jet->Fill(genJets[3].pt, genWeight);
-                    genFourthJetPt_2_Zinc4jet->Fill(genJets[3].pt, genWeight);
+                    
                     genFourthJetEta_Zinc4jet->Fill(fabs(genJets[3].eta), genWeight);
                     genFourthJetEta_2_Zinc4jet->Fill(fabs(genJets[3].eta), genWeight);
                     //*************************************** begin edit *************************************************************//
-                    genFourthJetRapidity_Zinc4jet->Fill(fabs(genNewFourthJ.Rapidity()), genWeight);
+                    genFourthJetAbsRapidity_Zinc4jet->Fill(fabs(genNewFourthJ.Rapidity()), genWeight);
+                    genFourthJetAbsRapidity_2_Zinc4jet->Fill(fabs(genNewFourthJ.Rapidity()), genWeight);
                     genFourthJetRapidityFull_Zinc4jet->Fill(genNewFourthJ.Rapidity(), genWeight);
                     gendRapidityJets_Zinc4jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
                     gendRapidityJets_2_Zinc4jet->Fill(fabs(genNewLeadJ.Rapidity() - genNewSecondJ.Rapidity()), genWeight);
@@ -2006,9 +2019,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZPt_Zinc5jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc5jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc5jet->Fill(genZ.Eta(), genWeight);
-                    genFifthJetPt_Zinc5jet->Fill(genJets[4].pt, genWeight);
-                    genFifthJetPt_1_Zinc5jet->Fill(genJets[4].pt, genWeight);
-                    genFifthJetPt_2_Zinc5jet->Fill(genJets[4].pt, genWeight);
+                    
                     genFifthJetEta_Zinc5jet->Fill(fabs(genJets[4].eta), genWeight);
                     genFifthJetEta_2_Zinc5jet->Fill(fabs(genJets[4].eta), genWeight);
                     genFifthJetPtEta_Zinc5jet->Fill(genJets[4].pt, fabs(genJets[4].eta), genWeight);
@@ -2026,8 +2037,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     genZPt_Zinc6jet->Fill(genZ.Pt(), genWeight);
                     genZRapidity_Zinc6jet->Fill(genZ.Rapidity(), genWeight);
                     genZEta_Zinc6jet->Fill(genZ.Eta(), genWeight);
-                    genSixthJetPt_Zinc6jet->Fill(genJets[5].pt, genWeight);
-                    genSixthJetPt_1_Zinc6jet->Fill(genJets[5].pt, genWeight);
+                    
                     genSixthJetEta_Zinc6jet->Fill(fabs(genJets[5].eta), genWeight);
                     genSixthJetPtEta_Zinc6jet->Fill(genJets[5].pt, fabs(genJets[5].eta), genWeight);
                     genFirstHighestJetPt_Zinc6jet->Fill(genJets[0].pt, genWeight);
@@ -2144,6 +2154,36 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 SpTLeptons_Zexc0jet->Fill(SpTsub(lep1, lep2), weight);
             }
             
+            if (nGoodJets_20 >= 1){
+                FirstJetPt_Zinc1jet  ->Fill(jets_20[0].pt, weight);
+                FirstJetPt_1_Zinc1jet->Fill(jets_20[0].pt, weight);
+                FirstJetPt_2_Zinc1jet->Fill(jets_20[0].pt, weight);
+            }
+            if (nGoodJets_20 >= 2){
+                SecondJetPt_Zinc2jet  ->Fill(jets_20[1].pt, weight);
+                SecondJetPt_1_Zinc2jet->Fill(jets_20[1].pt, weight);
+                SecondJetPt_2_Zinc2jet->Fill(jets_20[1].pt, weight);
+            }
+            if (nGoodJets_20 >= 3){
+                ThirdJetPt_Zinc3jet  ->Fill(jets_20[2].pt, weight);
+                ThirdJetPt_1_Zinc3jet->Fill(jets_20[2].pt, weight);
+                ThirdJetPt_2_Zinc3jet->Fill(jets_20[2].pt, weight);
+            }
+            if (nGoodJets_20 >= 4){
+                FourthJetPt_Zinc4jet  ->Fill(jets_20[3].pt, weight);
+                FourthJetPt_1_Zinc4jet->Fill(jets_20[3].pt, weight);
+                FourthJetPt_2_Zinc4jet->Fill(jets_20[3].pt, weight);
+            }
+            if (nGoodJets_20 >= 5){
+                FifthJetPt_Zinc5jet  ->Fill(jets_20[4].pt, weight);
+                FifthJetPt_1_Zinc5jet->Fill(jets_20[4].pt, weight);
+                FifthJetPt_2_Zinc5jet->Fill(jets_20[4].pt, weight);
+            }
+            if (nGoodJets_20 >= 6){
+                SixthJetPt_Zinc6jet  ->Fill(jets_20[5].pt, weight);
+                SixthJetPt_1_Zinc6jet->Fill(jets_20[5].pt, weight);
+            }
+                            
             if (nGoodJets >= 1){
                 ZNGoodJets_Zinc->Fill(1., weight);
                 ZNGoodJetsFull_Zinc->Fill(1., weight);
@@ -2167,16 +2207,14 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 dEtaLeptons_Zinc1jet->Fill(lepton1.eta - lepton2.eta, weight);
                 dRLeptons_Zinc1jet->Fill(deltaR(lepton1.phi, lepton1.eta, lepton2.phi, lepton2.eta), weight);
                 SpTLeptons_Zinc1jet->Fill(SpTsub(lep1, lep2), weight);
-                FirstJetPt_Zinc1jet->Fill(jets[0].pt, weight);
-                FirstJetPt_1_Zinc1jet->Fill(jets[0].pt, weight);
-                FirstJetPt_2_Zinc1jet->Fill(jets[0].pt, weight);
                 
                 FirstHighestJetPt_Zinc1jet->Fill(jets[0].pt, weight);
                 FirstJetEta_Zinc1jet->Fill(fabs(jets[0].eta), weight);
                 FirstJetEta_2_Zinc1jet->Fill(fabs(jets[0].eta), weight);
                 FirstJetEtaFull_Zinc1jet->Fill(jets[0].eta, weight);
                 //*************************************** begin edit *************************************************************//
-                FirstJetRapidity_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), weight);
+                FirstJetAbsRapidity_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), weight);
+                FirstJetAbsRapidity_2_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), weight);
                 FirstJetRapidityFull_Zinc1jet->Fill(newLeadJ.Rapidity(), weight);
                 FirstJetmass_Zinc1jet->Fill(newLeadJ.M(), weight);
                 FirstJetmass_1_Zinc1jet->Fill(newLeadJ.M(), weight);
@@ -2257,15 +2295,14 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 SpTLeptons_Zinc2jet->Fill(SpTsub(lep1, lep2), weight);
                 FirstHighestJetPt_Zinc2jet->Fill(jets[0].pt, weight);
                 SecondHighestJetPt_Zinc2jet->Fill(jets[1].pt, weight);
-                SecondJetPt_Zinc2jet->Fill(jets[1].pt, weight);
-                SecondJetPt_1_Zinc2jet->Fill(jets[1].pt, weight);
-                SecondJetPt_2_Zinc2jet->Fill(jets[1].pt, weight);
+                
                 SecondJetEta_Zinc2jet->Fill(fabs(jets[1].eta), weight);
                 SecondJetEta_2_Zinc2jet->Fill(fabs(jets[1].eta), weight);
                 
                 SecondJetEtaFull_Zinc2jet->Fill(jets[1].eta, weight);
                 //*************************************** begin edit *************************************************************//
-                SecondJetRapidity_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), weight);
+                SecondJetAbsRapidity_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), weight);
+                SecondJetAbsRapidity_2_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), weight);
                 SecondJetRapidityFull_Zinc2jet->Fill(newSecondJ.Rapidity(), weight);
                 SecondJetmass_Zinc2jet->Fill(newSecondJ.M(), weight);
                 SecondJetmass_1_Zinc2jet->Fill(newSecondJ.M(), weight);
@@ -2325,7 +2362,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 
                 
                 for ( int i =0 ; i < NbinsEta2D - 1 ; i++){
-                    if ( fabs(jets[1].eta) >= j_Y_range[i] &&  fabs(jets[1].eta) < j_Y_range[i+1]                                   )                                                SecondJetPt_Zinc2jet_Eta[i]->Fill(fabs(jets[0].pt), weight);
+                    if ( fabs(jets[1].eta) >= j_Y_range[i] &&  fabs(jets[1].eta) < j_Y_range[i+1]) SecondJetPt_Zinc2jet_Eta[i]->Fill(fabs(jets[0].pt), weight);
                 }
                 //--- V + 2 jets EWK histograms
                 if (passesEWKJetPt){
@@ -2691,9 +2728,6 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 dEtaLeptons_Zinc3jet->Fill(lepton1.eta - lepton2.eta, weight);
                 dRLeptons_Zinc3jet->Fill(deltaR(lepton1.phi, lepton1.eta, lepton2.phi, lepton2.eta), weight);
                 SpTLeptons_Zinc3jet->Fill(SpTsub(lep1, lep2), weight);
-                ThirdJetPt_Zinc3jet->Fill(jets[2].pt, weight);
-                ThirdJetPt_1_Zinc3jet->Fill(jets[2].pt, weight);
-                ThirdJetPt_2_Zinc3jet->Fill(jets[2].pt, weight);
                 
                 FirstHighestJetPt_Zinc3jet->Fill(jets[0].pt, weight);
                 SecondHighestJetPt_Zinc3jet->Fill(jets[1].pt, weight);
@@ -2702,7 +2736,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 ThirdJetEta_2_Zinc3jet->Fill(fabs(jets[2].eta), weight);
                 ThirdJetEtaFull_Zinc3jet->Fill(jets[2].eta, weight);
                 //*************************************** begin edit *************************************************************//
-                ThirdJetRapidity_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), weight);
+                ThirdJetAbsRapidity_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), weight);
+                ThirdJetAbsRapidity_2_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), weight);
                 ThirdJetRapidityFull_Zinc3jet->Fill(newThirdJ.Rapidity(), weight);
                 ThirdJetmass_Zinc3jet->Fill(newThirdJ.M(), weight);
                 ThirdJetmass_1_Zinc3jet->Fill(newThirdJ.M(), weight);
@@ -2772,9 +2807,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 dEtaLeptons_Zinc4jet->Fill(lepton1.eta - lepton2.eta, weight);
                 dRLeptons_Zinc4jet->Fill(deltaR(lepton1.phi, lepton1.eta, lepton2.phi, lepton2.eta), weight);
                 SpTLeptons_Zinc4jet->Fill(SpTsub(lep1, lep2), weight);
-                FourthJetPt_Zinc4jet->Fill(jets[3].pt, weight);
-                FourthJetPt_1_Zinc4jet->Fill(jets[3].pt, weight);
-                FourthJetPt_2_Zinc4jet->Fill(jets[3].pt, weight);
+                
                 FirstHighestJetPt_Zinc4jet->Fill(jets[0].pt, weight);
                 SecondHighestJetPt_Zinc4jet->Fill(jets[1].pt, weight);
                 ThirdHighestJetPt_Zinc4jet->Fill(jets[2].pt, weight);
@@ -2782,7 +2815,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 FourthJetEta_2_Zinc4jet->Fill(fabs(jets[3].eta), weight);
                 FourthJetEtaFull_Zinc4jet->Fill(jets[3].eta, weight);
                 //*************************************** begin edit *************************************************************//
-                FourthJetRapidity_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), weight);
+                FourthJetAbsRapidity_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), weight);
+                FourthJetAbsRapidity_2_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), weight);
                 FourthJetRapidityFull_Zinc4jet->Fill(newFourthJ.Rapidity(), weight);
                 FourthJetmass_Zinc4jet->Fill(newFourthJ.M(), weight);
                 FourthJetmass_1_Zinc4jet->Fill(newFourthJ.M(), weight);
@@ -2843,9 +2877,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 dEtaLeptons_Zinc5jet->Fill(lepton1.eta - lepton2.eta, weight);
                 dRLeptons_Zinc5jet->Fill(deltaR(lepton1.phi, lepton1.eta, lepton2.phi, lepton2.eta), weight);
                 SpTLeptons_Zinc5jet->Fill(SpTsub(lep1, lep2), weight);
-                FifthJetPt_Zinc5jet->Fill(jets[4].pt, weight);
-                FifthJetPt_1_Zinc5jet->Fill(jets[4].pt, weight);
-                FifthJetPt_2_Zinc5jet->Fill(jets[4].pt, weight);
+                
                 FirstHighestJetPt_Zinc5jet->Fill(jets[0].pt, weight);
                 SecondHighestJetPt_Zinc5jet->Fill(jets[1].pt, weight);
                 ThirdHighestJetPt_Zinc5jet->Fill(jets[2].pt, weight);
@@ -2882,8 +2914,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 ZPt_Zinc6jet->Fill(Z.Pt(), weight);
                 ZRapidity_Zinc6jet->Fill(Z.Rapidity(), weight);
                 ZEta_Zinc6jet->Fill(Z.Eta(), weight);
-                SixthJetPt_Zinc6jet->Fill(jets[5].pt, weight);
-                SixthJetPt_1_Zinc6jet->Fill(jets[5].pt, weight);
+                
                 FirstHighestJetPt_Zinc6jet->Fill(jets[0].pt, weight);
                 SecondHighestJetPt_Zinc6jet->Fill(jets[1].pt, weight);
                 ThirdHighestJetPt_Zinc6jet->Fill(jets[2].pt, weight);
@@ -2922,30 +2953,54 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
             hresponseZNGoodJetsFull_Zexc->Fill(nGoodJets, nGoodGenJets, weight);
             hresponseZNGoodJets_Zinc->Fill(0., 0., weight);
             hresponseZNGoodJetsFull_Zinc->Fill(0., 0., weight);
+            
+            if (nGoodGenJets_20 >= 1 && nGoodJets_20 >= 1){
+                hresponseFirstJetPt_Zinc1jet  ->Fill(jets_20[0].pt, genJets_20[0].pt, weight);
+                hresponseFirstJetPt_1_Zinc1jet->Fill(jets_20[0].pt, genJets_20[0].pt, weight);
+                hresponseFirstJetPt_2_Zinc1jet->Fill(jets_20[0].pt, genJets_20[0].pt, weight);
+            }
+            if (nGoodGenJets_20 >= 2 && nGoodJets_20 >= 2){
+                hresponseSecondJetPt_Zinc2jet  ->Fill(jets_20[1].pt, genJets_20[1].pt, weight);
+                hresponseSecondJetPt_1_Zinc2jet->Fill(jets_20[1].pt, genJets_20[1].pt, weight);
+                hresponseSecondJetPt_2_Zinc2jet->Fill(jets_20[1].pt, genJets_20[1].pt, weight);
+            }
+            if (nGoodGenJets_20 >= 3 && nGoodJets_20 >= 3){
+                hresponseThirdJetPt_Zinc3jet  ->Fill(jets_20[2].pt, genJets_20[2].pt, weight);
+                hresponseThirdJetPt_1_Zinc3jet->Fill(jets_20[2].pt, genJets_20[2].pt, weight);
+                hresponseThirdJetPt_2_Zinc3jet->Fill(jets_20[2].pt, genJets_20[2].pt, weight);
+            }
+            if (nGoodGenJets_20 >= 4 && nGoodJets_20 >= 4){
+                hresponseFourthJetPt_Zinc4jet  ->Fill(jets_20[3].pt, genJets_20[3].pt, weight);
+                hresponseFourthJetPt_1_Zinc4jet->Fill(jets_20[3].pt, genJets_20[3].pt, weight);
+                hresponseFourthJetPt_2_Zinc4jet->Fill(jets_20[3].pt, genJets_20[3].pt, weight);
+            }
+            if (nGoodGenJets_20 >= 5 && nGoodJets_20 >= 5){
+                hresponseFifthJetPt_Zinc5jet  ->Fill(jets_20[4].pt, genJets_20[4].pt, weight);
+                hresponseFifthJetPt_1_Zinc5jet->Fill(jets_20[4].pt, genJets_20[4].pt, weight);
+                hresponseFifthJetPt_2_Zinc5jet->Fill(jets_20[4].pt, genJets_20[4].pt, weight);
+            }
+            
             //-- First Jet Pt
             if (nGoodGenJets >= 1 && nGoodJets >= 1){
                 hresponseZNGoodJets_Zinc->Fill(1., 1., weight);
                 hresponseZNGoodJetsFull_Zinc->Fill(1., 1., weight);
-                hresponseFirstJetPt_Zinc1jet->Fill(jets[0].pt, genJets[0].pt, weight);
                 hresponseFirstJetEta_Zinc1jet->Fill(fabs(jets[0].eta), fabs(genJets[0].eta), weight);
                 hresponseJetsHT_Zinc1jet->Fill(jetsHT, genJetsHT, weight);
                 
-                hresponseFirstJetPt_1_Zinc1jet->Fill(jets[0].pt, genJets[0].pt, weight);
-                hresponseFirstJetPt_2_Zinc1jet->Fill(jets[0].pt, genJets[0].pt, weight);
                 hresponseFirstJetEta_2_Zinc1jet->Fill(fabs(jets[0].eta), fabs(genJets[0].eta), weight);
                 hresponseJetsHT_1_Zinc1jet->Fill(jetsHT, genJetsHT, weight);
                 hresponseJetsHT_2_Zinc1jet->Fill(jetsHT, genJetsHT, weight);
+                
+                hresponseFirstJetAbsRapidity_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), fabs(genNewLeadJ.Rapidity()), weight);
+                hresponseFirstJetAbsRapidity_2_Zinc1jet->Fill(fabs(newLeadJ.Rapidity()), fabs(genNewLeadJ.Rapidity()), weight);
             }
             //-- Second Jet Pt
             if (nGoodGenJets >= 2 && nGoodJets >= 2){
                 hresponseZNGoodJets_Zinc->Fill(2., 2., weight);
                 hresponseZNGoodJetsFull_Zinc->Fill(2., 2., weight);
-                hresponseSecondJetPt_Zinc2jet->Fill(jets[1].pt, genJets[1].pt, weight);
                 hresponseSecondJetEta_Zinc2jet->Fill(fabs(jets[1].eta), fabs(genJets[1].eta), weight);
                 hresponseJetsHT_Zinc2jet->Fill(jetsHT, genJetsHT, weight);
                 
-                hresponseSecondJetPt_1_Zinc2jet->Fill(jets[1].pt, genJets[1].pt, weight);
-                hresponseSecondJetPt_2_Zinc2jet->Fill(jets[1].pt, genJets[1].pt, weight);
                 hresponseSecondJetEta_2_Zinc2jet->Fill(fabs(jets[1].eta), fabs(genJets[1].eta), weight);
                 hresponseJetsHT_1_Zinc2jet->Fill(jetsHT, genJetsHT, weight);
                 hresponseJetsHT_2_Zinc2jet->Fill(jetsHT, genJetsHT, weight);
@@ -2970,17 +3025,17 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 
                 hresponsediJetPt_Zinc2jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                 hresponsediJetPt_2_Zinc2jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                
+                hresponseSecondJetAbsRapidity_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), fabs(genNewSecondJ.Rapidity()), weight);
+                hresponseSecondJetAbsRapidity_2_Zinc2jet->Fill(fabs(newSecondJ.Rapidity()), fabs(genNewSecondJ.Rapidity()), weight);
             }
             //-- Third Jet Pt
             if (nGoodGenJets >= 3 && nGoodJets >= 3){
                 hresponseZNGoodJets_Zinc->Fill(3., 3., weight);
                 hresponseZNGoodJetsFull_Zinc->Fill(3., 3., weight);
-                hresponseThirdJetPt_Zinc3jet->Fill(jets[2].pt, genJets[2].pt, weight);
                 hresponseThirdJetEta_Zinc3jet->Fill(fabs(jets[2].eta), fabs(genJets[2].eta), weight);
                 hresponseJetsHT_Zinc3jet->Fill(jetsHT, genJetsHT, weight);
                 
-                hresponseThirdJetPt_1_Zinc3jet->Fill(jets[2].pt, genJets[2].pt, weight);
-                hresponseThirdJetPt_2_Zinc3jet->Fill(jets[2].pt, genJets[2].pt, weight);
                 hresponseThirdJetEta_2_Zinc3jet->Fill(fabs(jets[2].eta), fabs(genJets[2].eta), weight);
                 hresponseJetsHT_1_Zinc3jet->Fill(jetsHT, genJetsHT, weight);
                 hresponseJetsHT_2_Zinc3jet->Fill(jetsHT, genJetsHT, weight);
@@ -3002,17 +3057,17 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 
                 hresponsediJetPt_Zinc3jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                 hresponsediJetPt_2_Zinc3jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                
+                hresponseThirdJetAbsRapidity_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), fabs(genNewThirdJ.Rapidity()), weight);
+                hresponseThirdJetAbsRapidity_2_Zinc3jet->Fill(fabs(newThirdJ.Rapidity()), fabs(genNewThirdJ.Rapidity()), weight);
             }
             //-- Fourth Jet Pt
             if (nGoodGenJets >= 4 && nGoodJets >= 4){
                 hresponseZNGoodJets_Zinc->Fill(4., 4., weight);
                 hresponseZNGoodJetsFull_Zinc->Fill(4., 4., weight);
-                hresponseFourthJetPt_Zinc4jet->Fill(jets[3].pt, genJets[3].pt, weight);
                 hresponseFourthJetEta_Zinc4jet->Fill(fabs(jets[3].eta), fabs(genJets[3].eta), weight);
                 hresponseJetsHT_Zinc4jet->Fill(jetsHT, genJetsHT, weight);
                 
-                hresponseFourthJetPt_1_Zinc4jet->Fill(jets[3].pt, genJets[3].pt, weight);
-                hresponseFourthJetPt_2_Zinc4jet->Fill(jets[3].pt, genJets[3].pt, weight);
                 hresponseFourthJetEta_2_Zinc4jet->Fill(fabs(jets[3].eta), fabs(genJets[3].eta), weight);
                 hresponseJetsHT_1_Zinc4jet->Fill(jetsHT, genJetsHT, weight);
                 hresponseJetsHT_2_Zinc4jet->Fill(jetsHT, genJetsHT, weight);
@@ -3029,17 +3084,17 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                 
                 hresponsediJetPt_Zinc4jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
                 hresponsediJetPt_2_Zinc4jet->Fill(jet1Plus2.Pt(), genJet1Plus2.Pt(), weight);
+                
+                hresponseFourthJetAbsRapidity_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), fabs(genNewFourthJ.Rapidity()), weight);
+                hresponseFourthJetAbsRapidity_2_Zinc4jet->Fill(fabs(newFourthJ.Rapidity()), fabs(genNewFourthJ.Rapidity()), weight);
             }
             //-- Fifth Jet Pt
             if (nGoodGenJets >= 5 && nGoodJets >= 5){
                 hresponseZNGoodJets_Zinc->Fill(5., 5., weight);
                 hresponseZNGoodJetsFull_Zinc->Fill(5., 5., weight);
-                hresponseFifthJetPt_Zinc5jet->Fill(jets[4].pt, genJets[4].pt, weight);
                 hresponseFifthJetEta_Zinc5jet->Fill(fabs(jets[4].eta), fabs(genJets[4].eta), weight);
                 hresponseJetsHT_Zinc5jet->Fill(jetsHT, genJetsHT, weight);
                 
-                hresponseFifthJetPt_1_Zinc5jet->Fill(jets[4].pt, genJets[4].pt, weight);
-                hresponseFifthJetPt_2_Zinc5jet->Fill(jets[4].pt, genJets[4].pt, weight);
                 hresponseFifthJetEta_2_Zinc5jet->Fill(fabs(jets[4].eta), fabs(genJets[4].eta), weight);
                 hresponseJetsHT_1_Zinc5jet->Fill(jetsHT, genJetsHT, weight);
                 hresponseJetsHT_2_Zinc5jet->Fill(jetsHT, genJetsHT, weight);

@@ -787,7 +787,7 @@ def db_clear_task_record(prim_dataset, task_id):
     conn.commit()
     conn.close()
 
-    crab_dir = "old_crab_" + prim_dataset + ("-%04d" % int(task_id))
+    crab_dir = "crab_" + prim_dataset + ("-%04d" % int(task_id))
     ts = None
     try:
         ts = os.stat(crab_dir).st_ctime
@@ -795,8 +795,8 @@ def db_clear_task_record(prim_dataset, task_id):
         #file does not exist
         pass
     if ts:
-        newdirname="%s_%d" % (crab_dir, ts)
-        print "Renaming %s and %s.py to %s and %s.py" % (crab_dir, newdirname, crab_dir, newdirname)
+        newdirname="old_%s_%d" % (crab_dir, ts)
+        print "Renaming %s and %s.py to %s and %s.py" % (crab_dir, crab_dir, newdirname, newdirname)
         os.rename(crab_dir, newdirname)
         os.rename(crab_dir + ".py", newdirname + ".py")
 

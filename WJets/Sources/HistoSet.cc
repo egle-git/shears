@@ -202,8 +202,10 @@ HistoSet::HistoSet(string leptonFlavor)
 
     int nJetPt_Zinc1jet(22);
     double jetPt_Zinc1jet[23] = {20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 1000};
-    int nJetPt_Zinc2jet(21);
-    double jetPt_Zinc2jet[22] = {20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 800};
+    //int nJetPt_Zinc2jet(21);
+    //double jetPt_Zinc2jet[22] = {20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 800};
+    int nJetPt_Zinc2jet(13);
+    double jetPt_Zinc2jet[14] = {20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300, 380, 500};
     int nJetPt_Zinc3jet(11);
     double jetPt_Zinc3jet[12] = {20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300};
     int nJetPt_Zinc4jet(8);
@@ -238,8 +240,10 @@ HistoSet::HistoSet(string leptonFlavor)
     double jetHT_Zinc1jet[18] = {30, 39, 49, 62, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000, 1500};
     int nJetHT_Zinc2jet(13);
     double jetHT_Zinc2jet[14] = {60, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1200};
-    int nJetHT_Zinc3jet(11);
-    double jetHT_Zinc3jet[12] = {90, 105, 125, 151, 185, 230, 290, 366, 466, 586, 767, 990};
+    //int nJetHT_Zinc3jet(11);
+    //double jetHT_Zinc3jet[12] = {90, 105, 125, 151, 185, 230, 290, 366, 466, 586, 767, 990};
+    int nJetHT_Zinc3jet(8);
+    double jetHT_Zinc3jet[9] = {90, 118, 168, 220, 300, 400, 550, 780, 1100};
     int nJetHT_Zinc4jet(9);
     double jetHT_Zinc4jet[10] = {120, 140, 167, 203, 253, 320, 410, 530, 690, 910};
     int nJetHT_Zinc5jet(7);

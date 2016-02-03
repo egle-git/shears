@@ -747,7 +747,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     if (abs(jetflavour)==5){
                         float effb = 0.55745;
                         float effb_corr = 1;
-                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effb_corr = 0.85751227141;
+                        //if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effb_corr = 0.85751227141;
                         if (pt < 30.)                effb = 0.55745  * effb_corr;
                         if (pt >= 30. && pt < 50.)   effb = 0.55745  * effb_corr;
                         if (pt >= 50. && pt < 70.)   effb = 0.611329 * effb_corr;
@@ -809,7 +809,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     if (abs(jetflavour)==4){
                         float effc = 0.112358;
                         float effc_corr = 1;
-                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effc_corr = 0.90390213261;
+                        //if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) effc_corr = 0.90390213261;
                         if (pt < 30.)                effc = 0.112358 * effc_corr;
                         if (pt >= 30. && pt < 50.)   effc = 0.112358 * effc_corr;
                         if (pt >= 50. && pt < 70.)   effc = 0.113942 * effc_corr;
@@ -870,7 +870,7 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
                     if (abs(jetflavour)<4){
                         float eff_l = 0.0118925;
                         float eff_l_corr = 1;
-                        if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) eff_l_corr = 0.37420925055;
+                        //if (fileName.find("WJets") != string::npos && fileName.find("SMu_") != string::npos) eff_l_corr = 0.37420925055;
                         if (pt < 30.)                eff_l = 0.0118925 * eff_l_corr;
                         if (pt >= 30. && pt < 50.)   eff_l = 0.0118925 * eff_l_corr;
                         if (pt >= 50. && pt < 70.)   eff_l = 0.0129924 * eff_l_corr;

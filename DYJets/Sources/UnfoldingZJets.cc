@@ -804,7 +804,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     bool tsvd_unfold = cfg.getB("tsvdUnfold", false);
     bool binByBin_unfold = cfg.getB("binByBinUnfold", false);
     bool xvalIter = cfg.getB("xvalIter", false);
-    bool minIter = cfg.getI("minIter", 2);
+    int minIter = cfg.getI("minIter", 2);
     int maxIter = cfg.getI("maxIter", 20);
     int nSkipFirstJetPtBins = cfg.getI("nSkipFirstJetPtBins", 2);
     bool useFlatPrior = cfg.getB("useFlatPrior", false);

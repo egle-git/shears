@@ -101,10 +101,10 @@ The new-era command
 This command is used to set up work space on AFS and EOS for SMP Shears ntuple production. Online help can be obtained by running `new-era --help`.
 
 
-Production of Baobab ntuples
+Production of Bonzai ntuples
 ============================
 
-Baobab ntuple can be produced using the [Pruner](https://gitlab.cern.ch/shears/shears/tree/master/Bonzais/Pruner) utility. The grow_bonzai tool can be used for massing production using the GRID infractuction. The grow_bonzai tool is less advanced that the grow_baobab ones. Both tools will be eventually merged.
+Bonzai ntuple can be produced using the [Pruner](https://gitlab.cern.ch/shears/shears/tree/master/Bonzais/Pruner) utility. The grow_bonzai tool can be used for massing production using the GRID infractuction. The grow_bonzai tool is less advanced that the grow_baobab ones. Both tools will be eventually merged.
 
 Usage:
 -----

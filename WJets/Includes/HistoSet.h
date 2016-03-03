@@ -44,7 +44,21 @@ public:
 
 
     //***************************** Basic plots for Wjets *****************************//
+    
+    //--- For calculateing b-tagging efficiency---
+    TH2D *h_pt_eta_b;
+    TH2D *h_pt_eta_b_tagged;
+    TH2D *h_pt_eta_c;
+    TH2D *h_pt_eta_c_tagged;
+    TH2D *h_pt_eta_udsg;
+    TH2D *h_pt_eta_udsg_tagged;
+    
+    TH1D *h_pt_b;
+    TH1D *h_pt_b_tagged;
+    TH1D *h_pt_udsg;
+    TH1D *h_pt_udsg_tagged;
 
+    
     //--- Jet multiplicity
     TH1D *ZNGoodJets_Zexc;
     TH1D *genZNGoodJets_Zexc;
@@ -442,33 +456,49 @@ public:
     RooUnfoldResponse *responseMeanNJetsdRapidity_Zinc2jet;
     RooUnfoldResponse *responseMeanNJetsdRapidityFB_Zinc2jet;
 
+    //--- Jets Rapidity ---
+    TH1D *FirstJetAbsRapidity_Zinc1jet;
+    TH1D *SecondJetAbsRapidity_Zinc2jet;
+    TH1D *ThirdJetAbsRapidity_Zinc3jet;
+    TH1D *FourthJetAbsRapidity_Zinc4jet;
+    TH1D *FifthJetAbsRapidity_Zinc5jet;
+    TH1D *genFirstJetAbsRapidity_Zinc1jet;
+    TH1D *genSecondJetAbsRapidity_Zinc2jet;
+    TH1D *genThirdJetAbsRapidity_Zinc3jet;
+    TH1D *genFourthJetAbsRapidity_Zinc4jet;
+    TH1D *genFifthJetAbsRapidity_Zinc5jet;
+    TH2D *hresponseFirstJetAbsRapidity_Zinc1jet;
+    TH2D *hresponseSecondJetAbsRapidity_Zinc2jet;
+    TH2D *hresponseThirdJetAbsRapidity_Zinc3jet;
+    TH2D *hresponseFourthJetAbsRapidity_Zinc4jet;
+    TH2D *hresponseFifthJetAbsRapidity_Zinc5jet;
+    
+    TH1D *FirstJetAbsRapidity_2_Zinc1jet;
+    TH1D *SecondJetAbsRapidity_2_Zinc2jet;
+    TH1D *ThirdJetAbsRapidity_2_Zinc3jet;
+    TH1D *FourthJetAbsRapidity_2_Zinc4jet;
+    TH1D *FifthJetAbsRapidity_2_Zinc5jet;
+    TH1D *genFirstJetAbsRapidity_2_Zinc1jet;
+    TH1D *genSecondJetAbsRapidity_2_Zinc2jet;
+    TH1D *genThirdJetAbsRapidity_2_Zinc3jet;
+    TH1D *genFourthJetAbsRapidity_2_Zinc4jet;
+    TH1D *genFifthJetAbsRapidity_2_Zinc5jet;
+    TH2D *hresponseFirstJetAbsRapidity_2_Zinc1jet;
+    TH2D *hresponseSecondJetAbsRapidity_2_Zinc2jet;
+    TH2D *hresponseThirdJetAbsRapidity_2_Zinc3jet;
+    TH2D *hresponseFourthJetAbsRapidity_2_Zinc4jet;
+    TH2D *hresponseFifthJetAbsRapidity_2_Zinc5jet;
+
+    
     // Jets Rapidity -- not used
-    TH1D *FirstJetRapidity_Zinc1jet;
-    TH1D *SecondJetRapidity_Zinc2jet;
-    TH1D *ThirdJetRapidity_Zinc3jet;
-    TH1D *FourthJetRapidity_Zinc4jet;
     TH1D *FirstJetRapidityFull_Zinc1jet;
     TH1D *SecondJetRapidityFull_Zinc2jet;
     TH1D *ThirdJetRapidityFull_Zinc3jet;
     TH1D *FourthJetRapidityFull_Zinc4jet;
-    TH1D *genFirstJetRapidity_Zinc1jet;
-    TH1D *genSecondJetRapidity_Zinc2jet;
-    TH1D *genThirdJetRapidity_Zinc3jet;
-    TH1D *genFourthJetRapidity_Zinc4jet;
     TH1D *genFirstJetRapidityFull_Zinc1jet;
     TH1D *genSecondJetRapidityFull_Zinc2jet;
     TH1D *genThirdJetRapidityFull_Zinc3jet;
     TH1D *genFourthJetRapidityFull_Zinc4jet;
-    /*
-    RooUnfoldResponse *responseFirstJetRapidity_Zinc1jet;
-    RooUnfoldResponse *responseSecondJetRapidity_Zinc2jet;
-    RooUnfoldResponse *responseThirdJetRapidity_Zinc3jet;
-    RooUnfoldResponse *responseFourthJetRapidity_Zinc4jet;
-    RooUnfoldResponse *responseFirstJetRapidityFull_Zinc1jet;
-    RooUnfoldResponse *responseSecondJetRapidityFull_Zinc2jet;
-    RooUnfoldResponse *responseThirdJetRapidityFull_Zinc3jet;
-    RooUnfoldResponse *responseFourthJetRapidityFull_Zinc4jet;
-    */
 
     // Jets Mass -- not used
     TH1D *FirstJetmass_Zinc1jet;

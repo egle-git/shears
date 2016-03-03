@@ -296,8 +296,10 @@ double table::getEfficiency(double pt, double eta, int sysLepSF){
 double table::getEfficiency(double pt, double eta){
     double hiPtBin= 0;
     for (unsigned int i=0; i != recd.size(); i++) {
+        // if finds the proper bin, then return the efficiency
         if((recd[i]).belongTo(pt, eta)) return recd[i].effi;
-        if((recd[i]).belongTo(190, eta)) hiPtBin = recd[i].effi;
+        // else store the average pt of the current bin efficency but do not return and try the next bin
+        if((recd[i]).belongTo(0.5*(recd[i].ptHi + recd[i].ptLow), eta)) hiPtBin = recd[i].effi;
     }
     return hiPtBin;
 }
@@ -320,38 +322,38 @@ double table::getEfficiencyHigh(double pt, double eta){
 
 
 double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){
-    // 8TeV 2012 JER scaling factors
+    // Fall 2015 resolution scale factor
     // twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-    
     double centralSF(1.00);
-    if      (fabs(eta) < 0.5) centralSF = 1.079;
-    else if (fabs(eta) < 1.1) centralSF = 1.099;
-    else if (fabs(eta) < 1.7) centralSF = 1.121;
-    else if (fabs(eta) < 2.3) centralSF = 1.208;
-    else if (fabs(eta) < 2.8) centralSF = 1.254;
-    else if (fabs(eta) < 3.2) centralSF = 1.395;
-    else if (fabs(eta) < 5.0) centralSF = 1.056;
-    else centralSF = 1.056;
+    if      (fabs(eta) < 0.8) centralSF = 1.061;
+    else if (fabs(eta) < 1.3) centralSF = 1.088;
+    else if (fabs(eta) < 1.9) centralSF = 1.106;
+    else if (fabs(eta) < 2.5) centralSF = 1.126;
+    else if (fabs(eta) < 3.0) centralSF = 1.343;
+    else if (fabs(eta) < 3.2) centralSF = 1.303;
+    else if (fabs(eta) < 5.0) centralSF = 1.320;
+    else centralSF = 1.320;
     
     double upSF(1.00);
-    if      (fabs(eta) < 0.5) upSF = 1.105;
-    else if (fabs(eta) < 1.1) upSF = 1.127;
-    else if (fabs(eta) < 1.7) upSF = 1.150;
-    else if (fabs(eta) < 2.3) upSF = 1.254;
-    else if (fabs(eta) < 2.8) upSF = 1.316;
-    else if (fabs(eta) < 3.2) upSF = 1.458;
-    else if (fabs(eta) < 5.0) upSF = 1.247;
-    else upSF = 1.247;
+    if      (fabs(eta) < 0.8) upSF = 1.084;
+    else if (fabs(eta) < 1.3) upSF = 1.117;
+    else if (fabs(eta) < 1.9) upSF = 1.136;
+    else if (fabs(eta) < 2.5) upSF = 1.220;
+    else if (fabs(eta) < 3.0) upSF = 1.466;
+    else if (fabs(eta) < 3.2) upSF = 1.414;
+    else if (fabs(eta) < 5.0) upSF = 1.606;
+    else upSF = 1.606;
     
     double downSF(1.00);
-    if      (fabs(eta) < 0.5) downSF = 1.053;
-    else if (fabs(eta) < 1.1) downSF = 1.071;
-    else if (fabs(eta) < 1.7) downSF = 1.092;
-    else if (fabs(eta) < 2.3) downSF = 1.162;
-    else if (fabs(eta) < 2.8) downSF = 1.192;
-    else if (fabs(eta) < 3.2) downSF = 1.332;
-    else if (fabs(eta) < 5.0) downSF = 0.865;
-    else downSF = 0.865;
+    if      (fabs(eta) < 0.8) downSF = 1.038;
+    else if (fabs(eta) < 1.3) downSF = 1.059;
+    else if (fabs(eta) < 1.9) downSF = 1.076;
+    else if (fabs(eta) < 2.5) downSF = 1.032;
+    else if (fabs(eta) < 3.0) downSF = 1.220;
+    else if (fabs(eta) < 3.2) downSF = 1.192;
+    else if (fabs(eta) < 5.0) downSF = 1.034;
+    else downSF = 1.034;
+
 
     double smearedPt(0);
     

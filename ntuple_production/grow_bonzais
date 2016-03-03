@@ -482,18 +482,17 @@ def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
         sys.stderr.write("Directory %s was not found!\n\n" % (ntuple_dir_path + "/" + ntuple_subdir))
         return
 
-    subdirs = os.listdir(ntuple_dir_path + "/" + ntuple_subdir)
+    mtime = lambda f: os.stat(ntuple_dir_path + "/" + ntuple_subdir + "/" + f).st_mtime
+    subdirs = sorted(os.listdir(ntuple_dir_path + "/" + ntuple_subdir), key=mtime)
 
     if len(subdirs) == 0:
         sys.stderr.write("Directory %s is empty!\n" % ntuple_dir)
         return
 
     if len(subdirs) > 1:
-        sys.stderr.write("Directory %s contains too many directories! Please keep only one of them.\n\t%s\n" 
-                         % (ntuple_dir + "/" + ntuple_subdir, ", ".join(subdirs)))        
-        return
+          sys.stderr.write("Warning: directory %s contains several directories! Ntuple from the most recent one, %s, will be used.\n\n" % (ntuple_subdir, subdirs[-1]))
 
-    ntuple_subdir = ntuple_subdir + "/" +  subdirs[0]
+    ntuple_subdir = ntuple_subdir + "/" +  subdirs[-1]
 
     #creates directory if it does not exist as it should
     try:

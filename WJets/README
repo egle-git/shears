@@ -1,6 +1,6 @@
 The instructions for running the W+jets analysis code on Bonzai (also possibly on Baobab) data and MC ntuples produced at 13 TeV.
 Kadir Ocalan (29.10.2015)
-updated by K. Ocalan on 06.06.2016)
+updated by K. Ocalan on 06.03.2016)
 
 -- For now use CMSSW_5_3_11, planned migration to CMSSW 76X 
 

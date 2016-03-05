@@ -1,9 +1,11 @@
-The instructions for running the W+jets analysis code on baobab data and MC ntuples produced at 13 TeV.
+The instructions for running the W+jets analysis code on Bonzai (also possibly on Baobab) data and MC ntuples produced at 13 TeV.
 Kadir Ocalan (29.10.2015)
+updated by K. Ocalan on 06.06.2016)
 
--- For now use CMSSW_5_3_11, migrating to CMSSW 75X
-cmsrel CMSSW_5_3_20  
-cd CMSSW_5_3_20/src
+-- For now use CMSSW_5_3_11, planned migration to CMSSW 76X 
+
+cmsrel CMSSW_5_3_11  
+cd CMSSW_5_3_11/src
 cmsenv 
 
 -- Clone shears from the gitlab (can be found here https://gitlab.cern.ch/shears/shears/tree/master)
@@ -18,13 +20,15 @@ make clean
 make
 cd -
 
--- One can run on the skimmed ntuples called Bonzais. The paths to these Bonzais are specified in the txt files in the directory DataW_txt
+-- One can run on the skimmed ntuples called Bonzais. The paths to these Bonzais are specified in the txt files in the directory WJets/DataW_txt. You can add similar text files pointing to any bonzai if you want.
  
--- SKIP the following steps if you run on Bonzai: Another option is to run on 13 TeV v10 Baobab data and MC 25ns samples that are merged from here /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/
+-- SKIP the following steps if you run on Bonzai: Another option is to run on 13 TeV Baobab data and MC 25ns samples that are merged from here /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/
+
 mkdir DataW
 mkdir ~/eos
 eosmount ~/eos
 ln -s  ~/eos/cms/store/user/ocalan/13TeV_25ns   DataW
+--SKIP until here
 
 -- Ready to run the code!!! Before running it, change doQCD to 0 (int doQCD=0) in WJets/runDYJets.cc.
 

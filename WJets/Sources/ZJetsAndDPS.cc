@@ -113,7 +113,7 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
             LeptID = SC_Ele_2012EA;
         }
         if (leptonFlavor == "SingleMuon")  {
-            // Single Muon SFs measured using 13 TeV 25 ns samples (run 2015D golden JSON, 1280 /pb)
+            // Single Muon SFs measured using full 2015 25ns dataset.
             // Muon POG SFs: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonReferenceEffsRun2
             table SF_Muon_TightID_ReReco("EfficiencyTables/SMu_SFs_TightId_13TeV_EtaPt.txt");
             table SF_Muon_TightISO_ReReco("EfficiencyTables/SMu_SFs_TightISO_13TeV_EtaPt.txt");

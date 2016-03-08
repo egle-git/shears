@@ -45,7 +45,7 @@ using namespace std;
 #include "variablesOfInterestVarWidth.h"
 
 const int NQCD = 4 ;
-const int NMC = 9 ;
+const int NMC = 10 ;
 
 string energy = getEnergy();
 int JetPtMin(30);
@@ -91,7 +91,7 @@ void DataDrivenQCD( string leptonFlavor, int METcut , int doBJets ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][9], string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
+void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][10], string leptonFlavor,int METcut, bool doFlat , bool doVarWidth, int doBJets){
     // Get data files
     for ( int i = 0 ; i < NQCD ; i++){
         fData[i] = getFile(FILESDIRECTORY,  leptonFlavor, energy, ProcessInfo[DATAFILENAME].filename, JetPtMin, JetPtMax, doFlat, doVarWidth, i, 0, 0, METcut, doBJets, "", "0");
@@ -108,11 +108,12 @@ void FuncOpenAllFiles(TFile *fData[], TFile *fMC[][9], string leptonFlavor,int M
             if (j == 1) FilenameTemp = "DYJets50toInf_dR_5311_List";
             if (j == 2) FilenameTemp = "TTJets_dR_5311_List";
             if (j == 3) FilenameTemp = "ST_s_channel_dR_5311_List";
-            if (j == 4) FilenameTemp = "ST_tW_top_channel_dR_5311_List";
-            if (j == 5) FilenameTemp = "ST_tW_antitop_channel_dR_5311_List";
-            if (j == 6) FilenameTemp = "WW_dR_5311_List";
-            if (j == 7) FilenameTemp = "WZ_dR_5311_List";
-            if (j == 8) FilenameTemp = "ZZ_dR_5311_List";
+            if (j == 4) FilenameTemp = "ST_t_channel_dR_5311_List";
+            if (j == 5) FilenameTemp = "ST_tW_top_channel_dR_5311_List";
+            if (j == 6) FilenameTemp = "ST_tW_antitop_channel_dR_5311_List";
+            if (j == 7) FilenameTemp = "WW_dR_5311_List";
+            if (j == 8) FilenameTemp = "WZ_dR_5311_List";
+            if (j == 9) FilenameTemp = "ZZ_dR_5311_List";
             
             
             fMC[i][j] = getFile(FILESDIRECTORY,  leptonFlavor, energy, FilenameTemp, JetPtMin, JetPtMax, doFlat, doVarWidth, i , 0, 0, METcut, doBJets, "", "0");
@@ -177,11 +178,12 @@ void FuncDataDrivenQCD(string variable, TFile *fData[], TFile *fMC[][NMC], TFile
             if (j == 1) FilenameTemp = "DYJets50toInf_dR_5311_List";
             if (j == 2) FilenameTemp = "TTJets_dR_5311_List";
             if (j == 3) FilenameTemp = "ST_s_channel_dR_5311_List";
-            if (j == 4) FilenameTemp = "ST_tW_top_channel_dR_5311_List";
-            if (j == 5) FilenameTemp = "ST_tW_antitop_channel_dR_5311_List";
-            if (j == 6) FilenameTemp = "WW_dR_5311_List";
-            if (j == 7) FilenameTemp = "WZ_dR_5311_List";
-            if (j == 8) FilenameTemp = "ZZ_dR_5311_List";
+            if (j == 4) FilenameTemp = "ST_t_channel_dR_5311_List";
+            if (j == 5) FilenameTemp = "ST_tW_top_channel_dR_5311_List";
+            if (j == 6) FilenameTemp = "ST_tW_antitop_channel_dR_5311_List";
+            if (j == 7) FilenameTemp = "WW_dR_5311_List";
+            if (j == 8) FilenameTemp = "WZ_dR_5311_List";
+            if (j == 9) FilenameTemp = "ZZ_dR_5311_List";
             
             //cout << endl;
             TH1D *hTemp1 = getHisto(fMC[i][j], variable);

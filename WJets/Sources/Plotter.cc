@@ -24,7 +24,7 @@
 using namespace std;
 
 void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
-        int doQCD = 0, bool doSSign = 0, bool doInvMassCut = 0, int MET = 0 , int doBJets = 0 , 
+        int doQCD = 0, bool doSSign = 0, bool doInvMassCut = 0, int MET = 0 , int doBJets = -1 , 
         int JetPtMax = 0, int ZEtaMin = -999999, int ZEtaMax = 999999, 
         bool doRoch = 0, bool doFlat = 0, bool doVarWidth = 1)
 {
@@ -40,8 +40,8 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
     ostringstream ZEtaMaxStr;   ZEtaMaxStr << abs(ZEtaMax); 
     ostringstream doQCDStr;     doQCDStr << doQCD ;
     ostringstream METStr;   METStr << MET ; 
-    string year = "2012"; 
-    if (energy == "7TeV") year = "2011";
+    string year = "2016"; 
+    if (energy == "13TeV") year = "2015";
     int Colors[] = {kBlack, kSpring+5, kOrange, kOrange-3, kRed+1, kPink-6, kViolet+5, kPink, kAzure+4, kBlue, kCyan+1, kCyan+1, kCyan+1}; 
     string legendNames[] = {
         " #mu#mu ", " ZZJets2L2Nu", " ZZJets4L", " ZZJets2L2Q", 
@@ -289,11 +289,11 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
         cmsColl[i]->DrawLatex(0.2,0.87, "CMS Preliminary");
-        if (energy == "7TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 5.05 fb^{-1},  #sqrt{s} = 7 TeV");
         if (energy == "8TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 19.6 fb^{-1},  #sqrt{s} = 8 TeV");
+        if (energy == "13TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 2.5 fb^{-1},  #sqrt{s} = 13 TeV");
         if ( histoName[i].find("inc0") == string::npos){
             ostringstream ptLegend;
-            ptLegend << "p_{T}^{jet} > " << JetPtMin << "GeV,  |#eta^{jet}| < 2.4";
+            ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |y^{jet}| < 2.4";
             jetCuts[i]->DrawLatex(0.16,0.72, ptLegend.str().c_str());
             jetAlgo[i]->DrawLatex(0.16,0.77, "anti-k_{t} jets,  R = 0.4");
             pad1[i]->Draw();

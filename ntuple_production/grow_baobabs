@@ -2158,7 +2158,7 @@ def parse_command_line():
     parser.add_argument('--max-run-num', type=int, action='store', default=None,
                         help='Specifies a maximum run number above which runs are ignored new job submissions. This maximum applies also for the result returned by --new-runs option.')
 
-    parser.add_argument('--events-per-job', type=int, action='store', default = 200000,
+    parser.add_argument('--events-per-job', type=int, action='store', default = 250000,
                         help='Specify the number of events each job should process')
 
     parser.add_argument('--check',  action='store_true',

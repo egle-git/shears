@@ -4,6 +4,13 @@ for p in EgammaAnalysis/ElectronTools RecoJets/JetProducers; do
     { mkdir $s && cp -r `readlink -f $CMSSW_RELEASE_BASE/src/$p` $s/; } || { echo "Failed to copy $p. Aborting."; exit 1; }
 done
 
+(cd RecoJets/JetProducers/data && {
+wget https://github.com/jbrands/RecoJets-JetProducers/raw/3dad903ed25d025f68be94d6f781ca957d6f86ac/pileupJetId_76x_Eta0to2p5_BDT.weights.xml.gz
+wget https://github.com/jbrands/RecoJets-JetProducers/raw/3dad903ed25d025f68be94d6f781ca957d6f86ac/pileupJetId_76x_Eta2p5to2p75_BDT.weights.xml.gz
+wget https://github.com/jbrands/RecoJets-JetProducers/raw/3dad903ed25d025f68be94d6f781ca957d6f86ac/pileupJetId_76x_Eta2p75to3_BDT.weights.xml.gz
+wget https://github.com/jbrands/RecoJets-JetProducers/raw/3dad903ed25d025f68be94d6f781ca957d6f86ac/pileupJetId_76x_Eta3to5_BDT.weights.xml.gz;
+})
+
 patch -p1 <<EOF
 diff --git a/EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimatorCSA14.h b/EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimatorCSA14.h
 index 4674c75..b872685 100644

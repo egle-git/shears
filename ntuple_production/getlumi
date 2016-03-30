@@ -17,7 +17,7 @@ fi
 
 filter(){
     if [ "$recorded_only" = y ]; then
-	tail -n 2 | head -n 1 | awk -F \| '{print $7/1.e6}'
+	tail -n 2 | head -n 1 | awk -F \| '{printf "%f\n", $7/1.e6}'
     else
 	cat
     fi
@@ -33,6 +33,9 @@ if [ ! -x $HOME/.local/bin/brilcalc ]; then
 fi
 
 #brilcalc lumi -i "$1" -n 0.962 | filter
-brilcalc lumi --normtag /afs/cern.ch/user/c/cmsbril/public/normtag_json/OfflineNormtagV1.json -i "$1"  | filter
+#before Dec. 6, 15:
+#brilcalc lumi --normtag /afs/cern.ch/user/c/cmsbril/public/normtag_json/OfflineNormtagV1.json -i "$1"  | filter
+#Updated on Dec. 6, 15 to normtag announced in https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/544.html
+brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/OfflineNormtagV2.json -i "$1"  | filter
 
 #pip uninstall brilws

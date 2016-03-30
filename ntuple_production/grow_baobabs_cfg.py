@@ -131,7 +131,7 @@ if reapply_jec:
     applyJec=True,
     vertexes=cms.InputTag("offlineSlimmedPrimaryVertices")
     )
-  print process.pileupJetIdUpdated.dumpConfig()
+  #print process.pileupJetIdUpdated.dumpConfig()
 
   ### ---------------------------------------------------------------------------
   ### Removing the HF from the MET computation
@@ -226,7 +226,6 @@ process.tupel = cms.EDAnalyzer("Tupel",
   electronSrc  = cms.untracked.InputTag(electronSrc),
   muonSrc      = cms.untracked.InputTag("slimmedMuons"),
   jetSrc       = cms.untracked.InputTag(jetSrc),
-  metSrc       = cms.untracked.InputTag("patMETsPF"),
   genSrc       = cms.untracked.InputTag("prunedGenParticles"),
   gjetSrc      = cms.untracked.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
@@ -234,8 +233,8 @@ process.tupel = cms.EDAnalyzer("Tupel",
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
   mSrcRho      = cms.untracked.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.untracked.InputTag('slimmedJets'), #same collection now BB 
-  metSource    = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
-  lheSource    = cms.untracked.InputTag('source'),
+  metSrcs      = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
+  lheSrc       = cms.untracked.InputTag('source'),
   puSrc        = cms.untracked.InputTag('slimmedAddPileupInfo'),
   puMvaName    = cms.untracked.string(puMvaName),
   puJetIdSrc   = cms.untracked.InputTag("pileupJetIdUpdated"),

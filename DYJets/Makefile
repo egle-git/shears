@@ -1,6 +1,6 @@
-# =============================== 
-# Makefile for ZJets Analysis 
-# =============================== 
+# ===============================
+# Makefile for ZJets Analysis
+# ===============================
 
 # Determine if working at CERN on lxplus machine or at IIHE on m machines
 HOST = $(shell hostname -f | grep cern)
@@ -10,9 +10,13 @@ else
     HOST = "iihe"
 endif
 
-# define LHAPDF library Path accroding to the host 
+# define LHAPDF library Path accroding to the host
 ifeq ($(HOST), "lxplus")
-  LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
+  ifeq ($(LHAPDF_DATA_PATH),)
+    LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
+  else
+    LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
+  endif
 else
   ifeq ($(HOST), "iihe")
     LHAPDFPATH = /user/aleonard/LHAPDF/
@@ -21,9 +25,9 @@ endif
 
 # get Root compiler flags
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
-ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags) 
+ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags)
 
-LIB = RooUnfold LHAPDF
+LIB = LHAPDF
 LIBLIST = $(addprefix -l, $(LIB))
 
 LIBDIR = RooUnfold $(LHAPDFPATH)lib
@@ -36,82 +40,65 @@ SRCDIR = Sources/
 INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
 
 CXX           = g++ -std=c++0x
-CXXFLAGS      = -g -Wall -fPIC   	
-CXXFLAGS      += $(ROOTCFLAGS) 
+CXXFLAGS      = -g -fPIC -O0
+CXXFLAGS      += $(ROOTCFLAGS)
+CXXFLAGS      += -MD -Wall
+#CPPFLAGS      += $(INCDIR)
 
 # list of all source files
-SOURCES = ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc ConfigVJets.cc HistoSetZJets.cc ZJets.cc functions.cc
-SOURCES += MergeTop.cc standalone_LumiReWeighting.cc UnfoldingZJets.cc RecoComparison.cc
-SOURCES += PlotSettings.cc BLUEMeth.cc Combination.cc makeStatisticsTable.cc muresolution_run2.cc rochcor2015.cc
+SOURCES = \
+ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
+ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
+RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
-
-OBJLIST_NEWFORMAT = $(patsubst Sources/ZJets.o, Sources/ZJets_newformat.o, $(OBJLIST))
+DEPS    = $(SRCLIST:.cc=.d)
 
 .PHONY: all clean
 
-all: runCombination \
-runRecoComparison \
-runVJets \
-runZJets \
-runUnfoldingZJets \
-runMakeStatisticsTable \
-dispatcher
+all: runRecoComparison \
+runZJets_newformat \
+runUnfoldingZJets
+
+
+#in untested branch:
+# runCombination \
+# runVJets \
+# runZJets \
+# runMakeStatisticsTable \
+# dispatcher
 
 # ===========================================================================
-.cc.o:
+%.o: %.cc
 	$(CXX) -c $< -o $@ $(CXXFLAGS) $(INCDIR)
 
-runVJets: $(OBJLIST) runVJets.o RooUnfold/libRooUnfold.so
-	$(CXX) -o runVJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+#I'm not sure why this generic rule does not work...
+#run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
+#	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runVJets.o: runVJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
+runZJets_newformat: runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runZJets: $(OBJLIST) runZJets.o RooUnfold/libRooUnfold.so
-	$(CXX) -o runZJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+runRecoComparison: runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runZJets.o: runZJets.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR) 
-
-runRecoComparison: $(OBJLIST) runRecoComparison.o  RooUnfold/libRooUnfold.so
-	$(CXX) -o runRecoComparison $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runRecoComparison.o: runRecoComparison.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
-
-runUnfoldingZJets: $(OBJLIST) runUnfoldingZJets.o  RooUnfold/libRooUnfold.so
-	$(CXX) -o runUnfoldingZJets $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runUnfoldingZJets.o: runUnfoldingZJets.cc RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
-
-runCombination: $(OBJLIST) runCombination.o
-	$(CXX) -o runCombination $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runCombination.o: runCombination.cc RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
-
-runMakeStatisticsTable: $(OBJLIST) runMakeStatisticsTable.o
-	$(CXX) -o runMakeStatisticsTable $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-runMakeStatisticsTable.o: runMakeStatisticsTable.cc RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
-
-dispatcher: $(OBJLIST) dispatcher.o  RooUnfold/libRooUnfold.so
-	$(CXX) -o dispatcher $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-dispatcher.o: dispatcher.cc
-	$(CXX) -o $@ -c -IIncludes $< $(CXXFLAGS) $(INCDIR)
+runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 RooUnfold/libRooUnfold.so:
 	$(MAKE) -C RooUnfold
 
-# =========================================================================== 
-clean: 
+# ===========================================================================
+clean:
 	rm -f *.o Sources/*.o
+	$(MAKE) -C RooUnfold clean
+
+clean-dep:
+	rm -f *.d Sources/*.d
 	$(MAKE) -C RooUnfold clean
 
 echo_%:
 	@echo $* = $($*)
+
+-include $(DEPS)

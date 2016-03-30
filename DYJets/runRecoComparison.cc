@@ -5,6 +5,9 @@
 #include "ConfigVJets.h"
 #include "getFilesAndHistogramsZJets.h"
 #include "RecoComparison.h"
+//#include "variablesOfInterest.h"
+
+ConfigVJets cfg;
 
 int main(int argc, char **argv)
 {
@@ -12,8 +15,6 @@ int main(int argc, char **argv)
     gErrorIgnoreLevel = kError;
 
     //--- Loads configuration -----------------------------------------------------
-    ConfigVJets cfg;
-
     TString histoDir    = cfg.getS("histoDir");
     TString recoCompDir = cfg.getS("recoCompDir");
     TString lepSel      = cfg.getS("lepSel");
@@ -30,21 +31,27 @@ int main(int argc, char **argv)
             //--- possible options ---
             if (currentArg.BeginsWith("histoDir=")) {
                 getArg(currentArg, histoDir);
+		cfg.set("histoDir", histoDir);
             }
             else if (currentArg.BeginsWith("recoCompDir=")) {
                 getArg(currentArg, recoCompDir);
+		cfg.set("recoCompDir", recoCompDir);
             }
             else if (currentArg.BeginsWith("lepSel=")) {
                 getArg(currentArg, lepSel);
+		cfg.set("lepSel", lepSel);
             }
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
+		cfg.set("jetPtMin", jetPtMin);
             }
             else if (currentArg.BeginsWith("jetEtaMax=")) {
                 getArg(currentArg, jetEtaMax);
+		cfg.set("jetEtaMax", jetEtaMax);
             }
             else if (currentArg.BeginsWith("doPASPlots=")) {
                 getArg(currentArg, doPASPlots);
+		cfg.set("doPASPlots", doPASPlots);
             }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
@@ -68,6 +75,19 @@ int main(int argc, char **argv)
 
     RecoComparison(doPASPlots, lepSel, histoDir, recoCompDir, jetPtMin, jetEtaMax);
 
+    std::cout << "Produce event yield table for p_T(jet) > " << jetPtMin << " GeV, |y(jet)| < " << jetEtaMax
+	      << "\n";
+
+    
+    //for(int ivar = 0; ivar < NVAROFINTEREST; ++ivar){
+    // getStatistics(lepSel, jetPtMin, jetEtaMax, VAROFINTEREST[ivar].name);
+    //}
+    getStatistics(lepSel, jetPtMin, jetEtaMax, "ZNGoodJets_Zexc");
+    getStatistics(lepSel, jetPtMin, jetEtaMax, "ZNGoodJets_Zinc");
+    getStatistics(lepSel, jetPtMin, jetEtaMax, "FirstJetPt_Zinc1jet");
+    getStatistics(lepSel, jetPtMin, jetEtaMax, "SecondJetPt_Zinc2jet");
+    getStatistics(lepSel, jetPtMin, jetEtaMax, "ThirdJetPt_Zinc3jet");
+    
     //getStatistics("Electrons", 30);
     //getStatistics("Muons", 30);
     //getStatistics("Muons", 30,0,0,1,0,1);

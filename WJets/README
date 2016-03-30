@@ -1,42 +1,39 @@
-The instructions for running the W+jets analysis code on baobab data and MC ntuples produced at 13 TeV.
+The instructions for running the W+jets analysis code on Bonzai (also possibly on Baobab) data and MC ntuples produced at 13 TeV.
 Kadir Ocalan (29.10.2015)
+updated by K. Ocalan on 06.03.2016)
+
+-- For now use CMSSW_5_3_11, planned migration to CMSSW 76X 
+
+cmsrel CMSSW_5_3_11  
+cd CMSSW_5_3_11/src
+cmsenv 
 
 -- Clone shears from the gitlab (can be found here https://gitlab.cern.ch/shears/shears/tree/master)
 git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 
--- Once cloned, go to the directory 
+-- Go to the directory 
 cd shears/WJets
 
 -- Compile RooUnfold
-cd RooUnfold-1.1.1
+cd RooUnfold
 make clean
 make
 cd -
 
--- Make LHAPDF work with quick hacks
-sed -i 's#/user/aleonard/LHAPDF/lib/libLHAPDF.so#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/lib/libLHAPDF.so#g' runDYJets.cc
-sed -i 's#/user/aleonard/lhapdf-5.9.1/include/#/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/#g' rootlogon.C
-sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' ComputePDFUncertainties.cc
-sed -i 's#NNPDF23_nlo_as_0118#NNPDF20_as_0118_100#g' runDYJets.cc
+-- One can run on the skimmed ntuples called Bonzais. The paths to these Bonzais are specified in the txt files in the directory WJets/DataW_txt. You can add similar text files pointing to any bonzai if you want.
+ 
+-- SKIP the following steps if you run on Bonzai: Another option is to run on 13 TeV Baobab data and MC 25ns samples that are merged from here /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/
 
--- Test the code over a single ntuple file (such as the one produced at 8 TeV first):
-cmsStage /store/group/phys_smp/WPlusJets/NtuplesTomislavNEW/SMu_8TeV_T_s_channel_dR_5311.root DataW/SMu_8TeV_T_s_channel_dR_5311.root
-cd WJets
-root -b runDYJets.cc  
-
--- If everything works fine, run over complete set of ntuples:
-
+mkdir DataW
 mkdir ~/eos
 eosmount ~/eos
-ln -s  ~/eos/cms/store/group/phys_smp/WPlusJets/NtuplesTomislavNEW  DataW
+ln -s  ~/eos/cms/store/user/ocalan/13TeV_25ns   DataW
+--SKIP until here
 
--- Note: You need to go to /eos/cms/store/group/phys_smp/AnalysisFramework/Baobab/ and find the ntuples unmerged after crab -get, then use your eos directory to merge the files and run over them like described for 8 TeV above. In future, we will have ntuples merged and we will update this part of instructions.
+-- Ready to run the code!!! Before running it, change doQCD to 0 (int doQCD=0) in WJets/runDYJets.cc.
 
--- Ready to run the code!!!Before running it, change (line 27) int doQCD=0 in WJets/runDYJets.cc.
-
--- Run the code
-cd WJets
-root -b runDYJets.cc  
+-- Run the code under /WJets
+root -b -q runDYJets.cc++  
 
 -- For QCD Background go to WJets/runDYJets.cc change int doQCD = 1
 root -b -q runDYJets.cc
@@ -50,6 +47,6 @@ root -b -q MergeTop_BVeto.cc++
 root -b -q runQCD_BVeto.cc++
 
 -- Plotting:
-root -b -q runTest_BVeto.cc
+root -b -q runTest_BVeto.cc++
 
 --Congratulations! Output PDF files will be in the directory PNGFiles

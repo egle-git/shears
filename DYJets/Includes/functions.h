@@ -109,4 +109,13 @@ FILE* eosOpen(const char* path, int (**closeFunc)(FILE*));
  */
 bool isRootFile(const char* path);
 
+/** Adds histograms and RooUnfoldResponse objects  with same name
+ * and definition read from different files and writes the result
+ * in a new file.
+ * @param src list of input files
+ * @param dest output files
+ * @return true on success, false on failure
+ */
+bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest);
+
 #endif

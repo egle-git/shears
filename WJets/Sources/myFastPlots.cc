@@ -219,6 +219,9 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     outputRootFile->cd();
     hUnfData->Write();
     
+    TH1D *hUnfDataSVD= NULL;
+    int nIterSVD = UnfoldData(leptonFlavor, "SVD", Bayeskterm, responseZJ, hRecDataMinusFakes, hUnfDataSVD, variable, "");
+    
     //-- get Powheg histograms -------------------------------------------------------
     //TFile *Powheg = getFile(FILESDIRECTORY, leptonFlavor, energy, DYPOWHEGFILENAME, JetPtMin, JetPtMax, doFlat);
 
@@ -243,10 +246,10 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     myplotChi2OfChange(response, Bayeskterm, meas, hBG, nBG, leptonFlavor, variable, energy, outputDirectory, outputRootFile, closureTest);
     
     //-- Bin by bin method ----------------------------------------------------------
-    //myplotSelectedMethod2("BinByBin", response, genMad, 0, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
+    myplotSelectedMethod2("BinByBin", response, genMad, 0, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
     
     //-- draw SVD selected kTerm and +/- 1 ------------------------------------------
-    //myplotSelectedMethod2("SVD", response, genMad, SVDkterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
+    myplotSelectedMethod2("SVD", response, genMad, SVDkterm, meas, hBG, nBG, leptonFlavor, variable, logZ, decrease, outputDirectory, outputRootFile, closureTest, true);
     
 
     //-- close every files ----------------------------------------------------------
@@ -257,6 +260,105 @@ void FastPlotsRun(const int *sel, int nsel, string leptonFlavor, string variable
     //closeFile(Sherpa);
     for (int i(0); i < nBG; i++) closeFile(BG[i]);
     //outputTexFile.close();
+    
+    
+    
+    TFile *CompareAlgoInFile = new TFile(outputRootFileName.c_str(), "READ");
+    
+    TH1D *hisUnfBayes = (TH1D*) CompareAlgoInFile->Get("Central");
+    TH1D *hisUnfSVD   = (TH1D*) CompareAlgoInFile->Get("CentralSVD");
+    TH1D *hisUnfBBB   = (TH1D*) CompareAlgoInFile->Get("CentralBinByBin");
+    
+    TH1D *hisRatBayes = (TH1D*) hisUnfBayes->Clone();
+    TH1D *hisRatSVD = (TH1D*) hisUnfSVD->Clone();
+    TH1D *hisRatBBB = (TH1D*) hisUnfBBB->Clone();
+    
+    for (int i = 1; i <= hisUnfBayes->GetNbinsX(); i++){
+        if (hisUnfBayes->GetBinContent(i) > 0){
+            hisRatBayes->SetBinContent( i, 1 );
+            hisRatBayes->SetBinError  ( i, hisUnfBayes->GetBinError(i)/hisUnfBayes->GetBinContent(i) );
+            
+            hisRatSVD->SetBinContent( i, hisUnfSVD->GetBinContent(i)/hisUnfBayes->GetBinContent(i) );
+            hisRatSVD->SetBinError  ( i, hisUnfSVD->GetBinError(i)/hisUnfBayes->GetBinContent(i) );
+            
+            hisRatBBB->SetBinContent( i, hisRatBBB->GetBinContent(i)/hisUnfBayes->GetBinContent(i) );
+            hisRatBBB->SetBinError  ( i, hisRatBBB->GetBinError(i)/hisUnfBayes->GetBinContent(i) );
+        }
+        else{
+            hisRatBayes->SetBinContent( i, 0. );
+            hisRatBayes->SetBinError  ( i, 0. );
+            
+            hisRatSVD->SetBinContent( i, 0. );
+            hisRatSVD->SetBinError  ( i, 0. );
+            
+            hisRatBBB->SetBinContent( i, 0. );
+            hisRatBBB->SetBinError  ( i, 0. );
+        }
+    }
+    
+    
+    TCanvas *can = new TCanvas("can1", "can1", 500, 300);
+    can->cd();
+    can->SetTicks();
+    can->SetGrid();
+    
+    hisRatBayes->SetTitle(("Comparison of Unfolding Algorithm for " + variable).c_str());
+    
+    hisRatBayes->GetYaxis()->SetTitle("Ratio");
+    hisRatBayes->GetYaxis()->SetRangeUser(0.41,1.59);
+    
+    
+    hisRatBayes->SetLineColor(kBlack);
+    hisRatBayes->SetLineWidth(2);
+    hisRatBayes->SetFillColor(16);
+    hisRatBayes->SetMarkerColor();
+    hisRatBayes->SetMarkerStyle();
+    //hisRatBayes->Draw("E2");
+    hisRatBayes->Draw("E1");
+    
+    hisRatBBB->SetFillStyle(1001);
+    hisRatBBB->SetFillColor(kOrange-2);
+    hisRatBBB->SetLineColor(kOrange+10);
+    hisRatBBB->SetLineWidth(2);
+    hisRatBBB->SetMarkerColor(kOrange+10);
+    hisRatBBB->SetMarkerStyle(21);
+    hisRatBBB->SetMarkerSize(0.5);
+    //hisRatBBB->Draw("E2 same");
+    hisRatBBB->Draw("E1 same");
+    
+    hisRatSVD->SetFillStyle(1001);
+    hisRatSVD->SetFillColor(kBlue-10);
+    hisRatSVD->SetLineColor(kBlue);
+    hisRatSVD->SetLineWidth(2);
+    hisRatSVD->SetMarkerColor(kBlue);
+    hisRatSVD->SetMarkerStyle(20);
+    hisRatSVD->SetMarkerSize(0.5);
+    //hisRatSVD->Draw("E2 same");
+    hisRatSVD->Draw("E1 same");
+    
+    TLegend *legend = new TLegend(0.54, 0.75, 0.9, 0.9);
+    //legend->SetX1(0.44);
+    //legend->SetY1(0.77);
+    //legend->SetX2(0.95);
+    //legend->SetY2(0.98);
+    //legend->SetTextSize(.034);
+    legend->SetFillColor(0);
+    legend->SetFillStyle(1001);
+    legend->SetBorderSize(1);
+    legend->AddEntry(hisRatBayes, "Bayes", "PLE");
+    legend->AddEntry(hisRatSVD, "SVD", "ple");
+    legend->AddEntry(hisRatBBB, "BinByBin", "ple");
+    legend->Draw();
+
+    
+    string OutDirAlgo = outputDirectory + "CompareAlgo";
+    string commandOutDirAlgo = "mkdir -p " + OutDirAlgo;
+    system(commandOutDirAlgo.c_str());
+    string CompareAlgoOutFileName = OutDirAlgo + "/" + variable + "CompareAlgo.pdf";
+    can->Print(CompareAlgoOutFileName.c_str());
+    
+    CompareAlgoInFile->Close();
+    
 }
 
 
@@ -354,6 +456,8 @@ void myplotSelectedMethod2(string method, RooUnfoldResponse *response, TH1D *gen
         hUnfoldedC->Write("Central");
         genMad->Write("genMad");
     }
+    else if (method == "SVD") hUnfoldedC->Write("CentralSVD");
+    else if (method == "BinByBin") hUnfoldedC->Write("CentralBinByBin");
     
     TLatex *cmsColl = new TLatex();
     cmsColl->SetTextSize(0.025);
@@ -635,7 +739,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     string command = "mkdir -p PNGFiles/UnfoldingCheck";
     system(command.c_str());
     
-    TFile *f = new TFile("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    TFile *f = new TFile("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + ".root", "RECREATE");
     f->cd();
     int finalNIter = -1;
     int nIter = 99;
@@ -644,7 +748,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     hchi2->SetTitle("#chi^{2}/ndf for reco vs folded-unfolded for " + TString(hRecDataMinusFakes->GetTitle()));
     hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
     hchi2->GetYaxis()->SetTitleOffset(1.40);
-    hchi2->GetXaxis()->SetTitle("number of iterations of the Bayes method");
+    hchi2->GetXaxis()->SetTitle(TString("number of iterations of the " + algo + " method"));
     hchi2->GetXaxis()->CenterTitle();
     hchi2->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
     hchi2->GetXaxis()->SetLabelSize(0.03);
@@ -733,7 +837,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     line->Draw();
     hchi2->Write();
     chchi2->Write();
-    chchi2->Print("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "chi2.pdf");
+    chchi2->Print("PNGFiles/UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
     
     RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
     RObjectForDataBinByBin->SetVerbose(0);

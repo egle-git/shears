@@ -2,6 +2,9 @@
 #include "TStyle.h"
 #include "TFile.h"
 #include "TMath.h"
+#include "ConfigVJets.h"
+
+extern ConfigVJets cfg;
 
 void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator)
 {
@@ -277,25 +280,28 @@ TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const 
     double *yErrDown = new double[nPoints];
 
     TFile *fDE[7];
+
+    TString histoDir    = cfg.getS("histoDir");
+
     if (lepSel == "DE" || lepSel == "") {
-        fDE[0] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_1.root");
-        fDE[1] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_0.5.root");
-        fDE[2] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_1.root");
-        fDE[3] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_0.5.root");
-        fDE[4] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_2.root");
-        fDE[5] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_1.root");
-        fDE[6] = new TFile("HistoFilesMay/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_2.root");
+        fDE[0] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_1.root");
+        fDE[1] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_0.5.root");
+        fDE[2] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_1.root");
+        fDE[3] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_0.5.root");
+        fDE[4] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_2.root");
+        fDE[5] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_1.root");
+        fDE[6] = new TFile(histoDir + "/DE_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_2.root");
     }
 
     TFile *fDMu[7];
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu[0] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_1.root");
-        fDMu[1] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_0.5.root");
-        fDMu[2] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_1.root");
-        fDMu[3] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_0.5.root");
-        fDMu[4] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_2.root");
-        fDMu[5] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_1.root");
-        fDMu[6] = new TFile("HistoFilesMay/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_2.root");
+        fDMu[0] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_1.root");
+        fDMu[1] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_0.5.root");
+        fDMu[2] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_0.5_muF_1.root");
+        fDMu[3] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_0.5.root");
+        fDMu[4] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_1_muF_2.root");
+        fDMu[5] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_1.root");
+        fDMu[6] = new TFile(histoDir + "/DMu_8TeV_DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights_dR_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_muR_2_muF_2.root");
     }
 
     TH1D *hDE[7], *hDMu[7];
@@ -418,7 +424,8 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
         hSyst->GetYaxis()->SetTitleOffset(0.8);
         if (numbOfGenerator == 2) hSyst->GetYaxis()->SetTitleOffset(0.63);
         if (numbOfGenerator == 3) hSyst->GetYaxis()->SetTitleOffset(0.60);
-        hSyst->GetXaxis()->SetLabelSize(0.14);
+        //hSyst->GetXaxis()->SetLabelSize(0.14);
+	hSyst->GetXaxis()->SetLabelSize(0.08);
         hSyst->GetXaxis()->SetTitleSize(0.12);
         hSyst->GetXaxis()->SetTitleOffset(1.0);
     }
@@ -487,27 +494,33 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
     //minX -= grCentralSyst->GetErrorXlow(firstBin); 
     //maxX += grCentralSyst->GetErrorXhigh(grCentralSyst->GetN()-1);
     if (variable.Index("ZNGoodJets_Zexc") >= 0) {
-        //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
         grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
-        grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
-        grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
-        grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
-        grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
+        //grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
+        //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
+	//     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
         grCentralSyst->GetXaxis()->SetLabelSize(0.18);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }
     else if (variable.Index("ZNGoodJets_Zinc") >= 0) {
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
         grCentralSyst->GetXaxis()->SetBinLabel(2, "#geq 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "#geq 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "#geq 3");
-        grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
-        grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
-        grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
-        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
+	grCentralSyst->GetXaxis()->SetBinLabel(5, "#geq 4");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(6, "#geq 5");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(7, "#geq 6");
+	//        grCentralSyst->GetXaxis()->SetBinLabel(8, "#geq 7");
         grCentralSyst->GetXaxis()->SetLabelSize(0.14);
         grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
     }
@@ -558,10 +571,10 @@ std::string getYaxisTitle(bool doNormalized, const TH1D *gen1)
     return title;
 }
 
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3)
+TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hStat, TH2D *hCovSyst, TH1D *hGen1, TH1D *hGen2, TH1D* hGen3, double integratedLumi)
 {
 
-    gStyle->SetOptStat(0);
+  //gStyle->SetOptStat(0);
     //--- Determine how many comparison we have ---
     int numbOfGenerator = 1;
     if (hGen2) numbOfGenerator = 2;
@@ -684,7 +697,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetTextFont(52);
     latexLabel->DrawLatex(0.20,0.95,"Preliminary");
     latexLabel->SetTextFont(42);
-    latexLabel->DrawLatex(0.13,0.95-0.045,"1.26 fb^{-1} (13 TeV)");
+    if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
     latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
 
     if (canvasName.Contains("FirstJetPt50")){

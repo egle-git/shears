@@ -7,7 +7,7 @@
   string srcdir = currentWorkingDir + "Sources/";
   string incdir = currentWorkingDir + "Includes/";
   string lhapdfdir = "/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/";
-  string roounfolddir = currentWorkingDir + "RooUnfold-1.1.1/";
+  string roounfolddir = currentWorkingDir + "RooUnfold/";  
 
   cout << "--------------------------------------------------------------------------------\n" << endl; 
   cout << "Adding " << incdir << " to includes directories..." << endl;

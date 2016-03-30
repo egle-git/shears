@@ -260,3 +260,42 @@ T ConfigVJets::get2(const char* key, const T& defaultValue){
     return value;
 }
 
+template<typename T>
+void ConfigVJets::set(const char* key, const T& value){
+    std::string sVal;
+    convert(value, sVal);    
+    T prevValue;
+    std::map<std::string, std::string>::iterator it = table_.find(key);
+    if(it!=table_.end()){
+      convert(it->second, prevValue);
+      if(prevValue != value){
+	std::cout << "Info: the value of " << key << " from configuration has been overwritten "
+	  "from " << it->second << " to " << sVal << "\n";
+	it->second = sVal;
+      }
+    } else{
+      table_[key] = sVal;
+    }
+}
+
+template
+void ConfigVJets::set<bool>(const char* key, const bool& value);
+template
+void ConfigVJets::set<int>(const char* key, const int& value);
+template
+void ConfigVJets::set<Long64_t>(const char* key, const Long64_t& value);
+template
+void ConfigVJets::set<float>(const char* key, const float& value);
+template
+void ConfigVJets::set<double>(const char* key, const double& value);
+template
+void ConfigVJets::set<std::string>(const char* key, const std::string& value);
+template
+void ConfigVJets::set<std::vector<int> >(const char* key, const std::vector<int>& value);
+template
+void ConfigVJets::set<std::vector<float> >(const char* key, const std::vector<float>& value);
+template
+void ConfigVJets::set<std::vector<double> >(const char* key, const std::vector<double>& value);
+template
+void ConfigVJets::set<std::vector<std::string> >(const char* key, const std::vector<std::string>& value);
+

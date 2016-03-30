@@ -1,7 +1,10 @@
-Scripts to produce Baobab Ntuples
-=================================
+Scripts to produce Baobab and Bonzai Ntuples
+===========================================
 
 Author: Ph. Gras. CEA/Saclay
+
+Production of Baobab ntuples
+============================
 
 Usage:
 -----
@@ -97,6 +100,32 @@ The new-era command
 
 This command is used to set up work space on AFS and EOS for SMP Shears ntuple production. Online help can be obtained by running `new-era --help`.
 
+
+Production of Bonzai ntuples
+============================
+
+Bonzai ntuple can be produced using the [Pruner](https://gitlab.cern.ch/shears/shears/tree/master/Bonzais/Pruner) utility. The grow_bonzai tool can be used for massing production using the GRID infractuction. The grow_bonzai tool is less advanced that the grow_baobab ones. Both tools will be eventually merged.
+
+Usage:
+-----
+
+* Create a task list file like the [grow_bonzai_task_list_example.txt](grow_bonzai_task_list_example.txt). You should specify in the file the EOS location to write the ntuple to.
+* Run:
+
+```grow_bonzai --task-list your_task_list.txt```
+
+* Use the standard crab command to check the GRID task status or use the script `get_crab_status`. To use this script you should remove from your directory old crab_XXXX subdirectories and keep only the ones of your current submissions. This script will ask you for each process if the submission is terminated. If you answer yes, the crab task will be recorded in the jobs_ok file and the task won't be check at the next call to `get_crab_status`. Once you are done remove the file jobs_ok, otherwise if your submit again tasks with the same names from the same directory, the `get_crab_status` will ignore them.
+
+* Once the jobs are successfully completed, you can produce the catalog files using the command:
+
+```grow_bonzai --make-catalogs your_task_list.txt```
+
+If you want to produce the catalog of completed jobs before all jobs are done, you can comment the uncompleted ones in the task list file. For instance add at the beginning of the line the comment %running% .
+
+Online help can be obtained by executing `grow_bonzai --help`. As for grow_baobab, it is important to set up CMSSW environment after CRAB3.
+
+Common Utilities
+================
 
 The cmslog-inputfiles command
 ----------------------------

@@ -12,6 +12,7 @@
 #include <TLatex.h>   
 #include <TLegend.h>
 #include "getFilesAndHistogramsZJets.h"
+#include "ConfigVJets.h"
 
 //--  Setting global variables --------------------------------------------------------------
 #include "fileNamesZJets.h"
@@ -19,38 +20,57 @@
 
 using namespace std;
 
+/** Draw data/MC comparison plots from the histograms of the individual contributions.
+ * The list of histograms to superimposed is taken from Samples array defined in fileNamesZJets.h.
+ * Histogram colours and labels are defined in the same array.
+ * The first element is used as signal data and the last one as signal MC.
+ * @param doPASPlots if true PAS style is use, if false AN style is used.
+ * @param lepSel DE, DMu. SE, SMu for Z+jet electron channel, Z+jet muon channel, W+jet...
+ * @param histDir location of histogram to use as input.
+ * @param recoCompDir directory where the produced plots should be stored
+ * @param jetPtMin lower bound for jet pt histograms
+ * @param jetEtaMax upper bound in jet |eta| for jet eta histograms
+ */
 void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString recoCompDir, int jetPtMin, int jetEtaMax)
 {
     TH1::SetDefaultSumw2();
     gStyle->SetOptStat(0);
 
-    TString energy = "13TeV";
+    //    TString energy = "13TeV";
+    ConfigVJets cfg;
+    TString energy = TString::Format("%gTeV", cfg.getD("energy"));
 
     int Colors[NFILESDYJETS];
     TString legendNames[NFILESDYJETS];
     
     //-- get the files, legend names and colors -----------------------------------------------------------
     TFile *fSamples[NFILESDYJETS];
-    for (unsigned short iSample = 0; iSample < NFILESDYJETS; ++iSample){
+    for (unsigned short i = 0; i < NFILESDYJETS; ++i){
+
+	int iSample = FilesDYJets[i];
+
+	if(iSample < 0) continue;
+	
         //--- get the file ---
         TString syst = "0";
         if (iSample != 0) syst = "0";
-        fSamples[iSample] = getFile(histoDir, lepSel, energy, Samples[iSample].name, jetPtMin, jetEtaMax, "", syst);
-        if (!fSamples[iSample]) return;
+        fSamples[i] = getFile(histoDir, lepSel, energy, Samples[iSample].name, jetPtMin, jetEtaMax, "", syst);
+        if (!fSamples[i]) return;
+
         //-- set the legend name for the current file ---
         if (iSample == 0) {
-            if (lepSel == "DMu") legendNames[iSample] = " #mu#mu Data";
-            else if (lepSel == "DE") legendNames[iSample] = " ee Data";
-            else if (lepSel == "SMu") legendNames[iSample] = " #mu Data";
-            else if (lepSel == "SE") legendNames[iSample] = " e Data";
-            else legendNames[iSample] = " Data";
+            if (lepSel == "DMu")      legendNames[i] = " #mu#mu Data";
+            else if (lepSel == "DE")  legendNames[i] = " ee Data";
+            else if (lepSel == "SMu") legendNames[i] = " #mu Data";
+            else if (lepSel == "SE")  legendNames[i] = " e Data";
+            else                      legendNames[i] = " Data";
         }
-        else if (iSample == NFILESDYJETS-1) 
-            legendNames[iSample] = (lepSel == "DMu") ? " Z/#gamma^{*} #rightarrow #mu#mu" : "Z/#gamma^{*} #rightarrow ee"; 
+	//        else if (i == NFILESDYJETS-1) 
+        //    legendNames[i] = (lepSel == "DMu") ? " Z/#gamma^{*} #rightarrow #mu#mu" : "Z/#gamma^{*} #rightarrow ee"; 
         else 
-            legendNames[iSample] = doPASPlots ? Samples[iSample].legendPAS : Samples[iSample].legendAN; 
+            legendNames[i] = doPASPlots ? Samples[iSample].legendPAS : Samples[iSample].legendAN; 
         //--- set the legend color for the current file ---
-        Colors[iSample] = doPASPlots ? Samples[iSample].colorPAS : Samples[iSample].colorAN;    
+        Colors[i] = doPASPlots ? Samples[iSample].colorPAS : Samples[iSample].colorAN;    
     }
     //-----------------------------------------------------------------------------------------------------
 
@@ -144,6 +164,11 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     for (unsigned int i = 0; i < NFILESDYJETS; ++i) {
         for (int j = 0; j < nHist; ++j) {
             hist[i][j] = getHisto(fSamples[i], vhNames[j]);
+	    if(!hist[i][j]) {
+	      std::cerr << "Histogram " << vhNames[j] 
+			<< " was not found for sample " << Samples[FilesDYJets[i]].name << "\n";
+	      continue;
+	    }
             hist[i][j]->SetTitle(vhTitles[j]);
             if (i == 0) {
                 hist[0][j]->SetMarkerStyle(20);
@@ -159,21 +184,34 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
                     legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
                     legend[j]->SetTextSize(0.042);
                 }
-                legend[j]->SetFillStyle(0);
-                legend[j]->SetBorderSize(0);
-                legend[j]->SetTextFont(42);
-                legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
+		legend[j]->SetFillStyle(0);
+		legend[j]->SetBorderSize(0);
+		legend[j]->SetTextFont(42);
             }
             else {
-                hist[i][j]->SetFillColor(Colors[i]);
+	        hist[i][j]->SetFillStyle(1001);
+	        hist[i][j]->SetFillColor(Colors[i]);
                 hist[i][j]->SetLineColor(Colors[i]);
                 hSumMC[j]->Add(hist[i][j]);
-                if (!doPASPlots || i == 1 || i == 3 || i == 5 || i == 11) legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
+                //if (!doPASPlots || i == 1 || i == 3 || i == 5 || i == 11) legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
             }
-        }
+        } //next histo j
+    } //next file i
+
+    //Fill the legend in reverse order of drawing in order
+    //that the legend lines order matches with stacked histogram one.
+    for (int j = 0; j < nHist; ++j) {
+      if(NFILESDYJETS > 0) legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
+      for (int i = NFILESDYJETS - 1; i > 0; --i) {
+	legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
+      }
     }
-
-
+    //reads integrated luminosity
+    double lumi = -1;
+    TH1* Lumi;
+    fSamples[0]->GetObject("Lumi", Lumi);
+    if(Lumi) lumi = Lumi->GetBinContent(1) / 1000.;
+    else cerr << "Warning: Lumi histogram was not found. The integrated luminosity indicaion will be missing from the plots.\n";
 
     cout << "Now creating the pdf files ..." << endl;
     for (unsigned short i = 0; i < nHist; ++i) {
@@ -219,9 +257,10 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
         cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
-        cmsPrel->DrawLatex(0.13,0.74, "#int L dt = 1.26 fb^{-1}, #sqrt{s} = 13 TeV (25ns)");
-        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
-        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "1.26 fb^{-1} (13 TeV)");
+	//        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
+	//        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
+	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
+	if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
         if (vhNames[i].Index("inc0") < 0){
             if (!doPASPlots) {
                 ostringstream ptLegend;
@@ -277,6 +316,10 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         canvas->Print(outputFilePDF);
         outputFile->cd();
         canvas->Write();
+	
+        TString outputFileBase = outputFileName + "/" + vhNames[i];
+	canvas->SaveAs(outputFileBase + ".root");
+	canvas->SaveAs(outputFileBase + ".C");
 
         hSumMC[i]->SetMaximum(1.5*hSumMC[i]->GetMaximum());
         TCanvas *tmpCanvas = (TCanvas*) canvas->Clone();
@@ -292,6 +335,11 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         tmpCanvas->Print(outputFileLinPDF);
         outputFile->cd();
         tmpCanvas->Write();
+
+	TString outputFileLinBase = outputFileName + "/" + vhNames[i];
+	tmpCanvas->SaveAs(outputFileLinBase + ".root");
+	tmpCanvas->SaveAs(outputFileLinBase + ".C");
+
     }
 
     outputFile->cd();

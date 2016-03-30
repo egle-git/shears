@@ -31,9 +31,11 @@ class HistoSetZJets {
         TH2D* newTH2D(string, string, int, double, double, int, double*);
         TH2D* newTH2D(string, string, int, double, double, int, double, double);
 
+	TH1D *Lumi;
         TH1D *NumberPFcandidates;
         TH1D *ZMass_lowDeltaR;
         TH1D *ZMass_Zinc0jet;
+        TH1D *ZMass_Zinc1jet;
         TH1D *ZMassFrom60_Zinc0jet;
         TH1D *genZMass_Zinc0jet;
         TH1D *ZPt_Zinc0jet;
@@ -73,6 +75,7 @@ class HistoSetZJets {
         TH1D *ZEta_Zexc2jet;
 
         TH1D *lepEta_Zinc0jet;
+        TH1D *lepEta_Zinc1jet;
         TH1D *lepEtaUpTo4_Zinc0jet;
         TH1D *genlepEta_Zinc0jet;
 
@@ -104,11 +107,20 @@ class HistoSetZJets {
         TH1D *SixthJetEtaHigh_Zinc6jet;
 
         TH1D *FirstJetAbsRapidity_Zinc1jet;
+	TH1D *FirstJetAbsRapidity_Zinc1jet_Odd;
+	TH1D *FirstJetAbsRapidity_Zinc1jet_Even;
         TH1D *FirstJetRapidityHigh_Zinc1jet;
+	
         TH1D *SecondJetAbsRapidity_Zinc2jet;
+	TH1D *SecondJetAbsRapidity_Zinc2jet_Odd;
+	TH1D *SecondJetAbsRapidity_Zinc2jet_Even;
         TH1D *SecondJetRapidityHigh_Zinc2jet;
+	
         TH1D *ThirdJetAbsRapidity_Zinc3jet;
+	TH1D *ThirdJetAbsRapidity_Zinc3jet_Odd;	
+	TH1D *ThirdJetAbsRapidity_Zinc3jet_Even;
         TH1D *ThirdJetRapidityHigh_Zinc3jet;
+	
         TH1D *FourthJetAbsRapidity_Zinc4jet;
         TH1D *FourthJetRapidityHigh_Zinc4jet;
         TH1D *FifthJetAbsRapidity_Zinc5jet;
@@ -168,14 +180,18 @@ class HistoSetZJets {
         TH1D *FirstJetPhi_Zexc1jet;
         TH1D *SecondJetPhi_Zexc2jet;
         TH1D *lepPt_Zinc0jet;
+        TH1D *lepPt_Zinc1jet;
         TH1D *lepPtFrom15_Zinc0jet;
         TH1D *genlepPt_Zinc0jet;
         TH1D *lepPt_Zexc0jet;
         TH1D *dPhiLeptons_Zexc0jet;
         TH1D *dPhiLeptons_Zinc0jet;
+        TH1D *dPhiLeptons_Zinc1jet;
         TH1D *dEtaLeptons_Zexc0jet;
         TH1D *dEtaLeptons_Zinc0jet;
+        TH1D *dEtaLeptons_Zinc1jet;
         TH1D *dRLeptons_Zinc0jet;
+        TH1D *dRLeptons_Zinc1jet;
         TH1D *SpTLeptons_Zexc0jet;
         TH1D *SpTLeptons_Zexc1jet;
         TH1D *SpTLeptons_Zexc2jet;
@@ -206,10 +222,19 @@ class HistoSetZJets {
         TH1D *genJetsHT_Zinc6jet;
 
         TH1D *FirstJetPt_Zinc1jet;
+	TH1D *FirstJetPt_Zinc1jet_Odd;
+	TH1D *FirstJetPt_Zinc1jet_Even;
         TH1D *FirstJetPt_2_Zinc1jet;
+	
         TH1D *SecondJetPt_Zinc2jet;
+	TH1D *SecondJetPt_Zinc2jet_Odd;
+	TH1D *SecondJetPt_Zinc2jet_Even;	
         TH1D *SecondJetPt_2_Zinc2jet;
+	
         TH1D *ThirdJetPt_Zinc3jet;
+	TH1D *ThirdJetPt_Zinc3jet_Odd;
+	TH1D *ThirdJetPt_Zinc3jet_Even;
+	
         TH1D *ThirdJetPt_2_Zinc3jet;
         TH1D *FourthJetPt_Zinc4jet;
         TH1D *FifthJetPt_Zinc5jet;

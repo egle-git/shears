@@ -25,6 +25,11 @@ static float minJetAk04Pt = 15;
 static float mll_low = 66;
 static float mll_high = 126;
 
+static const unsigned elIdMask = (1 <<10);
+
+//For data v11
+//static const unsigned elIdMask = (1 <<20);
+
 /**************************/
 
 
@@ -189,7 +194,7 @@ bool VJetPruner::eventSelection(){
     if(fabs((*GLepDr01Id)[i]) == kMu) ++GMuCnt;
   }  
 
-  float m, mgen;
+  float m;
   switch(iSubSelection_){
   case DMu:
     return MuPt->size() > 1;
@@ -260,7 +265,7 @@ bool VJetPruner::filterMu(int iMu){
 }
 
 bool VJetPruner::filterEl(int iEl){
-  return (*ElPt)[iEl] > minLepPt && ((*ElId)[iEl] & (1 <<20));
+  return ((*ElPt)[iEl] > minLepPt) && ((*ElId)[iEl] & elIdMask);
 }
 
 bool VJetPruner::filterJetAk04(int iJetAk04){

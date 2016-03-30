@@ -98,7 +98,7 @@ void RooUnfoldBayes::CopyData (const RooUnfoldBayes& rhs)
   _smoothit= rhs._smoothit;
 }
 
-void RooUnfoldBayes::Unfold()
+void RooUnfoldBayes::Unfold(std::vector<TH1*>* hUnf_i)
 {
   setup();
   if (verbose() >= 2) {
@@ -106,7 +106,7 @@ void RooUnfoldBayes::Unfold()
     RooUnfoldResponse::PrintMatrix(_Nji,"RooUnfoldBayes response matrix (Nji)");
   }
   if (verbose() >= 1) cout << "Now unfolding..." << endl;
-  unfold();
+  unfold(hUnf_i);
   if (verbose() >= 2) Print();
   _rec.ResizeTo(_nc);
   _rec = _nbarCi;
@@ -181,14 +181,22 @@ void RooUnfoldBayes::setup()
   // Initial distribution
   _N0C= _nCi.Sum();
   if (_N0C!=0.0) {
-    _P0C= _nCi;
-    _P0C *= 1.0/_N0C;
+    if(_flatPrior){
+      std::cout << "RooUnfoldBayes: using a flat prior.\n";
+      for(int i = 0; i < _P0C.GetNrows(); ++i) _P0C[i] = 1. / _P0C.GetNrows();
+    } else{
+      _P0C= _nCi;
+      _P0C *= 1.0/_N0C;
+    }
   }
 }
 
 //-------------------------------------------------------------------------
-void RooUnfoldBayes::unfold()
+void RooUnfoldBayes::unfold(std::vector<TH1*>* hUnf_i)
 {
+
+  if(hUnf_i) hUnf_i->reserve(_niter + 1);
+  
   // Calculate the unfolding matrix.
   // _niter = number of iterations to perform (3 by default).
   // _smoothit = smooth the matrix in between iterations (default false).
@@ -209,8 +217,22 @@ void RooUnfoldBayes::unfold()
 
   TVectorD PbarCi(_nc);
 
-  for (Int_t kiter = 0 ; kiter < _niter; kiter++) {
-
+  if(hUnf_i){
+    TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());
+    reco->Reset();
+    reco->SetName(TString::Format("%s_prior", _meas->GetName()));
+    reco->SetTitle (TString::Format("%s prior", _meas->GetTitle()));
+    for (Int_t ii= 0; ii < _nt; ii++) {
+	Int_t jj = RooUnfoldResponse::GetBin (reco, ii, _overflow);
+	reco->SetBinContent (jj, _P0C(ii) * _N0C);
+	reco->SetBinError (jj, sqrt (fabs (_variances(ii))));
+    }
+    hUnf_i->push_back(reco);
+  }
+      
+  for (Int_t kiter = 0 ; kiter <= _niter; kiter++) {
+   if(kiter == _niter) break;
+    
     if (verbose()>=1) cout << "Iteration : " << kiter << endl;
 
     // update prior from previous iteration
@@ -224,7 +246,7 @@ void RooUnfoldBayes::unfold()
       for (Int_t i = 0 ; i < _nc ; i++)
         Uj += PEjCi(j,i) * _P0C[i];
       _UjInv[j] = Uj > 0.0 ? 1.0/Uj : 0.0;
-    }
+    } //next effect
 
     // Unfolding matrix M
     _nbartrue = 0.0;
@@ -237,11 +259,27 @@ void RooUnfoldBayes::unfold()
       }
       _nbarCi[i] = nbarC;
       _nbartrue += nbarC;  // best estimate of true number of events
+    } //next cause
+    
+    if(hUnf_i){
+      TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());
+      reco->Reset();
+      reco->SetTitle (TString::Format("%s after %d iteration(s)", _meas->GetTitle(), kiter));
+      for (Int_t ii= 0; ii < _nt; ii++) {
+	Int_t jj = RooUnfoldResponse::GetBin (reco, ii, _overflow);
+	reco->SetBinContent (jj, _nbarCi(ii));
+      }
+      hUnf_i->push_back(reco);
     }
-
+    
     // new estimate of true distribution
     PbarCi= _nbarCi;
-    PbarCi *= 1.0/_nbartrue;
+    if(_nbartrue==0){
+      std::cerr << __FILE__ << ":" << __LINE__ << ". RooUnfoldBayes: "
+		<< "No event in the estimated true distribution!\n";
+    } else{
+      PbarCi *= 1.0/_nbartrue;
+    }
 
 #ifndef OLDERRS
     if (_dosys!=2) {
@@ -332,7 +370,7 @@ void RooUnfoldBayes::unfold()
     if (verbose()>=1) cout << "Chi^2 of change " << chi2 << endl;
 
     // and repeat
-  }
+  } //next algorithm iteration
 }
 
 //-------------------------------------------------------------------------

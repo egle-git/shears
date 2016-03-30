@@ -1686,8 +1686,8 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                         sys.stdout.flush()
                         res = crabCommand("report", "-d", requestname)
                         print " Done."
-                        lumiSummaryFile = requestname + "/results/lumiSummary.json"
-                        lumiSummaryFileEosCpyShort =  ntuple_dir + "/" + ntuple_subdir + "/lumiSummary.json"
+                        lumiSummaryFile = requestname + "/results/processedLumis.json"
+                        lumiSummaryFileEosCpyShort =  ntuple_dir + "/" + ntuple_subdir + "/processedLumis.json"
                         lumiSummaryFileEosCpy = "/eos/cms/" + lumiSummaryFileEosCpyShort
                         lumiFileEosCpy = "/eos/cms/" + ntuple_dir + "/" + ntuple_subdir + "/lumi"
                         with open(lumiSummaryFile) as f:
@@ -1719,11 +1719,11 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                         except IOError, e:
                             sys.stderr.write("%s\n" % str(e))
                             
-
-                        db_update_task_record(prim_dataset, task_id, {"n_events": res["eventsRead"], "n_files": res["processedFiles"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
+                        
+                        db_update_task_record(prim_dataset, task_id, {"n_events": res["numEventsRead"], "n_files": res["numFilesProcessed"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
                     else:
                         db_update_task_record(prim_dataset, task_id, {"n_events": -1, "n_files": -1, "lumi_file": "", "lumi_file_md5sum": -1, "lumi": -1})
-                        res['eventsRead'] = -1
+                        res['numEventsRead'] = -1
                     #endif
                         
                     catalog = catalog_make_ntuple_catalog(prim_dataset, task_id)

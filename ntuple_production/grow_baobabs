@@ -1357,14 +1357,14 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
             return None
         for bound in bounds:
             if len(bound) > 0 and not run.match(bound):
-                sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.' % bound\n")
+                sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.\n" % bound)
                 return None
             #endif not run.match
         #next bound
             
         # Applies runMin and runMax requirement and resolves open intervals:
         if len(bounds) == 1:
-            r_ranges[i] = int(bounds[0])
+            r_ranges[i] = [ int(bounds[0]) ]
             if r_ranges[i] < runMin or r_ranges[i] > runMax:
                 r_ranges[i] = None
         else:

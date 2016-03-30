@@ -18,9 +18,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.source = cms.Source("PoolSource",
                             fileNames =  cms.untracked.vstring(
-#'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'.
+'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
-'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
+#'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
   )
 )
 
@@ -60,8 +60,8 @@ if opt.isMC < 0:
 #endif
 
 #for 76x:
-dataGlobalTag = "76X_dataRun2_v15"
-mcGlobalTag = '76X_mcRun2_asymptotic_v12'
+dataGlobalTag = '76X_dataRun2_16Dec2015_v0'
+mcGlobalTag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
 reapply_jec = True
 jec_file = False
 eg_corr = True   #photon and electron correction

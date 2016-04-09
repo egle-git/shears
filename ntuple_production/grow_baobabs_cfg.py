@@ -219,7 +219,7 @@ process.goodOfflinePrimaryVertices = cms.EDFilter(
 
 process.tupel = cms.EDAnalyzer("Tupel",
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
-  candidateSw  = cms.untracked.string("withTrack"), #on, off, or withTrack
+  candidateSw  = cms.untracked.string("off"), #on, off, or withTrack
   candidateSrc = cms.untracked.InputTag("packedPFCandidates"),
   photonSw     = cms.untracked.string("on"), #on or off
   photonSrc    = cms.untracked.InputTag(photonSrc),

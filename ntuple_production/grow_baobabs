@@ -434,9 +434,9 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     minRun = min(runs)
     maxRun = max(runs)
     if datatype == 'mc':
-        isMC = 0
-    else:
         isMC = 1
+    else:
+        isMC = 0
 
     config = Configuration()
 

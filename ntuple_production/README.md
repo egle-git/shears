@@ -9,7 +9,10 @@ Production of Baobab ntuples
 Usage:
 -----
 
-1. Set crab 3 environment
+1. Set crab 3 environment following instructions from <https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CheatSheet#Environment_setup>. On lxplus for bash shell user:
+```
+source /cvmfs/cms.cern.ch/crab3/crab_light.sh
+```
 2. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/readme.txt>.
 3. Run grow\_baobabs. See options in the next section.
 

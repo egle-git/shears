@@ -18,9 +18,9 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.source = cms.Source("PoolSource",
                             fileNames =  cms.untracked.vstring(
-#'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'.
+'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
-'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
+#'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
   )
 )
 
@@ -60,8 +60,8 @@ if opt.isMC < 0:
 #endif
 
 #for 76x:
-dataGlobalTag = "76X_dataRun2_v15"
-mcGlobalTag = '76X_mcRun2_asymptotic_v12'
+dataGlobalTag = '76X_dataRun2_16Dec2015_v0'
+mcGlobalTag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
 reapply_jec = True
 jec_file = False
 eg_corr = True   #photon and electron correction
@@ -131,7 +131,7 @@ if reapply_jec:
     applyJec=True,
     vertexes=cms.InputTag("offlineSlimmedPrimaryVertices")
     )
-  print process.pileupJetIdUpdated.dumpConfig()
+  #print process.pileupJetIdUpdated.dumpConfig()
 
   ### ---------------------------------------------------------------------------
   ### Removing the HF from the MET computation
@@ -219,14 +219,13 @@ process.goodOfflinePrimaryVertices = cms.EDFilter(
 
 process.tupel = cms.EDAnalyzer("Tupel",
   triggerEvent = cms.InputTag( "patTriggerEvent" ),
-  candidateSw  = cms.untracked.string("withTrack"), #on, off, or withTrack
+  candidateSw  = cms.untracked.string("off"), #on, off, or withTrack
   candidateSrc = cms.untracked.InputTag("packedPFCandidates"),
   photonSw     = cms.untracked.string("on"), #on or off
   photonSrc    = cms.untracked.InputTag(photonSrc),
   electronSrc  = cms.untracked.InputTag(electronSrc),
   muonSrc      = cms.untracked.InputTag("slimmedMuons"),
   jetSrc       = cms.untracked.InputTag(jetSrc),
-  metSrc       = cms.untracked.InputTag("patMETsPF"),
   genSrc       = cms.untracked.InputTag("prunedGenParticles"),
   gjetSrc      = cms.untracked.InputTag('slimmedGenJets'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
@@ -234,8 +233,8 @@ process.tupel = cms.EDAnalyzer("Tupel",
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
   mSrcRho      = cms.untracked.InputTag('fixedGridRhoFastjetAll'),#arbitrary rho now
   CalojetLabel = cms.untracked.InputTag('slimmedJets'), #same collection now BB 
-  metSource    = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
-  lheSource    = cms.untracked.InputTag('source'),
+  metSrcs      = cms.VInputTag("slimmedMETs","slimmedMETsNoHF","slimmedMETsPuppi"),
+  lheSrc       = cms.untracked.InputTag('source'),
   puSrc        = cms.untracked.InputTag('slimmedAddPileupInfo'),
   puMvaName    = cms.untracked.string(puMvaName),
   puJetIdSrc   = cms.untracked.InputTag("pileupJetIdUpdated"),

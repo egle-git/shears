@@ -13,7 +13,7 @@ Usage:
 ```
 source /cvmfs/cms.cern.ch/crab3/crab_light.sh
 ```
-2. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/readme.txt>.
+2. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/README.md>.
 3. Run grow\_baobabs. See options in the next section.
 
 Important: CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.

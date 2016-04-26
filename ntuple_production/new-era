@@ -1,5 +1,6 @@
 #!/bin/bash
-
+myself="`readlink -f "$0"`"
+mydir="`dirname "$myself"`"
 if [ "$1" = -f ]; then
     force=y
     shift
@@ -82,8 +83,8 @@ TMPFILE=`mktemp`
 (for typ in MC Data; do
     d=/afs/cern.ch/user/p/pgras/shearsop/work/baobab-prod/"$era"/$typ
     cd $d || { echo "Failed to enter directory $d"; continue; }
-    ln -s ../../shears/ntuple_production/grow_baobabs_cfg.py .
-    ln -s ../../shears/ntuple_production/grow_baobabs .
+    ln -s "$mydir/grow_baobabs_cfg.py" .
+    ln -s "$mydir/grow_baobabs" .
     cat > "$TMPFILE" <<EOF
 # output directory: /$eos_space/Baobab/$era/MC/v1/Ntuple
 # json file: <put here the path to the json file, /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/...>

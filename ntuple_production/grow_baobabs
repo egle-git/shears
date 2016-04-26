@@ -434,9 +434,9 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     minRun = min(runs)
     maxRun = max(runs)
     if datatype == 'mc':
-        isMC = 0
-    else:
         isMC = 1
+    else:
+        isMC = 0
 
     config = Configuration()
 
@@ -506,8 +506,8 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 #----------------------------------------------------------------------
 
 #A list of sites where the jobs should not run.
-#    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T1_US_FNAL']
-    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP']
+#    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_Demokritos', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T2_BR_SPRACE']
+    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T2_BR_SPRACE']
     
 #Site where the output should be copied. 
 # See https://cmsweb.cern.ch/sitedb/prod/sites/ for the list of site names
@@ -786,6 +786,20 @@ def db_clear_task_record(prim_dataset, task_id):
     nrows = conn.execute(sql).rowcount
     conn.commit()
     conn.close()
+
+    crab_dir = "crab_" + prim_dataset + ("-%04d" % int(task_id))
+    ts = None
+    try:
+        ts = os.stat(crab_dir).st_ctime
+    except OSError:
+        #file does not exist
+        pass
+    if ts:
+        newdirname="old_%s_%d" % (crab_dir, ts)
+        print "Renaming %s and %s.py to %s and %s.py" % (crab_dir, crab_dir, newdirname, newdirname)
+        os.rename(crab_dir, newdirname)
+        os.rename(crab_dir + ".py", newdirname + ".py")
+
     return (nrows > 0)
 
 
@@ -1343,14 +1357,14 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
             return None
         for bound in bounds:
             if len(bound) > 0 and not run.match(bound):
-                sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.' % bound\n")
+                sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.\n" % bound)
                 return None
             #endif not run.match
         #next bound
             
         # Applies runMin and runMax requirement and resolves open intervals:
         if len(bounds) == 1:
-            r_ranges[i] = int(bounds[0])
+            r_ranges[i] = [ int(bounds[0]) ]
             if r_ranges[i] < runMin or r_ranges[i] > runMax:
                 r_ranges[i] = None
         else:
@@ -1593,12 +1607,14 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'. Database will be fixed by setting it to %s.\n" % (dataset, task_id, requestname))
                             db_update_task_record(prim_dataset, task_id, {'requestname': requestname});
                         print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
-                        if args.verbosity > 0:
+                        if args.verbosity > 1:
+                            res = crabCommand("status", "-d", requestname, '--verboseErrors', '--long')
+                        elif  args.verbosity > 0:
                             res = crabCommand("status", "-d", requestname, '--verboseErrors')
                         else:
                             res = crabCommand("status", "-d", requestname)
 #                        print "Status of request %s: " % requestname, res
-                        if not ntuple_subdir and res['jobSetID']:
+                        if not ntuple_subdir and 'jobSetID' in res and res['jobSetID']:
                             #jobSetID example: 150930_085838:pgras_crab_DoubleMuon-0001
                             # ->  ntuple dir: crab_DoubleMuon-0001/150930_085838
                             jobsetid_re = re.compile(r'([^:]+):[^_]*_(.*)')
@@ -1630,6 +1646,24 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                 if failed:
                     continue
                 target_status="REPORT_DONE"
+                
+#Check COMPLETED status
+                if res["status"] == 'COMPLETED':
+                    ok = True;
+                    for i, r in enumerate(res["jobList"]):
+                        if r[0] != 'finished':
+                            sys.stdout.write("Job %d in state %s" % (i, r[0]))
+                            ok = False
+                            break;
+                        #endif
+                    #next r
+                    if not ok:
+                        crab_dir = "crab_%s-%04d" % (prim_dataset, task_id)
+                        os.system("/afs/cern.ch/user/p/pgras/public/crab_check_hook " + crab_dir)
+                        sys.stderr.write("Inconsistency between task status and job status. Task status ignored, log uploaded and mail sent to philippe.gras@cern.ch.\n")
+                        res["status"] = status
+                #endif
+
                 if res["status"] != status:
                     db_update_task_record(prim_dataset, task_id, {"status": res["status"], "status_ts": int(time.time())})
                     status = res["status"]

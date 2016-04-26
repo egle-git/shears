@@ -3,11 +3,8 @@ Scripts to produce Baobab and Bonzai Ntuples
 
 Author: Ph. Gras. CEA/Saclay
 
-Production of Baobab ntuples
-============================
-
-Usage:
------
+Setting up working environment of ntuple producton
+=================================================
 
 1. Set crab 3 environment following instructions from <https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CheatSheet#Environment_setup>. On lxplus for bash shell user:
 ```
@@ -24,22 +21,25 @@ cd shears
 PATH=$PATH:`pwd`/ntuple_production:`pwd`/Bonzais/Pruner
 cd -
 ```
-5. Copy the `shears/ntuple_production/grow_baobabs_cfg.py` in the working directory where you intend to send the jobs from.
+5. Copy the file `shears/ntuple_production/grow_baobabs_cfg.py` in the working directory where you intend to send the baobab production jobs from. This step can be skipped if you intend to produce only Bonzais.
 ```
-mkdir workdir
-cd workdir
+mkdir boabab-prod
+cd boabab-prod
 cp ../shears/ntuple_production/grow_baobabs_cfg.py .
 ```
-6. Run grow\_baobabs. See options in the next section.
+6. Copy the files `shears/ntuple_production/job_bonzai_prod.sh` and `shears/ntuple_production/do_nothing_cfg.py` in the working directory where you intend to send the bonzai production jobs from. This step can be skipped if you intend to produce only Baobabs. It is important to use a different working directory for the Bonzai and Baoabab production job submissions.
+```
+mkdir bonzai-prod
+cd bonzai-prod
+cp ../shears/ntuple_production/grow_baobabs_cfg.py .
+```
 
-Important: CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
+Important: if you don't use the "light" version of the crab 3 environmemt, the CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
 
-For central production operation, you should also read the instructions specific to the central production which can be in, https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
+Production of Baobab ntuples
+============================
 
-Main options of grow\_baobabs command:
--------------------------------------
-
-The data sets to process, the json file in case of real data and the EOS destination directory for the produce ntuple need to be listed in a file in the format defined in [1], we suggest to call datasets.txt. Follows an example of datasets.txt file content:
+You should first follow the instruction of the "Setting up environment..." section. The command to steer the Baobab ntuple production is `grow_boabab`. The data sets to process, the json file in case of real data and the EOS destination directory for the produce ntuple need to be listed in a file in the format defined in [1], we suggest to call datasets.txt. Follows an example of datasets.txt file content:
 
 ```
 # output directory: /store/group/phys_smp/AnalysisFramework/Test/Ntuple
@@ -67,6 +67,8 @@ To list the content of the production database file, used the --list option:
 `grow_baobabs --list`
 
 A [Crab 3](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideCrab) directory is created for each GRID task (processing of a dataset, called also <it>job batch</i>). It is name crab\_ followed by the dataset name and the job batch id. Crab 3 commands can be used directly. Use the Crab option -d to specify the task directory.
+
+For central production operation, you should also read the instructions specific to the central production which can be in, https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
 
 More options for grow\_baobabs command
 --------------------------------------
@@ -123,12 +125,14 @@ Production of Bonzai ntuples
 
 Bonzai ntuple can be produced using the [Pruner](https://gitlab.cern.ch/shears/shears/tree/master/Bonzais/Pruner) utility. The grow_bonzai tool can be used for massing production using the GRID infractuction. The grow_bonzai tool is less advanced that the grow_baobab ones. Both tools will be eventually merged.
 
+
+
 Usage:
 -----
 
-* Follow "Usage" instruction of previous "Production of Baobab ntuples" section to set up the environment and PATH variable.
+* You should first follow the instruction of the "Setting up environment..." section.
 * Go into the shears/Bonzai directory and run the `make` command to build the `pruner` executable.
-* Enter into the working direcroty where you intent to launch the job from and copy into this directory the two files `shears/ntuple_production/job_bonzai_prod.sh` and `shears/ntuple_production/donothing_cfg.py`
+* Enter into the working directory you created for Bonzai production (`bonzai-prod` of the "Setting up environment..." section)
 * Create a task list file like the [grow_bonzai_task_list_example.txt](grow_bonzai_task_list_example.txt). You should specify in the file the EOS location to write the ntuple to.
 * Run:
 

@@ -92,10 +92,12 @@ def eos_mount():
     #endwith
     try:
         if mymount:
-            mountpoint = mkdtemp(prefix='grow_baobabs')
-            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + "> /dev/null 2>&1")
+            mountpoint = mkdtemp(prefix='grow_bonzais')
+            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + " > /dev/null 2>&1 || { echo Failed to mount EOS; false; }  1>&2")
             if rc != 0:
                 mountpoint = None
+            else:
+                print "EOS mounted under %s." % mountpoint
             #endif
         else:
             print "Use eos mount found in %s" % mountpoint
@@ -103,6 +105,7 @@ def eos_mount():
         yield mountpoint
     finally:
         if mymount and mountpoint:
+            print "Unmounting EOS from %s." % mountpoint 
             os.system("fusermount -u " + mountpoint)
             os.rmdir(mountpoint)
 
@@ -700,16 +703,16 @@ def main():
         if not eos_mount_point:
             sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
 
-    if not pruner_path:
-        sys.stderr.write("The pruner command was not found. Command search PATH list must include path to this command.\n\n")
+        if not pruner_path:
+            sys.stderr.write("The pruner command was not found. Command search PATH list must include path to this command.\n\n")
 
-    if args.make_catalogs:
-        catalog_make_bonzai_catalog(args.make_catalogs)
-        return
+        if args.make_catalogs:
+            catalog_make_bonzai_catalog(args.make_catalogs)
+            return
                 
-    prod_process_bonzai_tasks(args.task_list)
+        prod_process_bonzai_tasks(args.task_list)
 
-    #endtry
+    #endwith
 
 
 if __name__ == '__main__':

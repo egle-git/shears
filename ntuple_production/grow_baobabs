@@ -187,13 +187,16 @@ def eos_mount():
     try:
         if mymount:
             mountpoint = mkdtemp(prefix='grow_baobabs')
-            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + "> /dev/null 2>&1")
+            rc = os.system(eos_cmd + " -b fuse mount " + mountpoint + " > /dev/null 2>&1 || { echo Failed to mount EOS; false; }  1>&2")
             if rc != 0:
                 mountpoint = None
+            else:
+                print "EOS mounted under %s." % mountpoint
         #endif
         yield mountpoint
     finally:
         if mymount and mountpoint:
+            print "Unmounting EOS from %s." % mountpoint
             os.system("fusermount -u " + mountpoint)
             os.rmdir(mountpoint)
         #endif

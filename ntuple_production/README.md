@@ -14,7 +14,11 @@ Usage:
 source /cvmfs/cms.cern.ch/crab3/crab_light.sh
 ```
 2. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/README.md>.
-3. Run grow\_baobabs. See options in the next section.
+3. If you don't have yet a copy of the Shears framework, download it from the [gitlab repository](https://gitlab.cern.ch/shears/shears):
+```
+git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
+```
+4. Run grow\_baobabs. See options in the next section.
 
 Important: CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
 

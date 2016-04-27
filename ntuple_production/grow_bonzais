@@ -723,7 +723,7 @@ def main():
             #endif
             print "The pruner executable was not found, trying to compile it."
             os.system("cd %s && make" % os.path.dirname(pruner_path))
-            if os.path.isfile(pruner_path):
+            if not os.path.isfile(pruner_path):
                 sys.stderr.write("Compilation failed.\n\n")
                 sys.exit(1)
             #endif

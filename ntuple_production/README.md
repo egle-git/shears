@@ -17,8 +17,8 @@ source /cvmfs/cms.cern.ch/crab3/crab_light.sh
 3. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/README.md>.
 4. Add the `shears/ntuple_production` to your command search path PATH. Assuming you use the bash shell:
 ```
-cd shears
-PATH=$PATH:`pwd`/ntuple_production
+cd shears/ntuple_production
+PATH=$PATH:`pwd`
 cd -
 ```
 

@@ -6,15 +6,15 @@ Author: Ph. Gras. CEA/Saclay
 Setting up working environment of ntuple producton
 =================================================
 
-1. Set crab 3 environment following instructions from <https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CheatSheet#Environment_setup>. On lxplus for bash shell user:
-```
-source /cvmfs/cms.cern.ch/crab3/crab_light.sh
-```
-2. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/README.md>.
-3. If you don't have yet a copy of the Shears framework, download it from the [gitlab repository](https://gitlab.cern.ch/shears/shears):
+1. If you don't have yet a copy of the Shears framework, download it from the [gitlab repository](https://gitlab.cern.ch/shears/shears):
 ```
 git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 ```
+2. Set crab 3 environment following instructions from <https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CheatSheet#Environment_setup>. On lxplus for bash shell user:
+```
+source /cvmfs/cms.cern.ch/crab3/crab_light.sh
+```
+3. Set up Tuple environment following instructions from <https://github.com/UGent/Tupel/blob/Tupel_MiniAOD/Tupel/README.md>.
 4. Add the `shears/ntuple_production` to your command search path PATH. Assuming you use the bash shell:
 ```
 cd shears

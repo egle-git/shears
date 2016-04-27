@@ -3,11 +3,8 @@ Scripts to produce Baobab and Bonzai Ntuples
 
 Author: Ph. Gras. CEA/Saclay
 
-Production of Baobab ntuples
-============================
-
-Usage:
------
+Setting up working environment of ntuple producton
+=================================================
 
 1. Set crab 3 environment following instructions from <https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CheatSheet#Environment_setup>. On lxplus for bash shell user:
 ```
@@ -18,24 +15,25 @@ source /cvmfs/cms.cern.ch/crab3/crab_light.sh
 ```
 git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 ```
-4. Run grow\_baobabs. See options in the next section.
+4. Add the `shears/ntuple_production` to your command search path PATH. Assuming you use the bash shell:
+```
+cd shears
+PATH=$PATH:`pwd`/ntuple_production
+cd -
+```
 
-Important: CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
+Important: if you don't use the "light" version of the crab 3 environmemt, the CMSSW environment must be set after the crab 3 environment. Otherwise you will inherit from a Python version too old for the Baobab production tools.
 
-For central production operation, you should also read the instructions specific to the central production which can be in, https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
+Production of Baobab ntuples
+============================
 
-Main options of grow\_baobabs command:
--------------------------------------
-
-Add the `shears/ntuple_production` to your command search path PATH. 
-
-The data sets to process, the json file in case of real data and the EOS destination directory for the produce ntuple need to be listed in a file in the format defined in [1]. Follows an example of the file content:
+You should first follow the instruction of the "Setting up environment..." section. The command to steer the Baobab ntuple production is `grow_boabab`. The data sets to process, the json file in case of real data and the EOS destination directory for the produce ntuple need to be listed in a file in the format defined in [1], we suggest to call datasets.txt. Follows an example of datasets.txt file content:
 
 ```
 # output directory: /store/group/phys_smp/AnalysisFramework/Test/Ntuple
 # json file: /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_*-*_13TeV_PromptReco_Collisions15_25ns_JSON.txt
 
-/SingleMuon/Run2015D-PromptReco-v4/MINIAOD
+/SingleMuon/Run2015D-16Dec2015-v1/MINIAOD
 ```
 
 The output directory path must end with the command
@@ -44,7 +42,7 @@ The output directory path must end with the command
 
 To submit the jobs to produce the Boabab ntuple of the datasets listed in the catalog file, runs:
 
-`grow_baoabas --new-jobs`
+`grow_baobabs --new-jobs`
 
 To check running job and generate luminosity section summary json file, use the --check option:
 
@@ -57,6 +55,8 @@ To list the content of the production database file, used the --list option:
 `grow_baobabs --list`
 
 A [Crab 3](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideCrab) directory is created for each GRID task (processing of a dataset, called also <it>job batch</i>). It is name crab\_ followed by the dataset name and the job batch id. Crab 3 commands can be used directly. Use the Crab option -d to specify the task directory.
+
+For central production operation, you should also read the instructions specific to the central production which can be in, https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
 
 More options for grow\_baobabs command
 --------------------------------------
@@ -113,19 +113,25 @@ Production of Bonzai ntuples
 
 Bonzai ntuple can be produced using the [Pruner](https://gitlab.cern.ch/shears/shears/tree/master/Bonzais/Pruner) utility. The grow_bonzai tool can be used for massing production using the GRID infractuction. The grow_bonzai tool is less advanced that the grow_baobab ones. Both tools will be eventually merged.
 
+
 Usage:
 -----
 
+* You should first follow the instruction of the "Setting up environment..." section.
+* Create a clean working directory and enter into this directory
+```mkdir bonzai-prod
+cd bonzai-prod
+```
 * Create a task list file like the [grow_bonzai_task_list_example.txt](grow_bonzai_task_list_example.txt). You should specify in the file the EOS location to write the ntuple to.
 * Run:
 
-```grow_bonzai --task-list your_task_list.txt```
+```grow_bonzais --task-list your_task_list.txt```
 
 * Use the standard crab command to check the GRID task status or use the script `get_crab_status`. To use this script you should remove from your directory old crab_XXXX subdirectories and keep only the ones of your current submissions. This script will ask you for each process if the submission is terminated. If you answer yes, the crab task will be recorded in the jobs_ok file and the task won't be check at the next call to `get_crab_status`. Once you are done remove the file jobs_ok, otherwise if your submit again tasks with the same names from the same directory, the `get_crab_status` will ignore them.
 
 * Once the jobs are successfully completed, you can produce the catalog files using the command:
 
-```grow_bonzai --make-catalogs your_task_list.txt```
+```grow_bonzais --make-catalogs your_task_list.txt```
 
 If you want to produce the catalog of completed jobs before all jobs are done, you can comment the uncompleted ones in the task list file. For instance add at the beginning of the line the comment %running% .
 

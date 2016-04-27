@@ -877,7 +877,29 @@ def db_update_processing_stat(prim_dataset, task_id, jobList):
                                  "other": other})
 #enddef
 
+def db_info():
+    """Display production information: description and dataset catalog directories, etc..."""
+    conn, c = db_get_conn()
+    c.execute("SELECT dataset_catalog, description FROM production")
+    r = c.fetchone()
+    conn.close()
+    
+    if len(r) != 2:
+        return
 
+    dataset_catalog= r[0]
+    description = r[1]
+
+    try:
+        outDir, jsonFile, datasets =  catalog_read(dataset_catalog)
+    except IOError:
+        outDir = "the input dataset catalog was not found."
+
+    print '''
+Input dataset catalog: %s
+Output directory (set in the catalog): %s
+Description: %s
+''' % (dataset_catalog, outDir, description)
 
 #
 # End of database access tools
@@ -1966,15 +1988,11 @@ def prod_new_version():
     datasets = catalog_get()
 
     if not datasets:
-        sys.stderr.write("A dataset catalog must be set with --catalog command in order to run the --new-version command\n\n")
-        return
-
-    basedir = os.path.dirname(os.path.dirname(catalog_get_out_dir(datasets)))
-    
-    if not datasets:
         sys.stderr.write("The parameter 'output directory' was not found in the dataset catalog %s. This parameter is mandatorry for the --new-version command.\n" % datasets)
         return
-    
+
+    #basedir = os.path.dirname(os.path.dirname(catalog_get_out_dir(datasets)))
+    basedir = re.sub(r'(v[[:digit:]]+)?/Tuple$', '', catalog_get_out_dir(datasets))    
     basedir = eos_to_local_path(basedir)
 
     if not basedir:
@@ -1996,13 +2014,13 @@ def prod_new_version():
             dirs_.append(int(m.groups()[0]))
 
     if len(dirs_) == 0:
-        new_vers=1
+        last_vers=0
     else:
         last_vers = max(dirs_)
-        new_vers = last_vers + 1
+    
+    new_vers = last_vers + 1
 
-        olddir=basedir + "/v" + str(last_vers)
-
+    olddir=basedir + "/v" + str(last_vers)
     newdir = basedir + "/v" + str(new_vers)
 
     ntuple_newdir_local = newdir + "/Ntuple"
@@ -2053,15 +2071,16 @@ https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
     #endif fake
     
     catalog_copy(datasets, datasets_newfile, ntuple_newdir)
-    
+
     if not fake:
         catalog_set_default(datasets_newfile)
-        if last_vers:
+        if last_vers is not None:
             #moves previous production files to a separate subdirectory:
             os.mkdir("v%d" % last_vers)
             print "\nMoving previous production to v%d directory..." % last_vers
             os.system("mv crab_* v%d/" % last_vers)
             os.system("mv baobab_prod.sqlite3 v%d/" % last_vers)
+            os.system("mv datasets.txt v%d/" % last_vers)
             #sets up database and sets catalog file for the new production:
             db_create_database()
             catalog_set_default(datasets_newfile)
@@ -2184,6 +2203,9 @@ def parse_command_line():
 
     parser.add_argument('--catalog', action='store', default=None,
                         help='Deprecated. Replaced by --set-catalog-path.')
+
+    parser.add_argument('--info', action='store_true',
+                        help='Displays general information on the production setting.')
 
     parser.add_argument('--set-catalog-path', action='store', default=None,
                         help='Sets the catalog file path. If combined with other option specifying an action to take, the action will be processed already with this new catalog.')
@@ -2321,7 +2343,9 @@ def run():
         #for the new production database
         prod_set_description(args.description)
 
-    if args.check:
+    if args.info:
+        db_info()
+    elif args.check:
         tasks_baby_sitting(*args.task)
     elif args.force_close:
         tasks_forced_close(args.force_close[0], int(args.force_close[1]))

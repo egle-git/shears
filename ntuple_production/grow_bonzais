@@ -44,7 +44,7 @@ myself=os.path.realpath(__file__)
 mydir=os.path.dirname(myself)
 getlumi=mydir + "/getlumi"
 
-pruner_path=find_executable('pruner')
+pruner_path=os.path.realpath('%s/../Bonzais/Pruner/pruner' % mydir)
 
 try:
     from CRABAPI.RawCommand import crabCommand
@@ -63,6 +63,19 @@ from WMCore.Configuration import loadConfigurationFile
 def time2str(t):
     """Convert unix time to human-readable text."""
     return time.strftime("%Y-%m-%d-%T-%Z", time.localtime(t))
+
+def check_environment():
+    for f in [ "job_bonzai_prod.sh", "donothing_cfg.py" ]:
+        if not os.path.isfile(f):
+            print "File %s was not found. Copying file from %s." % (f, mydir)
+            try:
+                shutil.copyfile(mydir + "/" + f, "./" + f)
+            except IOError:
+                sys.stderr.write("File copy failed.\n")
+            #end try
+        #endif
+    #next f
+
 #
 ######################################################################
 
@@ -703,13 +716,33 @@ def main():
         if not eos_mount_point:
             sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
 
-        if not pruner_path:
-            sys.stderr.write("The pruner command was not found. Command search PATH list must include path to this command.\n\n")
+        if not os.path.isfile(pruner_path):
+            if not os.path.isdir(os.path.dirname(pruner_path)):
+                print "The pruner directory, %s, was not found.\n\n" % os.path.dirname(pruner_path)
+                sys.exit(1)
+            #endif
+            print "The pruner executable was not found, trying to compile it."
+            os.system("cd %s && make" % os.path.dirname(pruner_path))
+            if os.path.isfile(pruner_path):
+                sys.stderr.write("Compilation failed.\n\n")
+                sys.exit(1)
+            #endif
+        #endif
 
         if args.make_catalogs:
             catalog_make_bonzai_catalog(args.make_catalogs)
             return
                 
+        check_environment()
+
+        if not args.task_list:
+            sys.stderr.write("A task list must be specified with the --task-list option.\n\n")
+            sys.exit(1)
+
+        if not os.path.isfile(args.task_list):
+            sys.stderr.write("The supplied task list file, %s, was not found!\n\n" % args.task_list)
+            sys.exit(1)
+
         prod_process_bonzai_tasks(args.task_list)
 
     #endwith

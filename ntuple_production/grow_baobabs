@@ -16,7 +16,12 @@ import sqlite3
 import time
 import hashlib
 import os
-import das_client
+import shutil
+try:
+    import das_client
+except ImportError:
+    sys.stderr.write("\nFatal error: CMSSW environment needs to be set before running this script.\n")
+    sys.exit(1)
 import os.path
 import datetime
 import operator
@@ -414,6 +419,21 @@ def get_runs_from_json_file(jsonFile):
         return None
     return r
 #enddef
+
+def check_environment():
+    mydir  = os.path.dirname(os.path.realpath( __file__ ))
+    print "Base directory:", mydir
+    for f in [ "grow_baobabs_cfg.py" ]:
+        if not os.path.isfile(f):
+            print "File %s was not found. Copying file from %s." % (f, mydir)
+            try:
+                shutil.copyfile(mydir + "/" + f, "./" + f)
+            except IOError:
+                sys.stderr.write("File copy failed.\n")
+            #end try
+        #endif
+    #next f
+
 
 # End of miscellaneous functions
 ######################################################################
@@ -2292,6 +2312,8 @@ def main():
     #endtry
 
 def run():
+
+    check_environment()
 
     if args.description and not args.new_version:
         #note: if a new version is create, description

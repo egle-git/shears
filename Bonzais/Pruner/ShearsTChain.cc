@@ -38,7 +38,7 @@ bool ShearsTChain::setCatalog(const char* catalog, int maxFiles, int skipFiles){
     if(p!=std::string::npos) l.erase(p);
       
     //sanity check:
-    const char ext[] = ".root";
+    const char ext[6] = ".root";
       
     if(l.size() < sizeof(ext) || l.substr(l.size() - sizeof(ext) + 1) != ext){
       std::cerr << "Line " << iline << " of catalog file " << catalog << " was skipped.\n";

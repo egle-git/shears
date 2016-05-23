@@ -268,8 +268,8 @@ void ZJetsAndDPS::Loop(bool hasRecoInfo, bool hasGenInfo, int doQCD, bool doSSig
     
     cout << " run on " << nentries << " events" << endl;
     //--- Begin Loop All Entries --
-    for (Long64_t jentry(0); jentry < nentries; jentry++){
-    //for (Long64_t jentry(0); jentry < 500000; jentry++){
+    //for (Long64_t jentry(0); jentry < nentries; jentry++){
+    for (Long64_t jentry(0); jentry < 100000; jentry++){
         Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
 
@@ -2263,6 +2263,8 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     FirstJetPt_Zexc1jet->Fill(jets[0].pt, weight);
                     FirstJetEta_Zexc1jet->Fill(jets[0].eta, weight);
                     FirstJetPhi_Zexc1jet->Fill(jets[0].phi, weight);
+                    FirstJetPtEta_Zexc1jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    NVtx_Zexc1jet->Fill(EvtVtxCnt, weight);
                     if ( doW ) dEtaBosonJet_Zexc1jet->Fill(fabs(jets[0].eta - lepton1.eta), weight);
                     else dEtaBosonJet_Zexc1jet->Fill(fabs(jets[0].eta-Z.Eta()), weight);
                     
@@ -2626,6 +2628,12 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     SecondJetPt_Zexc2jet->Fill(jets[1].pt, weight);
                     SecondJetEta_Zexc2jet->Fill(jets[1].eta, weight);
                     SecondJetPhi_Zexc2jet->Fill(jets[1].phi, weight);
+                    SecondJetPtEta_Zexc2jet->Fill(jets[1].pt, fabs(jets[1].eta), weight);
+                    FirstJetPhi_Zexc2jet->Fill(jets[0].phi, weight);
+                    FirstJetEta_Zexc2jet->Fill(fabs(jets[0].eta), weight);
+                    FirstJetPtEta_Zexc2jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    FirstJetPt_Zexc2jet->Fill(jets[0].pt, weight);
+                    NVtx_Zexc2jet->Fill(EvtVtxCnt, weight);
                     
                     //-- DPS Histograms
                     TwoJetsPtDiff_Zexc2jet->Fill(jet1Minus2.Pt(), weight);
@@ -2787,6 +2795,19 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     dPhiLeptons_Zexc3jet->Fill(deltaPhi(lep1, lep2), weight);
                     dEtaLeptons_Zexc3jet->Fill(lepton1.eta - lepton2.eta, weight);
                     SpTLeptons_Zexc3jet->Fill(SpTsub(lep1, lep2), weight);
+                    ThirdJetPhi_Zexc3jet->Fill(jets[2].phi, weight);
+                    ThirdJetEta_Zexc3jet->Fill(fabs(jets[2].eta), weight);
+                    ThirdJetPtEta_Zexc3jet->Fill(jets[2].pt, fabs(jets[2].eta), weight);
+                    ThirdJetPt_Zexc3jet->Fill(jets[2].pt, weight);
+                    SecondJetPhi_Zexc3jet->Fill(jets[1].phi, weight);
+                    SecondJetEta_Zexc3jet->Fill(fabs(jets[1].eta), weight);
+                    SecondJetPtEta_Zexc3jet->Fill(jets[1].pt, fabs(jets[1].eta), weight);
+                    SecondJetPt_Zexc3jet->Fill(jets[1].pt, weight);
+                    FirstJetPhi_Zexc3jet->Fill(jets[0].phi, weight);
+                    FirstJetEta_Zexc3jet->Fill(fabs(jets[0].eta), weight);
+                    FirstJetPtEta_Zexc3jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    FirstJetPt_Zexc3jet->Fill(jets[0].pt, weight);
+		    NVtx_Zexc3jet->Fill(EvtVtxCnt, weight);
                 }
             }
             if (nGoodJets >= 4){
@@ -2857,6 +2878,23 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     dPhiLeptons_Zexc4jet->Fill(deltaPhi(lep1, lep2), weight);
                     dEtaLeptons_Zexc4jet->Fill(lepton1.eta - lepton2.eta, weight);
                     SpTLeptons_Zexc4jet->Fill(SpTsub(lep1, lep2), weight);
+                    FourthJetPhi_Zexc4jet->Fill(jets[3].phi, weight);
+                    FourthJetEta_Zexc4jet->Fill(fabs(jets[3].eta), weight);
+                    FourthJetPtEta_Zexc4jet->Fill(jets[3].pt, fabs(jets[3].eta), weight);
+                    FourthJetPt_Zexc4jet->Fill(jets[3].pt, weight);
+                    ThirdJetPhi_Zexc4jet->Fill(jets[2].phi, weight);
+                    ThirdJetEta_Zexc4jet->Fill(fabs(jets[2].eta), weight);
+                    ThirdJetPtEta_Zexc4jet->Fill(jets[2].pt, fabs(jets[2].eta), weight);
+                    ThirdJetPt_Zexc4jet->Fill(jets[2].pt, weight);
+                    SecondJetPhi_Zexc4jet->Fill(jets[1].phi, weight);
+                    SecondJetEta_Zexc4jet->Fill(fabs(jets[1].eta), weight);
+                    SecondJetPtEta_Zexc4jet->Fill(jets[1].pt, fabs(jets[1].eta), weight);
+                    SecondJetPt_Zexc4jet->Fill(jets[1].pt, weight);
+                    FirstJetPhi_Zexc4jet->Fill(jets[0].phi, weight);
+                    FirstJetEta_Zexc4jet->Fill(fabs(jets[0].eta), weight);
+                    FirstJetPtEta_Zexc4jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    FirstJetPt_Zexc4jet->Fill(jets[0].pt, weight);
+                    NVtx_Zexc4jet->Fill(EvtVtxCnt, weight);
                 }
             }
             if (nGoodJets >= 5){
@@ -2904,6 +2942,27 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     dPhiLeptons_Zexc5jet->Fill(deltaPhi(lep1, lep2), weight);
                     dEtaLeptons_Zexc5jet->Fill(lepton1.eta - lepton2.eta, weight);
                     SpTLeptons_Zexc5jet->Fill(SpTsub(lep1, lep2), weight);
+                    FifthJetPhi_Zexc5jet->Fill(jets[4].phi, weight);
+                    FifthJetEta_Zexc5jet->Fill(fabs(jets[4].eta), weight);
+                    FifthJetPtEta_Zexc5jet->Fill(jets[4].pt, fabs(jets[4].eta), weight);
+                    FifthJetPt_Zexc5jet->Fill(jets[4].pt, weight);
+                    FourthJetPhi_Zexc5jet->Fill(jets[3].phi, weight);
+                    FourthJetEta_Zexc5jet->Fill(fabs(jets[3].eta), weight);
+                    FourthJetPtEta_Zexc5jet->Fill(jets[3].pt, fabs(jets[3].eta), weight);
+                    FourthJetPt_Zexc5jet->Fill(jets[3].pt, weight);
+                    ThirdJetPhi_Zexc5jet->Fill(jets[2].phi, weight);
+                    ThirdJetEta_Zexc5jet->Fill(fabs(jets[2].eta), weight);
+                    ThirdJetPtEta_Zexc5jet->Fill(jets[2].pt, fabs(jets[2].eta), weight);
+                    ThirdJetPt_Zexc5jet->Fill(jets[2].pt, weight);
+                    SecondJetPhi_Zexc5jet->Fill(jets[1].phi, weight);
+                    SecondJetEta_Zexc5jet->Fill(fabs(jets[1].eta), weight);
+                    SecondJetPtEta_Zexc5jet->Fill(jets[1].pt, fabs(jets[1].eta), weight);
+                    SecondJetPt_Zexc5jet->Fill(jets[1].pt, weight);
+                    FirstJetPhi_Zexc5jet->Fill(jets[0].phi, weight);
+                    FirstJetEta_Zexc5jet->Fill(fabs(jets[0].eta), weight);
+                    FirstJetPtEta_Zexc5jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    FirstJetPt_Zexc5jet->Fill(jets[0].pt, weight);
+                    NVtx_Zexc5jet->Fill(EvtVtxCnt, weight);
                 }
             }
             if (nGoodJets >= 6){
@@ -2930,6 +2989,31 @@ if (DEBUG) cout << "Stop after line " << __LINE__ << "   " << hasGenInfo <<"    
                     ZPt_Zexc6jet->Fill(Z.Pt(), weight);
                     ZRapidity_Zexc6jet->Fill(Z.Rapidity(), weight);
                     ZEta_Zexc6jet->Fill(Z.Eta(), weight);
+                    SixthJetPhi_Zexc6jet->Fill(jets[5].phi, weight);
+                    SixthJetEta_Zexc6jet->Fill(fabs(jets[5].eta), weight);
+                    SixthJetPtEta_Zexc6jet->Fill(jets[5].pt, fabs(jets[5].eta), weight);
+                    SixthJetPt_Zexc6jet->Fill(jets[5].pt, weight);
+                    FifthJetPhi_Zexc6jet->Fill(jets[4].phi, weight);
+                    FifthJetEta_Zexc6jet->Fill(fabs(jets[4].eta), weight);
+                    FifthJetPtEta_Zexc6jet->Fill(jets[4].pt, fabs(jets[4].eta), weight);
+                    FifthJetPt_Zexc6jet->Fill(jets[4].pt, weight);
+                    FourthJetPhi_Zexc6jet->Fill(jets[3].phi, weight);
+                    FourthJetEta_Zexc6jet->Fill(fabs(jets[3].eta), weight);
+                    FourthJetPtEta_Zexc6jet->Fill(jets[3].pt, fabs(jets[3].eta), weight);
+                    FourthJetPt_Zexc6jet->Fill(jets[3].pt, weight);
+                    ThirdJetPhi_Zexc6jet->Fill(jets[2].phi, weight);
+                    ThirdJetEta_Zexc6jet->Fill(fabs(jets[2].eta), weight);
+                    ThirdJetPtEta_Zexc6jet->Fill(jets[2].pt, fabs(jets[2].eta), weight);
+                    ThirdJetPt_Zexc6jet->Fill(jets[2].pt, weight);
+                    SecondJetPhi_Zexc6jet->Fill(jets[1].phi, weight);
+                    SecondJetEta_Zexc6jet->Fill(fabs(jets[1].eta), weight);
+                    SecondJetPtEta_Zexc6jet->Fill(jets[1].pt, fabs(jets[1].eta), weight);
+                    SecondJetPt_Zexc6jet->Fill(jets[1].pt, weight);
+                    FirstJetPhi_Zexc6jet->Fill(jets[0].phi, weight);
+                    FirstJetEta_Zexc6jet->Fill(fabs(jets[0].eta), weight);
+                    FirstJetPtEta_Zexc6jet->Fill(jets[0].pt, fabs(jets[0].eta), weight);
+                    FirstJetPt_Zexc6jet->Fill(jets[0].pt, weight);
+                    NVtx_Zexc6jet->Fill(EvtVtxCnt, weight);
                 }
             }
             if (nGoodJets >= 7){

@@ -229,6 +229,98 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
     
     for (int i = 1; i < nFiles; i++) {
         for (int j = 0; j < nHistNoGen ; j++) {
+            if (histoName[j].find("FirstJetPhi_Zexc2jet") != string::npos){
+                cout << "matched third jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(2);
+                if (i==1){
+                  hist[0][j]->Rebin(2);
+                }
+            }
+            if (histoName[j].find("FirstJetPhi_Zexc4jet") != string::npos){
+                cout << "matched fourth jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("SecondJetPhi_Zexc4jet") != string::npos){
+                cout << "matched fourth jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("ThirdJetPhi_Zexc4jet") != string::npos){
+                cout << "matched fourth jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            /*if (histoName[j].find("FifthJetPhi_Zexc5jet") != string::npos){
+                cout << "matched fifth jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("SixthJetPhi_Zexc6jet") != string::npos){
+                cout << "matched sixth jet phi: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("SecondJetEta_Zexc2jet") != string::npos){
+                cout << "matched second jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(2);
+                if (i==1){
+                  hist[0][j]->Rebin(2);
+                }
+            }*/
+            if (histoName[j].find("FirstJetEta_Zexc3jet") != string::npos){
+                cout << "matched third jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(2);
+                if (i==1){
+                  hist[0][j]->Rebin(2);
+                }
+            }
+            if (histoName[j].find("FirstJetEta_Zexc4jet") != string::npos){
+                cout << "matched fourth jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("SecondJetEta_Zexc4jet") != string::npos){
+                cout << "matched fourth jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(2);
+                if (i==1){
+                  hist[0][j]->Rebin(2);
+                }
+            }
+            if (histoName[j].find("ThirdJetEta_Zexc4jet") != string::npos){
+                cout << "matched fourth jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(2);
+                if (i==1){
+                  hist[0][j]->Rebin(2);
+                }
+            }
+
+            /*if (histoName[j].find("FifthJetEta_Zexc5jet") != string::npos){
+                cout << "matched fifth jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }
+            if (histoName[j].find("SixthJetEta_Zexc6jet") != string::npos){
+                cout << "matched sixth jet eta: " << histoName[j] << endl;
+                hist[i][j]->Rebin(4);
+                if (i==1){
+                  hist[0][j]->Rebin(4);
+                }
+            }*/
             if (doBJets <= 0 ){
                 histSumMC[j]->Add(hist[i][j]);
             }
@@ -293,7 +385,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         if (energy == "13TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 2.5 fb^{-1},  #sqrt{s} = 13 TeV");
         if ( histoName[i].find("inc0") == string::npos){
             ostringstream ptLegend;
-            ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |y^{jet}| < 2.4";
+            ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |#eta^{jet}| < 2.4";
             jetCuts[i]->DrawLatex(0.16,0.72, ptLegend.str().c_str());
             jetAlgo[i]->DrawLatex(0.16,0.77, "anti-k_{t} jets,  R = 0.4");
             pad1[i]->Draw();
@@ -341,8 +433,10 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         hist[0][i]->DrawCopy("EP");
         canvas[i]->cd();
 
-        string outputFilePNG = outputFileName + "/" + histoName[i] + ".pdf";
+        string outputFilePNG = outputFileName + "/" + histoName[i] + ".png";
+        string outputFilePDF = outputFileName + "/" + histoName[i] + ".pdf";
         canvas[i]->Print(outputFilePNG.c_str());
+        canvas[i]->Print(outputFilePDF.c_str());
         outputFile->cd();
         canvas[i]->Write();
 
@@ -355,8 +449,10 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         histoName[i] += "_Lin";
         tmpCanvas->SetTitle(histoName[i].c_str());
         tmpCanvas->SetName(histoName[i].c_str());
-        string outputFileLinPNG = outputFileName + "/" + histoName[i] + ".pdf";
+        string outputFileLinPNG = outputFileName + "/" + histoName[i] + ".png";
+        string outputFileLinPDF = outputFileName + "/" + histoName[i] + ".pdf";
         tmpCanvas->Print(outputFileLinPNG.c_str());
+        tmpCanvas->Print(outputFileLinPDF.c_str());
         outputFile->cd();
         tmpCanvas->Write();
     }

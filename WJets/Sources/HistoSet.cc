@@ -1069,8 +1069,28 @@ HistoSet::HistoSet(string leptonFlavor)
     FifthJetEtaFull_Zinc5jet                = newTH1D("FifthJetEtaFull_Zinc5jet",                "5th jet #eta (N_{jets} #geq 5)",              "#eta(j_{5})",   4,-2.4, 2.4);
     SixthJetEtaFull_Zinc6jet                = newTH1D("SixthJetEtaFull_Zinc6jet",                "#geq 6th jets #eta (N_{jets} #geq 6)",        "#eta(j_{6})",   4,-2.4, 2.4);
     
-    FirstJetEta_Zexc1jet                = newTH1D("FirstJetEta_Zexc1jet",                "1st jet #eta (N_{jets} = 1)",                 "#eta(j_{1})",  47,-4.7, 4.7);
-    SecondJetEta_Zexc2jet               = newTH1D("SecondJetEta_Zexc2jet",               "2nd jet #eta (N_{jets} = 2)",                 "#eta(j_{2})",  47,-4.7, 4.7);
+    FirstJetEta_Zexc1jet                = newTH1D("FirstJetEta_Zexc1jet",                "1st jet #eta (N_{jets} = 1)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    FirstJetEta_Zexc2jet                = newTH1D("FirstJetEta_Zexc2jet",                "1st jet #eta (N_{jets} = 2)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    FirstJetEta_Zexc3jet                = newTH1D("FirstJetEta_Zexc3jet",                "1st jet #eta (N_{jets} = 3)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    FirstJetEta_Zexc4jet                = newTH1D("FirstJetEta_Zexc4jet",                "1st jet #eta (N_{jets} = 4)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    FirstJetEta_Zexc5jet                = newTH1D("FirstJetEta_Zexc5jet",                "1st jet #eta (N_{jets} = 5)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    FirstJetEta_Zexc6jet                = newTH1D("FirstJetEta_Zexc6jet",                "1st jet #eta (N_{jets} = 6)",                 "#eta(j_{1})",  48,0.0, 2.4);
+    SecondJetEta_Zexc2jet               = newTH1D("SecondJetEta_Zexc2jet",               "2nd jet #eta (N_{jets} = 2)",                 "#eta(j_{2})",  24,0.0, 2.4);
+    SecondJetEta_Zexc3jet               = newTH1D("SecondJetEta_Zexc3jet",               "2nd jet #eta (N_{jets} = 3)",                 "#eta(j_{2})",  24,0.0, 2.4);
+    SecondJetEta_Zexc4jet               = newTH1D("SecondJetEta_Zexc4jet",               "2nd jet #eta (N_{jets} = 4)",                 "#eta(j_{2})",  24,0.0, 2.4);
+    SecondJetEta_Zexc5jet               = newTH1D("SecondJetEta_Zexc5jet",               "2nd jet #eta (N_{jets} = 5)",                 "#eta(j_{2})",  24,0.0, 2.4);
+    SecondJetEta_Zexc6jet               = newTH1D("SecondJetEta_Zexc6jet",               "2nd jet #eta (N_{jets} = 6)",                 "#eta(j_{2})",  24,0.0, 2.4);
+    ThirdJetEta_Zexc3jet                = newTH1D("ThirdJetEta_Zexc3jet",                "3rd jet #eta (N_{jets} = 3)",                 "#eta(j_{3})",  24,0.0, 2.4);
+    ThirdJetEta_Zexc4jet                = newTH1D("ThirdJetEta_Zexc4jet",                "3rd jet #eta (N_{jets} = 4)",                 "#eta(j_{3})",  24,0.0, 2.4);
+    ThirdJetEta_Zexc5jet                = newTH1D("ThirdJetEta_Zexc5jet",                "3rd jet #eta (N_{jets} = 5)",                 "#eta(j_{3})",  24,0.0, 2.4);
+    ThirdJetEta_Zexc6jet                = newTH1D("ThirdJetEta_Zexc6jet",                "3rd jet #eta (N_{jets} = 6)",                 "#eta(j_{3})",  24,0.0, 2.4);
+    FourthJetEta_Zexc4jet               = newTH1D("FourthJetEta_Zexc4jet",               "4th jet #eta (N_{jets} = 4)",                 "#eta(j_{4})",  12,0.0, 2.4);
+    FourthJetEta_Zexc5jet               = newTH1D("FourthJetEta_Zexc5jet",               "4th jet #eta (N_{jets} = 5)",                 "#eta(j_{4})",  12,0.0, 2.4);
+    FourthJetEta_Zexc6jet               = newTH1D("FourthJetEta_Zexc6jet",               "4th jet #eta (N_{jets} = 6)",                 "#eta(j_{4})",  12,0.0, 2.4);
+    FifthJetEta_Zexc5jet                = newTH1D("FifthJetEta_Zexc5jet",                "5th jet #eta (N_{jets} = 5)",                 "#eta(j_{5})",  12,0.0, 2.4);
+    FifthJetEta_Zexc6jet                = newTH1D("FifthJetEta_Zexc6jet",                "5th jet #eta (N_{jets} = 6)",                 "#eta(j_{5})",  12,0.0, 2.4);
+    SixthJetEta_Zexc6jet               = newTH1D("SixthJetEta_Zexc6jet",               "6th jet #eta (N_{jets} = 6)",                 "#eta(j_{6})",  12,0.0, 2.4);
+
     
     AllJetEta_Zinc1jet                  = newTH1D("AllJetEta_Zinc1jet",                  "All jets #eta (N_{jets} #geq 1)",             "#eta(jets)",   47,-4.7, 4.7);
     AllJetEta_Zinc2jet                  = newTH1D("AllJetEta_Zinc2jet",                  "All jets #eta (N_{jets} #geq 2)",             "#eta(jets)",   47,-4.7, 4.7);
@@ -1085,8 +1105,28 @@ HistoSet::HistoSet(string leptonFlavor)
     FifthJetPhi_Zinc5jet                = newTH1D("FifthJetPhi_Zinc5jet",                "5th jet #phi (N_{jets} #geq 5)",              "#phi(j_{5})",  30,-PI, PI );
     SixthJetPhi_Zinc6jet                = newTH1D("SixthJetPhi_Zinc6jet",                "6th jet #phi (N_{jets} #geq 6)",              "#phi(j_{6})",  30,-PI, PI );
 
-    FirstJetPhi_Zexc1jet                = newTH1D("FirstJetPhi_Zexc1jet",                "1st jet #phi (N_{jets} = 1)",                 "#phi(j_{1})",  30,-PI, PI );
-    SecondJetPhi_Zexc2jet               = newTH1D("SecondJetPhi_Zexc2jet",               "2nd jet #phi (N_{jets} = 2)",                 "#phi(j_{2})",  30,-PI, PI );
+    FirstJetPhi_Zexc1jet                = newTH1D("FirstJetPhi_Zexc1jet",                "1st jet #phi (N_{jets} = 1)",                 "#phi(j_{1})",  32,-PI, PI );
+    FirstJetPhi_Zexc2jet                = newTH1D("FirstJetPhi_Zexc2jet",                "1st jet #phi (N_{jets} = 2)",                 "#phi(j_{1})",  32,-PI, PI );
+    FirstJetPhi_Zexc3jet                = newTH1D("FirstJetPhi_Zexc3jet",                "1st jet #phi (N_{jets} = 3)",                 "#phi(j_{1})",  32,-PI, PI );
+    FirstJetPhi_Zexc4jet                = newTH1D("FirstJetPhi_Zexc4jet",                "1st jet #phi (N_{jets} = 4)",                 "#phi(j_{1})",  32,-PI, PI );
+    FirstJetPhi_Zexc5jet                = newTH1D("FirstJetPhi_Zexc5jet",                "1st jet #phi (N_{jets} = 5)",                 "#phi(j_{1})",  32,-PI, PI );
+    FirstJetPhi_Zexc6jet                = newTH1D("FirstJetPhi_Zexc6jet",                "1st jet #phi (N_{jets} = 6)",                 "#phi(j_{1})",  32,-PI, PI );
+    SecondJetPhi_Zexc2jet               = newTH1D("SecondJetPhi_Zexc2jet",               "2nd jet #phi (N_{jets} = 2)",                 "#phi(j_{2})",  32,-PI, PI );
+    SecondJetPhi_Zexc2jet               = newTH1D("SecondJetPhi_Zexc2jet",               "2nd jet #phi (N_{jets} = 2)",                 "#phi(j_{2})",  32,-PI, PI );
+    SecondJetPhi_Zexc3jet               = newTH1D("SecondJetPhi_Zexc3jet",               "2nd jet #phi (N_{jets} = 3)",                 "#phi(j_{2})",  32,-PI, PI );
+    SecondJetPhi_Zexc4jet               = newTH1D("SecondJetPhi_Zexc4jet",               "2nd jet #phi (N_{jets} = 4)",                 "#phi(j_{2})",  32,-PI, PI );
+    SecondJetPhi_Zexc5jet               = newTH1D("SecondJetPhi_Zexc5jet",               "2nd jet #phi (N_{jets} = 5)",                 "#phi(j_{2})",  32,-PI, PI );
+    SecondJetPhi_Zexc6jet               = newTH1D("SecondJetPhi_Zexc6jet",               "2nd jet #phi (N_{jets} = 6)",                 "#phi(j_{2})",  32,-PI, PI );
+    ThirdJetPhi_Zexc3jet                = newTH1D("ThirdJetPhi_Zexc3jet",                "3rd jet #phi (N_{jets} = 3)",                 "#phi(j_{3})",  16,-PI, PI );
+    ThirdJetPhi_Zexc4jet                = newTH1D("ThirdJetPhi_Zexc4jet",                "3rd jet #phi (N_{jets} = 4)",                 "#phi(j_{3})",  16,-PI, PI );
+    ThirdJetPhi_Zexc5jet                = newTH1D("ThirdJetPhi_Zexc5jet",                "3rd jet #phi (N_{jets} = 5)",                 "#phi(j_{3})",  16,-PI, PI );
+    ThirdJetPhi_Zexc6jet                = newTH1D("ThirdJetPhi_Zexc6jet",                "3rd jet #phi (N_{jets} = 6)",                 "#phi(j_{3})",  16,-PI, PI );
+    FourthJetPhi_Zexc4jet               = newTH1D("FourthJetPhi_Zexc4jet",               "4th jet #phi (N_{jets} = 4)",                 "#phi(j_{4})",  8,-PI, PI );
+    FourthJetPhi_Zexc5jet               = newTH1D("FourthJetPhi_Zexc5jet",               "4th jet #phi (N_{jets} = 5)",                 "#phi(j_{4})",  8,-PI, PI );
+    FourthJetPhi_Zexc6jet               = newTH1D("FourthJetPhi_Zexc6jet",               "4th jet #phi (N_{jets} = 6)",                 "#phi(j_{4})",  8,-PI, PI );
+    FifthJetPhi_Zexc5jet                = newTH1D("FifthJetPhi_Zexc5jet",                "5th jet #phi (N_{jets} = 5)",                 "#phi(j_{5})",  8,-PI, PI );
+    FifthJetPhi_Zexc6jet                = newTH1D("FifthJetPhi_Zexc6jet",                "5th jet #phi (N_{jets} = 6)",                 "#phi(j_{5})",  8,-PI, PI );
+    SixthJetPhi_Zexc6jet               = newTH1D("SixthJetPhi_Zexc6jet",               "6th jet #phi (N_{jets} = 6)",                 "#phi(j_{6})",  8,-PI, PI );
 
     AllJetPhi_Zinc1jet                  = newTH1D("AllJetPhi_Zinc1jet",                  "All jets #phi (N_{jets} #geq 1)",             "#phi(jets)",   30,-PI, PI );
     AllJetPhi_Zinc2jet                  = newTH1D("AllJetPhi_Zinc2jet",                  "All jets #phi (N_{jets} #geq 2)",             "#phi(jets)",   30,-PI, PI );
@@ -1172,7 +1212,26 @@ HistoSet::HistoSet(string leptonFlavor)
     genRatioJetPt32_Zinc3jet           = newTH1D("genRatioJetPt32_Zinc3jet",           "gen ratio 3rd/2nd jet p_{T} (N_{jets} #geq 3)",         "p_{T}(j_{3})/p_{T}(j_{2})",    10 , 0 , 1);
 
     FirstJetPt_Zexc1jet                 = newTH1D("FirstJetPt_Zexc1jet",                 "1st jet p_{T} (N_{jets} = 1)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
+    FirstJetPt_Zexc2jet                 = newTH1D("FirstJetPt_Zexc2jet",                 "1st jet p_{T} (N_{jets} = 2)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
+    FirstJetPt_Zexc3jet                 = newTH1D("FirstJetPt_Zexc3jet",                 "1st jet p_{T} (N_{jets} = 3)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
+    FirstJetPt_Zexc4jet                 = newTH1D("FirstJetPt_Zexc4jet",                 "1st jet p_{T} (N_{jets} = 4)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
+    FirstJetPt_Zexc5jet                 = newTH1D("FirstJetPt_Zexc5jet",                 "1st jet p_{T} (N_{jets} = 5)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
+    FirstJetPt_Zexc6jet                 = newTH1D("FirstJetPt_Zexc6jet",                 "1st jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
     SecondJetPt_Zexc2jet                = newTH1D("SecondJetPt_Zexc2jet",                "2nd jet p_{T} (N_{jets} = 2)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet); 
+    SecondJetPt_Zexc3jet                = newTH1D("SecondJetPt_Zexc3jet",                "2nd jet p_{T} (N_{jets} = 3)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    SecondJetPt_Zexc4jet                = newTH1D("SecondJetPt_Zexc4jet",                "2nd jet p_{T} (N_{jets} = 4)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    SecondJetPt_Zexc5jet                = newTH1D("SecondJetPt_Zexc5jet",                "2nd jet p_{T} (N_{jets} = 5)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    SecondJetPt_Zexc6jet                = newTH1D("SecondJetPt_Zexc6jet",                "2nd jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    ThirdJetPt_Zexc3jet                = newTH1D("ThirdJetPt_Zexc3jet",                "3rd jet p_{T} (N_{jets} = 3)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    ThirdJetPt_Zexc4jet                = newTH1D("ThirdJetPt_Zexc4jet",                "3rd jet p_{T} (N_{jets} = 4)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    ThirdJetPt_Zexc5jet                = newTH1D("ThirdJetPt_Zexc5jet",                "3rd jet p_{T} (N_{jets} = 5)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    ThirdJetPt_Zexc6jet                = newTH1D("ThirdJetPt_Zexc6jet",                "3rd jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    FourthJetPt_Zexc4jet                = newTH1D("FourthJetPt_Zexc4jet",                "4th jet p_{T} (N_{jets} = 4)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet);
+    FourthJetPt_Zexc5jet                = newTH1D("FourthJetPt_Zexc5jet",                "4th jet p_{T} (N_{jets} = 5)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet);
+    FourthJetPt_Zexc6jet                = newTH1D("FourthJetPt_Zexc6jet",                "4th jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet);
+    FifthJetPt_Zexc5jet                = newTH1D("FifthJetPt_Zexc5jet",                "5th jet p_{T} (N_{jets} = 5)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet);
+    FifthJetPt_Zexc6jet                = newTH1D("FifthJetPt_Zexc6jet",                "5th jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet);
+    SixthJetPt_Zexc6jet                = newTH1D("SixthJetPt_Zexc6jet",                "6th jet p_{T} (N_{jets} = 6)",                "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc5jet, jetPt_Zinc5jet);
 
     genFirstJetPt_Zexc1jet              = newTH1D("genFirstJetPt_Zexc1jet",              "gen 1st jet p_{T} (N_{jets} = 1)",            "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet,   jetPt_Zinc1jet);
     genSecondJetPt_Zexc2jet             = newTH1D("genSecondJetPt_Zexc2jet",             "gen 2nd jet p_{T} (N_{jets} = 2)",            "p_{T}(j_{2}) [GeV]",     nJetPt_Zinc2jet, jetPt_Zinc2jet);
@@ -1228,6 +1287,29 @@ HistoSet::HistoSet(string leptonFlavor)
     FourthJetPtEta_Zinc4jet             = newTH2D("FourthJetPtEta_Zinc4jet",             "4th jet p_{T} #eta (N_{jets} #geq 4)",       nJetPt_Zinc4jet, jetPt_Zinc4jet         ,       4  ,  0., 2.4);
     FifthJetPtEta_Zinc5jet              = newTH2D("FifthJetPtEta_Zinc5jet",              "5th jet p_{T} #eta (N_{jets} #geq 5)",       nJetPt_Zinc5jet, jetPt_Zinc5jet         ,       2  ,  0., 2.4);
     SixthJetPtEta_Zinc6jet              = newTH2D("SixthJetPtEta_Zinc6jet",              "6th jet p_{T} #eta (N_{jets} #geq 6)",       nJetPt_Zinc5jet, jetPt_Zinc5jet         ,       2  ,  0., 2.4);
+
+
+    FirstJetPtEta_Zexc1jet              = newTH2D("FirstJetPtEta_Zexc1jet",              "1st jet p_{T} #eta (N_{jets} #geq 1)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    FirstJetPtEta_Zexc2jet              = newTH2D("FirstJetPtEta_Zexc2jet",              "1st jet p_{T} #eta (N_{jets} #geq 2)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    FirstJetPtEta_Zexc3jet              = newTH2D("FirstJetPtEta_Zexc3jet",              "1st jet p_{T} #eta (N_{jets} #geq 3)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    FirstJetPtEta_Zexc4jet              = newTH2D("FirstJetPtEta_Zexc4jet",              "1st jet p_{T} #eta (N_{jets} #geq 4)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    FirstJetPtEta_Zexc5jet              = newTH2D("FirstJetPtEta_Zexc5jet",              "1st jet p_{T} #eta (N_{jets} #geq 5)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    FirstJetPtEta_Zexc6jet              = newTH2D("FirstJetPtEta_Zexc6jet",              "1st jet p_{T} #eta (N_{jets} #geq 6)",       nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet   ,      12  ,  0., 2.4);
+    SecondJetPtEta_Zexc2jet             = newTH2D("SecondJetPtEta_Zexc2jet",             "2nd jet p_{T} #eta (N_{jets} #geq 2)",       nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet   ,       8  ,  0., 2.4);
+    SecondJetPtEta_Zexc3jet             = newTH2D("SecondJetPtEta_Zexc3jet",             "2nd jet p_{T} #eta (N_{jets} #geq 3)",       nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet   ,       8  ,  0., 2.4);
+    SecondJetPtEta_Zexc4jet             = newTH2D("SecondJetPtEta_Zexc4jet",             "2nd jet p_{T} #eta (N_{jets} #geq 4)",       nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet   ,       8  ,  0., 2.4);
+    SecondJetPtEta_Zexc5jet             = newTH2D("SecondJetPtEta_Zexc5jet",             "2nd jet p_{T} #eta (N_{jets} #geq 5)",       nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet   ,       8  ,  0., 2.4);
+    SecondJetPtEta_Zexc6jet             = newTH2D("SecondJetPtEta_Zexc6jet",             "2nd jet p_{T} #eta (N_{jets} #geq 6)",       nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet   ,       8  ,  0., 2.4);
+    ThirdJetPtEta_Zexc3jet              = newTH2D("ThirdJetPtEta_Zexc3jet",              "3rd jet p_{T} #eta (N_{jets} #geq 3)",       nJetPt_Zinc3jet, jetPt_Zinc3jet	        ,       6  ,  0., 2.4);
+    ThirdJetPtEta_Zexc4jet              = newTH2D("ThirdJetPtEta_Zexc4jet",              "3rd jet p_{T} #eta (N_{jets} #geq 4)",       nJetPt_Zinc3jet, jetPt_Zinc3jet          ,       6  ,  0., 2.4);
+    ThirdJetPtEta_Zexc5jet              = newTH2D("ThirdJetPtEta_Zexc5jet",              "3rd jet p_{T} #eta (N_{jets} #geq 5)",       nJetPt_Zinc3jet, jetPt_Zinc3jet          ,       6  ,  0., 2.4);
+    ThirdJetPtEta_Zexc6jet              = newTH2D("ThirdJetPtEta_Zexc6jet",              "3rd jet p_{T} #eta (N_{jets} #geq 6)",       nJetPt_Zinc3jet, jetPt_Zinc3jet          ,       6  ,  0., 2.4);
+    FourthJetPtEta_Zexc4jet             = newTH2D("FourthJetPtEta_Zexc4jet",             "4th jet p_{T} #eta (N_{jets} #geq 4)",       nJetPt_Zinc4jet, jetPt_Zinc4jet         ,       4  ,  0., 2.4);
+    FourthJetPtEta_Zexc5jet             = newTH2D("FourthJetPtEta_Zexc5jet",             "4th jet p_{T} #eta (N_{jets} #geq 5)",       nJetPt_Zinc4jet, jetPt_Zinc4jet         ,       4  ,  0., 2.4);
+    FourthJetPtEta_Zexc6jet             = newTH2D("FourthJetPtEta_Zexc6jet",             "4th jet p_{T} #eta (N_{jets} #geq 6)",       nJetPt_Zinc4jet, jetPt_Zinc4jet         ,       4  ,  0., 2.4);
+    FifthJetPtEta_Zexc5jet              = newTH2D("FifthJetPtEta_Zexc5jet",              "5th jet p_{T} #eta (N_{jets} #geq 5)",       nJetPt_Zinc5jet, jetPt_Zinc5jet         ,       2  ,  0., 2.4);
+    FifthJetPtEta_Zexc6jet              = newTH2D("FifthJetPtEta_Zexc6jet",              "5th jet p_{T} #eta (N_{jets} #geq 6)",       nJetPt_Zinc5jet, jetPt_Zinc5jet         ,       2  ,  0., 2.4);
+    SixthJetPtEta_Zexc6jet              = newTH2D("SixthJetPtEta_Zexc6jet",              "6th jet p_{T} #eta (N_{jets} #geq 6)",       nJetPt_Zinc5jet, jetPt_Zinc5jet         ,       2  ,  0., 2.4);
 
     genFirstJetPtEta_Zinc1jet           = newTH2D("genFirstJetPtEta_Zinc1jet",           "gen 1st jet p_{T} #eta (N_{jets} #geq 1)",    nJetPtEta_Zinc1jet, jetPtEta_Zinc1jet  ,      12  ,  0., 2.4);
     genSecondJetPtEta_Zinc2jet          = newTH2D("genSecondJetPtEta_Zinc2jet",          "gen 2nd jet p_{T} #eta (N_{jets} #geq 2)",    nJetPtEta_Zinc2jet, jetPtEta_Zinc2jet  ,       8  ,  0., 2.4);
@@ -1585,6 +1667,12 @@ HistoSet::HistoSet(string leptonFlavor)
 
     //TH2D* jecVspt=newTH1D("jecVspt","jec Vs pt","jec","pt",80,0.,400,100,0,0.5);
     NVtx                          = newTH1D("NVtx","Number of vertices","#Vtx",45,0.5,45.5);
+    NVtx_Zexc1jet                 = newTH1D("NVtx_Zexc1jet","Number of vertices, NJets=1","#Vtx",45,0.5,45.5);
+    NVtx_Zexc2jet                 = newTH1D("NVtx_Zexc2jet","Number of vertices, NJets=2","#Vtx",45,0.5,45.5);
+    NVtx_Zexc3jet                 = newTH1D("NVtx_Zexc3jet","Number of vertices, NJets=3","#Vtx",45,0.5,45.5);
+    NVtx_Zexc4jet                 = newTH1D("NVtx_Zexc4jet","Number of vertices, NJets=4","#Vtx",45,0.5,45.5);
+    NVtx_Zexc5jet                 = newTH1D("NVtx_Zexc5jet","Number of vertices, NJets=5","#Vtx",45,0.5,45.5);
+    NVtx_Zexc6jet                 = newTH1D("NVtx_Zexc6jet","Number of vertices, NJets=6","#Vtx",45,0.5,45.5);
     ZNGoodJetsBeta_Zexc = newTH2D("ZNGoodJetsBeta_Zexc","Beta cut vs Jet Counter (excl.) ", 11, -0.5, 10.5, 10, -0.5, 9.5);
     ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
     ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(2, "= 1");

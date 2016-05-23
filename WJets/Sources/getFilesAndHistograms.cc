@@ -17,17 +17,7 @@ string getEnergy()
 {
     string energy = "";
     ostringstream fileBeingProcessed; fileBeingProcessed << __FILE__;
-    if (fileBeingProcessed.str().find("Analysis2012") != string::npos) {
-        energy = "13TeV";
-    }
-    else if (fileBeingProcessed.str().find("Analysis2011") != string::npos) {
-        energy = "7TeV";
-    }
-    else 
-    {
-        std::cout << "WARNING ! Impossible to retrieve te energy from the current location !" << std::endl;
-        energy = "Unknown";
-    }
+    energy = "13TeV";
     fileBeingProcessed.str("");
 
     return energy;

@@ -28,7 +28,7 @@
                               // 100 - all ; 0 - data, 1 - background , 2 - tau ?, 3 - DY, 4 - W+jets,
                               // 51 - MC gen, 90 - PDF Syst., 1001 - do pull DY samples
         
-    int doSysRunning = 100;
+    int doSysRunning = 0;
                              // 0 - no syst running, 100 - all systematic runnings,
                              // 1 - PU, 2 - JES, 3 - XSEC, 4 - JER, 5 - LepSF,
                              // 6 - BtagSF, 7 - MES, 8 - MER, 9 - WB, 10 - RESP
@@ -231,7 +231,7 @@
         
     // This is unfolding part for W+jets 
     if ( doWhat == 4 || doWhat == 100 ){
-        int doGen = 1 ;
+        int doGen = 0 ;
         if ( (lepSelection.find("SE") == 0 || lepSelection.find("SMu") == 0 ) && lepSelection.find("SMuE") == -1 )  doGen = 1 ;
         
         for (unsigned int i(0); i < NSystWJets; i++){

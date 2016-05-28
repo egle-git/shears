@@ -6,7 +6,7 @@
   gErrorIgnoreLevel = kError;
   string srcdir = currentWorkingDir + "Sources/";
   string incdir = currentWorkingDir + "Includes/";
-  string lhapdfdir = "/afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/";
+  string lhapdfdir = "/cvmfs/cms.cern.ch/slc5_amd64_gcc434/external/lhapdf/5.8.5/include/";
   string roounfolddir = currentWorkingDir + "RooUnfold/";  
 
   cout << "--------------------------------------------------------------------------------\n" << endl; 

@@ -199,14 +199,20 @@ HistoSet::HistoSet(string leptonFlavor)
 
     }
 
-    int nJetPt_Zinc1jet(14);
-    double jetPt_Zinc1jet[15] = {20, 24, 30, 39, 49, 62, 79, 105, 138, 181, 231, 294, 375, 494, 800};
+    //int nJetPt_Zinc1jet(14);
+    //double jetPt_Zinc1jet[15] = {20, 24, 30, 39, 49, 62, 79, 105, 138, 181, 231, 294, 375, 494, 800};
+    int nJetPt_Zinc1jet(13);
+    double jetPt_Zinc1jet[14] = {20, 24, 30, 39, 49, 62, 79, 105, 138, 181, 231, 294, 375, 494};
     //int nJetPt_Zinc2jet(21);
     //double jetPt_Zinc2jet[22] = {20, 24, 30, 39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 800};
-    int nJetPt_Zinc2jet(13);
-    double jetPt_Zinc2jet[14] = {20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300, 380, 500};
-    int nJetPt_Zinc3jet(9);
-    double jetPt_Zinc3jet[10] =   {20, 24, 30, 41, 59, 81, 110, 152, 200, 300};
+    //int nJetPt_Zinc2jet(13);
+    //double jetPt_Zinc2jet[14] = {20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300, 380, 500};
+    int nJetPt_Zinc2jet(12);
+    double jetPt_Zinc2jet[13] = {20, 24, 30, 39, 49, 62, 78, 105, 142, 185, 235, 300, 380};
+    //int nJetPt_Zinc3jet(9);
+    //double jetPt_Zinc3jet[10] =   {20, 24, 30, 41, 59, 81, 110, 152, 200, 300};
+    int nJetPt_Zinc3jet(8);
+    double jetPt_Zinc3jet[9] =   {20, 24, 30, 41, 59, 81, 110, 152, 200};
     int nJetPt_Zinc4jet(8);
     double jetPt_Zinc4jet[9] = {20, 24, 30, 39, 49, 62, 78, 96, 150};
     int nJetPt_Zinc5jet(6);
@@ -235,14 +241,20 @@ HistoSet::HistoSet(string leptonFlavor)
     jetPt_2_Zinc5jet = buildVecFineBin(nJetPt_Zinc5jet, jetPt_Zinc5jet, 5);
     
     
-    int nJetHT_Zinc1jet(17);
-    double jetHT_Zinc1jet[18] = {30, 39, 49, 62, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000, 1500};
-    int nJetHT_Zinc2jet(13);
-    double jetHT_Zinc2jet[14] = {60, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1200};
+    //int nJetHT_Zinc1jet(17);
+    //double jetHT_Zinc1jet[18] = {30, 39, 49, 62, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000, 1500};
+    int nJetHT_Zinc1jet(16);
+    double jetHT_Zinc1jet[17] = {30, 39, 49, 62, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1000};
+    //int nJetHT_Zinc2jet(13);
+    //double jetHT_Zinc2jet[14] = {60, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800, 1200};
+    int nJetHT_Zinc2jet(12);
+    double jetHT_Zinc2jet[13] = {60, 78, 96, 118, 150, 190, 240, 300, 370, 450, 540, 650, 800};
     //int nJetHT_Zinc3jet(11);
     //double jetHT_Zinc3jet[12] = {90, 105, 125, 151, 185, 230, 290, 366, 466, 586, 767, 990};
-    int nJetHT_Zinc3jet(8);
-    double jetHT_Zinc3jet[9] = {90, 118, 168, 220, 300, 400, 550, 780, 1100};
+    //int nJetHT_Zinc3jet(8);
+    //double jetHT_Zinc3jet[9] = {90, 118, 168, 220, 300, 400, 550, 780, 1100};
+    int nJetHT_Zinc3jet(7);
+    double jetHT_Zinc3jet[8] = {90, 118, 168, 220, 300, 400, 550, 780};
     int nJetHT_Zinc4jet(9);
     double jetHT_Zinc4jet[10] = {120, 140, 167, 203, 253, 320, 410, 530, 690, 910};
     int nJetHT_Zinc5jet(7);
@@ -309,7 +321,8 @@ HistoSet::HistoSet(string leptonFlavor)
     
     
     //--- Jet multiplicity -----------
-    if ( doWJets ) ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 11, -0.5, 10.5);
+    if ( doWJets ) ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 7, -0.5, 6.5);
+    //if ( doWJets ) ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 11, -0.5, 10.5);
     else ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 8, -0.5, 7.5);
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
@@ -318,12 +331,12 @@ HistoSet::HistoSet(string leptonFlavor)
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
     ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
-    if ( doWJets ){
+    //ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+    /*if ( doWJets ){
         ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
         ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
         ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
-    }
+    }*/
     
     if ( doWJets )  genZNGoodJets_Zexc = newTH1D("genZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 11, -0.5, 10.5);
     else genZNGoodJets_Zexc = newTH1D("genZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 8, -0.5, 7.5);
@@ -341,7 +354,8 @@ HistoSet::HistoSet(string leptonFlavor)
         genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
     }
     
-    ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 11, -0.5, 10.5);
+    ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
+    //ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 11, -0.5, 10.5);
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, "#geq 0");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2, "#geq 1");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(3, "#geq 2");
@@ -349,10 +363,10 @@ HistoSet::HistoSet(string leptonFlavor)
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(5, "#geq 4");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(6, "#geq 5");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(7, "#geq 6");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8, "#geq 7");
+    /*ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8, "#geq 7");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(9, "#geq 8");
     ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(10,"#geq 9");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");
+    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");*/
     
     genZNGoodJets_Zinc = newTH1D("genZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 11, -0.5, 10.5);
     genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1,"#geq 0");

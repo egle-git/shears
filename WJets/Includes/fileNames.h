@@ -43,7 +43,7 @@ const processInfoStruct ProcessInfo[] = {
 
     {"DYJets_FromTau_UNFOLDING_dR_5311_List_Inf3", 30459503.,  3531.8,  1,         0.033,         kAzure+4,    " DYtautau"},
     {"DYJets10toInf3_dR_5311_List",	              1.,         1,       1,         0.04,          kGreen-8,   " DYJets"},          // 23
-    {"DataQCD_dR_5311_List",	                      1.,         1,       1,         0.04,          kYellow,     " QCD"},         // 24
+    {"DataQCD_dR_5311_List",	                      1.,         1,       1,         0.04,          kGreen+3,     " QCD"},         // 24
     {"WJetsALL_MIX_UNFOLDING_dR_5311_List",        76102995.,  36864.,  1,         0.03,          kOrange,       " W #rightarrow #mu#nu"},       // 25
     {"WJetsALL_MIX_dR_5311_List",                  76102995.,  36864.,  1,         0.03,          kPink,       " WJets"},  // relative weight for mixed DY and WJ files are set inthe code
     {"WJetsALL_dR_5311_List",                      76102995.,  36864.,  1,         0.03,          kPink,       " WJets"},

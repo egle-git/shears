@@ -148,6 +148,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
     THStack *histSumMC[nHist];
     TLegend *legend[nHist];
     TLatex *cmsColl[nHist];
+    TLatex *cmsPre[nHist];
     TLatex *jetAlgo[nHist];
     TLatex *jetCuts[nHist];
     TLatex *intLumi[nHist];
@@ -164,7 +165,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         histoName.push_back(file[0]->GetListOfKeys()->At(i)->GetName());
         histoTitle.push_back(file[0]->GetListOfKeys()->At(i)->GetTitle());
         histSumMC[nHistNoGen] = new THStack(histoName[nHistNoGen].c_str(), histoTitle[nHistNoGen].c_str());
-        double xLowLeg(0.74), xHighLeg(0.78);
+        double xLowLeg(0.66), xHighLeg(0.78);
         legend[nHistNoGen] = new TLegend(xLowLeg, 0.54, xHighLeg, 0.91);
         legend[nHistNoGen]->SetFillStyle(0);
         legend[nHistNoGen]->SetBorderSize(0);
@@ -172,12 +173,20 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         legend[nHistNoGen]->SetTextFont(42);
 
         cmsColl[nHistNoGen] = new TLatex();
-        cmsColl[nHistNoGen]->SetTextSize(0.04);
+        cmsColl[nHistNoGen]->SetTextSize(0.05);
         cmsColl[nHistNoGen]->SetTextFont(61);
         cmsColl[nHistNoGen]->SetLineWidth(2);
         cmsColl[nHistNoGen]->SetTextColor(kBlack);
         cmsColl[nHistNoGen]->SetNDC();
         cmsColl[nHistNoGen]->SetTextAlign(11);
+
+        cmsPre[nHistNoGen] = new TLatex();
+        cmsPre[nHistNoGen]->SetTextSize(0.038);
+        cmsPre[nHistNoGen]->SetTextFont(52);
+        cmsPre[nHistNoGen]->SetLineWidth(1);
+        cmsPre[nHistNoGen]->SetTextColor(kBlack);
+        cmsPre[nHistNoGen]->SetNDC();
+        cmsPre[nHistNoGen]->SetTextAlign(11);
 
         intLumi[nHistNoGen] = new TLatex();
         intLumi[nHistNoGen]->SetTextSize(0.035);
@@ -288,14 +297,15 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         /// first pad plots
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
-        cmsColl[i]->DrawLatex(0.20,0.89, "CMS Preliminary");
+        cmsColl[i]->DrawLatex(0.17,0.87, "CMS");
+        cmsPre[i]->DrawLatex(0.27,0.87, "Preliminary");
         if (energy == "8TeV") intLumi[i]->DrawLatex(0.20,0.83, "#int L dt = 19.6 fb^{-1},  #sqrt{s} = 8 TeV");
-        if (energy == "13TeV") intLumi[i]->DrawLatex(0.20,0.83, "#int L dt = 2.5 fb^{-1},  #sqrt{s} = 13 TeV");
+        if (energy == "13TeV") intLumi[i]->DrawLatex(0.76,0.955, "2.5 fb^{-1} (13 TeV)");
         if ( histoName[i].find("inc0") == string::npos){
             ostringstream ptLegend;
             ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |y^{jet}| < 2.4";
-            jetCuts[i]->DrawLatex(0.20,0.73, ptLegend.str().c_str());
-            jetAlgo[i]->DrawLatex(0.20,0.78, "anti-k_{t} jets,  R = 0.4");
+            jetCuts[i]->DrawLatex(0.17,0.75, ptLegend.str().c_str());
+            jetAlgo[i]->DrawLatex(0.17,0.80, "anti-k_{t} jets,  R = 0.4");
             pad1[i]->Draw();
         }
         canvas[i]->cd();

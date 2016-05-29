@@ -40,8 +40,12 @@ root -b -q runDYJets.cc
 # Change it 1-3 and run every time. 
 
 -- Output root files are available in the directory HistoFiles.
+
 -- Merge single top and DYJets root files:
 root -b -q MergeTop_BVeto.cc++
+
+-- Merge di-boson (WW, WZ, and ZZ) root files:
+root -b -q MergeVV_BVeto.cc++
 
 -- Merge QCD Background:
 root -b -q runQCD_BVeto.cc++

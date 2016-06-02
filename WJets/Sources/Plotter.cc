@@ -148,6 +148,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
     THStack *histSumMC[nHist];
     TLegend *legend[nHist];
     TLatex *cmsColl[nHist];
+    TLatex *cmsPre[nHist];
     TLatex *jetAlgo[nHist];
     TLatex *jetCuts[nHist];
     TLatex *intLumi[nHist];
@@ -164,7 +165,7 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         histoName.push_back(file[0]->GetListOfKeys()->At(i)->GetName());
         histoTitle.push_back(file[0]->GetListOfKeys()->At(i)->GetTitle());
         histSumMC[nHistNoGen] = new THStack(histoName[nHistNoGen].c_str(), histoTitle[nHistNoGen].c_str());
-        double xLowLeg(0.74), xHighLeg(0.78);
+        double xLowLeg(0.66), xHighLeg(0.78);
         legend[nHistNoGen] = new TLegend(xLowLeg, 0.54, xHighLeg, 0.91);
         legend[nHistNoGen]->SetFillStyle(0);
         legend[nHistNoGen]->SetBorderSize(0);
@@ -173,11 +174,19 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
 
         cmsColl[nHistNoGen] = new TLatex();
         cmsColl[nHistNoGen]->SetTextSize(0.05);
-        cmsColl[nHistNoGen]->SetTextFont(62);
+        cmsColl[nHistNoGen]->SetTextFont(61);
         cmsColl[nHistNoGen]->SetLineWidth(2);
         cmsColl[nHistNoGen]->SetTextColor(kBlack);
         cmsColl[nHistNoGen]->SetNDC();
         cmsColl[nHistNoGen]->SetTextAlign(11);
+
+        cmsPre[nHistNoGen] = new TLatex();
+        cmsPre[nHistNoGen]->SetTextSize(0.038);
+        cmsPre[nHistNoGen]->SetTextFont(52);
+        cmsPre[nHistNoGen]->SetLineWidth(1);
+        cmsPre[nHistNoGen]->SetTextColor(kBlack);
+        cmsPre[nHistNoGen]->SetNDC();
+        cmsPre[nHistNoGen]->SetTextAlign(11);
 
         intLumi[nHistNoGen] = new TLatex();
         intLumi[nHistNoGen]->SetTextSize(0.035);
@@ -367,12 +376,12 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
 
         hist[0][i]->SetTitle("");
         histSumMC[i]->SetTitle(""); 
-        histSumMC[i]->GetYaxis()->SetLabelSize(0.05); 
+        histSumMC[i]->GetYaxis()->SetLabelSize(0.04); 
         histSumMC[i]->GetYaxis()->SetLabelOffset(0.002); 
         histSumMC[i]->GetYaxis()->SetLabelFont(42); 
         histSumMC[i]->GetYaxis()->SetTitle("# Events"); 
         histSumMC[i]->GetYaxis()->SetTitleFont(42); 
-        histSumMC[i]->GetYaxis()->SetTitleSize(0.05); 
+        histSumMC[i]->GetYaxis()->SetTitleSize(0.04); 
         histSumMC[i]->GetYaxis()->SetTitleOffset(1.2); 
         histSumMC[i]->SetMinimum(8);
         histSumMC[i]->SetMaximum(110*histSumMC[i]->GetMaximum()); 
@@ -380,14 +389,15 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         /// first pad plots
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
-        cmsColl[i]->DrawLatex(0.2,0.87, "CMS Preliminary");
-        if (energy == "8TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 19.6 fb^{-1},  #sqrt{s} = 8 TeV");
-        if (energy == "13TeV") intLumi[i]->DrawLatex(0.16,0.82, "#int L dt = 2.5 fb^{-1},  #sqrt{s} = 13 TeV");
+        cmsColl[i]->DrawLatex(0.17,0.87, "CMS");
+        cmsPre[i]->DrawLatex(0.27,0.87, "Preliminary");
+        if (energy == "8TeV") intLumi[i]->DrawLatex(0.20,0.83, "#int L dt = 19.6 fb^{-1},  #sqrt{s} = 8 TeV");
+        if (energy == "13TeV") intLumi[i]->DrawLatex(0.76,0.955, "2.5 fb^{-1} (13 TeV)");
         if ( histoName[i].find("inc0") == string::npos){
             ostringstream ptLegend;
-            ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |#eta^{jet}| < 2.4";
-            jetCuts[i]->DrawLatex(0.16,0.72, ptLegend.str().c_str());
-            jetAlgo[i]->DrawLatex(0.16,0.77, "anti-k_{t} jets,  R = 0.4");
+            ptLegend << "p_{T}^{jet} > " << JetPtMin << " GeV,  |y^{jet}| < 2.4";
+            jetCuts[i]->DrawLatex(0.17,0.75, ptLegend.str().c_str());
+            jetAlgo[i]->DrawLatex(0.17,0.80, "anti-k_{t} jets,  R = 0.4");
             pad1[i]->Draw();
         }
         canvas[i]->cd();
@@ -408,18 +418,18 @@ void Plotter(string leptonFlavor = "Muons", int JetPtMin = 30,
         hist[0][i]->GetXaxis()->SetTitleSize(0.11);
         hist[0][i]->GetXaxis()->SetTitleOffset(1.05);
         hist[0][i]->GetXaxis()->SetTitleFont(42); 
-        hist[0][i]->GetXaxis()->SetLabelSize(0.09);
+        hist[0][i]->GetXaxis()->SetLabelSize(0.12);
         hist[0][i]->GetXaxis()->SetLabelOffset(0.018);
         hist[0][i]->GetXaxis()->SetLabelFont(42); 
 
         hist[0][i]->GetYaxis()->SetRangeUser(0.51,1.49);
         hist[0][i]->GetYaxis()->SetNdivisions(5,5,0);
-        hist[0][i]->GetYaxis()->SetTitle("MC / Data");
+        hist[0][i]->GetYaxis()->SetTitle("Simulation/Data");
         hist[0][i]->GetYaxis()->SetTitleFont(42);
-        hist[0][i]->GetYaxis()->SetTitleSize(0.12);
+        hist[0][i]->GetYaxis()->SetTitleSize(0.1);
         hist[0][i]->GetYaxis()->SetTitleOffset(0.5);
         hist[0][i]->GetYaxis()->CenterTitle();
-        hist[0][i]->GetYaxis()->SetLabelSize(0.1);
+        hist[0][i]->GetYaxis()->SetLabelSize(0.08);
         hist[0][i]->GetYaxis()->SetLabelFont(42); 
 
         hist[0][i]->Divide((TH1D*) histSumMC[i]->GetStack()->Last());

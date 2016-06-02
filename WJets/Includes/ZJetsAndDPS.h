@@ -54,7 +54,7 @@ class ZJetsAndDPS: public HistoSet {
     Int_t           EvtVtxCnt;
     Int_t           EvtRunNum;
     Int_t           EvtNum;
-    
+
     //Int_t	        nup_;
     Int_t           GNup;
     
@@ -69,10 +69,15 @@ class ZJetsAndDPS: public HistoSet {
     //vector<double>  *genLepQ_;
     vector<int>  *GLepBareId;
     vector<int>  *GLepBareSt;
+    vector<bool>  *GLepBarePrompt;
+    vector<bool>  *GLepBareTauProd;
     
-//    vector<double>  *GPhotPt;
-//    vector<double>  *GPhotEta;
-//    vector<double>  *GPhotPhi;
+    vector<float>  *GPhotPt;
+    vector<float>  *GPhotEta;
+    vector<float>  *GPhotPhi;
+    vector<float>  *GPhotE;
+    vector<int>  *GPhotMotherId;
+    vector<int>  *GPhotSt;
     
     vector<float>   *GLepClosePhotPt;
     vector<float>   *GLepClosePhotEta;
@@ -165,6 +170,7 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_EvtVtxCnt;   //!
     TBranch        *b_EvtRunNum;   //!
     TBranch        *b_EvtNum;   //!
+
     TBranch        *b_GLepBarePt;   //!
     TBranch        *b_GLepBareEta;   //!
     TBranch        *b_GLepBarePhi;   //!
@@ -172,9 +178,15 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_genLepQ_;   //!
     TBranch        *b_GLepBareId;   //!
     TBranch        *b_GLepBareSt;   //!
-//    TBranch        *b_GPhotPt;   //!
-//    TBranch        *b_GPhotEta;   //!
-//    TBranch        *b_GPhotPhi;   //!
+    TBranch        *b_GLepBarePrompt;   //!
+    TBranch        *b_GLepBareTauProd;   //!
+    
+    TBranch        *b_GPhotPt;   //!
+    TBranch        *b_GPhotEta;   //!
+    TBranch        *b_GPhotPhi;   //!
+    TBranch        *b_GPhotE;   //!
+    TBranch        *b_GPhotMotherId;   //!
+    TBranch        *b_GPhotSt;   //!
     
     TBranch        *b_GLepClosePhotPt;   //!
     TBranch        *b_GLepClosePhotEta;   //!
@@ -240,9 +252,10 @@ class ZJetsAndDPS: public HistoSet {
     TBranch        *b_METPy;   //!
     TBranch        *b_METPz;   //!
     TBranch        *b_METE;   //!
-    
+
     TBranch        *b_METPhi;   //!
     TBranch        *b_METsig;   //!
+    
 
     ZJetsAndDPS(string fileName_, float lumiScale_ = 1., float puScale_ = 1., bool useTriggerCorrection_ = 0, bool useEfficiencyCorrection_ = 0, int systematics_ = 0, int direction_ = 0, float xsecfactor_ = 1., int jetPtCutMin_ = 20, int jetPtCutMax_ = 0, int ZPtCutMin_ = 0 , int ZEtaCutMin_ = -999999, int ZEtaCutMax_ = 999999, int METcut_ = -30, bool nEvents_10000_ = 0, int jetEtaCutMin_ = -24, int jetEtaCutMax_ = 24) ; 
     ~ZJetsAndDPS();

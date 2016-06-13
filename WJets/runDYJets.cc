@@ -16,8 +16,8 @@
     ////--- Load shaared libraries ---
     unsigned int nSources = sources.size();
     gSystem->AddIncludePath("-D__USE_XOPEN2K8");
-    //gROOT->ProcessLine(".L /usr/local/lib/libLHAPDF.dylib");
     gROOT->ProcessLine(".L /cvmfs/cms.cern.ch/slc5_amd64_gcc434/external/lhapdf/5.8.5/lib/libLHAPDF.so");
+
     for (unsigned int i(0); i < nSources; i++) {
         std::cout << "Compiling " << srcdir + sources[i] << ".cc" << std::endl;
         gROOT->ProcessLine(string(".L " + srcdir + sources[i] + ".cc+").c_str());

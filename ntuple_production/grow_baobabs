@@ -18,10 +18,11 @@ import hashlib
 import os
 import shutil
 import imp
+import os.path
 
 try:
     backup_das_path = "/cvmfs/cms.cern.ch/slc6_amd64_gcc481/cms/das_client/v02.17.04/bin"
-    das_path =  imp.find_module("das_client")[1]
+    das_path =  os.path.realpath(imp.find_module("das_client")[1])
     m = re.search(r"/v(\d{2})\.(\d{2})\.(\d{2}).*/", das_path)
     if m:
         vers = int(m.groups()[0])*100*100 + int(m.groups()[1])*100 + int(m.groups()[0])

@@ -22,14 +22,14 @@ import imp
 try:
     backup_das_path = "/cvmfs/cms.cern.ch/slc6_amd64_gcc481/cms/das_client/v02.17.04/bin"
     das_path =  imp.find_module("das_client")[1]
-    m = re.search(r"/v(\d{2})\.(\d{2})\.(\d{2})/", das_path)
+    m = re.search(r"/v(\d{2})\.(\d{2})\.(\d{2}).*/", das_path)
     if m:
         vers = int(m.groups()[0])*100*100 + int(m.groups()[1])*100 + int(m.groups()[0])
+        if vers < 21704:
+            sys.stderr.write("Warning: version of the das client from the default environment is too old. Version v02.17.04 from %s will be used.\n" %  backup_das_path)
+            sys.path.insert(0, backup_das_path)
     else:
         sys.stderr.write("Warning: failed to check the das client version.\n")
-    if vers < 21704:
-        sys.stderr.write("Warning: version of the das client from the default environment is too old. Version v02.17.04 from %s will be used.\n" %  backup_das_path)
-        sys.path.insert(0, backup_das_path)
     import das_client
 
 except ImportError:

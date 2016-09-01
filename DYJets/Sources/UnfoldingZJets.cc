@@ -94,6 +94,12 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//--- Open additional generator files -----------------------------------------------------
 	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
 
+	if(fSheUnf->IsZombie()){
+	    std::cerr << "The file " << fSheUnf->GetName() << " required for unfolding systematic uncertainty estimate was not found. Please check its presence and the file name spelling. The file name is defined in ludes/fileNamesZJets.h with the variable DYSHERPA14FILENAME. Unfolding systemayic uncertainty estimate can be disable by setting the file name to an empty string. Aborts.\n";
+	    abort();
+	}
+	   
+
 	std::map<TString, vector<TString> > generatorNames;
       
 	vector<TString> sherpa14;
@@ -192,6 +198,10 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//--- Get Sherpa Unfolding response ---
 	
 	respDYJets[17] = getResp(fSheUnf, variable);
+	if(respDYJets[17] == 0){
+	    std::cerr << "Response matrix was not found in the file " << fSheUnf->GetName() << ". Aborts.\n";
+	    abort();
+	}
 	//TH1D *hGen1 = getHisto(fGen1, "gen" + variable);
 	//TH1D *hGen2 = getHisto(fGen2, "gen" + variable);
 	//----------------------------------------------------------------------------------------- 

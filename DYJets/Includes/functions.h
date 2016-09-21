@@ -70,6 +70,7 @@ class record{
         record();
         record(double, double, double, double, double, double, double);
         bool belongTo(double, double);
+	bool equalTo(int num);
 };
 
 class table{
@@ -79,6 +80,7 @@ class table{
         double getEfficiency(double, double);  
         double getEfficiencyLow(double, double);  
         double getEfficiencyHigh(double, double);  
+        double getTTbarSF(int);  
 
     private:
         vector<record> recd;

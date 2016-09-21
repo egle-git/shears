@@ -157,6 +157,11 @@ bool record::belongTo(double pt, double eta)
     return (pt < ptHi && pt >= ptLow) && (eta < etaHi && eta >= etaLow);
 }
 
+bool record::equalTo(int num)
+{
+    return (fabs(num-etaLow)<0.5);//etaLow means the first value
+}
+
 table::table()
 {
 }
@@ -202,6 +207,13 @@ double table::getEfficiencyHigh(double pt, double eta){
         if ((recd[i]).belongTo(350, eta)) hiPtBin = recd[i].effi;
     }
     return hiPtBin;
+}
+
+double table::getTTbarSF(int NJets){
+    for (unsigned int i=0; i != recd.size(); i++) {
+	if((recd[i]).equalTo(NJets)) return recd[i].etaHi;
+	
+    }
 }
 
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor){

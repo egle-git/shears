@@ -124,6 +124,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	
     table LeptTrig = TrigMu17Mu8SF;
     
+    //TTbar SF
+    table TTbarSF("EfficiencyTables/sf_multi.txt"); 
     //Ele_Rec = Ele_Rec_8TeV;
     //if (lepSel == "DE" || lepSel == "SE") LeptID = SC_Ele_2012EA;
     // else if (lepSel == "SMu") LeptTrig = TrigIsoMu24SF;
@@ -908,6 +910,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             jets.clear(); 
             jets = tmpJets; 
             nGoodJets = jets.size();
+	    if(fileName.Index("TT") >= 0)weight /= TTbarSF.getTTbarSF(nGoodJets);
+	    //if(fileName.Index("TT") >= 0) cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQTTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
             nGoodJets_20 = jets_20.size();
             sort(jets.begin(), jets.end(), JetDescendingOrder);
             sort(jets_20.begin(), jets_20.end(), JetDescendingOrder);

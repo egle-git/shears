@@ -239,6 +239,56 @@ double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){
     // Fall 2015 resolution scale factor
     // twiki.cern.ch/twiki/bin/view/CMS/JetResolution
     double centralSF(1.00);
+    if      (fabs(eta) < 0.5) centralSF = 1.095;
+    else if (fabs(eta) < 0.8) centralSF = 1.120;
+    else if (fabs(eta) < 1.1) centralSF = 1.097;
+    else if (fabs(eta) < 1.3) centralSF = 1.103;
+    else if (fabs(eta) < 1.7) centralSF = 1.118;
+    else if (fabs(eta) < 1.9) centralSF = 1.100;
+    else if (fabs(eta) < 2.1) centralSF = 1.162;
+    else if (fabs(eta) < 2.3) centralSF = 1.160;
+    else if (fabs(eta) < 2.5) centralSF = 1.161;
+    else if (fabs(eta) < 2.8) centralSF = 1.209;
+    else if (fabs(eta) < 3.0) centralSF = 1.564;
+    else if (fabs(eta) < 3.2) centralSF = 1.384;
+    else if (fabs(eta) < 5.0) centralSF = 1.216;
+    else centralSF = 1.320;
+
+    double upSF(1.00);
+    if      (fabs(eta) < 0.5) upSF = 1.095+0.018;
+    else if (fabs(eta) < 0.8) upSF = 1.120+0.028;
+    else if (fabs(eta) < 1.1) upSF = 1.097+0.017;
+    else if (fabs(eta) < 1.3) upSF = 1.103+0.033;
+    else if (fabs(eta) < 1.7) upSF = 1.118+0.014;
+    else if (fabs(eta) < 1.9) upSF = 1.100+0.033;
+    else if (fabs(eta) < 2.1) upSF = 1.162+0.044;
+    else if (fabs(eta) < 2.3) upSF = 1.160+0.048;
+    else if (fabs(eta) < 2.5) upSF = 1.161+0.060;
+    else if (fabs(eta) < 2.8) upSF = 1.209+0.059;
+    else if (fabs(eta) < 3.0) upSF = 1.564+0.321;
+    else if (fabs(eta) < 3.2) upSF = 1.384+0.033;
+    else if (fabs(eta) < 5.0) upSF = 1.216+0.050;
+    else upSF = 1.606;
+
+    double downSF(1.00);
+    if      (fabs(eta) < 0.5) downSF = 1.095-0.018;
+    else if (fabs(eta) < 0.8) downSF = 1.120-0.028;
+    else if (fabs(eta) < 1.1) downSF = 1.097-0.017;
+    else if (fabs(eta) < 1.3) downSF = 1.103-0.033;
+    else if (fabs(eta) < 1.7) downSF = 1.118-0.014;
+    else if (fabs(eta) < 1.9) downSF = 1.100-0.033;
+    else if (fabs(eta) < 2.1) downSF = 1.162-0.044;
+    else if (fabs(eta) < 2.3) downSF = 1.160-0.048;
+    else if (fabs(eta) < 2.5) downSF = 1.161-0.060;
+    else if (fabs(eta) < 2.8) downSF = 1.209-0.059;
+    else if (fabs(eta) < 3.0) downSF = 1.564-0.321;
+    else if (fabs(eta) < 3.2) downSF = 1.384-0.033;
+    else if (fabs(eta) < 5.0) downSF = 1.216-0.050;
+    else downSF = 1.034;
+
+    double smearedPt(0);
+
+/*    double centralSF(1.00);
     if      (fabs(eta) < 0.8) centralSF = 1.061;
     else if (fabs(eta) < 1.3) centralSF = 1.088;
     else if (fabs(eta) < 1.9) centralSF = 1.106;
@@ -269,7 +319,7 @@ double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){
     else downSF = 1.034;
 
     double smearedPt(0);
-
+*/
     if (smearJet == 0) {
         smearedPt = std::max(0., genPt + centralSF*(recoPt - genPt));
     }

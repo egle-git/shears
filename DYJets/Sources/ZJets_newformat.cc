@@ -843,7 +843,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 jetStruct genJet(GJetAk04Pt->at(i), GJetAk04Eta->at(i), GJetAk04Phi->at(i), GJetAk04E->at(i), i, 0);
                 bool genJetPassesdRCut(1);
                 for (unsigned short j(0); j < ngenLeptons; j++){ 
-                    if (deltaR(genJet.v, genLeptons[j].v) < 0.5) {
+                    if (deltaR(genJet.v, genLeptons[j].v) < 0.4) {
                         genJetPassesdRCut = 0;
                     }
                 }

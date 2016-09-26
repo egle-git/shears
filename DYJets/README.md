@@ -55,6 +55,22 @@ of HistoFiles.
 Producing Data/MC comparison
 ============================
 
+```
+for TTbar background, TTbar SF need to be implemented.
+Includes/functions.h
+declare getTTbarSF, equalTo   in the class
+
+Sources/functions.cc
+define the function of getTTbarSF, equalTo
+
+Sources/ZJets_newformat.cc
+implement the TTbarSF
+
+That's the code to implement the TTbar SF
+```
+
+
+
 To produce data/MC comparison plot, you need to run on data, DY+jet and background simulation samples. This can be achieved by runnning the following commads within the DYJets directory. See Quick start to set up the code.
 
 ```

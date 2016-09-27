@@ -124,7 +124,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	
     table LeptTrig = TrigMu17Mu8SF;
     
-    \\table for electron SF
+    //table for electron SF
     table LeptId("EfficiencyTables/Electron_Id_2015D_SF.txt");
     table LeptReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
    table LeptTrig("EfficiencyTables/Trig_Ele17_Ele12_2015D_SF.txt");

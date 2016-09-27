@@ -124,6 +124,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	
     table LeptTrig = TrigMu17Mu8SF;
     
+    \\table for electron SF
+    table LeptId("EfficiencyTables/Electron_Id_2015D_SF.txt");
+    table LeptReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
+   table LeptTrig("EfficiencyTables/Trig_Ele17_Ele12_2015D_SF.txt");
     //TTbar SF
     table TTbarSF("EfficiencyTables/sf_multi.txt"); 
     //Ele_Rec = Ele_Rec_8TeV;
@@ -509,13 +513,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			}
                         if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     }
-                    //else if (lepSel == "DE") {
-                    //    effWeight *= Ele_Rec.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                    //    effWeight *= Ele_Rec.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
-                    //    effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                    //    effWeight *= LeptID.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta)); 
-                    //}
-                    weight *= effWeight;
+                    if (lepSel == "DE") {
+                        effWeight *= LeptReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= LeptReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
+                        effWeight *= LeptId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= LeptId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta)); 
+                    //cout<< "Reco" <<LeptReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta))<<endl;
+ if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
+                    //cout<< "Trig "<<LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()))<<endl;
+}
+                                        weight *= effWeight;
                 }
 
 		weightSum += weight;
@@ -797,7 +804,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 bool jetPassesdRCut(1);
                 unsigned short nRemovedLep = min(int(nLeptons), 2);
                 for (unsigned short j(0); j < nRemovedLep; j++) {
-                    if (deltaR(jet.v, leptons[j].v) < 0.5) {
+                    if (deltaR(jet.v, leptons[j].v) < 0.4) {
                         jetPassesdRCut = 0;
                     }
                 }
@@ -3008,7 +3015,8 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
         bool elePassesVetoIsoCut(ele.iso < 0.25);
 
         // select the good electrons only
-        if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && (!useTriggerCorrection || elePassesAnyTrig || eventTrigger)){
+        //if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && (!useTriggerCorrection || elePassesAnyTrig || eventTrigger))
+        if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && elePassesAnyTrig){
             leptons.push_back(ele);
         }
         // select the veto electrons

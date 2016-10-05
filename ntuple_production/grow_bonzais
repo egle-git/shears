@@ -478,6 +478,30 @@ def catalog_read_boabab_catalog_header(baobab_catalog):
             'luminosity': lumi, 'xsec': xsec }
 #enddef
 
+def read_xsec(fname, sample):
+    """Reads a sample cross section table file. fname is the file path and sample the sample name. Returns None if the cross section value was not found."""
+    res = None
+    f = open(fname)
+    for il, l in enumerate(f):
+        l = l.strip()
+        if len(l) == 0 or l[0] == "#":
+            continue
+        cols = l.split()
+        if len(cols) < 2:
+            sys.stderr.write("Syntax error in line %d of cross section file %s.\n" % (fname, il+1))
+            continue
+        #endif
+        if cols[0] == sample:
+              val = float(cols[1])
+              if res is not None and res != val:
+                   sys.stderr.write("Cross section of sample %s is specified several times with differennt values in file %s.\n" % fname)
+              res = val
+        #endif
+     #next il, l
+    return res
+#enddef
+
+
 def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
     '''Produces a bonzai ntuple catalog'''
 
@@ -531,6 +555,24 @@ def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
 
     bonzai_catalog = cat_dir_path + "/" + bonzai_catalog_basename
 
+    xsec = None
+    if args.cross_sections:
+        if len(info['primary_dataset'].strip()) == 0:
+            sys.stderr.write("Primary dataset information, which is required to retrieve the sample cross section, is missing from the Boabab catalog %f.\n" % baobab_catalog)
+        try:
+            xsec = read_xsec(args.cross_sections, info['primary_dataset'])
+        except IOError, e:
+            print e
+        if xsec is None:
+            if len(info['xsec']) != 0:
+                sys.stderr.write("Failed to get cross section value from file %s for the dataset %s. The value %f found in the Baobab catalog will be used.\n" %  (args.cross_sections, info['primary_dataset'], info['xsec']))
+            else:
+                sys.stderr.write("Failed to get cross section value from file %s for the dataset %s.\n" %  (args.cross_sections, info['primary_dataset']))
+        #endif
+    #endif
+    if xsec is None:
+        xsec = info['xsec']
+        
     fout = open(bonzai_catalog, "w")
     
     fout.write('''# primary dataset: %s
@@ -540,7 +582,7 @@ def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
 * lumi: %s
 * sample xsec: %s
 
-''' % (info['primary_dataset'], info['datatype'], info['primary_events'], info['primary_files'], info['luminosity'], info['xsec']))
+''' % (info['primary_dataset'], info['datatype'], info['primary_events'], info['primary_files'], info['luminosity'], xsec))
     
     ntuple_pattern = ntuple_dir_path + "/" + ntuple_subdir + "/*/Bonzai*.root"
     print "Looking for ntuples with path like %s." % ntuple_pattern
@@ -694,7 +736,9 @@ def parse_command_line():
 
     parser.add_argument('--make-catalogs', action='store', metavar='FILE',
                         help="Command to produce the catalogs of produced bonzai ntuples of the tasks listed in FILE.")
-
+    
+    parser.add_argument('--cross-sections', action='store', metavar='FILE',
+                        help="To be used with --make-catalog command. Takes the cross section value from the cross section table FILE instead of the one from the boabab catalog. The file FILE should contain one line per data set, with the data set name followed by the cross section value in pb and separated by a unlimited number of space or tabulation. Lines starting with a # sign are considered as comment lines and are ignored.")
     return parser.parse_args()
 #enddef
 

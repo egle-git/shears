@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 import FWCore.ParameterSet.VarParsing as VarParsing
 import re
 
-process = cms.Process("GrowBoababs")
+process = cms.Process("GrowBaobabs")
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 10
@@ -18,7 +18,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.source = cms.Source("PoolSource",
                             fileNames =  cms.untracked.vstring(
-'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
+'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
+#'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
   )
@@ -65,7 +66,7 @@ mcGlobalTag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
 reapply_jec = True
 jec_file = False
 eg_corr = True   #photon and electron correction
-
+include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
 
 #------------------------------------
 #Condition DB tag
@@ -96,6 +97,12 @@ if reapply_jec:
                 tag    = cms.string(jec_file_tag),
                 label  = cms.untracked.string('AK4PFchs')
                 ),
+          #Modified by Clement Leloup
+          cms.PSet(
+                record = cms.string('JetCorrectionsRecord'),
+                tag    = cms.string(jec_file_tag),
+                label  = cms.untracked.string('AK8PFchs')
+                ),
           ), 
           connect = cms.string('sqlite:' + jec_file)
     )
@@ -108,22 +115,9 @@ if reapply_jec:
     jec_levels.append('L2L3Residual')
   #endif
 
-  process.load("PhysicsTools.PatAlgos.producersLayer1.jetUpdater_cff")
-  process.patJetCorrFactorsReapplyJEC = process.patJetCorrFactorsUpdated.clone(
-    src = cms.InputTag("slimmedJets"),
-    levels = jec_levels,
-    payload = 'AK4PFchs' # Make sure to choose the appropriate levels and payload here!
-  )
 
-  process.updatedJets = process.patJetsUpdated.clone(
-    jetSource = cms.InputTag("slimmedJets"),
-    jetCorrFactorsSource = cms.VInputTag(cms.InputTag("patJetCorrFactorsReapplyJEC"))
-    )
-
-  jetSrc = "updatedJets"
-  puMvaName = 'pileupJetIdUpdated:fullDiscriminant'
-  process.updatedJets.userData.userFloats.src += [ puMvaName ]
-
+  #Modified by Clement Leloup
+  from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
   process.load("RecoJets.JetProducers.PileupJetID_cfi")
   process.pileupJetIdUpdated = process.pileupJetId.clone(
     jets=cms.InputTag("slimmedJets"),
@@ -131,7 +125,32 @@ if reapply_jec:
     applyJec=True,
     vertexes=cms.InputTag("offlineSlimmedPrimaryVertices")
     )
-  #print process.pileupJetIdUpdated.dumpConfig()
+
+  updateJetCollection(
+    process,
+    jetSource =cms.InputTag('slimmedJets'),
+    labelName ='UpdatedJEC',
+    jetCorrections = ('AK4PFchs', jec_levels, 'None')
+  )
+
+  jetSrc = 'updatedPatJetsUpdatedJEC'
+
+  if include_ak08:
+    updateJetCollection(
+      process,
+      jetSource = cms.InputTag('slimmedJetsAK8'),
+      labelName = 'AK8UpdatedJEC',
+      jetCorrections = ('AK8PFchs', jec_levels, 'None')
+    )
+    fatJetSrc = 'updatedPatJetsAK8UpdatedJEC'
+    fatJetSw = 'on'
+  else:
+    fatJetSrc = ''
+    fatJetSw = 'off'
+  #endif //include_ak08
+  puMvaName = 'pileupJetIdUpdated:fullDiscriminant'
+  process.updatedPatJetsUpdatedJEC.userData.userFloats.src += [puMvaName]
+
 
   ### ---------------------------------------------------------------------------
   ### Removing the HF from the MET computation
@@ -162,6 +181,16 @@ if reapply_jec:
   #                            )
 else:
   jetSrc = "slimmedJets"
+
+  #Modified by Clement Leloup
+  if include_ak08:
+    fatJetSrc = "slimmedJetsAK8"
+    fatJetSw = "on"
+  else:
+    fatJetSrc = ""
+    fatJetSw = "off"
+  #endif include_ak08
+
   puMvaName = 'pileupJetId:fullDiscriminant'
 #endif reapply_jec
 #
@@ -169,6 +198,7 @@ else:
 
 # Photon and electron correction
 #
+
 if eg_corr:
   process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
     calibratedPatElectrons = cms.PSet(
@@ -225,9 +255,13 @@ process.tupel = cms.EDAnalyzer("Tupel",
   photonSrc    = cms.untracked.InputTag(photonSrc),
   electronSrc  = cms.untracked.InputTag(electronSrc),
   muonSrc      = cms.untracked.InputTag("slimmedMuons"),
+  tauSrc       = cms.untracked.InputTag("slimmedTaus"),
   jetSrc       = cms.untracked.InputTag(jetSrc),
+  fatJetSw     = cms.untracked.string(fatJetSw), #on or off
+  fatJetSrc    = cms.untracked.InputTag(fatJetSrc),
   genSrc       = cms.untracked.InputTag("prunedGenParticles"),
   gjetSrc      = cms.untracked.InputTag('slimmedGenJets'),
+  gfatJetSrc   = cms.untracked.InputTag('slimmedGenJetsAK8'),
   muonMatch    = cms.string( 'muonTriggerMatchHLTMuons' ),
   muonMatch2   = cms.string( 'muonTriggerMatchHLTMuons2' ),
   elecMatch    = cms.string( 'elecTriggerMatchHLTElecs' ),
@@ -247,7 +281,11 @@ process.tupel = cms.EDAnalyzer("Tupel",
 process.p = cms.Path()
 
 if reapply_jec:
-  process.p += cms.Sequence( process.pileupJetIdUpdated + process.patJetCorrFactorsReapplyJEC + process.updatedJets )
+  process.p += cms.Sequence( process.pileupJetIdUpdated + process.patJetCorrFactorsUpdatedJEC + process.updatedPatJetsUpdatedJEC )
+  if include_ak08:
+    process.p += cms.Sequence( process.patJetCorrFactorsAK8UpdatedJEC + process.updatedPatJetsAK8UpdatedJEC )
+  #endif include_ak08
+#endif reapply_jec
 
 if eg_corr:
   process.p += process.calibratedPatElectrons 

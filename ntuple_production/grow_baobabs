@@ -17,8 +17,22 @@ import time
 import hashlib
 import os
 import shutil
+import imp
+import os.path
+
 try:
+    backup_das_path = "/cvmfs/cms.cern.ch/slc6_amd64_gcc481/cms/das_client/v02.17.04/bin"
+    das_path =  os.path.realpath(imp.find_module("das_client")[1])
+    m = re.search(r"/v(\d{2})\.(\d{2})\.(\d{2}).*/", das_path)
+    if m:
+        vers = int(m.groups()[0])*100*100 + int(m.groups()[1])*100 + int(m.groups()[0])
+        if vers < 21704:
+            sys.stderr.write("Warning: version of the das client from the default environment is too old. Version v02.17.04 from %s will be used.\n" %  backup_das_path)
+            sys.path.insert(0, backup_das_path)
+    else:
+        sys.stderr.write("Warning: failed to check the das client version.\n")
     import das_client
+
 except ImportError:
     sys.stderr.write("\nFatal error: CMSSW environment needs to be set before running this script.\n")
     sys.exit(1)
@@ -47,6 +61,8 @@ myself=os.path.realpath(__file__)
 mydir=os.path.dirname(myself)
 getlumi=mydir + "/getlumi"
 eos_mount_point=None
+das_ckey = das_client.x509()
+das_cert = das_ckey
 
 try:
     from CRABAPI.RawCommand import crabCommand
@@ -555,7 +571,7 @@ def db_das_query(query):
     debug=False
     if args.verbosity > 0:
         sys.stderr.write("\nDAS query: %s\n" % query)  
-    das_res=das_client.get_data(host, query, idx, limit, debug)
+    das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     data=das_res['data']
     res=[]
     for r in data:
@@ -572,7 +588,7 @@ def db_das_query2(query, att):
     obj, item = att.split(".")
     if args.verbosity > 0:
         sys.stderr.write("\nDAS query: %s\n" % query)  
-    das_res=das_client.get_data(host, query, idx, limit, debug)
+    das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     res = []
     
     if not das_res.has_key('data'):
@@ -602,7 +618,7 @@ def db_das_query3(query, att_list):
 
     if args.verbosity > 0:
         sys.stderr.write("\nDAS query: %s\n" % query)  
-    das_res=das_client.get_data(host, query, idx, limit, debug)
+    das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     res = {}
     
     if not das_res.has_key('data'):
@@ -2333,9 +2349,15 @@ def main():
         pass
     #endtry
 
+def init_das():
+    das_ckey = das_client.x509()
+    das_client.check_glidein()
+
 def run():
 
     check_environment()
+
+    init_das()
 
     if args.description and not args.new_version:
         #note: if a new version is create, description

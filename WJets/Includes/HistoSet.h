@@ -648,7 +648,26 @@ public:
     TH1D *SixthJetEtaFull_Zinc6jet;
 
     TH1D *FirstJetEta_Zexc1jet;
+    TH1D *FirstJetEta_Zexc2jet;
+    TH1D *FirstJetEta_Zexc3jet;
+    TH1D *FirstJetEta_Zexc4jet;
+    TH1D *FirstJetEta_Zexc5jet;
+    TH1D *FirstJetEta_Zexc6jet;
     TH1D *SecondJetEta_Zexc2jet;
+    TH1D *SecondJetEta_Zexc3jet;
+    TH1D *SecondJetEta_Zexc4jet;
+    TH1D *SecondJetEta_Zexc5jet;
+    TH1D *SecondJetEta_Zexc6jet;
+    TH1D *ThirdJetEta_Zexc3jet;
+    TH1D *ThirdJetEta_Zexc4jet;
+    TH1D *ThirdJetEta_Zexc5jet;
+    TH1D *ThirdJetEta_Zexc6jet;
+    TH1D *FourthJetEta_Zexc4jet;
+    TH1D *FourthJetEta_Zexc5jet;
+    TH1D *FourthJetEta_Zexc6jet;
+    TH1D *FifthJetEta_Zexc5jet;
+    TH1D *FifthJetEta_Zexc6jet;
+    TH1D *SixthJetEta_Zexc6jet;
 
     TH1D *AllJetEta_Zinc1jet;
     TH1D *AllJetEta_Zinc2jet;
@@ -662,7 +681,26 @@ public:
     TH1D *FifthJetPhi_Zinc5jet;
     TH1D *SixthJetPhi_Zinc6jet;
     TH1D *FirstJetPhi_Zexc1jet;
+    TH1D *FirstJetPhi_Zexc2jet;
+    TH1D *FirstJetPhi_Zexc3jet;
+    TH1D *FirstJetPhi_Zexc4jet;
+    TH1D *FirstJetPhi_Zexc5jet;
+    TH1D *FirstJetPhi_Zexc6jet;
     TH1D *SecondJetPhi_Zexc2jet;
+    TH1D *SecondJetPhi_Zexc3jet;
+    TH1D *SecondJetPhi_Zexc4jet;
+    TH1D *SecondJetPhi_Zexc5jet;
+    TH1D *SecondJetPhi_Zexc6jet;
+    TH1D *ThirdJetPhi_Zexc3jet;
+    TH1D *ThirdJetPhi_Zexc4jet;
+    TH1D *ThirdJetPhi_Zexc5jet;
+    TH1D *ThirdJetPhi_Zexc6jet;
+    TH1D *FourthJetPhi_Zexc4jet;
+    TH1D *FourthJetPhi_Zexc5jet;
+    TH1D *FourthJetPhi_Zexc6jet;
+    TH1D *FifthJetPhi_Zexc5jet;
+    TH1D *FifthJetPhi_Zexc6jet;
+    TH1D *SixthJetPhi_Zexc6jet;
     TH1D *AllJetPhi_Zinc1jet;
     TH1D *AllJetPhi_Zinc2jet;
     TH1D *AllJetPhi_Zinc3jet;
@@ -734,7 +772,26 @@ public:
     TH1D *genRatioJetPt32_Zinc3jet;
 
     TH1D *FirstJetPt_Zexc1jet;
+    TH1D *FirstJetPt_Zexc2jet;
+    TH1D *FirstJetPt_Zexc3jet;
+    TH1D *FirstJetPt_Zexc4jet;
+    TH1D *FirstJetPt_Zexc5jet;
+    TH1D *FirstJetPt_Zexc6jet;
     TH1D *SecondJetPt_Zexc2jet;
+    TH1D *SecondJetPt_Zexc3jet;
+    TH1D *SecondJetPt_Zexc4jet;
+    TH1D *SecondJetPt_Zexc5jet;
+    TH1D *SecondJetPt_Zexc6jet;
+    TH1D *ThirdJetPt_Zexc3jet;
+    TH1D *ThirdJetPt_Zexc4jet;
+    TH1D *ThirdJetPt_Zexc5jet;
+    TH1D *ThirdJetPt_Zexc6jet;
+    TH1D *FourthJetPt_Zexc4jet;
+    TH1D *FourthJetPt_Zexc5jet;
+    TH1D *FourthJetPt_Zexc6jet;
+    TH1D *FifthJetPt_Zexc5jet;
+    TH1D *FifthJetPt_Zexc6jet;
+    TH1D *SixthJetPt_Zexc6jet;
     TH1D *genFirstJetPt_Zexc1jet;
     TH1D *genSecondJetPt_Zexc2jet;
     TH1D *FirstHighestJetPt_Zinc1jet;
@@ -782,6 +839,27 @@ public:
     TH2D *FourthJetPtEta_Zinc4jet;
     TH2D *FifthJetPtEta_Zinc5jet;
     TH2D *SixthJetPtEta_Zinc6jet;
+    TH2D *FirstJetPtEta_Zexc1jet;
+    TH2D *FirstJetPtEta_Zexc2jet;
+    TH2D *FirstJetPtEta_Zexc3jet;
+    TH2D *FirstJetPtEta_Zexc4jet;
+    TH2D *FirstJetPtEta_Zexc5jet;
+    TH2D *FirstJetPtEta_Zexc6jet;
+    TH2D *SecondJetPtEta_Zexc2jet;
+    TH2D *SecondJetPtEta_Zexc3jet;
+    TH2D *SecondJetPtEta_Zexc4jet;
+    TH2D *SecondJetPtEta_Zexc5jet;
+    TH2D *SecondJetPtEta_Zexc6jet;
+    TH2D *ThirdJetPtEta_Zexc3jet;
+    TH2D *ThirdJetPtEta_Zexc4jet;
+    TH2D *ThirdJetPtEta_Zexc5jet;
+    TH2D *ThirdJetPtEta_Zexc6jet;
+    TH2D *FourthJetPtEta_Zexc4jet;
+    TH2D *FourthJetPtEta_Zexc5jet;
+    TH2D *FourthJetPtEta_Zexc6jet;
+    TH2D *FifthJetPtEta_Zexc5jet;
+    TH2D *FifthJetPtEta_Zexc6jet;
+    TH2D *SixthJetPtEta_Zexc6jet;
     TH2D *genFirstJetPtEta_Zinc1jet;
     TH2D *genSecondJetPtEta_Zinc2jet;
     TH2D *genThirdJetPtEta_Zinc3jet;
@@ -1087,6 +1165,12 @@ public:
     TH1D *deltaRjetMu;
     TH1D *deltaPtjetMu;
     TH1D *NVtx;
+    TH1D *NVtx_Zexc1jet;
+    TH1D *NVtx_Zexc2jet;
+    TH1D *NVtx_Zexc3jet;
+    TH1D *NVtx_Zexc4jet;
+    TH1D *NVtx_Zexc5jet;
+    TH1D *NVtx_Zexc6jet;
 
     TH1D *Beta;
     TH1D *BetaStar;
@@ -1489,3 +1573,4 @@ public:
 };
 
 #endif
+

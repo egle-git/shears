@@ -438,7 +438,7 @@ def get_runs_from_json_file(jsonFile):
 
 def check_environment():
     mydir  = os.path.dirname(os.path.realpath( __file__ ))
-    print "Base directory:", mydir
+#    print "Base directory:", mydir
     for f in [ "grow_baobabs_cfg.py" ]:
         if not os.path.isfile(f):
             print "File %s was not found. Copying file from %s." % (f, mydir)
@@ -523,7 +523,8 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     config.Data.splitting = 'EventAwareLumiBased'
 
 # Runs to process (if runs list is empty, set to empty string, which indicates no run filter)
-    config.Data.runRange = ",".join(map(str,runs))
+    if datatype != 'mc':
+        config.Data.runRange = ",".join(map(str,runs))
 
     if datatype != 'mc':
         config.Data.lumiMask = json_file
@@ -741,7 +742,10 @@ def db_print_jobs():
     conn, c = db_get_conn()
     c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
     table = []
-    header = ["Prim. dataset", "Task", "Status C/R/F/O", "Reco tag", "Runs", "Submission time"]
+    if args.terse:
+        header = []
+    else:
+        header = ["Prim. dataset", "Task", "Status C/R/F/O", "Reco tag", "Runs/MC ext.", "Submission time"]
     for x in c:
         prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname = x
         status += " " + "/".join(map(lambda x: str(x) if x is not None else '', (finished, running, failed, other)))
@@ -754,9 +758,10 @@ def db_print_jobs():
         if prim_dataset != toks[1]:
             system.stderr.write("Internal error: found an inconsistentcy in the local production database.")
         table.append([ prim_dataset, task_id, status, processed_dataset, run_spec, time2str(submit_ts)])
-
+    
     print_table(table, header)
-    print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, O: other statuses"
+    if not args.terse:
+        print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, O: other statuses"
     conn.close()
 
 def db_get_task_status(prim_dataset, task_id):
@@ -1070,7 +1075,7 @@ def catalog_read(filepath):
             #endif validateRunSpec
             continue
         sys.stderr.write("\nWarning: line %d of %s was not understood and will be ignored!\n"  % (i+1, filepath))
-    #next line    
+    #next line 
     return (outDir, jsonFile, datasets)
 
 def catalog_get_out_dir(catalog):
@@ -1344,12 +1349,12 @@ def runspec_prettify(run_spec):
     for r in run_spec:
         if not isinstance(r, list):
             r = [r, r]
-        if len(r) == 1:
-            res = res + c + r[0]
+        if len(r) == 1 or (len(r) == 2 and r[0] == r[1]):
+            res = res + c + "%d" % r[0]
         elif len(r) == 2:
             if r[0] == 1 and r[1] == 999999:
                 return "all"
-            elif r[0] == 1:
+            elif r[0] == 0:
                     res = res + c + "< %d" % (r[1] + 1)
             elif r[1] == 999999:
                 res = res + c + "> %d" % (r[0] - 1)
@@ -1403,9 +1408,10 @@ def runspec_run_duplicates(datasets):
     #endif
     return False
 
-def runspec_expand(runs, runMin = 1, runMax = 999999):
+def runspec_expand(runs, runMin = 0, runMax = 999999):
     """Interprets a shears run list specification after filtering runs out of [runMin, runMax] range. Returns a Python list of integers and lists of two integers. The two-integer lists specify run intervals."""
-    run = re.compile(r'[\d]{6}')
+###    run = re.compile(r'[\d]{6}')
+    run = re.compile(r'[\d]+')
     if not runs:
         return [[runMin, runMax]]
     r_ranges = runs.split(",")
@@ -1416,18 +1422,21 @@ def runspec_expand(runs, runMin = 1, runMax = 999999):
         if len(bounds) >  2:
             sys.stderr.write("\nWarning: %s is not valid run range specification\n")
             return None
+        #sanity check of run number format
         for bound in bounds:
             if len(bound) > 0 and not run.match(bound):
                 sys.stderr.write("\nWarning: %s is not a valid run number. A run number must be a 6-digit number.\n" % bound)
                 return None
             #endif not run.match
         #next bound
-            
+        
         # Applies runMin and runMax requirement and resolves open intervals:
         if len(bounds) == 1:
-            r_ranges[i] = [ int(bounds[0]) ]
-            if r_ranges[i] < runMin or r_ranges[i] > runMax:
+            single_run = int(bounds[0])
+            if single_run < runMin or single_run > runMax:
                 r_ranges[i] = None
+            else:
+                r_ranges[i] = [ single_run, single_run ]
         else:
             if len(bounds[0]) == 0:
                 bounds[0] = runMin
@@ -1861,21 +1870,31 @@ inserts the task in the database. Return the task_id or None."""
             sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
             return None
     #endif datatype
-    if (not newDataset) and datatype == 'mc':
-        if args.verbosity > 0:
-            sys.stderr.write("\nDataset %s in MC and has already been processed.\n" % dataset)
-        #endif
-        return None
-    #endif
-
-    prim_dataset = ds_primary_dataset(dataset)
 #    runs_in_str = runspec_prettify(run_spec)
 
     if datatype != 'mc' and not jsonFile:
         system.stderr.write("\nDataset %s is from real data, which requires a json file. Please check that the json file path is set in the input dataset catalog file.\n\n")
         return None
     if datatype == 'mc':
-        runs = [1, 999999]
+        #for MC a run corresponds to a dataset extension
+        if len(run_spec) == 0 or run_spec == [[1, 999999]]: #default value used for non-specified run_spec. OK for data. Must be changed for MC
+            run_spec = [[0, 0 ]]
+        if len(run_spec) > 1 or (len(run_spec[0]) > 1 and run_spec[0][0] != run_spec[0][1]):
+            if args.verbosity > 0:
+                sys.stderr.write('\nThe datasets.txt file contains a line with invalid "run specification" for the MC dataset %s. For MC dataset, the run specification must be a single number used in case of a sample split in "extensions" to distinguisthe different entries that shares the same dataset name. In absence of run specification the value 0 is used as "run number".\n' % dataset)
+            #endif
+            return None
+        else:
+            run_to_process = run_spec[0][0]
+            registered_runs = db_get_runs(prim_dataset)
+            if run_to_process in registered_runs:
+                if args.verbosity > 0:
+                    sys.stderr.write("\nMC dataset %s with run/extension id %d has already been processed.\n" % (dataset, run_to_process))
+                #endif
+                return None
+            #endif
+        #endif
+        runs =  [ run_to_process ] 
     else:    
         runs =  db_get_list_of_new_runs(dataset, jsonFile, run_spec)
 
@@ -1897,12 +1916,11 @@ inserts the task in the database. Return the task_id or None."""
     try:
         conn, c = db_get_conn()
         conn.execute("INSERT INTO jobs(prim_dataset, task_id, dataset, datatype, ntuple_dir, submit_ts, status, status_ts, run_spec) VALUES('%s',%d,'%s', '%s','%s',%d, '%s', %d, '%s')" % (prim_dataset, task_id, dataset, datatype, ntuple_dir, ts, 'to_submit', ts, runs_in_str))
-        if datatype != 'mc': #data
-            #in case of data, runs was obtained from db_get_list_of_new_runs function and is a list of individual runs
-            for run in runs:
-                conn.execute("INSERT INTO runs(prim_dataset, run, task_id) VALUES('%s', %d, %d)" % (prim_dataset, run, task_id))
-            #next runs
-        #endif
+        #in case of data, runs was obtained from db_get_list_of_new_runs function and is a list of individual runs,
+        #in case of mc is a list with a single run
+        for run in runs:
+            conn.execute("INSERT INTO runs(prim_dataset, run, task_id) VALUES('%s', %d, %d)" % (prim_dataset, run, task_id))
+        #next runs
         conn.commit()
         conn.close()
     except sqlite3.IntegrityError, e:
@@ -2310,6 +2328,9 @@ def parse_command_line():
     parser.add_argument('--make-ntuple-catalog-from', metavar='FILE', action='store',
                         help="Makes the nutple catalag of task specified in FILE. See --clear-from for the FILE format. The catalogs are already produced by the --check command once the task is finished. Therefore, it is normally not needed to call this --make-ntuple-catalog command. If the catalog already exists, it will be overwritten")
 
+
+    parser.add_argument('--terse', action='store_true', default=False,
+                        help="Option for the --list command. Use this option to create an output, which can be read directly with the commands which takes a task list as input like the --clear-from command. You can redirect the standard output to create the file, as 'grow_baobabs --list --terse > task_list'. The grep command can be used to select tasks, e.g 'grow_baobabs --list --terse | grep FAILED > task_list'")
 
     return parser.parse_args()
 

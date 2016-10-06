@@ -118,6 +118,15 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"DifZFirstJetRapidity_ZPt300_Zinc1jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1
     {"ZPt_Zinc1jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //    {"ZPt_Zinc2jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"VisPt_Zinc0jetQun",    0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"VisPt_Zinc1jetQun",    0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"VisPt_Zinc2jetQun",    0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"VisPt_Zinc3jetQun",    0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"HadRecoil",            1,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"JZB",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"JZB_bin1",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"JZB_bin2",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
+    {"JZB_bin3",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
     //different JetPt cuts////////
 //    {"AbsZRapidity_FirstJetPt50_Zinc1jet",        1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //    {"AbsFirstJetRapidity_FirstJetPt50_Zinc1jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1

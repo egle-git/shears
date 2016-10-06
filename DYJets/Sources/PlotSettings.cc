@@ -660,6 +660,9 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     if (canvasName.Contains("DPhi")) {
         hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
     }
+    if (canvasName.Contains("Vis")) {
+        hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.3*maximum);
+    }
     hSyst->DrawCopy("e");
     grCentralSyst->SetName("grCentralSyst");
     grCentralSyst->Draw("2");
@@ -699,6 +702,12 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetTextFont(42);
     if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
     latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+    if (canvasName.Contains("Vis")){
+	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");
+    }
+    else{
+	latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+    }
 
     if (canvasName.Contains("FirstJetPt50")){
         latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 50 GeV, |#eta^{jet}| < 2.4 ");
@@ -727,12 +736,16 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     else if (canvasName.Contains("ZPt150_HT300")){
         latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
     }
+    else if (canvasName.Contains("Vis")){
+	latexLabel->DrawLatex(0.44, 0.7-0.06,"p_{T}^{#mu} > 20 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+    }
 
     else{
         latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
     }
 
     if (lepSel == "") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ll channel");
+    else if ((lepSel == "DMu") && canvasName.Contains("Vis")) latexLabel->DrawLatex(0.44,0.7-0.12,"Z/#gamma*#rightarrow #mu#mu channel");
     else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
     else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ee channel");
     latexLabel->SetName("latexLabel");
@@ -884,6 +897,24 @@ void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString x
         title = "$p_{T}^{Z}$";
         var = "$p_{\\text{T}}(Z)$ \\tiny{[GeV]}";
         dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(Z)} \\tiny{\\left[\\frac{\\text{pb}}{\\text{GeV}}\\right]}$";
+    }
+
+    if (xtitle.Index("p_{T} balance") >= 0) {
+        title = "$p_{T}^{balance}$";
+        var = "$p_{\\text{T}}(balance)$ \\tiny{[GeV]}";
+        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(balance)} \\tiny{\\left[\\frac{\\text{pb}}{\\text{GeV}}\\right]}$";
+    }
+
+    if (xtitle.Index("Recoil") >= 0) {
+        title = "$Hadronic recoil$";
+        var = "Hadronic recoil \\tiny{[GeV]}";//"$p_{\\text{T}}(balance)$ \\tiny{[GeV]}";
+        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(hadronic recoil)} \\tiny{\\left[\\frac{\\text{pb}}{\\text{GeV}}\\right]}$";
+    }
+
+    if (xtitle.Index("JZB") >= 0) {
+        title = "$p_{T}^{JZB}$";
+        var = "$p_{\\text{T}}(JZB)$ \\tiny{[GeV]}";
+        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(JZB)} \\tiny{\\left[\\frac{\\text{pb}}{\\text{GeV}}\\right]}$";
     }
 
     // Z Boson and Jet rapidity

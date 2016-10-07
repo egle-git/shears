@@ -488,7 +488,7 @@ def read_xsec(fname, sample):
             continue
         cols = l.split()
         if len(cols) < 2:
-            sys.stderr.write("Syntax error in line %d of cross section file %s.\n" % (fname, il+1))
+            sys.stderr.write("Syntax error in line %d of cross section file %s.\n" % (il+1, fname))
             continue
         #endif
         if cols[0] == sample:

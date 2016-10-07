@@ -18,7 +18,7 @@ die(){
 
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 
-tmp="`cd /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSSW && scram runtime -sh`"
+tmp="`cd /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSSW_7_6_4 && scram runtime -sh`"
 
 [ $? = 0 ] || die "Failed to set CMSSW runtime environment. Is directory /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSS existing?"
 
@@ -37,12 +37,17 @@ function run(){
     for d in $dirs; do
 	check_warden_stop && return
 	{ echo $d | underline; echo; } | tee -a .warden_summary
+	(cd $d && {
 	echo "Checking status of running tasks..."
-	(cd "$d" && "$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox")
+	xsec_file=xsec.txt
+	[ -f $xsec_file ] && xsec_opt="--cross-section $xsec_file" || xsec_opt=""
+	("$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox")
 	echo "Checking if some tasks need to be submitted..."
-	(cd "$d" && "$mydir/grow_baobabs" --new-jobs)
+	("$mydir/grow_baobabs" --new-jobs)
 	echo "Task summary:"
-	(cd "$d" && "$mydir/grow_baobabs" --list) | tee -a .warden_summary
+	("$mydir/grow_baobabs" --list) | tee -a .warden_summary
+	    }
+	)
 cat<<EOF | tee -a .warden_summary
 ======================================================================
 

@@ -1102,6 +1102,12 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
 
     dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, nevents, nfiles, lumi_file, lumi_file_md5sum, lumi, submit_ts = r
 
+    if not nevents:
+        nevents = -1
+
+    if not nfiles:
+        nfiles = -1
+
     reco_dataset = dataset.split("/")[2]
 
     if lumi < 0:
@@ -1123,6 +1129,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
     except OSError:
         pass
 
+
 #    catalogs = os.listdir(cat_dir_path)
 #    catname = re.compile(r"%s-([\d]+).txt" % prim_dataset)
 #    latest_cat = None
@@ -1138,15 +1145,30 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
 #            latest_cat  = f
 #    #next f
 
+    xsec = None
+    if args.cross_sections:
+        try:
+            xsec = read_xsec(args.cross_sections, prim_dataset)
+        except IOError, e:
+            print e
+        if xsec is None:
+            sys.stderr.write("Failed to get cross section value from file %s for the dataset %s.\n" %  (args.cross_sections, info['primary_dataset']))
+        #endif
+    #endif
 
-    def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi):
+    def write_file_header(fout, prim_dataset, datatype, processed_events, processed_files, lumi, xsec):
+        if xsec:
+            xsec_str = "# sample xsec: %s\n" % xsec
+        else:
+            xsec_str = ""
+        #endif
         fout.write('''# primary dataset: %s
 # data type: %s
 # processed events: %s
 # processed files: %s
 # lumi: %s
-
-''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or '')))
+%s
+''' % (prim_dataset, datatype, str(processed_events or ''), str(processed_files or ''), str(lumi or ''), xsec_str))
     #enddef
 
     cat_alltasks = cat_dir_path + "/Baobabs-%s-all.txt" % prim_dataset
@@ -1154,7 +1176,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
     file_deleted = False
 
     fout_thistask = open(cat_thistask, "w")
-    write_file_header(fout_thistask, prim_dataset, datatype, nevents, nfiles, lumi)
+    write_file_header(fout_thistask, prim_dataset, datatype, nevents, nfiles, lumi, xsec)
     try:
         fout = tempfile.NamedTemporaryFile(dir = os.path.dirname(cat_thistask), delete=False)
         #file header processing
@@ -1197,18 +1219,18 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
                         file_section_task_id = int(m.groups()[0])
                     if file_section_task_id > 0 and file_section_task_id != task_id:
                         m = task_lumi_line.match(l)
-                        if m:
+                        if m and tot_lumi >= 0:
                             tot_lumi += float(m.groups()[0])
                         m = task_nevents_line.match(l)
-                        if m:
+                        if m and tot_events >= 0:
                             tot_events += int(m.groups()[0])
                         m = task_nfiles_line.match(l)                        
-                        if m:
+                        if m and tot_files >= 0:
                             tot_files += int(m.groups()[0])
                     #endif file_section_task_id > ...
                 #next l
                 
-                write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi)
+                write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi, xsec)
                 
                 #read a second time the file to copy its content
                 file_section_task_id = -1
@@ -1226,10 +1248,10 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
                     if file_section_task_id >= 0 and file_section_task_id != task_id:
                         fout.write(l + "\n")
         except IOError:
-            write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+            write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi, xsec)
         except TypeError: #TypeError in case cat_alltasks is None
             if cat_alltasks is None: #expected exception
-                write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi)
+                write_file_header(fout, prim_dataset, datatype, nevents, nfiles, lumi, xsec)
             else:
                 #unexpected exception, rethrow it:
                 raise
@@ -2026,7 +2048,7 @@ def prod_new_version():
         return
 
     #basedir = os.path.dirname(os.path.dirname(catalog_get_out_dir(datasets)))
-    basedir = re.sub(r'(v[[:digit:]]+)?/Tuple$', '', catalog_get_out_dir(datasets))    
+    basedir = re.sub(r'(/v\d+)?/Ntuple$', '', catalog_get_out_dir(datasets))    
     basedir = eos_to_local_path(basedir)
 
     if not basedir:
@@ -2047,12 +2069,19 @@ def prod_new_version():
         if m and len(m.groups()) > 0:
             dirs_.append(int(m.groups()[0]))
 
+    print 'Looking at existing ntuple versions in directory %s.' % basedir
+
     if len(dirs_) == 0:
         last_vers=0
     else:
         last_vers = max(dirs_)
     
     new_vers = last_vers + 1
+
+    rep = raw_input('Create version %s? (y/n)' % new_vers)
+    
+    if rep != 'y' and rep != 'Y':
+        return
 
     olddir=basedir + "/v" + str(last_vers)
     newdir = basedir + "/v" + str(new_vers)
@@ -2231,6 +2260,32 @@ def prod_report_close_datasets(prim_dataset = None, task_id = None):
 # Upper level production management tools
 ######################################################################
 
+def read_xsec(fname, sample):
+    """Reads a sample cross section table file. fname is the file path and sample the sample name. Returns None if the cross se
+ction value was not found."""
+    res = None
+    f = open(fname)
+    for il, l in enumerate(f):
+        l = l.strip()
+        if len(l) == 0 or l[0] == "#":
+            continue
+        cols = l.split()
+        if len(cols) < 2:
+            sys.stderr.write("Syntax error in line %d of cross section file %s.\n" % (il+1, fname))
+            continue
+        #endif
+        if cols[0] == sample:
+              val = float(cols[1])
+              if res is not None and res != val:
+                   sys.stderr.write("Cross section of sample %s is specified several times with differennt values in file %s.\n" % fname)
+              #endif
+              res = val
+        #endif
+     #next il, l
+    return res
+#enddef
+
+
 def parse_command_line():
     """Parse the command line parser"""
     parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
@@ -2331,6 +2386,9 @@ def parse_command_line():
 
     parser.add_argument('--terse', action='store_true', default=False,
                         help="Option for the --list command. Use this option to create an output, which can be read directly with the commands which takes a task list as input like the --clear-from command. You can redirect the standard output to create the file, as 'grow_baobabs --list --terse > task_list'. The grep command can be used to select tasks, e.g 'grow_baobabs --list --terse | grep FAILED > task_list'")
+
+    parser.add_argument('--cross-sections', action='store', metavar='FILE',
+                        help="To be used with --make-catalog command. Takes the cross section value from the cross section table FILE instead of the one from the boabab catalog. The file FILE should contain one line per data set, with the data set name followed by the cross section value in pb and separated by a unlimited number of space or tabulation. Lines starting with a # sign are considered as comment lines and are ignored.")
 
     return parser.parse_args()
 

@@ -664,6 +664,7 @@ def db_get_conn():
     conn.execute('PRAGMA foreign_keys = ON')
     return (conn, conn.cursor())
 
+db_schema_version=1
 def db_create_database():
     """Creates sqlite3 database used to manage the jobs submissions. Tables are created only if they do not already exists."""
     (conn, c) = db_get_conn()
@@ -690,6 +691,7 @@ notified    INTEGER DEFAULT 0,
 running INTEGER,
 finished INTEGER,
 failed INTEGER,
+transferring INTEGER,
 other INTEGER,
 PRIMARY KEY(prim_dataset, task_id)
 )''')
@@ -704,8 +706,16 @@ FOREIGN KEY (prim_dataset, task_id) REFERENCES jobs (prim_dataset, task_id) ON D
 #TODO table and filpath column to be renamed -> production, catalog
     conn.execute('''CREATE TABLE IF NOT EXISTS production (
 dataset_catalog TEXT,
-description TEXT)
+description TEXT,
+version INTEGER)
 ''')
+    try:
+        conn.execute('''CREATE TABLE schema_version (
+version NUMBER)
+''')
+        conn.execute('''INSERT INTO schema_version(version) VALUES (%d)''' % db_schema_version)
+    except sqlite3.OperationalError: #table was already existing
+        pass
     conn.commit()
     conn.close()
 #enddef
@@ -740,15 +750,15 @@ description TEXT)
 def db_print_jobs():
     """Displays the content of the job database"""
     conn, c = db_get_conn()
-    c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
+    c.execute('''SELECT prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, transferring, other, run_spec, requestname FROM jobs ORDER BY dataset, task_id''')
     table = []
     if args.terse:
         header = []
     else:
-        header = ["Prim. dataset", "Task", "Status C/R/F/O", "Reco tag", "Runs/MC ext.", "Submission time"]
+        header = ["Prim. dataset", "Task", "Status C/R/F/T/O", "Reco tag", "Runs/MC ext.", "Submission time"]
     for x in c:
-        prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, other, run_spec, requestname = x
-        status += " " + "/".join(map(lambda x: str(x) if x is not None else '', (finished, running, failed, other)))
+        prim_dataset, dataset, task_id, submit_ts, status, finished, running, failed, transferring, other, run_spec, requestname = x
+        status += " " + "/".join(map(lambda x: str(x) if x is not None else '', (finished, running, failed, transferring, other)))
         toks = dataset.split("/")
         if len(toks) != 4:
             system.stderr.write("Internal error: found an invalid dataset name, %s, in the local production database." % dataset)
@@ -761,7 +771,7 @@ def db_print_jobs():
     
     print_table(table, header)
     if not args.terse:
-        print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, O: other statuses"
+        print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, T: transferring, O: other statuses"
     conn.close()
 
 def db_get_task_status(prim_dataset, task_id):
@@ -881,6 +891,7 @@ def db_update_processing_stat(prim_dataset, task_id, jobList):
     finished = 0
     running = 0
     failed = 0
+    transferring = 0
     other = 0
     for r in jobList:
         if r[0] == 'finished':
@@ -889,12 +900,15 @@ def db_update_processing_stat(prim_dataset, task_id, jobList):
             running += 1
         elif r[0] == 'failed':
             failed += 1
+        elif r[0] == 'transferring':
+            transferring += 1
         else:
             other += 1
     return db_update_task_record(prim_dataset, task_id, 
                                  {"finished": finished, 
                                  "running": running, 
                                  "failed": failed, 
+                                 "transferring": transferring, 
                                  "other": other})
 #enddef
 

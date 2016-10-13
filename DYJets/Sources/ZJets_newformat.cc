@@ -77,7 +77,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     muIso_ = cfg.getD("muRelIso");
     eIso_ = cfg.getD("elRelIso");
-    bool pogSF = cfg.getD("pogSF", true);
+    bool pogSF = cfg.getB("pogSF", true);
+
+    bool doPuReweight = cfg.getB("doPuReweight", true);
 
     //==========================================================================================================//
     //         Output file name           //
@@ -99,6 +101,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     // muon SF
     table TrigMu17Mu8SF("EfficiencyTables/Efficiency_SF_Mu17Mu8.txt");
 
+    ////////////////////////////////////////////////////////////////////////
     //8TeV
     //table LeptIso, LeptID;
     //table SC_RunABCD_TightID("EfficiencyTables/Muon_IDTight_Efficiencies_Run_2012ABCD_53X_Eta_Pt.txt");
@@ -110,31 +113,35 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //table Ele_Rec;
     //table Ele_Rec_8TeV("EfficiencyTables/Ele_SF_Reconstruction_2012.txt");
     //table SC_Ele_2012EA("EfficiencyTables/Ele_SF_EA2012.txt");
+    ////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////////////////////////////////
+    // 13TeV 2015 data
+    //
     // new for 13 TeV SF for Id+Iso
-    table Iso_TightID13TeV("EfficiencyTables/ratios.txt"); 
     table TrigIsoMu24SF("EfficiencyTables/Efficiency_SF_IsoMu24_eta2p1.txt");
 
-    //Aram's numbers
-    table LeptIdIso = Iso_TightID13TeV;
+    //Muon Aram's numbers (Id+Iso)
+    table Iso_TightID13TeV("EfficiencyTables/ratios.txt"); 
+    table MuIdIso = Iso_TightID13TeV;
 
     //Muon POG numbers
-    table LeptIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_RunD_2015_Eta_Pt.txt");
-    table LeptId("EfficiencyTables/Muon_IDTight_Efficiencies_RunD_2015_Eta_Pt.txt");
-	
-    table LeptTrig = TrigMu17Mu8SF;
+    table MuIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_RunD_2015_Eta_Pt.txt");
+    table MuId("EfficiencyTables/Muon_IDTight_Efficiencies_RunD_2015_Eta_Pt.txt");
+    table MuTrig = TrigMu17Mu8SF;
     
     //table for electron SF
-    table LeptId("EfficiencyTables/Electron_Id_2015D_SF.txt");
-    table LeptReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
-   table LeptTrig("EfficiencyTables/Trig_Ele17_Ele12_2015D_SF.txt");
+    table ElId("EfficiencyTables/Electron_Id_2015D_SF.txt");
+    table ElReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
+    table ElTrig("EfficiencyTables/Trig_Ele17_Ele12_2015D_SF.txt");
+
     //TTbar SF
     table TTbarSF("EfficiencyTables/sf_multi.txt"); 
     //Ele_Rec = Ele_Rec_8TeV;
     //if (lepSel == "DE" || lepSel == "SE") LeptID = SC_Ele_2012EA;
     // else if (lepSel == "SMu") LeptTrig = TrigIsoMu24SF;
     //==========================================================================================================//
-  
+    ////////////////////////////////////////////////////////////////////////
 
     if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
     //==========================================================================================================//
@@ -185,40 +192,52 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //======================================================================
     // Data/MC ration  needed for unfolding uncertainties
 
-    // jet pt
-    TFile *fratio1jpt = new TFile("FirstJetPt_2_Zinc1jet_ratio.root");
-    TH1D *FirstJetPt_2_Zinc1jet_ratio =  (TH1D*) fratio1jpt->Get("FirstJetPt_2_Zinc1jet_ratio");
+ // jet pt
+    TH1D* FirstJetPt_2_Zinc1jet_ratio = 0;
+    TH1D* SecondJetPt_2_Zinc2jet_ratio = 0;
+    TH1D* ThirdJetPt_2_Zinc3jet_ratio = 0;
+    TH1D *JetsHT_2_Zinc1jet_ratio = 0; 
+    TH1D *JetsHT_2_Zinc2jet_ratio = 0;
+    TH1D *JetsHT_2_Zinc3jet_ratio = 0;
+    TH1D *FirstJetEta_2_Zinc1jet_ratio = 0;
+    TH1D *SecondJetEta_2_Zinc2jet_ratio = 0;
+    TH1D *ThirdJetEta_2_Zinc3jet_ratio = 0;
+    TH1D *ZNGoodJets_Zexc_ratio = 0;
 
-    TFile *fratio2jpt = new TFile("SecondJetPt_2_Zinc2jet_ratio.root");
-    TH1D *SecondJetPt_2_Zinc2jet_ratio =  (TH1D*) fratio2jpt->Get("SecondJetPt_2_Zinc2jet_ratio");
-
-    TFile *fratio3jpt = new TFile("ThirdJetPt_2_Zinc3jet_ratio.root");
-    TH1D *ThirdJetPt_2_Zinc3jet_ratio =  (TH1D*) fratio3jpt->Get("ThirdJetPt_2_Zinc3jet_ratio");
-
-    // jet Ht
-    TFile *fratioht = new TFile("JetsHT_2_Zinc1jet_ratio.root");
-    TH1D *JetsHT_2_Zinc1jet_ratio =  (TH1D*) fratioht->Get("JetsHT_2_Zinc1jet_ratio");
-
-    TFile *fratioht2 = new TFile("JetsHT_2_Zinc2jet_ratio.root");
-    TH1D *JetsHT_2_Zinc2jet_ratio =  (TH1D*) fratioht2->Get("JetsHT_2_Zinc2jet_ratio");
-
-    TFile *fratioht3 = new TFile("JetsHT_2_Zinc3jet_ratio.root");
-    TH1D *JetsHT_2_Zinc3jet_ratio =  (TH1D*) fratioht3->Get("JetsHT_2_Zinc3jet_ratio");
-
-    // jet eta
-    TFile *fratio1jeta = new TFile("FirstJetEta_2_Zinc1jet_ratio.root");
-    TH1D *FirstJetEta_2_Zinc1jet_ratio =  (TH1D*) fratio1jeta->Get("FirstJetEta_2_Zinc1jet_ratio");
-
-    TFile *fratio2jeta = new TFile("SecondJetEta_2_Zinc2jet_ratio.root");
-    TH1D *SecondJetEta_2_Zinc2jet_ratio =  (TH1D*) fratio2jeta->Get("SecondJetEta_2_Zinc2jet_ratio");
-
-    TFile *fratio3jeta = new TFile("ThirdJetEta_2_Zinc3jet_ratio.root");
-    TH1D *ThirdJetEta_2_Zinc3jet_ratio =  (TH1D*) fratio3jeta->Get("ThirdJetEta_2_Zinc3jet_ratio");
-
-    //  multiplicity
-    TFile *fratioNJexc = new TFile("ZNGoodJets_Zexc_ratio.root");
-    TH1D *ZNGoodJets_Zexc_ratio =  (TH1D*) fratioNJexc->Get("ZNGoodJets_Zexc_ratio");
-
+    if(UnfoldUnc){
+	TFile *fratio1jpt = new TFile("FirstJetPt_2_Zinc1jet_ratio.root");
+	FirstJetPt_2_Zinc1jet_ratio =  (TH1D*) fratio1jpt->Get("FirstJetPt_2_Zinc1jet_ratio");
+	
+	TFile *fratio2jpt = new TFile("SecondJetPt_2_Zinc2jet_ratio.root");
+	SecondJetPt_2_Zinc2jet_ratio =  (TH1D*) fratio2jpt->Get("SecondJetPt_2_Zinc2jet_ratio");
+	
+	TFile *fratio3jpt = new TFile("ThirdJetPt_2_Zinc3jet_ratio.root");
+	ThirdJetPt_2_Zinc3jet_ratio =  (TH1D*) fratio3jpt->Get("ThirdJetPt_2_Zinc3jet_ratio");
+	
+	// jet Ht
+	TFile *fratioht = new TFile("JetsHT_2_Zinc1jet_ratio.root");
+	JetsHT_2_Zinc1jet_ratio =  (TH1D*) fratioht->Get("JetsHT_2_Zinc1jet_ratio");
+	
+	TFile *fratioht2 = new TFile("JetsHT_2_Zinc2jet_ratio.root");
+	JetsHT_2_Zinc2jet_ratio =  (TH1D*) fratioht2->Get("JetsHT_2_Zinc2jet_ratio");
+	
+	TFile *fratioht3 = new TFile("JetsHT_2_Zinc3jet_ratio.root");
+	JetsHT_2_Zinc3jet_ratio =  (TH1D*) fratioht3->Get("JetsHT_2_Zinc3jet_ratio");
+	
+	// jet eta
+	TFile *fratio1jeta = new TFile("FirstJetEta_2_Zinc1jet_ratio.root");
+	FirstJetEta_2_Zinc1jet_ratio =  (TH1D*) fratio1jeta->Get("FirstJetEta_2_Zinc1jet_ratio");
+	
+	TFile *fratio2jeta = new TFile("SecondJetEta_2_Zinc2jet_ratio.root");
+	SecondJetEta_2_Zinc2jet_ratio =  (TH1D*) fratio2jeta->Get("SecondJetEta_2_Zinc2jet_ratio");
+	
+	TFile *fratio3jeta = new TFile("ThirdJetEta_2_Zinc3jet_ratio.root");
+	ThirdJetEta_2_Zinc3jet_ratio =  (TH1D*) fratio3jeta->Get("ThirdJetEta_2_Zinc3jet_ratio");
+	
+	//  multiplicity
+	TFile *fratioNJexc = new TFile("ZNGoodJets_Zexc_ratio.root");
+	ZNGoodJets_Zexc_ratio =  (TH1D*) fratioNJexc->Get("ZNGoodJets_Zexc_ratio");
+    }
 
     //==========================================================================================================//
     // Start looping over all the events //
@@ -344,8 +363,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         //====================================//
         double weight = norm_;
 
-	if (hasRecoInfo && !EvtIsRealData) {
-	    //cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
+	if (hasRecoInfo && doPuReweight && !EvtIsRealData) {
+	    //std::cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
 	    weight *= puWeight.weight(EvtPuCntTruth);
 	}
 
@@ -504,23 +523,23 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     double effWeight = 1.;
                     if (lepSel == "DMu") {
 			if(pogSF){
-			    effWeight *= LeptId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-			    effWeight *= LeptId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
-			    effWeight *= LeptIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-			    effWeight *= LeptIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+			    effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+			    effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 			} else{
-			    effWeight *= LeptIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 			}
-                        if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
+                        if (useTriggerCorrection) effWeight *= MuTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     }
                     if (lepSel == "DE") {
-                        effWeight *= LeptReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                        effWeight *= LeptReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
-                        effWeight *= LeptId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                        effWeight *= LeptId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta)); 
-                    //cout<< "Reco" <<LeptReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta))<<endl;
- if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
-                    //cout<< "Trig "<<LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()))<<endl;
+                        effWeight *= ElReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= ElReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
+                        effWeight *= ElId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= ElId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta)); 
+                    //cout<< "Reco" <<ElReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta))<<endl;
+ if (useTriggerCorrection) effWeight *= ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
+                    //cout<< "Trig "<<ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()))<<endl;
 }
                                         weight *= effWeight;
                 }
@@ -569,18 +588,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     double effWeight = 1.;
                     if (lepSel == "SMu") {
 			if(pogSF){
-			    effWeight *= LeptId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-			    effWeight *= LeptId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
-			    effWeight *= LeptIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-			    effWeight *= LeptIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+			    effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+			    effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 			} else{
-			    effWeight *= LeptIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 			}
-                        if (useTriggerCorrection) effWeight *= LeptTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
+                        if (useTriggerCorrection) effWeight *= MuTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     }
                     else if (lepSel == "SE") {
-                        //effWeight *= Ele_Rec.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
-                        //effWeight *= LeptID.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= ElReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
+                        effWeight *= ElId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
                     }
                     weight *= effWeight;
                 }
@@ -3016,7 +3035,7 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
     unsigned short nTotLeptons(ElEta->size());
 
     // if we don't really care to match both leptons to trigger
-    bool eventTrigger = false;
+    //bool eventTrigger = false;
     for (unsigned short i(0); i < nTotLeptons; i++){
 /* // CommentAG
         int whichTrigger(patElecTrig_->at(i));

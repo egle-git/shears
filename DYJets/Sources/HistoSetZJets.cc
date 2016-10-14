@@ -308,8 +308,6 @@ int nZPt_Zinc0jet(22);
     genJZB_bin1    		                = newTH1D("genJZB_bin1",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
     JZB_bin2                                 = newTH1D("JZB_bin2", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     genJZB_bin2    		                = newTH1D("genJZB_bin2",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    JZB_bin3                                 = newTH1D("JZB_bin3", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    genJZB_bin3    		                = newTH1D("genJZB_bin3",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
 
     ZPt_Zinc2jet                        = newTH1D("ZPt_Zinc2jet",                        "Z p_{T} (N_{jets} #geq 2)",                   ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
     genZPt_Zinc2jet                     = newTH1D("genZPt_Zinc2jet",                     "gen Z p_{T} (N_{jets} #geq 2)",               ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
@@ -615,7 +613,6 @@ int nZPt_Zinc0jet(22);
     hresponseJZB        = newTH2D("hresponseJZB",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     hresponseJZB_bin1        = newTH2D("hresponseJZB_bin1",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB, nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
     hresponseJZB_bin2        = newTH2D("hresponseJZB_bin2",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    hresponseJZB_bin3        = newTH2D("hresponseJZB_bin3",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     hresponseZPt_Zinc2jet = newTH2D("hresponseZPt_Zinc2jet","hresponseZPt_Zinc2jet",nZPt_Zinc2jet, zPt_Zinc2jet, nZPt_Zinc2jet, zPt_Zinc2jet);
     hresponseZAbsRapidity_Zinc1jet = newTH2D("hresponseZAbsRapidity_Zinc1jet", "hresp ZAbsRapidity_Zinc1jet", 12, 0., 2.4, 12, 0., 2.4); 
 

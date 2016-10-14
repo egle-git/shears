@@ -44,7 +44,6 @@ class HistoSetZJets {
         TH1D *JZB;
         TH1D *JZB_bin1;
         TH1D *JZB_bin2;
-        TH1D *JZB_bin3;
         TH1D *ZPt_Zinc2jet;
         TH1D *VisPt_Zinc0jetQun;
         TH1D *genVisPt_Zinc0jetQun;
@@ -61,7 +60,6 @@ class HistoSetZJets {
         TH1D *genJZB;
         TH1D *genJZB_bin1;
         TH1D *genJZB_bin2;
-        TH1D *genJZB_bin3;
         TH1D *genZPt_Zinc2jet;
         TH1D *ZPt_Zexc0jet;
         TH1D *ZPt_Zexc1jet;
@@ -941,7 +939,6 @@ class HistoSetZJets {
         TH2D *hresponseJZB;
         TH2D *hresponseJZB_bin1;
         TH2D *hresponseJZB_bin2;
-        TH2D *hresponseJZB_bin3;
         TH2D *hresponseZPt_Zinc2jet;
         TH2D *hresponseVisPt_Zinc0jetQun;
         TH2D *hresponseVisPt_Zinc1jetQun;

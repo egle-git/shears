@@ -81,6 +81,8 @@ class table{
         double getEfficiencyLow(double, double);  
         double getEfficiencyHigh(double, double);  
         double getTTbarSF(int);  
+        double getTTbarSFLow(int);  
+        double getTTbarSFHigh(int);  
 
     private:
         vector<record> recd;

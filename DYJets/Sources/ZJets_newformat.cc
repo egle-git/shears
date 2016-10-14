@@ -938,8 +938,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             jets.clear(); 
             jets = tmpJets; 
             nGoodJets = jets.size();
-	    if(fileName.Index("TT") >= 0)weight /= TTbarSF.getTTbarSF(nGoodJets);
 	    //if(fileName.Index("TT") >= 0) cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQTTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
+	    if(fileName.Index("TT") >= 0 && (systematics == 3)) {
+		if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
+		else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);
+	    }
+	    else if(fileName.Index("TT") >= 0) weight /= TTbarSF.getTTbarSF(nGoodJets);
             nGoodJets_20 = jets_20.size();
             sort(jets.begin(), jets.end(), JetDescendingOrder);
             sort(jets_20.begin(), jets_20.end(), JetDescendingOrder);
@@ -1565,8 +1569,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		if (nGoodGenJets >= 1) {
 		    genHadRecoil->Fill(genHadronicR.Pt(),genWeight);
 		    genJZB->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
-		    if(EWKBoson.Pt()<= 30)	   genJZB_bin1->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
-		    else if(EWKBoson.Pt()<= 60) genJZB_bin2->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
+		    if(EWKBoson.Pt()<= 50)	   genJZB_bin1->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
+		    //else if(EWKBoson.Pt()<= 60) genJZB_bin2->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
 		    else 			   genJZB_bin3->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
 		}
             }
@@ -2327,8 +2331,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets >= 1){
 	        HadRecoil->Fill(hadronicR.Pt(),weight);
 		JZB->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
-		if(EWKBoson.Pt()<= 30)	JZB_bin1->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
-		else if(EWKBoson.Pt()<= 60)	JZB_bin2->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
+		if(EWKBoson.Pt()<= 50)	JZB_bin1->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
+		//else if(EWKBoson.Pt()<= 60)	JZB_bin2->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
 		else				JZB_bin3->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
 	    }
             //=======================================================================================================//
@@ -2765,8 +2769,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodGenJets >= 1 && passesgenLeptonCut && nGoodJets >= 1 && passesLeptonCut) {
 		hresponseHadRecoil->Fill(hadronicR.Pt(), genHadronicR.Pt(), weight);
 		hresponseJZB->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
-		if(EWKBoson.Pt()<= 30)	hresponseJZB_bin1->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
-		else if(EWKBoson.Pt()<= 60)	hresponseJZB_bin2->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
+		if(EWKBoson.Pt()<= 50)	hresponseJZB_bin1->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
+		//else if(EWKBoson.Pt()<= 60)	hresponseJZB_bin2->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
 		else				hresponseJZB_bin3->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
 	    }
         }

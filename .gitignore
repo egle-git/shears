@@ -1,6 +1,6 @@
 # git will ignore the executable files:
 runVJets
-runZJets
+runZJets_newformat
 runRecoComparison
 runFinalUnfold
 runUnfoldingZJets
@@ -16,6 +16,7 @@ DYJets/RooUnfold-1.1.1/libRooUnfold.rootmap
 DYJets/RooUnfold-1.1.1/tmp
 DYJets/RooUnfold/libRooUnfold.rootmap
 DYJets/RooUnfold/tmp
+DYJets/RooUnfold/*.pcm
 DYJets/RooUnfold/tmp/linuxx8664gcc/Roo*
 *.so
 *.d

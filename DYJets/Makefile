@@ -49,7 +49,7 @@ CXXFLAGS      += -MD -Wall
 SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
-RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc
+RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -59,8 +59,8 @@ DEPS    = $(SRCLIST:.cc=.d)
 
 all: runRecoComparison \
 runZJets_newformat \
-runUnfoldingZJets
-
+runUnfoldingZJets  \
+runCombination
 
 #in untested branch:
 # runCombination \
@@ -84,6 +84,9 @@ runRecoComparison: runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runCombination: runCombination.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 RooUnfold/libRooUnfold.so:

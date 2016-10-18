@@ -13,9 +13,9 @@
 #include <TAxis.h>
 #include <TLatex.h>
 
-const int ZJetsFillColor[3] = {kBlue-10, kOrange-2, kGreen-8};
-const int ZJetsPdfFillColor[3] = {kBlue-6, kOrange-5, kGreen-2};
-const int ZJetsLineColor[3] = {kBlue, kOrange+10, kGreen+3};;
+const int ZJetsFillColor[3] = {kBlue-10, kOrange-2, kGreen-10};
+const int ZJetsScaleFillColor[3] = {kBlue-6, kOrange-5, kGreen-8};
+const int ZJetsLineColor[3] = {kBlue, kOrange+10, kGreen+3};
 const int ZJetsMarkerColor[3] = {ZJetsLineColor[0], ZJetsLineColor[1], ZJetsLineColor[2]};
 const int ZJetsMarkerStyle[3] = {24, 25, 26};
 const int ZJetsFillStyle = 1001;
@@ -35,7 +35,7 @@ TGraphAsymmErrors* createGrFromHist(const TH1D *h);
 TGraphAsymmErrors* createRatioGraph(const TGraphAsymmErrors* grCentral);
 TGraphErrors* createRatioGraph(const TGraphErrors* grCentral);
 TGraphAsymmErrors *createGenToCentral(const TH1D *gen, const TGraphAsymmErrors *grCentral);
-TGraphAsymmErrors* createPDFSystGraph(const TH1D *hPDFUp, const TH1D *hPDFDown, const TGraphAsymmErrors *grGenToCentral);
+TGraphAsymmErrors* createPDFSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral);
 TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1D *hData, TH2D *hCovSyst, TH1D *hGen, TH1D *hGen1 = NULL, TH1D *hGen2 = NULL, double integratedLumi = -1);
 void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString &title, TString &var, TString &dSigma) ;

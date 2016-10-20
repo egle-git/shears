@@ -201,3 +201,22 @@ Following features are under development and will be available soon:
 * Recording the cross section computed with higher-order calculation and used to compute the simulation sample integrated luminosity value.
 
 * Recording an acceptance flow histogram in the Bonzai ntuple.
+
+
+ShearsTChain
+============
+
+This directory contains also a utility class to read Boabab and Bonzai ntuples and extending the TChain functionnality. It gets the list of ntuple file from a shears catalog file. The class, ShearsTChain, inherits from TChain and provides all the functionnality, like Draw() of TChain and TTree. It can be used from root prompt as the following:
+
+.L ShearsTChain.cc++
+ShearsTChain tc
+tc.set(path_to_ntuple_catalog_files)
+...
+tc.Draw(...)
+
+ShearsTChain provides in addition to the methods of TChain the following methods:
+
+  . lsLeaves(): display the list of the EventTree branchs
+  . helpBranch(branch_name): display the description of the eventTree branch branch_name
+
+Limitation: direct access to EOS is not supported for the catalog file. For a catalog file on EOS you should either mount EOS on the filesystem or copy the file on the local disk.

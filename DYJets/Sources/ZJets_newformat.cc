@@ -379,6 +379,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
        //     weight *= mcSherpaWeights_->at(0) / 43597515.;
        // }
 
+        double commonGenWeight = weight; // This variable is used in the fill(x, commonGenWeight, EvtWeights) function for taking care of scale/PDF/alphas uncertainty graph production if need (see Includes/GenH1D.h).
 	if(!EvtIsRealData){
 	    if(EvtWeights->size() > 0){
 		weight *= (*EvtWeights)[0];
@@ -1038,16 +1039,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		} 
 
                 genZNGoodJets_Zexc->Fill(nGoodGenJets, genWeight*RatioValue);
-                genZNGoodJets_Zinc->Fill(0., genWeight);
-                genZMass_Zinc0jet->Fill(genEWKBoson.M(), genWeight);
-                genZPt_Zinc0jet->Fill(genEWKBoson.Pt(), genWeight);
-                genZRapidity_Zinc0jet->Fill(genEWKBoson.Rapidity(), genWeight);
-                genZEta_Zinc0jet->Fill(genEWKBoson.Eta(), genWeight);
-                genlepPt_Zinc0jet->Fill(genLeptons[0].v.Pt(), genWeight);
-                genlepPt_Zinc0jet->Fill(genLeptons[1].v.Pt(), genWeight);
-                genlepEta_Zinc0jet->Fill(genLeptons[0].v.Eta(), genWeight);
-                genlepEta_Zinc0jet->Fill(genLeptons[1].v.Eta(), genWeight);
-		genVisPt_Zinc0jetQun->Fill(genEWKBoson.Pt(), genWeight);
+                genZNGoodJets_Zinc->Fill(0., commonGenWeight, EvtWeights);
+                genZMass_Zinc0jet->Fill(genEWKBoson.M(), commonGenWeight, EvtWeights);
+                genZPt_Zinc0jet->Fill(genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                genZRapidity_Zinc0jet->Fill(genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
+                genZEta_Zinc0jet->Fill(genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                genlepPt_Zinc0jet->Fill(genLeptons[0].v.Pt(), commonGenWeight, EvtWeights);
+                genlepPt_Zinc0jet->Fill(genLeptons[1].v.Pt(), commonGenWeight, EvtWeights);
+                genlepEta_Zinc0jet->Fill(genLeptons[0].v.Eta(), commonGenWeight, EvtWeights);
+                genlepEta_Zinc0jet->Fill(genLeptons[1].v.Eta(), commonGenWeight, EvtWeights);
+		genVisPt_Zinc0jetQun->Fill(genEWKBoson.Pt(), commonGenWeight, EvtWeights);
 
                 if (nGoodGenJets_20 >= 1) {
 
@@ -1063,63 +1064,63 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (nGoodGenJets >= 1){
                     nGenEventsVInc1Jets++;
                     nEffGenEventsVInc1Jets += genWeight;
-                    genAbsFirstJetRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                    genSumZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                    genDifZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                    genAbsFirstJetRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                    genSumZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                    genDifZFirstJetRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                     //cross check//////
-                    genSumZFirstJetEta_Zinc1jet->Fill(fabs(genEWKBoson.Eta()+genJets[0].v.Eta())/2.0,genWeight);
-                    genDifZFirstJetEta_Zinc1jet->Fill(fabs(genEWKBoson.Eta()-genJets[0].v.Eta())/2.0,genWeight);
+                    genSumZFirstJetEta_Zinc1jet->Fill(fabs(genEWKBoson.Eta()+genJets[0].v.Eta())/2.0,commonGenWeight, EvtWeights);
+                    genDifZFirstJetEta_Zinc1jet->Fill(fabs(genEWKBoson.Eta()-genJets[0].v.Eta())/2.0,commonGenWeight, EvtWeights);
 
                     ///Azimuth cross check//////////////////////////
-                    genDPhiZFirstJet_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
+                    genDPhiZFirstJet_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
 
 
                     if(genEWKBoson.Pt()>100.)
                     {
-                        genAbsZRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_ZPt100_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                     }
 
                     if(genEWKBoson.Pt()>150.)
                     {
-                        genAbsZRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
 
-                        genDPhiZFirstJet_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
+                        genDPhiZFirstJet_ZPt150_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
                     }
 
                     if(genEWKBoson.Pt()>300.)
                     {
-                        genAbsZRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
-                        genDPhiZFirstJet_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
+                        genDPhiZFirstJet_ZPt300_Zinc1jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
                     }
 
                     ///different JetPt cuts///////
                     if(genJets[0].v.Pt()>50.)
                     {
-                        genAbsZRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_FirstJetPt50_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                     }
 
                     if(genJets[0].v.Pt()>80.)
                     {
-                        genAbsZRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_FirstJetPt80_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                     }
 
@@ -1143,22 +1144,22 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                     for (unsigned short i(0); i < 5; i++) {
                         if (genEWKBoson.Pt() > ZptRange[i] && genEWKBoson.Pt() <= ZptRange[i+1]) {
-                            gentau_sum_Zinc1jet[i]->Fill(gentau_sum, genWeight);
-                            gentau_max_Zinc1jet[i]->Fill(gentau_max, genWeight);
-                            gentau_c_sum_Zinc1jet[i]->Fill(gentau_c_sum, genWeight);
-                            gentau_c_max_Zinc1jet[i]->Fill(gentau_c_max, genWeight);
-                            gentau_cm_sum_Zinc1jet[i]->Fill(gentau_cm_sum, genWeight);
-                            gentau_cm_max_Zinc1jet[i]->Fill(gentau_cm_max, genWeight);
-                            gentau_c_cm_sum_Zinc1jet[i]->Fill(gentau_c_cm_sum, genWeight);
-                            gentau_c_cm_max_Zinc1jet[i]->Fill(gentau_c_cm_max, genWeight);
+                            gentau_sum_Zinc1jet[i]->Fill(gentau_sum, commonGenWeight, EvtWeights);
+                            gentau_max_Zinc1jet[i]->Fill(gentau_max, commonGenWeight, EvtWeights);
+                            gentau_c_sum_Zinc1jet[i]->Fill(gentau_c_sum, commonGenWeight, EvtWeights);
+                            gentau_c_max_Zinc1jet[i]->Fill(gentau_c_max, commonGenWeight, EvtWeights);
+                            gentau_cm_sum_Zinc1jet[i]->Fill(gentau_cm_sum, commonGenWeight, EvtWeights);
+                            gentau_cm_max_Zinc1jet[i]->Fill(gentau_cm_max, commonGenWeight, EvtWeights);
+                            gentau_c_cm_sum_Zinc1jet[i]->Fill(gentau_c_cm_sum, commonGenWeight, EvtWeights);
+                            gentau_c_cm_max_Zinc1jet[i]->Fill(gentau_c_cm_max, commonGenWeight, EvtWeights);
                         }
                     }
 
-                    genZNGoodJets_Zinc->Fill(1., genWeight);
-                    genZPt_Zinc1jet->Fill(genEWKBoson.Pt(), genWeight);
-                    genZRapidity_Zinc1jet->Fill(genEWKBoson.Rapidity(), genWeight);
-                    genZAbsRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()), genWeight);
-                    genZEta_Zinc1jet->Fill(genEWKBoson.Eta(), genWeight);
+                    genZNGoodJets_Zinc->Fill(1., commonGenWeight, EvtWeights);
+                    genZPt_Zinc1jet->Fill(genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    genZRapidity_Zinc1jet->Fill(genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
+                    genZAbsRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()), commonGenWeight, EvtWeights);
+                    genZEta_Zinc1jet->Fill(genEWKBoson.Eta(), commonGenWeight, EvtWeights);
 
                     double RatioValue = 1.;
 		    double RatioValue1 = 1.;
@@ -1171,37 +1172,37 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     // cout << RatioValue1 << " , " << RatioValue1 << "\n";
 
                     genFirstJetEta_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), genWeight*RatioValue);
-                    genAbsZRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);		    
+                    genAbsZRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);		    
                     genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight*RatioValue);
-                    genFirstJetEtaHigh_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), genWeight);
-                    genFirstJetRapidityHigh_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight);
+                    genFirstJetEtaHigh_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), commonGenWeight, EvtWeights);
+                    genFirstJetRapidityHigh_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     genJetsHT_Zinc1jet->Fill(genJetsHT, genWeight*RatioValue1);
-                    //genJetsHT_2_Zinc1jet->Fill(genJetsHT, genWeight);
-		    genVisPt_Zinc1jetQun->Fill(fabs((genJets[0].v+genEWKBoson).Pt()), genWeight);
-                    genSumZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), genWeight);
-                    genDifZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity()), genWeight);
+                    //genJetsHT_2_Zinc1jet->Fill(genJetsHT, commonGenWeight, EvtWeights);
+		    genVisPt_Zinc1jetQun->Fill(fabs((genJets[0].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
+                    genSumZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genDifZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     if (nGoodGenJets == 1){
-                        genFirstJetPt_Zexc1jet->Fill(genJets[0].v.Pt(), genWeight);
+                        genFirstJetPt_Zexc1jet->Fill(genJets[0].v.Pt(), commonGenWeight, EvtWeights);
                         //Additional Branch
-                        genAbsZRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsJetRapidity_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZJetRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZJetRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsJetRapidity_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZJetRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZJetRapidity_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                         if(genEWKBoson.Pt()>100.)
                         {
-                            genAbsZRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                            genAbsJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                            genSumZJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                            genDifZJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                            genAbsZRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                            genAbsJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                            genSumZJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                            genDifZJetRapidity_ZPt100_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                         }
 
                         if(genEWKBoson.Pt()>150.)
                         {
-                            genAbsZRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                            genAbsJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                            genSumZJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                            genDifZJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                            genAbsZRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                            genAbsJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                            genSumZJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                            genDifZJetRapidity_ZPt150_Zexc1jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                         }
 
                     }
@@ -1222,97 +1223,97 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     nGenEventsVInc2Jets++;
                     nEffGenEventsVInc2Jets += genWeight;
                     ///////////Special Branch//////////////////
-                    genAbsFirstJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                    genSumZFirstJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                    genDifZFirstJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                    genAbsFirstJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                    genSumZFirstJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                    genDifZFirstJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
-                    genAbsZRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                    genAbsSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                    genSumZSecondJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                    genDifZSecondJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                    genAbsZRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                    genAbsSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                    genSumZSecondJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                    genDifZSecondJetRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
-                    genSumFirstSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                    genDifFirstSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                    genSumFirstSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                    genDifFirstSecondJetRapidity_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                     TLorentzVector genDiJets = genJets[0].v + genJets[1].v;
-                    genSumZTwoJetsRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genDiJets.Rapidity())/2.0,genWeight);
-                    genDifZTwoJetsRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genDiJets.Rapidity())/2.0,genWeight);
+                    genSumZTwoJetsRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genDiJets.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                    genDifZTwoJetsRapidity_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genDiJets.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                     /////Azimuth cross check//////////////////////////////////
-                    genDPhiZFirstJet_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
-                    genDPhiZSecondJet_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),genWeight);
-                    genDPhiFirstSecondJet_Zinc2jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),genWeight);
+                    genDPhiZFirstJet_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
+                    genDPhiZSecondJet_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                    genDPhiFirstSecondJet_Zinc2jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
 
 
                     if(genEWKBoson.Pt()>100.)
                     {
-                        genAbsZRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                        genSumZSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                        genDifZSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZSecondJetRapidity_ZPt100_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                     }
 
                     if(genEWKBoson.Pt()>150.)
                     {
-                        genAbsZRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                        genSumZSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                        genDifZSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZSecondJetRapidity_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
-                        genDPhiZFirstJet_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
+                        genDPhiZFirstJet_ZPt150_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
                     }
 
                     if(genEWKBoson.Pt()>300.)
                     {
-                        genDPhiZFirstJet_ZPt300_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
+                        genDPhiZFirstJet_ZPt300_Zinc2jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
                     }
 
                     //Set Jet rapidity discriminator/////
 
                     if(fabs(genJets[0].v.Rapidity()-genJets[1].v.Rapidity())>2)
                     {
-                        genAbsZRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_DifJetRapidityl2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                     }
 
                     if(fabs(genJets[0].v.Rapidity()-genJets[1].v.Rapidity())<2)
                     {
-                        genAbsZRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),genWeight);
-                        genSumZFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,genWeight);
-                        genDifZFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genJets[0].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZFirstJetRapidity_DifJetRapiditys2_Zinc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                     }
 
 
-                    genZNGoodJets_Zinc->Fill(2., genWeight);
-                    genTwoJetsPtDiff_Zinc2jet->Fill(genJet1Minus2.Pt(), genWeight);
-                    genBestTwoJetsPtDiff_Zinc2jet->Fill(genBestJet1Minus2.Pt(), genWeight);
-                    genJetsMass_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
-                    genllJetsMass_Zinc2jet->Fill(genJet1Plus2PlusZ.M(), genWeight);
+                    genZNGoodJets_Zinc->Fill(2., commonGenWeight, EvtWeights);
+                    genTwoJetsPtDiff_Zinc2jet->Fill(genJet1Minus2.Pt(), commonGenWeight, EvtWeights);
+                    genBestTwoJetsPtDiff_Zinc2jet->Fill(genBestJet1Minus2.Pt(), commonGenWeight, EvtWeights);
+                    genJetsMass_Zinc2jet->Fill(genJet1Plus2.M(), commonGenWeight, EvtWeights);
+                    genllJetsMass_Zinc2jet->Fill(genJet1Plus2PlusZ.M(), commonGenWeight, EvtWeights);
 
                     if (genJet1Plus2PlusZ.M() > 450 && genJet1Plus2PlusZ.M() < 600) {
                         if (fabs(genJets[0].v.Eta()) < fabs(genJets[1].v.Eta())) {
-                            genCentralJetEta_Zinc2jet->Fill(fabs(genJets[0].v.Eta()), genWeight);
-                            genForwardJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), genWeight);
-                            genCentralJetPt_Zinc2jet->Fill(genJets[0].v.Pt(), genWeight);
-                            genForwardJetPt_Zinc2jet->Fill(genJets[1].v.Pt(), genWeight);
+                            genCentralJetEta_Zinc2jet->Fill(fabs(genJets[0].v.Eta()), commonGenWeight, EvtWeights);
+                            genForwardJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
+                            genCentralJetPt_Zinc2jet->Fill(genJets[0].v.Pt(), commonGenWeight, EvtWeights);
+                            genForwardJetPt_Zinc2jet->Fill(genJets[1].v.Pt(), commonGenWeight, EvtWeights);
                         }
                         else {
-                            genCentralJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), genWeight);
-                            genForwardJetEta_Zinc2jet->Fill(fabs(genJets[0].v.Eta()), genWeight);
-                            genCentralJetPt_Zinc2jet->Fill(genJets[1].v.Pt(), genWeight);
-                            genForwardJetPt_Zinc2jet->Fill(genJets[0].v.Pt(), genWeight);
+                            genCentralJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
+                            genForwardJetEta_Zinc2jet->Fill(fabs(genJets[0].v.Eta()), commonGenWeight, EvtWeights);
+                            genCentralJetPt_Zinc2jet->Fill(genJets[1].v.Pt(), commonGenWeight, EvtWeights);
+                            genForwardJetPt_Zinc2jet->Fill(genJets[0].v.Pt(), commonGenWeight, EvtWeights);
                         }
                     }
 
-                    if (EvtVtxCnt < 14) genJetsMassLowPU_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
-                    else if (EvtVtxCnt < 18) genJetsMassMidPU_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
-                    else genJetsMassHigPU_Zinc2jet->Fill(genJet1Plus2.M(), genWeight);
-                    genZPt_Zinc2jet->Fill(genEWKBoson.Pt(), genWeight);
-                    genZRapidity_Zinc2jet->Fill(genEWKBoson.Rapidity(), genWeight);
-                    genZEta_Zinc2jet->Fill(genEWKBoson.Eta(), genWeight);
+                    if (EvtVtxCnt < 14) genJetsMassLowPU_Zinc2jet->Fill(genJet1Plus2.M(), commonGenWeight, EvtWeights);
+                    else if (EvtVtxCnt < 18) genJetsMassMidPU_Zinc2jet->Fill(genJet1Plus2.M(), commonGenWeight, EvtWeights);
+                    else genJetsMassHigPU_Zinc2jet->Fill(genJet1Plus2.M(), commonGenWeight, EvtWeights);
+                    genZPt_Zinc2jet->Fill(genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    genZRapidity_Zinc2jet->Fill(genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
+                    genZEta_Zinc2jet->Fill(genEWKBoson.Eta(), commonGenWeight, EvtWeights);
 
                     double RatioValue =1.;
 		    double RatioValue1 = 1.;
@@ -1325,142 +1326,142 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                     genSecondJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), genWeight*RatioValue);
                     genSecondJetAbsRapidity_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), genWeight*RatioValue);
-                    genSecondJetEtaHigh_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), genWeight);
-                    genSecondJetRapidityHigh_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), genWeight);
+                    genSecondJetEtaHigh_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
+                    genSecondJetRapidityHigh_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), commonGenWeight, EvtWeights);
                     genJetsHT_Zinc2jet->Fill(genJetsHT, genWeight*RatioValue1);
-		    genVisPt_Zinc2jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), genWeight);
-                    genptBal_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
-                    gendPhiJets_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                    genBestdPhiJets_Zinc2jet->Fill(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                    gendEtaJets_Zinc2jet->Fill(genJets[0].v.Eta() - genJets[1].v.Eta(), genWeight);
-                    gendEtaFirstJetZ_Zinc2jet->Fill(genJets[0].v.Eta() - genEWKBoson.Eta(), genWeight);
-                    gendEtaSecondJetZ_Zinc2jet->Fill(genJets[1].v.Eta() - genEWKBoson.Eta(), genWeight);
-                    gendEtaJet1Plus2Z_Zinc2jet->Fill(genJet1Plus2.Eta() - genEWKBoson.Eta(), genWeight);
-                    genPHI_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                    genBestPHI_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                    genPHI_T_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                    genBestPHI_T_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                    genSpT_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                    genBestSpT_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                    genSpTJets_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                    genBestSpTJets_Zinc2jet->Fill(SpTsub(genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                    genSpTLeptons_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                    genSPhi_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                    genBestSPhi_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
+		    genVisPt_Zinc2jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
+                    genptBal_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
+                    gendPhiJets_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestdPhiJets_Zinc2jet->Fill(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                    gendEtaJets_Zinc2jet->Fill(genJets[0].v.Eta() - genJets[1].v.Eta(), commonGenWeight, EvtWeights);
+                    gendEtaFirstJetZ_Zinc2jet->Fill(genJets[0].v.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                    gendEtaSecondJetZ_Zinc2jet->Fill(genJets[1].v.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                    gendEtaJet1Plus2Z_Zinc2jet->Fill(genJet1Plus2.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                    genPHI_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestPHI_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                    genPHI_T_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestPHI_T_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                    genSpT_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestSpT_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                    genSpTJets_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestSpTJets_Zinc2jet->Fill(SpTsub(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                    genSpTLeptons_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                    genSPhi_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                    genBestSPhi_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
 
                     if (genEWKBoson.Pt() < 25){
-                        genptBal_LowPt_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
-                        gendPhiJets_LowPt_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                        genBestdPhiJets_LowPt_Zinc2jet->Fill(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                        genPHI_T_LowPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genBestPHI_T_LowPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                        genPHI_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genBestPHI_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                        genSpTJets_LowPt_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                        genBestSpTJets_LowPt_Zinc2jet->Fill(SpTsub(genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                        genSpTLeptons_LowPt_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                        genSpT_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genBestSpT_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
-                        genSPhi_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genBestSPhi_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), genWeight);
+                        genptBal_LowPt_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
+                        gendPhiJets_LowPt_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestdPhiJets_LowPt_Zinc2jet->Fill(deltaPhi(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                        genPHI_T_LowPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestPHI_T_LowPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                        genPHI_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestPHI_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                        genSpTJets_LowPt_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestSpTJets_LowPt_Zinc2jet->Fill(SpTsub(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                        genSpTLeptons_LowPt_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                        genSpT_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestSpT_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
+                        genSPhi_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genBestSPhi_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
                         if (SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v) < 0.5){ 
-                            genPHI_LowSpT_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSPhi_LowSpT_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genPHI_LowSpT_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSPhi_LowSpT_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                         }
                         else {
-                            genPHI_HighSpT_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSPhi_HighSpT_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genPHI_HighSpT_LowPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSPhi_HighSpT_LowPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                         }
                         if (SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v) < 0.5){
-                            genSpT_LowSPhi_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genSpT_LowSPhi_LowPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                         }
                         else {
-                            genSpT_HighSPhi_LowPt_Zinc2jet ->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genSpT_HighSPhi_LowPt_Zinc2jet ->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                         }
                     }
                     else {
-                        genptBal_HighPt_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
-                        gendPhiJets_HighPt_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                        genPHI_HighPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genPHI_T_HighPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genSpTJets_HighPt_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                        genSpTLeptons_HighPt_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                        genSpT_HighPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genSPhi_HighPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                        genptBal_HighPt_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
+                        gendPhiJets_HighPt_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genPHI_HighPt_Zinc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genPHI_T_HighPt_Zinc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genSpTJets_HighPt_Zinc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genSpTLeptons_HighPt_Zinc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                        genSpT_HighPt_Zinc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genSPhi_HighPt_Zinc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                     }
                     if (nGoodGenJets == 2){
                         //////Special Branch/////////////////////////
-                        genAbsZRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                        genAbsSecondJetRapidity_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                        genSumZSecondJetRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                        genDifZSecondJetRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                        genAbsZRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                        genAbsSecondJetRapidity_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                        genSumZSecondJetRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                        genDifZSecondJetRapidity_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
                         if(genEWKBoson.Pt()>100.)
                         {
-                            genAbsZRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                            genAbsSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                            genSumZSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                            genDifZSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                            genAbsZRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                            genAbsSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                            genSumZSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                            genDifZSecondJetRapidity_ZPt100_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                         }
 
                         if(genEWKBoson.Pt()>150.)
                         {
-                            genAbsZRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),genWeight);
-                            genAbsSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),genWeight);
-                            genSumZSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,genWeight);
-                            genDifZSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,genWeight);
+                            genAbsZRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);
+                            genAbsSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genJets[1].v.Rapidity()),commonGenWeight, EvtWeights);
+                            genSumZSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()+genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
+                            genDifZSecondJetRapidity_ZPt150_Zexc2jet->Fill(fabs(genEWKBoson.Rapidity()-genJets[1].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
                         }
 
 
-                        genTwoJetsPtDiff_Zexc2jet->Fill(genJet1Minus2.Pt(), genWeight);
-                        genJetsMass_Zexc2jet->Fill(genJet1Plus2.M(), genWeight);
-                        genSecondJetPt_Zexc2jet->Fill(genJets[1].v.Pt(), genWeight);
-                        gendPhiJets_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                        genPHI_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genPHI_T_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        gendEtaJets_Zexc2jet->Fill(genJets[0].v.Eta() - genJets[1].v.Eta(), genWeight);
-                        gendEtaFirstJetZ_Zexc2jet->Fill(genJets[0].v.Eta() - genEWKBoson.Eta(), genWeight);
-                        gendEtaSecondJetZ_Zexc2jet->Fill(genJets[1].v.Eta() - genEWKBoson.Eta(), genWeight);
-                        gendEtaJet1Plus2Z_Zexc2jet->Fill(genJet1Plus2.Eta() - genEWKBoson.Eta(), genWeight);
-                        genSpT_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genSpTJets_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                        genSpTLeptons_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                        genSPhi_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                        genptBal_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
+                        genTwoJetsPtDiff_Zexc2jet->Fill(genJet1Minus2.Pt(), commonGenWeight, EvtWeights);
+                        genJetsMass_Zexc2jet->Fill(genJet1Plus2.M(), commonGenWeight, EvtWeights);
+                        genSecondJetPt_Zexc2jet->Fill(genJets[1].v.Pt(), commonGenWeight, EvtWeights);
+                        gendPhiJets_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genPHI_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genPHI_T_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        gendEtaJets_Zexc2jet->Fill(genJets[0].v.Eta() - genJets[1].v.Eta(), commonGenWeight, EvtWeights);
+                        gendEtaFirstJetZ_Zexc2jet->Fill(genJets[0].v.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                        gendEtaSecondJetZ_Zexc2jet->Fill(genJets[1].v.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                        gendEtaJet1Plus2Z_Zexc2jet->Fill(genJet1Plus2.Eta() - genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+                        genSpT_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genSpTJets_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genSpTLeptons_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                        genSPhi_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                        genptBal_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
 
                         if (genEWKBoson.Pt() < 25){
-                            genptBal_LowPt_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
-                            gendPhiJets_LowPt_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                            genPHI_T_LowPt_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genPHI_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSpTJets_LowPt_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                            genSpTLeptons_LowPt_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                            genSpT_LowPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSPhi_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genptBal_LowPt_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
+                            gendPhiJets_LowPt_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genPHI_T_LowPt_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genPHI_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSpTJets_LowPt_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSpTLeptons_LowPt_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                            genSpT_LowPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSPhi_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                             if (SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v) < 0.5) { 
-                                genPHI_LowSpT_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                                genSPhi_LowSpT_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                                genPHI_LowSpT_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                                genSPhi_LowSpT_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                             }
                             else {
-                                genPHI_HighSpT_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                                genSPhi_HighSpT_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                                genPHI_HighSpT_LowPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                                genSPhi_HighSpT_LowPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                             }
                             if (SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v) < 0.5) {
-                                genSpT_LowSPhi_LowPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                                genSpT_LowSPhi_LowPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                             }
                             else {
-                                genSpT_HighSPhi_LowPt_Zexc2jet ->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                                genSpT_HighSPhi_LowPt_Zexc2jet ->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                             }
                         }
                         else {
-                            genptBal_HighPt_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), genWeight);
-                            gendPhiJets_HighPt_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), genWeight);
-                            genPHI_HighPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genPHI_T_HighPt_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSpTJets_HighPt_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), genWeight);
-                            genSpTLeptons_HighPt_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), genWeight);
-                            genSpT_HighPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
-                            genSPhi_HighPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), genWeight);
+                            genptBal_HighPt_Zexc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
+                            gendPhiJets_HighPt_Zexc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genPHI_HighPt_Zexc2jet->Fill(PHI(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genPHI_T_HighPt_Zexc2jet->Fill(PHI_T(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSpTJets_HighPt_Zexc2jet->Fill(SpTsub(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSpTLeptons_HighPt_Zexc2jet->Fill(SpTsub(genLeptons[0].v, genLeptons[1].v), commonGenWeight, EvtWeights);
+                            genSpT_HighPt_Zexc2jet->Fill(SpT(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
+                            genSPhi_HighPt_Zexc2jet->Fill(SPhi(genLeptons[0].v, genLeptons[1].v, genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                         }
                     }
 
@@ -1480,7 +1481,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (nGoodGenJets >= 3){
                     nGenEventsVInc3Jets++;
                     nEffGenEventsVInc3Jets += genWeight;
-                    genZNGoodJets_Zinc->Fill(3., genWeight);
+                    genZNGoodJets_Zinc->Fill(3., commonGenWeight, EvtWeights);
 
                     double RatioValue = 1.;
 		    double RatioValue1 = .1;
@@ -1493,84 +1494,84 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                     genThirdJetEta_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), genWeight*RatioValue);
                     genThirdJetAbsRapidity_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), genWeight*RatioValue);
-                    genThirdJetEtaHigh_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), genWeight);
-                    genThirdJetRapidityHigh_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), genWeight);
+                    genThirdJetEtaHigh_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), commonGenWeight, EvtWeights);
+                    genThirdJetRapidityHigh_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), commonGenWeight, EvtWeights);
                     genJetsHT_Zinc3jet->Fill(genJetsHT, genWeight*RatioValue1);
-		    genVisPt_Zinc3jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), genWeight);
+		    genVisPt_Zinc3jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
  
                     /////Azimuth cross check//////////////////////////////////
-                    genDPhiZFirstJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
-                    genDPhiZSecondJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),genWeight);
-                    genDPhiZThirdJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),genWeight);
-                    genDPhiFirstSecondJet_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),genWeight);
-                    genDPhiFirstThirdJet_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),genWeight);
-                    genDPhiSecondThirdJet_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),genWeight);
+                    genDPhiZFirstJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
+                    genDPhiZSecondJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                    genDPhiZThirdJet_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                    genDPhiFirstSecondJet_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                    genDPhiFirstThirdJet_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                    genDPhiSecondThirdJet_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
 
                     if(genEWKBoson.Pt()>150.)
                     {
-                        genDPhiZFirstJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
-                        genDPhiZSecondJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),genWeight);
-                        genDPhiZThirdJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),genWeight);
-                        genDPhiFirstSecondJet_ZPt150_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),genWeight);
-                        genDPhiFirstThirdJet_ZPt150_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),genWeight);
-                        genDPhiSecondThirdJet_ZPt150_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),genWeight);
+                        genDPhiZFirstJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
+                        genDPhiZSecondJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                        genDPhiZThirdJet_ZPt150_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                        genDPhiFirstSecondJet_ZPt150_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                        genDPhiFirstThirdJet_ZPt150_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                        genDPhiSecondThirdJet_ZPt150_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
                     }
 
                     if(genEWKBoson.Pt()>300.)
                     {
-                        genDPhiZFirstJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
-                        genDPhiZSecondJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),genWeight);
-                        genDPhiZThirdJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),genWeight);
-                        genDPhiFirstSecondJet_ZPt300_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),genWeight);
-                        genDPhiFirstThirdJet_ZPt300_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),genWeight);
-                        genDPhiSecondThirdJet_ZPt300_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),genWeight);
+                        genDPhiZFirstJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
+                        genDPhiZSecondJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                        genDPhiZThirdJet_ZPt300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                        genDPhiFirstSecondJet_ZPt300_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                        genDPhiFirstThirdJet_ZPt300_Zinc3jet->Fill(fabs(genJets[0].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+                        genDPhiSecondThirdJet_ZPt300_Zinc3jet->Fill(fabs(genJets[1].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
                     }
 
                     if(genEWKBoson.Pt()>150. && (genJets[0].v.Pt()+genJets[1].v.Pt()+genJets[2].v.Pt()>300.))
                     {
-                        genDPhiZFirstJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),genWeight);
-                        genDPhiZSecondJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),genWeight);
-                        genDPhiZThirdJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),genWeight);
+                        genDPhiZFirstJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
+                        genDPhiZSecondJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
+                        genDPhiZThirdJet_ZPt150_HT300_Zinc3jet->Fill(fabs(genEWKBoson.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
                     }
 
                 }
-                if (nGoodGenJets_20 >= 4) genFourthJetPt_Zinc4jet->Fill(genJets_20[3].v.Pt(), genWeight);
+                if (nGoodGenJets_20 >= 4) genFourthJetPt_Zinc4jet->Fill(genJets_20[3].v.Pt(), commonGenWeight, EvtWeights);
                 if (nGoodGenJets >= 4){
-                    genZNGoodJets_Zinc->Fill(4., genWeight);
-                    genFourthJetEta_Zinc4jet->Fill(fabs(genJets[3].v.Eta()), genWeight);
-                    genFourthJetAbsRapidity_Zinc4jet->Fill(fabs(genJets[3].v.Rapidity()), genWeight);
-                    genFourthJetEtaHigh_Zinc4jet->Fill(fabs(genJets[3].v.Eta()), genWeight);
-                    genFourthJetRapidityHigh_Zinc4jet->Fill(fabs(genJets[3].v.Rapidity()), genWeight);
-                    genJetsHT_Zinc4jet->Fill(genJetsHT, genWeight);
+                    genZNGoodJets_Zinc->Fill(4., commonGenWeight, EvtWeights);
+                    genFourthJetEta_Zinc4jet->Fill(fabs(genJets[3].v.Eta()), commonGenWeight, EvtWeights);
+                    genFourthJetAbsRapidity_Zinc4jet->Fill(fabs(genJets[3].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genFourthJetEtaHigh_Zinc4jet->Fill(fabs(genJets[3].v.Eta()), commonGenWeight, EvtWeights);
+                    genFourthJetRapidityHigh_Zinc4jet->Fill(fabs(genJets[3].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genJetsHT_Zinc4jet->Fill(genJetsHT, commonGenWeight, EvtWeights);
                 }
-                if (nGoodGenJets_20 >= 5) genFifthJetPt_Zinc5jet->Fill(genJets_20[4].v.Pt(), genWeight);
+                if (nGoodGenJets_20 >= 5) genFifthJetPt_Zinc5jet->Fill(genJets_20[4].v.Pt(), commonGenWeight, EvtWeights);
                 if (nGoodGenJets >= 5){
-                    genZNGoodJets_Zinc->Fill(5., genWeight);
-                    genFifthJetEta_Zinc5jet->Fill(fabs(genJets[4].v.Eta()), genWeight);
-                    genFifthJetAbsRapidity_Zinc5jet->Fill(fabs(genJets[4].v.Rapidity()), genWeight);
-                    genFifthJetEtaHigh_Zinc5jet->Fill(fabs(genJets[4].v.Eta()), genWeight);
-                    genFifthJetRapidityHigh_Zinc5jet->Fill(fabs(genJets[4].v.Rapidity()), genWeight);
-                    genJetsHT_Zinc5jet->Fill(genJetsHT, genWeight);
+                    genZNGoodJets_Zinc->Fill(5., commonGenWeight, EvtWeights);
+                    genFifthJetEta_Zinc5jet->Fill(fabs(genJets[4].v.Eta()), commonGenWeight, EvtWeights);
+                    genFifthJetAbsRapidity_Zinc5jet->Fill(fabs(genJets[4].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genFifthJetEtaHigh_Zinc5jet->Fill(fabs(genJets[4].v.Eta()), commonGenWeight, EvtWeights);
+                    genFifthJetRapidityHigh_Zinc5jet->Fill(fabs(genJets[4].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genJetsHT_Zinc5jet->Fill(genJetsHT, commonGenWeight, EvtWeights);
                 }
-                if (nGoodGenJets_20 >= 6) genSixthJetPt_Zinc6jet->Fill(genJets_20[5].v.Pt(), genWeight);
+                if (nGoodGenJets_20 >= 6) genSixthJetPt_Zinc6jet->Fill(genJets_20[5].v.Pt(), commonGenWeight, EvtWeights);
                 if (nGoodGenJets >= 6){
-                    genZNGoodJets_Zinc->Fill(6., genWeight);
-                    genSixthJetEta_Zinc6jet->Fill(fabs(genJets[5].v.Eta()), genWeight);
-                    genSixthJetEtaHigh_Zinc6jet->Fill(fabs(genJets[5].v.Eta()), genWeight);
-                    genSixthJetRapidityHigh_Zinc6jet->Fill(fabs(genJets[5].v.Rapidity()), genWeight);
-                    genJetsHT_Zinc6jet->Fill(genJetsHT, genWeight);
+                    genZNGoodJets_Zinc->Fill(6., commonGenWeight, EvtWeights);
+                    genSixthJetEta_Zinc6jet->Fill(fabs(genJets[5].v.Eta()), commonGenWeight, EvtWeights);
+                    genSixthJetEtaHigh_Zinc6jet->Fill(fabs(genJets[5].v.Eta()), commonGenWeight, EvtWeights);
+                    genSixthJetRapidityHigh_Zinc6jet->Fill(fabs(genJets[5].v.Rapidity()), commonGenWeight, EvtWeights);
+                    genJetsHT_Zinc6jet->Fill(genJetsHT, commonGenWeight, EvtWeights);
                 }
                 if (nGoodGenJets >= 7) {
-                    genZNGoodJets_Zinc->Fill(7., genWeight);               
+                    genZNGoodJets_Zinc->Fill(7., commonGenWeight, EvtWeights);               
                 }
                 if (nGoodGenJets >= 8) {
-                    genZNGoodJets_Zinc->Fill(8., genWeight);
+                    genZNGoodJets_Zinc->Fill(8., commonGenWeight, EvtWeights);
                 }
 		if (nGoodGenJets >= 1) {
-		    genHadRecoil->Fill(genHadronicR.Pt(),genWeight);
-		    genJZB->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
-		    if(EWKBoson.Pt()<= 50)	   genJZB_bin1->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
-		    else 			   genJZB_bin2->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), genWeight);
+		    genHadRecoil->Fill(genHadronicR.Pt(),commonGenWeight, EvtWeights);
+		    genJZB->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+		    if(EWKBoson.Pt()<= 50)	   genJZB_bin1->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+		    else 			   genJZB_bin2->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
 		}
             }
         }

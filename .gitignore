@@ -8,6 +8,8 @@ runCombination
 dispatcher
 runMakeStatisticsTable
 DYJets/Sources/plotRespMatrix
+DYJets/runDMu.sh
+DYJets/runDE.sh
 
 # git will not consider the following files:
 *.root

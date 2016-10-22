@@ -1038,7 +1038,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		    RatioValue =  ZNGoodJets_Zexc_ratio->GetBinContent(binNumber);
 		} 
 
-                genZNGoodJets_Zexc->Fill(nGoodGenJets, genWeight*RatioValue);
+                genZNGoodJets_Zexc->Fill(nGoodGenJets, commonGenWeight*RatioValue, EvtWeights);
                 genZNGoodJets_Zinc->Fill(0., commonGenWeight, EvtWeights);
                 genZMass_Zinc0jet->Fill(genEWKBoson.M(), commonGenWeight, EvtWeights);
                 genZPt_Zinc0jet->Fill(genEWKBoson.Pt(), commonGenWeight, EvtWeights);
@@ -1058,7 +1058,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		       RatioValue =  FirstJetPt_2_Zinc1jet_ratio->GetBinContent(binNumber);
 		    }
 		    
-		    genFirstJetPt_Zinc1jet->Fill(genJets_20[0].v.Pt(), genWeight*RatioValue);
+		    genFirstJetPt_Zinc1jet->Fill(genJets_20[0].v.Pt(), commonGenWeight*RatioValue, EvtWeights);
 		    genFirstJetPtEta_Zinc1jet->Fill(genJets_20[0].v.Pt(), fabs(genJets[0].v.Eta()), genWeight);
                 }
                 if (nGoodGenJets >= 1){
@@ -1171,12 +1171,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     }
                     // cout << RatioValue1 << " , " << RatioValue1 << "\n";
 
-                    genFirstJetEta_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), genWeight*RatioValue);
+                    genFirstJetEta_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), commonGenWeight*RatioValue, EvtWeights);
                     genAbsZRapidity_Zinc1jet->Fill(fabs(genEWKBoson.Rapidity()),commonGenWeight, EvtWeights);		    
-                    genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), genWeight*RatioValue);
+                    genFirstJetAbsRapidity_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), commonGenWeight*RatioValue, EvtWeights);
                     genFirstJetEtaHigh_Zinc1jet->Fill(fabs(genJets[0].v.Eta()), commonGenWeight, EvtWeights);
                     genFirstJetRapidityHigh_Zinc1jet->Fill(fabs(genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
-                    genJetsHT_Zinc1jet->Fill(genJetsHT, genWeight*RatioValue1);
+                    genJetsHT_Zinc1jet->Fill(genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
                     //genJetsHT_2_Zinc1jet->Fill(genJetsHT, commonGenWeight, EvtWeights);
 		    genVisPt_Zinc1jetQun->Fill(fabs((genJets[0].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
                     genSumZJetRapidity_Zinc1jet->Fill(0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
@@ -1215,7 +1215,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			RatioValue =  SecondJetPt_2_Zinc2jet_ratio->GetBinContent(binNumber);
 		    }
 
-                   genSecondJetPt_Zinc2jet->Fill(genJets_20[1].v.Pt(), genWeight*RatioValue);
+                   genSecondJetPt_Zinc2jet->Fill(genJets_20[1].v.Pt(), commonGenWeight*RatioValue, EvtWeights);
 
                 }
                 if (nGoodGenJets >= 2) {
@@ -1324,11 +1324,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			RatioValue1 = JetsHT_2_Zinc2jet_ratio->GetBinContent(binNumber1);
                     }
 
-                    genSecondJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), genWeight*RatioValue);
-                    genSecondJetAbsRapidity_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), genWeight*RatioValue);
+                    genSecondJetEta_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), commonGenWeight*RatioValue, EvtWeights);
+                    genSecondJetAbsRapidity_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), commonGenWeight*RatioValue, EvtWeights);
                     genSecondJetEtaHigh_Zinc2jet->Fill(fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
                     genSecondJetRapidityHigh_Zinc2jet->Fill(fabs(genJets[1].v.Rapidity()), commonGenWeight, EvtWeights);
-                    genJetsHT_Zinc2jet->Fill(genJetsHT, genWeight*RatioValue1);
+                    genJetsHT_Zinc2jet->Fill(genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
 		    genVisPt_Zinc2jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
                     genptBal_Zinc2jet->Fill(genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
                     gendPhiJets_Zinc2jet->Fill(deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
@@ -1474,7 +1474,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                        RatioValue =  ThirdJetPt_2_Zinc3jet_ratio->GetBinContent(binNumber);
                     }
 
-                    genThirdJetPt_Zinc3jet->Fill(genJets_20[2].v.Pt(), genWeight*RatioValue);
+                    genThirdJetPt_Zinc3jet->Fill(genJets_20[2].v.Pt(), commonGenWeight*RatioValue, EvtWeights);
 
 
                 }
@@ -1492,11 +1492,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                        RatioValue1 = JetsHT_2_Zinc3jet_ratio->GetBinContent(binNumber1);
                     }
 
-                    genThirdJetEta_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), genWeight*RatioValue);
-                    genThirdJetAbsRapidity_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), genWeight*RatioValue);
+                    genThirdJetEta_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), commonGenWeight*RatioValue, EvtWeights);
+                    genThirdJetAbsRapidity_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), commonGenWeight*RatioValue, EvtWeights);
                     genThirdJetEtaHigh_Zinc3jet->Fill(fabs(genJets[2].v.Eta()), commonGenWeight, EvtWeights);
                     genThirdJetRapidityHigh_Zinc3jet->Fill(fabs(genJets[2].v.Rapidity()), commonGenWeight, EvtWeights);
-                    genJetsHT_Zinc3jet->Fill(genJetsHT, genWeight*RatioValue1);
+                    genJetsHT_Zinc3jet->Fill(genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
 		    genVisPt_Zinc3jetQun->Fill(fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), commonGenWeight, EvtWeights);
  
                     /////Azimuth cross check//////////////////////////////////

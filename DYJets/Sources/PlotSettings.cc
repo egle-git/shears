@@ -593,7 +593,7 @@ void customizeGenGraph(TH1D *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *g
             leEntry->SetFillStyle(ZJetsFillStyle);
             leEntry->SetLineColor(ZJetsScaleFillColor[genNum-1]);
 
-            pdfEntry = legend->AddEntry(gPDF, "#oplus PDF. #oplus #alpha_{s} unc.", "f");
+            pdfEntry = legend->AddEntry(gPDF, "#oplus PDF #oplus #alpha_{s} unc.", "f");
             pdfEntry->SetFillStyle(0);
         }
         else {
@@ -915,7 +915,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetTextFont(52);
     latexLabel->DrawLatex(0.20,0.95,"Preliminary");
     latexLabel->SetTextFont(42);
-    if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
+    latexLabel->DrawLatex(0.13,0.95-0.045, "2.5 fb^{-1} (13 TeV)");
+    //if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
     latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     if (canvasName.Contains("Vis")){
 	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");

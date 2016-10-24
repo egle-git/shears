@@ -126,7 +126,6 @@ const variableStruct VAROFINTERESTZJETS[] = {
     {"JZB",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
     {"JZB_bin1",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
     {"JZB_bin2",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
-    {"JZB_bin3",                  0,      1,           3,              3,             3,            3 ,               3    }, // 1
     //different JetPt cuts////////
 //    {"AbsZRapidity_FirstJetPt50_Zinc1jet",        1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //    {"AbsFirstJetRapidity_FirstJetPt50_Zinc1jet",         1,      1,           3,              3,             3,            3 ,               3    }, // 1

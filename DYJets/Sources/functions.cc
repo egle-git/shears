@@ -216,6 +216,18 @@ double table::getTTbarSF(int NJets){
     }
 }
 
+double table::getTTbarSFLow(int NJets){
+    for (unsigned int i=0; i != recd.size(); i++) {
+	if((recd[i]).equalTo(NJets)) return recd[i].etaHi-recd[i].ptLow;
+    }
+}
+
+double table::getTTbarSFHigh(int NJets){
+    for (unsigned int i=0; i != recd.size(); i++) {
+	if((recd[i]).equalTo(NJets)) return recd[i].etaHi+recd[i].ptLow;
+    }
+}
+
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor){
 
     double smearedPt(0);

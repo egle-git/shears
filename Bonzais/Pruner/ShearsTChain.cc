@@ -1,4 +1,5 @@
 #include "ShearsTChain.h"
+#include "TFile.h"
 
 //ClassImp(ShearsTChain);
 
@@ -14,6 +15,7 @@ bool ShearsTChain::setCatalog(const char* catalog, int maxFiles, int skipFiles){
 
   int iline = 0;
   int nfiles = 0;
+  firstFile_ = "";
   while(f.good()){
     ++iline;
     std::string l;
@@ -59,12 +61,56 @@ bool ShearsTChain::setCatalog(const char* catalog, int maxFiles, int skipFiles){
 	std::cout << "Add file " << l.c_str() << " to the list of input files.\n";
       }
       Add(l.c_str());
+      if(firstFile_.size()==0) firstFile_ = l;
     } else{
       --skipFiles;
     }      
   }
   
   return true;
+}
+
+void ShearsTChain::branchHelp(const char* branchName){
+  TFile* firstFile = (TFile*) GetListOfFiles()->First();
+  if(firstFile_.empty()){
+    std::cerr << "No ntuple file found. Did you set the catalog using the setCatalog method?\n";
+    return;
+  }
+  TFile* f =  TFile::Open(firstFile_.c_str());
+  if(!f || f->IsZombie()){
+    std::cerr << "Failed to open file " << firstFile_ << "\n";
+    return;
+  }
+  TTree* t;
+  f->GetObject("tupel/Description", t);
+  if(!t){
+    std::cerr << "The branch description tree tupel/Description was not found in file "
+	      << firstFile->GetName() << ".  Please check that the file is a boabab or bonzai file.\n";
+    return;
+  }
+  if(t->GetEntries()<1){
+    std::cerr << "The tree tupel/Description found in file "
+	      << firstFile->GetName() << " is empty!\n";
+    return;
+  }
+
+  TLeaf* l = t->FindLeaf(branchName);
+
+  if(!l){
+    std::cerr << "No description was found for branch " << branchName << " in file "
+	      << firstFile->GetName() << "\n";
+    return;
+  }
+  
+  size_t len = l->GetLen();
+
+  std::vector<char> buffer(len);
+  
+  l->SetAddress(&buffer[0]);
+  
+  t->GetEntry(0);
+
+  std::cout << &buffer[0] << "\n";
 }
 
 #if defined(__ROOTCLING__)

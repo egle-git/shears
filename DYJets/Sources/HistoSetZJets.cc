@@ -54,20 +54,20 @@ vector<double> HistoSetZJets::buildVecFineBin( int nStdBin, double arrStdBin[], 
 }
 
 
-TH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double *xBins){
-    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
+GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double *xBins){
+    GenH1D* hist = new GenH1D(name.c_str(), title.c_str(), nBins, xBins);
     hist->GetXaxis()->SetTitle(xTitle.c_str());
     hist->GetYaxis()->SetTitle("# Events");
     listOfHistograms.push_back(hist);
     return hist;
 }
 
-TH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, vector<double>& xBinsVect)
+GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, vector<double>& xBinsVect)
 {
     int nBins = xBinsVect.size()-1;
     double *xBins = new double[xBinsVect.size()];
     std::copy(xBinsVect.begin(), xBinsVect.end(), xBins);
-    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xBins);
+    GenH1D* hist = new GenH1D(name.c_str(), title.c_str(), nBins, xBins);
     hist->GetXaxis()->SetTitle(xTitle.c_str());
     hist->GetYaxis()->SetTitle("# Events");
     delete [] xBins;
@@ -76,8 +76,8 @@ TH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, vector<do
 }
 
 
-TH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double xLow, double xUp){
-    TH1D* hist = new TH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
+GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double xLow, double xUp){
+    GenH1D* hist = new GenH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
     hist->GetXaxis()->SetTitle(xTitle.c_str());
     hist->GetYaxis()->SetTitle("# Events");
     hist->SetOption("HIST");
@@ -202,6 +202,8 @@ int nZPt_Zinc0jet(22);
     int nZPt_Zinc2jetQunJZB(30);
     double zPt_Zinc2jetQunJZB[31] = {-200, -180, -160, -140, -120, -100, -90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
 
+    int nZPt_Zinc1jetQunJZB(20);
+    double zPt_Zinc1jetQunJZB[21] = {-200, -180, -160, -140, -120, -100, -90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50};//, 260, 400};// 240, 260, 280, 300, 400, 800};
     int nZPt_Zinc4jetQun(8);
     double zPt_Zinc4jetQun[9] = {0, 15, 30, 45, 60, 80, 120, 160, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
 
@@ -302,12 +304,10 @@ int nZPt_Zinc0jet(22);
     genHadRecoil                        = newTH1D("genHadRecoil",                        "genHadRecoil p_{T} (N_{jets} #geq 1)",        HRecoi,    nZPt_Zinc1jet, zPt_Zinc1jet);
     JZB                                 = newTH1D("JZB", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     genJZB    		                = newTH1D("genJZB",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    JZB_bin1                                 = newTH1D("JZB_bin1", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    genJZB_bin1    		                = newTH1D("genJZB_bin1",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
+    JZB_bin1                                 = newTH1D("JZB_bin1", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
+    genJZB_bin1    		                = newTH1D("genJZB_bin1",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
     JZB_bin2                                 = newTH1D("JZB_bin2", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     genJZB_bin2    		                = newTH1D("genJZB_bin2",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    JZB_bin3                                 = newTH1D("JZB_bin3", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    genJZB_bin3    		                = newTH1D("genJZB_bin3",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
 
     ZPt_Zinc2jet                        = newTH1D("ZPt_Zinc2jet",                        "Z p_{T} (N_{jets} #geq 2)",                   ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
     genZPt_Zinc2jet                     = newTH1D("genZPt_Zinc2jet",                     "gen Z p_{T} (N_{jets} #geq 2)",               ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
@@ -611,9 +611,8 @@ int nZPt_Zinc0jet(22);
     hresponseZPt_Zinc1jet = newTH2D("hresponseZPt_Zinc1jet","hresponseZPt_Zinc1jet",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseHadRecoil = newTH2D("hresponseHadRecoil","hresponseHadRecoil",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseJZB        = newTH2D("hresponseJZB",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    hresponseJZB_bin1        = newTH2D("hresponseJZB_bin1",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
+    hresponseJZB_bin1        = newTH2D("hresponseJZB_bin1",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB, nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
     hresponseJZB_bin2        = newTH2D("hresponseJZB_bin2",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    hresponseJZB_bin3        = newTH2D("hresponseJZB_bin3",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     hresponseZPt_Zinc2jet = newTH2D("hresponseZPt_Zinc2jet","hresponseZPt_Zinc2jet",nZPt_Zinc2jet, zPt_Zinc2jet, nZPt_Zinc2jet, zPt_Zinc2jet);
     hresponseZAbsRapidity_Zinc1jet = newTH2D("hresponseZAbsRapidity_Zinc1jet", "hresp ZAbsRapidity_Zinc1jet", 12, 0., 2.4, 12, 0., 2.4); 
 

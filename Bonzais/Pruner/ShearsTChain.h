@@ -34,8 +34,16 @@ public:
       std::cout << ((TLeaf*)(*it))->GetTypeName() << "\t" << ((*it))->GetName() << std::endl;
     }
   }
+
+  /** Display the description of a branch of the event tree
+   * @param branchName the name of the branch to get the help on
+   */
+  void branchHelp(const char* branchName);
+  
 protected:
   int verbosity_;
+
+  std::string firstFile_;
   
   //  ClassDef(ShearsTChain, 1);
 };

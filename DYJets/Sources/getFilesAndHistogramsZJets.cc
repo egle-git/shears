@@ -715,10 +715,13 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
 
     cout << "Closed all files" << endl;
 
-    system("mkdir Statistics");
+    TString recoCompDir  = cfg.getS("recoCompDir");
+    TString statDir = recoCompDir.Strip(TString::kTrailing, '/') + "Stat";
+
+    system(TString("mkdir ") + statDir);
     
     ostringstream nameStr;
-    nameStr << "Statistics/outputTable_" << lepSel << "_" << variable << "_JetPtMin_"
+    nameStr << statDir << "/outputTable_" << lepSel << "_" << variable << "_JetPtMin_"
 	    << jetPtMin << "_JetEtaMax_" << jetEtaMax;
     nameStr << ".tex";
 

@@ -226,11 +226,12 @@ def eos_mount():
 
 def eos_to_local_path(path):
     myusername = pwd.getpwuid(os.getuid())[0]
-    if path.find("/store/") == 0: #path: /store/...
+    
+    if re.match('^/+store/', path): #path: /store/...
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
         return eos_mount_point.rstrip("/") + "/cms" + path
-    elif path.find("/eos/") == 0: #path: /eos/...
+    elif re.match('^/+eos/', path): #path: /eos/...
         #an eos path
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")

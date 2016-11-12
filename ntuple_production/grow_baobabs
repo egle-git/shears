@@ -936,7 +936,7 @@ def db_info():
     description = r[1]
 
     try:
-        outDir, jsonFile, datasets =  catalog_read(dataset_catalog)
+        outDir, jsonFile, datasets =  catalog_read(eos_to_local_path(dataset_catalog))
     except IOError:
         outDir = "the input dataset catalog was not found."
 

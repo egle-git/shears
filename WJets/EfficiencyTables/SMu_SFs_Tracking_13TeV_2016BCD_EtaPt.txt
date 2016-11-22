@@ -1,35 +1,11 @@
-#include <iostream>
-#include <iomanip>
-#include <TFile.h>
-#include <TGraphAsymmErrors.h>
-#include <TH1.h>
-#include <TH2.h>
-
-runMakeTable_TGraph_2016()
-{
-  TFile *effFile = new TFile("ratios.root", "READ");
-  string effName = "ratio_eta";
-  
-  TGraphAsymmErrors *g1_Efficiency = (TGraphAsymmErrors*)effFile->Get(effName.c_str());
-  g1_Efficiency->Draw(); 
-  
-  int etaBins = g1_Efficiency->GetN(); 
-  cout<<"EtaBins: "<<etaBins<<endl; 
-  
-  double etaLow(-1.), etaHigh(-1.), ptLow(10.), ptHigh(500.), eff(-1.), effErrLow(-1.), effErrHigh(-1.); 
-  double x(0.),y(0.); 
-  
-  for(int eta(1); eta<=etaBins; eta++){
-    g1_Efficiency->GetPoint(eta, x, y); 
-    
-    etaLow = x - g1_Efficiency->GetErrorXlow(eta);
-    etaHigh = x + g1_Efficiency->GetErrorXhigh(eta);
-    eff = y;
-    effErrLow = g1_Efficiency->GetErrorYlow(eta);
-    effErrHigh = g1_Efficiency->GetErrorYhigh(eta);
-    cout<<etaLow<<"	"<<etaHigh<<"	"<<ptLow<<"	"<<ptHigh<<"	"<<eff<<"	"<<effErrLow<<"	"<<effErrHigh<<endl; 
-  }
-  
-  
-  
-}
+-2.4    -2.1    10      500     0.982399        0.000269666     0.0020969
+-2.1    -1.6    10      500     0.991747        0.000337868     0.000334369
+-1.6    -1.1    10      500     0.995945        0.000226653     0.000226392
+-1.1    -0.6    10      500     0.993413        0.000145144     0.000144868
+-0.6    0       10      500     0.991461        0.000116281     0.000116036
+0       0.6     10      500     0.99468         0.000102018     0.000101841
+0.6     1.1     10      500     0.996666        0.000123578     0.000123528
+1.1     1.6     10      500     0.994934        0.000248764     0.000248707
+1.6     2.1     10      500     0.991187        0.000302383     0.000303747
+2.1     2.4     10      500     0.976812        0.00160723      0.00158632
+2.2333  2.2333  10      500     0.976812        0               0

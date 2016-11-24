@@ -41,18 +41,6 @@ die(){
 date;
 t1=`date +%s`
 
-[ -n $cfg ] || die "Parameter cfg was not found!"
-
-unset maxEventsOpt
-[ -n "$maxEvents" ] && maxEventsOpt="maxEvents=$maxEvents"
-[ -f libRooUnfold.so ] || die "You need to add libRooUnfold.so in your task input file list."
-
-mkdir RooUnfold
-mv libRooUnfold.so RooUnfold/
-mv RooUnfoldDict_rdict.pcm RooUnfold/
-
-tar xzf EfficiencyTables.tgz
-
 #echo Arguments:
 #echo "$@"
 #echo "----------------------------------------------------------------------"
@@ -68,10 +56,16 @@ tar xzf EfficiencyTables.tgz
 #echo "----------------------------------------------------------------------"
 #echo
 
-
-
 #produces FramworkJobReport.xml
-cmsRun -j FrameworkJobReport.xml -p PSet.py
+#It's a dummy run and we don't need to loop
+#on any event.
+cat > myPSet.py <<EOF
+import FWCore.ParameterSet.Config as cms
+import pickle
+process = pickle.load(open('PSet.pkl', 'rb'))
+process.maxEvents.input = 0
+EOF
+cmsRun -j FrameworkJobReport.xml myPSet.py
 
 NJob="$1"
 
@@ -88,9 +82,27 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+echo "cfg=$cfg"
+echo "maxEvents=$maxEvents"
+[ -n "$cfg" ] || die "Parameter cfg was not found!"
+
+unset maxEventsOpt
+[ -n "$maxEvents" ] && maxEventsOpt="maxEvents=$maxEvents"
+
 [ -n "$NJob" ] || die "Missing job ID"
 
 echo "Job id: $NJob"
+
+#note: when using --dryrun option of crab submit, the job is run twice in the same directory, we therefore
+#need to look for libRooUnfold.so both in local directory and RooUnfold one, where it is moved to by this
+#script.
+[ -f libRooUnfold.so -o -f RooUnfold/libRooUnfold.so ] || die "You need to add libRooUnfold.so in your task input file list."
+
+mkdir RooUnfold
+mv libRooUnfold.so RooUnfold/
+mv RooUnfoldDict_rdict.pcm RooUnfold/
+
+tar xzf EfficiencyTables.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
 echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"

@@ -48,6 +48,8 @@ The default script, `job_crab.sh`, runs the Z+jet analysis for all the standard 
 Note
 ----
 
-If you use the `--dryrun` option of `crab submit` to test the jobs, beware it will run on the full set of data events. The reason is that the `job_crab.sh` script does not use the maximum number of events set by crab in the CMSSW configuration file. You can edit temporally the job_crab.sh script and add a `maxEvents` option to limit the number of events.
+If you use the `--dryrun` option of `crab submit` to test the jobs, beware it will run on the full set of data events. The reason is that the `job_crab.sh` script does not use the maximum number of events set by crab in the CMSSW configuration file. You add temporally in your crab configuration the option `maxEvents=10` in the list of arguments defined by `config.JobType.scriptArgs` to limit the run to 10 events.
+
+job_crab.sh script and add a `maxEvents` option to limit the number of events.
 
 (*) I don't know how to get the list of supported combinations. If you are aware of how to get it, I'm interested to learn it. -- Philippe.

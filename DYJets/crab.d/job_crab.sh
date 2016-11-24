@@ -50,6 +50,7 @@ unset maxEventsOpt
 mkdir RooUnfold
 mv libRooUnfold.so RooUnfold/
 mv RooUnfoldDict_rdict.pcm RooUnfold/
+
 tar xzf EfficiencyTables.tgz
 
 #echo Arguments:
@@ -73,6 +74,12 @@ tar xzf EfficiencyTables.tgz
 cmsRun -j FrameworkJobReport.xml -p PSet.py
 
 NJob="$1"
+
+if [ "$NJob" = 0 ]; then
+    echo "NJob=0! Forced to 1"
+    NJob=1
+fi
+
 shift
 
 while [ $# -gt 0 ]; do
@@ -81,14 +88,26 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-[ -n $NJob ] || die "Missing job ID"
-
+[ -n "$NJob" ] || die "Missing job ID"
 
 echo "Job id: $NJob"
 
-export VJETS_CONFIG=$cfg
+#%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
+echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"
 
-case "$NJob" in
+nRuns=20
+if [ $NJob -gt $nRuns ]; then
+    iRun=$((NJob-nRuns))
+    lepSel=DE
+else
+    iRun=$NJob
+    lepSel=DMu
+fi
+
+export VJETS_CONFIG="`echo "$cfg" | sed "s/lepSel/${lepSel}/"`"
+echo "Running with configuraion file $VJETS_CONFIG..."
+    
+case "$iRun" in
     1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0;;
     2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=1;;
     3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=2;;
@@ -108,9 +127,13 @@ case "$NJob" in
     17) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=4;;
     18) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=5;;
     19) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=6;;
+    20) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
 esac
 
 tar czf HistoFiles.tgz HistoFiles*
+
+echo "List of files:"
+ls
 
 date 
 t2=`date +%s`

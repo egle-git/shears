@@ -4,33 +4,6 @@ import re
 
 process = cms.Process("GrowBaobabs")
 
-process.load("FWCore.MessageLogger.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 10
-process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
-process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
-#process.options.allowUnscheduled = cms.untracked.bool(True)
-
-# Load the standard set of configuration modules
-process.load('Configuration.StandardSequences.Services_cff')
-process.load('Configuration.StandardSequences.GeometryDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-
-process.source = cms.Source("PoolSource",
-                            fileNames =  cms.untracked.vstring(
-'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
-#'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
-#'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
-#'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
-  )
-)
-
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
-
-process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('ntuple.root' )
-)
-
 # setup 'analysis'  options
 opt = VarParsing.VarParsing ('analysis')
 # Addition options.
@@ -44,7 +17,42 @@ opt.register('dataTier', '', VarParsing.VarParsing.multiplicity.singleton, VarPa
 opt.register('isMC',    -1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
 opt.register('makeEdm', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Switch for EDM output production. Use 0 (default) to disable it, 1 to enable it.')
 
+#input files. Can be changed on the command line with the option inputFiles=...
+opt.inputFiles = [
+"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
+#'/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/680BED0F-D919-E611-85E6-02163E01424F.root'
+#'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
+#'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
+#'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
+#'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
+]
+
+#max number of events. #input files. Can be changed on the command line with the option maxEvents=...
+opt.maxEvents = 10
+
 opt.parseArguments()
+
+
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 10
+process.MessageLogger.suppressWarning = cms.untracked.vstring('ecalLaserCorrFilter','manystripclus53X','toomanystripclus53X')
+process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
+#process.options.allowUnscheduled = cms.untracked.bool(True)
+
+# Load the standard set of configuration modules
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
+process.source = cms.Source("PoolSource",
+                            fileNames =  cms.untracked.vstring(opt.inputFiles))
+
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(opt.maxEvents))
+
+process.TFileService = cms.Service("TFileService",
+                                   fileName = cms.string('ntuple.root' )
+)
 
 if opt.isMC < 0 and len(process.source.fileNames) > 0:
   if re.match(r'.*/(MINI)?AODSIM/.*', process.source.fileNames[0]):
@@ -60,13 +68,26 @@ if opt.isMC < 0:
   raise Exception("Failed to detect data type. Data type need to be specify with the isMC cmsRun command line option")
 #endif
 
+if opt.prodEra in [ "13TeV_25ns", "13TeV_25ns_silver", "13TeV_25ns_silver"]: 
 #for 76x:
-dataGlobalTag = '76X_dataRun2_16Dec2015_v0'
-mcGlobalTag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
-reapply_jec = True
-jec_file = False
-eg_corr = True   #photon and electron correction
+    dataGlobalTag = '76X_dataRun2_16Dec2015_v0'
+    mcGlobalTag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
+    triggerMenu = '2015'
+    reapply_jec = True
+    jec_file = False
+    eg_corr = True   #photon and electron correction
+else:
+#for 80x:
+  dataGlobalTag = '80X_dataRun2_2016SeptRepro_v4'
+  mcGlobalTag = '80X_mcRun2_asymptotic_2016_miniAODv2_v3'
+  triggerMenu = '2016'
+  reapply_jec = False
+  eg_corr = True
+#endif
+
 include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
+
+
 
 #------------------------------------
 #Condition DB tag
@@ -219,7 +240,7 @@ if eg_corr:
                                                 isMC = cms.bool(opt.isMC != 0),
                                                 # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
                                                 isSynchronization = cms.bool(False),
-                                                correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"))
+                                                correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"))
   
   #copied from  EgammaAnalysis/ElectronTools/python/calibratedElectronsRun2_cfi.py')
   process.calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2", 
@@ -231,7 +252,7 @@ if eg_corr:
                                                   isMC = cms.bool(opt.isMC != 0),
                                                   # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
                                                   isSynchronization = cms.bool(False),
-                                                  correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015")
+                                                  correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele")
                                                   )
   electronSrc = "calibratedPatElectrons"
   photonSrc   = "calibratedPatPhotons"
@@ -275,7 +296,8 @@ process.tupel = cms.EDAnalyzer("Tupel",
   pvSrc        = cms.untracked.InputTag('goodOfflinePrimaryVertices'),
   reducedBarrelRecHitCollection = cms.InputTag("reducedEgamma","reducedEBRecHits"),
   reducedEndcapRecHitCollection = cms.InputTag("reducedEgamma","reducedEERecHits"),
-  reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits")
+  reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits"),
+  triggerMenu = cms.untracked.string(triggerMenu)
 )
 
 process.p = cms.Path()

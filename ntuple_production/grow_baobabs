@@ -226,11 +226,12 @@ def eos_mount():
 
 def eos_to_local_path(path):
     myusername = pwd.getpwuid(os.getuid())[0]
-    if path.find("/store/") == 0: #path: /store/...
+    
+    if re.match('^/+store/', path): #path: /store/...
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
         return eos_mount_point.rstrip("/") + "/cms" + path
-    elif path.find("/eos/") == 0: #path: /eos/...
+    elif re.match('^/+eos/', path): #path: /eos/...
         #an eos path
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
@@ -241,28 +242,37 @@ def eos_to_local_path(path):
     #endif
 #enddef
 
+mtab_black_list = set()
 def eos_to_eos_path(p):
     """Remove the eos mount point from a path."""
+    global mtab_black_list
     f=open("/etc/mtab")
     r = re.compile(r'^\s*eoscms(\.cern\.ch)?\s+([^\s]+)')
     mount_points=[]
     for l in f:
         m = r.match(l)
         if m and len(m.groups()) > 1:
-            mount_points.append(m.groups()[1])
+            mpoint = m.groups()[1]
+            if mpoint not in mtab_black_list:
+                mount_points.append(mpoint)
         #endif
     #next l
     for l in mount_points:
-        if p.find(l)==0:
-            p = p[len(l):]
-            if p.find("/cms/store/") == 0:
-                #a /store path
-                p = p[len("/cms"):]
-            else:
-                #not a /store/..... path
-                p = "root://eoscms//eos/" + p
+        try:
+            if p.find(l)==0:
+                p = p[len(l):]
+                if p.find("/cms/store/") == 0:
+                    #a /store path
+                    p = p[len("/cms"):]
+                else:
+                    #not a /store/..... path
+                    p = "root://eoscms//eos/" + p
+                #endif
             #endif
-        #endif
+        except UnicodeDecodeError: #exception can be thrown if /etc/mtab contains an entry with a non-ascii character
+            sys.stderr.write("Warning: ignoring entry %s of /etc/mtab when looking for EOS mounting points\n" % l)
+            mtab_black_list.add(l)
+            pass
     #next l
     return p
 #enddef
@@ -926,7 +936,7 @@ def db_info():
     description = r[1]
 
     try:
-        outDir, jsonFile, datasets =  catalog_read(dataset_catalog)
+        outDir, jsonFile, datasets =  catalog_read(eos_to_local_path(dataset_catalog))
     except IOError:
         outDir = "the input dataset catalog was not found."
 
@@ -1775,7 +1785,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                     status = res["status"]
                 else:
                     dt_hours = (time.time() - status_ts)/3600
-                    if dt_hours > 10 and res["status"] != "FAILED":
+                    if dt_hours > 10 and res["status"] not in ["FAILED", "COMPLETED", "CLOSED_WITH_FAILURE", ]:
                         sys.stderr.write("\ntask %d of primary dataset %s is stuck in state %s for %d hour(s).\n" % 
                                          (task_id, prim_dataset, status, int(dt_hours+0.5)))
                     #endif dt_hours
@@ -2476,7 +2486,12 @@ def run():
         prod_new_version()
     elif args.list_run2_datasets:
         print "Asking the DAS database. This operation can take some time..."
+        print "\nData from 2015 run:"
+        print "-------------------\n"
         db_das_query_rint("dataset=/*/Run2015*/MINIAOD")
+        print "\nData from 2016 run:"
+        print "-------------------\n"
+        db_das_query_rint("dataset=/*/Run2016*/MINIAOD")
     elif args.show_catalog:
         catalog_show()
     elif args.submit and args.task != [None, None]:

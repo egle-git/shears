@@ -35,12 +35,14 @@ const processInfoStruct Samples[] = {
     /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW", " WW"},
     /*10*/{"WZ",    	'+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ", " WZ"},
     /*11*/{"VV",    	'=',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " VV", "VV"},              
-    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets", " Z/#gamma^{*} #rightarrow ll"}, 
+    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " DYJets FxFx", " Z/#gamma^{*} #rightarrow ll"}, 
+    /*13*/{"DYJets_MLM", ' ', 1.,    1.,      1,  0.06,     kBlue-10,  kBlue-10,  " DYJets MLM", " Z/#gamma^{*} #rightarrow ll"}, 
+    /*14*/{"DYJets_GE", ' ', 1.,    1.,      1,  0.06,     kBlue-5,  kBlue-5,  " DYJets GE", " Z/#gamma^{*} #rightarrow ll"}, 
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
 const int DATA(0);
-const int DYJETS(NSamples - 1); // Signal MC is the seconf from the last sample of the list.
+const int DYJETS(NSamples - 3); // Signal MC is the third from the last sample of the list.
 
 /** Total number of samples after sample grouping, including real data, background MC, and signal MC
  */

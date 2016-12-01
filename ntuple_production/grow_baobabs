@@ -846,8 +846,14 @@ def db_update_task_record(prim_dataset, task_id, props):
 def db_clear_task_record(prim_dataset, task_id):
     """Removes a dataset from the job management database. To be used be care."""
     conn, c = db_get_conn()
-    sql = "DELETE FROM jobs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
-    nrows = conn.execute(sql).rowcount
+    try:
+        sql = "DELETE FROM jobs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
+        nrows = conn.execute(sql).rowcount
+        sql = "DELETE FROM runs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
+        conn.execute(sql)
+    except:
+        conn.rollback()
+        raise
     conn.commit()
     conn.close()
 
@@ -1398,7 +1404,7 @@ def runspec_prettify(run_spec):
         if len(r) == 1 or (len(r) == 2 and r[0] == r[1]):
             res = res + c + "%d" % r[0]
         elif len(r) == 2:
-            if r[0] == 1 and r[1] == 999999:
+            if r[0] <= 1 and r[1] == 999999:
                 return "all"
             elif r[0] == 0:
                     res = res + c + "< %d" % (r[1] + 1)
@@ -1539,8 +1545,16 @@ def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
     prim_dataset = ds_primary_dataset(dataset)
     known = sorted(db_get_runs(prim_dataset))
     toprocess = sorted(tuple(set(available) - set(known)))
+    if args.verbosity > 1:
+        sys.stderr.write('Primary dataset: %s\n' % dataset)
+        sys.stderr.write('All runs: %s\n' % str(available))
+        sys.stderr.write('Already processed runs: %s\n'% str(known))
+        sys.stderr.write('To process: %s\n' % str(toprocess))
+        sys.stderr.write('Run specs: %s\n' % str(run_spec))
+
     if args.max_run_num:
         toprocess = [ x for x in toprocess if x < args.max_run_num ]
+
     if run_spec:
         toprocess_ = set()
         for x in toprocess:
@@ -1558,6 +1572,8 @@ def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
         #next x
         toprocess = list(toprocess_)
     #endif run_spec
+    if args.verbosity > 1:
+        sys.stderr.write('To process after run_spec filter and max-run-num limit: %s\n' % str(toprocess))
     return toprocess
 
 # End of dataset name manipulation tools
@@ -1923,7 +1939,7 @@ inserts the task in the database. Return the task_id or None."""
         return None
     if datatype == 'mc':
         #for MC a run corresponds to a dataset extension
-        if len(run_spec) == 0 or run_spec == [[1, 999999]]: #default value used for non-specified run_spec. OK for data. Must be changed for MC
+        if len(run_spec) == 0 or run_spec == [[0, 999999]]: #default value used for non-specified run_spec. OK for data. Must be changed for MC
             run_spec = [[0, 0 ]]
         if len(run_spec) > 1 or (len(run_spec[0]) > 1 and run_spec[0][0] != run_spec[0][1]):
             if args.verbosity > 0:

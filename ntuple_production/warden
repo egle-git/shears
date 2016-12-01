@@ -39,7 +39,7 @@ function run(){
 	echo "Checking status of running tasks..."
 	xsec_file=xsec.txt
 	[ -f $xsec_file ] && xsec_opt="--cross-section $xsec_file" || xsec_opt=""
-	("$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox")
+	("$mydir/grow_baobabs" --check --no-crab-report-for-mc --cross-sections /afs/cern.ch/work/s/shearsop/private/baobab-prod/shears/ntuple_production/xsec.txt --report "$mailbox")
 	echo "Checking if some tasks need to be submitted..."
 	("$mydir/grow_baobabs" --new-jobs)
 	echo "Task summary:"

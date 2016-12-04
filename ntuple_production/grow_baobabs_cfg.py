@@ -76,6 +76,10 @@ if opt.prodEra in [ "13TeV_25ns", "13TeV_25ns_silver", "13TeV_25ns_silver"]:
     reapply_jec = True
     jec_file = False
     eg_corr = True   #photon and electron correction
+    eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"
+    eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"
+
+
 else:
 #for 80x:
   dataGlobalTag = '80X_dataRun2_2016SeptRepro_v4'
@@ -83,6 +87,8 @@ else:
   triggerMenu = '2016'
   reapply_jec = False
   eg_corr = True
+  eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
+  eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
 #endif
 
 include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
@@ -240,7 +246,8 @@ if eg_corr:
                                                 isMC = cms.bool(opt.isMC != 0),
                                                 # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
                                                 isSynchronization = cms.bool(False),
-                                                correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"))
+                                                correctionFile = cms.string(eg_corr_phot_file)
+                                                )
   
   #copied from  EgammaAnalysis/ElectronTools/python/calibratedElectronsRun2_cfi.py')
   process.calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2", 
@@ -252,7 +259,7 @@ if eg_corr:
                                                   isMC = cms.bool(opt.isMC != 0),
                                                   # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
                                                   isSynchronization = cms.bool(False),
-                                                  correctionFile = cms.string("EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele")
+                                                  correctionFile = cms.string(eg_corr_el_file)
                                                   )
   electronSrc = "calibratedPatElectrons"
   photonSrc   = "calibratedPatPhotons"

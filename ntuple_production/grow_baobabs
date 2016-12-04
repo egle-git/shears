@@ -1590,7 +1590,7 @@ def tasks_prepare_and_submit(prim_dataset, task_id, dataset, json_file, datatype
         raise RuntimeError("\nInternal error. Inconsistency in primary dataset name.")
 
     #FIXME: defines prod era by another mean than current directory name? A parameter in datasets.txt file?
-    prodEra = os.path.basename(os.getcwd())
+    prodEra = os.path.basename(os.path.dirname(os.getcwd()))
 
     toks = dataset.split('/')
     recoTag = toks[2]

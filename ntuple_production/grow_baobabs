@@ -67,6 +67,9 @@ das_cert = das_ckey
 try:
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException, TaskNotFoundException, CachefileNotFoundException, ConfigurationException, ConfigException, UsernameException, ProxyException
+    from CRABClient.Commands import status as crabStatus
+    from CRABClient.ClientUtilities import initLoggers, flushMemoryLogger, removeLoggerHandlers
+
 except ImportError:
     sys.stderr.write("\nFatal error: CRAB 3 environment needs to be set before running this script.\n")
     sys.exit(1)
@@ -475,6 +478,24 @@ def check_environment():
 #    except CRABClient.ClientExceptions.ClientException, e:
 #        sys.stderr.write("\n%s\n" % e.message)
 #        return None
+
+def crab_status(args):
+    tblogger, logger, memhandler = initLoggers()
+    try:
+        cs = crabStatus.status(logger, args)
+        res = cs()
+        jobSetID = cs.cachedinfo["RequestName"]
+    except SystemExit as se:
+        # most likely an error from the OptionParser in Subcommand.
+        # CRABClient #4283 should make this less ugly
+        if se.code == 2:
+            raise CRABAPI.BadArgumentException
+    finally:
+        flushMemoryLogger(tblogger, memhandler, logger.logfile)
+        removeLoggerHandlers(tblogger)
+        removeLoggerHandlers(logger)
+    return res, jobSetID
+
 
 def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag, dataTier):
     """Builds the crab configuration file."""
@@ -1739,25 +1760,24 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'. Database will be fixed by setting it to %s.\n" % (dataset, task_id, requestname))
                             db_update_task_record(prim_dataset, task_id, {'requestname': requestname});
                         print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
+                        crab_status_args = [ "-d", requestname]
+                        if  args.verbosity > 0:
+                            crab_status_args += [  '--verboseErrors' ]
                         if args.verbosity > 1:
-                            res = crabCommand("status", "-d", requestname, '--verboseErrors', '--long')
-                        elif  args.verbosity > 0:
-                            res = crabCommand("status", "-d", requestname, '--verboseErrors')
-                        else:
-                            res = crabCommand("status", "-d", requestname)
-#                        print "Status of request %s: " % requestname, res
-                        if not ntuple_subdir and 'jobSetID' in res and res['jobSetID']:
+                            crab_status_args += [ '--long' ]
+                        res, jobSetID = crab_status(crab_status_args)
+#                        print "Status of request %s: " % requestname, res, request_name
+                        if not ntuple_subdir:
                             #jobSetID example: 150930_085838:pgras_crab_DoubleMuon-0001
                             # ->  ntuple dir: crab_DoubleMuon-0001/150930_085838
                             jobsetid_re = re.compile(r'([^:]+):[^_]*_(.*)')
-                            m = jobsetid_re.match(res['jobSetID'])
+                            m = jobsetid_re.match(jobSetID)
                             if m:
                                 ntuple_subdir = prim_dataset + '/' + m.groups()[1] + '/' + m.groups()[0]
                                 print "Nutple subdir was missing in database. It will be set to %s." % ntuple_subdir
                                 db_update_task_record(prim_dataset, task_id, {'ntuple_subdir': ntuple_subdir});
                         if not ntuple_subdir:
                             print "Nutple subdir was missing in database and we failed to fix it."
-                            continue
                         db_update_processing_stat(prim_dataset, task_id, res["jobList"]);
                         break
                     except HTTPException, e:

@@ -42,10 +42,37 @@ A list of available selections can be obtained with the command:
 
 `./pruner --list-selection`
 
+Using Pruner to skim event content
+----------------------------------
+
+In the Quick start section, we have described how to use Pruner to filer events. Pruner can also be used to filter the event content and produce an ntuple where only a selection of branches are copied. This is done in three steps:
+
+1. Generation of a file with the list of branches of the input ntuple;
+2. Making the list of the list of the branch to copy using the branch names as appearing in the file generated in the first step. You can edit directly the file and delete from it all the branches which should not be copiedl
+3. Production of the skimmed ntuple.
+
+To generate the file, we will call `branch_list.txt`, you should run the command:
+
+`./pruner -o branch_list.txt --make-branch-list -c CATALOG`
+
+where you have replaced `CATALOG` with your input ntuple catalog file. When running on a single file, the option `-c CATALOG` can be replaced by the `.root` file path.
+
+After having edited the `branch_list.txt` to keep only the branch to be copied, performs the step 3 by running:
+
+`./pruner --branches-from branch_list.txt -o skim.root -c CATALOG`
+
+with the same remark than above for `-s CATALOG`
+
+*Note 1*: the `--branches-from` option can be combined with a selector (`--selection` and `--sub-selection` options) to filter at the same time events and the content of the selected events.
+
+*Note 2*: the `--branches-from` option should cover most of the needs. Nevertheless, more advanced branch selection can be done by implementing your own selection c++ class as described in the next section.
+
 Implementing a new selection
 ----------------------------
 
-Implementing an event and event content selection is relatively easy. You need to write a C++ class, where you wil code the event and event content selection. The description of the class to write follows:
+Implementing an event and event content selection is relatively easy. You need
+to write a C++ class, where you wil code the event and event content
+selection. The description of the class to write follows:
 
 ```c++
 //The four following lines are needed to import
@@ -106,21 +133,16 @@ subselection should be used. Example:
          ...
    }
 
-The filterBranch can be overridden for a custom branch selection. The default one
-read the list of branches to copy from a text file. This default branch filter
-covers most of the needs. A template of the branch list file can be produced
-with the command:
+The filterBranch can be overridden for a custom branch selection. The default
+one reads the list of branches to copy from a text file. This default branch
+filter covers most of the needs and its usage is described in the previous section "Using
+Pruner to skim event content".
 
-`./pruner -o branch_list.txt --make-branch-list -c CATALOG`
-
-Instead of `-c CATALOG` you can specify one input ntuple file. Then you can edit
-the branch_list.txt file and delete the branches you don't what to copy.
-
-The new Pruner can then be used from the pruner application using the
---selection option. Note that the pruner application will need to be recompiled,
-which is done automatically when the make command is run in the Pruner
-folder. The new Pruner should appear in the selection list displayed with the
-command,
+One the selection class written and compiled, it can be used from the pruner
+application using the --selection option. Note that the pruner application will
+need to be recompiled, which is done automatically when the make command is run
+in the Pruner folder. The new Pruner should appear in the selection list
+displayed with the command,
 
 `./pruner --list-selections` .
 
@@ -206,7 +228,7 @@ Following features are under development and will be available soon:
 ShearsTChain
 ============
 
-This directory contains also a utility class to read Boabab and Bonzai ntuples and extending the TChain functionnality. It gets the list of ntuple file from a shears catalog file. The class, ShearsTChain, inherits from TChain and provides all the functionnality, like Draw() of TChain and TTree. It can be used from root prompt as the following:
+This directory contains also a utility class to read Boabab and Bonzai ntuples and extending the TChain functionality. It gets the list of ntuple file from a shears catalog file. The class, ShearsTChain, inherits from TChain and provides all the functionality, like Draw() of TChain and TTree. It can be used from root prompt as the following:
 
 .L ShearsTChain.cc++
 ShearsTChain tc

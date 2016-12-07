@@ -139,6 +139,8 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
     string ZpTVis = "p_{T} balance [GeV]";
     string HRecoi = "Hadronic Recoil [GeV]";
     string JZb = "JZB [GeV]";
+    string JZb_low = "JZB at low Z_{pT} [GeV]";
+    string JZb_high = "JZB at high Z_{pT} [GeV]";
     string HT = "H_{T}(jets) [GeV]", Mjj = "M_{j_{1}j_{2}} [GeV]", jSpt = "#Delta_{pT}^{rel}(j_{1}j_{2})", jdPhi = "#Delta#phi(j_{1}j_{2})", jdEta = "#Delta#eta(j_{1}j_{2})";
     string Mll = "M_{#mu#mu} [GeV]", leta = "#eta(#mu)", lphi = "#phi(#mu)",lpT = "p_{T}(#mu) [GeV]", ldPhi = "#Delta#phi(#mu_{1}#mu_{2})", ldEta = "#Delta#eta(#mu_{1}#mu_{2})", ldR = "#DeltaR(#mu_{1}#mu_{2})";
     string lSpt = "#Delta_{pT}^{rel}(#mu_{1}#mu_{2})";
@@ -197,21 +199,23 @@ int nZPt_Zinc0jet(22);
     int nZPt_Zinc2jet(32);
     double zPt_Zinc2jet[33] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 590, 800};
 
-    int nZPt_Zinc2jetQun(15);
-    double zPt_Zinc2jetQun[16] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
+    int nZPt_Zinc2jetQun(11);
+    double zPt_Zinc2jetQun[12] = {0, 10, 20, 35, 50, 65, 80, 100, 125, 150, 175, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
+    int nZPt_Zinc2JetQun(10);
+    double zPt_Zinc2JetQun[11] = {0, 15, 30, 45, 60, 80, 100, 125, 150, 175, 200};
+    int nZPt_Zinc3jetQun(8);
+    double zPt_Zinc3jetQun[9] = {0, 20, 40, 65, 90, 120, 150, 175, 200};
+    int nZPt_Zinc2jetQunJZB(16);
+    double zPt_Zinc2jetQunJZB[17] = {-200, -165, -140, -105, -80, -60, -40, -20, 0, 20, 40, 60, 85, 110, 140, 165, 200};
+    int nZPt_Zinc2jetQunJZBptHigh(11);
+    double zPt_Zinc2jetQunJZBptHigh[12] = { -165, -125, -95, -70, -45, -20, 0, 25, 55, 85, 120, 150};
     //int nZPt_Zinc2jetQunJZB(30);
     //double zPt_Zinc2jetQunJZB[31] = {-200, -180, -160, -140, -120, -100, -90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
 
+    int nZPt_Zinc1jetQunJZB(10);
+    double zPt_Zinc1jetQunJZB[11] = {-50, -30, -15, 0, 15, 30, 50, 75, 105, 150, 200};
     //int nZPt_Zinc1jetQunJZB(20);
     //double zPt_Zinc1jetQunJZB[21] = {-200, -180, -160, -140, -120, -100, -90, -80, -70, -60, -50, -40, -30, -20, -10, 0, 10, 20, 30, 40, 50};//, 260, 400};// 240, 260, 280, 300, 400, 800};
-    int nZPt_Zinc2JetQun(13);
-    double zPt_Zinc2JetQun[14] = {0, 10, 20, 30, 40, 55, 70, 85, 100, 120, 140, 160, 180, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
-    int nZPt_Zinc3jetQun(11);
-    double zPt_Zinc3jetQun[12] = {0, 15, 30, 45, 60, 75, 90, 110, 135, 160, 180, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
-    int nZPt_Zinc1jetQunJZB(14);
-    double zPt_Zinc1jetQunJZB[15] = {-240, -180, -150, -120, -90, -70, -50, -35, -20, -10, 0, 10, 20, 35, 50};//, 260, 400};// 240, 260, 280, 300, 400, 800};
-    int nZPt_Zinc2jetQunJZB(22);
-    double zPt_Zinc2jetQunJZB[23] = {-240, -190, -165, -140, -115, -90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 115, 140, 165, 190, 240};//, 260, 400};// 240, 260, 280, 300, 400, 800};
     int nZPt_Zinc4jetQun(8);
     double zPt_Zinc4jetQun[9] = {0, 15, 30, 45, 60, 80, 120, 160, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
 
@@ -274,7 +278,7 @@ int nZPt_Zinc0jet(22);
 
 
     int nJetHT_Zinc3jet(8);
-    double jetHT_Zinc3jet[9] = {90, 118, 168, 220, 300, 400, 550, 780, 1100};
+    double jetHT_Zinc3jet[9] = {90, 130, 168, 220, 300, 400, 550, 780, 1100};
   //  double jetHT_Zinc3jet[10] = {30, 41, 59, 83, 118, 168, 220, 300, 400, 550}; 
 
    vector<double> jetHT_2_Zinc3jet;
@@ -312,10 +316,10 @@ int nZPt_Zinc0jet(22);
     genHadRecoil                        = newTH1D("genHadRecoil",                        "genHadRecoil p_{T} (N_{jets} #geq 1)",        HRecoi,    nZPt_Zinc1jet, zPt_Zinc1jet);
     JZB                                 = newTH1D("JZB", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     genJZB    		                = newTH1D("genJZB",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    JZB_bin1                                 = newTH1D("JZB_bin1", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
-    genJZB_bin1    		                = newTH1D("genJZB_bin1",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
-    JZB_bin2                                 = newTH1D("JZB_bin2", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    genJZB_bin2    		                = newTH1D("genJZB_bin2",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
+    JZB_ptLow                                 = newTH1D("JZB_ptLow", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb_low,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
+    genJZB_ptLow    		                = newTH1D("genJZB_ptLow",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb_low,    nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
+    JZB_ptHigh                                 = newTH1D("JZB_ptHigh", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb_high,    nZPt_Zinc2jetQunJZBptHigh, zPt_Zinc2jetQunJZBptHigh);
+    genJZB_ptHigh    		                = newTH1D("genJZB_ptHigh",     		         "gen JZB p_{T} (N_{jets} #geq 1)",             JZb_high,    nZPt_Zinc2jetQunJZBptHigh, zPt_Zinc2jetQunJZBptHigh);
 
     ZPt_Zinc2jet                        = newTH1D("ZPt_Zinc2jet",                        "Z p_{T} (N_{jets} #geq 2)",                   ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
     genZPt_Zinc2jet                     = newTH1D("genZPt_Zinc2jet",                     "gen Z p_{T} (N_{jets} #geq 2)",               ZpT,    nZPt_Zinc2jet, zPt_Zinc2jet);
@@ -619,8 +623,8 @@ int nZPt_Zinc0jet(22);
     hresponseZPt_Zinc1jet = newTH2D("hresponseZPt_Zinc1jet","hresponseZPt_Zinc1jet",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseHadRecoil = newTH2D("hresponseHadRecoil","hresponseHadRecoil",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseJZB        = newTH2D("hresponseJZB",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
-    hresponseJZB_bin1        = newTH2D("hresponseJZB_bin1",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB, nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
-    hresponseJZB_bin2        = newTH2D("hresponseJZB_bin2",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
+    hresponseJZB_ptLow        = newTH2D("hresponseJZB_ptLow",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB, nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
+    hresponseJZB_ptHigh        = newTH2D("hresponseJZB_ptHigh",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZBptHigh, zPt_Zinc2jetQunJZBptHigh, nZPt_Zinc2jetQunJZBptHigh, zPt_Zinc2jetQunJZBptHigh);
     hresponseZPt_Zinc2jet = newTH2D("hresponseZPt_Zinc2jet","hresponseZPt_Zinc2jet",nZPt_Zinc2jet, zPt_Zinc2jet, nZPt_Zinc2jet, zPt_Zinc2jet);
     hresponseZAbsRapidity_Zinc1jet = newTH2D("hresponseZAbsRapidity_Zinc1jet", "hresp ZAbsRapidity_Zinc1jet", 12, 0., 2.4, 12, 0., 2.4); 
 

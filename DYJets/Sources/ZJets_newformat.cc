@@ -1569,9 +1569,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 }
 		if (nGoodGenJets >= 1) {
 		    genHadRecoil->Fill(genHadronicR.Pt(),commonGenWeight, EvtWeights);
-		    genJZB->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
-		    if(EWKBoson.Pt()<= 50)	   genJZB_bin1->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
-		    else 			   genJZB_bin2->Fill(-genHadronicR.Pt()+genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+		    genJZB->Fill(genHadronicR.Pt()-genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+		    if(EWKBoson.Pt()<= 50)	   genJZB_ptLow->Fill(genHadronicR.Pt()-genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+		    else 			   {genJZB_ptHigh->Fill(genHadronicR.Pt()-genEWKBoson.Pt(), commonGenWeight, EvtWeights);}
 		}
             }
         }
@@ -2330,9 +2330,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    
 	    if (nGoodJets >= 1){
 	        HadRecoil->Fill(hadronicR.Pt(),weight);
-		JZB->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
-		if(EWKBoson.Pt()<= 50)	JZB_bin1->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
-		else				JZB_bin2->Fill(-hadronicR.Pt()+EWKBoson.Pt(), weight);
+		JZB->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		if(EWKBoson.Pt()<= 50)	JZB_ptLow->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		else				{JZB_ptHigh->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);}
 	    }
             //=======================================================================================================//
         }
@@ -2767,9 +2767,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 	    if (nGoodGenJets >= 1 && passesgenLeptonCut && nGoodJets >= 1 && passesLeptonCut) {
 		hresponseHadRecoil->Fill(hadronicR.Pt(), genHadronicR.Pt(), weight);
-		hresponseJZB->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
-		if(EWKBoson.Pt()<= 50)	hresponseJZB_bin1->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
-		else				hresponseJZB_bin2->Fill((-hadronicR.Pt()+EWKBoson.Pt()), (-genHadronicR.Pt()+genEWKBoson.Pt()),  weight);
+		hresponseJZB->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
+		if(EWKBoson.Pt()<= 50)	hresponseJZB_ptLow->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
+		else				{hresponseJZB_ptHigh->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);}
 	    }
         }
         //=======================================================================================================//

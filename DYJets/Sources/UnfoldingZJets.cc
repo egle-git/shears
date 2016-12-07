@@ -48,6 +48,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     int start = 0;
     int end = NVAROFINTERESTZJETS;
 
+    TString sysPlotDir = unfoldDir.Strip(TString::kTrailing, '/') + "SysPlots";
+
+
     if (variable != "") {
         start = findVariable(variable);
         if (start >= 0) {
@@ -343,8 +346,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	  continue;
 	}
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
-				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy,
-				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi,
+				  unfoldDir, logy, hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
 
 	//--- save the unfolded histograms ---
 	outputRootFile->cd(); 
@@ -412,7 +415,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
 
       if(whichSyst < 0){
-	  createSystPlots(outputFileName, variable, lepSel, hUnfData, logy);
+	  createSystPlots(outputFileName, sysPlotDir, variable, lepSel, hUnfData, logy);
       //--- print out break down of errors ---
 	  for (int i = 2; i <= nCovs; ++i) {
 	  cout << hUnfData[0]->GetBinContent(i);
@@ -469,7 +472,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
 }
 
-void createSystPlots(TString outputFileName, TString variable, TString lepSel, TH1D *hUnfData[], bool logy)
+void createSystPlots(TString outputFileName, TString sysPlotDir, TString variable, 
+		     TString lepSel, TH1D *hUnfData[], bool logy)
 {
 
   // 0 - Central, 
@@ -573,13 +577,13 @@ void createSystPlots(TString outputFileName, TString variable, TString lepSel, T
 
 	TString systStr = syst[i/2];
 	if (systStr == "S.F.") systStr = "SF";
-	system("mkdir SystPlot");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".png");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".ps");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".eps");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".pdf");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".C");
-	c->SaveAs("SystPlot/" + lepSel + "_" + variable + "_" + systStr + ".root");
+	system("mkdir " + sysPlotDir);
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".png");
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".ps");
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".pdf");
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
+	c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");
     }
 }
 
@@ -773,7 +777,7 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp,
 	       TH1D* hRecDataMinusFakes,
 	       TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, 
-	       double integratedLumi, bool logy,
+	       double integratedLumi, const TString& unfoldDir, bool logy,
 	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
 {
     //--- make sure we use OverFlow (should already be set to true) ---
@@ -795,8 +799,9 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
     std::cout << "-----------------------" << std::endl;
     TString variable = TString(hRecDataMinusFakes->GetName());
-    system("mkdir UnfoldingCheck/");
-    TFile *f = new TFile("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    TString unfoldCheckDir = unfoldDir.Strip(TString::kTrailing, '/') + "Check";
+    system(TString("mkdir ") + unfoldCheckDir + "/");
+    TFile *f = new TFile(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
     f->cd();
 
     TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable.Data(), name.Data()));

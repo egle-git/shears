@@ -265,14 +265,27 @@ int main(int argc, char **argv)
 		if(iSyst >= NSystMC) continue;
 	    } else {//alternative DY
 		hasRecoInfo = true;
-		if (doWhat != "MG_MLM" && doWhat != "ALL") continue;
+		if (Samples[iSample].name.CompareTo(doWhat, TString::kIgnoreCase) != 0
+		    && Samples[iSample].name.CompareTo(TString("DYJets_") + doWhat, TString::kIgnoreCase) != 0
+		    &&  doWhat != "ALL") continue;
+		if(cfg.getS(TString("sample_") + Samples[iSample].name).size()==0){
+		    if(doWhat == "ALL"){
+			std::cerr << "Info: sample " << Samples[iSample].name << " won't be processed"
+			     << " in absence of the parameter sample_" << Samples[iSample].name
+			     << " in the configuration file.\n";
+		    } else {
+			std::cerr << "Error: the parameter sample_" << Samples[iSample].name 
+				  << " is mising from the configuration file to run with option doWhat=" 
+				  << doWhat <<".\n";
+		    }
+		    continue;
+		}
+		if(iSyst != 0) continue;
 		hasGenInfo  = true;
 		syst = mcSignalSyst;
 		systDir = mcSignalDir;
 		bonzaiDir = mcBonzaiDir;
 		yieldScale = mcYieldScale;
-		if (doWhat != "DYJETS" && doWhat != "ALL") continue;
-		if(iSyst != 0) continue;
 	    }
 	
 	    if(Samples[iSample].merge == '='){//sample is a merge of previous one
@@ -297,7 +310,6 @@ int main(int argc, char **argv)
 			  << " needs to be defined in configuration file with sample_Data parameter.";
 		return 1;
 	    }
-
 	    ZJets ana(lepSel, Samples[iSample].name, TString::Format(input, lepSel.Data()), lumi,  trigCorr,
 		      syst[iSyst], systDir[iSyst], Samples[iSample].xsecError,
 		      lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,

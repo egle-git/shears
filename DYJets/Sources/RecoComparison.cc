@@ -320,6 +320,7 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         TString outputFileBase = outputFileName + "/" + vhNames[i];
 	canvas->SaveAs(outputFileBase + ".root");
 	canvas->SaveAs(outputFileBase + ".C");
+	canvas->SaveAs(outputFileBase + ".png");
 
         hSumMC[i]->SetMaximum(1.5*hSumMC[i]->GetMaximum());
         TCanvas *tmpCanvas = (TCanvas*) canvas->Clone();

@@ -337,7 +337,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	}
 
 	if(nEvents == 0 && !EvtIsRealData){
-	    norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
+	    if(xsec_ == 0){
+		std::cerr << "Warning: cross section value for MC sample " << sampleLabel_
+			  <<  " is null or was not specified. We will assume the event"
+			  << " weights are normalizes such that the cross section on pb "
+			  << " is equal to the sum of weights divivided by the numnber of events\n";
+		norm_ = yieldScale * lumi_ * 1. * xsecFactor_ * skimAccep_[0];
+	    } else{
+		norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
+	    }
 	    if(norm_ == 0){
 		std::cerr << "Error: normaliation factor for sample " << fileName
 			  << " is null! Aborts at " __FILE__ ":" 
@@ -620,7 +628,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         double genMT = -99;
         TLorentzVector genEWKBoson;
         int countTauS3 = 0;
-
+	
         if (hasGenInfo) {
             // CommentAG: this line is commented because can't do countTauS3-- since status 3 is not stored
             // if (hasRecoInfo) countTauS3 = (lepSel == "DMu" || lepSel == "DE") ? 2 : 1; // AG
@@ -637,6 +645,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 		bool passesTauVeto = true;
 		if(GLepBarePrompt) passesTauVeto = (*GLepBarePrompt)[i];
+
 		if(!passesTauVeto) continue;
 		
                 if (!lepToBeConsidered) continue;
@@ -673,7 +682,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
 
             ngenLeptons = genLeptons.size();
-
 
             // sort leptons by descending pt
             sort(genLeptons.begin(), genLeptons.end(), LepDescendingOrder);
@@ -2814,7 +2822,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         string hName = listOfHistograms[i]->GetName();
         if ((!hasGenInfo && hName.find("gen") != string::npos) || (!hasRecoInfo && hName.find("gen") == string::npos)) continue; 
 	//finalize normalisation of MC histograms:
-	double a = 1./processedEventMcWeightSum_;
+	double a;
+	if (xsec_ > 0 ){
+	    a = 1./processedEventMcWeightSum_;
+	} else{
+	    a = 1./nEvents;
+	}
 	if(!EvtIsRealData){
 	    listOfHistograms[i]->Scale(a);
 	}
@@ -2857,7 +2870,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     cout << "Number of events passing the trigger                      : " << nEventsPassingTrigger << "\n";
     cout << "Number with two good leptons (gen)                        : " << nEventsWithTwoGoodLeptons 
 	 << " (" << nGenEventsWithTwoGoodLeptons << ")" << endl;
-    cout << "Number with two good leptons of opp. charge (gem)         : " << nEventsWithTwoGoodLeptonsWithOppCharge 
+    cout << "Number with two good leptons of opp. charge (gen)         : " << nEventsWithTwoGoodLeptonsWithOppCharge 
 	 << " (" << nGenEventsWithTwoGoodLeptonsWithOppCharge << ")" << endl;
     cout << "Number with two good leptons of opp. charge and good mass : " << nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass 
 	 << " (" << nGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass << ")" << endl;
@@ -2888,10 +2901,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     cout << "Eff. number GEN Inclusif V + 3 jets                            : " << nEffGenEventsVInc3Jets << endl;
     cout << "Sum of MC event weights                                        : " << processedEventMcWeightSum_ << endl;
     if(!EvtIsRealData){
-    cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
-	     << yieldScale << "*" << lumi_ << "*" << xsec_ << "*"
-	     << skimAccep_[0] << "/" << processedEventMcWeightSum_
-	     << "*" << xsecFactor_ << " = " << norm_ / processedEventMcWeightSum_ << endl;
+	if(xsec_ > 0){
+	    cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
+		 << yieldScale << "*" << lumi_ << "*" << xsec_ << "*"
+		 << skimAccep_[0] << "/" << processedEventMcWeightSum_
+		 << "*" << xsecFactor_ << " = " << norm_ / processedEventMcWeightSum_ << endl;
+	} else{
+	    cout << "MC norm., yield_scale*lumi*skim_accep/n_events*unc_var. : " 
+		 << yieldScale << "*" << lumi_ << "*"
+		 << skimAccep_[0] << "/" << nEvents
+		 << "*" << xsecFactor_ << " = " << norm_ / nEvents << endl;
+	}
     }
 }
 
@@ -3115,10 +3135,12 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
 			  &fullFileName, &baseName);
 
     fileName = baseName;
+    
+    Input->SetTitle(fullFileName);
 
     readCatalog(fullFileName, bonzaiDir, maxFiles, &lumi_, &xsec_,
-		fChain, &fBonzaiHeaderChain, &fBonzaiBitFieldsChain);
-    
+		fChain, &fBonzaiHeaderChain, &fBitFieldsChain);
+
     getMcNorm();
 
     if(!setTriggerMask()){
@@ -3161,7 +3183,7 @@ void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileN
 
 void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, int maxFiles,
 			double* pLumi, double* pXsec, TChain* pEventTreeChain,
-			TChain* pBonzaiHeaderChain, TChain* pBonzaiBitFieldsChain){
+			TChain* pBonzaiHeaderChain, TChain* pBitFieldsChain){
     regex_t xsecLine;
     int rc =  regcomp(&xsecLine,"[#*][[:space:]]*sample xsec[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
     if(rc){
@@ -3180,95 +3202,131 @@ void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, i
     	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
     }
     
-    
     if (isRootFile(fullFileName)){
         TString treePath = fullFileName + "/tupel/EventTree";
 	TString bonzaiHeaderPath = fullFileName + "/tupel/BonzaiHeader";
 	TString bonzaiBitFieldsPath = fullFileName + "/tupel/BitFields";
         cout << "Loading file: " << fullFileName << endl;
         if(pEventTreeChain) pEventTreeChain->Add(treePath);
-	if(pBonzaiHeaderChain) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
-	if(pBonzaiBitFieldsChain) pBonzaiBitFieldsChain->Add(bonzaiBitFieldsPath);
+	if(pBonzaiHeaderChain){
+	    //check presence of the BonzaiHeader tree:
+	    TFile* f = TFile::Open(fullFileName);
+	    if(f && !f->IsZombie()){
+		if(f->GetDirectory("tupel")->FindKey("BonzaiHeader")){
+		    pBonzaiHeaderChain->Add(bonzaiHeaderPath);
+		} else{
+		    std::cerr << "Warning: the tree BonzaiHeader was not found in file "
+			      << fullFileName
+			      << ". We will assume we run on a boabab file and not Baobab->Bonzai "
+			      << "acceptance correction will be considered. This message can be ignored "
+			      << "if for this sample Boabab ntuples are usd as input.\n";
+		}
+	    }
+	}
+	if(pBitFieldsChain) pBitFieldsChain->Add(bonzaiBitFieldsPath);
     } else {
-	int (*closeFunc)(FILE*);
-	FILE* f = eosOpen(fullFileName, &closeFunc);
-	if(!f){
-	    std::cerr << "Failed to  open file " << fullFileName << ".\n";
-	} else{
-	    std::cout << "Reading input files from catalog file " << fullFileName << "\n";
-	    string line; 
-	    char* buffer = 0;
-	    size_t buffer_size = 0;
-	    int ifile = 0;
-	    //if maxFiles = 0 only catalog header is read.
-	    while (!feof(f)){
-		ssize_t len = getline(&buffer, &buffer_size, f);
-		if(len  < 0) break;
-		char* line = buffer;
-		size_t n = len - 1;
-		//trim white spaces:
-		while(line[0] == ' ' || line[0] == '\t') {++line; --n;}
-		while(n >=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
-		    line[n] = 0; --n;
-		}
-
-		regmatch_t pmatch[2];
-		if(pXsec && !regexec(&xsecLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
-		    line[pmatch[1].rm_eo] = 0;
-		    *pXsec = strtod(line + pmatch[1].rm_so, 0);
-		    if(*pXsec == 0){
-			std::cerr << "Value of parameter 'sample xsec', " << line + pmatch[1].rm_so
-				  << " found in file " << fullFileName << " is not valid.\n";
+	    int (*closeFunc)(FILE*);
+	    FILE* f = eosOpen(fullFileName, &closeFunc);
+	    if(!f){
+		std::cerr << "Failed to  open file " << fullFileName << ".\n";
+	    } else{
+		std::cout << "Reading input files from catalog file " << fullFileName << "\n";
+		string line; 
+		char* buffer = 0;
+		size_t buffer_size = 0;
+		int ifile = 0;
+		//if maxFiles = 0 only catalog header is read.
+		enum {False = 0, True, Unknown } isBonzai = Unknown;
+		while (!feof(f)){
+		    ssize_t len = getline(&buffer, &buffer_size, f);
+		    if(len  < 0) break;
+		    char* line = buffer;
+		    size_t n = len - 1;
+		    //trim white spaces:
+		    while(line[0] == ' ' || line[0] == '\t') {++line; --n;}
+		    while(n >=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
+			line[n] = 0; --n;
 		    }
-		}
-		else if(pLumi && !regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
-		    line[pmatch[1].rm_eo] = 0;
-		    *pLumi = strtod(line + pmatch[1].rm_so, 0);
-		    if(*pLumi == 0){
-			std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
-				  << " found in file " << fullFileName << " is not valid.\n";
-		    }
-		}
-		
-		//skip empty lines,  comment lines and metadata lines:
-		if (line[0] == 0 || line[0] == '#' || line[0] == '*') continue;
-		
-		if(maxFiles == 0 || (pEventTreeChain == 0 && pEventTreeChain ==0)) break;
-		
-		//keep content of first column only:
-		char* p = line;
-		while(*p != 0 && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') ++p;
-		*p = 0;
 
-		//following check is done having read the header
-		//such that maxFiles = 0 can be used to read only
-		//the header.
-		if(maxFiles >= 0 && ifile >= maxFiles) break;
+		    regmatch_t pmatch[2];
+		    if(pXsec && !regexec(&xsecLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+			line[pmatch[1].rm_eo] = 0;
+			*pXsec = strtod(line + pmatch[1].rm_so, 0);
+			if(*pXsec == 0){
+			    std::cerr << "Value of parameter 'sample xsec', " << line + pmatch[1].rm_so
+				      << " found in file " << fullFileName << " is not valid.\n";
+			}
+		    }
+		    else if(pLumi && !regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
+			line[pmatch[1].rm_eo] = 0;
+			*pLumi = strtod(line + pmatch[1].rm_so, 0);
+			if(*pLumi == 0){
+			    std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
+				      << " found in file " << fullFileName << " is not valid.\n";
+			}
+		    }
 		
-		TString treePath = TString(line) + "/tupel";
-		if(treePath[0]!='/'){
-		    treePath.Insert(0, TString(bonzaiDir) + "/");
-		}
-		if(treePath.BeginsWith("/store/")){
-		    treePath.Insert(0, "root://eoscms.cern.ch//eos/cms");
-		}
-		TString bonzaiHeaderPath = treePath + "/BonzaiHeader";
-		TString bonzaiBitFieldsPath = treePath + "/BitFields";
-		treePath += "/EventTree";
-		std::cout << "Adding path " << treePath << " to the tree chain.\n";
-		if(pEventTreeChain) pEventTreeChain->Add(treePath);
-		if(pBonzaiHeaderChain) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
-		if(pBonzaiBitFieldsChain) pBonzaiBitFieldsChain->Add(bonzaiBitFieldsPath);
-		++ifile;
-	    }//next line
-	    std::cout << "Closing catalog file " << fullFileName << "\n";
-	    if(buffer) free(buffer);
-	    closeFunc(f);
-	} //file opening succeeded
-    }//is root file
-    regfree(&xsecLine);
-    regfree(&lumiLine);
-}
+		    //skip empty lines,  comment lines and metadata lines:
+		    if (line[0] == 0 || line[0] == '#' || line[0] == '*') continue;
+		
+		    if(maxFiles == 0 || (pEventTreeChain == 0 && pEventTreeChain ==0)) break;
+		
+		    //keep content of first column only:
+		    char* p = line;
+		    while(*p != 0 && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') ++p;
+		    *p = 0;
+
+		    //following check is done having read the header
+		    //such that maxFiles = 0 can be used to read only
+		    //the header.
+		    if(maxFiles >= 0 && ifile >= maxFiles) break;
+		
+		    TString filePath = TString(line);
+
+		    if(filePath[0]!='/'){
+			filePath.Insert(0, TString(bonzaiDir) + "/");
+		    }
+		    if(filePath.BeginsWith("/store/")){
+			filePath.Insert(0, "root://eoscms.cern.ch//eos/cms");
+		    }
+
+		    TString treePath = filePath + "/tupel";
+		    TString bonzaiHeaderPath = treePath + "/BonzaiHeader";
+		    TString bonzaiBitFieldsPath = treePath + "/BitFields";
+		    treePath += "/EventTree";
+		    //std::cout << "Adding path " << treePath << " to the tree chain.\n";
+		    if(pEventTreeChain) pEventTreeChain->Add(treePath);
+		    
+		    if(pBonzaiHeaderChain && (isBonzai == Unknown)){
+			//check presence of the BonzaiHeader tree. It is checked
+			//only on the first file which can be succesfully opened
+			//assuming that all files of the catalog are the same.
+			TFile* f = TFile::Open(filePath);
+			if(f && !f->IsZombie()){
+			    if(f->GetDirectory("tupel")->FindKey("BonzaiHeader")){
+				isBonzai = True;
+			    } else{
+				isBonzai = False;
+				std::cerr << "Warning: the tree BonzaiHeader was not found in file "
+					  << fullFileName
+					  << ". We will assume we run on a boabab file and not Baobab->Bonzai "
+					  << "acceptance correction will be considered. This message can be ignored "
+					  << "if for this sample Boabab ntuples are usd as input.\n";
+			    }
+			}
+		    }
+		    if(isBonzai) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
+		    if(pBitFieldsChain) pBitFieldsChain->Add(bonzaiBitFieldsPath);
+		    ++ifile;
+		}//next line
+		std::cout << "Closing catalog file " << fullFileName << "\n";
+		if(buffer) free(buffer);
+		closeFunc(f);
+	    } //file opening succeeded
+	}//is root file
+	regfree(&xsecLine);
+	regfree(&lumiLine);
+    }
 
 //#define weight_bug //to read bonzai version 2.
 
@@ -3282,63 +3340,69 @@ void ZJets::getMcNorm(){
 //#else
     std::vector<Double_t>* InEvtWeightSums  = 0;
     std::vector<Double_t>* EvtWeightSums = 0;
-    fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
-    fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
-    //#endif
-    //for(Long64_t i = 0; i < nfiles; ++ i){
-    int nheaders = fBonzaiHeaderChain.GetEntries(); //can be several in case files were merged with haddd
-    for(int ientry = 0; ientry < nheaders; ++ientry){
-	fBonzaiHeaderChain.GetEntry(ientry);
-	if(ientry == 0){
-	    InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
-	    EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
-	    if(InEvtWeightSums->size() != EvtWeightSums->size()){
-		std::cerr << "InEvtWeightSums and EvtWeightSums branches "
-		    "of input BonzaiHeader tree have different size ("
-		    "resp. " << InEvtWeightSums->size() << " and "
-			  << EvtWeightSums->size() << "). Aborts at " __FILE__ ":"
+    EvtCount_ = fChain->GetEntries();
+
+    if(fBonzaiHeaderChain.GetListOfFiles()->IsEmpty()){
+	std::cerr << "Running on a boabab file, skim acceptance = 1\n";
+	skimAccep_ = std::vector<double>(1,1.);	
+    } else{
+	fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
+	fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
+	//#endif
+	//for(Long64_t i = 0; i < nfiles; ++ i){
+	int nheaders = fBonzaiHeaderChain.GetEntries(); //can be several in case files were merged with haddd
+	for(int ientry = 0; ientry < nheaders; ++ientry){
+	    fBonzaiHeaderChain.GetEntry(ientry);
+	    if(ientry == 0){
+		InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+		EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
+		if(InEvtWeightSums->size() != EvtWeightSums->size()){
+		    std::cerr << "InEvtWeightSums and EvtWeightSums branches "
+			"of input BonzaiHeader tree have different size ("
+			"resp. " << InEvtWeightSums->size() << " and "
+			      << EvtWeightSums->size() << "). Aborts at " __FILE__ ":"
+			      << __LINE__ << ".\n";
+		    abort();
+		}
+	    } 
+	    if(InEvtWeightSums->size() != InEvtWeightSums_.size()){
+		std::cerr << "Inconsistency in number of elements of "
+			  << " InEvtWeightSums branch of input files! Aborts at " __FILE__ ":" 
 			  << __LINE__ << ".\n";
 		abort();
 	    }
-	} 
-	if(InEvtWeightSums->size() != InEvtWeightSums_.size()){
-	    std::cerr << "Inconsistency in number of elements of "
-		      << " InEvtWeightSums branch of input files! Aborts at " __FILE__ ":" 
-		      << __LINE__ << ".\n";
-	    abort();
+	    if(EvtWeightSums->size() != EvtWeightSums_.size()){
+		std::cerr << "Inconsistency in number of elements of EvtWeightSums "
+		    "branch of input files! Aborts at " __FILE__ ":" << __LINE__ << ".\n";
+		abort();
+	    }
+	    for(size_t i = 0; i < InEvtWeightSums_.size(); ++i){
+		InEvtWeightSums_[i] += (*InEvtWeightSums)[i];
+	    }
+	    for(size_t i = 0; i < EvtWeightSums_.size(); ++i){
+		EvtWeightSums_[i] += (*EvtWeightSums)[i];
+	    }
+	    InEvtCount_ += InEvtCount;
 	}
-	if(EvtWeightSums->size() != EvtWeightSums_.size()){
-	    std::cerr << "Inconsistency in number of elements of EvtWeightSums "
-		"branch of input files! Aborts at " __FILE__ ":" << __LINE__ << ".\n";
-	    abort();
+	//}
+	
+	if(InEvtWeightSums_.size() > 0){
+	    std::cerr << "InEvtWeightSums_[0] = " <<	InEvtWeightSums_[0] << "\n";
 	}
-	for(size_t i = 0; i < InEvtWeightSums_.size(); ++i){
-	    InEvtWeightSums_[i] += (*InEvtWeightSums)[i];
-	}
-	for(size_t i = 0; i < EvtWeightSums_.size(); ++i){
-	    EvtWeightSums_[i] += (*EvtWeightSums)[i];
-	}
-	InEvtCount_ += InEvtCount;
-    }
-    //}
-
-    EvtCount_ = fChain->GetEntries();
-
-    if(InEvtWeightSums_.size() > 0){
-	std::cerr << "InEvtWeightSums_[0] = " <<	InEvtWeightSums_[0] << "\n";
-    }
-
-    if(EvtWeightSums_.size() == 0 || InEvtWeightSums_.size() == 0 || InEvtWeightSums_[0] == 0 ){
-	if(InEvtCount_){
-	    skimAccep_ = std::vector<double>(1, EvtCount_/InEvtCount_);
+	
+	if(EvtWeightSums_.size() == 0 || InEvtWeightSums_.size() == 0 || InEvtWeightSums_[0] == 0 ){
+	    if(InEvtCount_){
+		skimAccep_ = std::vector<double>(1, EvtCount_/InEvtCount_);
+	    } else{
+		std::cout << "Warning: InEvtCount is equal to 0. Event yield normalization might be wrong!" << std::endl;
+	    }
 	} else{
-	    std::cout << "Warning: InEvtCount is equal to 0. Event yield normalization might be wrong!" << std::endl;
+	    skimAccep_ = std::vector<double>(InEvtWeightSums_.size());
+	    for(unsigned i = 0; i < InEvtWeightSums_.size() && i < EvtWeightSums_.size(); ++i){
+		skimAccep_[i] = EvtWeightSums_[i]/InEvtWeightSums_[i];
+	    }
 	}
-    } else{
-	skimAccep_ = std::vector<double>(InEvtWeightSums_.size());
-	for(unsigned i = 0; i < InEvtWeightSums_.size() && i < EvtWeightSums_.size(); ++i){
-	    skimAccep_[i] = EvtWeightSums_[i]/InEvtWeightSums_[i];
-	}
+
     }
     //    delete InEvtWeightSums;
     //    delete EvtWeightSums;
@@ -3633,8 +3697,8 @@ bool ZJets::setTriggerMask(){
 	return true;
     }
     
-    if(fBonzaiBitFieldsChain.GetBranch(branchName)){
-	fBonzaiBitFieldsChain.SetBranchAddress(branchName, &TrigHlt);
+    if(fBitFieldsChain.GetBranch(branchName)){
+	fBitFieldsChain.SetBranchAddress(branchName, &TrigHlt);
     } else{
 	std::cerr << "Cannot set the trigger bits, because the Branch "
 		  << branchName << " was not found in the tree BitFields.\n\n";
@@ -3642,7 +3706,7 @@ bool ZJets::setTriggerMask(){
     }
 
     //FIXME: check all files?
-    if(fBonzaiBitFieldsChain.GetEntry(0)<=0){
+    if(fBitFieldsChain.GetEntry(0)<=0){
 	std::cerr << "Failed to read BitFields tree. Is the tree empty? "
 		  << "Cannot set the trigger bits.\n\n";
 	return false;	

@@ -67,6 +67,9 @@ das_cert = das_ckey
 try:
     from CRABAPI.RawCommand import crabCommand
     from CRABClient.ClientExceptions import ClientException, TaskNotFoundException, CachefileNotFoundException, ConfigurationException, ConfigException, UsernameException, ProxyException
+    from CRABClient.Commands import status as crabStatus
+    from CRABClient.ClientUtilities import initLoggers, flushMemoryLogger, removeLoggerHandlers
+
 except ImportError:
     sys.stderr.write("\nFatal error: CRAB 3 environment needs to be set before running this script.\n")
     sys.exit(1)
@@ -226,11 +229,12 @@ def eos_mount():
 
 def eos_to_local_path(path):
     myusername = pwd.getpwuid(os.getuid())[0]
-    if path.find("/store/") == 0: #path: /store/...
+    
+    if re.match('^/+store/', path): #path: /store/...
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
         return eos_mount_point.rstrip("/") + "/cms" + path
-    elif path.find("/eos/") == 0: #path: /eos/...
+    elif re.match('^/+eos/', path): #path: /eos/...
         #an eos path
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
@@ -474,6 +478,24 @@ def check_environment():
 #    except CRABClient.ClientExceptions.ClientException, e:
 #        sys.stderr.write("\n%s\n" % e.message)
 #        return None
+
+def crab_status(args):
+    tblogger, logger, memhandler = initLoggers()
+    try:
+        cs = crabStatus.status(logger, args)
+        res = cs()
+        jobSetID = cs.cachedinfo["RequestName"]
+    except SystemExit as se:
+        # most likely an error from the OptionParser in Subcommand.
+        # CRABClient #4283 should make this less ugly
+        if se.code == 2:
+            raise CRABAPI.BadArgumentException
+    finally:
+        flushMemoryLogger(tblogger, memhandler, logger.logfile)
+        removeLoggerHandlers(tblogger)
+        removeLoggerHandlers(logger)
+    return res, jobSetID
+
 
 def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, outDir, maxEvents, prodEra, recoTag, dataTier):
     """Builds the crab configuration file."""
@@ -845,8 +867,14 @@ def db_update_task_record(prim_dataset, task_id, props):
 def db_clear_task_record(prim_dataset, task_id):
     """Removes a dataset from the job management database. To be used be care."""
     conn, c = db_get_conn()
-    sql = "DELETE FROM jobs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
-    nrows = conn.execute(sql).rowcount
+    try:
+        sql = "DELETE FROM jobs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
+        nrows = conn.execute(sql).rowcount
+        sql = "DELETE FROM runs WHERE prim_dataset='%s' AND TASK_ID='%s'" % (prim_dataset, task_id)
+        conn.execute(sql)
+    except:
+        conn.rollback()
+        raise
     conn.commit()
     conn.close()
 
@@ -935,7 +963,7 @@ def db_info():
     description = r[1]
 
     try:
-        outDir, jsonFile, datasets =  catalog_read(dataset_catalog)
+        outDir, jsonFile, datasets =  catalog_read(eos_to_local_path(dataset_catalog))
     except IOError:
         outDir = "the input dataset catalog was not found."
 
@@ -1397,7 +1425,7 @@ def runspec_prettify(run_spec):
         if len(r) == 1 or (len(r) == 2 and r[0] == r[1]):
             res = res + c + "%d" % r[0]
         elif len(r) == 2:
-            if r[0] == 1 and r[1] == 999999:
+            if r[0] <= 1 and r[1] == 999999:
                 return "all"
             elif r[0] == 0:
                     res = res + c + "< %d" % (r[1] + 1)
@@ -1538,8 +1566,16 @@ def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
     prim_dataset = ds_primary_dataset(dataset)
     known = sorted(db_get_runs(prim_dataset))
     toprocess = sorted(tuple(set(available) - set(known)))
+    if args.verbosity > 1:
+        sys.stderr.write('Primary dataset: %s\n' % dataset)
+        sys.stderr.write('All runs: %s\n' % str(available))
+        sys.stderr.write('Already processed runs: %s\n'% str(known))
+        sys.stderr.write('To process: %s\n' % str(toprocess))
+        sys.stderr.write('Run specs: %s\n' % str(run_spec))
+
     if args.max_run_num:
         toprocess = [ x for x in toprocess if x < args.max_run_num ]
+
     if run_spec:
         toprocess_ = set()
         for x in toprocess:
@@ -1557,6 +1593,8 @@ def db_get_list_of_new_runs(dataset, jsonFile, run_spec = None):
         #next x
         toprocess = list(toprocess_)
     #endif run_spec
+    if args.verbosity > 1:
+        sys.stderr.write('To process after run_spec filter and max-run-num limit: %s\n' % str(toprocess))
     return toprocess
 
 # End of dataset name manipulation tools
@@ -1573,7 +1611,7 @@ def tasks_prepare_and_submit(prim_dataset, task_id, dataset, json_file, datatype
         raise RuntimeError("\nInternal error. Inconsistency in primary dataset name.")
 
     #FIXME: defines prod era by another mean than current directory name? A parameter in datasets.txt file?
-    prodEra = os.path.basename(os.getcwd())
+    prodEra = os.path.basename(os.path.dirname(os.getcwd()))
 
     toks = dataset.split('/')
     recoTag = toks[2]
@@ -1722,25 +1760,24 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             sys.stderr.write("\nWarning: problem in the production local database. Request name field is not filled for dataset '%s' task id '%d'. Database will be fixed by setting it to %s.\n" % (dataset, task_id, requestname))
                             db_update_task_record(prim_dataset, task_id, {'requestname': requestname});
                         print "Asking CRAB for status of request %s (dataset %s, task %d)" % (requestname, prim_dataset, task_id)
+                        crab_status_args = [ "-d", requestname]
+                        if  args.verbosity > 0:
+                            crab_status_args += [  '--verboseErrors' ]
                         if args.verbosity > 1:
-                            res = crabCommand("status", "-d", requestname, '--verboseErrors', '--long')
-                        elif  args.verbosity > 0:
-                            res = crabCommand("status", "-d", requestname, '--verboseErrors')
-                        else:
-                            res = crabCommand("status", "-d", requestname)
-#                        print "Status of request %s: " % requestname, res
-                        if not ntuple_subdir and 'jobSetID' in res and res['jobSetID']:
+                            crab_status_args += [ '--long' ]
+                        res, jobSetID = crab_status(crab_status_args)
+#                        print "Status of request %s: " % requestname, res, request_name
+                        if not ntuple_subdir:
                             #jobSetID example: 150930_085838:pgras_crab_DoubleMuon-0001
                             # ->  ntuple dir: crab_DoubleMuon-0001/150930_085838
                             jobsetid_re = re.compile(r'([^:]+):[^_]*_(.*)')
-                            m = jobsetid_re.match(res['jobSetID'])
+                            m = jobsetid_re.match(jobSetID)
                             if m:
                                 ntuple_subdir = prim_dataset + '/' + m.groups()[1] + '/' + m.groups()[0]
                                 print "Nutple subdir was missing in database. It will be set to %s." % ntuple_subdir
                                 db_update_task_record(prim_dataset, task_id, {'ntuple_subdir': ntuple_subdir});
                         if not ntuple_subdir:
                             print "Nutple subdir was missing in database and we failed to fix it."
-                            continue
                         db_update_processing_stat(prim_dataset, task_id, res["jobList"]);
                         break
                     except HTTPException, e:
@@ -1922,7 +1959,7 @@ inserts the task in the database. Return the task_id or None."""
         return None
     if datatype == 'mc':
         #for MC a run corresponds to a dataset extension
-        if len(run_spec) == 0 or run_spec == [[1, 999999]]: #default value used for non-specified run_spec. OK for data. Must be changed for MC
+        if len(run_spec) == 0 or run_spec == [[0, 999999]]: #default value used for non-specified run_spec. OK for data. Must be changed for MC
             run_spec = [[0, 0 ]]
         if len(run_spec) > 1 or (len(run_spec[0]) > 1 and run_spec[0][0] != run_spec[0][1]):
             if args.verbosity > 0:

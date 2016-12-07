@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     TString recoCompDir = cfg.getS("recoCompDir");
     TString lepSel      = cfg.getS("lepSel");
     int jetPtMin        = cfg.getI("jetPtMin");
-    int jetEtaMax  = cfg.getI("jetEtaMax");
+    int jetEtaMax       = cfg.getI("jetEtaMax");
     bool doPASPlots     = cfg.getB("doPASPlots");
     
     //-----------------------------------------------------------------------------

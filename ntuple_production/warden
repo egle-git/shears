@@ -18,8 +18,6 @@ die(){
 
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 
-tmp="`cd /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSSW_7_6_4 && scram runtime -sh`"
-
 [ $? = 0 ] || die "Failed to set CMSSW runtime environment. Is directory /afs/cern.ch/user/s/shearsop/work/baobab-prod/CMSS existing?"
 
 eval "$tmp"
@@ -41,7 +39,7 @@ function run(){
 	echo "Checking status of running tasks..."
 	xsec_file=xsec.txt
 	[ -f $xsec_file ] && xsec_opt="--cross-section $xsec_file" || xsec_opt=""
-	("$mydir/grow_baobabs" --check --no-crab-report-for-mc --report "$mailbox")
+	("$mydir/grow_baobabs" --check --no-crab-report-for-mc --cross-sections /afs/cern.ch/work/s/shearsop/private/baobab-prod/shears/ntuple_production/xsec.txt --report "$mailbox")
 	echo "Checking if some tasks need to be submitted..."
 	("$mydir/grow_baobabs" --new-jobs)
 	echo "Task summary:"
@@ -261,7 +259,7 @@ EOF
 
 for d in $dirs; do
     echo -n "$d " >> .warden_summary
-    (cd $d && ./grow_baobabs --show-catalog | awk -F / '{f=NF-2; if(f>0) print $f}') >> .warden_summary
+    (cd $d && "$mydir/grow_baobabs" --show-catalog | awk -F / '{f=NF-2; if(f>0) print $f}') >> .warden_summary
 done
 
 cat >> .warden_summary <<EOF

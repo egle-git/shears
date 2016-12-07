@@ -2,14 +2,18 @@
 #ifndef _HistoSetZJets_h_
 #define _HistoSetZJets_h_
 
-#include <iostream>
-#include <TH1.h>
-#include <TH2.h>
+#include "TH1.h"
+#include "TH2.h"
 #include "TAxis.h" 
-#include <TArray.h>
+#include "TArray.h"
+#include "TNamed.h"
+
+#include <iostream>
 #include <vector>
 #include <cstdarg>
 #include "GenH1D.h"
+
+
 
 using namespace std;
 
@@ -31,6 +35,8 @@ class HistoSetZJets {
         TH2D* newTH2D(string, string, int, double*, int, double, double);
         TH2D* newTH2D(string, string, int, double, double, int, double*);
         TH2D* newTH2D(string, string, int, double, double, int, double, double);
+
+	TH1D* Input;
 
 	TH1D *Lumi;
         TH1D *NumberPFcandidates;

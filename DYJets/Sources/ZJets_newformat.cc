@@ -2878,6 +2878,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     if(maxFiles_ < 0){
 	cout << "Fraction of processed events from dataset                 : " << nEvents << "/" << EvtCount_
 	     << " = " << (nEvents/double(EvtCount_)) << endl;
+	if(EvtIsRealData){
+	    cout << "\tvalue stored in file .mcYieldScale for the '--mcYieldScale -1' auto normalisation option.\n";
+	    std::ofstream f(outputDirectory + "/.mcYieldScale");
+	    f << nEvents/double(EvtCount_);
+	    f.close();
+	}
     }
     cout << "Number of events passing the trigger                      : " << nEventsPassingTrigger << "\n";
     cout << "Number with two good leptons (gen)                        : " << nEventsWithTwoGoodLeptons 

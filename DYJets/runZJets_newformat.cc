@@ -20,6 +20,7 @@ int main(int argc, char **argv)
     TString dataBonzaiDir  = cfg.getS("dataBonzaiDir");
     TString mcBonzaiDir  = cfg.getS("mcBonzaiDir");
     TString histoDir   = cfg.getS("histoDir", "HistoFiles");
+    bool fixedDir      = cfg.getB("fixedDir", 0);
     TString lepSel     = cfg.getS("lepSel", "DMu");
     TString doWhat     = cfg.getS("doWhat", "DYJETS");
     int lepPtMin       = cfg.getI("lepPtMin", 20);
@@ -81,6 +82,10 @@ int main(int argc, char **argv)
             else if (currentArg.BeginsWith("histoDir")) {
                 getArg(currentArg, histoDir);
 		cfg.set("histoDir", histoDir);
+            }
+            else if (currentArg.BeginsWith("fixedDir")) {
+                getArg(currentArg, fixedDir);
+		cfg.set("fixedDir", fixedDir);
             }
             else if (currentArg.BeginsWith("lepSel=")) {
                 getArg(currentArg, lepSel);
@@ -150,7 +155,7 @@ int main(int argc, char **argv)
 
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
-                std::cout << "\nUsage: ./runZJets [dataBonzaiDir=(path)] [mcBonzaiDir=(path)] [histoDir=(path)] [lepSel=(DMu, DE)] [algo=(Bayes, SVD)] [lepPtMin=(int)] [lepEtaMax=(int*10)] [jetPtMin=(int)] [jetEtaMax=(int*10)] ";
+                std::cout << "\nUsage: ./runZJets [dataBonzaiDir=(path)] [mcBonzaiDir=(path)] [fixedDir=(1,0)] [histoDir=(path)] [lepSel=(DMu, DE)] [algo=(Bayes, SVD)] [lepPtMin=(int)] [lepEtaMax=(int*10)] [jetPtMin=(int)] [jetEtaMax=(int*10)] ";
                 std::cout << "[doWhat=(sample)] [doSysRunning=(1,0)] [doCentral=(1,0)] [maxEvents=-1|N] [--help]" << std::endl;
                 std::cout << "eg: ./runZJets lepSel=DMu jetEtaMax=24" << std::endl;
                 std::cout << "unspecified options will be read from vjets.cfg\n" << std::endl;
@@ -165,13 +170,14 @@ int main(int argc, char **argv)
         }
     }
 
-    if (maxEvents > 0) {
+    if (maxEvents > 0 && !fixedDir) {
         histoDir.Remove(TString::kTrailing, '/');
         histoDir += TString::Format("_%devts/", maxEvents);
         cout << "Output directory (histoDir) has been changed to " << histoDir << endl;
     }
     
     if (!histoDir.EndsWith("/")) histoDir += "/";
+
     doWhat.ToUpper();
 
     //-----------------------------------------------------------------------------
@@ -287,6 +293,22 @@ int main(int argc, char **argv)
 		bonzaiDir = mcBonzaiDir;
 		yieldScale = mcYieldScale;
 	    }
+
+	    //read the MC yield scale from file in case of auto scale mode
+	    //this is done in the loop as the file is created at the
+	    //first iteration in the case of the doWhat=ALL option
+	    if(yieldScale == -1.){
+		std::cout << TString("Reading mc yield from file ") + histoDir + ".mcYieldScale...";
+		std::ifstream f(histoDir + ".mcYieldScale");
+		if(!f.good()) {
+		    std::cout << "  FAILED.\n";
+		    exit(1);
+		}
+		f >> yieldScale;
+		mcYieldScale = yieldScale; //prevents to read again the file in the next iterations.
+		std::cout << " mcYieldScale = " << mcYieldScale << "\n";
+	    }
+
 	
 	    if(Samples[iSample].merge == '='){//sample is a merge of previous one
 		const TString mergedFile = ZJets::CreateOutputFileName(pdfSet, pdfMember, muR, muF,

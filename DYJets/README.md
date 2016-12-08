@@ -97,12 +97,12 @@ If you are impatient you can run on a subset of events. This can be done by repl
 
 ```
   ./runZJets_newformat doWhat=data maxEvents=10000
-  ./runZJets_newformat doWhat=dyjets maxEvents=10000 mcYieldScale=0.0112369
-  ./runZJets_newformat doWhat=background maxEvents=10000 mcYieldScale=0.0112369
+  ./runZJets_newformat doWhat=dyjets maxEvents=10000 mcYieldScale=-1
+  ./runZJets_newformat doWhat=background maxEvents=10000 mcYieldScale=-1
   ./runRecoComparison histoDir=HistoFiles_10000evts/
 ```
 
-Note 1: the mcYieldScale=0.0112369 is required to get the proper normalizations of the MC sample. It is the fraction of data events which has been processed. Use the value displayed during the first step when you run with the doWhat=data and maxEvent=XXXX option if it differs from 0.0112369. The histoDir=HistoFiles_10000evts/ is required because when limiting the number of events, the histogram are stored in a different directory than the default HistoFiles: it is to prevent to delete histograms produced from a long run, when running a short test.
+Note 1: the mcYieldScale=-1 is required to get the proper normalizations of the MC sample. The option is used to pass the fraction of data events which has been processed. With the special value -1 used here the value is read from the file `histoDir/.mcYieldScale` that is created when running on data (doWhat=data). Note that the value is print on screen in addition to be store in this file. The histoDir=HistoFiles_10000evts/ is required because when limiting the number of events, the histogram are stored in a different directory than the default HistoFiles: it is to prevent to delete histograms produced from a long run, when running a short test.
 
 Note 2: the first time you run make, do not use the parallel running option, -j N.  There is a problem when doing it the first time, when the RooUnfold library is not yet compiled. The following times you can use it without problem. Anyway compiling the code is fast enough to not require the -j N option.
 

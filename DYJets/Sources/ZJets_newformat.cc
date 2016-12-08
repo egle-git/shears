@@ -397,6 +397,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    }
 	}
 
+	if(fileName.Index("MLM") >= 0 && EvtWeights->size() > 117){
+	    //MLM sample includes weights for several PDFs.
+	    //Keep only the NNPDF3.0 ones, as current GenH1D implemention
+	    //won't work with these extra weights.
+	    bool static weightTrimWarning = true;
+	    EvtWeights->resize(110);
+	    if(weightTrimWarning){
+		std::cerr << "The MC sample contains more than 117 event weights. Only the 110 first ones will be considered and assumed to have the same defintion than for the FxFx sample (nominal + 9 scale variations + 100 NNPF replicas.\n";
+		weightTrimWarning = false;
+	    }
+	}
+
 //        if (fileName.Index("Sherpa2") >= 0) {
 //            weight *= EvtWeights->at(0);
 //            weight_amcNLO_sum += EvtWeights->at(1);

@@ -349,7 +349,7 @@ void Combination(TString unfoldDir, TString combDir, TString algo, int jetPtMin,
         //--- print out break down of errors ---
         for (int i = 2; i <= 11; ++i) {
             cout << hCombination->GetBinContent(i);
-            for (int j = 0; j < covuxaxb.size(); ++j) {
+            for (unsigned j = 0; j < covuxaxb.size(); ++j) {
                 cout << " +/- " << sqrt(covuxaxb[j]->GetBinContent(i,i))*100./hCombination->GetBinContent(i) << "%";
             }
             cout << endl;

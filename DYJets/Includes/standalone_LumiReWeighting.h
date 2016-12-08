@@ -543,13 +543,13 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
 		      Form("luminumer_%d",mode),
 		      NBins,0., float(NBins));
 
-  weights_.SetBit(TH1::kIsAverage);
+  weights_->SetBit(TH1::kIsAverage);
 
   TH1F* den = new TH1F(Form("lumidenom_%d",mode),
 		       Form("lumidenom_%d",mode),
 		       NBins,0., float(NBins));
 
-  den.SetBit(TH1::kIsAverage);
+  den->SetBit(TH1::kIsAverage);
 
   for(int ibin = 1; ibin<NBins+1; ++ibin ) {
     weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);

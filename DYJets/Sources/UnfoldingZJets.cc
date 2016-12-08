@@ -664,7 +664,6 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1D *hUnfData, TH2D *hCov[])
 {
-    cout << "Hello" << endl;    
     //--- print out break down of errors ---
     TString title = hUnfData->GetTitle();
     int nBins = hUnfData->GetNbinsX();
@@ -812,8 +811,6 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     int finalNIterXval = -1;
     int nIterXval = 99;
 
-    int nBinsTmp = hRecDataMinusFakes->GetNbinsX();
-    //int nBinsTmp = 50;
 
     bool svd_unfold = cfg.getB("svdUnfold", false);
     bool tsvd_unfold = cfg.getB("tsvdUnfold", false);
@@ -826,14 +823,17 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     double lumiUnc = cfg.getD("lumiUnc", 0.046);
     verbosity = cfg.getI("unfoldingVerbosity", 1);
         
-    TH1D *hchi2 = new TH1D("hchi2", "hchi2", nBinsTmp + 1, -0.5, nBinsTmp + .5);
+    //int nTestIterMax = hRecDataMinusFakes->GetNbinsX();
+    int nTestIterMax = std::max(hRecDataMinusFakes->GetNbinsX(), maxIter);
+
+    TH1D *hchi2 = new TH1D("hchi2", "hchi2", nTestIterMax + 1, -0.5, nTestIterMax + .5);
     hchi2->SetTitle(TString::Format("#chi^{2}/ndf of reco vs folded-unfolded for %s %s",
 				    variable.Data(), name.Data()));
     hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
     hchi2->GetYaxis()->SetTitleOffset(1.40);
     hchi2->GetXaxis()->SetTitle("number of iterations of the Bayes method");
     hchi2->GetXaxis()->CenterTitle();
-    hchi2->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
+    hchi2->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
     hchi2->GetXaxis()->SetLabelSize(0.03);
     hchi2->SetLineWidth(2);    
     TH1D* hchi2Xval = 0;
@@ -844,7 +844,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	hResMaxXval = new TH1D("hResMaxXval",
 			       TString::Format("Max(res) %s %s;Iter;max(res) cross-validation",
 					       variable.Data(), name.Data()),
-			       nBinsTmp + 1, -.5, nBinsTmp +  0.5);
+			       nTestIterMax + 1, -.5, nTestIterMax +  0.5);
 	
     }
     
@@ -855,7 +855,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 //FAST..
 //FAST..    std::cerr << "========= > " << hRecDataMinusFakes->GetBinError(3) << "\n";
 //FAST..    
-//FAST..    RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, nBinsTmp);
+//FAST..    RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, nTestIterMax);
 //FAST..    RObjectForDataTmp->SetVerbose(verbosity);
 //FAST..    //RObjectForDataTmp->UseFlatPrior(true);
 //FAST..    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
@@ -868,7 +868,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 //FAST..    //RObjectForDataTmp->Hreco(RooUnfold::kCovariance, hUnfs.get());
 //FAST..
 //FAST..    std::cerr << "========= > " << (*hUnfs)[4]->GetBinError(3) << "\n";
-//FAST..    std::cerr << "========= > " << (*hUnfs)[nBinsTmp]->GetBinError(3) << "\n";
+//FAST..    std::cerr << "========= > " << (*hUnfs)[nTestIterMax]->GetBinError(3) << "\n";
 //FAST..    std::cerr << "========= > " << hUnfDataBis->GetBinError(3) << "\n";
 //FAST..    
 //FAST..    //    TString tmpStr2 = TString::Format("%s residuals;Iter;Residual", name.Data());
@@ -946,7 +946,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 //FAST..      //      std::cout << "ROOT Chi2/ndf odd/even: "
 //FAST..      //		<< hRecDataMinusFakesOdd->Chi2Test(hRecDataMinusFakesEven, "WW,P,CHI2/NDF") << "\n";
 //FAST..      
-//FAST..      RooUnfold *RObjectForDataTmp2 = RooUnfold::New(alg, respBis2, hRecDataMinusFakesBisOdd, nBinsTmp);
+//FAST..      RooUnfold *RObjectForDataTmp2 = RooUnfold::New(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax);
 //FAST..      RObjectForDataTmp2->SetVerbose(verbosity);
 //FAST..      //      RObjectForDataTmp2->UseFlatPrior(true);
 //FAST..      //    int nBinsToSkip = (TString(hRecDataMinusFakesBis->GetName()).Index("JetPt_Zinc") > 0) ? 2 : 0;
@@ -1028,14 +1028,14 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     
 #else
     TH1* hResMax = new TH1D("hResMax", TString::Format("Max(res) %s %s;Iter;max(res)", variable.Data(), name.Data()),
-			    nBinsTmp+1, -.5, nBinsTmp + 0.5);
+			    nTestIterMax+1, -.5, nTestIterMax + 0.5);
     
     int nBinsToSkip = (TString(hRecDataMinusFakes->GetName()).Index("JetPt_Zinc") > 0) ? nSkipFirstJetPtBins : 0;
 
     std::cout << "Bayes unfolding, number of first bins to skip: " << nBinsToSkip << "\n";
 
     //Test different regularisation values (=number of iterations for Bayes case)
-    for (int i = 1; i <= nBinsTmp; ++i) {
+    for (int i = 1; i <= nTestIterMax; ++i) {
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 	RooUnfold *RObjectForDataTmp = RooUnfold::New(alg, respBis, hRecDataMinusFakesBis, i);
@@ -1176,6 +1176,8 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	"\tSelected value: " << chosenIter << "\n";
     
 
+    //....
+
     hchi2->GetYaxis()->SetRangeUser(0, max(1.3, 1.1*hchi2->GetMaximum()));
     TArrow *arrowChi2 = new TArrow(nIter, min(1.2, hchi2->GetMaximum()), nIter, 0.8, 0.02, "|>");
     arrowChi2->SetLineColor(kRed);
@@ -1187,7 +1189,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     arrowChi2_2->SetFillColor(kGreen+2);
     arrowChi2_2->SetLineWidth(2);
 
-    TLine *line = new TLine(0.5, 0.7, nBinsTmp + 0.5, 0.7);
+    TLine *line = new TLine(0.5, 0.7, nTestIterMax + 0.5, 0.7);
     line->SetLineColor(kBlack);
     line->SetLineStyle(kDashed);
     line->SetLineWidth(2);
@@ -1214,7 +1216,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
       arrowChi2Xval2->SetFillColor(kGreen+2);
       arrowChi2Xval2->SetLineWidth(2);
 
-      TLine *line = new TLine(0.5, 1., nBinsTmp + 0.5, 1.);
+      TLine *line = new TLine(0.5, 1., nTestIterMax + 0.5, 1.);
       line->SetLineColor(kBlack);
       line->SetLineStyle(kDashed);
       line->SetLineWidth(2);
@@ -1245,7 +1247,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     hUnfDataBayes->Write();
     
     if(svd_unfold){
-      for (int i(1); i <= nBinsTmp; i++) {
+      for (int i(1); i <= nTestIterMax; i++) {
 	RooUnfold *RObjectForDataSVD = RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, i);
 	RObjectForDataSVD->SetVerbose(verbosity);
 	TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
@@ -1260,12 +1262,12 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
       TH1D *hmodDOriginal = (TH1D*) unfoldTSVD->GetD();
       TH1D *hSV       = (TH1D*) unfoldTSVD->GetSV();
       
-      TH1D *hmodD = new TH1D("hmodD", "hmodD", nBinsTmp, 0.5, nBinsTmp+0.5);
-      for (int i(0); i <= nBinsTmp+1; i++) {
+      TH1D *hmodD = new TH1D("hmodD", "hmodD", nTestIterMax, 0.5, nTestIterMax+0.5);
+      for (int i(0); i <= nTestIterMax+1; i++) {
 	hmodD->SetBinContent(i, hmodDOriginal->GetBinContent(i));
       }
       hmodD->SetTitle(hmodDOriginal->GetTitle() + TString(" for ") + TString(hRecDataMinusFakes->GetTitle()));
-      hmodD->GetXaxis()->SetNdivisions(nBinsTmp, 0, 0);
+      hmodD->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
       hmodD->GetXaxis()->SetLabelSize(0.03);
       hmodD->GetYaxis()->SetTitle("|d_{i}|");
       hmodD->GetYaxis()->SetTitleOffset(1.40);

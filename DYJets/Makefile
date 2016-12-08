@@ -40,7 +40,8 @@ SRCDIR = Sources/
 INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
 
 CXX           = g++ -std=c++0x
-CXXFLAGS      = -g -fPIC -O0
+CXXFLAGS      = -fPIC
+CXXFLAGS      += -g -O0
 CXXFLAGS      += $(ROOTCFLAGS)
 CXXFLAGS      += -MD -Wall
 #CPPFLAGS      += $(INCDIR)

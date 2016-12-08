@@ -68,7 +68,7 @@ TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name,
     if (!File->IsOpen()) {
       std::cerr << "Please check that you produced the following file. I was not able to open it." << std::endl;
       std::cerr << "\t\033[031m " << fileName << "\033[0m " << std::endl;
-      abort();
+      //      abort();
       return NULL;
     }
     else return File;
@@ -164,8 +164,9 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 	  if(hRecBg[iBg][iSyst] == 0){
 	      std::cerr << __FILE__ << ":" << __LINE__ << ". Missing histogram " << variable
 			<< ", systematic id " << iSyst << " for process with central value file " 
-			<< fBg[iBg][0]->GetName() << ". Exiting.\n";
-	      exit(1);
+			<< fBg[iBg][0]->GetName() << "\n"; //<< ". Exiting.\n";
+	      //exit(1);
+	      continue;
 	  }	  
 	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
 	  else{
@@ -216,7 +217,8 @@ void closeFiles(TFile *Files[])
         else nFiles = 7; 
 
         for (int i(0); i < nFiles; i++){
-            Files[i]->cd();
+            if(!Files[i]) continue;
+	    Files[i]->cd();
             closeFile(Files[i]);
         }
     }
@@ -226,6 +228,7 @@ void closeFiles(TFile *Files[], int nFiles)
 {
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     for (int i(0); i < nFiles; i++){
+	if (!Files[i]) continue;
         Files[i]->cd();
         closeFile(Files[i]);
         cout << "Closing file: " << Files[i]->GetName() << "   --->   Closed ? " << (!(Files[i]->IsOpen())) << endl;
@@ -280,7 +283,10 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
     else nFiles = 7; 
 
     for (int i(0); i < nFiles; i++){
-      if(Files[i] == 0) abort();
+	if(Files[i] == 0){
+	    histograms[i] = NULL;
+	    continue;
+	} 
         Files[i]->cd();
         histograms[i] = (TH1D*) Files[i]->Get(variable);
 	//We had for an unknown reason some histo with the CanExtendAxis option active,
@@ -370,9 +376,19 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
     else nFiles = 7; 
 
     for (unsigned short i = 0; i < nFiles; i++){
-        Files[i]->cd();
-        histograms[i] = (TH2D*) Files[i]->Get(variable);
+	if(Files[i]){
+	    Files[i]->cd();
+	    histograms[i] = (TH2D*) Files[i]->Get(variable);
+	} else{
+	    histograms[i] = NULL;
+	}
     } 
+
+    if (!histograms[0]) {
+	std::cerr << "Central value histogran of observable " << variable
+		  << " was not found." << " Aborting.\n";
+	abort(); //can't to much without the central value
+    }
 
     if (!isData) {
         //--- From central histograms, we simulate the histograms
@@ -496,6 +512,8 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
+    if (!hResDYJets || !hRecData || !hRecSumBg || !hResDYJets) return 0;
+
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
 
     //int sm= hRecDYJets->GetSumw2N();
@@ -559,6 +577,7 @@ void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D
 
 TH1D* getPurities(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 { 
+    if (!hRecDYJets || hResDYJets) return 0;
     TH1D* hSignal = (TH1D*) hResDYJets->ProjectionY("hSignal", 0, -1, "e");
     hSignal->SetDirectory(0);
     TH1D* hPurity = (TH1D*) hRecDYJets->Clone(TString("purity") + hRecDYJets->GetName());
@@ -617,20 +636,36 @@ void getResps(RooUnfoldResponse *responses[], TH1D *hRecDYJets[13], TH1D *hGenDY
     responses[2]->UseOverflow();
 
     //--- build response object for PU up ---
-    responses[3] = new RooUnfoldResponse(hRec, hGenDYJets[1], hResDYJets[1]); 
-    responses[3]->UseOverflow();
+    if (hGenDYJets[1] && hResDYJets[1]){
+	responses[3] = new RooUnfoldResponse(hRec, hGenDYJets[1], hResDYJets[1]); 
+	responses[3]->UseOverflow();
+    } else{
+	responses[3] = 0;
+    }
 
     //--- build response object for PU down ---
-    responses[4] = new RooUnfoldResponse(hRec, hGenDYJets[2], hResDYJets[2]); 
-    responses[4]->UseOverflow();
+    if (hGenDYJets[2] && hResDYJets[2]){
+	responses[4] = new RooUnfoldResponse(hRec, hGenDYJets[2], hResDYJets[2]); 
+	responses[4]->UseOverflow();
+    } else{
+	responses[4] = 0;
+    }
 
     //--- build response object for JER up ---
-    responses[5] = new RooUnfoldResponse(hRec, hGenDYJets[3], hResDYJets[3]); 
-    responses[5]->UseOverflow();
+    if (hGenDYJets[3] && hResDYJets[3]){
+	responses[5] = new RooUnfoldResponse(hRec, hGenDYJets[3], hResDYJets[3]); 
+	responses[5]->UseOverflow();
+    } else{
+	responses[5] = 0;
+    }
 
     //--- build response object for JER down ---
-    responses[6] = new RooUnfoldResponse(hRec, hGenDYJets[4], hResDYJets[4]); 
-    responses[6]->UseOverflow();
+    if (hGenDYJets[4] && hResDYJets[4]){
+	responses[6] = new RooUnfoldResponse(hRec, hGenDYJets[4], hResDYJets[4]); 
+	responses[6]->UseOverflow();
+    } else{
+	responses[6] = 0;
+    }
 
     //--- build response object for XSec up ---
     responses[7] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[0]); 
@@ -641,36 +676,68 @@ void getResps(RooUnfoldResponse *responses[], TH1D *hRecDYJets[13], TH1D *hGenDY
     responses[8]->UseOverflow();
 
     //--- build response object for LES up ---
-    responses[9] = new RooUnfoldResponse(hRec, hGenDYJets[5], hResDYJets[5]); 
-    responses[9]->UseOverflow();
+    if (hGenDYJets[5] && hResDYJets[5]){
+	responses[9] = new RooUnfoldResponse(hRec, hGenDYJets[5], hResDYJets[5]); 
+	responses[9]->UseOverflow();
+    } else{
+	responses[9] = 0;
+    }
 
     //--- build response object for LES down ---
-    responses[10] = new RooUnfoldResponse(hRec, hGenDYJets[6], hResDYJets[6]); 
-    responses[10]->UseOverflow();
+    if (hGenDYJets[6] && hResDYJets[6]){
+	responses[10] = new RooUnfoldResponse(hRec, hGenDYJets[6], hResDYJets[6]); 
+	responses[10]->UseOverflow();
+    } else{
+	responses[10] = 0;
+    }
 
     //--- build response object for LER up ---
-    responses[11] = new RooUnfoldResponse(hRec, hGenDYJets[7], hResDYJets[7]); 
-    responses[11]->UseOverflow();
+    if (hGenDYJets[7] && hResDYJets[7]){
+	responses[11] = new RooUnfoldResponse(hRec, hGenDYJets[7], hResDYJets[7]); 
+	responses[11]->UseOverflow();
+    } else{
+	responses[11] = 0;
+    }
 
     //--- build response object for LER down ---
-    responses[12] = new RooUnfoldResponse(hRec, hGenDYJets[8], hResDYJets[8]); 
-    responses[12]->UseOverflow();
+    if (hGenDYJets[8] && hResDYJets[8]){
+	responses[12] = new RooUnfoldResponse(hRec, hGenDYJets[8], hResDYJets[8]); 
+	responses[12]->UseOverflow();
+    } else{
+	responses[12] = 0;
+    }
 
     //--- build response object for Lumi up ---
-    responses[13] = new RooUnfoldResponse(hRec, hGenDYJets[9], hResDYJets[9]); 
-    responses[13]->UseOverflow();
+    if (hGenDYJets[9] && hResDYJets[9]){
+	responses[13] = new RooUnfoldResponse(hRec, hGenDYJets[9], hResDYJets[9]); 
+	responses[13]->UseOverflow();
+    } else{
+	responses[13] = 0;
+    }
 
     //--- build response object for Lumi down ---
-    responses[14] = new RooUnfoldResponse(hRec, hGenDYJets[10], hResDYJets[10]); 
-    responses[14]->UseOverflow();
+    if (hGenDYJets[10] && hResDYJets[10]){
+	responses[14] = new RooUnfoldResponse(hRec, hGenDYJets[10], hResDYJets[10]); 
+	responses[14]->UseOverflow();
+    } else{
+	responses[14] = 0;
+    }
 
     //--- build response object for SF up ---
-    responses[15] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[11]); 
-    responses[15]->UseOverflow();
+    if (hGenDYJets[11] && hResDYJets[11]){
+	responses[15] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[11]); 
+	responses[15]->UseOverflow();
+    } else{
+	responses[15] = 0;
+    }
 
     //--- build response object for SF down ---
-    responses[16] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[12]); 
-    responses[16]->UseOverflow();
+    if (hGenDYJets[12] && hResDYJets[12]){
+	responses[16] = new RooUnfoldResponse(hRec, hGenDYJets[0], hResDYJets[12]); 
+	responses[16]->UseOverflow();
+    } else{
+	responses[16] = 0;
+    }
 
 }
 

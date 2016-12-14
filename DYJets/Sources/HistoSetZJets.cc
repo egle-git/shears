@@ -296,8 +296,17 @@ int nZPt_Zinc0jet(22);
     double jetsMass_Zinc2jet[20] = {0, 25, 52, 81, 112, 145, 180, 217, 256, 297, 340, 385, 432, 481, 532, 585, 640, 700, 830, 1000}; 
 
     Input                               = newTH1D("input", "", "", 1, 0, 1);
+    const char* JobInfo_Labels[] = { "JobNum","nJobs", "JobWeight", "nEvtsJob", "nEvtsAllJobs", "nEvtsSample",
+				     "Xsec", "Lumi" };
+    unsigned nBins = sizeof(JobInfo_Labels)/sizeof(JobInfo_Labels[0]);
+    JobInfo                = newTH1D("JobInfo", "", "", nBins, -0.5, -0.5 + nBins);
+    JobInfo->SetTitle("Information to merge histograms produced in multi job mode");
+    JobInfo->SetBit(TH1::kIsAverage);
+    for(unsigned i = 0; i < nBins; ++i){
+      JobInfo->GetXaxis()->SetBinLabel(i+1, JobInfo_Labels[i]);
+    }
 
-    Lumi                                = newTH1D("Lumi", "Integrated luminosity (fb^{-1})", "", 1, 0, 1); 
+    Lumi                                = newTH1D("Lumi", "Integrated luminosity (fb^{-1})", "", 1, 0, 1);
 
     NumberPFcandidates                  = newTH1D("NumberPFcandidates",                  "NumberPFcandidates",           "Number of lepton PF candidates",    20, -0.5, 19.5);
 

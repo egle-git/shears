@@ -36,8 +36,12 @@ class HistoSetZJets {
         TH2D* newTH2D(string, string, int, double, double, int, double*);
         TH2D* newTH2D(string, string, int, double, double, int, double, double);
 
-	TH1D* Input;
+	//bins indices of JobInfo histogram:
+	enum  { kJobNum = 1, kNJobs, kJobWeight, kNEvts, kNEvtsAllJobs, 
+		kNEvtsSample, kXsec, kLumi };
 
+	TH1D* Input;
+	TH1D* JobInfo;
 	TH1D *Lumi;
         TH1D *NumberPFcandidates;
         TH1D *ZMass_lowDeltaR;

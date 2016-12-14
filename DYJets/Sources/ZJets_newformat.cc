@@ -31,7 +31,7 @@ using namespace std;
 void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		 TString pdfSet, int pdfMember, double muR, double muF, double yieldScale)
 {
-
+    
     //--- Random generator necessary for BTagging ---
     TRandom3* RandGen = new TRandom3();
     //--------------------------------------------
@@ -42,6 +42,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
     //--------------------------------------------
 
+    //store job id
+    //using unique name for jobinfo to prevent hadd to merge them
+    if(jobNum > 0) JobInfo->SetName(TString::Format("%s_%d", JobInfo->GetName(), jobNum));
+    JobInfo->SetBinContent(kJobNum, jobNum);
+    JobInfo->SetBinContent(kNJobs, nJobs);    
+    
     //--- Counters to check the yields ---
     Long64_t nEvents(0);
     unsigned int nEventsVInc0Jets(0),  nEventsVInc0JetsNoTrig(0), nEventsVInc1Jets(0), nEventsVInc2Jets(0), nEventsVInc3Jets(0);
@@ -239,9 +245,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	ZNGoodJets_Zexc_ratio =  (TH1D*) fratioNJexc->Get("ZNGoodJets_Zexc_ratio");
     }
 
-    //==========================================================================================================//
-    // Start looping over all the events //
-    //===================================//
     cout << endl;
     stringstream s;
     cout << "\nProcessing : " << fileName << "\n";
@@ -266,27 +269,26 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     // --------------------------------
 
     //event yield normalisation for MC
-    norm_ = yieldScale;
+    //norm_ = yieldScale;
 
     double prev_rate = 0;
 
+    Long64_t nEventsToProcessTot = nentries;
+    if(nMaxEvents >= 0 && nEventsToProcessTot > nMaxEvents) nEventsToProcessTot = nMaxEvents;    
+
     Long64_t entry_start = 0;
-    Long64_t entry_stop = nentries;
+    Long64_t entry_stop = nEventsToProcessTot;
     if(nJobs > 1){
-	Long64_t eventsPerJob = nentries / nJobs;
+	Long64_t eventsPerJob = nEventsToProcessTot / nJobs;
 	entry_start = eventsPerJob * (jobNum - 1);
 	if(jobNum < nJobs)  entry_stop = entry_start + eventsPerJob;
-	else entry_stop = nentries;
+	else entry_stop = nEventsToProcessTot;
     }
 
     int nEventsToProcess = entry_stop - entry_start;
-    if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
+    //if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
     cout << "We will run on " << nEventsToProcess << " events" << endl;
     
-    //store integrated luminosity in Lumi histogram:
-    Lumi->SetBit(TH1::kIsAverage); //to prevent hadd to sum-up the numbers
-    Lumi->Fill(0., lumi_);
-
     processedEventMcWeightSum_ = 0.;
     nEvents = 0;
     double weightSum = 0;
@@ -336,24 +338,24 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    continue;
 	}
 
-	if(nEvents == 0 && !EvtIsRealData){
-	    if(xsec_ == 0){
-		std::cerr << "Warning: cross section value for MC sample " << sampleLabel_
-			  <<  " is null or was not specified. We will assume the event"
-			  << " weights are normalizes such that the cross section on pb "
-			  << " is equal to the sum of weights divivided by the numnber of events\n";
-		norm_ = yieldScale * lumi_ * 1. * xsecFactor_ * skimAccep_[0];
-	    } else{
-		norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
-	    }
-	    if(norm_ == 0){
-		std::cerr << "Error: normaliation factor for sample " << fileName
-			  << " is null! Aborts at " __FILE__ ":" 
-			  << __LINE__ << "." << std::endl;
-		abort();
-	    }
-	}
-	
+//	if(nEvents == 0 && !EvtIsRealData){
+//	    if(xsec_ == 0){
+//		std::cerr << "Warning: cross section value for MC sample " << sampleLabel_
+//			  <<  " is null or was not specified. We will assume the event"
+//			  << " weights are normalizes such that the cross section on pb "
+//			  << " is equal to the sum of weights divivided by the numnber of events\n";
+//		norm_ = yieldScale * lumi_ * 1. * xsecFactor_ * skimAccep_[0];
+//	    } else{
+//		norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
+//	    }
+//	    if(norm_ == 0){
+//		std::cerr << "Error: normaliation factor for sample " << fileName
+//			  << " is null! Aborts at " __FILE__ ":" 
+//			  << __LINE__ << "." << std::endl;
+//		abort();
+//	    }
+//	}
+
         //=======================================================================================================//
         //         Continue Statements        //
         //====================================//
@@ -366,10 +368,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
         //=======================================================================================================//
         //         Computing weight            //
         //====================================//
-        double weight = norm_;
+	//        double weight = norm_;
+	double weight = 1;
 
 	if (hasRecoInfo && doPuReweight && !EvtIsRealData) {
 	    //std::cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
@@ -387,7 +391,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
        //     weight *= mcSherpaWeights_->at(0) / 43597515.;
        // }
 
-        double commonGenWeight = weight; // This variable is used in the fill(x, commonGenWeight, EvtWeights) function for taking care of scale/PDF/alphas uncertainty graph production if need (see Includes/GenH1D.h).
+        double commonGenWeight = weight; // This variable is used in the fill(x, commonGenWeight, EvtWeights) function for taking care of scale/PDF/alphas uncertainty graph production if needed (see Includes/GenH1D.h).
 	if(!EvtIsRealData){
 	    if(EvtWeights->size() > 0){
 		weight *= (*EvtWeights)[0];
@@ -479,7 +483,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 getMuons(leptons, vetoMuons);
 
             }
-
 
             //--- get Electrons ---
             if (lepSel == "DE" || lepSel == "SE") {
@@ -2821,6 +2824,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     cout << endl;
     //==========================================================================================================//
 
+
+    JobInfo->SetBinContent(kNEvts, nEventsToProcess);
+    JobInfo->SetBinContent(kNEvtsSample, nentries);
+    JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
+    double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nentries)): yieldScale;
+    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
+    //store integrated luminosity in Lumi histogram:
+    Lumi->SetBinContent(1., lumi_ *  data_frac);
+    JobInfo->SetBinContent(kXsec, xsec_);
+
+    
     if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
     //==========================================================================================================//
     //         Writing file              //
@@ -2830,19 +2844,71 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     //--- Save all the histograms ---
     unsigned short numbOfHistograms = listOfHistograms.size();
+
+    //factor the histogram contents must be scaled down to
+    //matches the data integrated luminosity times, in case of
+    //of multi MC jobs, the fraction of MC events processed by this job
+    if(!EvtIsRealData){
+	double xsec = xsec_;
+	if(xsec == 0){
+	    std::cerr << "Warning: cross section value for MC sample " << sampleLabel_
+		      <<  " is null or was not specified. We will assume the event"
+		      << " weights are normalizes such that the cross section on pb "
+		      << " is equal to the sum of weights divivided by the numnber of events\n";
+	    xsec= 1;
+	}
+
+	//sum of weights before any cut over the full dataset:
+	std::cout << "used norm_: data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_ * skimAccep_[0]"
+	    " * nEventsToProcess / nEventsToProcessTot\n"
+		  << data_frac << "*" << lumi_ << "*" << xsec << "*" << xsecFactor_  << "/" << processedEventMcWeightSum_ << "*" << skimAccep_[0] << "*" << nEventsToProcess << "/" << nEventsToProcessTot << "=" 
+		  << data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_ * skimAccep_[0]
+	    * nEventsToProcess / nEventsToProcessTot
+		  << "\n";
+	if (InEvtWeightSums_.size() > 0){
+	    //normalisation is defined to get perfect normalisation when running
+	    //on the full dataset statistics by just adding up the histograms.
+	    //In case of partial dataset processing, direct sum will include an
+	    //approximation (*) which can removed by using the JobWeight information
+	    //stored in the JobInfo histograms.
+	    //
+	    //(*) sum of processed event weights equals to the sum over all the events times
+	    //the fraction of processed events.
+	    //
+	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / InEvtWeightSums_[0]
+	    * nentries / nEventsToProcessTot;
+	} else{
+	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_
+	    * nEventsToProcess / nEventsToProcessTot;
+	}
+
+	if(norm_ == 0){
+	    std::cerr << "Error: normaliation factor for sample " << fileName
+		      << " is null! Aborts at " __FILE__ ":" 
+		      << __LINE__ << "." << std::endl;
+	    abort();
+	}
+    } else{
+	norm_ = 1;
+    }
+	
+
+    if(!EvtIsRealData){
+	JobInfo->SetBinContent(kXsec, xsec_ * xsecFactor_);
+	double a = 1.;
+	if(EvtWeightSums_.size()) a = EvtWeightSums_[0];
+	JobInfo->SetBinContent(kJobWeight, processedEventMcWeightSum_ / a);
+    }
+    
     for (unsigned short i(0); i < numbOfHistograms; i++){
         string hName = listOfHistograms[i]->GetName();
-        if ((!hasGenInfo && hName.find("gen") != string::npos) || (!hasRecoInfo && hName.find("gen") == string::npos)) continue; 
+        if ((!hasGenInfo && hName.find("gen") != string::npos)
+	    || (!hasRecoInfo && hName.find("gen") == string::npos)) continue;
 	//finalize normalisation of MC histograms:
-	double a;
-	if (xsec_ > 0 ){
-	    a = 1./processedEventMcWeightSum_;
-	} else{
-	    a = 1./nEvents;
+	if(!EvtIsRealData && !listOfHistograms[i]->TestBit(TH1::kIsAverage)){
+	    listOfHistograms[i]->Scale(norm_);
 	}
-	if(!EvtIsRealData){
-	    listOfHistograms[i]->Scale(a);
-	}
+	
         listOfHistograms[i]->Write();        
     }
 
@@ -2880,9 +2946,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	     << " = " << (nEvents/double(EvtCount_)) << endl;
 	if(EvtIsRealData){
 	    cout << "\tvalue stored in file .mcYieldScale for the '--mcYieldScale -1' auto normalisation option.\n";
-	    std::ofstream f(outputDirectory + "/.mcYieldScale");
-	    f << nEvents/double(EvtCount_);
+	    std::ofstream f(outputDirectory + "/.mcYieldScale#");
+	    f << data_frac << "\n";
 	    f.close();
+	    rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
 	}
     }
     cout << "Number of events passing the trigger                      : " << nEventsPassingTrigger << "\n";
@@ -3363,6 +3430,8 @@ void ZJets::getMcNorm(){
     if(fBonzaiHeaderChain.GetListOfFiles()->IsEmpty()){
 	std::cerr << "Running on a boabab file, skim acceptance = 1\n";
 	skimAccep_ = std::vector<double>(1,1.);	
+	InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+	EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
     } else{
 	fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
 	fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
@@ -3405,7 +3474,7 @@ void ZJets::getMcNorm(){
 	//}
 	
 	if(InEvtWeightSums_.size() > 0){
-	    std::cerr << "InEvtWeightSums_[0] = " <<	InEvtWeightSums_[0] << "\n";
+	    std::cerr << "InEvtWeightSums_[0] = " << InEvtWeightSums_[0] << "\n";
 	}
 	
 	if(EvtWeightSums_.size() == 0 || InEvtWeightSums_.size() == 0 || InEvtWeightSums_[0] == 0 ){

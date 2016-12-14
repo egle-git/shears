@@ -24,7 +24,7 @@ struct processInfoStruct{
 const processInfoStruct Samples[] = {
     //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorAN - colorPAS - name on legend
     /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data", " Data"},
-    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.10,     kBlue,     kBlue,     " TT",   " t#bar{t}"},  
+    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.00,     kBlue,     kBlue,     " TT",   " t#bar{t}"},  
     /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},
     /* 3*/{"ST_tch",    '+',     1.,       1.,      1,  0.06,     kBlue+4,   kBlue+4,   " Single Top t-ch", " Single Top t-ch"},
     /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W", " #bar{t}W"},
@@ -65,6 +65,8 @@ const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
 //const TString DYAMCATNLOLEGEND("MG5_aMC + PY8 (#leq 2j NLO + PS)");
 //const TString DYSHERPA2FILENAME("DYJets_Sherpa2_0_16000");
 //const TString DYSHERPA2LEGEND("SHERPA 2 (#leq 2j NLO 3,4j LO + PS)");
+const TString DYMLM2FILENAME("DYJets_MLM");
+const TString DYMLM2LEGEND("Madgraph + PY8 (#leq 4j LO + PS)");
 
 //DYSHERPA14FILENAME: alternate signal sample to use to estimate
 //unfolding systematic uncertainties. Use empty string to disable

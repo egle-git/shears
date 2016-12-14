@@ -33,12 +33,13 @@ static int verbosity = 1;
 
 using namespace std;
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
-void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection);
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
+//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection);
 
 //void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
 //        int jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable, bool doNormalized)
 void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, 
-		    int jetPtMin, int jetEtaMax, TString variable, bool doNormalized,
+		    int jetPtMin, int jetEtaMax, TString gen1, TString variable, bool doNormalized,
 		    int whichSyst)
 {
     gStyle->SetOptStat(0);
@@ -93,24 +94,18 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     }
 
     TFile *fSheUnf = 0;
-    if (DYSHERPA14FILENAME.Length() > 0 ){
+    // if (DYSHERPA14FILENAME.Length() > 0 ){
 	//--- Open additional generator files -----------------------------------------------------
-	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYSHERPA14FILENAME + "_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
-
-	if(fSheUnf->IsZombie()){
-	    std::cerr << "The file " << fSheUnf->GetName() << " required for unfolding systematic uncertainty estimate was not found. Please check its presence and the file name spelling. The file name is defined in ludes/fileNamesZJets.h with the variable DYSHERPA14FILENAME. Unfolding systemayic uncertainty estimate can be disable by setting the file name to an empty string. Aborts.\n";
-	    abort();
-	}
-	   
+	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYMLM2FILENAME + "_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
 
 	std::map<TString, vector<TString> > generatorNames;
       
-	vector<TString> sherpa14;
-	sherpa14.push_back(DYSHERPA14FILENAME);
-	sherpa14.push_back(DYSHERPA14LEGEND);
-	//vector<TString> sherpa2;
-	//sherpa2.push_back(DYSHERPA2FILENAME);
-	//sherpa2.push_back(DYSHERPA2LEGEND);
+	//vector<TString> sherpa14;
+	//sherpa14.push_back(DYSHERPA14FILENAME);
+	//sherpa14.push_back(DYSHERPA14LEGEND);
+	vector<TString> sherpa2;
+	sherpa2.push_back(DYMLM2FILENAME);
+	sherpa2.push_back(DYMLM2LEGEND);
 	//vector<TString> amcatnlo;
 	//amcatnlo.push_back(DYAMCATNLOFILENAME);
 	//amcatnlo.push_back(DYAMCATNLOLEGEND);
@@ -118,28 +113,33 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//mgpythia8.push_back(DYMGPYTHIA8FILENAME);
 	//mgpythia8.push_back(DYMGPYTHIA8LEGEND);
       
-	generatorNames["sherpa14"] = sherpa14;
-	//generatorNames["sherpa2"] = sherpa2;
+	//generatorNames["sherpa14"] = sherpa14;
+	  generatorNames["sherpa2"] = sherpa2;
 	//generatorNames["amcatnlo"] = amcatnlo; 
 	//generatorNames["mgpythia8"] = mgpythia8;
       
-	//TFile *fGen1 = NULL; 
+	TFile *fGen1 = NULL; 
 	//TFile *fGen2 = NULL; 
       
-	//TString gen1File = histoDir + lepSel + "_8TeV_" + generatorNames[gen1][0] + "_dR_TrigCorr_1_Syst_0_JetPtMin_";
-	//gen1File += jetPtMin;
-	//gen1File += "_JetEtaMax_";
-	//gen1File += jetEtaMax;
-	//gen1File += ".root";
-	//fGen1 = new TFile(gen1File);
+	TString gen1File = histoDir + lepSel + "_13TeV_" + generatorNames[gen1][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
+	gen1File += jetPtMin;
+	gen1File += "_JetEtaMax_";
+	gen1File += jetEtaMax;
+	gen1File += ".root";
+	fGen1 = new TFile(gen1File);
 
-	//TString gen2File = histoDir + lepSel + "_8TeV_" + generatorNames[gen2][0] + "_dR_TrigCorr_1_Syst_0_JetPtMin_";
+	if(!fGen1 || fGen1->IsZombie()){
+	    std::cerr << "Fatal error. The file " << gen1File << " was not found.\n";
+	    abort();
+	}
+	
+	//TString gen2File = histoDir + lepSel + "_8TeV_" + generatorNames[gen2][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
 	//gen2File += jetPtMin;
 	//gen2File += "_JetEtaMax_";
 	//gen2File += jetEtaMax;
 	//gen2File += ".root";
 	//fGen2 = new TFile(gen2File);
-    }      
+   // }      
     //----------------------------------------------------------------------------------------- 
 
     //----------------------------------------------------------------------------------------- 
@@ -197,6 +197,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       getAllHistos(variable, hRecData, fData, 
 		   hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
 		   hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
+
+      TH1D *hGen1 = getHisto(fGen1, "gen" + variable);
+
       if (DYSHERPA14FILENAME.Length() > 0 ){
 	//--- Get Sherpa Unfolding response ---
 	
@@ -212,9 +215,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       
       TH1D *hMadGenCrossSection = makeCrossSectionHist(hGenDYJets[0], integratedLumi);
-      hMadGenCrossSection->SetZTitle("AMCATNLO + PY8 (#leq 2j NLO + PS)");
-      //TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
-      //hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
+      hMadGenCrossSection->SetZTitle("aMC@NLO + PY8 (#leq 2j NLO + PS)");
+      TH1D *hGen1CrossSection = makeCrossSectionHist(hGen1, integratedLumi);
+      hGen1CrossSection->SetZTitle(generatorNames[gen1][1]);
       //TH1D *hGen2CrossSection = makeCrossSectionHist(hGen2, integratedLumi);
       //hGen2CrossSection->SetZTitle(generatorNames[gen2][1]);
       //if (gen1 == "sherpa2" && lepSel == "DMu") hGen1CrossSection->Scale(1./3.9731e+09); 
@@ -346,8 +349,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	  continue;
 	}
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
-				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi,
-				  unfoldDir, logy, hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy,
+				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
 
 	//--- save the unfolded histograms ---
 	outputRootFile->cd(); 
@@ -396,15 +399,16 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       if (doNormalized) {
 	double Madtot = hMadGenCrossSection->Integral("width");
-	//double gen1tot = hGen1CrossSection->Integral("width");
+	double gen1tot = hGen1CrossSection->Integral("width");
 	//double gen2tot = hGen2CrossSection->Integral("width");
 	hMadGenCrossSection->Scale(1.0/Madtot);
-	//hGen1CrossSection->Scale(1.0/gen1tot);	
+	hGen1CrossSection->Scale(1.0/gen1tot);	
 	//hGen2CrossSection->Scale(1.0/gen2tot);	
       }
 
       //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection); 
-      TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
+      TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection, hGen1CrossSection); 
+      //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11], hMadGenCrossSection); 
       crossSectionPlot->Draw();
       crossSectionPlot->SaveAs(outputFileName + ".png");
       crossSectionPlot->SaveAs(outputFileName + ".pdf");
@@ -432,7 +436,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       
       if (variable.Index("ZNGoodJets_Zexc") >= 0) {
 	//createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection, hGen2CrossSection);
-	createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection);
+         createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection, hGen1CrossSection);
+	// createInclusivePlots(doNormalized, outputFileName, lepSel, hUnfData[0], hCov, hMadGenCrossSection);
       }
       //--------------------------------------
 
@@ -443,7 +448,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       hRecDYJets[0]->Write("hRecDYJetsCentral");
       hGenDYJets[0]->Write("hGenDYJetsCentral");
       hMadGenCrossSection->Write("hMadGenDYJetsCrossSection");
-      //hGen1CrossSection->Write("hGen1DYJetsCrossSection");
+      hGen1CrossSection->Write("hGen1DYJetsCrossSection");
       //hGen2CrossSection->Write("hGen2DYJetsCrossSection");
       respDYJets[0]->Write("respDYJetsCentral");
       for (int i = 0; i < 11; ++i) {
@@ -588,14 +593,15 @@ void createSystPlots(TString outputFileName, TString sysPlotDir, TString variabl
 }
 
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection)
-void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection)
+//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
 {
     //    std::cerr << "createInclusivePlots disabled!" << __FILE__ << __LINE__ << "\n\n";
     //return;
 
     TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
     TH1D *hIncMad = (TH1D*) hMadGenCrossSection->Clone("ZNGoodJets_Zinc_Mad");
-    //TH1D *hIncShe = (TH1D*) hSheGenCrossSection->Clone("ZNGoodJets_Zinc_She");
+    TH1D *hIncShe = (TH1D*) hSheGenCrossSection->Clone("ZNGoodJets_Zinc_She");
     //TH1D *hIncPow = (TH1D*) hPowGenCrossSection->Clone("ZNGoodJets_Zinc_Pow");
     TH2D *hCovInc[12] = {NULL};
     if(hCov[0]) hCovInc[0] = (TH2D*) hCov[0]->Clone("CovDataStat");
@@ -616,21 +622,21 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     for (int i = 1; i <= nBins; i++) {
 	double binSum = 0;
 	double binSumMad = 0;
-	//double binSumShe = 0;
+	double binSumShe = 0;
 	//double binSumPow = 0;
 	double binStatError2 = 0;
 	double binStatMadError2 = 0;
-	//double binStatSheError2 = 0;
+	double binStatSheError2 = 0;
 	//double binStatPowError2 = 0;
 	double binCov[12] = {0};
 	for (int j = i; j <= nBins; j++) {
 	    binSum += hInc->GetBinContent(j);
 	    binSumMad += hIncMad->GetBinContent(j);
-	    //binSumShe += hIncShe->GetBinContent(j);
+	    binSumShe += hIncShe->GetBinContent(j);
 	    //binSumPow += hIncPow->GetBinContent(j);
 	    binStatError2 += pow(hInc->GetBinError(j), 2);
 	    binStatMadError2 += pow(hIncMad->GetBinError(j), 2);
-	    //binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
+	    binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
 	    //binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
 	    for (int k = 0; k < 12; k++) {
 	      if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
@@ -638,11 +644,11 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	}
 	hInc->SetBinContent(i, binSum);
 	hIncMad->SetBinContent(i, binSumMad);
-	//hIncShe->SetBinContent(i, binSumShe);
+	hIncShe->SetBinContent(i, binSumShe);
 	//hIncPow->SetBinContent(i, binSumPow);
 	hInc->SetBinError(i, sqrt(binStatError2));
 	hIncMad->SetBinError(i, sqrt(binStatMadError2));
-	//hIncShe->SetBinError(i, sqrt(binStatSheError2));
+	hIncShe->SetBinError(i, sqrt(binStatSheError2));
 	//hIncPow->SetBinError(i, sqrt(binStatPowError2));
 	for (int k = 0; k < 12; k++) {
 	  if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
@@ -650,7 +656,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     }
 
     //TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe, hIncPow); 
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
+     TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe); 
+    //  TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
     crossSectionPlot->Draw();
     crossSectionPlot->SaveAs(outputFileName + ".png");
@@ -820,7 +827,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     int maxIter = cfg.getI("maxIter", 20);
     int nSkipFirstJetPtBins = cfg.getI("nSkipFirstJetPtBins", 2);
     bool useFlatPrior = cfg.getB("useFlatPrior", false);
-    double lumiUnc = cfg.getD("lumiUnc", 0.046);
+    double lumiUnc = cfg.getD("lumiUnc", 0.027);
     verbosity = cfg.getI("unfoldingVerbosity", 1);
         
     //int nTestIterMax = hRecDataMinusFakes->GetNbinsX();

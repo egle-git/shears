@@ -714,12 +714,13 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
 		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
 	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
 	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
+        grCentralSyst->GetXaxis()->SetBinLabel(1, "= 0");
         grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
         grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
-        //grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
-	//        grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
+        grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
+	    grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
         //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
 	//     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
         grCentralSyst->GetXaxis()->SetLabelSize(0.18);
@@ -730,6 +731,7 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
 		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
 	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
         //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+        grCentralSyst->GetXaxis()->SetBinLabel(1, "#geq 0");
         grCentralSyst->GetXaxis()->SetBinLabel(2, "#geq 1");
         grCentralSyst->GetXaxis()->SetBinLabel(3, "#geq 2");
         grCentralSyst->GetXaxis()->SetBinLabel(4, "#geq 3");
@@ -866,7 +868,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     configXaxis(hSyst, hGen1, variable);
     configYaxis(hSyst, hGen1, hGen2, hGen3);
     if (canvasName.Contains("ZNGoodJets")) {
-        hSyst->GetXaxis()->SetRangeUser(0.5, hSyst->GetXaxis()->GetXmax());
+        hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
     }
     if (canvasName.Contains("JetPt_Zinc")) {
         hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
@@ -919,7 +921,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetTextFont(52);
     latexLabel->DrawLatex(0.20,0.95,"Preliminary");
     latexLabel->SetTextFont(42);
-    latexLabel->DrawLatex(0.13,0.95-0.045, "2.5 fb^{-1} (13 TeV)");
+    latexLabel->DrawLatex(0.13,0.95-0.045, "2.25 fb^{-1} (13 TeV)");
     //if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
     latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     if (canvasName.Contains("Vis")){

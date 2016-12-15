@@ -96,27 +96,27 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
     TFile *fSheUnf = 0;
     // if (DYSHERPA14FILENAME.Length() > 0 ){
 	//--- Open additional generator files -----------------------------------------------------
-	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYMLM2FILENAME + "_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYMLM2FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
 
 	std::map<TString, vector<TString> > generatorNames;
       
 	//vector<TString> sherpa14;
 	//sherpa14.push_back(DYSHERPA14FILENAME);
 	//sherpa14.push_back(DYSHERPA14LEGEND);
-	vector<TString> sherpa2;
-	sherpa2.push_back(DYMLM2FILENAME);
-	sherpa2.push_back(DYMLM2LEGEND);
+	//vector<TString> sherpa2;
+	//sherpa2.push_back(DYMLM2FILENAME);
+	//sherpa2.push_back(DYMLM2LEGEND);
 	//vector<TString> amcatnlo;
 	//amcatnlo.push_back(DYAMCATNLOFILENAME);
 	//amcatnlo.push_back(DYAMCATNLOLEGEND);
-	//vector<TString> mgpythia8;
-	//mgpythia8.push_back(DYMGPYTHIA8FILENAME);
-	//mgpythia8.push_back(DYMGPYTHIA8LEGEND);
+	vector<TString> mgpythia8;
+	mgpythia8.push_back(DYMLM2FILENAME);
+	mgpythia8.push_back(DYMLM2LEGEND);
       
 	//generatorNames["sherpa14"] = sherpa14;
-	  generatorNames["sherpa2"] = sherpa2;
+	//generatorNames["sherpa2"] = sherpa2;
 	//generatorNames["amcatnlo"] = amcatnlo; 
-	//generatorNames["mgpythia8"] = mgpythia8;
+	generatorNames["mgpythia8"] = mgpythia8;
       
 	TFile *fGen1 = NULL; 
 	//TFile *fGen2 = NULL; 

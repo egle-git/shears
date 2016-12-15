@@ -307,14 +307,15 @@ TGraphAsymmErrors* createScaleSystGraph(TString lepSel, TString variable, const 
     double *yErrUp   = new double[nPoints];
     double *yErrDown = new double[nPoints];
 
+    TString histoDir = cfg.getS("histoDir");
     TFile *fDE;
     if (lepSel == "DE" || lepSel == "") {
-        fDE = new TFile("HistoFilesUnc/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDE = new TFile(histoDir + "/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TFile *fDMu;
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu = new TFile("HistoFilesUnc/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDMu = new TFile(histoDir + "/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TGraphAsymmErrors *grDE, *grDMu;
@@ -386,14 +387,15 @@ TGraphAsymmErrors* createPDFSystGraph(TString lepSel, TString variable, const TG
     double *yErrUp   = new double[nPoints];
     double *yErrDown = new double[nPoints];
 
+    TString histoDir = cfg.getS("histoDir");
     TFile *fDE;
     if (lepSel == "DE" || lepSel == "") {
-        fDE = new TFile("HistoFilesUnc/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDE = new TFile(histoDir + "/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TFile *fDMu;
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu = new TFile("HistoFilesUnc/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDMu = new TFile(histoDir + "/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TGraphAsymmErrors *grDE, *grDMu;
@@ -466,14 +468,16 @@ TGraphAsymmErrors* createPDFSystGraph(TString lepSel, TString variable, const TG
     double *yErrUp   = new double[nPoints];
     double *yErrDown = new double[nPoints];
 
+    TString histoDir = cfg.getS("histoDir");
     TFile *fDE;
     if (lepSel == "DE" || lepSel == "") {
-        fDE = new TFile("HistoFilesUnc/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+      //        fDE = new TFile("HistoFilesUnc/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDE = new TFile(histoDir + "/DE_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TFile *fDMu;
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu = new TFile("HistoFilesUnc/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDMu = new TFile(histoDir + "/DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
     }
 
     TGraphAsymmErrors *grDE, *grDMu;

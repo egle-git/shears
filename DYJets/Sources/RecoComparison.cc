@@ -256,7 +256,18 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         // first pad plots
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
-        cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
+
+        cmsColl->DrawLatex(0.17,0.83, "CMS Preliminary");
+        if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s} = 13 TeV");
+        if (vhNames[i].Index("inc0") < 0){
+            ostringstream ptLegend;
+            ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
+            jetCuts->DrawLatex(0.17,0.66, ptLegend.str().c_str());
+            jetAlgo->DrawLatex(0.17,0.715, "anti-k_{t} jets,  R = 0.4");
+            pad1->Draw();
+        }
+        //-------------------------
+        //cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
 	//        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
 	//        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
 	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");

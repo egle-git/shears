@@ -33,7 +33,7 @@ config.Data.unitsPerJob = 1
 config.Data.totalUnits = 20*2
 config.Data.publication = False
 config.Data.splitting = 'EventBased'
-config.Data.outLFNDirBase = 'TO BE FILLED'
+config.Data.outLFNDirBase = TO_BE_FILLED
 config.section_('User')
 config.section_('Site')
 config.Site.whitelist = ['T2_CH_CERN']

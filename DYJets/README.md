@@ -126,14 +126,7 @@ The unfolded result can then be found in the UnfoldedFiles directory and the con
 Running on the grid
 ===================
 
-An example of script and configuration file to run the analysis can be found in the directory:
-. `job_crab.sh`
-. `crabConfig.py`
-
-You need to set the config.Data.outLFNDirBase and config.Site.storageSite to indicate where to store the job output. With the script example, the output of each job is stored as a tarball.
-
-In order to run runZJets_newformat on the grid, you will need to pack the EfficiencyTables directory in a tarball:
-```tar czf EfficiencyTables.tgz EfficiencyTables```
+Intrusctions to run the grid can be found in the `README.md` file of the `crab.d` directory.
 
 Configuration file
 ==================

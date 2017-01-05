@@ -44,6 +44,10 @@ The default script, `job_crab.sh`, runs the Z+jet analysis for all the standard 
 * change the variable nRuns value in the script according to the number of entries in the case block;
 * change the number of units (`config.Data.totalUnit`) in the `crabConfig.py` file to matches the number of jobs: the number of entries in the case block times the number of channels.
 
+Splitting processing of a  sample in mulitple jobs
+--------------------------------------------------
+
+For large sample, like the signal MC samples, it can be useful to split the sample in pieces processed by different jobs. This can be achieved by using the `nJobs` and `jobNum` options of `runZJets_newfomat` program. An example of crab configuration and script can be found in this directory (`DYJets/crab.d`): `crabConfig.py`, `job_crabDY.sh` and for the analysis configuration file `vjets_silver_lepSel_crabDY.cfg`. The number of samples pieces is defined by the nJobs variable of the script, you can find around line 118. If its value is changed the number of total number of jobs should be updated in the crab configuration file. Note that this number is displayed at the beginning of the log of the jobs to ease the check of the crab configuration. You can check the number a posteriori or run a local test with the command `./job_crabDY.sh 1 cfg=vjets_silver_lepSel_crabDY.cfg maxEvents=1` to let the script to compute it for you.
 
 Note
 ----

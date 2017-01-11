@@ -758,7 +758,7 @@ void configXaxis(TH1D *grCentralSyst, TH1D *gen1, TString variable)
         xtitle = "H_{T}, N_{jets} #geq " + njets + " [GeV]";
     }
     grCentralSyst->GetXaxis()->SetTitle(xtitle);
-    std::cout << "find Xaxix !!!!!!!!!!!  "   << xtitle << "\n";
+    //    std::cout << "find Xaxis !!!!!!!!!!!  "   << xtitle << "\n";
     grCentralSyst->GetXaxis()->SetTitleSize(0.12);
     //-----------------------------------------
 

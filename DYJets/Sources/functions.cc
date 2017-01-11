@@ -214,18 +214,24 @@ double table::getTTbarSF(int NJets){
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi;
 	
     }
+    abort();
+    return 1;
 }
 
 double table::getTTbarSFLow(int NJets){
     for (unsigned int i=0; i != recd.size(); i++) {
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi-recd[i].ptLow;
     }
-}
+    abort();
+    return 1;}
+
 
 double table::getTTbarSFHigh(int NJets){
     for (unsigned int i=0; i != recd.size(); i++) {
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi+recd[i].ptLow;
     }
+    abort();
+    return 1;
 }
 
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor){
@@ -647,4 +653,22 @@ bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest
     }
     fout.Close();
     return true;
+}
+
+//Check that two Root TAxis have indentical boudaries and binning:
+bool isSameBinning(const TAxis& ax1, const TAxis& ax2){
+  const static bool verbose = true;
+  //check number of bins
+  if(ax1.GetNbins() != ax2.GetNbins()) return false;
+
+  for(int ibin = 1; ibin <= ax1.GetNbins(); ++ibin){
+    if(verbose) std::cout << ax1.GetBinLowEdge(ibin)
+			  << " (" << ax2.GetBinLowEdge(ibin) << ")\t";
+    if(ax1.GetBinLowEdge(ibin) != ax2.GetBinLowEdge(ibin)) return false;
+  }
+  if(verbose) std::cout << ax1.GetBinUpEdge(ax1.GetNbins())
+			  << " (" << ax2.GetBinUpEdge(ax2.GetNbins()) << ")\n";
+  if(ax1.GetBinUpEdge(ax1.GetNbins()) != ax2.GetBinUpEdge(ax2.GetNbins())) return false;
+  
+  return true;
 }

@@ -199,7 +199,7 @@ void closeFile(TFile *File)
 {
     if (File) {
         if (File->IsOpen()) File->Close();
-        cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+        if(cfg.getI("verbosity") > 1) cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
     }
 }
 
@@ -231,7 +231,7 @@ void closeFiles(TFile *Files[], int nFiles)
 	if (!Files[i]) continue;
         Files[i]->cd();
         closeFile(Files[i]);
-        cout << "Closing file: " << Files[i]->GetName() << "   --->   Closed ? " << (!(Files[i]->IsOpen())) << endl;
+	if(cfg.getI("verbosity") > 1) cout << "Closing file: " << Files[i]->GetName() << "   --->   Closed ? " << (!(Files[i]->IsOpen())) << endl;
     }
 }
 
@@ -524,9 +524,10 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
     double dyIntegral = hRecDYJets->Integral(0, hRecDYJets->GetNbinsX()+1);
     double dataIntegral = hRecData->Integral(0, hRecData->GetNbinsX()+1);
     double bgIntegral = hRecSumBg->Integral(0, hRecSumBg->GetNbinsX()+1);
-    for (int i= 0; i<nm; i++) {
+
+    for (int i = 0; i < nm; i++) {
         double nmes= 0.0, wmes= 0.0;
-        for (int j= 0; j<nt; j++) {
+        for (int j = 0; j < nt; j++) {
             nmes += hResDYJets->GetBinContent(i, j);
             wmes += pow(hResDYJets->GetBinError(i, j), 2);
             //if (s) wmes += pow(hResDYJets->GetBinError(i, j), 2);
@@ -538,8 +539,11 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         hFakDYJets->SetBinContent (i, factor*fake);
 	double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes;
 	if(err2 < 0) {
-	  std::cerr << __FILE__ << ":"  << __LINE__ << "Uncertainty on n_tot is smaller than the one on n_signal!"
-		      << "\n";
+	  std::cerr << __FILE__ << ":"  << __LINE__ 
+		    << ". " << hRecDYJets->GetTitle() << ", bin " << i << ": "
+		    << "Uncertainty on n_tot (" << hRecDYJets->GetBinError(i)
+		    << ") is smaller than the one on n_signal ("
+		    << sqrt(wmes) << ")!\n";
 	  err2 = 0;
 	}
 	//We neglect the uncertainty on the scale factor.
@@ -780,7 +784,7 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
         fData->Close();
     }
 
-    cout << "Closed all files" << endl;
+    if(cfg.getI("verbosity") > 1)  cout << "Closed all files" << endl;
 
     TString recoCompDir  = cfg.getS("recoCompDir");
     TString statDir = recoCompDir.Strip(TString::kTrailing, '/') + "Stat";

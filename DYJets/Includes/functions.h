@@ -122,4 +122,12 @@ bool isRootFile(const char* path);
  */
 bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest);
 
+/** Check that two Root TAxis have indentical boudaries and binning:
+ * @param ax1 first axis to compare
+ * @param ax2 second axis to compare
+ * @return true iff the test succeeds
+ */
+
+bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
+
 #endif

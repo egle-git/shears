@@ -61,12 +61,12 @@ const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
 
 //AG
 //const TString DYPOWHEGFILENAME("DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights");
-// const TString DYAMCATNLOFILENAME("DYJetsToLL_M-50_TuneCUETP8M1_8TeV-amcatnloFXFX-Bonzai_fixed_allWeights");
-//const TString DYAMCATNLOLEGEND("MG5_aMC + PY8 (#leq 2j NLO + PS)");
+const TString DYAMCATNLOFILENAME("DYJets_UNFOLDING");
+const TString DYAMCATNLOLEGEND("MG5_aMC + PY8 (#leq 2j NLO + PS)");
 //const TString DYSHERPA2FILENAME("DYJets_Sherpa2_0_16000");
 //const TString DYSHERPA2LEGEND("SHERPA 2 (#leq 2j NLO 3,4j LO + PS)");
 const TString DYMLM2FILENAME("DYJets_MLM");
-const TString DYMLM2LEGEND("Madgraph + PY8 (#leq 4j LO + PS)");
+const TString DYMLM2LEGEND("MG5_aMC + PY8 (#leq 4j LO + PS)");
 
 //DYSHERPA14FILENAME: alternate signal sample to use to estimate
 //unfolding systematic uncertainties. Use empty string to disable

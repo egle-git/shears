@@ -262,6 +262,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     struct timeval t0;
     int mess_every_n =  std::min(1000LL, nentries/10);
+    if(mess_every_n < 1) mess_every_n = 1;
 
     // ------ Random number for lepton energy resolution smearing -----
     //TRandom* RamMu = new TRandom(10);
@@ -1661,6 +1662,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             dRLeptons_Zinc0jet->Fill(deltaR(leptons[0].v, leptons[1].v), weight);
             SpTLeptons_Zinc0jet->Fill(SpTsub(leptons[0].v, leptons[1].v), weight);
             VisPt_Zinc0jetQun->Fill(EWKBoson.Pt(), weight);
+            VisPt_2_Zinc0jetQun->Fill(EWKBoson.Pt(), weight);
+	    if(nEvents % 2) VisPt_Zinc0jetQun_Odd->Fill(EWKBoson.Pt(), weight);
+	    else VisPt_Zinc0jetQun_Even->Fill(EWKBoson.Pt(), weight);
 
             if (nGoodJets == 0){
                 //TruePU_0->Fill(EvtPuCntTruth, weight);
@@ -1788,6 +1792,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 FirstJetEta_Zinc1jet->Fill(fabs(jets[0].v.Eta()), weight*RatioValue);
                 FirstJetEta_2_Zinc1jet->Fill(fabs(jets[0].v.Eta()), weight);
                 FirstJetAbsRapidity_Zinc1jet->Fill(fabs(jets[0].v.Rapidity()), weight*RatioValue);
+                FirstJetAbsRapidity_2_Zinc1jet->Fill(fabs(jets[0].v.Rapidity()), weight*RatioValue);
                 if(nEvents % 2) FirstJetAbsRapidity_Zinc1jet_Odd->Fill(fabs(jets[0].v.Rapidity()), weight*RatioValue);
 		else FirstJetAbsRapidity_Zinc1jet_Even->Fill(fabs(jets[0].v.Rapidity()), weight*RatioValue);
                 FirstJetEtaHigh_Zinc1jet->Fill(fabs(jets[0].v.Eta()), weight);
@@ -1800,6 +1805,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 SumZJetRapidity_Zinc1jet->Fill(0.5*fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity()), weight);
                 DifZJetRapidity_Zinc1jet->Fill(0.5*fabs(EWKBoson.Rapidity()-jets[0].v.Rapidity()), weight);
 		VisPt_Zinc1jetQun->Fill(fabs((jets[0].v+EWKBoson).Pt()), weight);
+		VisPt_2_Zinc1jetQun->Fill(fabs((jets[0].v+EWKBoson).Pt()), weight);
+		if(nEvents % 2) VisPt_Zinc1jetQun_Odd->Fill(fabs((jets[0].v+EWKBoson).Pt()), weight);
+		else VisPt_Zinc1jetQun_Even->Fill(fabs((jets[0].v+EWKBoson).Pt()), weight);
 
                 for (unsigned short i(0); i < nGoodJets; i++) {
                     double trans_mass = jets[i].v.Mt();
@@ -1977,6 +1985,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 else JetsMassHigPU_Zinc2jet->Fill(jet1Plus2.M(), weight);
                 ZPt_Zinc2jet->Fill(EWKBoson.Pt(), weight);
 		VisPt_Zinc2jetQun->Fill(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight);
+		VisPt_2_Zinc2jetQun->Fill(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight);
+		if(nEvents % 2) VisPt_Zinc2jetQun_Odd->Fill(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight);
+		else VisPt_Zinc2jetQun_Even->Fill(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight);
                 ZRapidity_Zinc2jet->Fill(EWKBoson.Rapidity(), weight);
                 ZEta_Zinc2jet->Fill(EWKBoson.Eta(), weight);
                 SpTLeptons_Zinc2jet->Fill(SpTsub(leptons[0].v, leptons[1].v), weight);
@@ -1993,6 +2004,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 SecondJetEta_Zinc2jet->Fill(fabs(jets[1].v.Eta()), weight*RatioValue);
                 SecondJetEta_2_Zinc2jet->Fill(fabs(jets[1].v.Eta()), weight);
                 SecondJetAbsRapidity_Zinc2jet->Fill(fabs(jets[1].v.Rapidity()), weight*RatioValue);
+                SecondJetAbsRapidity_2_Zinc2jet->Fill(fabs(jets[1].v.Rapidity()), weight*RatioValue);
 		if(nEvents % 2) SecondJetAbsRapidity_Zinc2jet_Odd->Fill(fabs(jets[1].v.Rapidity()), weight*RatioValue);
 		else SecondJetAbsRapidity_Zinc2jet_Even->Fill(fabs(jets[1].v.Rapidity()), weight*RatioValue);
                 SecondJetEtaHigh_Zinc2jet->Fill(fabs(jets[1].v.Eta()), weight);
@@ -2233,6 +2245,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 ThirdJetEta_Zinc3jet->Fill(fabs(jets[2].v.Eta()), weight*RatioValue);
                 ThirdJetEta_2_Zinc3jet->Fill(fabs(jets[2].v.Eta()), weight);
                 ThirdJetAbsRapidity_Zinc3jet->Fill(fabs(jets[2].v.Rapidity()), weight*RatioValue);
+                ThirdJetAbsRapidity_2_Zinc3jet->Fill(fabs(jets[2].v.Rapidity()), weight*RatioValue);
+
                 if(nEvents% 2) ThirdJetAbsRapidity_Zinc3jet_Odd->Fill(fabs(jets[2].v.Rapidity()), weight*RatioValue);
                 else ThirdJetAbsRapidity_Zinc3jet_Even->Fill(fabs(jets[2].v.Rapidity()), weight*RatioValue);
                 ThirdJetEtaHigh_Zinc3jet->Fill(fabs(jets[2].v.Eta()), weight);
@@ -2242,6 +2256,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 JetsHT_Zinc3jet->Fill(jetsHT, weight*RatioValue1);
                 JetsHT_2_Zinc3jet->Fill(jetsHT, weight);
 		VisPt_Zinc3jetQun->Fill(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight);
+		VisPt_2_Zinc3jetQun->Fill(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight);
+		if(nEvents % 2) VisPt_Zinc3jetQun_Odd->Fill(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight);
+		else VisPt_Zinc3jetQun_Even->Fill(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight);
+
 
                 ///Azimuth cross check
                 DPhiZFirstJet_Zinc3jet->Fill(fabs(EWKBoson.DeltaPhi(jets[0].v)),weight);
@@ -2354,8 +2372,23 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets >= 1){
 	        HadRecoil->Fill(hadronicR.Pt(),weight);
 		JZB->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
-		if(EWKBoson.Pt()<= 50)	JZB_ptLow->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
-		else				{JZB_ptHigh->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);}
+		JZB_2->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+                if(nEvents % 2) JZB_Odd->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+                else JZB_Even->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		
+		if(EWKBoson.Pt()<= 50){
+		    JZB_ptLow->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    JZB_ptLow_2->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    if(nEvents % 2) JZB_ptLow_Odd->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    else JZB_ptLow_Even->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+
+		}
+		else{
+		    JZB_ptHigh->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    JZB_ptHigh_2->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    if(nEvents % 2) JZB_ptHigh_Odd->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    else JZB_ptHigh->Fill(hadronicR.Pt()-EWKBoson.Pt(), weight);
+		}
 	    }
             //=======================================================================================================//
         }
@@ -2790,9 +2823,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 	    if (nGoodGenJets >= 1 && passesgenLeptonCut && nGoodJets >= 1 && passesLeptonCut) {
 		hresponseHadRecoil->Fill(hadronicR.Pt(), genHadronicR.Pt(), weight);
-		hresponseJZB->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
-		if(EWKBoson.Pt()<= 50)	hresponseJZB_ptLow->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
-		else				{hresponseJZB_ptHigh->Fill((hadronicR.Pt()-EWKBoson.Pt()), (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);}
+		hresponseJZB->Fill((hadronicR.Pt()-EWKBoson.Pt()), 
+				   (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
+		if(EWKBoson.Pt()<= 50){
+		    hresponseJZB_ptLow->Fill((hadronicR.Pt()-EWKBoson.Pt()), 
+					     (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
+		} else{
+		    hresponseJZB_ptHigh->Fill((hadronicR.Pt()-EWKBoson.Pt()), 
+					      (genHadronicR.Pt()-genEWKBoson.Pt()),  weight);
+		}
 	    }
         }
         //=======================================================================================================//
@@ -3636,6 +3675,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
         fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);
         fChain->SetBranchAddress("EvtRunNum", &EvtRunNum, &b_EvtRunNum); 
         fChain->SetBranchAddress("EvtNum", &EvtNum, &b_EvtNum); 
+        fChain->SetBranchAddress("EvtLumiNum", &EvtLumiNum, &b_EvtLumiNum); 
         fChain->SetBranchAddress("JetAk04E", &JetAk04E, &b_JetAk04E);
         fChain->SetBranchAddress("JetAk04Pt", &JetAk04Pt, &b_JetAk04Pt);
         fChain->SetBranchAddress("JetAk04Eta", &JetAk04Eta, &b_JetAk04Eta);

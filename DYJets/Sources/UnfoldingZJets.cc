@@ -21,6 +21,7 @@
 #include "PlotSettings.h"
 #include "fixYscale.C"
 #include "ConfigVJets.h"
+#include "functions.h"
 
 //#define FAST_BAYES
 //#define NEW_CHI2
@@ -106,21 +107,32 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	//vector<TString> sherpa2;
 	//sherpa2.push_back(DYMLM2FILENAME);
 	//sherpa2.push_back(DYMLM2LEGEND);
-	//vector<TString> amcatnlo;
-	//amcatnlo.push_back(DYAMCATNLOFILENAME);
-	//amcatnlo.push_back(DYAMCATNLOLEGEND);
+	vector<TString> amcatnlo;
+	amcatnlo.push_back(DYAMCATNLOFILENAME);
+	amcatnlo.push_back(DYAMCATNLOLEGEND);
 	vector<TString> mgpythia8;
 	mgpythia8.push_back(DYMLM2FILENAME);
 	mgpythia8.push_back(DYMLM2LEGEND);
       
 	//generatorNames["sherpa14"] = sherpa14;
 	//generatorNames["sherpa2"] = sherpa2;
-	//generatorNames["amcatnlo"] = amcatnlo; 
+	generatorNames["amcatnlo"] = amcatnlo; 
 	generatorNames["mgpythia8"] = mgpythia8;
       
 	TFile *fGen1 = NULL; 
 	//TFile *fGen2 = NULL; 
       
+	if(generatorNames.find(gen1) == generatorNames.end()){
+	    std::cout << __FILE__ << ":" << __LINE__ << ": fatal error. Generator name "
+		      << gen1 << " is not supported.";
+	    abort();
+	}
+
+
+	std::cout << "-=> " << histoDir << "\n";
+	    std::cout	  << lepSel << "\n";
+	std::cout	  << gen1 << "\n";
+	std::cout	  <<  generatorNames[gen1][0] << "\n";
 	TString gen1File = histoDir + lepSel + "_13TeV_" + generatorNames[gen1][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
 	gen1File += jetPtMin;
 	gen1File += "_JetEtaMax_";
@@ -349,7 +361,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	  continue;
 	}
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
-				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, logy,
+				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, 
+				  unfoldDir, logy,
 				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
 
 	//--- save the unfolded histograms ---
@@ -786,6 +799,20 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	       double integratedLumi, const TString& unfoldDir, bool logy,
 	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
 {
+
+    //-- sanity check
+    //response matrix: x-axis = measured, y-axis = truth
+    const TH2& hr = *resp->Hresponse();
+    if(!isSameBinning(*hr.GetXaxis(), *hRecDataMinusFakes->GetXaxis())){
+	std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: axes of measured and hronse matrix histograms are not conistents.\n";
+	abort();
+    }
+
+    if(!isSameBinning(*hr.GetXaxis(), *hr.GetYaxis())){
+	std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: x- and y- axes of the response matrices differs. If it's on purpose, please edit the code to suppress this sanity check.\n";
+	abort();
+    }
+    
     //--- make sure we use OverFlow (should already be set to true) ---
     resp->UseOverflow();
 
@@ -1041,6 +1068,25 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 
     std::cout << "Bayes unfolding, number of first bins to skip: " << nBinsToSkip << "\n";
 
+    //Before unfolding:
+    TH1D* hPrior = (TH1D*) resp->Htruth()->Clone(TString("Unf") +  name + "_0");
+    hPrior->SetTitle(hPrior->GetName());
+    std::cout << "!!!!!!!!!! useFlatPrior = " << useFlatPrior << "\n";
+    if(useFlatPrior){
+	hPrior->Reset();
+	const int nbins = hPrior->GetNbinsX();
+	for(int ibin = 1; ibin <= nbins; ++ibin){
+	    hPrior->SetBinContent(ibin, 1.);
+	    hPrior->SetBinError(ibin, 0);
+	}
+    }
+    double denom = hPrior->Integral();
+    if(denom){
+	hPrior->Scale(hRecDataMinusFakes->Integral() / denom);
+    }
+    hPrior->Write(hPrior->GetName());
+
+
     //Test different regularisation values (=number of iterations for Bayes case)
     for (int i = 1; i <= nTestIterMax; ++i) {
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
@@ -1050,6 +1096,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	RObjectForDataTmp->UseFlatPrior(useFlatPrior);
 	RObjectForDataTmp->IncludeSystematics(0); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	std::cout << "niter = " << i << std::endl;
+	//The following Hreco call will trigger the data unfolding
 	TH1D* hUnfDataBis = (TH1D*) RObjectForDataTmp->Hreco(RooUnfold::kCovariance);
 	TString tmpName = "Unf" + name + "_"; 
 	tmpName += i; 
@@ -1061,23 +1108,27 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	hfoldUnfData->SetName(tmpName);
 	hfoldUnfData->SetTitle(tmpName);
 	TH1D *hgen = (TH1D*) respBis->Htruth();
-	tmpName = "gen" + name + "_";
-	tmpName += i;
-	hgen->SetName(tmpName);
-	hgen->SetTitle(tmpName);
-	hgen->Write();
+	//For debugging>>>	
+	//tmpName = "gen" + name + "_";
+	//tmpName += i;
+	//hgen->SetName(tmpName);
+	//hgen->SetTitle(tmpName);
+	//hgen->Write();
+	//<<< for debugging
 	TH1D *hfoldgen = foldUnfData(hgen, respBis);
 	tmpName = "folgen" + name + "_";
 	tmpName += i;
 	hfoldgen->SetName(tmpName);
 	hfoldgen->SetTitle(tmpName);
 	hfoldgen->Write();
-	TH1D *hmes = (TH1D*) respBis->Hmeasured();
-	tmpName = "mes" + name + "_";
-	tmpName += i;
-	hmes->SetName(tmpName);
-	hmes->SetTitle(tmpName);
-	hmes->Write();
+	//For debugging>>>
+	//TH1D *hmes = (TH1D*) respBis->Hmeasured();
+	//tmpName = "mes" + name + "_";
+	//tmpName += i;
+	//hmes->SetName(tmpName);
+	//hmes->SetTitle(tmpName);
+	//hmes->Write();
+	//<<<for debugging
 
 	TH1* hRes = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hRes%s_%d", name.Data(), i));
 	hRes->Reset();
@@ -1099,7 +1150,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	    TH1* hfoldUnfDataOdd = foldUnfData(hUnfDataOdd, respBis);
 	    hfoldUnfDataOdd->SetName(TString::Format("dataOddfoldedBack%s_%d", name.Data(), i));
 	    hfoldUnfDataOdd->SetTitle(TString::Format("dataOddFoldedBack%s_%d", name.Data(), i));
-	    hfoldUnfDataOdd->Write();
+	    hfoldUnfDataOdd->Write(hfoldUnfDataOdd->GetName());
 	    
 	    TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i+1));
 	    hResXval->Reset();
@@ -1121,7 +1172,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 		hResXval->SetBinContent(hfoldUnfDataOdd->GetXaxis()->GetFirst() + j, x);
 		if(x > maxRes) maxRes = x;
 	    }
-	    hResXval->Write();
+	    hResXval->Write(hResXval->GetName());
 	    hResMaxXval->Fill(i, maxRes);
 	}
 	
@@ -1131,14 +1182,13 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nBinsToSkip, res);
 	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
 	hchi2->SetBinContent(i, mychi2);
-	if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0"); 
-	hUnfDataBis->Write();
-	hfoldUnfData->Write();
+	//if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0"); 
+	hUnfDataBis->Write(hUnfDataBis->GetName());
+	hfoldUnfData->Write(hfoldUnfData->GetName());
 	if (mychi2 < 1./sqrt(2) && finalNIter < 0) {
 	    nIter = i;
 	    finalNIter = i;
 	    std::cout << "nIter: " << nIter << "\n";
-	    //break;
 	}
 
 	double maxRes = -1.;
@@ -1209,7 +1259,12 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     line->Draw();
     hchi2->Write();
     chchi2->Write();
-    //    chchi2->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
+    if(!xvalIter){
+	chchi2->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
+	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.C");
+	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.root");
+	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.png");
+    }
 
     if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
       hchi2Xval->GetYaxis()->SetRangeUser(0, max(1.3, 1.1*hchi2Xval->GetMaximum()));
@@ -1236,9 +1291,14 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
       line->Draw();
       hchi2Xval->Write();
       chchi2Xval->Write();
-      chchi2Xval->Print("UnfoldingCheck/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.pdf");
+      if(xvalIter){
+	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.pdf");
+	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.C");
+	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.root");
+	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.png");
+      }
     }
-      
+
     if(binByBin_unfold){
       RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
       RObjectForDataBinByBin->SetVerbose(verbosity);

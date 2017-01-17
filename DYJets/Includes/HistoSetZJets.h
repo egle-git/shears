@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 #include <cstdarg>
 #include "GenH1D.h"
 
@@ -27,6 +28,10 @@ class HistoSetZJets {
         vector<double> makeVector(int num, ...);
         void insertVector(vector<double>& veca, int num, ...);
         vector<double> buildVecFineBin(int nStdBin, double arrStdBin[], int factChop);
+	
+	//List of actually used histograms;
+	std::set<std::string> varList;
+
         GenH1D* newTH1D(string, string, string, int, double*);
         GenH1D* newTH1D(string, string, string, int, double, double);
         GenH1D* newTH1D(string, string, string, vector<double>&);
@@ -35,6 +40,11 @@ class HistoSetZJets {
         TH2D* newTH2D(string, string, int, double*, int, double, double);
         TH2D* newTH2D(string, string, int, double, double, int, double*);
         TH2D* newTH2D(string, string, int, double, double, int, double, double);
+
+	void readHistList();
+	void writeHistList() const;
+	
+	bool filterHist(const char* name) const;
 
 	//bins indices of JobInfo histogram:
 	enum  { kJobNum = 1, kNJobs, kJobWeight, kNEvts, kNEvtsAllJobs, 
@@ -257,10 +267,16 @@ class HistoSetZJets {
         GenH1D *genSpTLeptons_Zinc2jet;
 
         TH1D *JetsHT_Zinc1jet;
+        TH1D *JetsHT_Zinc1jet_Odd;
+        TH1D *JetsHT_Zinc1jet_Even;
         TH1D *JetsHT_2_Zinc1jet;
         TH1D *JetsHT_Zinc2jet;
+        TH1D *JetsHT_Zinc2jet_Odd;
+        TH1D *JetsHT_Zinc2jet_Even;
         TH1D *JetsHT_2_Zinc2jet;
         TH1D *JetsHT_Zinc3jet;
+        TH1D *JetsHT_Zinc3jet_Odd;
+        TH1D *JetsHT_Zinc3jet_Even;
         TH1D *JetsHT_2_Zinc3jet;
         TH1D *JetsHT_Zinc4jet;
         TH1D *JetsHT_Zinc5jet;
@@ -309,6 +325,8 @@ class HistoSetZJets {
         GenH1D *genFirstJetPt_Zexc1jet;
         GenH1D *genSecondJetPt_Zexc2jet;
         TH1D *ZNGoodJets_Zexc;
+        TH1D *ZNGoodJets_Zexc_Odd;
+        TH1D *ZNGoodJets_Zexc_Even;
         TH2D *ZNGoodJetsNVtx_Zexc;
         TH1D *ZNGoodJets_Zinc;
        // TH1D *ZNGoodJets_test;

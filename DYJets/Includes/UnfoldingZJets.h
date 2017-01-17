@@ -11,7 +11,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 		    TString gen1, TString variable = "", bool noramlized = false, int whichSyst = -1);
 int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfoldResponse *resp, TH1D *hRecData, TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, double integratedLumi, const TString& unfoldDir,
 	       bool logy = false,
-	       TH1D *hRecDataMinusFakesOdd = 0, TH1D *hRecDataMinusFakesEven = 0);
+	       TH1D *hRecDataMinusFakesOdd = 0, TH1D *hRecDataMinusFakesEven = 0, int fixNIterTo = -1);
 TH2D* M2H(TMatrixD m);
 TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name);
 TH1D* makeCrossSectionHist(TH1D* hGenDYJets, double integratedLumi);

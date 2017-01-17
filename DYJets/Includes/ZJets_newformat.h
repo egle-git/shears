@@ -52,7 +52,7 @@ class ZJets: public HistoSetZJets {
    Int_t           EvtPuCntTruth;
    vector<double>  *EvtWeights;
    Float_t         EvtFastJetRho;
-   UInt_t          TrigHlt;
+	//   UInt_t          TrigHlt;
    ULong64_t       TrigHltPhot;
    ULong64_t       TrigHltMu;
    ULong64_t       TrigHltDiMu;
@@ -121,7 +121,7 @@ class ZJets: public HistoSetZJets {
    vector<float>   *MuEta;
    vector<float>   *MuPhi;
    vector<float>   *MuE;
-   vector<int>     *MuId;
+	//   vector<int>     *MuId;
    vector<unsigned int> *MuIdTight;
    vector<float>   *MuCh;
    vector<float>   *MuVtxZ;
@@ -248,7 +248,7 @@ class ZJets: public HistoSetZJets {
    TBranch        *b_EvtPuCntTruth;   //!
    TBranch        *b_EvtWeights;   //!
    TBranch        *b_EvtFastJetRho;   //!
-   TBranch        *b_TrigHlt;   //!
+	//   TBranch        *b_TrigHlt;   //!
    TBranch        *b_TrigHltPhot;   //!
    TBranch        *b_TrigHltMu;   //!
    TBranch        *b_TrigHltDiMu;   //!
@@ -491,6 +491,26 @@ class ZJets: public HistoSetZJets {
 	 * @return true if succesful false otherwise
 	 */
 	bool setTriggerMask();
+	
+	Int_t fill(TH1* h, Double_t x, Double_t w = 1.){
+		if(!h) return 0;
+		return h->Fill(x, w);
+	}
+
+	Int_t fill(TH2* h, Double_t x, Double_t y, Double_t w = 1.){
+		if(!h) return 0;
+		return h->Fill(x, y, w);
+	}
+	
+	Int_t fill(GenH1D* h, double x, double commonWeight, const std::vector<double>& weights){
+		if(!h) return 0;
+		return h->Fill(x, commonWeight, weights);
+	}
+
+	Int_t fill(GenH1D* h, double x, double commonWeight, const std::vector<double>* weights){
+		if(!h) return 0;
+		return h->Fill(x, commonWeight, weights);
+	}
 	
 	TString outputDirectory;
 	TString outputFileName;

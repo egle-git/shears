@@ -267,7 +267,7 @@ int main(int argc, char **argv)
 		systDir = bgDir;
 		bonzaiDir = mcBonzaiDir;
 		yieldScale = mcYieldScale;
-		if (doWhat != "BACKGROUND" && doWhat != "ALL") continue;
+		if (doWhat != "BACKGROUND" && doWhat != "ALL" && doWhat != Samples[iSample].name) continue;
 		if(iSyst >= NSystMC) continue;
 	    } else {//alternative DY
 		hasRecoInfo = true;

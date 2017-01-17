@@ -4,12 +4,51 @@
 #include <TH2.h>
 #include <RooUnfoldResponse.h>
 #include <sstream>
+#include <iostream>
 #include "HistoSetZJets.h"
+#include "ConfigVJets.h"
+
+extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
 using namespace std;
 
 HistoSetZJets::~HistoSetZJets()
 {
+}
+
+bool HistoSetZJets::filterHist(const char* name) const{
+  if(varList.size() == 0) return true;
+  std::string n(name);
+  for(std::set<std::string>::const_iterator it = varList.begin();
+      it != varList.end();
+      ++it){
+    if((*it) == n) return true;
+    if((*it) + "_Odd" == n) return true;
+    if((*it) + "_Even" == n) return true;
+    if((*it) + "_2" == n) return true;
+    if(std::string("gen")+ (*it) == n) return true;
+    if(std::string("hresponse") + (*it) == n) return true;
+  }
+  return false;
+}
+
+void HistoSetZJets::readHistList(){
+  std::string fname = cfg.getS("histList");
+  if(fname.empty()) return;
+  std::ifstream f(fname);
+  if(!f.good()){
+    std::cerr << "Failed to read file " << fname << " defined by parameter varList\n";
+    abort();
+  }
+  while(!f.eof()){
+    std::string v;
+    f >> v;
+    varList.insert(v);
+  }
+  //Histogram to always include:
+  varList.insert("JobInfo");
+  varList.insert("lumi");
+  varList.insert("input");
 }
 
 vector<double> HistoSetZJets::makeVector(int num, ...)
@@ -55,6 +94,7 @@ vector<double> HistoSetZJets::buildVecFineBin( int nStdBin, double arrStdBin[], 
 
 
 GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double *xBins){
+    if(!filterHist(name.c_str())) return 0;
     GenH1D* hist = new GenH1D(name.c_str(), title.c_str(), nBins, xBins);
     hist->GetXaxis()->SetTitle(xTitle.c_str());
     hist->GetYaxis()->SetTitle("# Events");
@@ -64,6 +104,7 @@ GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBi
 
 GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, vector<double>& xBinsVect)
 {
+    if(!filterHist(name.c_str())) return 0;
     int nBins = xBinsVect.size()-1;
     double *xBins = new double[xBinsVect.size()];
     std::copy(xBinsVect.begin(), xBinsVect.end(), xBins);
@@ -77,6 +118,7 @@ GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, vector<
 
 
 GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBins, double xLow, double xUp){
+  if(!filterHist(name.c_str())) return 0;
     GenH1D* hist = new GenH1D(name.c_str(), title.c_str(), nBins, xLow, xUp);
     hist->GetXaxis()->SetTitle(xTitle.c_str());
     hist->GetYaxis()->SetTitle("# Events");
@@ -86,6 +128,7 @@ GenH1D* HistoSetZJets::newTH1D(string name, string title, string xTitle, int nBi
 }
 
 TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double *xBins, int nBinsY, double *yBinsY){
+  if(!filterHist(name.c_str())) return 0;
     TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xBins, nBinsY, yBinsY);
     hist->GetZaxis()->SetTitle("# Events");
     listOfHistograms.push_back(hist);
@@ -93,6 +136,7 @@ TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double *xBin
 }
 
 TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double *xBins, int nBinsY, double yLow, double yUp){
+  if(!filterHist(name.c_str())) return 0;
     TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xBins, nBinsY, yLow, yUp);
     hist->GetZaxis()->SetTitle("# Events");
     listOfHistograms.push_back(hist);
@@ -100,6 +144,7 @@ TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double *xBin
 }
 
 TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double xLow, double xUp, int nBinsY, double *yBins){
+  if(!filterHist(name.c_str())) return 0;
     TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yBins);
     hist->GetZaxis()->SetTitle("# Events");
     listOfHistograms.push_back(hist);
@@ -107,6 +152,7 @@ TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double xLow,
 }
 
 TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double xLow, double xUp, int nBinsY, double yLow, double yUp){
+  if(!filterHist(name.c_str())) return 0;
     TH2D* hist = new TH2D(name.c_str(), title.c_str(), nBinsX, xLow, xUp, nBinsY, yLow, yUp);
     hist->GetZaxis()->SetTitle("# Events");
     hist->SetOption("HIST");
@@ -116,6 +162,7 @@ TH2D* HistoSetZJets::newTH2D(string name, string title, int nBinsX, double xLow,
 
 TH2D* HistoSetZJets::newTH2D(string name, string title, vector<double>& xBinsVect, vector<double>& yBinsVect)
 {
+  if(!filterHist(name.c_str())) return 0;
     int nBins_x = xBinsVect.size()-1;
     int nBins_y = yBinsVect.size()-1;
     double *xBins = new double[xBinsVect.size()];
@@ -135,6 +182,8 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
     TH1::SetDefaultSumw2();
     TH2::SetDefaultSumw2();
 
+    readHistList();
+    
     string ZpT = "p_{T}(Z) [GeV]", Zrap = "y(Z)", Zeta = "#eta(Z)";
     string ZpTVis = "p_{T} balance [GeV]";
     string HRecoi = "Hadronic Recoil [GeV]";
@@ -472,6 +521,13 @@ int nZPt_Zinc0jet(22);
     ThirdJetAbsRapidity_Zinc3jet_Odd    = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Odd",     "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  8, 0., 2.4);
     ThirdJetAbsRapidity_Zinc3jet_Even   = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Even",    "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  8, 0., 2.4);
     ThirdJetAbsRapidity_2_Zinc3jet        = newTH1D("ThirdJetAbsRapidity_2_Zinc3jet",        "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  5*8, 0., 2.4);
+
+    //to match with binning of current response matrices..
+//    ThirdJetAbsRapidity_Zinc3jet        = newTH1D("ThirdJetAbsRapidity_Zinc3jet",        "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  12, 0., 2.4);
+//    ThirdJetAbsRapidity_Zinc3jet_Odd    = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Odd",     "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  12, 0., 2.4);
+//    ThirdJetAbsRapidity_Zinc3jet_Even   = newTH1D("ThirdJetAbsRapidity_Zinc3jet_Even",    "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  12, 0., 2.4);
+//    ThirdJetAbsRapidity_2_Zinc3jet        = newTH1D("ThirdJetAbsRapidity_2_Zinc3jet",        "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  5*12, 0., 2.4);    
+
     
     ThirdJetRapidityHigh_Zinc3jet       = newTH1D("ThirdJetRapidityHigh_Zinc3jet",       "3rd jet |y| (N_{jets} #geq 3)",              "|y(j_{3})|",  24, 0., 4.7);  
     FourthJetAbsRapidity_Zinc4jet       = newTH1D("FourthJetAbsRapidity_Zinc4jet",       "4th jet |y| (N_{jets} #geq 4)",              "|y(j_{4})|",  8, 0., 2.4);  
@@ -556,15 +612,21 @@ int nZPt_Zinc0jet(22);
 
     genSpTLeptons_Zinc2jet              = newTH1D("genSpTLeptons_Zinc2jet",              "gen #Delta_{pT}^{rel} lep (N_{jets} #geq 2)",     lSpt,          50, 0, 1);
 
-    JetsHT_Zinc1jet                     = newTH1D("JetsHT_Zinc1jet",                     "Scalar sum jets p_{T} (N_{jets} #geq 1)",     HT,     nJetHT_Zinc1jet, jetHT_Zinc1jet); 
+    JetsHT_Zinc1jet                     = newTH1D("JetsHT_Zinc1jet",                     "Scalar sum jets p_{T} (N_{jets} #geq 1)",     HT,     nJetHT_Zinc1jet, jetHT_Zinc1jet);
+    JetsHT_Zinc1jet_Odd                 = newTH1D("JetsHT_Zinc1jet_Odd",                     "Scalar sum jets p_{T} (N_{jets} #geq 1)",     HT,     nJetHT_Zinc1jet, jetHT_Zinc1jet);
+    JetsHT_Zinc1jet_Even                = newTH1D("JetsHT_Zinc1jet_Even",                     "Scalar sum jets p_{T} (N_{jets} #geq 1)",     HT,     nJetHT_Zinc1jet, jetHT_Zinc1jet);
 
-    JetsHT_2_Zinc1jet                    = newTH1D("JetsHT_2_Zinc1jet",                 "Scalar sum jets p_{T} (N_{jets} #geq 1)2",     HT,   jetHT_2_Zinc1jet); 
+    JetsHT_2_Zinc1jet                   = newTH1D("JetsHT_2_Zinc1jet",                 "Scalar sum jets p_{T} (N_{jets} #geq 1)2",     HT,   jetHT_2_Zinc1jet); 
  
     JetsHT_Zinc2jet                      = newTH1D("JetsHT_Zinc2jet",                     "Scalar sum jets p_{T} (N_{jets} #geq 2)",     HT,     nJetHT_Zinc2jet, jetHT_Zinc2jet);  
+    JetsHT_Zinc2jet_Odd                  = newTH1D("JetsHT_Zinc2jet_Odd",                     "Scalar sum jets p_{T} (N_{jets} #geq 2)",     HT,     nJetHT_Zinc2jet, jetHT_Zinc2jet);  
+    JetsHT_Zinc2jet_Even                 = newTH1D("JetsHT_Zinc2jet_Even",                     "Scalar sum jets p_{T} (N_{jets} #geq 2)",     HT,     nJetHT_Zinc2jet, jetHT_Zinc2jet);  
 
     JetsHT_2_Zinc2jet                    = newTH1D("JetsHT_2_Zinc2jet",                 "Scalar sum jets p_{T} (N_{jets} #geq 2)2",     HT,   jetHT_2_Zinc2jet); 
 
     JetsHT_Zinc3jet                     = newTH1D("JetsHT_Zinc3jet",                     "Scalar sum jets p_{T} (N_{jets} #geq 3)",     HT,     nJetHT_Zinc3jet, jetHT_Zinc3jet);  
+    JetsHT_Zinc3jet_Odd                 = newTH1D("JetsHT_Zinc3jet_Odd",                     "Scalar sum jets p_{T} (N_{jets} #geq 3)",     HT,     nJetHT_Zinc3jet, jetHT_Zinc3jet);  
+    JetsHT_Zinc3jet_Even                = newTH1D("JetsHT_Zinc3jet_Even",                     "Scalar sum jets p_{T} (N_{jets} #geq 3)",     HT,     nJetHT_Zinc3jet, jetHT_Zinc3jet);  
 
     JetsHT_2_Zinc3jet                   = newTH1D("JetsHT_2_Zinc3jet",                   "Scalar sum jets p_{T} (N_{jets} #geq 3)2",     HT,   jetHT_2_Zinc3jet);  
 
@@ -611,7 +673,7 @@ int nZPt_Zinc0jet(22);
 
     ThirdJetPt_Zinc3jet               = newTH1D("ThirdJetPt_Zinc3jet",                 "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
     ThirdJetPt_Zinc3jet_Odd           = newTH1D("ThirdJetPt_Zinc3jet_Odd",             "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet); 
-    ThirdJetPt_Zinc3jet_Even          = newTH1D("ThirdJetPt_Zinc3jet_Eve",             "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    ThirdJetPt_Zinc3jet_Even          = newTH1D("ThirdJetPt_Zinc3jet_Even",             "3rd jet p_{T} (N_{jets} #geq 3)",             "p_{T}(j_{3}) [GeV]",     nJetPt_Zinc3jet, jetPt_Zinc3jet);
     
     ThirdJetPt_2_Zinc3jet               = newTH1D("ThirdJetPt_2_Zinc3jet",             "3rd jet p_{T} (N_{jets} #geq 3)2",             "p_{T}(j_{3}) [GeV]",      jetPt_2_Zinc3jet); 
     FourthJetPt_Zinc4jet              = newTH1D("FourthJetPt_Zinc4jet",                "4th jet p_{T} (N_{jets} #geq 4)",             "p_{T}(j_{4}) [GeV]",     nJetPt_Zinc4jet, jetPt_Zinc4jet); 
@@ -641,15 +703,26 @@ int nZPt_Zinc0jet(22);
     
     //    ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 8, -0.5, 7.5);
     ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 7, -0.5, 6.5);
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
-    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-    //    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+    if(ZNGoodJets_Zexc){
+	for(int ibin = 1; ibin < ZNGoodJets_Zexc->GetNbinsX(); ++ibin){
+	    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	}
 
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
+//	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
+//     //ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+	ZNGoodJets_Zexc_Odd = (TH1D*) ZNGoodJets_Zexc->Clone("ZNGoodJets_Zexc_Odd");
+	ZNGoodJets_Zexc_Odd->SetName("ZNGoodJets_Zexc_Odd");
+	ZNGoodJets_Zexc_Even = (TH1D*) ZNGoodJets_Zexc->Clone("ZNGoodJets_Zexc_Even");
+	ZNGoodJets_Zexc_Even->SetName("ZNGoodJets_Zexc_Even");
+
+    }
+    
     SumZJetRapidity_Zinc1jet = newTH1D("SumZJetRapidity_Zinc1jet", "SumZJetRapidity_Zinc1jet", "y_{sum}", 12, 0, 2.4);
     genSumZJetRapidity_Zinc1jet = newTH1D("genSumZJetRapidity_Zinc1jet", "genSumZJetRapidity_Zinc1jet", "y_{sum}", 12, 0, 2.4);
     DifZJetRapidity_Zinc1jet = newTH1D("DifZJetRapidity_Zinc1jet", "DifZJetRapidity_Zinc1jet", "y_{dif}", 12, 0, 2.4);
@@ -734,51 +807,72 @@ jetPt_2_Zinc3jet);
     hresponseFirstJetPtEta_Zinc1jet = newTH2D("hresponseFirstJetPtEta_Zinc1jet", "hresponseFirstJetPtEta_Zinc1jet", 10*6, 0, 10*6, 10*6, 0, 10*6); 
 
     ZNGoodJetsNVtx_Zexc = newTH2D("ZNGoodJetsNVtx_Zexc","NVtx vs Jet Counter (excl.)", 11, -0.5, 10.5, 45, 0.5, 45.5);
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
-    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
+    if(ZNGoodJetsNVtx_Zexc){
+	for(int ibin = 1; ibin < ZNGoodJetsNVtx_Zexc->GetNbinsX(); ++ibin){
+	    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	}
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
+//	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
+    }
 
     ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, "#geq 0");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2, "#geq 1");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(3, "#geq 2");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(4, "#geq 3");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(5, "#geq 4");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(6, "#geq 5");
-    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(7, "#geq 6");
-//  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8, "#geq 7");
-//  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(9, "#geq 8");
-//  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(10,"#geq 9");
-//  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");
-
+    if(ZNGoodJets_Zinc){
+	for(int ibin = 1; ibin < ZNGoodJets_Zinc->GetNbinsX(); ++ibin){
+	    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	}
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, "#geq 0");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2, "#geq 1");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(3, "#geq 2");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(4, "#geq 3");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(5, "#geq 4");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(6, "#geq 5");
+//    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(7, "#geq 6");
+////  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8, "#geq 7");
+////  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(9, "#geq 8");
+////  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(10,"#geq 9");
+////  ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");
+    }
+    
     ZNGoodJets_Zexc_NoWeight = newTH1D("ZNGoodJets_Zexc_NoWeight","Unweighted jet Counter (excl.)", "N_{jets}", 8, -0.5, 7.5);
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(1,"= 0");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(2,"= 1");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(3,"= 2");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(4,"= 3");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(5,"= 4");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(6,"= 5");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(7,"= 6");
-    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(8,"= 7");
-
+    if(ZNGoodJets_Zexc_NoWeight){
+	for(int ibin = 1; ibin < ZNGoodJets_Zexc_NoWeight->GetNbinsX(); ++ibin){
+	    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	}
+	
+	//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(1,"= 0");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(2,"= 1");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(3,"= 2");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(4,"= 3");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(5,"= 4");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(6,"= 5");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(7,"= 6");
+//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(8,"= 7");
+    }
+    
     ZNGoodJets_Zinc_NoWeight = newTH1D("ZNGoodJets_Zinc_NoWeight","Unweighted jet Counter (incl.)", "N_{jets}", 8, -0.5, 7.5);
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(1,"#geq 0");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(2,"#geq 1");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(3,"#geq 2");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(4,"#geq 3");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(5,"#geq 4");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(6,"#geq 5");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(7,"#geq 6");
-    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(8,"#geq 7");
-
+    if(ZNGoodJets_Zinc_NoWeight){
+	for(int ibin = 1; ibin < ZNGoodJets_Zinc_NoWeight->GetNbinsX(); ++ibin){
+	    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	}
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(1,"#geq 0");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(2,"#geq 1");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(3,"#geq 2");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(4,"#geq 3");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(5,"#geq 4");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(6,"#geq 5");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(7,"#geq 6");
+//	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(8,"#geq 7");
+    }
+    
     //DPS histograms
     //binning 
     int nbinSpt=21;
@@ -1080,32 +1174,44 @@ jetPt_2_Zinc3jet);
     genSpTDPSPartons_Zexc2jet     = newTH1D("genSpTDPSPartons_Zexc2jet",     "#Delta_{pT}^{rel} DPS partons (N_{jets} = 2)","#Delta_{pT}^{rel}",nbinSpt,binSpt);
 
     genZNGoodJets_Zinc = newTH1D("genZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1,"#geq 0");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2,"#geq 1");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(3,"#geq 2");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(4,"#geq 3");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(5,"#geq 4");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(6,"#geq 5");
-    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(7,"#geq 6");
-    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8,"#geq 7");
-    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(9,"#geq 8");
-    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(10,"#geq 9");
-    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");
-
+    if(genZNGoodJets_Zinc){
+	for(int ibin = 1; ibin < genZNGoodJets_Zinc->GetNbinsX(); ++ibin){
+	    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	}
+	
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1,"#geq 0");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2,"#geq 1");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(3,"#geq 2");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(4,"#geq 3");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(5,"#geq 4");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(6,"#geq 5");
+//	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(7,"#geq 6");
+//    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(8,"#geq 7");
+//    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(9,"#geq 8");
+//    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(10,"#geq 9");
+//    //genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(11,"#geq 10");
+    }
     if ( doWJets )  genZNGoodJets_Zexc = newTH1D("genZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 11, -0.5, 10.5);
     else genZNGoodJets_Zexc = newTH1D("genZNGoodJets_Zexc","Jet Counter (excl.)", "N_{jets}", 7, -0.5, 6.5);
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1,"= 0");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2,"= 1");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(3,"= 2");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(4,"= 3");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5,"= 4");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6,"= 5");
-    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7,"= 6");
-    if ( doWJets ){
-        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8,"= 7"); 
-        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(9,"#geq 8");
-        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(10,"#geq 9");
-        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(11,"#geq 10");
+
+    if(genZNGoodJets_Zexc){
+	for(int ibin = 1; ibin < genZNGoodJets_Zexc->GetNbinsX(); ++ibin){
+	    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	}
+	
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1,"= 0");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(2,"= 1");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(3,"= 2");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(4,"= 3");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(5,"= 4");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(6,"= 5");
+//    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(7,"= 6");
+//    if ( doWJets ){
+//        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(8,"= 7"); 
+//        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(9,"#geq 8");
+//        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(10,"#geq 9");
+//        genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(11,"#geq 10");
+//    }
     }
     //Correlations
 
@@ -1148,18 +1254,22 @@ jetPt_2_Zinc3jet);
     PU_7                      = newTH1D("PU_7","pile-up 7 jets","#pu",45,0.5,45.5);
 
     ZNGoodJetsBeta_Zexc = newTH2D("ZNGoodJetsBeta_Zexc","Beta cut vs Jet Counter (excl.) ", 11, -0.5, 10.5, 10, -0.5, 9.5);
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
-    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
-
+    if(ZNGoodJetsBeta_Zexc){
+      	for(int ibin = 1; ibin < ZNGoodJetsBeta_Zexc->GetNbinsX(); ++ibin){
+	    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	}
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
+//    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
+    }
 
     Beta                          = newTH1D("Beta","Jet PU variable Beta","Beta",50,0.,1.);
     BetaStar                      = newTH1D("BetaStar","Jet PU variable BetaStar","BetaStar",50,0.,1.);
@@ -1666,4 +1776,15 @@ jetPt_2_Zinc3jet);
         hresponsetau_c_cm_max_Zinc1jet[i] = newTH2D(string("hresponsetau_c_cm_max_Zinc1jet" + i_str.str()).c_str(), "max#tau^{c}_{cm}", 100, 0, 100, 100, 0, 100);
     }
 
+    writeHistList();
+}
+
+void HistoSetZJets::writeHistList() const{
+    std::ofstream f(".histList");
+    f << "# File generated by runZJets_newformat. The file .histList will be overwritten at each execution.\n\n";
+    for(std::vector<TH1*>::const_iterator it= listOfHistograms.begin();
+	it != listOfHistograms.end();
+	++it){
+	f << (*it)->GetName() << "\n";
+    }
 }

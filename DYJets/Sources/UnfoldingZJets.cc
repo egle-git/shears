@@ -52,7 +52,6 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
     TString sysPlotDir = unfoldDir.Strip(TString::kTrailing, '/') + "SysPlots";
 
-
     if (variable != "") {
         start = findVariable(variable);
         if (start >= 0) {
@@ -202,6 +201,8 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 	fData[0]->cd();
 	hRecDataOdd = (TH1D*) fData[0]->Get(variable_odd);
 	hRecDataEven = (TH1D*) fData[0]->Get(variable_even);
+	if(!hRecDataOdd){ std::cout << "Missing Odd histogram for " << variable << "\n"; }
+	if(!hRecDataEven) std::cout << "Missing Even histogram for " << variable << "\n";
       }
       
       //--- Get all histograms ---
@@ -280,8 +281,9 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
 
       //--- Unfold the Data histograms for each systematic ---
+      int fixNIterTo = -1;
       for (unsigned short iSyst = 0; iSyst < nSysts; ++iSyst) {
-
+	  
 	if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 	
 	//--- only JES up and down (iSyst = 1 and 2) is applied on data ---
@@ -360,10 +362,14 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 		    << " has no entries. Its unfolding will be skipped.\n";
 	  continue;
 	}
+
 	nIter[iSyst] = UnfoldData(lepSel, algo, svdKterm, respDYJets[iSyst], hRecDataMinusFakes, hUnfData[iSyst], 
 				  hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst], name[iSyst], integratedLumi, 
 				  unfoldDir, logy,
-				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+				  hRecDataMinusFakesOdd, hRecDataMinusFakesEven,
+				  fixNIterTo);
+	//The number of unfolding iterations is fixed to the value used for the central value.
+	if(iSyst == 0) fixNIterTo = nIter[0];
 
 	//--- save the unfolded histograms ---
 	outputRootFile->cd(); 
@@ -797,7 +803,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	       TH1D* hRecDataMinusFakes,
 	       TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov, TString name, 
 	       double integratedLumi, const TString& unfoldDir, bool logy,
-	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven)
+	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven, int fixNIterTo)
 {
 
     //-- sanity check
@@ -842,8 +848,11 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     
     int finalNIter = -1;
     int nIter = 99;
-    int finalNIterXval = -1;
-    int nIterXval = 99;
+    //    int finalNIterXval = -1;
+    //    int nIterXval = 99;
+    int nIterXval = -1;
+    int nIterXvalMin = 0;
+    double chi2XvalMin = 1.e9;
 
 
     bool svd_unfold = cfg.getB("svdUnfold", false);
@@ -1085,6 +1094,32 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	hPrior->Scale(hRecDataMinusFakes->Integral() / denom);
     }
     hPrior->Write(hPrior->GetName());
+    TH1* hfoldUnfData = foldUnfData(hPrior, resp);
+    const int nRes = hfoldUnfData->GetXaxis()->GetLast() - hfoldUnfData->GetXaxis()->GetFirst() + 1;
+    Double_t resXval[nRes];
+    //double mychi2Xval = MyChi2Test(hfoldUnfData, hRecDataMinusFakes, nBinsToSkip, resXval);
+    //hchi2->SetBinContent(1, mychi2Xval);
+    if(hRecDataMinusFakesEven==0){
+	std::cout << "Missing hRecDataMinusFakesEven for " << variable << std::endl;
+	//	abort();
+    }
+    //mychi2Xval = MyChi2Test(hfoldUnfData, hRecDataMinusFakesEven, nBinsToSkip, resXval);
+    //hchi2Xval->SetBinContent(1, mychi2Xval);	
+    //    const int nRes = hfoldUnfData->GetXaxis()->GetLast() - hfoldUnfDataOdd->GetXaxis()->GetFirst() + 1;
+    double maxRes = 0;
+    TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), 0));
+    hResXval->Reset();
+    hResXval->SetTitle(TString::Format("%s %s residuals - iteration %d, cross validation",
+				       variable.Data(), name.Data(), 0));
+    hResXval->GetYaxis()->SetTitle("Residuals");
+    
+    for(int j = 0; j < nRes; ++j){
+	double x = fabs(resXval[j]);
+	hResXval->SetBinContent(hfoldUnfData->GetXaxis()->GetFirst() + j, x);
+	if(x > maxRes) maxRes = x;
+    }
+    hResXval->Write(hResXval->GetName());
+    //PROBLEM which whisys!=//hResMaxXval->Fill(0., maxRes);
 
 
     //Test different regularisation values (=number of iterations for Bayes case)
@@ -1136,6 +1171,7 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 				       variable.Data(), name.Data(), i));
 	hRes->GetYaxis()->SetTitle("Residuals");
 
+	double mychi2Xval = -1;
 	if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
 	    TH1D *hRecDataMinusFakesBisOdd = (TH1D*) hRecDataMinusFakesOdd->Clone();
 	    TH1D *hRecDataMinusFakesBisEven = (TH1D*) hRecDataMinusFakesEven->Clone();
@@ -1152,19 +1188,24 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	    hfoldUnfDataOdd->SetTitle(TString::Format("dataOddFoldedBack%s_%d", name.Data(), i));
 	    hfoldUnfDataOdd->Write(hfoldUnfDataOdd->GetName());
 	    
-	    TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i+1));
+	    TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i));
 	    hResXval->Reset();
 	    hResXval->SetTitle(TString::Format("%s %s residuals - iteration %d, cross validation",
-					       variable.Data(), name.Data(), i+1));
+					       variable.Data(), name.Data(), i));
 	    hResXval->GetYaxis()->SetTitle("Residuals");
 	    const int nRes = hfoldUnfDataOdd->GetXaxis()->GetLast() - hfoldUnfDataOdd->GetXaxis()->GetFirst() + 1;
 	    Double_t resXval[nRes];
-	    double mychi2Xval = MyChi2Test(hfoldUnfDataOdd, hRecDataMinusFakesBisEven, nBinsToSkip, resXval);
-	    hchi2Xval->SetBinContent(i, mychi2Xval);
-	    if (mychi2Xval < 1. && finalNIterXval < 0) {
+	    mychi2Xval = MyChi2Test(hRecDataMinusFakesBisEven, hfoldUnfDataOdd, nBinsToSkip, resXval);
+	    hchi2Xval->SetBinContent(hchi2Xval->GetXaxis()->FindBin(i), mychi2Xval);
+	    //	    if (mychi2Xval < 1. && finalNIterXval < 0) {
+	    if (mychi2Xval < 1. && nIterXval < 0) {
 		nIterXval = i;
-		finalNIterXval = i;
+		//	finalNIterXval = i;
 		std::cout << "nIterXval: " << nIterXval << "\n";
+	    }
+	    if(mychi2Xval < chi2XvalMin){
+		nIterXvalMin =  i;
+		chi2XvalMin = mychi2Xval;
 	    }
 	    double maxRes = 0;
 	    for(int j = 0; j < nRes; ++j){
@@ -1180,8 +1221,9 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
 	const int nRes = hfoldUnfData->GetXaxis()->GetLast() - hfoldUnfData->GetXaxis()->GetFirst() + 1;
 	Double_t res[nRes];
 	double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nBinsToSkip, res);
-	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
-	hchi2->SetBinContent(i, mychi2);
+	if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions std/xval: " 
+				<< mychi2 << " / " << mychi2Xval << "\n"; 
+	hchi2->SetBinContent(hchi2->GetXaxis()->FindBin(i), mychi2);
 	//if (i==1) hRecDataMinusFakesBis->Write("Unf" + name + "_0"); 
 	hUnfDataBis->Write(hUnfDataBis->GetName());
 	hfoldUnfData->Write(hfoldUnfData->GetName());
@@ -1214,6 +1256,11 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     //nIter = max(nIter, 2);
    // nIter = 4;
 
+    if(nIterXval < 0){
+	std::cout << "Chi2/ndof is always larged than 1. Using minimum as number of iterations determined with  the cross-validation method.\n";
+	nIterXval = nIterXvalMin;
+    }
+
     int chosenIter = 0;
     if(xvalIter){
 	chosenIter = nIterXval;
@@ -1223,8 +1270,13 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     if(chosenIter < minIter){
 	chosenIter = minIter;
     }
-    if(chosenIter > maxIter){
+    if(chosenIter > maxIter || chosenIter < 0){
 	chosenIter = maxIter;
+    }
+
+    if(fixNIterTo > 0){
+	std::cout << "Warning: forcing nunber of iterations to " << fixNIterTo<< "!\n";
+	chosenIter = fixNIterTo;
     }
 
     std::cout << "Bayes unfold, choice of number of iterations\n"
@@ -1259,12 +1311,12 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
     line->Draw();
     hchi2->Write();
     chchi2->Write();
-    if(!xvalIter){
+    //if(!xvalIter){
 	chchi2->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.pdf");
 	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.C");
 	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.root");
 	chchi2->Print(unfoldCheckDir + "/"  + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2.png");
-    }
+	//}
 
     if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
       hchi2Xval->GetYaxis()->SetRangeUser(0, max(1.3, 1.1*hchi2Xval->GetMaximum()));
@@ -1291,12 +1343,12 @@ int UnfoldData(const TString lepSel, const TString algo, int svdKterm, RooUnfold
       line->Draw();
       hchi2Xval->Write();
       chchi2Xval->Write();
-      if(xvalIter){
+      //if(xvalIter){
 	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.pdf");
 	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.C");
 	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.root");
 	  chchi2Xval->Print(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Xval.png");
-      }
+	  //}
     }
 
     if(binByBin_unfold){
@@ -1603,7 +1655,9 @@ double MyChi2Test(TH1 *h1, TH1 *h2, int nBinsToSkip, Double_t* res)
 	h1Copy->SetBinContent(i, 0.0);
 	h2Copy->SetBinContent(i, 0.0);
     }
-    return h1Copy->Chi2Test(h2Copy, "WW,P,CHI2/NDF", res);
+    //    return h1Copy->Chi2Test(h2Copy, "WW,P,CHI2/NDF", res);
+    std::cout << "TTTTT\n";
+    return h1Copy->Chi2Test(h2Copy, "P,CHI2/NDF", res);
 }
 #endif
 

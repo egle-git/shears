@@ -887,18 +887,18 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     grCentralSyst->SetName("grCentralSyst");
     grCentralSyst->Draw("2");
     customizeGenHist(hGen1, 1, legend, hGen1->GetZaxis()->GetTitle());
-    hGen1->SetName("hGen1");
+    //hGen1->SetName("hGen1");
     hGen1->SetStats(0);
     hGen1->DrawCopy("ESAME");
 
     if (hGen2) {
         customizeGenHist(hGen2, 2, legend, hGen2->GetZaxis()->GetTitle());
-        hGen2->SetName("hGen2");
+        //hGen2->SetName("hGen2");
         hGen2->DrawCopy("ESAME");
     }
     if (hGen3) {
         customizeGenHist(hGen3, 3, legend, hGen3->GetZaxis()->GetTitle());
-        hGen3->SetName("hGen3");
+        //hGen3->SetName("hGen3");
         hGen3->DrawCopy("ESAME");
     }
 

@@ -214,7 +214,7 @@ double table::getTTbarSF(int NJets){
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi;
 	
     }
-    abort();
+    //    abort();
     return 1;
 }
 
@@ -222,7 +222,7 @@ double table::getTTbarSFLow(int NJets){
     for (unsigned int i=0; i != recd.size(); i++) {
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi-recd[i].ptLow;
     }
-    abort();
+    //    abort();
     return 1;}
 
 
@@ -230,7 +230,7 @@ double table::getTTbarSFHigh(int NJets){
     for (unsigned int i=0; i != recd.size(); i++) {
 	if((recd[i]).equalTo(NJets)) return recd[i].etaHi+recd[i].ptLow;
     }
-    abort();
+    //    abort();
     return 1;
 }
 

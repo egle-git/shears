@@ -1508,7 +1508,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genZNGoodJets_Zinc, 3., commonGenWeight, EvtWeights);
 
                     double RatioValue = 1.;
-		    double RatioValue1 = .1;
+		    double RatioValue1 = 1.;
                     if(nGoodJets >= 3 && UnfoldUnc){
                        double binNumber = ThirdJetEta_2_Zinc3jet_ratio->GetXaxis()->FindBin(fabs(jets[2].v.Eta()));
                        RatioValue =  ThirdJetEta_2_Zinc3jet_ratio->GetBinContent(binNumber);
@@ -2391,7 +2391,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		    fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight);
 		    fill(JZB_ptHigh_2, hadronicR.Pt()-EWKBoson.Pt(), weight);
 		    if(nEvents % 2) fill(JZB_ptHigh_Odd, hadronicR.Pt()-EWKBoson.Pt(), weight);
-		    else fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    else fill(JZB_ptHigh_Even, hadronicR.Pt()-EWKBoson.Pt(), weight); //was filling JZB_ptHigh before Jan 19!
 		}
 	    }
             //=======================================================================================================//

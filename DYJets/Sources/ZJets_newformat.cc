@@ -1800,6 +1800,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(FirstJetEtaFull_Zinc1jet, jets[0].v.Eta(), weight);
                 fill(FirstJetPhi_Zinc1jet, jets[0].v.Phi(), weight);
                 fill(JetsHT_Zinc1jet, jetsHT, weight*RatioValue1);
+                if(nEvents % 2) fill(JetsHT_Zinc1jet_Odd, weight*RatioValue1);
+		else fill(JetsHT_Zinc1jet_Even, weight*RatioValue1);
                 fill(JetsHT_2_Zinc1jet, jetsHT, weight);
                 fill(dEtaBosonJet_Zinc1jet, fabs(jets[0].v.Eta() - EWKBoson.Eta()), weight);
                 fill(SumZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity()), weight);

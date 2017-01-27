@@ -93,64 +93,66 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
       return;
     }
 
-    TFile *fSheUnf = 0;
-    // if (DYSHERPA14FILENAME.Length() > 0 ){
+    TFile *fAltUnf = 0;
+    if (ALT_UNFOLDING_FILENAME.Length() > 0 ){
 	//--- Open additional generator files -----------------------------------------------------
-	fSheUnf = new TFile(histoDir + lepSel + "_13TeV_" + DYMLM2FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	fAltUnf = new TFile(histoDir + lepSel + "_13TeV_" + ALT_UNFOLDING_FILENAME + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        if(!fAltUnf || fAltUnf->IsZombie()) std::cerr << "Error: failed to load alternative response matrices for the unfolding uncertainty estimate.\n";
+    }
 
-	std::map<TString, vector<TString> > generatorNames;
+    std::map<TString, vector<TString> > generatorNames;
       
-	//vector<TString> sherpa14;
-	//sherpa14.push_back(DYSHERPA14FILENAME);
-	//sherpa14.push_back(DYSHERPA14LEGEND);
-	//vector<TString> sherpa2;
-	//sherpa2.push_back(DYMLM2FILENAME);
-	//sherpa2.push_back(DYMLM2LEGEND);
-	vector<TString> amcatnlo;
-	amcatnlo.push_back(DYAMCATNLOFILENAME);
-	amcatnlo.push_back(DYAMCATNLOLEGEND);
-	vector<TString> mgpythia8;
-	mgpythia8.push_back(DYMLM2FILENAME);
-	mgpythia8.push_back(DYMLM2LEGEND);
+    //vector<TString> sherpa14;
+    //sherpa14.push_back(ALT_UNFOLDING_FILENAME);
+    //sherpa14.push_back(DYSHERPA14LEGEND);
+    //vector<TString> sherpa2;
+    //sherpa2.push_back(DYMLM2FILENAME);
+    //sherpa2.push_back(DYMLM2LEGEND);
+    vector<TString> amcatnlo;
+    amcatnlo.push_back(DYAMCATNLOFILENAME);
+    amcatnlo.push_back(DYAMCATNLOLEGEND);
+    vector<TString> mgpythia8;
+    mgpythia8.push_back(DYMLM2FILENAME);
+    mgpythia8.push_back(DYMLM2LEGEND);
       
-	//generatorNames["sherpa14"] = sherpa14;
-	//generatorNames["sherpa2"] = sherpa2;
-	generatorNames["amcatnlo"] = amcatnlo; 
-	generatorNames["mgpythia8"] = mgpythia8;
+    //generatorNames["sherpa14"] = sherpa14;
+    //generatorNames["sherpa2"] = sherpa2;
+    generatorNames["amcatnlo"] = amcatnlo; 
+    generatorNames["mgpythia8"] = mgpythia8;
       
-	TFile *fGen1 = NULL; 
-	//TFile *fGen2 = NULL; 
+    TFile *fGen1 = NULL; 
+    //TFile *fGen2 = NULL; 
       
-	if(generatorNames.find(gen1) == generatorNames.end()){
-	    std::cout << __FILE__ << ":" << __LINE__ << ": fatal error. Generator name "
-		      << gen1 << " is not supported.";
-	    abort();
-	}
+    if(generatorNames.find(gen1) == generatorNames.end()){
+	std::cout << __FILE__ << ":" << __LINE__ << ": fatal error. Generator name "
+		  << gen1 << " is not supported.";
+	abort();
+    }
 
 
-	std::cout << "-=> " << histoDir << "\n";
-	    std::cout	  << lepSel << "\n";
-	std::cout	  << gen1 << "\n";
-	std::cout	  <<  generatorNames[gen1][0] << "\n";
-	TString gen1File = histoDir + lepSel + "_13TeV_" + generatorNames[gen1][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
-	gen1File += jetPtMin;
-	gen1File += "_JetEtaMax_";
-	gen1File += jetEtaMax;
-	gen1File += ".root";
-	fGen1 = new TFile(gen1File);
+    std::cout << "-=> " << histoDir << "\n";
+    std::cout	  << lepSel << "\n";
+    std::cout	  << gen1 << "\n";
+    std::cout	  <<  generatorNames[gen1][0] << "\n";
+    TString gen1File = histoDir + lepSel + "_13TeV_" + generatorNames[gen1][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
+    gen1File += jetPtMin;
+    gen1File += "_JetEtaMax_";
+    gen1File += jetEtaMax;
+    gen1File += ".root";
+    fGen1 = new TFile(gen1File);
 
-	if(!fGen1 || fGen1->IsZombie()){
-	    std::cerr << "Fatal error. The file " << gen1File << " was not found.\n";
-	    abort();
-	}
+    if(!fGen1 || fGen1->IsZombie()){
+	std::cerr << "Fatal error. The file " << gen1File << " was not found.\n";
+	abort();
+    }
 	
-	//TString gen2File = histoDir + lepSel + "_8TeV_" + generatorNames[gen2][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
-	//gen2File += jetPtMin;
-	//gen2File += "_JetEtaMax_";
-	//gen2File += jetEtaMax;
-	//gen2File += ".root";
-	//fGen2 = new TFile(gen2File);
-   // }      
+    //TString gen2File = histoDir + lepSel + "_8TeV_" + generatorNames[gen2][0] + "_TrigCorr_1_Syst_0_JetPtMin_";
+    //gen2File += jetPtMin;
+    //gen2File += "_JetEtaMax_";
+    //gen2File += jetEtaMax;
+    //gen2File += ".root";
+    //fGen2 = new TFile(gen2File);
+    // }      
     //----------------------------------------------------------------------------------------- 
 
     //----------------------------------------------------------------------------------------- 
@@ -213,12 +215,12 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       TH1D *hGen1 = getHisto(fGen1, "gen" + variable);
 
-      if (DYSHERPA14FILENAME.Length() > 0 ){
+      if (fAltUnf){
 	//--- Get Sherpa Unfolding response ---
 	
-	respDYJets[17] = getResp(fSheUnf, variable);
+	respDYJets[17] = getResp(fAltUnf, variable);
 	if(respDYJets[17] == 0){
-	    std::cerr << "Response matrix was not found in the file " << fSheUnf->GetName() << ". Aborts.\n";
+	    std::cerr << "Response matrix was not found in the file " << fAltUnf->GetName() << ". Aborts.\n";
 	    abort();
 	}
 	//TH1D *hGen1 = getHisto(fGen1, "gen" + variable);
@@ -277,7 +279,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
       bool logy = VAROFINTERESTZJETS[i].log;
 
-      int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
+      int nSysts = ALT_UNFOLDING_FILENAME.Length()? 18 : 17;
 
 
       //--- Unfold the Data histograms for each systematic ---
@@ -489,7 +491,7 @@ void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfo
 
     //--- Close all files ----------------------------------------------------------------------
     closeAllFiles(fData, fDYJets, fBg, NBGDYJETS);
-    if(fSheUnf) fSheUnf->Close();
+    if(fAltUnf){ fAltUnf->Close(); delete fAltUnf; }
     //fGen1->Close();
     //fGen2->Close();
     //------------------------------------------------------------------------------------------ 
@@ -778,11 +780,10 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	if(hCov[7]) numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
 	else numbers="N/A";
 	table += numbers + " & ";
-	if (hCov[10]){
-	  // Unf uncertainty
-	  numbers.Form("%#.2g", sqrt(hCov[10]->GetBinContent(i,i))*100./xs);
-	  table += numbers + " & ";
-	}
+	// Unf uncertainty
+	if (hCov[10]) numbers.Form("%#.2g", sqrt(hCov[10]->GetBinContent(i,i))*100./xs);
+	else numbers="N/A";
+	table += numbers + " & ";
 	// SF uncertinaty
 	if(hCov[9]) numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
 	else numbers="N/A";

@@ -68,12 +68,12 @@ const TString DYAMCATNLOLEGEND("MG5_aMC + PY8 (#leq 2j NLO + PS)");
 const TString DYMLM2FILENAME("DYJets_MLM");
 const TString DYMLM2LEGEND("MG5_aMC + PY8 (#leq 4j LO + PS)");
 
-//DYSHERPA14FILENAME: alternate signal sample to use to estimate
+//ALT_UNFOLDING_FILENAME: alternate signal sample to use to estimate
 //unfolding systematic uncertainties. Use empty string to disable
 //the calculaiton
-//const TString DYSHERPA14FILENAME("DYJets_UnfUnc_UNFOLDING");
-const TString DYSHERPA14FILENAME("");
-//const TString DYSHERPA14FILENAME("DYJets_Sherpa_Bugra_1_13_UNFOLDING");
+const TString ALT_UNFOLDING_FILENAME("DYJets_UnfUnc_UNFOLDING");
+//const TString ALT_UNFOLDING_FILENAME("DYJets_UNFOLDING_UNC");
+//const TString ALT_UNFOLDING_FILENAME("DYJets_Sherpa_Bugra_1_13_UNFOLDING");
 
 const TString DYSHERPA14LEGEND("Sherpa1.4 LO");
 //const TString DYMGPYTHIA8FILENAME("DYJetsToLL_M-50_TuneCUETP8M1_8TeV-MG-MLM-Bonzai");

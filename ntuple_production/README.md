@@ -42,7 +42,7 @@ The output directory path must end with the command
 
 To submit the jobs to produce the Boabab ntuple of the datasets listed in the catalog file, runs:
 
-`grow_baobabs --new-jobs`
+`grow_baobabs --new-jobs`  # if there is an error like: urllib2.HTTPError: HTTP Error 403: Forbidden---- need to do "voms-proxy-init -voms cms"
 
 To check running job and generate luminosity section summary json file, use the --check option:
 

@@ -7,14 +7,20 @@
 #include <algorithm>
 #include <cstdarg>
 #include <cstring>
+#include <set>
 #include "TH1.h"
 #include "TH2.h"
 #include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TSystem.h"
 #include "RooUnfoldResponse.h"
+#include "TCanvas.h"
+#include "TROOT.h"
+#include "ConfigVJets.h"
 
+extern ConfigVJets cfg;
 
 using namespace std;
 
@@ -672,3 +678,37 @@ bool isSameBinning(const TAxis& ax1, const TAxis& ax2){
   
   return true;
 }
+
+#if 0
+void saveCanvas(const char* fileBaseName, const TCanvas* c){
+  if(!c){
+    TVirtualPad* pad = gROOT->GetSelectedPad();
+    if(!pad){
+      c = pad->GetCanvas();
+    }
+  }
+  if(!c) return;
+  c->Print(TString(fileBaseName) + ".pdf");
+  c->Print(TString(fileBaseName) + ".C");
+  c->Print(TString(fileBaseName) + ".root");
+  c->Print(TString(fileBaseName) + ".png");
+}
+#else
+void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName){
+    std::string mainFormat = cfg.getS("mainFormat", "pdf");
+    std::vector<std::string> extraFormats_ = cfg.getVS("extraFormats", std::vector<std::string>(1, "root"));
+    //remove duplicates if any:
+    std::set<std::string> extraFormats;
+    for(auto s: extraFormats_){
+	extraFormats.insert(s);
+    }
+    c->SaveAs(TString(outputDir) + "/" + baseName + "." + mainFormat.c_str());
+    for(auto ext: extraFormats){
+	gSystem->mkdir(TString(outputDir) + "/" + ext);
+	//extra tag for .root file to distinguish with the file containing all the histograms:
+	const char* canvas = (ext == "root" ? "_canvas" : "");
+	c->SaveAs(TString(outputDir) + "/" + ext + "/" + baseName + canvas + "." + ext.c_str());    
+    }
+}
+#endif
+

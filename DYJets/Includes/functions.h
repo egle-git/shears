@@ -7,6 +7,8 @@
 #include <TLorentzVector.h>
 #include <RooUnfoldResponse.h>
 
+class TCanvas;
+
 using namespace std;
 
 void barre_de_progression(int);
@@ -129,5 +131,13 @@ bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest
  */
 
 bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
+
+//void saveCanvas(const char* fileBaseName, const TCanvas* c = 0);
+
+/** Save a root canvas in the file formats defined in the configuration
+ * parameters mainFormat and extraFormats
+ */
+void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName);
+
 
 #endif

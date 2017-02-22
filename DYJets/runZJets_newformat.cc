@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     //    TString mcSampleLabel_DY       = cfg.getS("mcSampleLabel_DY"      , "DYJets");
 
     //--- save config to .vjets.cfg ---
-    cfg.writeConfigVJets(".vjets.cfg");
+    cfg.write(".vjets.cfg");
     //----------------------------------------------------------------------
 
     //--- Parse the arguments -----------------------------------------------------

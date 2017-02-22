@@ -8,9 +8,7 @@
 #include "TMatrixD.h"
 
 class TH1;
-class TH1D;
 class TH2;
-class TH2D;
 
 using std::vector;
 
@@ -29,22 +27,22 @@ class BLUEMeth : public TNamed {
 
         // Special constructors
 
-        BLUEMeth (const vector<TH1D*> &measures, const vector<vector<TH2D*>> &covariances, const char *name= 0, const char *title= 0);
+        BLUEMeth (const vector<TH1*> &measures, const vector<vector<TH2*>> &covariances, const char *name= 0, const char *title= 0);
         //BLUEMeth (const vector<TVectorD*> &measures, const vector<vector<TMatrixD*>> &covariances, const char* name= 0, const char* title= 0);
 
         // Set up an existing object
 
-        BLUEMeth& Setup (const vector<TH1D*> &measurements, const vector<vector<TH2D*>> &covariances);
+        BLUEMeth& Setup (const vector<TH1*> &measurements, const vector<vector<TH2*>> &covariances);
         void Reset ();
-        void SetMeasurements (const vector<TH1D*> &measurements);
-        void SetCovariances (const vector<vector<TH2D*>> &covariances);
+        void SetMeasurements (const vector<TH1*> &measurements);
+        void SetCovariances (const vector<vector<TH2*>> &covariances);
 
         // Accessors
 
-        const vector<TH1D*> &measurements() const;
-        const vector<vector<TH2D*>> &covariances() const;
+        const vector<TH1*> &measurements() const;
+        const vector<vector<TH2*>> &covariances() const;
 
-        TH1D* GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCov, bool fullIndivChannelCov, bool modifiedSWA, vector<TH2D*> &covuxaxb, TH2D* &covxaxb);
+        TH1* GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCov, bool fullIndivChannelCov, bool modifiedSWA, vector<TH2*> &covuxaxb, TH2* &covxaxb);
 
     private:
         void Init();
@@ -62,8 +60,8 @@ class BLUEMeth : public TNamed {
         bool _fullCrossChannelCov;
         bool _fullIndivChannelCov;
 
-        vector<TH1D*> _measurements; // experimental results for each channel (not owned)
-        vector<vector<TH2D*>> _covariances; // covariances on the experimental results for each channel
+        vector<TH1*> _measurements; // experimental results for each channel (not owned)
+        vector<vector<TH2*>> _covariances; // covariances on the experimental results for each channel
         TVectorD _yi; // vector of the _n experimental results (usually the cross section measurements)
         //vector<TMatrixD> _covyiyj; // std::vector of the nSyst (_n X _n) TMatrixD covariance of _yi 
         vector<TMatrixD> _Muij; // (_n X _n) covariance matrices of _yi
@@ -119,13 +117,13 @@ inline BLUEMeth& BLUEMeth::operator=(const BLUEMeth& rhs)
     return *this;
 }
 
-inline const vector<TH1D*>& BLUEMeth::measurements() const
+inline const vector<TH1*>& BLUEMeth::measurements() const
 {
     // Return vector of individual experimental results
     return _measurements;
 }
 
-inline const vector<vector<TH2D*>>& BLUEMeth::covariances() const
+inline const vector<vector<TH2*>>& BLUEMeth::covariances() const
 {
     // Return vector of individual experimental results
     return _covariances;

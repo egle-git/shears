@@ -60,6 +60,7 @@ class GenH1D: public TH1D {
 
     Int_t Fill(double x, double commonWeight, const std::vector<double>& weights){
         if(weights.size() < 6) return Fill(x, commonWeight * weights.at(0)); // for sherpa2 compatibility
+	if(weights.size() == 11) return Fill(x, commonWeight * weights.at(0)); // for Geneva 
         if(!uncHistBooked) bookUncHist();
         if((weights.size() != pdfWeightMinIndex + hPdfs.size())
                 && (weights.size() != pdfWeightMinIndex + hPdfs.size() + 2)){
@@ -71,15 +72,15 @@ class GenH1D: public TH1D {
         Int_t rc  = TH1D::Fill(x, commonWeight *  weights.at(0)); // for the new multiplicity binning sample
         hEvtCnt->Fill(x, 1.);
         for(unsigned i = 0; i < hPdfsCut.size(); ++i){
-            double wr = weights.at(pdfWeightMinIndex + i) / weights.at(1); // for the new multiplicity binning sample
-            if(pdfWeightRatioMin < wr && wr < pdfWeightRatioMax){
-                hPdfsCut[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
-                hPdfEvtCnts[i]->Fill(x, 1.);
+          double wr = weights.at(pdfWeightMinIndex + i) / weights.at(1); // for the new multiplicity binning sample
+          if(pdfWeightRatioMin < wr && wr < pdfWeightRatioMax){
+              hPdfsCut[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
+              hPdfEvtCnts[i]->Fill(x, 1.);
             } else{
-                //std::cout << "Rejecting weight " << weights.at(pdfWeightMinIndex + i) << "\n";
-                hPdfRejRate->Fill(x, 1);
-            }
-            hPdfs[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
+              //std::cout << "Rejecting weight " << weights.at(pdfWeightMinIndex + i) << "\n";
+              hPdfRejRate->Fill(x, 1);
+         }
+         hPdfs[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
         }
 
 

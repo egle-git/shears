@@ -369,7 +369,8 @@ int nZPt_Zinc0jet(22);
     }
 
     Lumi                                = newTH1D("Lumi", "Integrated luminosity (fb^{-1})", "", 1, 0, 1);
-
+    Lumi->SetBit(TH1::kIsAverage);
+    
     NumberPFcandidates                  = newTH1D("NumberPFcandidates",                  "NumberPFcandidates",           "Number of lepton PF candidates",    20, -0.5, 19.5);
 
     ZMass_lowDeltaR                     = newTH1D("ZMass_lowDeltaR",                     "ZMass_lowDeltaR",                             Mll,    120, 50, 169);
@@ -705,7 +706,7 @@ int nZPt_Zinc0jet(22);
     ZNGoodJets_Zexc = newTH1D("ZNGoodJets_Zexc","Jet Multiplicity (excl.)", "N_{jets}", 7, -0.5, 6.5);
     if(ZNGoodJets_Zexc){
 	for(int ibin = 1; ibin < ZNGoodJets_Zexc->GetNbinsX(); ++ibin){
-	    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	    ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
 	}
 
 //	ZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
@@ -809,7 +810,7 @@ jetPt_2_Zinc3jet);
     ZNGoodJetsNVtx_Zexc = newTH2D("ZNGoodJetsNVtx_Zexc","NVtx vs Jet Counter (excl.)", 11, -0.5, 10.5, 45, 0.5, 45.5);
     if(ZNGoodJetsNVtx_Zexc){
 	for(int ibin = 1; ibin < ZNGoodJetsNVtx_Zexc->GetNbinsX(); ++ibin){
-	    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	    ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
 	}
 //	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
 //	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
@@ -827,7 +828,7 @@ jetPt_2_Zinc3jet);
     ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
     if(ZNGoodJets_Zinc){
 	for(int ibin = 1; ibin < ZNGoodJets_Zinc->GetNbinsX(); ++ibin){
-	    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(ibin, TString::Format("#geq %d", ibin));
 	}
 //    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, "#geq 0");
 //    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2, "#geq 1");
@@ -845,7 +846,7 @@ jetPt_2_Zinc3jet);
     ZNGoodJets_Zexc_NoWeight = newTH1D("ZNGoodJets_Zexc_NoWeight","Unweighted jet Counter (excl.)", "N_{jets}", 8, -0.5, 7.5);
     if(ZNGoodJets_Zexc_NoWeight){
 	for(int ibin = 1; ibin < ZNGoodJets_Zexc_NoWeight->GetNbinsX(); ++ibin){
-	    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	    ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
 	}
 	
 	//	ZNGoodJets_Zexc_NoWeight->GetXaxis()->SetBinLabel(1,"= 0");
@@ -861,7 +862,7 @@ jetPt_2_Zinc3jet);
     ZNGoodJets_Zinc_NoWeight = newTH1D("ZNGoodJets_Zinc_NoWeight","Unweighted jet Counter (incl.)", "N_{jets}", 8, -0.5, 7.5);
     if(ZNGoodJets_Zinc_NoWeight){
 	for(int ibin = 1; ibin < ZNGoodJets_Zinc_NoWeight->GetNbinsX(); ++ibin){
-	    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	    ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(ibin, TString::Format("#geq %d", ibin));
 	}
 //	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(1,"#geq 0");
 //	ZNGoodJets_Zinc_NoWeight->GetXaxis()->SetBinLabel(2,"#geq 1");
@@ -1176,7 +1177,7 @@ jetPt_2_Zinc3jet);
     genZNGoodJets_Zinc = newTH1D("genZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
     if(genZNGoodJets_Zinc){
 	for(int ibin = 1; ibin < genZNGoodJets_Zinc->GetNbinsX(); ++ibin){
-	    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, TString::Format("#ge %d", ibin));
+	    genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(ibin, TString::Format("#geq %d", ibin));
 	}
 	
 //	genZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1,"#geq 0");
@@ -1196,7 +1197,7 @@ jetPt_2_Zinc3jet);
 
     if(genZNGoodJets_Zexc){
 	for(int ibin = 1; ibin < genZNGoodJets_Zexc->GetNbinsX(); ++ibin){
-	    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
 	}
 	
 //    genZNGoodJets_Zexc->GetXaxis()->SetBinLabel(1,"= 0");
@@ -1256,7 +1257,7 @@ jetPt_2_Zinc3jet);
     ZNGoodJetsBeta_Zexc = newTH2D("ZNGoodJetsBeta_Zexc","Beta cut vs Jet Counter (excl.) ", 11, -0.5, 10.5, 10, -0.5, 9.5);
     if(ZNGoodJetsBeta_Zexc){
       	for(int ibin = 1; ibin < ZNGoodJetsBeta_Zexc->GetNbinsX(); ++ibin){
-	    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, TString::Format("= %d", ibin - 1));
+	    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
 	}
 //    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
 //    ZNGoodJetsBeta_Zexc->GetXaxis()->SetBinLabel(2, "= 1");

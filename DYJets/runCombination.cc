@@ -20,10 +20,10 @@ int main(int argc, char **argv)
     TString algo       = cfg.getS("algo");
     int jetPtMin       = cfg.getI("jetPtMin", 30);
     int jetEtaMax      = cfg.getI("jetEtaMax", 24);
-    bool diagXChanCov  = cfg.getB("diagXChanCov", false);
-    bool fullXChanCov  = cfg.getB("fullXChanCov", false);
-    bool fullSChanCov  = cfg.getB("fullSChanCov", false);
-    bool modifiedSWA   = cfg.getB("modifiedSWA", false);
+    bool diagXChanCov  = cfg.getB("diagXChanCov", true);
+    bool fullXChanCov  = cfg.getB("fullXChanCov", true);
+    bool fullSChanCov  = cfg.getB("fullSChanCov", true);
+    bool modifiedSWA   = cfg.getB("modifiedSWA", true);
     TString generator1 = cfg.getS("generator1", "sherpa2");
     //TString generator2 = cfg.getS("generator2", "amcatnlo");
 

@@ -50,18 +50,24 @@ CXXFLAGS      += -MD -Wall
 SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
-RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc
+RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc \
+printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
 DEPS    = $(SRCLIST:.cc=.d)
+DEPS    += runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d Sources/testDecompVar.d \
+Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d
 
 .PHONY: all clean
 
 all: runRecoComparison \
 runZJets_newformat \
 runUnfoldingZJets  \
-runCombination
+runCombination \
+testDecompVar \
+runIntegralCheck \
+plotCrossSections
 
 #in untested branch:
 # runCombination \
@@ -90,8 +96,23 @@ runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
 runCombination: runCombination.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
+plotCrossSections: plotCrossSections.o $(OBJLIST) RooUnfold/libRooUnfold.so 
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+testDecompVar: Sources/testDecompVar.o Sources/variablesOfInterestZJets.o
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+testPrintTable: Sources/testPrintTable.o Sources/printTable.o
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runIntegralCheck: runIntegralCheck.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
 RooUnfold/libRooUnfold.so:
 	$(MAKE) -C RooUnfold
+
+testSectionConfig: testSectionConfig.cc
+	$(CXX) -o $@ $(CXXFLAGS) $(INCDIR) $<
 
 # ===========================================================================
 clean:

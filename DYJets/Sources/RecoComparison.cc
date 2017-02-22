@@ -24,14 +24,13 @@ using namespace std;
  * The list of histograms to superimposed is taken from Samples array defined in fileNamesZJets.h.
  * Histogram colours and labels are defined in the same array.
  * The first element is used as signal data and the last one as signal MC.
- * @param doPASPlots if true PAS style is use, if false AN style is used.
  * @param lepSel DE, DMu. SE, SMu for Z+jet electron channel, Z+jet muon channel, W+jet...
  * @param histDir location of histogram to use as input.
  * @param recoCompDir directory where the produced plots should be stored
  * @param jetPtMin lower bound for jet pt histograms
  * @param jetEtaMax upper bound in jet |eta| for jet eta histograms
  */
-void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString recoCompDir, int jetPtMin, int jetEtaMax)
+void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int jetPtMin, int jetEtaMax)
 {
     TH1::SetDefaultSumw2();
     gStyle->SetOptStat(0);
@@ -68,15 +67,14 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
 	//        else if (i == NFILESDYJETS-1) 
         //    legendNames[i] = (lepSel == "DMu") ? " Z/#gamma^{*} #rightarrow #mu#mu" : "Z/#gamma^{*} #rightarrow ee"; 
         else 
-            legendNames[i] = doPASPlots ? Samples[iSample].legendPAS : Samples[iSample].legendAN; 
+	  legendNames[i] = Samples[iSample].legendReco;
         //--- set the legend color for the current file ---
-        Colors[i] = doPASPlots ? Samples[iSample].colorPAS : Samples[iSample].colorAN;    
+        Colors[i] = Samples[iSample].colorReco;
     }
     //-----------------------------------------------------------------------------------------------------
 
     TString outputFileName = recoCompDir;
     system("mkdir -p " + recoCompDir);
-    if (doPASPlots) outputFileName += "PAS_";
     outputFileName += "Comparison_" + lepSel + "_" + energy + "_Data_All_MC";
     outputFileName += "_JetPtMin_";
     outputFileName += jetPtMin;
@@ -176,14 +174,14 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
                 hist[0][j]->SetLineColor(Colors[0]);
                 hSumMC[j] = new THStack(vhNames[j], vhTitles[j]);
 
-                if (!doPASPlots) { 
-                    legend[j] = new TLegend(0.72, 0.5, 0.76, 0.86);
-                    legend[j]->SetTextSize(0.032);
-                }
-                else {
-                    legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
-                    legend[j]->SetTextSize(0.042);
-                }
+                //if (!doPASPlots) { 
+		//legend[j] = new TLegend(0.72, 0.5, 0.76, 0.86);
+		//legend[j]->SetTextSize(0.032);
+		//}
+		//else {
+		legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
+		legend[j]->SetTextSize(0.042);
+		//}
 		legend[j]->SetFillStyle(0);
 		legend[j]->SetBorderSize(0);
 		legend[j]->SetTextFont(42);
@@ -214,6 +212,9 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
     else cerr << "Warning: Lumi histogram was not found. The integrated luminosity indicaion will be missing from the plots.\n";
 
     cout << "Now creating the pdf files ..." << endl;
+    double minRatioY = cfg.getD("minRatioYReco", 0.51);;
+    double maxRatioY = cfg.getD("maxRatioYReco", 1.49);
+
     for (unsigned short i = 0; i < nHist; ++i) {
 
         TCanvas *canvas = new TCanvas(vhNames[i], vhNames[i], 700, 900);
@@ -273,17 +274,17 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
 	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
 	if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
         if (vhNames[i].Index("inc0") < 0){
-            if (!doPASPlots) {
-                ostringstream ptLegend;
-                if (vhNames[i].Index("JetPt_Zinc") > 0) {
-                    ptLegend << "p_{T}^{jet} > 20 GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
-                }
-                else {
-                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
-                }
-                jetAlgo->DrawLatex(0.13,0.68, "anti-k_{t} jets,  R = 0.4");
-                jetCuts->DrawLatex(0.13,0.63, ptLegend.str().c_str());
-            }
+//            if (!doPASPlots) {
+//                ostringstream ptLegend;
+//                if (vhNames[i].Index("JetPt_Zinc") > 0) {
+//                    ptLegend << "p_{T}^{jet} > 20 GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
+//                }
+//                else {
+//                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
+//                }
+//                jetAlgo->DrawLatex(0.13,0.68, "anti-k_{t} jets,  R = 0.4");
+//                jetCuts->DrawLatex(0.13,0.63, ptLegend.str().c_str());
+//            }
             pad1->Draw();
         }
         canvas->cd();
@@ -309,7 +310,9 @@ void RecoComparison(bool doPASPlots, TString lepSel, TString histoDir, TString r
         hRatio->GetXaxis()->SetLabelSize(0.12);
         hRatio->GetXaxis()->SetLabelOffset(0.017);
 
-        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);
+	//        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);
+	hRatio->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
+
         hRatio->GetYaxis()->SetNdivisions(5,5,0);
         hRatio->GetYaxis()->SetTitle("Simulation/Data");
         hRatio->GetYaxis()->SetTitleSize(0.1);

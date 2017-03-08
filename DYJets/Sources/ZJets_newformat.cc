@@ -1291,8 +1291,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
                         if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
                         else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
+                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR +EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
                         else RatioValue2 = 1.;     
                     }
                     // cout << RatioValue1 << " , " << RatioValue1 << "\n";
@@ -1304,7 +1304,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genFirstJetRapidityHigh_Zinc1jet, fabs(genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc1jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
                     //fill(genJetsHT_2_Zinc1jet, genJetsHT, commonGenWeight, EvtWeights);
-		    fill(genVisPt_Zinc1jetQun, fabs((genJets[0].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc1jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
                     fill(genSumZJetRapidity_Zinc1jet, 0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genDifZJetRapidity_Zinc1jet, 0.5*fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     if (nGoodGenJets == 1){
@@ -1450,8 +1450,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
 			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
                         else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
+                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
                         else RatioValue2 = 1.;
              
                     }
@@ -1462,7 +1462,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genSecondJetEtaHigh_Zinc2jet, fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
                     fill(genSecondJetRapidityHigh_Zinc2jet, fabs(genJets[1].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc2jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
-		    fill(genVisPt_Zinc2jetQun, fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc2jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
                     fill(genptBal_Zinc2jet, genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
                     fill(gendPhiJets_Zinc2jet, deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                     fill(genBestdPhiJets_Zinc2jet, deltaPhi(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
@@ -1628,9 +1628,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                       else RatioValue1 = 1.;
                       if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;  
 
-                       double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()));
+                       double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+genEWKBoson).Pt()));
                        //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
-                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
                     }
@@ -1641,7 +1641,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genThirdJetEtaHigh_Zinc3jet, fabs(genJets[2].v.Eta()), commonGenWeight, EvtWeights);
                     fill(genThirdJetRapidityHigh_Zinc3jet, fabs(genJets[2].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc3jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
-		    fill(genVisPt_Zinc3jetQun, fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc3jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
  
                     /////Azimuth cross check//////////////////////////////////
                     fill(genDPhiZFirstJet_Zinc3jet, fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
@@ -1933,8 +1933,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
                         if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
                         else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
+                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
                         else RatioValue2 = 1.;  
 		}
 
@@ -1953,10 +1953,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(dEtaBosonJet_Zinc1jet, fabs(jets[0].v.Eta() - EWKBoson.Eta()), weight);
                 fill(SumZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity()), weight);
                 fill(DifZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()-jets[0].v.Rapidity()), weight);
-		fill(VisPt_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc1jetQun_Odd, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc1jetQun_Even, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc1jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc1jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
 
                 for (unsigned short i(0); i < nGoodJets; i++) {
                     double trans_mass = jets[i].v.Mt();
@@ -2138,8 +2138,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
 			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
                         else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
+                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
                         else RatioValue2 = 1.;
 		}
                 //cout << 
@@ -2149,10 +2149,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 else if (EvtVtxCnt < 18) fill(JetsMassMidPU_Zinc2jet, jet1Plus2.M(), weight);
                 else fill(JetsMassHigPU_Zinc2jet, jet1Plus2.M(), weight);
                 fill(ZPt_Zinc2jet, EWKBoson.Pt(), weight);
-		fill(VisPt_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc2jetQun_Odd, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc2jetQun_Even, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc2jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc2jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
                 fill(ZRapidity_Zinc2jet, EWKBoson.Rapidity(), weight);
                 fill(ZEta_Zinc2jet, EWKBoson.Eta(), weight);
                 fill(SpTLeptons_Zinc2jet, SpTsub(leptons[0].v, leptons[1].v), weight);
@@ -2403,9 +2403,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     else RatioValue1 = 1.;
                     if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;                    
  
-                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()));
+                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
                     //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2);
-                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
 		}
@@ -2427,10 +2427,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if(nEvents % 2) fill(JetsHT_Zinc3jet_Odd, jetsHT, weight*RatioValue1);
                 else fill(JetsHT_Zinc3jet_Even, jetsHT, weight*RatioValue1);
                 fill(JetsHT_2_Zinc3jet, jetsHT, weight*RatioValue1);
-		fill(VisPt_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc3jetQun_Odd, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc3jetQun_Even, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc3jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc3jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
 
 
                 ///Azimuth cross check
@@ -2631,8 +2631,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
                         if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
                         else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
+                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
                         else RatioValue2 = 1.;  
 		}
 
@@ -2641,7 +2641,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseFirstJetEtaHigh_Zinc1jet, fabs(jets[0].v.Eta()), fabs(genJets[0].v.Eta()), weight);      
                 fill(hresponseFirstJetRapidityHigh_Zinc1jet, fabs(jets[0].v.Rapidity()), fabs(genJets[0].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc1jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()),fabs((genJets[0].v+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
 
                 // Additional Abs responses of variables
                 fill(hresponseAbsZRapidity_Zinc1jet, fabs(EWKBoson.Rapidity()),fabs(genEWKBoson.Rapidity()),weight);
@@ -2841,8 +2841,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
 			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
                         else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
-                        if(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) >=0. && fabs((jets[0].v+jets[1].v+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
+                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
                         else RatioValue2 = 1.;
 		}
 
@@ -2851,7 +2851,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseSecondJetEtaHigh_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[1].v.Eta()), weight);      
                 fill(hresponseSecondJetRapidityHigh_Zinc2jet, fabs(jets[1].v.Rapidity()), fabs(genJets[1].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc2jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()),fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
                 // fill(hresponseJetsHT_2_Zinc2jet, jetsHT, genJetsHT, weight);
                 //fill(responseTwoJetsPtDiffInc, jet1Minus2.Pt(), genJet1Minus2.Pt(), weight);
                 //fill(responseBestTwoJetsPtDiffInc, bestJet1Minus2.Pt(), genBestJet1Minus2.Pt(), weight);
@@ -2942,9 +2942,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     else RatioValue1 = 1.;
                     if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;  
 
-                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()));
+                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
                     //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2);
-                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
 		}
@@ -2954,7 +2954,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseThirdJetEtaHigh_Zinc3jet, fabs(jets[2].v.Eta()), fabs(genJets[2].v.Eta()), weight);      
                 fill(hresponseThirdJetRapidityHigh_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[2].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc3jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()),fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
 
                 /////Azimuthal cross check//////////////////////////////
                 fill(hresponseDPhiZFirstJet_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)),fabs(genEWKBoson.DeltaPhi(genJets[0].v)),weight);

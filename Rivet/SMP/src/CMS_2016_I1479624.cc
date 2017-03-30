@@ -45,8 +45,8 @@ namespace Rivet {
       VetoedFinalState jetConstits(visfs);
       jetConstits.addVetoOnThisFinalState(wFinder);
 
-      FastJets akt04Jets(jetConstits, FastJets::ANTIKT, 0.4);
-      addProjection(akt04Jets, "AntiKt04Jets");
+      FastJets jets(jetConstits, FastJets::ANTIKT, 0.4);
+      addProjection(jets, "AntiKt04Jetst");
 
       _h_excmult_jets_tot   = bookHisto1D(1, 1, 1);
       _h_incmult_jets_tot   = bookHisto1D(2, 1, 1);

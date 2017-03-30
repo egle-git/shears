@@ -41,8 +41,8 @@ namespace Rivet {
       jetConstits.addVetoOnThisFinalState(zmumuFinder);
       //jetConstits.addVetoOnThisFinalState(zeeFinder);
 
-      FastJets akt05Jets(jetConstits, FastJets::ANTIKT, 0.4);
-      addProjection(akt05Jets, "AntiKt05Jets");
+      FastJets jets(jetConstits, FastJets::ANTIKT, 0.4);
+      addProjection(jets, "jets");
 
 
       _h_excmult_jets_tot   = bookHisto1D(1, 1, 1);
@@ -89,7 +89,7 @@ namespace Rivet {
 
       // Cluster jets
       // NB. Veto has already been applied on leptons and photons used for dressing
-      const FastJets& fj = applyProjection<FastJets>(event, "AntiKt05Jets");
+      const FastJets& fj = applyProjection<FastJets>(event, "jets");
       const Jets& jets = fj.jetsByPt(Cuts::absrap < 2.4 && Cuts::pT > 30*GeV);
 
       // Perform lepton-jet overlap and HT calculation
@@ -100,7 +100,7 @@ namespace Rivet {
 	/// @todo Nice use-case for any() and a C++11 lambda
 	bool overlap = false;
 	foreach (const Particle& l, dressedLeptons) {
-	  if (Rivet::deltaR(j, l) < 0.5) {
+	  if (Rivet::deltaR(j, l) < 0.4) {
 	    overlap = true;
 	    break;
 	  }

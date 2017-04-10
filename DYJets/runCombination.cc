@@ -24,10 +24,10 @@ int main(int argc, char **argv)
     bool fullXChanCov  = cfg.getB("fullXChanCov", true);
     bool fullSChanCov  = cfg.getB("fullSChanCov", true);
     bool modifiedSWA   = cfg.getB("modifiedSWA", true);
-    TString generator1 = cfg.getS("generator1", "sherpa2");
-    //TString generator2 = cfg.getS("generator2", "amcatnlo");
-
+    
     TString variable = "";
+    TString genList;
+
     bool doNormalized(false);
     //bool doNormband(false);
 
@@ -48,16 +48,10 @@ int main(int argc, char **argv)
                 getArg(currentArg, algo);
 		cfg.set("algo", algo);
             }
-            else if (currentArg.BeginsWith("generator1=")) {
-                getArg(currentArg, generator1);
-		cfg.set("generator1", generator1);
+            else if (currentArg.BeginsWith("predictions=")) {
+                getArg(currentArg, genList);
+		cfg.set("predictions", genList);
             }
-/*
-           else if (currentArg.BeginsWith("generator2=")) {
-                getArg(currentArg, generator2);
-		cfg.set("generator2", generator2);
-            }
-*/
             else if (currentArg.BeginsWith("jetPtMin=")) {
                 getArg(currentArg, jetPtMin);
 		cfg.set("jetPtMin", jetPtMin);
@@ -95,8 +89,8 @@ int main(int argc, char **argv)
             }*/
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
-                std::cout << "\nUsage: ./runCombination [unfoldDir=(path)] [combDir=(path)] [algo=(Bayes, SVD)] [jetPtMin=(int)] [jetEtaMax=(int*10)] ";
-                std::cout << "[diagXChanCov=(1,0)] [fullXChanCov=(1,0)] [fullSChanCov=(1,0)] [modifiedSWA=(1,0)] [variable=(variableName)] [doNormalized=(0, 1)] [--help]" << std::endl;
+                std::cout << "\nUsage: ./runCombination [unfoldDir=(path)] [combDir=(path)] [algo=(Bayes, SVD)] [jetPtMin=(int)] [jetEtaMax=(int*10)]";
+                std::cout << "[diagXChanCov=(1,0)] [fullXChanCov=(1,0)] [fullSChanCov=(1,0)] [modifiedSWA=(1,0)] [variable=(variableName)] [doNormalized=(0, 1)]  [predictions=(comma-separated list)] [--help]" << std::endl;
                 std::cout << "eg: ./runCombination fullXChanCov=0 jetEtaMax=24" << std::endl;
                 std::cout << "unspecified options will be read from vjets.cfg\n" << std::endl;
                 return 0;
@@ -113,8 +107,6 @@ int main(int argc, char **argv)
     if (!unfoldDir.EndsWith("/")) unfoldDir += "/";
     if (!combDir.EndsWith("/")) combDir += "/";
 
-    Combination(unfoldDir, combDir, algo, jetPtMin, jetEtaMax, diagXChanCov, fullXChanCov, fullSChanCov, modifiedSWA, generator1, variable, doNormalized);
-    //Combination(unfoldDir, combDir, algo, jetPtMin, jetEtaMax, diagXChanCov, fullXChanCov, fullSChanCov, modifiedSWA, generator1, generator2, variable, doNormalized);
-    //Combination(unfoldDir, combDir, algo, jetPtMin, jetEtaMax, diagXChanCov, fullXChanCov, fullSChanCov, modifiedSWA, generator1, generator2, variable, doNormalized, doNormband);
+    Combination(unfoldDir, combDir, algo, jetPtMin, jetEtaMax, diagXChanCov, fullXChanCov, fullSChanCov, modifiedSWA, variable, doNormalized);
     return 0;
 }

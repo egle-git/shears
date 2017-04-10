@@ -24,6 +24,7 @@ extern ConfigVJets cfg;
 
 void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator)
 {
+    plot->SetNumber(plotNumber);
     if (numbOfGenerator == 1) {
         if (plotNumber == 1) {
             plot->SetPad(0.01, 0.35, 0.99, 0.99);
@@ -92,27 +93,34 @@ void customizeLegend(TLegend *legend, int numbOfGenerator)
     legend->SetFillColor(0);
     legend->SetFillStyle(1001);
     legend->SetBorderSize(1);
-    if (numbOfGenerator == 1) {
-        legend->SetX1(0.39);
-        legend->SetY1(0.84);
-        legend->SetX2(0.96);
-        legend->SetY2(0.98);
-        legend->SetTextSize(.029);
-    }
-    else if (numbOfGenerator == 2) {
-        legend->SetX1(0.39);
-        legend->SetY1(0.77);
-        legend->SetX2(0.96);
-        legend->SetY2(0.98);
-        legend->SetTextSize(.034);
-    }
-    else if (numbOfGenerator == 3) {
-        legend->SetX1(0.46);
-        legend->SetY1(0.7);
-        legend->SetX2(0.96);
-        legend->SetY2(0.98);
-        legend->SetTextSize(.042);
-    }
+    legend->SetMargin(0.15);
+    legend->SetTextFont(43);
+    legend->SetTextSize(15);
+//    if (numbOfGenerator == 1) {
+//        legend->SetX1(0.39);
+//        legend->SetY1(0.84);
+//        legend->SetX2(0.96);
+//        legend->SetY2(0.98);
+//	//        legend->SetTextSize(.029);
+//    }
+//    else if (numbOfGenerator == 2) {
+//        legend->SetX1(0.39);
+//        legend->SetY1(0.77);
+//        legend->SetX2(0.96);
+//        legend->SetY2(0.98);
+//        //legend->SetTextSize(.034);
+//    }
+//    else if (numbOfGenerator == 3) {
+//        legend->SetX1(0.39);
+//        legend->SetY1(0.7);
+//        legend->SetX2(0.96);
+//        legend->SetY2(0.98);
+//	//        legend->SetTextSize(.042);
+//    }
+    legend->SetX1(0.39);
+    legend->SetY1(std::max(0., 0.91 - numbOfGenerator*0.07));
+    legend->SetX2(0.96);
+    legend->SetY2(0.98);
 }
 
 void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator)
@@ -399,6 +407,80 @@ TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString 
     }
     if (lepSel == "DMu" || lepSel == "") {
         fDMu->Close();
+    }
+    return grScaleSyst;
+
+}
+
+// --- This function is dedicated for NNLO theoretical prediction ---
+TGraphAsymmErrors* createNNLOScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
+{
+    int nPoints = grGenToCentral->GetN();
+    double *xCoor    = new double[nPoints];
+    double *yCoor    = new double[nPoints];
+    double *xErr     = new double[nPoints];
+    double *yErrUp   = new double[nPoints];
+    double *yErrDown = new double[nPoints];
+
+    TString histoDir = cfg.getS("histoDir");
+
+    TFile *fnnlo[3];
+    if (lepSel == "DE" || lepSel == "DMu" || lepSel == "") {
+        fnnlo[0] = new TFile(histoDir + "/DMu_13TeV_DYJets_ZjNNLO_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	if(!fnnlo[0] || fnnlo[0]->IsZombie()){
+	    std::cerr << "Fatal error. Histo file for ZjNNLO prediction, "
+		      << histoDir + "NNLO.root"
+		      << " was not found.\n";
+	}
+        fnnlo[1] = new TFile(histoDir + "/DMu_13TeV_DYJets_ZjNNLO_Scaleup_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	if(!fnnlo[1] || fnnlo[1]->IsZombie()){
+	    std::cerr << "Fatal error. Histo file for scale up uncertainties of ZjNNLO prediction, "
+		      << histoDir + "NNLO.root"
+		      << " was not found.\n";
+	}
+	
+        fnnlo[2] = new TFile(histoDir + "/DMu_13TeV_DYJets_ZjNNLO_Scaledn_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	if(!fnnlo[2] || fnnlo[2]->IsZombie()){
+	    std::cerr << "Fatal error. Histo file for scale down uncertainties of ZjNNLO prediction, "
+		      << histoDir + "NNLO.root"
+		      << " was not found.\n";
+	}
+
+    }
+
+    TH1D *hnnlo[3];
+    if (lepSel == "DE" || lepSel == "DMu" || lepSel == "") {
+        hnnlo[0] = (TH1D*) fnnlo[0]->Get("gen" + variable);
+        hnnlo[1] = (TH1D*) fnnlo[1]->Get("gen" + variable);
+        hnnlo[2] = (TH1D*) fnnlo[2]->Get("gen" + variable);
+    }
+
+    // ---- this variable is used to fetch the TGraph of scale uncertainty from input file ----
+
+    for (int i(0); i < nPoints; i++) {
+        grGenToCentral->GetPoint(i, xCoor[i], yCoor[i]);
+
+        xErr[i] = grGenToCentral->GetErrorXlow(i);
+
+        yErrUp[i] = pow(grGenToCentral->GetErrorYhigh(i), 2);
+        yErrDown[i] = pow(grGenToCentral->GetErrorYlow(i), 2);
+
+        if (lepSel == "DMu" || lepSel == "DE" || lepSel == "") {
+            yErrUp[i] += pow((hnnlo[1]->GetBinContent(i+1) - hnnlo[0]->GetBinContent(i+1))/hnnlo[0]->GetBinContent(i+1) * yCoor[i], 2);
+            yErrDown[i] += pow((hnnlo[0]->GetBinContent(i+1) - hnnlo[2]->GetBinContent(i+1))/hnnlo[0]->GetBinContent(i+1) * yCoor[i], 2);
+        }
+
+        yErrUp[i] = sqrt(yErrUp[i]);
+        yErrDown[i] = sqrt(yErrDown[i]);
+
+    }
+
+    TGraphAsymmErrors *grScaleSyst = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErrDown, yErrUp);
+    delete [] xCoor; delete [] yCoor; delete [] xErr; delete [] yErrDown; delete [] yErrUp;
+    if (lepSel == "DE" || lepSel == "DMu" || lepSel == "") {
+        fnnlo[0]->Close();
+        fnnlo[1]->Close();
+        fnnlo[2]->Close();
     }
     return grScaleSyst;
 
@@ -856,371 +938,6 @@ std::string getYaxisTitle(bool doNormalized, const TH1 *gen1)
     return title;
 }
 
-//TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized,
-//			      TH1* hStat, TH2* hCovSyst,
-//			      std::vector<std::string> gens){
-//
-//    if(gens.size() > 3){
-//	std::cerr << "Warning. Maxium three generator comparison is supported. Only the first three will be considered."
-//		  << " (" << __FILE__ << ":" << __LINE__ << ").\n";
-//	gens.resize(3);
-//    }
-//  
-//    //gStyle->SetOptStat(0);
-//    //--- Determine how many comparison we have ---
-//    int numbOfGenerator = gens.size(); 
-//    //if (hGen2) numbOfGenerator = 2;
-//    //  if (hGen3) numbOfGenerator = 3;
-//    //---------------------------------------------
-//
-//    std::vector<TH1*> hGens = getGenHistos(gens, lepSel, variable);
-//
-//    int ipred = -1;
-//    for(auto g: hGens){
-//	++ipred;
-//	if(g) g->SetZTitle(getLegendGen(gens[ipred].c_str()));
-//	if(TString(gens[ipred]).BeginsWith("DYJets_GE")){
-//	    g->Scale(2.);
-//	}
-//    }
-//  
-//    hGens.resize(3, 0);
-//
-//    TH1* hGen1 = hGens[0];
-//    TH1* hGen2 = hGens[1];
-//    TH1* hGen3 = hGens[2];
-//  
-//  
-//    //TH1 *hPDFUp = (TH1*) hStat->Clone("hPDFUp");
-//    //hPDFUp->Scale(1.10);
-//    //TH1 *hPDFDown = (TH1*) hStat->Clone("hPDFDown");
-//    //hPDFDown->Scale(0.75);
-//  
-//    TH1* hSyst = 0;
-//    hSyst = (TH1*) hStat->Clone("hSyst");
-//    if(hCovSyst){
-//	int nBins = hSyst->GetNbinsX();
-//	for (int i = 1; i <= nBins; ++i) {
-//	    hSyst->SetBinError(i, sqrt(pow(hStat->GetBinError(i), 2) + hCovSyst->GetBinContent(i, i)));
-//	}
-//    }
-//  
-//    //--- Declare all additional TGraphs ---
-//    TGraphAsymmErrors *grCentralStat = createGrFromHist(hStat);
-//    grCentralStat->SetName("gr" + variable + "CentralStatError"); 
-//    TGraphAsymmErrors *grCentralSyst = 0;
-//    TGraphAsymmErrors *grCentralStatRatio = 0;
-//    TGraphAsymmErrors *grCentralSystRatio = 0;
-//
-//    if(hSyst){
-//	grCentralSyst = createGrFromHist(hSyst);
-//	grCentralSyst->SetName("gr" + variable + "CentralTotError"); 
-//	grCentralStatRatio = createRatioGraph(grCentralStat);
-//	grCentralSystRatio = createRatioGraph(grCentralSyst);
-//    }
-//
-//    TGraphAsymmErrors *grGen1ToCentral = 0;
-//    TGraphAsymmErrors *grGen1ScaleSyst = 0;
-//    TGraphAsymmErrors *grGen1PDFSyst   = 0;
-//    if(hGen1){
-//	grGen1ToCentral = createGenToCentral(hGen1, grCentralStat);
-//	grGen1ScaleSyst = createScaleSystGraph(gens[0], lepSel, variable, grGen1ToCentral);
-//	grGen1PDFSyst   = createPDFSystGraph(gens[0], lepSel, variable, grGen1ToCentral, grGen1ScaleSyst); 
-//	//grGen1PDFSyst = createPDFSystGraph(gens[0], lepSel, variable, grGen1ToCentral);
-//    }
-//    TGraphAsymmErrors *grGen2ToCentral = NULL;
-//    TGraphAsymmErrors *grGen2PDFSyst = NULL;
-//    if (hGen2) {
-//        grGen2ToCentral = createGenToCentral(hGen2, grCentralStat);
-//        grGen2PDFSyst = createPDFSystGraph(gens[1], lepSel, variable, grGen2ToCentral); 
-//    }
-//    TGraphAsymmErrors *grGen3ToCentral = NULL;
-//    TGraphAsymmErrors *grGen3PDFSyst = NULL;
-//    TGraphAsymmErrors *grGen3ScaleSyst = NULL;
-//    if (hGen3) {
-//        grGen3ToCentral = createGenToCentral(hGen3, grCentralStat);
-//        grGen3ScaleSyst = createScaleSystGraph(gens[2], lepSel, variable, grGen3ToCentral);
-//        grGen3PDFSyst = createPDFSystGraph(gens[2], lepSel, variable, grGen3ToCentral, grGen3ScaleSyst); 
-//    }
-//    //---------------------------------------------
-//
-//    //--- Main Canvas ---
-//    //double maximum = hGen1->GetMaximum();
-//    //double minimum = hGen1->GetMinimum();
-//    double maximum = hStat->GetMaximum();
-//    double minimum = hStat->GetMinimum();
-//    TString canvasName = "canvas" + variable;
-//    TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 800);
-//    //-------------------
-//
-//    //--- First Pad ---
-//    plots->cd();
-//    TPad *plot1 = new TPad("plot1", "plot1", 0., 0., 0., 0.);
-//    setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator);
-//
-//    //--- TLegend ---
-//    TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
-//    customizeLegend(legend, numbOfGenerator);
-//    //------------------
-//
-//    if(grCentralSyst) customizeCentral(grCentralSyst, legend, "Data (25ns)");
-//    customizeCentral(grCentralStat, false);
-//    if(grCentralSystRatio) customizeCentral(grCentralSystRatio, true);
-//    if(grCentralSystRatio) customizeCentral(grCentralStatRatio, true);
-//    if(hSyst){
-//	hSyst->SetLineColor(kWhite);
-//	hSyst->SetMarkerColor(kWhite);
-//	hSyst->SetTitle("");
-//	hSyst->GetXaxis()->SetLabelSize(0);
-//	hSyst->GetYaxis()->SetTitle("");
-//	hSyst->GetYaxis()->SetLabelSize(0.055);
-//    }
-//
-//    if(hSyst){
-//	if (canvasName.Contains("ZNGoodJets")) {
-//	    hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
-//	}
-//	if (canvasName.Contains("JetPt_Zinc")) {
-//	    hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
-//	}
-//	if (canvasName.Contains("Eta") || canvasName.Contains("AbsRapidity")) {
-//	    hSyst->GetYaxis()->SetRangeUser(0.001, 1.4*maximum);
-//	}
-//	if (canvasName.Contains("DPhi")) {
-//	    hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.5*maximum);
-//	}
-//	if (canvasName.Contains("Vis")) {
-//	    hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.3*maximum);
-//	}
-//	hSyst->SetStats(0);
-//	hSyst->DrawCopy("e");
-//	grCentralSyst->SetName("grCentralSyst");
-//	grCentralSyst->Draw("2");
-//    }
-//
-//    if(hGen1){
-//	configXaxis(hSyst, hGen1, variable);
-//	configYaxis(hSyst, hGen1, hGen2, hGen3);
-//	customizeGenHist(hGen1, 1, legend, hGen1->GetZaxis()->GetTitle());
-//	//hGen1->SetName("hGen1");
-//    	hGen1->SetStats(0);
-//	hGen1->DrawCopy("ESAME");
-//    }
-//    
-//    if (hGen2) {
-//        customizeGenHist(hGen2, 2, legend, hGen2->GetZaxis()->GetTitle());
-//        //hGen2->SetName("hGen2");
-//        hGen2->DrawCopy("ESAME");
-//    }
-//    if (hGen3) {
-//        customizeGenHist(hGen3, 3, legend, hGen3->GetZaxis()->GetTitle());
-//        //hGen3->SetName("hGen3");
-//        hGen3->DrawCopy("ESAME");
-//    }
-//
-//    grCentralStat->SetName("grCentralStat");
-//    if(hSyst){
-//	grCentralStat->Draw("p");
-//    } else{
-//	grCentralStat->Draw("pa");
-//    }
-//
-//    legend->Draw("same");
-//
-//    //--- TLatex stuff ---
-//    TLatex *latexLabel = new TLatex(); 
-//    latexLabel->SetNDC();
-//    latexLabel->SetTextSize(0.035);
-//    if (hGen2) latexLabel->SetTextSize(0.035);
-//    if (hGen3) latexLabel->SetTextSize(0.05);
-//    latexLabel->SetTextFont(42);
-//    latexLabel->SetLineWidth(2);
-//
-//    latexLabel->SetTextFont(61);
-//    latexLabel->DrawLatex(0.13,0.95,"CMS");
-//    latexLabel->SetTextFont(52);
-//    latexLabel->DrawLatex(0.20,0.95,"Preliminary");
-//    latexLabel->SetTextFont(42);
-//    latexLabel->DrawLatex(0.13,0.95-0.045, "2.25 fb^{-1} (13 TeV)");
-//    //if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
-//    latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
-//    if (canvasName.Contains("Vis")){
-//	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");
-//    }
-//    else{
-//	latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
-//    }
-//
-//    if (canvasName.Contains("FirstJetPt50")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4 ");
-//    }
-//
-//    else if (canvasName.Contains("FirstJetPt80")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 80 GeV, |y^{jet}| < 2.4 ");
-//    }
-//
-//    else if (canvasName.Contains("ZPt150")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-//    }
-//
-//    else if (canvasName.Contains("ZPt300")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-//    }
-//
-//    else if (canvasName.Contains("DifJetRapidityl2")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
-//    }
-//
-//    else if (canvasName.Contains("DifJetRapiditys2")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
-//    }
-//
-//    else if (canvasName.Contains("ZPt150_HT300")){
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
-//    }
-//    else if (canvasName.Contains("Vis")){
-//	latexLabel->DrawLatex(0.44, 0.7-0.06,"p_{T}^{#mu} > 20 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-//    }
-//
-//    else{
-//        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-//    }
-//
-//    if (lepSel == "") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ll channel");
-//    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
-//    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ee channel");
-//    latexLabel->SetName("latexLabel");
-//    latexLabel->Draw("same");
-//
-//
-//    TLatex *ytitle = new TLatex();
-//    ytitle->SetName("ytitle");
-//    ytitle->SetTextSize(0.04);
-//    if (hGen2) ytitle->SetTextSize(0.05);
-//    if (hGen3) ytitle->SetTextSize(0.06);
-//    ytitle->SetTextFont(42);
-//    ytitle->SetLineWidth(2);
-//    ytitle->SetTextColor(kBlack);
-//    ytitle->SetNDC();
-//    ytitle->SetTextAlign(33);
-//    ytitle->SetTextAngle(90);
-//    //TODO: check if we can use hStat anytime
-//    std::string strYtitle = hGen1 ?  getYaxisTitle(doNormalized, hGen1) :  getYaxisTitle(doNormalized, hStat);
-//    if (strYtitle.find("eta") != std::string::npos) {
-//        size_t first = strYtitle.find("#eta");
-//        std::string tmp1 = strYtitle.substr(0, first);
-//        std::string tmp2 = strYtitle.substr(first);
-//        strYtitle = tmp1 + "|" + tmp2;
-//        size_t second = strYtitle.find(")");
-//        tmp1 = strYtitle.substr(0, second+1);
-//        tmp2 = strYtitle.substr(second+1);
-//        strYtitle = tmp1 + "|" + tmp2;
-//    }
-//    ytitle->DrawLatex(0.008,0.91,strYtitle.c_str());
-//    //--- End Of first Pad ---
-//
-//    //--- Second Pad ---
-//    plots->cd();
-//    TPad *plot2 = new TPad("plot2", "plot2", 0., 0., 0., 0.);
-//    setAndDrawTPad(canvasName, plot2, 2, numbOfGenerator);
-//
-//
-//    //--- TLegend ---
-//    TLegend *legend2 = new TLegend(0.16, 0.05, 0.42, 0.20);
-//    customizeLegend(legend2, 1, numbOfGenerator);
-//    TString generator1 = hGen1->GetZaxis()->GetTitle();
-//    generator1 = generator1(0, generator1.Index(" "));
-//    customizeGenGraph(hSyst, grGen1ToCentral, grGen1ScaleSyst, grGen1PDFSyst, 1, generator1 + "/Data", numbOfGenerator, legend2);
-//    configXaxis(hSyst, hGen1, variable);
-//    if(hSyst) hSyst->DrawCopy("e");
-//    if(grGen1ToCentral){
-//	grGen1ToCentral->SetName("grGen1ToCentral");
-//	grGen1ToCentral->Draw("2");
-//    }
-//    if(grGen1ScaleSyst) grGen1ScaleSyst->Draw("2");
-//    if(grGen1ToCentral) grGen1ToCentral->Draw("2");
-//    if(grCentralSystRatio){
-//	grCentralSystRatio->SetName("grCentralSystRatio");
-//	grCentralSystRatio->Draw("2");
-//    }
-//    if(grCentralSystRatio) grCentralStatRatio->Draw("p");
-//    if(grGen1ToCentral) grGen1ToCentral->Draw("Xp");
-//    if(grGen1PDFSyst) grGen1PDFSyst->Draw("2");
-//    legend2->Draw("same");
-//    //if (canvasName.Contains("JetPt_Zinc")) {
-//    //    grGen1ToCentral->GetXaxis()->SetRangeUser(30, x + ex);
-//    //}
-//    plot2->RedrawAxis();
-//    //--- End of Second Pad ---
-//
-//    if (hGen2) {
-//        //--- Third Pad ---
-//        plots->cd();
-//        TPad *plot3 = new TPad("plot3", "plot3", 0., 0., 0., 0.);
-//        setAndDrawTPad(canvasName, plot3, 3, numbOfGenerator);
-//
-//        //--- TLegend ---
-//        TLegend *legend3 = new TLegend(0.16, 0.05, 0.42, 0.20);
-//        customizeLegend(legend3, 2, numbOfGenerator);
-//        TString generator2 = hGen2->GetZaxis()->GetTitle();
-//        generator2 = generator2(0, generator2.Index(" "));
-//        customizeGenGraph(hSyst, grGen2ToCentral, grGen2PDFSyst, 2, generator2 + "/Data", numbOfGenerator, legend3);
-//        configXaxis(hSyst, hGen2, variable);
-//        hSyst->DrawCopy("e");
-//	if(grGen2ToCentral){
-//	    grGen2ToCentral->SetName("grGen2ToCentral");
-//	    grGen2ToCentral->Draw("2");
-//	}
-//        //grGen2PDFSyst->Draw("2");
-//	if(grCentralSystRatio){
-//	    grCentralSystRatio->SetName("grCentralSystRatio");
-//	    grCentralSystRatio->Draw("2");
-//	}
-//        if(grCentralStatRatio) grCentralStatRatio->Draw("p");
-//        if(grGen2ToCentral) grGen2ToCentral->Draw("Xp");
-//        legend3->Draw("same");
-//        //if (canvasName.Contains("JetPt_Zinc")) {
-//        //    grGen2ToCentral->GetXaxis()->SetRangeUser(30, x + ex);
-//        //}
-//        plot3->RedrawAxis();
-//        //--- End of Third Pad ---
-//    }
-//
-//    if (hGen3) {
-//        //--- Fourth Pad ---
-//        plots->cd();
-//        TPad *plot4 = new TPad("plot4", "plot4", 0., 0., 0., 0.);
-//        setAndDrawTPad(canvasName, plot4, 4, numbOfGenerator);
-//
-//        //--- TLegend ---
-//        TLegend *legend4 = new TLegend(0.16, 0.05, 0.42, 0.20);
-//        customizeLegend(legend4, 3, numbOfGenerator);
-//        TString generator3 = hGen3->GetZaxis()->GetTitle();
-//        generator3 = generator3(0, generator3.Index(" "));
-//        customizeGenGraph(hSyst, grGen3ToCentral, grGen3ScaleSyst, grGen3PDFSyst, 3, generator3 + "/Data", numbOfGenerator, legend4);
-//        configXaxis(hSyst, hGen3, variable);
-//        hSyst->DrawCopy("e");
-//        grGen3ToCentral->SetName("grGen3ToCentral");
-//        grGen3ToCentral->Draw("2");
-//        //grGen3ScaleSyst->Draw("2");
-//        grGen3ToCentral->Draw("2");
-//	if(grCentralSystRatio){
-//	    grCentralSystRatio->SetName("grCentralSystRatio");
-//	    grCentralSystRatio->Draw("2");
-//	}
-//        grCentralStatRatio->Draw("p");
-//        grGen3ToCentral->Draw("Xp");
-//	if(grGen3PDFSyst) grGen3PDFSyst->Draw("2");
-//        legend4->Draw("same");
-//        //if (canvasName.Contains("JetPt_Zinc")) {
-//        //    grGen3ToCentral->GetXaxis()->SetRangeUser(30, x + ex);
-//        //}
-//        plot4->RedrawAxis();
-//        //--- End of Fourth Pad ---
-//    }
-//    plots->Update();
-//    return plots;
-//}
 
 void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString& title, TString& var, TString& dSigma)
 {
@@ -1928,24 +1645,30 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     }
   
     //gStyle->SetOptStat(0);
-    //--- Determine how many comparison we have ---
-    int numbOfGenerator = gens.size(); 
-    //if (hGen2) numbOfGenerator = 2;
-    //  if (hGen3) numbOfGenerator = 3;
-    //---------------------------------------------
 
     
     std::vector<TH1*> hGens = getGenHistos(gens, lepSel, variable);
-
+    std::vector<TH1*> tmp1;
+    std::vector<std::string> tmp2;
+    
     int ipred = -1;
     for(auto g: hGens){
 	++ipred;
+	if(!g) continue;
 	if(g) g->SetZTitle(getLegendGen(gens[ipred].c_str()));
 	if(TString(gens[ipred]).BeginsWith("DYJets_GE")){
 	    g->Scale(2.);
 	}
+	tmp1.push_back(g);
+	tmp2.push_back(gens[ipred]);
     }
-  
+
+    //drops missing predictions (we have ZjNNLO for only few distributions):
+    hGens = tmp1;
+    gens = tmp2;
+
+    int numbOfGenerator = gens.size(); 
+    
     //    hGens.resize(3, 0);
 
     //--- TGraph for data central value and stat. unc.:
@@ -1975,9 +1698,12 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	++igen;
 	grGen1ToCentral[igen] = createGenToCentral(h, grCentralStat);
 	int showSys = cfg.getI(TString::Format("%s_unc", gens[igen].c_str()));
-	if(showSys){
+	if(showSys == 1){
 	    grGen1ScaleSyst[igen] = createScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
 	    grGen1PDFSyst[igen]   = createPDFSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen], grGen1ScaleSyst[igen]);
+	    
+	} else if(showSys == 2){
+	    grGen1ScaleSyst[igen] = createNNLOScaleSystGraph(lepSel, variable, grGen1ToCentral[igen]);
 	}
     }
 
@@ -2048,12 +1774,13 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	hGen->DrawCopy("ESAME");
     }
 
-    fixYscale();
-    
     grCentralStat->SetName("grCentralStat");
     grCentralStat->Draw("p");
 
+    legend->SetName("mainLegend");
     legend->Draw("same");
+
+    fixYscale(1.2, 1.1);
 
     //--- TLatex stuff ---
     TLatex *latexLabel = new TLatex(); 
@@ -2065,7 +1792,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     latexLabel->SetLineWidth(2);
 
     latexLabel->SetTextFont(61);
-    if(TString(hStat->GetZaxis()->GetTitle()).BeginsWith("data", TString::kIgnoreCase)){
+    if(TString(hStat->GetZaxis()->GetTitle()).BeginsWith("data", TString::kIgnoreCase)
+       || TString(hStat->GetZaxis()->GetTitle()).BeginsWith("meas", TString::kIgnoreCase)){
 	latexLabel->DrawLatex(0.13,0.95,"CMS");	
 	latexLabel->SetTextFont(52);
 	latexLabel->DrawLatex(0.20,0.95,"Preliminary");
@@ -2079,52 +1807,51 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	latexLabel->DrawLatex(0.13,0.95-0.045,"Preliminary");
 	latexLabel->SetTextFont(42);
     }
-    latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+
+    //    latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+
+
+    double xlabel;
+    double ylabel;
+
     if (canvasName.Contains("Vis")){
-	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");
+	xlabel = 0.44;
+	ylabel = 0.75;
+	//	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");
+    } else if (canvasName.Contains("JZB") &&  !canvasName.Contains("JZB_ptLow")){
+	xlabel = 0.4;
+	ylabel = 0.21;
+	//	latexLabel->DrawLatex(0.4,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+    } else{
+	xlabel = 0.18;
+	ylabel = 0.21;
+	//	latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     }
-    else{
-	latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
-    }
+    latexLabel->DrawLatex(xlabel, ylabel - 0.05, "anti-k_{T} (R = 0.4) Jets");
 
     if (canvasName.Contains("FirstJetPt50")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4 ");
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{jet} > 50 GeV, |y^{jet}| < 2.4 ");
+    }else if (canvasName.Contains("FirstJetPt80")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{jet} > 80 GeV, |y^{jet}| < 2.4 ");
+    } else if (canvasName.Contains("ZPt150")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
+    } else if (canvasName.Contains("ZPt300")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
+    } else if (canvasName.Contains("DifJetRapidityl2")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
+    } else if (canvasName.Contains("DifJetRapiditys2")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
+    } else if (canvasName.Contains("ZPt150_HT300")){
+        latexLabel->DrawLatex(xlabel,ylabel-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
+    } else if (canvasName.Contains("Vis")){
+	latexLabel->DrawLatex(xlabel, 0.7-0.06,"p_{T}^{#mu} > 20 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
+    } else{
+        latexLabel->DrawLatex(xlabel, ylabel - 0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
     }
 
-    else if (canvasName.Contains("FirstJetPt80")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 80 GeV, |y^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("ZPt150")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("ZPt300")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 300 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-    }
-
-    else if (canvasName.Contains("DifJetRapidityl2")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| > 2 ");
-    }
-
-    else if (canvasName.Contains("DifJetRapiditys2")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, |y_{jet1}-y_{jet2}| < 2 ");
-    }
-
-    else if (canvasName.Contains("ZPt150_HT300")){
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{Z} > 150 GeV, p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4, H_{T}^{jet} > 300 GeV ");
-    }
-    else if (canvasName.Contains("Vis")){
-	latexLabel->DrawLatex(0.44, 0.7-0.06,"p_{T}^{#mu} > 20 GeV, p_{T}^{jet} > 30 GeV, |#eta^{jet}| < 2.4 ");
-    }
-
-    else{
-        latexLabel->DrawLatex(0.18,0.21-0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
-    }
-
-    if (lepSel == "") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ll channel");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(0.18,0.21-0.17,"Z/#gamma*#rightarrow ee channel");
+    if (lepSel == "") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel");
+    else if (lepSel == "DMu") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
+    else if (lepSel == "DE") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel");
     latexLabel->SetName("latexLabel");
     latexLabel->Draw("same");
 

@@ -70,10 +70,10 @@ def db_das_query3(query, att_list):
 
 def parse_command_line():
     """Parse the command line parser"""
-    parser = argparse.ArgumentParser(description='Launch baobab nutple production.')
+    parser = argparse.ArgumentParser(description='Retrieves from DAS database the run range(s) of one or several real data datasets. With no argument the dataset list is read from standard input (one dataset per line). This script can be used to get the range field to include in the grow_baobab datasets.txt catalog file. ')
 
-    parser.add_argument('dataset', action='store', default='',
-                        help='Full dataset name')
+    parser.add_argument('dataset', action='store', default=None, nargs='*',
+                        help='Full dataset name. E.g. /DoubleMuon/Run2016B-03Feb2017_ver2-v2/MINIAOD.')
 
     parser.add_argument('-v', action='count', dest='verbosity',
                         help="Increase verbosity")
@@ -87,9 +87,22 @@ das_ckey = das_client.x509()
 das_cert = das_ckey
 das_client.check_glidein()
 
-res = db_das_query3('run dataset=%s' % args.dataset, ["run.run_number"])
-try:
-    r = res["run.run_number"]
-    print "%d-%d" %(min(r), max(r))
-except KeyError:
-    print "Datast not found."
+
+def process_one_ds(dataset):
+    sys.stdout.write("%s\t" % dataset)
+    res = db_das_query3('run dataset=%s' % dataset, ["run.run_number"])
+    try:
+        r = res["run.run_number"]
+        print "%d-%d" %(min(r), max(r))
+    except KeyError:
+        print "Datast not found." % dataset
+#enddef
+
+if args.dataset:
+    for ds in args.dataset:
+        process_one_ds(ds)
+else:
+    for l in sys.stdin:
+        process_one_ds(l.strip())
+    #next l
+#endif

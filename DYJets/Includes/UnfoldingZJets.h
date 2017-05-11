@@ -49,7 +49,7 @@ std::vector<double> chi2FromToy(RooUnfold::Algorithm algo, bool smoothPrior, con
 				std::vector<double>* meanII = 0, std::vector<double>* rmsII = 0, 
 				std::vector<TH1*>* hChi2II = 0,
 				std::vector<TProfile*>* hRes = 0, std::vector<TProfile*>* hResMcErr = 0,
-				std::vector<TProfile*>* hResII = 0);
+				std::vector<TProfile*>* hResII = 0, bool toyIIrecoResampling = false);
 void makeChi2Plot(TH1* hChi2, int thisAlgoNIters, int chosenNIters,
 		  double thisAlgoThr, double chosenAlgoThr,
 		  const char* outDir, const char* fileBaseName, const char* canvasName, 

@@ -591,100 +591,100 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      }
  }
 
- void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1 *hUnfData, TH2 *hCov[],
-			   const std::vector<std::string>& predictions, double integratedLumi,
-			   int nFirstBinsToSkip, int nLastBinsToSkip)
+void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1 *hUnfData, TH2 *hCov[],
+			  const std::vector<std::string>& predictions, double integratedLumi,
+			  int nFirstBinsToSkip, int nLastBinsToSkip)
 
- //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection)
- //void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
- {
-     //    std::cerr << "createInclusivePlots disabled!" << __FILE__ << __LINE__ << "\n\n";
-     //return;
+//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection)
+//void createInclusivePlots(bool doNormalized, TString outputFileName, TString lepSel, TH1D *hUnfData, TH2D *hCov[], TH1D *hMadGenCrossSection)
+{
+    //    std::cerr << "createInclusivePlots disabled!" << __FILE__ << __LINE__ << "\n\n";
+    //return;
 
-     TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
+    TH1D *hInc = (TH1D*) hUnfData->Clone("ZNGoodJets_Zinc");
 
-     std::vector<TH1*> hGens = getGenHistos(predictions, lepSel, "ZNGoodJets_Zinc", true);
-     hGens.resize(3, 0);    
+    std::vector<TH1*> hGens = getGenHistos(predictions, lepSel, "ZNGoodJets_Zinc", true);
+    hGens.resize(3, 0);    
 
-     TH1D *hIncMad = hGens[0] ? (TH1D*) hGens[0]->Clone("ZNGoodJets_Zinc_Mad") : 0;
-     TH1D *hIncShe = hGens[1] ? (TH1D*) hGens[1]->Clone("ZNGoodJets_Zinc_She") : 0;
-     TH1D *hIncPow = hGens[2] ? (TH1D*) hGens[2]->Clone("ZNGoodJets_Zinc_Pow") : 0;
-     TH2 *hCovInc[12] = {NULL};
-     if(hCov[0]) hCovInc[0] = (TH2*) hCov[0]->Clone("CovDataStat");
-     if(hCov[1]) hCovInc[1] = (TH2*) hCov[1]->Clone("CovMCStat");
-     if(hCov[2]) hCovInc[2] = (TH2*) hCov[2]->Clone("CovJES");
-     if(hCov[3]) hCovInc[3] = (TH2*) hCov[3]->Clone("CovPU");
-     if(hCov[4]) hCovInc[4] = (TH2*) hCov[4]->Clone("CovJER");
-     if(hCov[5]) hCovInc[5] = (TH2*) hCov[5]->Clone("CovXSec");
-     if(hCov[6]) hCovInc[6] = (TH2*) hCov[6]->Clone("CovLES");
-     if(hCov[7]) hCovInc[7] = (TH2*) hCov[7]->Clone("CovLER");
-     if(hCov[8]) hCovInc[8] = (TH2*) hCov[8]->Clone("CovLumi");
-     if(hCov[9]) hCovInc[9] = (TH2*) hCov[9]->Clone("CovSF");
-     if(hCov[10]) hCovInc[10] = (TH2*) hCov[10]->Clone("CovSherpaUnf");
-     else hCovInc[10] = 0;
-     if(hCov[11]) hCovInc[11] = (TH2*) hCov[11]->Clone("CovTotSyst");
+    TH1D *hIncMad = hGens[0] ? (TH1D*) hGens[0]->Clone("ZNGoodJets_Zinc_Mad") : 0;
+    TH1D *hIncShe = hGens[1] ? (TH1D*) hGens[1]->Clone("ZNGoodJets_Zinc_She") : 0;
+    TH1D *hIncPow = hGens[2] ? (TH1D*) hGens[2]->Clone("ZNGoodJets_Zinc_Pow") : 0;
+    TH2 *hCovInc[12] = {NULL};
+    if(hCov[0]) hCovInc[0] = (TH2*) hCov[0]->Clone("CovDataStat");
+    if(hCov[1]) hCovInc[1] = (TH2*) hCov[1]->Clone("CovMCStat");
+    if(hCov[2]) hCovInc[2] = (TH2*) hCov[2]->Clone("CovJES");
+    if(hCov[3]) hCovInc[3] = (TH2*) hCov[3]->Clone("CovPU");
+    if(hCov[4]) hCovInc[4] = (TH2*) hCov[4]->Clone("CovJER");
+    if(hCov[5]) hCovInc[5] = (TH2*) hCov[5]->Clone("CovXSec");
+    if(hCov[6]) hCovInc[6] = (TH2*) hCov[6]->Clone("CovLES");
+    if(hCov[7]) hCovInc[7] = (TH2*) hCov[7]->Clone("CovLER");
+    if(hCov[8]) hCovInc[8] = (TH2*) hCov[8]->Clone("CovLumi");
+    if(hCov[9]) hCovInc[9] = (TH2*) hCov[9]->Clone("CovSF");
+    if(hCov[10]) hCovInc[10] = (TH2*) hCov[10]->Clone("CovSherpaUnf");
+    else hCovInc[10] = 0;
+    if(hCov[11]) hCovInc[11] = (TH2*) hCov[11]->Clone("CovTotSyst");
 
-     int nBins = hInc->GetNbinsX();
-     for (int i = 1; i <= nBins; i++) {
-	 double binSum = 0;
-	 double binSumMad = 0;
-	 double binSumShe = 0;
-	 double binSumPow = 0;
-	 double binStatError2 = 0;
-	 double binStatMadError2 = 0;
-	 double binStatSheError2 = 0;
-	 double binStatPowError2 = 0;
-	 double binCov[12] = {0};
-	 for (int j = i; j <= nBins; j++) {
-	     binSum += hInc->GetBinContent(j);
-	     if(hIncMad){
-		 binSumMad += hIncMad->GetBinContent(j);
-		 binStatMadError2 += pow(hIncMad->GetBinError(j), 2);
-	     }
-	     if(hIncShe){ 
-		 binSumShe += hIncShe->GetBinContent(j);
-		 binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
-	     }
-	     if(hIncPow){
-		 binSumPow += hIncPow->GetBinContent(j);
-		 binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
-	     }
-	     binStatError2 += pow(hInc->GetBinError(j), 2);
-	     for (int k = 0; k < 12; k++) {
-		 if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
-	     }
-	 }
-	 hInc->SetBinContent(i, binSum);
-	 if(hIncMad) hIncMad->SetBinContent(i, binSumMad);
-	 if(hIncShe) hIncShe->SetBinContent(i, binSumShe);
-	 if(hIncPow) hIncPow->SetBinContent(i, binSumPow);
-	 hInc->SetBinError(i, sqrt(binStatError2));
-	 if(hIncMad) hIncMad->SetBinError(i, sqrt(binStatMadError2));
-	 if(hIncShe) hIncShe->SetBinError(i, sqrt(binStatSheError2));
-	 if(hIncPow) hIncPow->SetBinError(i, sqrt(binStatPowError2));
-	 for (int k = 0; k < 12; k++) {
-	     if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
-	 }
-     }
+    int nBins = hInc->GetNbinsX();
+    for (int i = 1; i <= nBins; i++) {
+	double binSum = 0;
+	double binSumMad = 0;
+	double binSumShe = 0;
+	double binSumPow = 0;
+	double binStatError2 = 0;
+	double binStatMadError2 = 0;
+	double binStatSheError2 = 0;
+	double binStatPowError2 = 0;
+	double binCov[12] = {0};
+	for (int j = i; j <= nBins; j++) {
+	    binSum += hInc->GetBinContent(j);
+	    if(hIncMad){
+		binSumMad += hIncMad->GetBinContent(j);
+		binStatMadError2 += pow(hIncMad->GetBinError(j), 2);
+	    }
+	    if(hIncShe){ 
+		binSumShe += hIncShe->GetBinContent(j);
+		binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
+	    }
+	    if(hIncPow){
+		binSumPow += hIncPow->GetBinContent(j);
+		binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
+	    }
+	    binStatError2 += pow(hInc->GetBinError(j), 2);
+	    for (int k = 0; k < 12; k++) {
+		if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
+	    }
+	}
+	hInc->SetBinContent(i, binSum);
+	if(hIncMad) hIncMad->SetBinContent(i, binSumMad);
+	if(hIncShe) hIncShe->SetBinContent(i, binSumShe);
+	if(hIncPow) hIncPow->SetBinContent(i, binSumPow);
+	hInc->SetBinError(i, sqrt(binStatError2));
+	if(hIncMad) hIncMad->SetBinError(i, sqrt(binStatMadError2));
+	if(hIncShe) hIncShe->SetBinError(i, sqrt(binStatSheError2));
+	if(hIncPow) hIncPow->SetBinError(i, sqrt(binStatPowError2));
+	for (int k = 0; k < 12; k++) {
+	    if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
+	}
+    }
 
-     //    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe, hIncPow);
-     TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11],
-						      predictions, nFirstBinsToSkip, nLastBinsToSkip); 
-     // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe); 
-     //  TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
-     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
-     crossSectionPlot->Draw();
-     crossSectionPlot->SaveAs(outputFileName + ".png");
-     crossSectionPlot->SaveAs(outputFileName + ".pdf");
-     crossSectionPlot->SaveAs(outputFileName + ".eps");
-     crossSectionPlot->SaveAs(outputFileName + ".ps");
-     crossSectionPlot->SaveAs(outputFileName + ".C");
-     crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
-     createTable(outputFileName, lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc);
- }
+    //    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe, hIncPow);
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11],
+						     predictions, nFirstBinsToSkip, nLastBinsToSkip); 
+    // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe); 
+    //  TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
+    outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
+    crossSectionPlot->Draw();
+    crossSectionPlot->SaveAs(outputFileName + ".png");
+    crossSectionPlot->SaveAs(outputFileName + ".pdf");
+    crossSectionPlot->SaveAs(outputFileName + ".eps");
+    crossSectionPlot->SaveAs(outputFileName + ".ps");
+    crossSectionPlot->SaveAs(outputFileName + ".C");
+    crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+    createTable(outputFileName, lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc);
+}
 
- void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1 *hUnfData, TH2 *hCov[])
- {
+void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1 *hUnfData, TH2 *hCov[])
+{
      //--- print out break down of errors ---
      TString title = hUnfData->GetTitle();
      int nBins = hUnfData->GetNbinsX();
@@ -702,6 +702,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      table += " and break down of the systematic uncertainties for the ";
      if (lepSel == "DMu") table += "muon decay channel.}\n";
      if (lepSel == "DE") table += "electron decay channel.}\n";
+     if (lepSel == "")  table += "combination of both decay channels.}\n";
+ 
      table += "\\scriptsize{\n";
      table += "\\begin{tabular}{c|cc|ccccccccc}\n";
      //    table += "\\multicolumn{12}{c}{" + title + "} \\\\\n";
@@ -786,7 +788,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      }
 
      table += "\\end{tabular}}\n";
-     table += "\\label{tab:" + lepSel + variable + "}\n";
+     table += "\\label{tab:" + (lepSel.Length() ? lepSel : TString("comb")) + variable + "}\n";
      table += "\\end{center}\\end{table}\n";
      ofstream out(outputFileName + ".tex");
      out << table;
@@ -794,261 +796,263 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      if(verbosity > 0) cout << table << endl;
  }
 
+int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, RooUnfoldResponse *resp,
+	       TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov,
+	       TString name, double integratedLumi, const TString& unfoldDir,
+	       TH1* hRecDYJets, TH1* hGenDYJets, bool logy,
+	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven, int fixNIterTo,
+	       const char* outputFileName){
+    
+    //-- sanity check
+    //response matrix: x-axis = measured, y-axis = truth
+    const TH2& hr = *resp->Hresponse();
+    if(!isSameBinning(*hr.GetXaxis(), *hRecDataMinusFakes->GetXaxis())){
+	std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: axes of measured and hronse matrix histograms are not conistents.\n";
+	abort();
+    }
 
- int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, RooUnfoldResponse *resp,
-		TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov,
-		TString name, double integratedLumi, const TString& unfoldDir,
-		TH1* hRecDYJets, TH1* hGenDYJets, bool logy,
-		TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven, int fixNIterTo,
-		const char* outputFileName){
+    if(!isSameBinning(*hr.GetXaxis(), *hr.GetYaxis())){
+	std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: x- and y- axes of the response matrices differs. If it's on purpose, please edit the code to suppress this sanity check.\n";
+	abort();
+    }
 
-     //-- sanity check
-     //response matrix: x-axis = measured, y-axis = truth
-     const TH2& hr = *resp->Hresponse();
-     if(!isSameBinning(*hr.GetXaxis(), *hRecDataMinusFakes->GetXaxis())){
-	 std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: axes of measured and hronse matrix histograms are not conistents.\n";
-	 abort();
-     }
+    //--- make sure we use OverFlow (should already be set to true) ---
+    resp->UseOverflow();
 
-     if(!isSameBinning(*hr.GetXaxis(), *hr.GetYaxis())){
-	 std::cerr << __FILE__ << ":" << __LINE__ << ". Fatal error: x- and y- axes of the response matrices differs. If it's on purpose, please edit the code to suppress this sanity check.\n";
-	 abort();
-     }
+    //    TString variable = TString(hRecDataMinusFakes->GetName());
+    TString section = TString::Format("%s_%s", lepSel.Data(), variable);
 
-     //--- make sure we use OverFlow (should already be set to true) ---
-     resp->UseOverflow();
+    const TString algo = unfCfg.get<TString>(section.Data(), "algo");
+    int svdKterm       = unfCfg.get<int>(section.Data(), "svdKterm");
 
-     //    TString variable = TString(hRecDataMinusFakes->GetName());
-     TString section = TString::Format("%s_%s", lepSel.Data(), variable);
+    //--- Set the required unfolding algorithm ---
+    RooUnfold::Algorithm alg;
+    if (algo == "Bayes") {
+	alg = RooUnfold::kBayes;
+    }
+    else if (algo == "SVD") {
+	alg = RooUnfold::kSVD;
+    }
+    else {
+	cerr << "Error: the specified algo: " << algo << " is not implemented!" << endl;
+	cerr << "       I will proceed with kBayes algo" << endl;
+	alg = RooUnfold::kBayes;
+    }
 
-     const TString algo = unfCfg.get<TString>(section.Data(), "algo");
-     int svdKterm       = unfCfg.get<int>(section.Data(), "svdKterm");
+    std::cout << "-----------------------" << std::endl;
+    TString unfoldCheckDir = unfoldDir.Strip(TString::kTrailing, '/') + "Check";
+    system(TString("mkdir ") + unfoldCheckDir + "/");
+    std::cout << ">>> " << variable << "\n";
+    TFile *f = new TFile(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    f->cd();
 
-     //--- Set the required unfolding algorithm ---
-     RooUnfold::Algorithm alg;
-     if (algo == "Bayes") {
-	 alg = RooUnfold::kBayes;
-     }
-     else if (algo == "SVD") {
-	 alg = RooUnfold::kSVD;
-     }
-     else {
-	 cerr << "Error: the specified algo: " << algo << " is not implemented!" << endl;
-	 cerr << "       I will proceed with kBayes algo" << endl;
-	 alg = RooUnfold::kBayes;
-     }
+    TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable, name.Data()));
+    hresp->Write();
+    //    std::cout << "Response matrix dimensions: " << resp->Mresponse().GetNrows()
+    //	      << "x" << resp->Mresponse().GetNcols() << "\n";
+    TDecompSVD svd(resp->Mresponse());
+    svd.Decompose();
+    double matrixCond = svd.Condition();
+    TParameter<double>("respMatCondition", matrixCond).Write();
+    TParameter<int>("respMatIsSingular", svd.TestBit(21)).Write();
 
-     std::cout << "-----------------------" << std::endl;
-     TString unfoldCheckDir = unfoldDir.Strip(TString::kTrailing, '/') + "Check";
-     system(TString("mkdir ") + unfoldCheckDir + "/");
-     std::cout << ">>> " << variable << "\n";
-     TFile *f = new TFile(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
-     f->cd();
-
-     TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable, name.Data()));
-     hresp->Write();
- //    std::cout << "Response matrix dimensions: " << resp->Mresponse().GetNrows()
- //	      << "x" << resp->Mresponse().GetNcols() << "\n";
-     TDecompSVD svd(resp->Mresponse());
-     svd.Decompose();
-     double matrixCond = svd.Condition();
-     TParameter<double>("respMatCondition", matrixCond).Write();
-     TParameter<int>("respMatIsSingular", svd.TestBit(21)).Write();
-
-     double lumiUnc = cfg.getD("lumiUnc", 0.027);
-
-
-     //bool svd_unfold = cfg.getB("svdUnfold", false);
-     //bool tsvd_unfold = cfg.getB("tsvdUnfold", false);
-     //bool invert_unfold = cfg.getB("invertUnfold", false);
-     //bool binByBin_unfold = cfg.getB("binByBinUnfold", false);
-     //int nSkipFirstJetPtBins = cfg.getI("nSkipFirstJetPtBins", 2);
-     //verbosity = cfg.getI("unfoldingVerbosity", 1);    
-     //int xvalIter = cfg.getI("xvalIter", 0);
-     //int minIter = cfg.getI("minIter", 2);
-     //int maxIter = cfg.getI("maxIter", 20);
-     //bool smoothPrior = cfg.getB("unfSmootPrior", false);
-     //int nTestIterMax = std::max(hRecDataMinusFakes->GetNbinsX(), maxIter);
-     //bool forceNitersStudy = cfg.getB("forceNitersStudy", false);
+    double lumiUnc = cfg.getD("lumiUnc", 0.027);
 
 
-     bool svd_unfold          = cfg.getUnf(lepSel, variable, "svdUnfold", false);
-     bool tsvd_unfold         = cfg.getUnf(lepSel, variable, "tsvdUnfold", false);
-     bool invert_unfold       = cfg.getUnf(lepSel, variable, "invertUnfold", false);
-     bool binByBin_unfold     = cfg.getUnf(lepSel, variable, "binByBinUnfold", false);
-     //int nSkipFirstJetPtBins  = cfg.getUnf(lepSel, variable, "nSkipFirstJetPtBins", 2);
-     verbosity                = cfg.getUnf(lepSel, variable, "unfoldingVerbosity", 1); 
-     int xvalIter 	     = cfg.getUnf(lepSel, variable, "xvalIter", 0);
-     int nFixedIters          = cfg.getUnf(lepSel, variable, "nFixedIters", 0);
-     int minIter  	     = cfg.getUnf(lepSel, variable, "minIter", 2);
-     int maxIter  	     = cfg.getUnf(lepSel, variable, "maxIter", 20);
-     bool smoothPrior 	     = cfg.getUnf(lepSel, variable, "unfSmootPrior", false);
-     bool forceNitersStudy    = cfg.getUnf(lepSel, variable, "forceNitersStudy", false);
-     int nFirstBinsToSkip     = cfg.getUnf(lepSel, variable, "nFirstBinsToSkip", 0);
-     int nLastBinsToSkip      = cfg.getUnf(lepSel, variable, "nLastBinsToSkip", 0);
-     int ntoys                = cfg.getUnf(lepSel, variable, "nToysForChi2", 0);  
+    //bool svd_unfold = cfg.getB("svdUnfold", false);
+    //bool tsvd_unfold = cfg.getB("tsvdUnfold", false);
+    //bool invert_unfold = cfg.getB("invertUnfold", false);
+    //bool binByBin_unfold = cfg.getB("binByBinUnfold", false);
+    //int nSkipFirstJetPtBins = cfg.getI("nSkipFirstJetPtBins", 2);
+    //verbosity = cfg.getI("unfoldingVerbosity", 1);    
+    //int xvalIter = cfg.getI("xvalIter", 0);
+    //int minIter = cfg.getI("minIter", 2);
+    //int maxIter = cfg.getI("maxIter", 20);
+    //bool smoothPrior = cfg.getB("unfSmootPrior", false);
+    //int nTestIterMax = std::max(hRecDataMinusFakes->GetNbinsX(), maxIter);
+    //bool forceNitersStudy = cfg.getB("forceNitersStudy", false);
 
-     int nTestIterMax 	     = std::max(hRecDataMinusFakes->GetNbinsX(), maxIter);
-     int chosenIter;
 
-     if(xvalIter == 6 && nFixedIters < 1){
-	 std::cerr << "Fatal error. Configuration error for " << lepSel << "_" << variable
-		   << ". xvalIter set to fixed itertation mode while nFixedIters is either not set or "
-		   << "set to a value smaller than 1 for this variable. Aborts\n";
-	 abort();
-     }
+    bool svd_unfold          = cfg.getUnf(lepSel, variable, "svdUnfold", false);
+    bool tsvd_unfold         = cfg.getUnf(lepSel, variable, "tsvdUnfold", false);
+    bool invert_unfold       = cfg.getUnf(lepSel, variable, "invertUnfold", false);
+    bool binByBin_unfold     = cfg.getUnf(lepSel, variable, "binByBinUnfold", false);
+    //int nSkipFirstJetPtBins  = cfg.getUnf(lepSel, variable, "nSkipFirstJetPtBins", 2);
+    verbosity                = cfg.getUnf(lepSel, variable, "unfoldingVerbosity", 1); 
+    int xvalIter 	     = cfg.getUnf(lepSel, variable, "xvalIter", 0);
+    int nFixedIters          = cfg.getUnf(lepSel, variable, "nFixedIters", 0);
+    int minIter  	     = cfg.getUnf(lepSel, variable, "minIter", 2);
+    int maxIter  	     = cfg.getUnf(lepSel, variable, "maxIter", 20);
+    bool smoothPrior 	     = cfg.getUnf(lepSel, variable, "unfSmootPrior", false);
+    bool forceNitersStudy    = cfg.getUnf(lepSel, variable, "forceNitersStudy", false);
+    int nFirstBinsToSkip     = cfg.getUnf(lepSel, variable, "nFirstBinsToSkip", 0);
+    int nLastBinsToSkip      = cfg.getUnf(lepSel, variable, "nLastBinsToSkip", 0);
+    int ntoys                = cfg.getUnf(lepSel, variable, "nToysForChi2", 0);  
+    bool toyIIrecoResampling = cfg.getUnf(lepSel, variable, "toyIIrecoResampling", false); 
+
+    int nTestIterMax 	     = std::max(hRecDataMinusFakes->GetNbinsX(), maxIter);
+    int chosenIter;
+
+    if(xvalIter == 6 && nFixedIters < 1){
+	std::cerr << "Fatal error. Configuration error for " << lepSel << "_" << variable
+		  << ". xvalIter set to fixed itertation mode while nFixedIters is either not set or "
+		  << "set to a value smaller than 1 for this variable. Aborts\n";
+	abort();
+    }
      
-     if(fixNIterTo > 0){
-	 chosenIter = fixNIterTo;
-     } else if(!forceNitersStudy && (xvalIter == 6)){
-	 chosenIter = nFixedIters; //readNiters(lepSel, variable);
-	 fixNIterTo = nFixedIters;
-     } else {
-	 //test different number of iterations
-	 int finalNIter = -1;
-	 int nIter = 99;
-	 //    int finalNIterXval = -1;
-	 //    int nIterXval = 99;
-	 int nIterXval = -1;
-	 int nIterXvalMin = 0;
-	 int nIterToy = -1;
-	 int nIterToyMin = -1;
-	 int nIterResMax = -1;
-	 int nIterResMaxXval = -1;
-	 int nIterResMaxToy = -1;
-	 int nIterResMaxToyMin = -1;
-	 double resMaxToyMin = 1.e9;
-	 int nIterResMaxToyCmp = -1;
-	 int nIterResMaxToyII = -1;
-	 int nIterToyIIMin = -1;
-	 bool nIterToyIIMinFound = false;
-	 int nIterResMaxToyIIMin = -1;
-	 int nIterToyII = -1;
-	 double resMaxToyIIMin = 1.e9;
-	 int nIterBiasToyIIMin = -1;
-	 double biasToyIIMin = 1.e9;
-	 double chi2ToyIIMin = 1.e9;
-	 double chi2XvalMin = 1.e9;
-	 double chi2ToyMin = 1.e9;
+    if(fixNIterTo > 0){
+	chosenIter = fixNIterTo;
+    } else if(!forceNitersStudy && (xvalIter == 6)){
+	chosenIter = nFixedIters; //readNiters(lepSel, variable);
+	fixNIterTo = nFixedIters;
+    } else {
+	//test different number of iterations
+	int finalNIter = -1;
+	int nIter = 99;
+	//    int finalNIterXval = -1;
+	//    int nIterXval = 99;
+	int nIterXval = -1;
+	int nIterXvalMin = 0;
+	int nIterToy = -1;
+	int nIterToyMin = -1;
+	int nIterResMax = -1;
+	int nIterResMaxXval = -1;
+	int nIterResMaxToy = -1;
+	int nIterResMaxToyMin = -1;
+	double resMaxToyMin = 1.e9;
+	int nIterResMaxToyCmp = -1;
+	int nIterResMaxToyII = -1;
+	int nIterToyIIMin = -1;
+	bool nIterToyIIMinFound = false;
+	int nIterResMaxToyIIMin = -1;
+	int nIterToyII = -1;
+	double resMaxToyIIMin = 1.e9;
+	int nIterBiasToyIIMin = -1;
+	double biasToyIIMin = 1.e9;
+	double chi2ToyIIMin = 1.e9;
+	double chi2XvalMin = 1.e9;
+	double chi2ToyMin = 1.e9;
 
-	 TH1D *hchi2 = new TH1D("hchi2", "hchi2", nTestIterMax + 1, -0.5, nTestIterMax + .5);
-	 hchi2->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
-					 variable));
-	 hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
-	 hchi2->GetYaxis()->SetTitleOffset(1.40);
-	 hchi2->GetXaxis()->SetTitle("number of iterations");
-	 hchi2->GetXaxis()->CenterTitle();
-	 hchi2->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
-	 hchi2->GetXaxis()->SetLabelSize(0.03);
-	 hchi2->SetLineWidth(2);
-
-
-	 TH1D* hchi2dataMC = (TH1D*) hchi2->Clone("hchi2dataMC");
-	 hchi2dataMC->SetTitle(TString::Format("#chi^{2}/ndf test of MC gen and unfolded data for %s",
-					       variable));
-
-	 TH1D *hchi2Toy = new TH1D("hchi2Toy", "hchi2Toy", nTestIterMax + 1, -0.5, nTestIterMax + .5);
-	 hchi2Toy->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
-					    variable));
-	 hchi2Toy->GetYaxis()->SetTitle("#chi^{2}/ndf");
-	 hchi2Toy->GetYaxis()->SetTitleOffset(1.40);
-	 hchi2Toy->GetXaxis()->SetTitle("number of iterations");
-	 hchi2Toy->GetXaxis()->CenterTitle();
-	 hchi2Toy->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
-	 hchi2Toy->GetXaxis()->SetLabelSize(0.03);
-	 hchi2Toy->SetLineWidth(2);    
-
-	 TH1D *hchi2ToyMcErr = new TH1D("hchi2ToyMcErr", "hchi2ToyMcErr", nTestIterMax + 1, -0.5, nTestIterMax + .5);
-	 hchi2ToyMcErr->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
-						 variable));
-	 hchi2ToyMcErr->GetYaxis()->SetTitle("#chi^{2}/ndf");
-	 hchi2ToyMcErr->GetYaxis()->SetTitleOffset(1.40);
-	 hchi2ToyMcErr->GetXaxis()->SetTitle("number of iterations");
-	 hchi2ToyMcErr->GetXaxis()->CenterTitle();
-	 hchi2ToyMcErr->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
-	 hchi2ToyMcErr->GetXaxis()->SetLabelSize(0.03);
-	 hchi2ToyMcErr->SetLineWidth(2);    
+	TH1D *hchi2 = new TH1D("hchi2", "hchi2", nTestIterMax + 1, -0.5, nTestIterMax + .5);
+	hchi2->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
+					variable));
+	hchi2->GetYaxis()->SetTitle("#chi^{2}/ndf");
+	hchi2->GetYaxis()->SetTitleOffset(1.40);
+	hchi2->GetXaxis()->SetTitle("number of iterations");
+	hchi2->GetXaxis()->CenterTitle();
+	hchi2->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
+	hchi2->GetXaxis()->SetLabelSize(0.03);
+	hchi2->SetLineWidth(2);
 
 
-	 TH1D *hchi2ToyII = new TH1D("hchi2ToyII", "hchi2ToyII", nTestIterMax + 1, -0.5, nTestIterMax + .5);
-	 hchi2ToyII->SetTitle(TString::Format("Gen. #chi^{2}/ndf for %s",
+	TH1D* hchi2dataMC = (TH1D*) hchi2->Clone("hchi2dataMC");
+	hchi2dataMC->SetTitle(TString::Format("#chi^{2}/ndf test of MC gen and unfolded data for %s",
 					      variable));
-	 hchi2ToyII->GetYaxis()->SetTitle("#chi^{2}/ndf");
-	 hchi2ToyII->GetYaxis()->SetTitleOffset(1.40);
-	 hchi2ToyII->GetXaxis()->SetTitle("number of iterations");
-	 hchi2ToyII->GetXaxis()->CenterTitle();
-	 hchi2ToyII->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
-	 hchi2ToyII->GetXaxis()->SetLabelSize(0.03);
-	 hchi2ToyII->SetLineWidth(2);    
 
-	 TH1D* hchi2Xval = 0;
-	 TH1* hResMaxXval = 0;
-	 if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
-	     hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
-	     hchi2Xval->Reset();
-	     hResMaxXval = new TH1D("hResMaxXval",
-				    TString::Format("Max(#chi^{2}_{ibin}) for %s - Two samples;number of iterations;max(#chi^{2}_{ibin})",
-						    variable),
-				    nTestIterMax + 1, -.5, nTestIterMax +  0.5);
-	     hResMaxXval->SetLineWidth(2);
+	TH1D *hchi2Toy = new TH1D("hchi2Toy", "hchi2Toy", nTestIterMax + 1, -0.5, nTestIterMax + .5);
+	hchi2Toy->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
+					   variable));
+	hchi2Toy->GetYaxis()->SetTitle("#chi^{2}/ndf");
+	hchi2Toy->GetYaxis()->SetTitleOffset(1.40);
+	hchi2Toy->GetXaxis()->SetTitle("number of iterations");
+	hchi2Toy->GetXaxis()->CenterTitle();
+	hchi2Toy->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
+	hchi2Toy->GetXaxis()->SetLabelSize(0.03);
+	hchi2Toy->SetLineWidth(2);    
 
-	 }
+	TH1D *hchi2ToyMcErr = new TH1D("hchi2ToyMcErr", "hchi2ToyMcErr", nTestIterMax + 1, -0.5, nTestIterMax + .5);
+	hchi2ToyMcErr->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
+						variable));
+	hchi2ToyMcErr->GetYaxis()->SetTitle("#chi^{2}/ndf");
+	hchi2ToyMcErr->GetYaxis()->SetTitleOffset(1.40);
+	hchi2ToyMcErr->GetXaxis()->SetTitle("number of iterations");
+	hchi2ToyMcErr->GetXaxis()->CenterTitle();
+	hchi2ToyMcErr->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
+	hchi2ToyMcErr->GetXaxis()->SetLabelSize(0.03);
+	hchi2ToyMcErr->SetLineWidth(2);    
 
-	 //double chi2Thr = 1./sqrt(2.);
-	 double chi2Thr = 1.;
-	 double chi2XvalThr = 1; //pValueToNormChi2(0.05, hRecDataMinusFakes->GetNbinsX() - 1);
-	 double chi2ToyThr = chi2XvalThr;
-	 double chi2ToyIIThr = chi2XvalThr;
-	 double resMaxThr = 1;
-	 double resMaxXvalThr = 2;
-	 double resMaxToyThr = 0.4;
-	 double resMaxToyCmpThr1 = 1.; //applied on resMax
-	 double resMaxToyCmpThr2 = 0.01;//applied on difference between resMaxToy and resMax
-	 double resMaxToyIIThr = 1;
 
-	 //    chi2Thr= chi2XvalThr = chi2ToyThr = 0.95;
-	 //
-	 //    if(hRecDataMinusFakesOdd){
-	 //      chi2XvalThr = MyChi2Test(hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
-	 //    } else{
-	 //      chi2XvalThr = 0;
-	 //    }
+	TH1D *hchi2ToyII = new TH1D("hchi2ToyII", "hchi2ToyII", nTestIterMax + 1, -0.5, nTestIterMax + .5);
+	hchi2ToyII->SetTitle(TString::Format("Gen. #chi^{2}/ndf for %s",
+					     variable));
+	hchi2ToyII->GetYaxis()->SetTitle("#chi^{2}/ndf");
+	hchi2ToyII->GetYaxis()->SetTitleOffset(1.40);
+	hchi2ToyII->GetXaxis()->SetTitle("number of iterations");
+	hchi2ToyII->GetXaxis()->CenterTitle();
+	hchi2ToyII->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
+	hchi2ToyII->GetXaxis()->SetLabelSize(0.03);
+	hchi2ToyII->SetLineWidth(2);    
 
-	 double chosenAlgoThr = 0.;
+	TH1D* hchi2Xval = 0;
+	TH1* hResMaxXval = 0;
+	if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
+	    hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
+	    hchi2Xval->Reset();
+	    hResMaxXval = new TH1D("hResMaxXval",
+				   TString::Format("Max(#chi^{2}_{ibin}) for %s - Two samples;number of iterations;max(#chi^{2}_{ibin})",
+						   variable),
+				   nTestIterMax + 1, -.5, nTestIterMax +  0.5);
+	    hResMaxXval->SetLineWidth(2);
 
-	 std::cout << "Bayes unfolding, number of first bins to skip: " << nFirstBinsToSkip << "\n";
-	 std::cout << "Bayes unfolding, number of last bins to skip: " << nLastBinsToSkip << "\n";    
+	}
 
-	 RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
-	 TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
+	//double chi2Thr = 1./sqrt(2.);
+	double chi2Thr = 1.;
+	double chi2XvalThr = 1; //pValueToNormChi2(0.05, hRecDataMinusFakes->GetNbinsX() - 1);
+	double chi2ToyThr = chi2XvalThr;
+	double chi2ToyIIThr = chi2XvalThr;
+	double resMaxThr = 1;
+	double resMaxXvalThr = 2;
+	double resMaxToyThr = 0.4;
+	double resMaxToyCmpThr1 = 1.; //applied on resMax
+	double resMaxToyCmpThr2 = 0.01;//applied on difference between resMaxToy and resMax
+	double resMaxToyIIThr = 1;
 
-	 std::auto_ptr<std::vector<TH1*> > hUnfs (new std::vector<TH1*>);
-	 std::vector<TMatrixD> covs;
+	//    chi2Thr= chi2XvalThr = chi2ToyThr = 0.95;
+	//
+	//    if(hRecDataMinusFakesOdd){
+	//      chi2XvalThr = MyChi2Test(hRecDataMinusFakesOdd, hRecDataMinusFakesEven);
+	//    } else{
+	//      chi2XvalThr = 0;
+	//    }
 
-	 unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get(), &covs, 2);
-	 //unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get());
+	double chosenAlgoThr = 0.;
 
-	 TH1* hResMax = new TH1D("hResMax", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})", 
-							    variable),
-				 hUnfs->size(), -.5, hUnfs->size() - 0.5);
-	 hResMax->SetLineWidth(2);
+	std::cout << "Bayes unfolding, number of first bins to skip: " << nFirstBinsToSkip << "\n";
+	std::cout << "Bayes unfolding, number of last bins to skip: " << nLastBinsToSkip << "\n";    
 
-	 TH1* hResMaxToy = new TH1D("hResMaxToy", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
-								  variable),
-				    hUnfs->size(), -.5, hUnfs->size() - 0.5);
-	 hResMaxToy->SetLineWidth(2);
+	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
+	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
 
-	 TH1* hResMaxToyII = new TH1D("hResMaxToyII", TString::Format("Gen. Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
-								      variable),
+	std::auto_ptr<std::vector<TH1*> > hUnfs (new std::vector<TH1*>);
+	std::vector<TMatrixD> covs;
+
+	unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get(), &covs, 2);
+	//unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get());
+
+	TH1* hResMax = new TH1D("hResMax", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})", 
+							   variable),
+				hUnfs->size(), -.5, hUnfs->size() - 0.5);
+	hResMax->SetLineWidth(2);
+
+	TH1* hResMaxToy = new TH1D("hResMaxToy", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
+								 variable),
+				   hUnfs->size(), -.5, hUnfs->size() - 0.5);
+	hResMaxToy->SetLineWidth(2);
+
+	TH1* hResMaxToyII = new TH1D("hResMaxToyII", TString::Format("Gen. Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
+								     variable),
+				     hUnfs->size(), -.5, hUnfs->size() - 0.5);
+	hResMaxToyII->SetLineWidth(2);
+
+	TH1* hBiasMaxToyII = new TH1D("hBiasMaxToyII", TString::Format("Gen. Max(|pull_{ibin}|) for %s;Iter;max(|pull_{ibin}|)", variable),
 				      hUnfs->size(), -.5, hUnfs->size() - 0.5);
-	 hResMaxToyII->SetLineWidth(2);
-
-	 TH1* hBiasMaxToyII = new TH1D("hBiasMaxToyII", TString::Format("Gen. Max(|pull_{ibin}|) for %s;Iter;max(|pull_{ibin}|)", variable),
-				       hUnfs->size(), -.5, hUnfs->size() - 0.5);
 	hBiasMaxToyII->SetLineWidth(2);
 
 	
 	double chi2dataMCThr = TH1Chi2Test(hRecDataMinusFakes, hRecDYJets, nFirstBinsToSkip, nLastBinsToSkip);
+
+	double prevChi2 = -1;
 	
 	for (unsigned i = 0; i < hUnfs->size(); ++i) {
 	    (*hUnfs)[i]->SetName(TString::Format("hUnf_%d", i));
@@ -1083,10 +1087,15 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	    if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
 	    if(i > 0) hchi2->SetBinContent(i + 1, mychi2);
 	    if (mychi2 < chi2Thr && finalNIter < 0) {
-		nIter = i;
-		finalNIter = i;
+		if(i > 1 && fabs(prevChi2 - chi2Thr) < fabs(mychi2 - chi2Thr)){
+		    nIter = i - 1;
+		} else{
+		    nIter = i;
+		}
+		finalNIter = nIter;
 		std::cout << "Single distribution chi^2 leads to " << nIter << " iterations with a final Chi2/ndf of: " << mychi2 << std::endl;
 	    }
+	    prevChi2 = mychi2;
 
 	    double dataMcChi2;
 	    if(i==0){
@@ -1265,7 +1274,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 						  nLastBinsToSkip,
 						  nTestIterMax, ntoys, &chi2ToyMcErrs, &rms,
 						  &hChi2s, 0, &chi2ToyII, &rmsII,
-						  &hChi2IIs, &hResToys, 0, &hResToysII);
+						  &hChi2IIs, &hResToys, 0, &hResToysII, toyIIrecoResampling);
 
 	TParameter<int>("ntoys", ntoys).Write();
 
@@ -1540,20 +1549,30 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 		     "cChi2AndResMaxToyII", chi2Ylog,
 		     altH, labels, true);	
 	
-	altH.resize(4);
-	altH[0] = hchi2ToyMcErr;
-	altH[1] = hchi2;
-	altH[2] = hchi2Xval;
+	altH.resize(2);
+	altH[0] = hchi2;
+	altH[1] = hchi2Xval;
 	labels.resize(altH.size() + 1);
 	labels[0] = "Toy MC";
-	labels[1] = "Toy MC w. MC unc.";
-	labels[2] = "Same sample";
-	labels[3] = "Two samples";
+	labels[1] = "Same sample";
+	labels[2] = "Two samples";
 	makeChi2Plot(hchi2Toy, xvalIter == 2 ? -1 : nIterToy, chosenIter,
 		     chi2ToyThr, chosenAlgoThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2All", "cChi2All",
 		     chi2Ylog, altH, labels);
 
+	altH.resize(1);
+	altH[0] = hchi2Toy;
+	labels.resize(altH.size() + 1);
+	labels[0] = "Same sample";
+	labels[1] = "Toy MC";
+	makeChi2Plot(hchi2, nIter, chosenIter,
+		     chi2Thr, chi2Thr,
+		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2AndToyChi2", "cChi2AndToyChi2",
+		     chi2Ylog, altH, labels);
+
+
+	
 	altH.resize(0);
 	labels.resize(altH.size() + 1);
 	labels[0] = "Data vs MC";
@@ -2093,7 +2112,7 @@ chi2FromToy(RooUnfold::Algorithm algo, bool smoothPrior, const RooUnfoldResponse
 	    std::vector<double>* rms, std::vector<TH1*>* hChi2, std::vector<TH1*>* hChi2mcErr,
 	    std::vector<double>* meanII, std::vector<double>* rmsII, 
 	    std::vector<TH1*>* hChi2II, std::vector<TProfile*>* hRes, std::vector<TProfile*>* hResMcErr,
-	    std::vector<TProfile*>* hResII){
+	    std::vector<TProfile*>* hResII, bool recoResampling){
     
     std::auto_ptr<std::vector<TH1*> > hRefs (new std::vector<TH1*>);
 
@@ -2189,28 +2208,41 @@ chi2FromToy(RooUnfold::Algorithm algo, bool smoothPrior, const RooUnfoldResponse
 #               else
 		TH1* newUnf = resample(hRefs->at(iter));
 		TH1* newFold = foldUnfData(newUnf, 0, resp);
+		if(recoResampling) newFold = resample(newFold);
 		TH1* newUnf2 = unfold(algo, resp, newFold, iter, smoothPrior);
-		//		double chi2II = MyChi2Test(hRefs->at(iter), newUnf2, nFirstBinsToSkip,
-		//nLastBinsToSkip, res, hRefs->at(iter), false);
+#                       if 0
+		double chi2II = MyChi2Test(hRefs->at(iter), newUnf2, nFirstBinsToSkip,
+					   nLastBinsToSkip, res, hRefs->at(iter), true);
+#                       else
 		double chi2II = MyChi2Test(newUnf, newUnf2, nFirstBinsToSkip,
-					   nLastBinsToSkip, res, newUnf, false);
+					   nLastBinsToSkip, res, hRefs->at(iter), true);
+#                       endif   
 #               endif
+
+		//DEBUG>>>
+		if(iter==50){
+		    hRefs->at(iter)->Write(TString::Format("hRef_%d", itoy));
+		    newUnf2->Write(TString::Format("newUnf2_%d", itoy));
+		    newUnf->Write(TString::Format("newUnf_%d", itoy));
+		}
+		//<<<DEBUG
 		accII[iter] += chi2II;
 		acc2II[iter] += pow(chi2II, 2);
 		for(int iRes = 0; iRes < nRes; ++iRes){
 		    hResII->at(iter)->Fill(hResII->at(iter)->GetBinCenter(1 + iRes), res[iRes]);
+		    if(hChi2II) hChi2II->at(iter)->Fill(chi2II);
 		}
 	    }
-//	    if(iter>0){
-//		double chi2II = MyChi2Test(hRefs->at(iter), hUnfs->at(iter), nFirstBinsToSkip, nLastBinsToSkip, res, hRefs->at(iter), false);
-//		if(hChi2II) hChi2II->at(iter)->Fill(chi2II);
-//		accII[iter] += chi2II;
-//		acc2II[iter] += chi2II*chi2II;
-//		for(int iRes = 0; iRes < nRes; ++iRes){
-//		    double x = pow(res[iRes], 2);
-//		    hResII->at(iter)->Fill(hResII->at(iter)->GetBinCenter(1 + iRes), x);
-//		}
-//	    }
+	    //	    if(iter>0){
+	    //		double chi2II = MyChi2Test(hRefs->at(iter), hUnfs->at(iter), nFirstBinsToSkip, nLastBinsToSkip, res, hRefs->at(iter), false);
+	    //		if(hChi2II) hChi2II->at(iter)->Fill(chi2II);
+	    //		accII[iter] += chi2II;
+	    //		acc2II[iter] += chi2II*chi2II;
+	    //		for(int iRes = 0; iRes < nRes; ++iRes){
+	    //		    double x = pow(res[iRes], 2);
+	    //		    hResII->at(iter)->Fill(hResII->at(iter)->GetBinCenter(1 + iRes), x);
+	    //		}
+	    //	    }
 	}
 	delete h;
     }

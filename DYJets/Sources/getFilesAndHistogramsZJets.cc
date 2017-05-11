@@ -894,7 +894,8 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 		      << " was not found in " << f->GetName() << " file.\n";
 	    continue;
 	  }
-	  if(xsec){
+
+	  if(xsec  && s != "DYJets_ZjNNLO"){
 	    TH1* hLumi = (TH1*) f->Get("Lumi");
 	    if(!hLumi && verbose){
 	      std::cerr << "Error. Luminosity histogram required to normalized the histograms was not found in the file "
@@ -917,14 +918,15 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	  delete f;
 	}
       }
-      if(h[i] && xsec){
+      if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
 	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
-	h[i]->Scale(1/ich);
+	h[i]->Scale(1./ich);
 	//for xsec plots bin contents are divided by the bin width:
 	int nBins = h[i]->GetNbinsX();
 	for (int ibin = 1; ibin <= nBins; ++ibin) {
 	  double binWidth = h[i]->GetBinWidth(ibin);
-	  h[i]->SetBinContent(ibin, h[i]->GetBinContent(ibin)/binWidth);
+	  double binContent = h[i]->GetBinContent(ibin)/binWidth;
+	  h[i]->SetBinContent(ibin, binContent);
 	  h[i]->SetBinError(ibin, h[i]->GetBinError(ibin)/binWidth);
 	}
       }

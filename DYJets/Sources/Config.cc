@@ -204,7 +204,7 @@ void Config::convert(const std::string& str, std::vector<T>& x) const{
         trim(val);
         T val_;
         convert(val, val_);
-        std::cout << "Adding " << val_ << ", pos = " << pos << std::endl;
+        //std::cout << "Adding " << val_ << ", pos = " << pos << std::endl;
         x.push_back(val_);
     }
 }

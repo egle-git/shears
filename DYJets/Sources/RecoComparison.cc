@@ -13,6 +13,7 @@
 #include <TLegend.h>
 #include "getFilesAndHistogramsZJets.h"
 #include "ConfigVJets.h"
+#include "functions.h"
 
 //--  Setting global variables --------------------------------------------------------------
 #include "fileNamesZJets.h"
@@ -326,15 +327,16 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         canvas->cd();
         canvas->Update();
 
-        TString outputFilePDF = outputFileName + "/" + vhNames[i] + ".pdf";
-        canvas->Print(outputFilePDF);
-        outputFile->cd();
-        canvas->Write();
+        //TString outputFilePDF = outputFileName + "/" + vhNames[i] + ".pdf";
+        //canvas->Print(outputFilePDF);
+        //outputFile->cd();
+        //canvas->Write();
 	
-        TString outputFileBase = outputFileName + "/" + vhNames[i];
-	canvas->SaveAs(outputFileBase + ".root");
-	canvas->SaveAs(outputFileBase + ".C");
-	canvas->SaveAs(outputFileBase + ".png");
+        //TString outputFileBase = outputFileName + "/" + vhNames[i];
+	//canvas->SaveAs(outputFileBase + ".root");
+	//canvas->SaveAs(outputFileBase + ".C");
+	//canvas->SaveAs(outputFileBase + ".png");
+	saveCanvas(canvas, outputFileName, vhNames[i]);
 
         hSumMC[i]->SetMaximum(1.5*hSumMC[i]->GetMaximum());
         TCanvas *tmpCanvas = (TCanvas*) canvas->Clone();
@@ -346,14 +348,15 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         tmpCanvas->SetTitle(vhNames[i]);
         tmpCanvas->SetName(vhNames[i]);
         tmpCanvas->Update();
-        TString outputFileLinPDF = outputFileName + "/" + vhNames[i] + ".pdf";
-        tmpCanvas->Print(outputFileLinPDF);
-        outputFile->cd();
-        tmpCanvas->Write();
+        //TString outputFileLinPDF = outputFileName + "/" + vhNames[i] + ".pdf";
+        //tmpCanvas->Print(outputFileLinPDF);
+        //outputFile->cd();
+        //tmpCanvas->Write();
 
-	TString outputFileLinBase = outputFileName + "/" + vhNames[i];
-	tmpCanvas->SaveAs(outputFileLinBase + ".root");
-	tmpCanvas->SaveAs(outputFileLinBase + ".C");
+	//TString outputFileLinBase = outputFileName + "/" + vhNames[i];
+	//tmpCanvas->SaveAs(outputFileLinBase + ".root");
+	//tmpCanvas->SaveAs(outputFileLinBase + ".C");
+	saveCanvas(tmpCanvas, outputFileName, vhNames[i]);
 
     }
 

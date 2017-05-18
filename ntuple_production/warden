@@ -290,7 +290,7 @@ EOF
 
     t1=`date +%s`
     dt=$((60*cycle+t-t1))
-    echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up (my pid is $$)..."
+    echo "`date +'%F %R:%S'` sleeping $dt s... send me a SIGHUP to wake me up (my pid is $$, kill -s SIGHUP $$)..."
     while [ "$dt" -gt 0 -a "$makeitnow" != 1 ]; do
         sleep 1
 	check_warden_stop && break

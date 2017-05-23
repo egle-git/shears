@@ -40,6 +40,8 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     ConfigVJets cfg;
     TString energy = TString::Format("%gTeV", cfg.getD("energy"));
 
+    bool isPrel = cfg.getB("preliminaryTag", true);
+
     int Colors[NFILESDYJETS];
     TString legendNames[NFILESDYJETS];
     
@@ -246,6 +248,23 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 
         //}
 
+    if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
+      std::cout << __FILE__ << ":" << __LINE__ 
+		<< ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+      //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+      //	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
+        hRatio->GetXaxis()->SetBinLabel(1, "= 0");
+        hRatio->GetXaxis()->SetBinLabel(2, "= 1");
+        hRatio->GetXaxis()->SetBinLabel(3, "= 2");
+        hRatio->GetXaxis()->SetBinLabel(4, "= 3");
+        hRatio->GetXaxis()->SetBinLabel(5, "= 4");
+        hRatio->GetXaxis()->SetBinLabel(6, "= 5");
+	hRatio->GetXaxis()->SetBinLabel(7, "= 6");
+        hRatio->GetXaxis()->SetLabelSize(0.18);
+        hRatio->SetLabelOffset(0.01);
+    }
+
+
         hSumMC[i]->SetTitle(""); 
         hSumMC[i]->GetYaxis()->SetLabelSize(0.04); 
         hSumMC[i]->GetYaxis()->SetLabelOffset(0.002); 
@@ -259,7 +278,7 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
 
-        cmsColl->DrawLatex(0.17,0.83, "CMS Preliminary");
+        cmsColl->DrawLatex(0.17,0.83, isPrel ? "CMS Preliminary" : "CMS");
         if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s} = 13 TeV");
         if (vhNames[i].Index("inc0") < 0){
             ostringstream ptLegend;

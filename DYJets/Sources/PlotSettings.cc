@@ -1646,7 +1646,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
   
     //gStyle->SetOptStat(0);
 
-    
+    bool isPrel = cfg.getB("preliminaryTag", true);    
     std::vector<TH1*> hGens = getGenHistos(gens, lepSel, variable);
     std::vector<TH1*> tmp1;
     std::vector<std::string> tmp2;
@@ -1796,7 +1796,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
        || TString(hStat->GetZaxis()->GetTitle()).BeginsWith("meas", TString::kIgnoreCase)){
 	latexLabel->DrawLatex(0.13,0.95,"CMS");	
 	latexLabel->SetTextFont(52);
-	latexLabel->DrawLatex(0.20,0.95,"Preliminary");
+	if(isPrel) latexLabel->DrawLatex(0.20,0.95,"Preliminary");
 	latexLabel->SetTextFont(42);
 	//FIXME: integrated lumi must be read from data histo file
 	latexLabel->DrawLatex(0.13,0.95-0.045, "2.25 fb^{-1} (13 TeV)");
@@ -1804,7 +1804,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
     } else{
 	latexLabel->DrawLatex(0.13,0.95,"MC study");	
 	latexLabel->SetTextFont(52);
-	latexLabel->DrawLatex(0.13,0.95-0.045,"Preliminary");
+	if(isPrel) latexLabel->DrawLatex(0.13,0.95-0.045,"Preliminary");
 	latexLabel->SetTextFont(42);
     }
 

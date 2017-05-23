@@ -297,12 +297,19 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
     } 
 
+    bool dataDriven = TString(Files[0]->GetName()).Contains("_TT_");
+    if(dataDriven){
+      std::cout << "File " << Files[0]->GetName() << " is expected to contain ttbar contribution estimated from data. " 
+		<< " Event yield estimate of this contribution is assumed to be independant of"
+		<< " the integrated luminosity measurement accuracy.\n";
+    } 
+    
     if (!isData && histograms[0]) {
         Files[0]->cd();
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing
         //    since it is a global effect. 
-        double lumiErr = cfg.getD("lumiUnc");
+        double lumiErr = dataDriven ? 0 : cfg.getD("lumiUnc");
 
         if (isSignal) {
             //--- lumi scale up ---
@@ -904,7 +911,7 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	    }
 	    double lumi = hLumi->GetBinContent(1);
 	    if(lumi < 2000.){
-	      lumi = 2250.91;
+	      lumi = 2191.78;
 	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
 			<< ". Integrated luminosity forced to " << lumi << " pb-1"
 			<< "\n";

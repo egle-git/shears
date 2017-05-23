@@ -804,7 +804,7 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
     for (int i=1; i< usedFiles + 1 ; i++){
         int sel = FilesDYJets[i];
 
-        if (i < usedFiles) fprintf(outFile, " %s        & ", Samples[sel].legendAN.Data());
+        if (i < usedFiles) fprintf(outFile, " %s        & ", Samples[sel].legendReco.Data());
         else {
             fprintf( outFile, "\\hline \n");
             fprintf( outFile, " TOTAL & ");
@@ -837,5 +837,109 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
     fclose(outFile);
 }
 
+TString getUnfoldedFileName(TString unfoldDir, const TString& lepSel, 
+			    const TString& variable, const TString& algo,
+			    int jetPtMin, int jetEtaMax, const TString& genList,
+			    bool doNormalized){
+  if(!unfoldDir.EndsWith("/")) unfoldDir += "/";
+  std::cout << "++++ " << lepSel << "\n";
+  TString fname = unfoldDir + lepSel; 
+  fname += "_unfolded_" + variable + "_" + algo;
+  fname += "_JetPtMin_";
+  fname += jetPtMin;
+  fname += "_JetEtaMax_";
+  fname += jetEtaMax;
+  fname += genList;
+  fname += doNormalized ? "_normalized" : "";
+  return fname;
+}
 
+TFile* getHistoFile(const char* sample, const char* lepSel, int sys, bool verbose){
+  TString histoDir(cfg.getS("histoDir").c_str());
+  std::string jetPtMin = cfg.getS("jetPtMin");
+  std::string jetEtaMax = cfg.getS("jetEtaMax");
+  
+  TString fname = histoDir + "/" + lepSel + "_13TeV_" + sample + TString::Format("_TrigCorr_1_Syst_%d_JetPtMin_", sys);
+  fname += jetPtMin;
+  fname += "_JetEtaMax_";
+  fname += jetEtaMax;
+  fname += ".root";
+  TFile* f = new TFile(fname);
+  if(f && f->IsZombie()){
+    delete f;
+    f = 0;
+  }
+  
+  if(!f && verbose) std::cerr << "Failed to open file " << fname << "\n";
 
+  return f;
+}
+
+std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const char* lepSel,
+			       const char* variable, bool xsec, bool verbose){
+  std::vector<TH1*> h(samples.size(), 0);
+  int i = -1;
+  TString lepSel_(lepSel);
+  for(auto s: samples){
+    ++i;
+    if(s.size() > 0){
+      int ich = 0;
+      for(auto l: {"DMu", "DE"}){
+	if(lepSel_ == l || lepSel_.Length() == 0){ //empty string used for ee/mumu channel average
+	  TFile* f = getHistoFile(s.c_str(), l);
+	  if(!f) continue;
+	  TH1* h_ = (TH1*) f->Get(TString("gen") + variable);
+	  if(!h_ && verbose){
+	    std::cerr << "Histogram " << (TString("gen") + variable)
+		      << " was not found in " << f->GetName() << " file.\n";
+	    continue;
+	  }
+
+	  if(xsec  && s != "DYJets_ZjNNLO"){
+	    TH1* hLumi = (TH1*) f->Get("Lumi");
+	    if(!hLumi && verbose){
+	      std::cerr << "Error. Luminosity histogram required to normalized the histograms was not found in the file "
+			<< f->GetName() << ".\n";
+	      continue;
+	    }
+	    double lumi = hLumi->GetBinContent(1);
+	    if(lumi < 2000.){
+	      lumi = 2250.91;
+	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
+			<< ". Integrated luminosity forced to " << lumi << " pb-1"
+			<< "\n";
+	    }
+	    h_->Scale(1./lumi);
+	  }
+	  
+	  if(h[i]) h[i]->Add(h_);
+	  else {h[i] = h_; h_->SetDirectory(0); }
+	  ++ich;
+	  delete f;
+	}
+      }
+      if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
+	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
+	h[i]->Scale(1./ich);
+	//for xsec plots bin contents are divided by the bin width:
+	int nBins = h[i]->GetNbinsX();
+	for (int ibin = 1; ibin <= nBins; ++ibin) {
+	  double binWidth = h[i]->GetBinWidth(ibin);
+	  double binContent = h[i]->GetBinContent(ibin)/binWidth;
+	  h[i]->SetBinContent(ibin, binContent);
+	  h[i]->SetBinError(ibin, h[i]->GetBinError(ibin)/binWidth);
+	}
+      }
+    }
+  }
+  return h;
+}
+
+TString getLegendGen(const char* sample){
+  for(int i = 0; i < NSamples; ++i){
+    if(Samples[i].name == sample){
+      return Samples[i].legendGen;
+    }
+  }
+  return TString();
+}

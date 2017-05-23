@@ -222,7 +222,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     TH1D *ZNGoodJets_ZexcHratio_fit = 0;
 
     if(UnfoldUnc){
-
+	
  if (lepSel == "DMu"){
         // jet pt
 	TFile *fratio1jpt = new TFile("FirstJetPt_2_Zinc1jetHratio_fit.root");
@@ -273,12 +273,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	
 	TFile *fratioJZBhigh = new TFile("JZB_ptHigh_2Hratio_fit.root");
 	JZB_ptHigh_2Hratio_fit =  (TH1D*) fratioJZBhigh->Get("Hratio");
-
-
+	
+	
 	//  multiplicity
 	TFile *fratioNJexc = new TFile("ZNGoodJets_ZexcHratio_fit.root");
 	ZNGoodJets_ZexcHratio_fit =  (TH1D*) fratioNJexc->Get("Hratio");
-      }
+    }
 
  if (lepSel == "DE"){
         // jet pt
@@ -971,7 +971,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         }  // END IF HAS RECO
         //=======================================================================================================//
 
-//cout << "passesLeptonCut 2 : " << passesLeptonCut << "\n";
+	//cout << "passesLeptonCut 2 : " << passesLeptonCut << "\n";
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //=======================================================================================================//
         //        Retrieving gen jets          //
@@ -1096,10 +1096,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             genJetsHT = 0.;
             for (unsigned short i(0); i < nGoodGenJets; i++){
                 genJetsHT += genJets[i].v.Pt();  
-                if(nGoodGenJets>=1) genHadronicR += genJets[i].v;                  
+                if(nGoodGenJets>=1) genHadronicR += genJets[i].v;  
             }
-
- 
             sort(genJets_20.begin(), genJets_20.end(), JetDescendingOrder);
 
         }
@@ -1452,8 +1450,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         else RatioValue1 = 1.;
                         double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
                         if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
-                        else RatioValue2 = 1.;
-             
+                        else RatioValue2 = 1.;             
                     }
                     
  
@@ -1789,6 +1786,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    }
 
             fill(ZNGoodJets_Zexc, nGoodJets, weight*RatioValue);
+	    if(nEvents % 2) fill(ZNGoodJets_Zexc_Odd, nGoodJets, weight);
+	    else fill(ZNGoodJets_Zexc_Even, nGoodJets, weight);
+
             fill(ZNGoodJets_Zinc_NoWeight, 0.);
             fill(ZMass_Zinc0jet, EWKBoson.M(), weight);
             fill(ZPt_Zinc0jet, EWKBoson.Pt(), weight);
@@ -1927,7 +1927,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		double RatioValue1 = 1.;
 		double RatioValue2 = 1.;		
 		if(UnfoldUnc){
-
 		        double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
                         RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetBinContent(binNumber);
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
@@ -1949,6 +1948,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(FirstJetEtaFull_Zinc1jet, jets[0].v.Eta(), weight);
                 fill(FirstJetPhi_Zinc1jet, jets[0].v.Phi(), weight);
                 fill(JetsHT_Zinc1jet, jetsHT, weight*RatioValue1);
+                if(nEvents % 2) fill(JetsHT_Zinc1jet_Odd, jetsHT, weight*RatioValue1);
+		else fill(JetsHT_Zinc1jet_Even, jetsHT, weight*RatioValue1);
                 fill(JetsHT_2_Zinc1jet, jetsHT, weight);
                 fill(dEtaBosonJet_Zinc1jet, fabs(jets[0].v.Eta() - EWKBoson.Eta()), weight);
                 fill(SumZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity()), weight);
@@ -2409,7 +2410,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
 		}
-                
+
                 //cout << RatioValue1 << "\n";
 
                 fill(ThirdJetEta_Zinc3jet, fabs(jets[2].v.Eta()), weight*RatioValue);
@@ -2431,7 +2432,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		fill(VisPt_2_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
 		if(nEvents % 2) fill(VisPt_Zinc3jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
 		else fill(VisPt_Zinc3jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-
 
                 ///Azimuth cross check
                 fill(DPhiZFirstJet_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)),weight);
@@ -2542,7 +2542,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
 	    
 	    if (nGoodJets >= 1){
-
 		    double RatioValue = 1.;
                     double RatioValue1 = 1.;
                     double RatioValue2 = 1.;
@@ -2557,9 +2556,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                        double binNumber2 = JZB_ptHigh_2Hratio_fit->GetXaxis()->FindBin(hadronicR.Pt()-EWKBoson.Pt());
 		       RatioValue2 =  JZB_ptHigh_2Hratio_fit->GetBinContent(binNumber2);
-                     
 		    }
-
 
 	        fill(HadRecoil, hadronicR.Pt(),weight);
 		fill(JZB, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue);
@@ -2575,10 +2572,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 		}
 		else{
-		    fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
-		    fill(JZB_ptHigh_2, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
-		    if(nEvents % 2) fill(JZB_ptHigh_Odd, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
-		    else fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
+		    fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    fill(JZB_ptHigh_2, hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    if(nEvents % 2) fill(JZB_ptHigh_Odd, hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    else fill(JZB_ptHigh_Even, hadronicR.Pt()-EWKBoson.Pt(), weight); //was filling JZB_ptHigh before Jan 19!
 		}
 	    }
             //=======================================================================================================//
@@ -2625,7 +2622,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		double RatioValue1 = 1.;
 		double RatioValue2 = 1.;
 		if(UnfoldUnc){
-
      		        double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
                         RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetBinContent(binNumber);
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
@@ -3129,31 +3125,49 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		      <<  " is null or was not specified. We will assume the event"
 		      << " weights are normalizes such that the cross section on pb "
 		      << " is equal to the sum of weights divivided by the numnber of events\n";
-	    xsec= 1;
-	}
+	    if(InEvtCount_  > 0){
+		norm_ = data_frac * lumi_ * xsecFactor_ / InEvtCount_ * (nentries / nEventsToProcessTot);
+		std::cout << "Used norm_: data_frac * lumi_ * xsecFactor_  / InEvtCount_ "
+			  << "* (nentries / nEventsToProcessTot)"
+			  << data_frac << " * " <<  lumi_ << " * " <<  xsecFactor_  << " / " << InEvtCount_
+			  << " * (" << nentries << " / " << nEventsToProcessTot << ")"
+			  << " = " << norm_ << "\n";
 
-	//sum of weights before any cut over the full dataset:
-	std::cout << "used norm_: data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_ * skimAccep_[0]"
-	    " * nEventsToProcess / nEventsToProcessTot\n"
-		  << data_frac << "*" << lumi_ << "*" << xsec << "*" << xsecFactor_  << "/" << processedEventMcWeightSum_ << "*" << skimAccep_[0] << "*" << nEventsToProcess << "/" << nEventsToProcessTot << "=" 
-		  << data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_ * skimAccep_[0]
-	    * nEventsToProcess / nEventsToProcessTot
-		  << "\n";
-	if (InEvtWeightSums_.size() > 0){
-	    //normalisation is defined to get perfect normalisation when running
-	    //on the full dataset statistics by just adding up the histograms.
-	    //In case of partial dataset processing, direct sum will include an
-	    //approximation (*) which can removed by using the JobWeight information
-	    //stored in the JobInfo histograms.
-	    //
-	    //(*) sum of processed event weights equals to the sum over all the events times
-	    //the fraction of processed events.
-	    //
-	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / InEvtWeightSums_[0]
-	    * nentries / nEventsToProcessTot;
+	    } else{
+		norm_ = data_frac * lumi_ * xsecFactor_  / nEventsToProcessTot;
+		std::cout << "Used norm_: data_frac * lumi_ * xsecFactor_  / nEventsToProcessTot = "
+			  << data_frac <<  " * " <<  lumi_ << " * " <<  xsecFactor_  << " / " << nEventsToProcessTot
+			  << " = " << norm_ << "\n";
+	    }
 	} else{
-	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_
-	    * nEventsToProcess / nEventsToProcessTot;
+	    //sum of weights before any cut over the full dataset:
+	    if (InEvtWeightSums_.size() > 0){
+		//normalisation is defined to get perfect normalisation when running
+		//on the full dataset statistics by just adding up the histograms.
+		//In case of partial dataset processing, direct sum will include an
+		//approximation (*) which can be removed by using the JobWeight information
+		//stored in the JobInfo histograms.
+		//
+		//(*) sum of processed event weights equals to the sum over all the events times
+		//the fraction of processed events.
+		//
+		norm_ = data_frac * lumi_ * xsec * xsecFactor_  / InEvtWeightSums_[0]
+		    * nentries / nEventsToProcessTot;
+		std::cout << "Used norm_: data_frac * lumi_ * xsec * xsecFactor_  / nEvtWeightSums_[0] "
+		    "* nentries / nEventsToProcessTot = "
+			  <<  data_frac << " * " << lumi_ << " * " << xsec << " * " << xsecFactor_  << " / " << InEvtWeightSums_[0]
+			  << " * " << nentries << " / " <<  nEventsToProcessTot << "=" << norm_ << "\n";
+	    } else{
+		norm_ = data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_
+		    * nEventsToProcess / nEventsToProcessTot;
+		std::cout << "Used norm_: data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_"
+		    "* nEventsToProcess / nEventsToProcessTot = "
+			  <<  data_frac << " * " << lumi_ << " * " << xsec << " * " << xsecFactor_
+			  << " / " << processedEventMcWeightSum_
+			  << " * " << nEventsToProcess << " / " <<  nEventsToProcessTot
+			  << "=" << norm_ << "\n";
+		
+	    }
 	}
 
 	if(norm_ == 0){
@@ -3216,7 +3230,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    
     cout << "Number of processed events                                : " << nEvents << endl;
     if(maxFiles_ < 0){
-	cout << "Fraction of processed events from dataset                 : " << nEvents << "/" << EvtCount_
+	cout << "Fraction of processed events from dataset                 : " << nEvents << " / " << EvtCount_
 	     << " = " << (nEvents/double(EvtCount_)) << endl;
 	if(EvtIsRealData){
 	    cout << "\tvalue stored in file .mcYieldScale for the '--mcYieldScale -1' auto normalisation option.\n";
@@ -3262,14 +3276,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     if(!EvtIsRealData){
 	if(xsec_ > 0){
 	    cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
-		 << yieldScale << "*" << lumi_ << "*" << xsec_ << "*"
-		 << skimAccep_[0] << "/" << processedEventMcWeightSum_
-		 << "*" << xsecFactor_ << " = " << norm_ / processedEventMcWeightSum_ << endl;
+		 << yieldScale << " * " << lumi_ << " * " << xsec_ << " * "
+		 << skimAccep_[0] << " / " << processedEventMcWeightSum_
+		 << " * " << xsecFactor_ << " = " << norm_ / processedEventMcWeightSum_ << endl;
 	} else{
 	    cout << "MC norm., yield_scale*lumi*skim_accep/n_events*unc_var. : " 
-		 << yieldScale << "*" << lumi_ << "*"
-		 << skimAccep_[0] << "/" << nEvents
-		 << "*" << xsecFactor_ << " = " << norm_ / nEvents << endl;
+		 << yieldScale << " * " << lumi_ << " * "
+		 << skimAccep_[0] << " / " << nEvents
+		 << " * " << xsecFactor_ << " = " << norm_ / nEvents << endl;
 	}
     }
 }
@@ -3474,7 +3488,7 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     fileName(fileName_), lumi_(lumi), useTriggerCorrection(useTriggerCorrection_), 
     systematics(systematics_), direction(direction_), xsecUnc(xsecUnc_), 
     lepPtCutMin(lepPtCutMin_), lepEtaCutMax(lepEtaCutMax_), jetPtCutMin(jetPtCutMin_), jetEtaCutMax(jetEtaCutMax_),
-    nMaxEvents(maxEvents_), lepSel(lepSel_), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles),
+    nMaxEvents(maxEvents_), lepSel(lepSel_), InEvtCount_(0), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles),
     triggerMask_(0), triggerMaskSet_(false), muIso_(0), eIso_(0)
 {
     //--- Create output directory if necessary ---
@@ -3704,8 +3718,10 @@ void ZJets::getMcNorm(){
     if(fBonzaiHeaderChain.GetListOfFiles()->IsEmpty()){
 	std::cerr << "Running on a boabab file, skim acceptance = 1\n";
 	skimAccep_ = std::vector<double>(1,1.);	
-	InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
-	EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
+	//InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+	//EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0)
+	InEvtWeightSums_ = std::vector<Double_t>(0);
+	EvtWeightSums_ = std::vector<Double_t>(0);
     } else{
 	fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
 	fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);

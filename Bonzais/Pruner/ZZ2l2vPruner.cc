@@ -44,7 +44,6 @@ protected:
   void makeFilterMask(bool (ZZ2l2vPruner::*filter)(int), std::vector<bool>& mask);
   void skimCollections();
   bool eventSelection();
-  bool passAnyTrigger();
   bool passTrigger(int trig);
   enum { DMu, DE, DataDoubleMuDMu, DataDoubleMuDE, DataSingleMuDMu, DataSingleMuDE, DataDoubleElDMu, DataDoubleElDE, DataSingleElDMu, DataSingleElDE, DataElMuDMu, DataElMuDE, DataSinglePhotonDMu, DataSinglePhotonDE, NSubSels};
 };
@@ -198,24 +197,6 @@ bool ZZ2l2vPruner::filterMu(int iMu){
 
 bool ZZ2l2vPruner::filterEl(int iEl){
   return ((*ElPt)[iEl] > minLepPt);
-}
-
-bool ZZ2l2vPruner::passAnyTrigger(){ //Used for MC, which are required to pass any trigger of the analysis.
-  vector<vector<int> > trigList(Ntrig);
-  trigList[DoubleMu].insert(trigList[DoubleMu].end(),trigDoubleMu,trigDoubleMu+(sizeof(trigDoubleMu)/sizeof(trigDoubleMu[0])));
-  trigList[SingleMu].insert(trigList[SingleMu].end(),trigSingleMu,trigSingleMu+(sizeof(trigSingleMu)/sizeof(trigSingleMu[0])));
-  trigList[DoubleE].insert(trigList[DoubleE].end(),trigDoubleE,trigDoubleE+(sizeof(trigDoubleE)/sizeof(trigDoubleE[0])));
-  //trigList[HighPtE].insert(trigList[HighPtE].end(),{}); //No High-pT E trigger available
-  trigList[SingleE].insert(trigList[SingleE].end(),trigSingleE,trigSingleE+(sizeof(trigSingleE)/sizeof(trigSingleE[0])));
-  trigList[EMu].insert(trigList[EMu].end(),trigEMu,trigEMu+(sizeof(trigEMu)/sizeof(trigEMu[0])));
-  trigList[SinglePhoton].insert(trigList[SinglePhoton].end(),trigSinglePhoton,trigSinglePhoton+(sizeof(trigSinglePhoton)/sizeof(trigSinglePhoton[0])));
-  for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return true;
-  for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return true;
-  for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return true;
-  for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return true;
-  for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
-  for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
-  return false;
 }
 
 bool ZZ2l2vPruner::passTrigger(int trig){

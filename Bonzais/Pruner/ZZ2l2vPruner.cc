@@ -45,15 +45,28 @@ protected:
   void skimCollections();
   bool eventSelection();
   bool passAnyTrigger();
-  enum { DMu, DE, NSubSels};
+  bool passTrigger(int trig);
+  enum { DMu, DE, DataDoubleMuDMu, DataDoubleMuDE, DataSingleMuDMu, DataSingleMuDE, DataDoubleElDMu, DataDoubleElDE, DataSingleElDMu, DataSingleElDE, DataElMuDMu, DataElMuDE, DataSinglePhotonDMu, DataSinglePhotonDE, NSubSels};
 };
 
 DECLARE_PRUNER(ZZ2l2vPruner, "Pruner of ZZ2l2v analysis")
 
 void ZZ2l2vPruner::declareSubSelections(){
   subSelections_.resize(NSubSels);
-  subSelections_[DMu]    = SubSelection("DMu", "Dimuon selection for ZZ2l2v analysis");
-  subSelections_[DE]     = SubSelection("DE","Dielectron selection for ZZ2l2v analysis");
+  subSelections_[DMu]    = SubSelection("DMu", "Dimuon selection for ZZ2l2v analysis, for MC samples");
+  subSelections_[DE]     = SubSelection("DE","Dielectron selection for ZZ2l2v analysis, for MC samples");
+  subSelections_[DataDoubleMuDMu]     = SubSelection("DataDoubleMuDMu","Dimuon selection for ZZ2l2v analysis, for DoubleMu data");
+  subSelections_[DataDoubleMuDE]     = SubSelection("DataDoubleMuDE","Dielectron selection for ZZ2l2v analysis, for DoubleMu data");
+  subSelections_[DataSingleMuDMu]     = SubSelection("DataSingleMuDMu","Dimuon selection for ZZ2l2v analysis, for SingleMu data");
+  subSelections_[DataSingleMuDE]     = SubSelection("DataSingleMuDE","Dielectron selection for ZZ2l2v analysis, for SingleMu data");
+  subSelections_[DataDoubleElDMu]     = SubSelection("DataDoubleElDMu","Dimuon selection for ZZ2l2v analysis, for DoubleEl data");
+  subSelections_[DataDoubleElDE]     = SubSelection("DataDoubleElDE","Dielectron selection for ZZ2l2v analysis, for DoubleEl data");
+  subSelections_[DataSingleElDMu]     = SubSelection("DataSingleElDMu","Dimuon selection for ZZ2l2v analysis, for SingleEl data");
+  subSelections_[DataSingleElDE]     = SubSelection("DataSingleElDE","Dielectron selection for ZZ2l2v analysis, for SingleEl data");
+  subSelections_[DataElMuDMu]     = SubSelection("DataElMuDMu","Dimuon selection for ZZ2l2v analysis, for ElMu data");
+  subSelections_[DataElMuDE]     = SubSelection("DataElMuDE","Dielectron selection for ZZ2l2v analysis, for ElMu data");
+  subSelections_[DataSinglePhotonDMu]     = SubSelection("DataSinglePhotonDMu","Dimuon selection for ZZ2l2v analysis, for SinglePhoton data");
+  subSelections_[DataSinglePhotonDE]     = SubSelection("DataSinglePhotonDE","Dielectron selection for ZZ2l2v analysis, for SinglePhoton data");
 }
 
 bool ZZ2l2vPruner::init(TChain* tree){
@@ -143,12 +156,36 @@ void ZZ2l2vPruner::skimCollections(){
 
 //to be run after skimCollections
 bool ZZ2l2vPruner::eventSelection(){
-  if(!ZZ2l2vPruner::passAnyTrigger()) return false;
+  //if(!ZZ2l2vPruner::passTrigger(Ntrig)) return false;
   switch(iSubSelection_){
   case DMu:
-    return MuPt->size() > 1;
+    return MuPt->size() > 1 && passTrigger(Ntrig);
+  case DataDoubleMuDMu:
+    return MuPt->size() > 1 && passTrigger(DoubleMu);
+  case DataSingleMuDMu:
+    return MuPt->size() > 1 && passTrigger(SingleMu);
+  case DataDoubleElDMu:
+    return MuPt->size() > 1 && passTrigger(DoubleE);
+  case DataSingleElDMu:
+    return MuPt->size() > 1 && passTrigger(SingleE);
+  case DataElMuDMu:
+    return MuPt->size() > 1 && passTrigger(EMu);
+  case DataSinglePhotonDMu:
+    return MuPt->size() > 1 && passTrigger(SinglePhoton);
   case DE:
-    return ElPt->size() > 1;
+    return ElPt->size() > 1 && passTrigger(Ntrig);
+  case DataDoubleMuDE:
+    return ElPt->size() > 1 && passTrigger(DoubleMu);
+  case DataSingleMuDE:
+    return ElPt->size() > 1 && passTrigger(SingleMu);
+  case DataDoubleElDE:
+    return ElPt->size() > 1 && passTrigger(DoubleE);
+  case DataSingleElDE:
+    return ElPt->size() > 1 && passTrigger(SingleE);
+  case DataElMuDE:
+    return ElPt->size() > 1 && passTrigger(EMu);
+  case DataSinglePhotonDE:
+    return ElPt->size() > 1 && passTrigger(SinglePhoton);
   case NSubSels:
   default:
     return false;
@@ -179,4 +216,61 @@ bool ZZ2l2vPruner::passAnyTrigger(){ //Used for MC, which are required to pass a
   for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
   for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
   return false;
+}
+
+bool ZZ2l2vPruner::passTrigger(int trig){
+  vector<vector<int> > trigList(Ntrig);
+  trigList[DoubleMu].insert(trigList[DoubleMu].end(),trigDoubleMu,trigDoubleMu+(sizeof(trigDoubleMu)/sizeof(trigDoubleMu[0])));
+  trigList[SingleMu].insert(trigList[SingleMu].end(),trigSingleMu,trigSingleMu+(sizeof(trigSingleMu)/sizeof(trigSingleMu[0])));
+  trigList[DoubleE].insert(trigList[DoubleE].end(),trigDoubleE,trigDoubleE+(sizeof(trigDoubleE)/sizeof(trigDoubleE[0])));
+  //trigList[HighPtE].insert(trigList[HighPtE].end(),{}); //No High-pT E trigger available
+  trigList[SingleE].insert(trigList[SingleE].end(),trigSingleE,trigSingleE+(sizeof(trigSingleE)/sizeof(trigSingleE[0])));
+  trigList[EMu].insert(trigList[EMu].end(),trigEMu,trigEMu+(sizeof(trigEMu)/sizeof(trigEMu[0])));
+  trigList[SinglePhoton].insert(trigList[SinglePhoton].end(),trigSinglePhoton,trigSinglePhoton+(sizeof(trigSinglePhoton)/sizeof(trigSinglePhoton[0])));
+  switch(trig){
+  case DoubleMu:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return true;
+    break;
+  case SingleMu:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return true;
+    break;
+  case DoubleE:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return true;
+    break;
+  case SingleE:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return true;
+    break;
+  case EMu:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
+    break;
+  case SinglePhoton:
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
+    break;
+  case Ntrig://In this case (used for MC), take if any trigger passed
+    for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return true;
+    break;
+  default:
+    return false;
+  }
+  return false; //If nothing found.
 }

@@ -20,7 +20,7 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
   
   TLegend* tl = 0;
 
-  std::cout << "Pad name: " << gPad->GetName() << "\n";
+  //std::cout << "Pad name: " << gPad->GetName() << "\n";
   TListIter it(gPad->GetListOfPrimitives());
   while(it.Next()){
     TObject* obj = *it;
@@ -41,8 +41,8 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
     }
   }
   
-  std::cout << "ymin = " << ymin
-	    << "  ymax = " << ymax;
+  //std::cout << "ymin = " << ymin
+  //	    << "  ymax = " << ymax;
   
   if(gPad->GetLogy()){
     if(ymin <= 0) ymin = yposmin; //yposmin / 10.;
@@ -65,8 +65,8 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
     if(add_ymin_margin) ymin -= (linfact - 1) * (ymax-ymin);
   }
   
-std::cout << "  ->  axis min = " << ymin
-<< "  axis max = " << ymax << std::endl;
+  std::cout << "  ->  axis min = " << ymin
+	  << "  axis max = " << ymax << std::endl;
 
   //Prevent overlapping with the legend by zooming the y-axis.
   //Only legend place on top of the plot is handled.
@@ -87,29 +87,29 @@ std::cout << "  ->  axis min = " << ymin
   if(istopleg){
     double ymax_in_leg_area = - std::numeric_limits<double>::max();
     for(auto h: hs){
-      std::cout << ">>> tl->GetX1() = "  <<  tl->GetX1() << "\n";
-      std::cout << ">>> tl->GetX2() = "  <<  tl->GetX2() << "\n";
-      std::cout << ">>> tl->GetX1NDC() = "  <<  tl->GetX1NDC() << "\n";
-      std::cout << ">>> tl->GetX2NDC() = "  <<  tl->GetX2NDC() << "\n";
+//      std::cout << ">>> tl->GetX1() = "  <<  tl->GetX1() << "\n";
+//      std::cout << ">>> tl->GetX2() = "  <<  tl->GetX2() << "\n";
+//      std::cout << ">>> tl->GetX1NDC() = "  <<  tl->GetX1NDC() << "\n";
+//      std::cout << ">>> tl->GetX2NDC() = "  <<  tl->GetX2NDC() << "\n";
       int lb = h->GetXaxis()->FindBin(tl->GetX1());
       int ub = h->GetXaxis()->FindBin(tl->GetX2());
-      std::cout << ">>> lb, ub = "  <<  lb << ", " << ub << "\n";
+      //      std::cout << ">>> lb, ub = "  <<  lb << ", " << ub << "\n";
       if(lb > ub) std::swap(lb, ub);
       for(int ibin = lb ; ibin <= ub; ++ibin){ 
 	double y = h->GetBinContent(ibin) + h->GetBinError(ibin); 
-	std::cout << "ibin = " << ibin << " y = " << h->GetBinContent(ibin) + h->GetBinError(ibin) << "\n";
+	//	std::cout << "ibin = " << ibin << " y = " << h->GetBinContent(ibin) + h->GetBinError(ibin) << "\n";
 	if(y > ymax_in_leg_area) ymax_in_leg_area = y; 
       }
     }
     double y_leg_min = std::min(tl->GetY1(), tl->GetY2());
     
-    std::cout << "ymax_in_leg_area = " << ymax_in_leg_area 
-	      << ", y_leg_min = " << y_leg_min << "\n";
+    //    std::cout << "ymax_in_leg_area = " << ymax_in_leg_area 
+    //	      << ", y_leg_min = " << y_leg_min << "\n";
     
-    std::cout << "---> " << gPad->GetLogy() << "\n";
+    //std::cout << "---> " << gPad->GetLogy() << "\n";
 
     if(y_leg_min < ymax_in_leg_area){
-      double oldymax = ymax;
+      //double oldymax = ymax;
       //if(gPad->GetLogy()){
       //ymax = ymin * pow(ymax/ymin, log(ymax_in_leg_area/ymin)/log(y_leg_min/ymin));
       //} else{
@@ -117,7 +117,7 @@ std::cout << "  ->  axis min = " << ymin
 	//}
       //double margin = 0.03;
       //ymax += margin * (ymax - ymin);
-      std::cout << "ymax: " << oldymax << " -> " << ymax << "\n";
+      //std::cout << "ymax: " << oldymax << " -> " << ymax << "\n";
     }
   }
   //for(unsigned i = 0; i < hs.size(); ++i){

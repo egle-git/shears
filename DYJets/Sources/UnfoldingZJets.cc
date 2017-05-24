@@ -609,7 +609,9 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     TH1D *hIncMad = hGens[0] ? (TH1D*) hGens[0]->Clone("ZNGoodJets_Zinc_Mad") : 0;
     TH1D *hIncShe = hGens[1] ? (TH1D*) hGens[1]->Clone("ZNGoodJets_Zinc_She") : 0;
     TH1D *hIncPow = hGens[2] ? (TH1D*) hGens[2]->Clone("ZNGoodJets_Zinc_Pow") : 0;
-    TH2 *hCovInc[12] = {NULL};
+
+    const int kTot = 11;
+    TH2 *hCovInc[kTot+1] = {NULL};
     if(hCov[0]) hCovInc[0] = (TH2*) hCov[0]->Clone("CovDataStat");
     if(hCov[1]) hCovInc[1] = (TH2*) hCov[1]->Clone("CovMCStat");
     if(hCov[2]) hCovInc[2] = (TH2*) hCov[2]->Clone("CovJES");
@@ -662,8 +664,26 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	if(hIncMad) hIncMad->SetBinError(i, sqrt(binStatMadError2));
 	if(hIncShe) hIncShe->SetBinError(i, sqrt(binStatSheError2));
 	if(hIncPow) hIncPow->SetBinError(i, sqrt(binStatPowError2));
-	for (int k = 0; k < 12; k++) {
-	    if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
+    } //next i
+
+    //Covariance matrix.
+    //We can write:
+    //    Y_inc = A * Y_exc, with Y_inc and Y_exc the vector of the respective
+    //                       distribution bin contents
+    //                       and A_ij = 1 if j >=i, 0 otherwise
+    //   => Cov_inc = A * Cov_exc * A^{T}
+    for(int m = 0; m <= kTot; ++m){
+	if(hCov[m]==0) continue;
+	for(int i = 1; i <= nBins; ++i){
+	    for(int j = 1; j <= nBins; ++j){
+		double c = 0;
+		for(int k = i; k <= nBins; ++k){
+		    for(int l = j; l <= nBins; ++l){
+			c += hCov[m]->GetBinContent(k, l);
+		    }
+		}
+		hCovInc[m]->SetBinContent(i, j, c);
+	    }
 	}
     }
 

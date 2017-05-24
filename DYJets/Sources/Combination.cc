@@ -474,8 +474,15 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
     TH1D *hIncShe = hGens[1] ? (TH1D*) hGens[1]->Clone("ZNGoodJets_Zinc_She") : 0;
     TH1D *hIncPow = hGens[2] ? (TH1D*) hGens[2]->Clone("ZNGoodJets_Zinc_Pow") : 0;
 
-    TH2 *hIncCovSyst = (TH2*) hCovSyst->Clone("CovSystTot");
-    vector<TH2*> hCovInc(11, 0);
+    const int kTot = 11;
+    if(hCov.size() != 11){
+      std::cerr << "Bug found in " << __FILE__ << ":" << __LINE__
+		<< ": hCov vector has an unexpected size! Aborts.\n";
+      abort();
+    }
+    hCov.push_back(hCovSyst);
+
+    std::vector<TH2*> hCovInc(kTot + 1, 0);
     if(hCov[0])  hCovInc[0]  = (TH2*) hCov[0]->Clone("CovDataStat");
     if(hCov[1])  hCovInc[1]  = (TH2*) hCov[1]->Clone("CovMCStat");
     if(hCov[2])  hCovInc[2]  = (TH2*) hCov[2]->Clone("CovPU");
@@ -487,6 +494,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
     if(hCov[8])  hCovInc[8]  = (TH2*) hCov[8]->Clone("CovLES");
     if(hCov[9])  hCovInc[9]  = (TH2*) hCov[9]->Clone("CovLER");
     if(hCov[10]) hCovInc[10] = (TH2*) hCov[10]->Clone("CovSherpaUnf");
+    if(hCov[11]) hCovInc[11] = (TH2*) hCov[11]->Clone("CovSystTot");
 
     int nBins = hInc->GetNbinsX();
     for (int i = 1; i <= nBins; i++) {
@@ -498,9 +506,6 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
         double binStatMadError2 = 0;
         double binStatSheError2 = 0;
         double binStatPowError2 = 0;
-        //double binCov[10] = {0};
-        double binCov[11] = {0};
-        double binCovSystError2 = 0;
         for (int j = i; j <= nBins; j++) {
 	    binSum += hInc->GetBinContent(j);
             if(hIncMad) binSumMad += hIncMad->GetBinContent(j);
@@ -510,11 +515,6 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
 	    if(hIncMad) binStatMadError2 += pow(hIncMad->GetBinError(j), 2);
 	    if(hIncShe) binStatSheError2 += pow(hIncShe->GetBinError(j), 2);
 	    if(hIncPow) binStatPowError2 += pow(hIncPow->GetBinError(j), 2);
-            binCovSystError2 += hIncCovSyst->GetBinError(j, j);
-            //for (int k = 0; k < 10; k++) {
-	    for (int k = 0; k < 11; k++) {
-		if(hCovInc[k]) binCov[k] += hCovInc[k]->GetBinContent(j, j);
-            }
         }
         hInc->SetBinContent(i, binSum);
         if(hIncMad) hIncMad->SetBinContent(i, binSumMad);
@@ -524,28 +524,40 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
         if(hIncMad) hIncMad->SetBinError(i, sqrt(binStatMadError2));
         if(hIncShe) hIncShe->SetBinError(i, sqrt(binStatSheError2));
         if(hIncPow) hIncPow->SetBinError(i, sqrt(binStatPowError2));
-        hIncCovSyst->SetBinError(i, i, binCovSystError2);
-        //for (int k = 0; k < 10; k++) {
-	for (int k = 0; k < 11; k++) {
-	  if(binCov[k]) hCovInc[k]->SetBinContent(i, i, binCov[k]);
-	  else if(hCovInc[k]) hCovInc[k]->SetBinContent(i, i, 0);
-        }
     }
 
-    //    TCanvas *crossSectionPlot = makeCrossSectionPlot("", TString("ZNGoodJets_Zinc"), doNormalized, hInc, hIncCovSyst, hIncMad, hIncShe);
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(TString(""), TString("ZNGoodJets_Zinc"), doNormalized, hInc, hIncCovSyst,
+    //Covariance matrix.
+    //We can write:
+    //    Y_inc = A * Y_exc, with Y_inc and Y_exc the vector of the respective
+    //                       distribution bin contents
+    //                       and A_ij = 1 if j >=i, 0 otherwise
+    //   => Cov_inc = A * Cov_exc * A^{T}
+    for(int m = 0; m <= kTot; ++m){
+      if(hCov[m]==0) continue;
+      for(int i = 1; i <= nBins; ++i){
+	for(int j = 1; j <= nBins; ++j){
+	  double c = 0;
+	  for(int k = i; k <= nBins; ++k){
+	    for(int l = j; l <= nBins; ++l){
+	      c += hCov[m]->GetBinContent(k, l);
+	    }
+	  }
+	  hCovInc[m]->SetBinContent(i, j, c);
+	}
+      }
+    }
+    
+    
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(TString(""), TString("ZNGoodJets_Zinc"),
+						     doNormalized, hInc, hCovInc[kTot],
 						     predictions, nFirstBinsToSkip, nLastBinsToSkip);
-    //TCanvas *crossSectionPlot = makeCrossSectionPlot("", TString("ZNGoodJets_Zinc"), doNormalized, hInc, hIncCovSyst, hIncMad, hIncShe, hIncPow); 
     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
     crossSectionPlot->Draw();
     saveCanvas(crossSectionPlot, outputFileDir, outputFileName);
-//    crossSectionPlot->SaveAs(outputFilePath + ".png");
-//    crossSectionPlot->SaveAs(outputFilePath + ".pdf");
-//    crossSectionPlot->SaveAs(outputFilePath + ".eps");
-//    crossSectionPlot->SaveAs(outputFilePath + ".ps");
-//    crossSectionPlot->SaveAs(outputFilePath + ".C");
-    createTable(outputFileDir + "/" + outputFileName + "_withLERS", TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc, hIncCovSyst, true);
-    createTable(outputFileDir + "/" + outputFileName, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc, hIncCovSyst, false);
+    createTable(outputFileDir + "/" + outputFileName + "_withLERS",
+		TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc, hCovInc[kTot], true);
+    createTable(outputFileDir + "/" + outputFileName, TString("ZNGoodJets_Zinc"),
+		doNormalized, hInc, hCovInc, hCovInc[kTot], false);
 }
 
 void createTable(TString outputFilePath, TString variable, bool doNormalized, TH1 *hCombination, vector<TH2*> &covuxaxb, TH2* covxaxbSyst, bool withLERS)

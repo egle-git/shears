@@ -12,7 +12,7 @@ using namespace std;
 //fields to the EventTree contents.
 /////#define EventTree_cxx
 #include "EventTree.h"
-/////void EventTree::Loop(){} //To make the compiler/linker happy.
+/////void EventTree::Loop(){} //To make the compiler/linker happy. ---> This line was apparently not necessary since it's already included in another file.
 
 /** Selection parameters **/
 
@@ -20,13 +20,14 @@ static float minLepPt = 25;
 
 
 enum {DoubleMu, SingleMu, DoubleE, HighPtE, SingleE, EMu, SinglePhoton, Ntrig}; //List of triggers used for our analysis
-//The lines below correspond to the triggerBits used in our analysis. These can be found under BitFields/TrigHltBlabla/data().
-static int trigDoubleMu[4] = {18,19,20,21};
-static int trigSingleMu[3] = {17,21,45}; //is missing IsoTkMu22
-static int trigDoubleE[2] = {1,2};
-static int trigSingleE[2] = {11,12}; //tight path is with eta2p1
-static int trigEMu[2] = {0,2}; //all DZ paths missing, as well as Mu12Ele23
-static int trigSinglePhoton[10] = {32,30,24,20,55,49,44,38,33,28};
+//The lines below correspond to the triggerBits used in our analysis. These are all defined in the trigger2016.h file of the ntuple producer.
+static int trigDoubleMu[4] = {8,9,10,11};
+static int trigSingleMu[4] = {10,11,15,16};
+static int trigDoubleE[2] = {12,13};
+static int trigHighPtE[1] = {17};//Located in DoubleElectron
+static int trigSingleE[2] = {11,12};
+static int trigEMu[2] = {0,3}; //all DZ paths are still missing, as well as Mu12Ele23
+static int trigSinglePhoton[10] = {20,21,25,26,27,28,29,30,31,32};
 
 
 /**************************/
@@ -204,7 +205,7 @@ bool ZZ2l2vPruner::passTrigger(int trig){
   trigList[DoubleMu].insert(trigList[DoubleMu].end(),trigDoubleMu,trigDoubleMu+(sizeof(trigDoubleMu)/sizeof(trigDoubleMu[0])));
   trigList[SingleMu].insert(trigList[SingleMu].end(),trigSingleMu,trigSingleMu+(sizeof(trigSingleMu)/sizeof(trigSingleMu[0])));
   trigList[DoubleE].insert(trigList[DoubleE].end(),trigDoubleE,trigDoubleE+(sizeof(trigDoubleE)/sizeof(trigDoubleE[0])));
-  //trigList[HighPtE].insert(trigList[HighPtE].end(),{}); //No High-pT E trigger available
+  trigList[HighPtE].insert(trigList[HighPtE].end(),trigHighPtE,trigHighPtE+(sizeof(trigHighPtE)/sizeof(trigHighPtE[0])));
   trigList[SingleE].insert(trigList[SingleE].end(),trigSingleE,trigSingleE+(sizeof(trigSingleE)/sizeof(trigSingleE[0])));
   trigList[EMu].insert(trigList[EMu].end(),trigEMu,trigEMu+(sizeof(trigEMu)/sizeof(trigEMu[0])));
   trigList[SinglePhoton].insert(trigList[SinglePhoton].end(),trigSinglePhoton,trigSinglePhoton+(sizeof(trigSinglePhoton)/sizeof(trigSinglePhoton[0])));
@@ -216,21 +217,24 @@ bool ZZ2l2vPruner::passTrigger(int trig){
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return true;
     break;
-  case DoubleE:
+  case DoubleE: //Includes also HighPtE
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[HighPtE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(HighPtE).at(i))) return true; //Accepted also for HighPtE
     break;
   case SingleE:
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[HighPtE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(HighPtE).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return true;
     break;
   case EMu:
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[HighPtE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(HighPtE).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
     break;
@@ -238,14 +242,16 @@ bool ZZ2l2vPruner::passTrigger(int trig){
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return false;
+    for(unsigned int i = 0 ; i < trigList[HighPtE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(HighPtE).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return false;
     for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
     break;
   case Ntrig://In this case (used for MC), take if any trigger passed
-    for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true;
+    //for(unsigned int i = 0 ; i < trigList[SinglePhoton].size() ; i++)  if(TrigHltPhot & (1<<trigList.at(SinglePhoton).at(i))) return true; //It was decided not to take any photon triggers.
     for(unsigned int i = 0 ; i < trigList[EMu].size() ; i++)  if(TrigHltElMu & (1<<trigList.at(EMu).at(i))) return true;
     for(unsigned int i = 0 ; i < trigList[SingleE].size() ; i++)  if(TrigHltEl & (1<<trigList.at(SingleE).at(i))) return true;
+    for(unsigned int i = 0 ; i < trigList[HighPtE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(HighPtE).at(i))) return true;
     for(unsigned int i = 0 ; i < trigList[DoubleE].size() ; i++)  if(TrigHltDiEl & (1<<trigList.at(DoubleE).at(i))) return true;
     for(unsigned int i = 0 ; i < trigList[SingleMu].size() ; i++)  if(TrigHltMu & (1<<trigList.at(SingleMu).at(i))) return true;
     for(unsigned int i = 0 ; i < trigList[DoubleMu].size() ; i++)  if(TrigHltDiMu & (1<<trigList.at(DoubleMu).at(i))) return true;

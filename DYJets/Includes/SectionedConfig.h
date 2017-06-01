@@ -7,6 +7,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <iostream>
+#include <map>
 
 /** Class to read a configuration file organized in sections.
  */

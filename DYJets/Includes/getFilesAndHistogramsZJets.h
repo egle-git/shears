@@ -78,7 +78,7 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy,
 		 int jetPtMin, int jetEtaMax, TFile *fData[3], 
 		 TFile *fDYJets[9], TFile *fBg[][7], int nBg);
 
-void closeFile(TFile*);
+void closeFile(TFile*& File);
 void closeFiles(TFile *Files[]);
 void closeFiles(TFile *Files[], int nFiles);
 void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg);

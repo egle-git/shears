@@ -195,11 +195,13 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 //------------------------------------------------------------
 // Close the file if open and delete the pointer
 //------------------------------------------------------------
-void closeFile(TFile *File)
+void closeFile(TFile*& File)
 {
     if (File) {
-        if (File->IsOpen()) File->Close();
-        if(cfg.getI("verbosity") > 1) cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+      if (File->IsOpen()) File->Close();
+      if(cfg.getI("verbosity") > 1) cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+      delete File;
+      File = 0;
     }
 }
 
@@ -519,6 +521,11 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
+  if(hResDYJets && !hRecDYJets){
+    std::cerr << "No reco histo for response matrix " << hResDYJets->GetName() << "\n";
+    abort();
+  }
+  
     if (!hResDYJets || !hRecData || !hRecSumBg || !hResDYJets) return 0;
 
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();

@@ -655,8 +655,8 @@ TGraphAsymmErrors* createPDFSystGraph(TString sample, TString lepSel, TString va
 void customizeGenGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gScale, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
 {
 
-    double minRatioY = cfg.getD("minRatioY", 0.2);
-    double maxRatioY = cfg.getD("maxRatioY", 1.8);
+    double minRatioY = cfg.getD("minRatioYUnf", 0.2);
+    double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
 
     if(hSyst){
 	hSyst->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
@@ -1568,6 +1568,8 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
     TH1* hRef = 0;
     TH2* hCov = 0;
     
+    double lumi = 0;
+
     if(TString(ref).CompareTo("data", TString::kIgnoreCase) == 0){
 	TFile* fdata = TFile::Open(path + ".root");
 	if(fdata && fdata->IsZombie()){
@@ -1598,6 +1600,14 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
 	}
 	hRef->SetDirectory(0);
 	hCov->SetDirectory(0);
+
+	 TH1* Lumi = 0;
+	 if(fdata) fdata->GetObject("Lumi", Lumi);
+	 if(Lumi) lumi = Lumi->GetBinContent(1);
+	 else {
+	     cerr << "Error: Lumi histogram was not found.\n";
+	     return;
+	 }
 	delete fdata;
     } else{
 	hRef = getGenHistos(std::vector<std::string>(1, ref), lepSel.c_str(), variable, true, true)[0];
@@ -1605,7 +1615,7 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
     }
 
 
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized,
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, lumi, variable, doNormalized,
 						     hRef, hCov,
 						     predictions, nFirstBinsToSkip, nLastBinsToSkip);
     saveCanvas(crossSectionPlot, dir, fname);
@@ -1633,7 +1643,7 @@ TH1* makeCrossSectionHist(TH1* hGenDYJets, double integratedLumi)
 //======
 
 
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized,
+TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, bool doNormalized,
 			      TH1* hStat, TH2* hCovSyst,
 			      std::vector<std::string> gens,
 			      int nFirstBinsToSkip, int nLastBinsToSkip){
@@ -1658,6 +1668,11 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	if(g) g->SetZTitle(getLegendGen(gens[ipred].c_str()));
 	if(TString(gens[ipred]).BeginsWith("DYJets_GE")){
 	    g->Scale(2.);
+	}
+	double fac = cfg.getF(TString("scale_") + gens[ipred], 1.);
+	if(fac != 1.){
+	    std::cout << "Scaling " << gens[ipred] << " by factor " << fac << std::endl;
+	    g->Scale(fac);
 	}
 	tmp1.push_back(g);
 	tmp2.push_back(gens[ipred]);
@@ -1768,7 +1783,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	if(!hGen) continue;
 	configXaxis(hSyst, hGen, variable);
 	//configYaxis(hSyst, hGen1, hGen2, hGen3);
-	customizeGenHist(hGen, igen + 1, legend, TString::Format("MC %d: %s", igen + 1, hGen->GetZaxis()->GetTitle()));
+	customizeGenHist(hGen, igen + 1, legend, TString::Format("%s", hGen->GetZaxis()->GetTitle()));
 	//hGen1->SetName("hGen1");
     	hGen->SetStats(0);
 	hGen->DrawCopy("ESAME");
@@ -1799,8 +1814,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	if(isPrel) latexLabel->DrawLatex(0.20,0.95,"Preliminary");
 	latexLabel->SetTextFont(42);
 	//FIXME: integrated lumi must be read from data histo file
-	latexLabel->DrawLatex(0.13,0.95-0.045, "2.25 fb^{-1} (13 TeV)");
-	//if(integratedLumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString("%.3g fb^{-1} (13 TeV)", integratedLumi));
+	//latexLabel->DrawLatex(0.13,0.95-0.045, "2.25 fb^{-1} (13 TeV)");
+	if(lumi > 0) latexLabel->DrawLatex(0.13,0.95-0.045, TString::Format("%.3g fb^{-1} (13 TeV)", lumi/1000.));
     } else{
 	latexLabel->DrawLatex(0.13,0.95,"MC study");	
 	latexLabel->SetTextFont(52);
@@ -1899,10 +1914,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalize
 	generator = generator(0, generator.Index(" "));
 	TString ref_shortname = hStat->GetZaxis()->GetTitle();
 	ref_shortname = ref_shortname(0, ref_shortname.Index(" "));
-	if(ref_shortname.Length()==0) ref_shortname = "measurement";
+	if(ref_shortname.Length()==0) ref_shortname = "Measurement";
 	customizeGenGraph(hSyst, grGen1ToCentral[igen], grGen1ScaleSyst[igen], grGen1PDFSyst[igen], igen + 1,
 			  //TString("#frac{") + generator + "}{" + ref_shortname + "}", numbOfGenerator, legend);
-			  TString::Format("#frac{MC %d}{%s}", igen + 1, ref_shortname.Data()), numbOfGenerator, legend);
+			  TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()), numbOfGenerator, legend);
 									    
 	configXaxis(hSyst, hGen, variable);
 	hSyst->DrawCopy("e");

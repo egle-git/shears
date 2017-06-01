@@ -59,6 +59,10 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 
      if (variable != "") {
+	 
+	 //ZNGoodJets_Zexc is produced together with ZNGoodJets_Zexc:
+	 if(variable=="ZNGoodJets_Zinc") variable = "ZNGoodJets_Zexc";
+
 	 start = findVariable(variable);
 	 if (start >= 0) {
 	     end = start + 1;
@@ -85,33 +89,40 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      // 0 - central, 1 - PU up, 2 - PU down, 3 - XSEc up, 4 - XSEC down, 5 - LES up, 6 - LES down 
      TFile *fBg[NBGDYJETS][7] = {{NULL}};
 
-     //--- Open all files ---------------------------------------------------------------------- 
-     getAllFiles(histoDir, lepSel, "13TeV", jetPtMin, jetEtaMax, fData, fDYJets, fBg, NBGDYJETS);
-     //----------------------------------------------------------------------------------------- 
-
-     //reads integrated luminosity
-     double integratedLumi = -1;
-     TH1* Lumi = 0;
-     if(fData[0]) fData[0]->GetObject("Lumi", Lumi);
-     if(Lumi) integratedLumi = Lumi->GetBinContent(1);
-     else {
-	 cerr << "Error: Lumi histogram was not found.\n";
-	 return;
-     }
-
-     TFile *fAltUnf = 0;
-     fAltUnf = new TFile(histoDir + lepSel + "_13TeV_" + "DYJets_UNFOLDING_UNC" + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
-
      //--- Now run on the different variables ---
      for (int i = start; i < end; ++i) {
 	 timeval t0, t1;
 	 gettimeofday(&t0,0);
 
+	 //--- Open all files ---------------------------------------------------------------------- 
+	 //Note: we close and reopen files for each variable to trigger deletion of histogram of
+	 //the previous variables and reduce the memory usage.
+	 getAllFiles(histoDir, lepSel, "13TeV", jetPtMin, jetEtaMax, fData, fDYJets, fBg, NBGDYJETS);
+	 //----------------------------------------------------------------------------------------- 
+
+	 //reads integrated luminosity
+	 double integratedLumi = -1;
+	 TH1* Lumi = 0;
+	 if(fData[0]) fData[0]->GetObject("Lumi", Lumi);
+	 if(Lumi) integratedLumi = Lumi->GetBinContent(1);
+	 else {
+	     cerr << "Error: Lumi histogram was not found.\n";
+	     return;
+	 }
+
+	 std::unique_ptr<TFile> fAltUnf(new TFile(histoDir + lepSel + "_13TeV_" + "DYJets_UNFOLDING_UNC" + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root"));
+	 
 	 variable = VAROFINTERESTZJETS[i].name;
 	 TString outputFileName = getUnfoldedFileName(unfoldDir, lepSel, variable, algo,
 						      jetPtMin, jetEtaMax, "_MGPYTHIA6_", doNormalized);
 
-	 TFile *outputRootFile = new TFile(outputFileName + ".root", "RECREATE");
+	 //TFile *outputRootFile = new TFile(outputFileName + ".root", "RECREATE");
+	 std::unique_ptr<TFile> outputRootFile(new TFile(outputFileName + ".root", "RECREATE"));
+
+
+	 //Lumi is stored in the unfolded histo file, so it can be used by the
+	 //channel combination code.
+	 Lumi->Write();
 
 	 //	TString section = TString::Format("%s_%s", lepSel.Data(), variable.Data());
 	 bool withUnfUnc      = cfg.getUnf(lepSel, variable, "withUnfUnc", true);
@@ -159,7 +170,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 	 if(fAltUnf && withUnfUnc){
 	     //--- Get Sherpa Unfolding response ---	  
-	     respDYJets[17] = getResp(fAltUnf, variable);
+	     respDYJets[17] = getResp(fAltUnf.get(), variable);
 	     if(respDYJets[17] == 0){
 		 std::cerr << "Response matrix was not found in the file " << fAltUnf->GetName() << ". Aborts.\n";
 		 abort();
@@ -193,7 +204,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 // 17 - SherpaUnf
 	 TString name[] = {"Central", "JESUp", "JESDown", "PUUp", "PUDown", "JERUp", "JERDown", 
 			   "XSECUp", "XSECDown", "LESUp", "LESDown", "LERUp", "LERDown",
-			   "LumiUp", "LumiDown", "SFUp", "SFDown", "SherpaUnf"};
+			   "LumiUp", "LumiDown", "SFUp", "SFDown", "AltUnf"};
 	 TH1D *hUnfData[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
 	 TH2D *hUnfDataStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
 	 TH2D *hUnfMCStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
@@ -340,7 +351,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 	     //--- save the unfolded histograms ---
 	     outputRootFile->cd();
-	     hUnfData[iSyst]->SetZTitle("measurement");
+	     hUnfData[iSyst]->SetZTitle("Measurement");
 	     if(hUnfData[iSyst]) hUnfData[iSyst]->Write();
 	 }
 	 //----------------------------------------------------------------------------------------- 
@@ -397,7 +408,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     }
 	 }
 
-	 TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, variable, doNormalized, hUnfData[0], hCov[11],
+	 TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, integratedLumi, variable, doNormalized, 
+							  hUnfData[0], hCov[11],
 							  predictions, nFirstBinsToSkip, nLastBinsToSkip);
 	 crossSectionPlot->Draw();
 	 crossSectionPlot->SaveAs(outputFileName + ".png");
@@ -464,11 +476,10 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 		   << ((t1.tv_sec - t0.tv_sec) * 1e3 + (t1.tv_usec - t0.tv_usec) * 1e-3)
 		   << " ms.\n";
 
+	 //--- Close all files ----------------------------------------------------------------------
+	 closeAllFiles(fData, fDYJets, fBg, NBGDYJETS);
      }
 
-     //--- Close all files ----------------------------------------------------------------------
-     closeAllFiles(fData, fDYJets, fBg, NBGDYJETS);
-     delete fAltUnf;
      //------------------------------------------------------------------------------------------ 
 
      std::ofstream f(unfoldDir + "/" + "lastUnfConfig.txt");
@@ -510,7 +521,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 hDown->SetLineColor(kBlue);
 	 hDown->SetLineWidth(2);
 
-	 TCanvas *c = new TCanvas(variable + " - " + syst[i/2], variable + " - " + syst[i/2], 700, 900);
+	 std::unique_ptr<TCanvas> c(new TCanvas(variable + " - " + syst[i/2], variable + " - " + syst[i/2], 700, 900));
 	 c->cd();
 
 	 TPad *pad1 = new TPad("pad1", "pad1", 0, 0.3, 1, 1);
@@ -587,7 +598,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
 	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".pdf");
 	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");
+	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");	 
      }
  }
 
@@ -688,7 +699,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     }
 
     //    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe, hIncPow);
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11],
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, integratedLumi, 
+						     TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11],
 						     predictions, nFirstBinsToSkip, nLastBinsToSkip); 
     // TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad, hIncShe); 
     //  TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
@@ -757,53 +769,53 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	 table += numbers + " & ";
 	 // total uncertainty
 	 if(hCov[11]) numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i) + hCov[11]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // stat uncertainty
 	 if(hCov[0]) numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // MC stat uncertainty
 	 if(hCov[1]) numbers.Form("%#.2g", sqrt(hCov[1]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // JES uncertainty
 	 if(hCov[2]) numbers.Form("%#.2g", sqrt(hCov[2]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // JER uncertainty
 	 if(hCov[4]) numbers.Form("%#.2g", sqrt(hCov[4]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // PU uncertainty
 	 if(hCov[3]) numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // XSec uncertainty
 	 if(hCov[5]) numbers.Form("%#.2g", sqrt(hCov[5]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 // Lumi uncertainty
 	 if(hCov[8]) numbers.Form("%#.2g", sqrt(hCov[8]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " & ";
 	 //	// LES uncertainty
 	 //	if(hCov[6]) numbers.Form("%#.2g", sqrt(hCov[6]->GetBinContent(i,i))*100./xs);
-	 //	else numbers="N/A";
+	 //	else numbers="-";
 	 //	table += numbers + " & ";
 	 //	// LER uncertainty
 	 //	if(hCov[7]) numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
-	 //	else numbers="N/A";
+	 //	else numbers="-";
 	 //	table += numbers + " & ";
 	 if (hCov[10]){
 	     // Unf uncertainty
 	     numbers.Form("%#.2g", sqrt(hCov[10]->GetBinContent(i,i))*100./xs);
-	 } else  numbers="N/A";
+	 } else  numbers="-";
 	 table += numbers + " & ";
 
 	 // SF uncertinaty
 	 if(hCov[9]) numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
-	 else numbers="N/A";
+	 else numbers="-";
 	 table += numbers + " \\\\\n";
      }
 
@@ -862,8 +874,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     std::cout << "-----------------------" << std::endl;
     TString unfoldCheckDir = unfoldDir.Strip(TString::kTrailing, '/') + "Check";
     system(TString("mkdir ") + unfoldCheckDir + "/");
-    std::cout << ">>> " << variable << "\n";
-    TFile *f = new TFile(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE");
+    std::unique_ptr<TFile> f(new TFile(unfoldCheckDir + "/" + lepSel + "_" + variable + "_" + name + ".root", "RECREATE"));
     f->cd();
 
     TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable, name.Data()));
@@ -1423,11 +1434,6 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    else if(nIterResMax > 0 && nIterResMax < nTestIterMax) chosenIter = nIterResMax;
 	    else chosenIter = nIter;
 	    chosenAlgoThr = chi2Thr;
-	    std::cout << ">>>> " << nIterResMaxToyMin << "\t" << nTestIterMax << "\n"
-		      << nIterResMax << "\n"
-		      << nIter << "\n"
-		      << chosenIter << "\n";
-
 	} else if(xvalIter == 7){
 	    chosenIter = nIterResMaxToyCmp;
 	    chosenAlgoThr = -1;
@@ -1606,14 +1612,14 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     } //end of test of number of iterations
 
     if(binByBin_unfold){
-	RooUnfold *RObjectForDataBinByBin = RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes);
+	std::unique_ptr<RooUnfold> RObjectForDataBinByBin(RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes));
 	RObjectForDataBinByBin->SetVerbose(verbosity);
 	TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
 	hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
 	hUnfDataBinByBin->Write();
     }
     
-    //    RooUnfold *RObjectForDataBayes = RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, chosenIter);
+    //    std::unique_ptr<RooUnfold> RObjectForDataBayes(RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, chosenIter));
     //    RObjectForDataBayes->SetVerbose(verbosity);
     //    TH1D *hUnfDataBayes = (TH1D*) RObjectForDataBayes->Hreco(RooUnfold::kCovariance);
     //    hUnfDataBayes->SetName("UnfDataBayes" + name);
@@ -1621,7 +1627,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     
     if(svd_unfold){
 	for (int iter(1); iter <= nTestIterMax; iter++) {
-	    RooUnfold *RObjectForDataSVD = RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, iter);
+	    std::unique_ptr<RooUnfold> RObjectForDataSVD(RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, iter));
 	    RObjectForDataSVD->SetVerbose(verbosity);
 	    TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
 	    hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", iter) + "_" + name);
@@ -1631,7 +1637,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 
     if(tsvd_unfold){
 	std::cout << "----- RUN TSVD --- \n";
-	TSVDUnfold *unfoldTSVD = new TSVDUnfold(hRecDataMinusFakes, (TH1D*)resp->Htruth(), (TH1D*)resp->Hmeasured(), (TH2D*)resp->Hresponse());
+	std::unique_ptr<TSVDUnfold> unfoldTSVD(new TSVDUnfold(hRecDataMinusFakes, (TH1D*)resp->Htruth(), (TH1D*)resp->Hmeasured(), (TH2D*)resp->Hresponse()));
 	TH1D *unfresult = (TH1D*) unfoldTSVD->Unfold(1);
 	TH1D *hmodDOriginal = (TH1D*) unfoldTSVD->GetD();
 	TH1D *hSV       = (TH1D*) unfoldTSVD->GetSV();
@@ -1670,12 +1676,11 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 
     if(invert_unfold){
 	std::cout << "Running unfolding with matrix inversion\n";
-	RooUnfold *RObjectForDataInvert = RooUnfold::New(RooUnfold::kInvert, resp, hRecDataMinusFakes);
+	std::unique_ptr<RooUnfold> RObjectForDataInvert(RooUnfold::New(RooUnfold::kInvert, resp, hRecDataMinusFakes));
 	RObjectForDataInvert->SetVerbose(verbosity);
 	TH1D *hUnfDataInvert = (TH1D*) RObjectForDataInvert->Hreco(RooUnfold::kCovariance);
 	hUnfDataInvert->SetName("UnfDataInvert" + name);
 	hUnfDataInvert->Write();
-	delete RObjectForDataInvert;
     }
 
     f->Close();
@@ -1825,8 +1830,8 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, 
 
 TH1D* foldUnfData(const TH1 *hUnfData, const TMatrixD* cov, const RooUnfoldResponse *hresp)
 {
-    TH1D *hfoldUnfData = (TH1D*) hUnfData->Clone();
-    RooUnfoldResponse *resp = (RooUnfoldResponse*) hresp->Clone();
+    TH1D* hfoldUnfData = (TH1D*) hUnfData->Clone();
+    std::unique_ptr<RooUnfoldResponse> resp((RooUnfoldResponse*) hresp->Clone());
     TH2D *hres = (TH2D*) resp->Hresponse();
     TH1D *hgen = (TH1D*) resp->Htruth();
 
@@ -1918,8 +1923,6 @@ void test()
 double MyChi2Test(const TH1 *h1, const TH1 *h2, int nFirstBinsToSkip, int nLastBinsToSkip, 
 		  Double_t* res, const TH1* herr, bool poisErr)
 {
-    //    TH1 *h1Copy = (TH1*) h1->Clone();
-    //    TH1 *h2Copy = (TH1*) h2->Clone();
     int nbins = h1->GetNbinsX();
     double chi2 = 0;
     if(herr==0) herr = h2;
@@ -1941,10 +1944,6 @@ double MyChi2Test(const TH1 *h1, const TH1 *h2, int nFirstBinsToSkip, int nLastB
 	    if(res) res[i-1] = 0.;
 	}
     }
-    //    h1Copy->SetDirectory(0);
-    //    h2Copy->SetDirectory(0);
-    //    delete h1Copy;
-    //    delete h2Copy;
     return chi2 / ndof;
 }
 
@@ -2024,8 +2023,8 @@ double pValueToNormChi2(double alpha, int n){
 TH1* unfold(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 	    const TH1* hRecDataMinusFakes, int niters, bool smoothPrior, std::vector<TH1*>* hUnfs,
 	    int uncMode){
-    RooUnfold *rooUnfold = RooUnfold::New(algo, resp, hRecDataMinusFakes, niters);
-    if(algo==RooUnfold::kBayes) ((RooUnfoldBayes*) rooUnfold)->SetSmoothing(smoothPrior);
+    std::unique_ptr<RooUnfold> rooUnfold(RooUnfold::New(algo, resp, hRecDataMinusFakes, niters));
+    if(algo==RooUnfold::kBayes) ((RooUnfoldBayes*) rooUnfold.get())->SetSmoothing(smoothPrior);
     bool verbosity = cfg.getB("unfoldingVerbosity");
     bool useFlatPrior = cfg.getB("useFlatPrior");
     rooUnfold->SetVerbose(verbosity);
@@ -2033,7 +2032,6 @@ TH1* unfold(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
     rooUnfold->IncludeSystematics(uncMode); // new version of RooUnfold: will compute Cov based on Data Statistics only
     //The following Hreco call will trigger the data unfolding
     TH1* r =  rooUnfold->Hreco(RooUnfold::kCovariance, hUnfs);
-    delete rooUnfold;
     return r;
 }
 
@@ -2073,10 +2071,10 @@ TH1* unfoldWithErr(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 	    r->SetDirectory(0);
 	    delete r;
 	}
-	RooUnfold *rooUnfold = RooUnfold::New(algo, resp, hRecDataMinusFakes, i);
+	std::unique_ptr<RooUnfold> rooUnfold(RooUnfold::New(algo, resp, hRecDataMinusFakes, i));
 	rooUnfold->SetVerbose(verbosity);
 	rooUnfold->UseFlatPrior(useFlatPrior);
-	if(algo==RooUnfold::kBayes) ((RooUnfoldBayes*) rooUnfold)->SetSmoothing(smoothPrior);
+	if(algo==RooUnfold::kBayes) ((RooUnfoldBayes*) rooUnfold.get())->SetSmoothing(smoothPrior);
 	rooUnfold->IncludeSystematics(uncMode); // new version of RooUnfold: will compute Cov based on Data Statistics only
 	//The following Hreco call will trigger the data unfolding
 	//    r =  rooUnfold->Hreco(RooUnfold::kCovariance, 0);
@@ -2090,7 +2088,6 @@ TH1* unfoldWithErr(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 	//	std::cout << __FILE__ << ":" << __LINE__ << ": execution of RooUnfold::Ereco took "
 	//		  << ((t1.tv_sec - t0.tv_sec) * 1e3 + (t1.tv_usec - t0.tv_usec) * 1e-3)
 	//		  << " ms.\n";
-	delete rooUnfold;
     }
     return r;
 }

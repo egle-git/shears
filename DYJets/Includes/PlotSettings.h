@@ -40,7 +40,7 @@ TGraphAsymmErrors* createPDFSystGraph(TString sample, TString lepSel, TString va
 				      const TGraphAsymmErrors *grGen3ScaleSyst =0);
 TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString variable,
 					const TGraphAsymmErrors *grGenToCentral);
-TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized,
+TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, bool doNormalized,
 			      TH1* hStat, TH2* hCovSyst,
 			      std::vector<std::string> gens,
 			      int nFirstBinsToSkip, int nLastBinsToSkip);

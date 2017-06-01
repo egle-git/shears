@@ -21,7 +21,7 @@ using namespace std;
 
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TH1D *hUnfData, vector<TH2D*> hCov, TH2D *hCovSyst, TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
 //void createInclusivePlots(bool doNormalized, TString outputFileName, TH1D *hUnfData, vector<TH2D*> hCov, TH2D *hCovSyst, TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection);
-void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outputFileName, 
+void createInclusivePlots(bool doNormalized, double lumi, TString outputFileDir, TString outputFileName, 
 			  TH1 *hUnfData, vector<TH2*> hCov, TH2 *hCovSyst,
 			  const std::vector<std::string>& predictions, int nFirstBinsToSkip, int nLastBinsToSkip);
 //void createInclusivePlots(TString outputFileName, TH1D *hUnfData, vector<TH2D*> hCov, TH2D *hCovSyst, TH1D *hUnfDataNorm, vector<TH2D*> hCovNorm, TH2D *hCovSystNorm, TH1D *hMadGenCrossSection, TH1D *hSheGenCrossSection, TH1D *hPowGenCrossSection);
@@ -125,6 +125,15 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         TH2 *hCovLERSystDE = (TH2*) fDE->Get("CovLER");
         TH2 *hCovSherpaUnfSystDE = (TH2*) fDE->Get("CovSherpaUnf");
 
+	TH1* hLumiDE = (TH1*) fDE->Get("Lumi");
+	if(!hLumiDE){
+	  std::cerr << "Error. Luminosity histogram was not found in the file "
+		    << fDE->GetName() << ".\n";
+	  continue;
+	}
+	double lumiDE = hLumiDE->GetBinContent(1);
+	
+
         fDMu->cd();
         TH1 *hUnfDMu = (TH1*) fDMu->Get("UnfDataCentral");
         TH1 *hMadGenDMu = (TH1*) fDMu->Get("hMadGenDYJetsCrossSection");
@@ -141,6 +150,17 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         TH2 *hCovLESSystDMu = (TH2*) fDMu->Get("CovLES");
         TH2 *hCovLERSystDMu = (TH2*) fDMu->Get("CovLER");
         TH2 *hCovSherpaUnfSystDMu = (TH2*) fDMu->Get("CovSherpaUnf");
+
+	TH1* hLumiDMu = (TH1*) fDMu->Get("Lumi");
+	if(!hLumiDMu){
+	  std::cerr << "Error. Luminosity histogram was not found in the file "
+		    << fDMu->GetName() << ".\n";
+	  continue;
+	}
+	double lumiDMu = hLumiDMu->GetBinContent(1);
+	
+	double lumi = 0.5 * (lumiDE + lumiDMu);
+
         //---------------------------------------------------------------------
 	
 	/*
@@ -344,7 +364,7 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         //---------------------------------------------------------------------
         TCanvas *crossSectionPlot;
 /*        if(doNormband){
-            crossSectionPlot = makeCrossSectionPlot("", variable, hCombination, covxaxbSyst, hCombinationNorm, covxaxbSystNorm, hMadGenCombined, hGen1Combined, hGen2Combined); 
+            crossSectionPlot = makeCrossSectionPlot("", lumi, variable, hCombination, covxaxbSyst, hCombinationNorm, covxaxbSystNorm, hMadGenCombined, hGen1Combined, hGen2Combined); 
             crossSectionPlot->Draw();
 	    saveCanvas(crossSectionPlot, combDir, outputFileName);
 //            crossSectionPlot->SaveAs(outputFilePath + ".png");
@@ -354,8 +374,8 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         }
 	
         else{*/
-	//crossSectionPlot = makeCrossSectionPlot("", variable, doNormalized, hCombination, covxaxbSyst, hMadGenCombined, hGen1Combined, hGen2Combined); 
-	//crossSectionPlot = makeCrossSectionPlot("", variable, doNormalized, hCombination, covxaxbSyst, hMadGenCombined, hGen1Combined);
+	//crossSectionPlot = makeCrossSectionPlot("", lumi, variable, doNormalized, hCombination, covxaxbSyst, hMadGenCombined, hGen1Combined, hGen2Combined); 
+	//crossSectionPlot = makeCrossSectionPlot("", lumi, variable, doNormalized, hCombination, covxaxbSyst, hMadGenCombined, hGen1Combined);
 
 	TString unfCfgFile = cfg.getS("unfConf");
 	static SectionedConfig unfCfg;
@@ -368,7 +388,7 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
 	int nLastBinsToSkip = unfCfg.get(sectionDE.Data(), "nLastBinsToSkip", 0);
 	nLastBinsToSkip = std::max(nLastBinsToSkip, unfCfg.get(sectionDMu.Data(), "nLastBinsToSkip", 0));
 	
-	crossSectionPlot = makeCrossSectionPlot("", variable, doNormalized, hCombination, covxaxbSyst,
+	crossSectionPlot = makeCrossSectionPlot("", lumi, variable, doNormalized, hCombination, covxaxbSyst,
 						predictions, nFirstBinsToSkip, nLastBinsToSkip);
 	crossSectionPlot->Draw();
 	saveCanvas(crossSectionPlot, combDir, outputFileName);
@@ -404,7 +424,7 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
 		       }
 		       else{*/
 	  //createInclusivePlots(doNormalized, outputFilePath, hCombination, covuxaxb, covxaxbSyst, hMadGenCombined, hGen1Combined);
-	    createInclusivePlots(doNormalized, combDir, outputFileName, hCombination, covuxaxb, covxaxbSyst, predictions, nFirstBinsToSkip, nLastBinsToSkip);
+	  createInclusivePlots(doNormalized, lumi, combDir, outputFileName, hCombination, covuxaxb, covxaxbSyst, predictions, nFirstBinsToSkip, nLastBinsToSkip);
 
 	  //createInclusivePlots(doNormalized, outputFilePath, hCombination, covuxaxb, covxaxbSyst, hMadGenCombined, hGen1Combined, hGen2Combined);
 	  //}
@@ -459,7 +479,8 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
 }
 
  //void createInclusivePlots(bool doNormalized, TString outputFilePath, TH1 *hUnfData, vector<TH2*> hCov, TH2 *hCovSyst, TH1 *hMadGenCrossSection, TH1 *hSheGenCrossSection)
-void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outputFileName, 
+void createInclusivePlots(bool doNormalized, double lumi, 
+			  TString outputFileDir, TString outputFileName, 
 			  TH1 *hUnfData, vector<TH2*> hCov, TH2 *hCovSyst,
 			  const std::vector<std::string>& predictions,
 			  int nFirstBinsToSkip, int nLastBinsToSkip)
@@ -548,7 +569,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileDir, TString outp
     }
     
     
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(TString(""), TString("ZNGoodJets_Zinc"),
+    TCanvas *crossSectionPlot = makeCrossSectionPlot(TString(""), lumi, TString("ZNGoodJets_Zinc"),
 						     doNormalized, hInc, hCovInc[kTot],
 						     predictions, nFirstBinsToSkip, nLastBinsToSkip);
     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");

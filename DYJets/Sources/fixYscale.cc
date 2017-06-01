@@ -9,6 +9,8 @@
 
 void fixYscale(double linfact, double logfact, double logMaxRange){
 
+  const int verbosity  = 0;
+
   if(logfact <= 0) logfact = linfact;
   
   if(gPad==0) return;
@@ -20,12 +22,12 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
   
   TLegend* tl = 0;
 
-  //std::cout << "Pad name: " << gPad->GetName() << "\n";
+  if(verbosity > 0) std::cout << "Fixing y-scal for the pad with name: " << gPad->GetName() << "\n";
   TListIter it(gPad->GetListOfPrimitives());
   while(it.Next()){
     TObject* obj = *it;
     if(TClass(obj->ClassName()).InheritsFrom("TLegend")){
-      std::cout << "Found a legend with object name " << obj->GetName() << "\n";
+      if(verbosity > 0) std::cout << "Found a legend with object name " << obj->GetName() << "\n";
       tl = dynamic_cast<TLegend*>(obj);
     }
     if(!TClass(obj->ClassName()).InheritsFrom("TH1")) continue;
@@ -34,15 +36,25 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
     for(int ibin = 1; ibin <= h->GetXaxis()->GetNbins(); ++ibin){
       double  y = h->GetBinContent(ibin);
       double yerr = h->GetBinError(ibin); 
+      double yerr_low = 0;
+      if(!gPad->GetLogy()) yerr_low = yerr; //ignore error bar for log scales
       if(y + yerr > ymax) ymax = y + yerr;
-      if(y - yerr < ymin) ymin = y - yerr;
+      if(y - yerr_low < ymin){
+	if(verbosity > 0){
+	  std::cout << ">>> " << h->GetDrawOption() << "\n";
+	  std::cout << ">>> " << h->GetName() << ": ibin/nbins, y, yerr, yerr_low = " 
+		    << ibin << "/" << h->GetNbinsX() << ", " << y << ", " << yerr 
+		    << ", " << yerr_low << "\n";
+	}
+	ymin = y - yerr_low;
+      }
       if(y > 0 && y < yposmin) yposmin = y;
       hs.push_back(h);
     }
   }
   
-  //std::cout << "ymin = " << ymin
-  //	    << "  ymax = " << ymax;
+  if(verbosity > 0) std::cout << "ymin = " << ymin
+			      << "  ymax = " << ymax;
   
   if(gPad->GetLogy()){
     if(ymin <= 0) ymin = yposmin; //yposmin / 10.;
@@ -65,8 +77,8 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
     if(add_ymin_margin) ymin -= (linfact - 1) * (ymax-ymin);
   }
   
-  std::cout << "  ->  axis min = " << ymin
-	  << "  axis max = " << ymax << std::endl;
+  if(verbosity > 0) std::cout << "  ->  axis min = " << ymin
+			      << "      axis max = " << ymax << std::endl;
 
   //Prevent overlapping with the legend by zooming the y-axis.
   //Only legend place on top of the plot is handled.
@@ -74,7 +86,7 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
   if(tl && (1 - std::max(tl->GetY1NDC(), tl->GetY2NDC())) < std::min(tl->GetY1NDC(), tl->GetY2NDC())){
     istopleg = true;
   }
-  if(tl) std::cout << "Top legend: " << (istopleg ? "yes" : "no") << "\n";
+  if(verbosity > 0 && tl) std::cout << "Top legend: " << (istopleg ? "yes" : "no") << "\n";
 
   unsigned i = 0;
   if(hs.size() > i){
@@ -87,44 +99,41 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
   if(istopleg){
     double ymax_in_leg_area = - std::numeric_limits<double>::max();
     for(auto h: hs){
-//      std::cout << ">>> tl->GetX1() = "  <<  tl->GetX1() << "\n";
-//      std::cout << ">>> tl->GetX2() = "  <<  tl->GetX2() << "\n";
-//      std::cout << ">>> tl->GetX1NDC() = "  <<  tl->GetX1NDC() << "\n";
-//      std::cout << ">>> tl->GetX2NDC() = "  <<  tl->GetX2NDC() << "\n";
       int lb = h->GetXaxis()->FindBin(tl->GetX1());
       int ub = h->GetXaxis()->FindBin(tl->GetX2());
-      //      std::cout << ">>> lb, ub = "  <<  lb << ", " << ub << "\n";
       if(lb > ub) std::swap(lb, ub);
+      if(lb==0) lb = 1;
+      if(ub > h->GetXaxis()->GetNbins()) ub = h->GetXaxis()->GetNbins();
       for(int ibin = lb ; ibin <= ub; ++ibin){ 
 	double y = h->GetBinContent(ibin) + h->GetBinError(ibin); 
-	//	std::cout << "ibin = " << ibin << " y = " << h->GetBinContent(ibin) + h->GetBinError(ibin) << "\n";
 	if(y > ymax_in_leg_area) ymax_in_leg_area = y; 
       }
     }
-    double y_leg_min = std::min(tl->GetY1(), tl->GetY2());
-    
-    //    std::cout << "ymax_in_leg_area = " << ymax_in_leg_area 
-    //	      << ", y_leg_min = " << y_leg_min << "\n";
-    
-    //std::cout << "---> " << gPad->GetLogy() << "\n";
 
+    double y_leg_min = std::min(tl->GetY1NDC(), tl->GetY2NDC());
+    y_leg_min = ymin + (ymax-ymin) * y_leg_min;
+    
+    if(verbosity > 0 ) std::cout << "ymax_in_leg_area = " << ymax_in_leg_area 
+				 << ", y_leg_min = " << y_leg_min << "\n";
+    
     if(y_leg_min < ymax_in_leg_area){
-      //double oldymax = ymax;
-      //if(gPad->GetLogy()){
-      //ymax = ymin * pow(ymax/ymin, log(ymax_in_leg_area/ymin)/log(y_leg_min/ymin));
-      //} else{
+      double oldymax = ymax;
+      if(gPad->GetLogy()){
+	ymax = ymin * pow(ymax/ymin, log(ymax_in_leg_area/ymin) / log(y_leg_min/ymin));
+      } else{
 	ymax =  ymin +  ( ymax - ymin) * (ymax_in_leg_area - ymin) / (y_leg_min -  ymin);
-	//}
-      //double margin = 0.03;
-      //ymax += margin * (ymax - ymin);
-      //std::cout << "ymax: " << oldymax << " -> " << ymax << "\n";
+      }
+      double margin = 0.03;
+      ymax += margin * (ymax - ymin);
+      std::cout << "Legend overlap protection, ymax: " << oldymax << " -> " << ymax << "\n";
     }
   }
-  //for(unsigned i = 0; i < hs.size(); ++i){
-  i = 0;
-  if(hs.size() > i){
-    TH1* h = (TH1*) hs[i];
-    h->GetYaxis()->SetRangeUser(ymin, ymax);
+  for(unsigned i = 0; i < hs.size(); ++i){
+  //i = 0;
+    if(hs.size() > i){
+      TH1* h = (TH1*) hs[i];
+      h->GetYaxis()->SetRangeUser(ymin, ymax);
+    }
   }
   gPad->Paint();
 }

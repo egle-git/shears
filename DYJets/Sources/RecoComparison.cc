@@ -211,7 +211,7 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     double lumi = -1;
     TH1* Lumi;
     fSamples[0]->GetObject("Lumi", Lumi);
-    if(Lumi) lumi = Lumi->GetBinContent(1) / 1000.;
+    if(Lumi) lumi = Lumi->GetBinContent(1);
     else cerr << "Warning: Lumi histogram was not found. The integrated luminosity indicaion will be missing from the plots.\n";
 
     cout << "Now creating the pdf files ..." << endl;
@@ -279,7 +279,11 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         legend[i]->Draw();
 
         cmsColl->DrawLatex(0.17,0.83, isPrel ? "CMS Preliminary" : "CMS");
-        if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s} = 13 TeV");
+        //if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s} = 13 TeV");
+	if (energy == "13TeV"){
+	  if(lumi>0) intLumi->DrawLatex(0.5,0.77, TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", lumi/1000.));
+	  else intLumi->DrawLatex(0.5,0.77, "#sqrt{s} = 13 TeV");
+	}
         if (vhNames[i].Index("inc0") < 0){
             ostringstream ptLegend;
             ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
@@ -292,7 +296,7 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 	//        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
 	//        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
 	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
-	if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
+	//if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
         if (vhNames[i].Index("inc0") < 0){
 //            if (!doPASPlots) {
 //                ostringstream ptLegend;

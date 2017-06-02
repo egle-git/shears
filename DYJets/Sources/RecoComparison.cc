@@ -163,6 +163,12 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     intLumi->SetTextAlign(31);
 
     for (unsigned int i = 0; i < NFILESDYJETS; ++i) {
+      double scale =  cfg.getD(TString("scale_") + Samples[FilesDYJets[i]].name, 1.);
+      if(scale!=1.){
+	std::cout << "Info. Scale factor " << scale << " will be applied on the event yield of sample "
+		  << Samples[FilesDYJets[i]].name << "\n";
+      }
+      
         for (int j = 0; j < nHist; ++j) {
             hist[i][j] = getHisto(fSamples[i], vhNames[j]);
 	    if(!hist[i][j]) {
@@ -170,6 +176,7 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 			<< " was not found for sample " << Samples[FilesDYJets[i]].name << "\n";
 	      continue;
 	    }
+	    hist[i][j]->Scale(scale);
             hist[i][j]->SetTitle(vhTitles[j]);
             if (i == 0) {
                 hist[0][j]->SetMarkerStyle(20);

@@ -88,7 +88,7 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     plot->cd();
 }
 
-void customizeLegend(TLegend *legend, int numbOfGenerator)
+void customizeLegend(TString canvasName, TLegend *legend, int numbOfGenerator)
 {
     legend->SetFillColor(0);
     legend->SetFillStyle(1001);
@@ -123,7 +123,7 @@ void customizeLegend(TLegend *legend, int numbOfGenerator)
     legend->SetY2(0.98);
 }
 
-void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator)
+void customizeLegend(TString canvasName, TLegend *legend, int genNumb, int numbOfGenerator)
 {
     legend->SetFillColor(0);
     legend->SetFillStyle(ZJetsFillStyle);
@@ -141,11 +141,21 @@ void customizeLegend(TLegend *legend, int genNumb, int numbOfGenerator)
         }
 
         if (numbOfGenerator == 2) {
+
             legend->SetY1(0.34);
             legend->SetX2(0.43);
             legend->SetY2(0.45);
             //legend->SetTextSize(0.06);
             legend->SetTextSize(0.08);
+
+           if (canvasName.Index("JZB") > 0 || canvasName.Index("VisPt") > 0){
+               legend->SetY1(0.88);
+               legend->SetX1(0.16);
+               legend->SetX2(0.43);
+               legend->SetY2(0.97);
+               //legend->SetTextSize(0.06);
+               legend->SetTextSize(0.08);
+            }
         }
         if (numbOfGenerator == 3) {
             legend->SetY1(0.34);
@@ -904,8 +914,10 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
         else if (variable.Index("Zinc6jet") >= 0) njets = "6";
         else if (variable.Index("Zinc7jet") >= 0) njets = "7";
         else if (variable.Index("Zinc8jet") >= 0) njets = "8";
-        xtitle = "H_{T}, N_{jets} #geq " + njets + " [GeV]";
+        xtitle = "H_{T} [GeV]";
     }
+   if (xtitle.Index("JZB") >= 0) xtitle = "JZB [GeV]";
+
     if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitle(xtitle);
     if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitleSize(0.12);
     //-----------------------------------------
@@ -1738,7 +1750,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
-    customizeLegend(legend, numbOfGenerator);
+    customizeLegend(canvasName,legend, numbOfGenerator);
     //------------------
 
     if(grCentralSyst) customizeCentral(grCentralSyst, legend, hStat->GetZaxis()->GetTitle());
@@ -1796,21 +1808,24 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     legend->Draw("same");
 
     fixYscale(1.2, 1.1);
+    if (canvasName.Contains("JZB")) fixYscale(1.2, 1.2);
 
     //--- TLatex stuff ---
     TLatex *latexLabel = new TLatex(); 
     latexLabel->SetNDC();
-    latexLabel->SetTextSize(0.035);
-    if (gens.size() == 2) latexLabel->SetTextSize(0.035);
-    if (gens.size() >= 3) latexLabel->SetTextSize(0.05);
+
     latexLabel->SetTextFont(42);
     latexLabel->SetLineWidth(2);
 
     latexLabel->SetTextFont(61);
     if(TString(hStat->GetZaxis()->GetTitle()).BeginsWith("data", TString::kIgnoreCase)
        || TString(hStat->GetZaxis()->GetTitle()).BeginsWith("meas", TString::kIgnoreCase)){
-	latexLabel->DrawLatex(0.13,0.95,"CMS");	
+        latexLabel->SetTextSize(0.05);
+	latexLabel->DrawLatex(0.16,0.835,"CMS");	
 	latexLabel->SetTextFont(52);
+        latexLabel->SetTextSize(0.035);
+        if (gens.size() == 2) latexLabel->SetTextSize(0.035);
+        if (gens.size() >= 3) latexLabel->SetTextSize(0.05);
 	if(isPrel) latexLabel->DrawLatex(0.20,0.95,"Preliminary");
 	latexLabel->SetTextFont(42);
 	//FIXME: integrated lumi must be read from data histo file
@@ -1833,13 +1848,17 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	xlabel = 0.44;
 	ylabel = 0.75;
 	//	latexLabel->DrawLatex(0.44,0.7,"anti-k_{T} (R = 0.4) Jets");
-    } else if (canvasName.Contains("JZB") &&  !canvasName.Contains("JZB_ptLow")){
+    } else if (canvasName.Contains("JZB") &&  !canvasName.Contains("JZB_ptLow") &&  !canvasName.Contains("JZB_ptHigh")){
 	xlabel = 0.4;
-	ylabel = 0.21;
+	ylabel = 0.23;
+	//	latexLabel->DrawLatex(0.4,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+    } else if (canvasName.Contains("JZB_ptHigh")){
+	xlabel = 0.35;
+	ylabel = 0.23;
 	//	latexLabel->DrawLatex(0.4,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     } else{
 	xlabel = 0.18;
-	ylabel = 0.21;
+	ylabel = 0.23;
 	//	latexLabel->DrawLatex(0.18,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     }
     latexLabel->DrawLatex(xlabel, ylabel - 0.05, "anti-k_{T} (R = 0.4) Jets");
@@ -1864,9 +1883,37 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
         latexLabel->DrawLatex(xlabel, ylabel - 0.11,"p_{T}^{jet} > 30 GeV, |y^{jet}| < 2.4 ");
     }
 
-    if (lepSel == "") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel");
-    else if (lepSel == "DMu") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
-    else if (lepSel == "DE") latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel");
+    if (lepSel == "") { 
+        latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel");
+        if(canvasName.Contains("inc1"))  latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 1");
+        if(canvasName.Contains("inc2"))  latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 2");
+        if(canvasName.Contains("inc3"))  latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 3");
+        if(canvasName.Contains("JZB")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 1");
+        if(canvasName.Contains("JZB_ptHigh")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 1, p_{T}(Z) > 50 GeV");
+        if(canvasName.Contains("JZB_ptLow")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ll channel, N_{jets} #geq 1, p_{T}(Z) #leq 50 GeV");
+    }
+
+    else if (lepSel == "DMu"){
+         latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel");
+         if(canvasName.Contains("inc1")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 1");
+         if(canvasName.Contains("inc2")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 2");
+         if(canvasName.Contains("inc3")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 3");
+         if(canvasName.Contains("JZB")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 1");
+         if(canvasName.Contains("JZB_ptHigh")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 1, p_{T}(Z) > 50 GeV");
+         if(canvasName.Contains("JZB_ptLow")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow #mu#mu channel, N_{jets} #geq 1, p_{T}(Z) #leq 50 GeV");
+     }
+
+    else if (lepSel == "DE") {
+         latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel");
+         if(canvasName.Contains("inc1")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 1");
+         if(canvasName.Contains("inc2")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 2");
+         if(canvasName.Contains("inc3")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 3");
+         if(canvasName.Contains("JZB")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 1");
+         if(canvasName.Contains("JZB_ptHigh")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 1, p_{T}(Z) > 50 GeV");
+         if(canvasName.Contains("JZB_ptLow")) latexLabel->DrawLatex(xlabel,ylabel-0.17,"Z/#gamma*#rightarrow ee channel, N_{jets} #geq 1, p_{T}(Z) < 50 GeV");
+    }
+
+
     latexLabel->SetName("latexLabel");
     latexLabel->Draw("same");
 
@@ -1909,7 +1956,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 
 	//--- TLegend ---
 	TLegend *legend = new TLegend(0.16, 0.05, 0.42, 0.20);
-	customizeLegend(legend, 1 + igen, numbOfGenerator);
+	customizeLegend(canvasName,legend, 1 + igen, numbOfGenerator);
 	TString generator = hGen->GetZaxis()->GetTitle();
 	generator = generator(0, generator.Index(" "));
 	TString ref_shortname = hStat->GetZaxis()->GetTitle();

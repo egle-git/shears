@@ -242,6 +242,50 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         TH1D *hRatio = (TH1D*) hSumMC[i]->GetStack()->Last()->Clone();
         // Need to draw MC Stack first other wise
         // cannot access Xaxis !!!
+
+
+
+  if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+	//	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+        hRatio->GetXaxis()->SetBinLabel(1, "= 0");
+        hRatio->GetXaxis()->SetBinLabel(2, "= 1");
+        hRatio->GetXaxis()->SetBinLabel(3, "= 2");
+        hRatio->GetXaxis()->SetBinLabel(4, "= 3");
+        hRatio->GetXaxis()->SetBinLabel(5, "= 4");
+        hRatio->GetXaxis()->SetBinLabel(6, "= 5");
+      	hRatio->GetXaxis()->SetBinLabel(7, "= 6");
+        //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+	//     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+      //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+      //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
+    }
+
+  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
+	std::cout << __FILE__ << ":" << __LINE__ 
+		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	//hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+	//	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+        hRatio->GetXaxis()->SetBinLabel(1, "#geq 0");
+        hRatio->GetXaxis()->SetBinLabel(2, "#geq 1");
+        hRatio->GetXaxis()->SetBinLabel(3, "#geq 2");
+        hRatio->GetXaxis()->SetBinLabel(4, "#geq 3");
+        hRatio->GetXaxis()->SetBinLabel(5, "#geq 4");
+        hRatio->GetXaxis()->SetBinLabel(6, "#geq 5");
+      	hRatio->GetXaxis()->SetBinLabel(7, "#geq 6");
+        //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+	//     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+      //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+      //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
+    }
+
+
+
+
+
+
         hSumMC[i]->Draw("HIST"); 
         if (vhNames[i].Index("ZMass_Z") >= 0){
             hist[0][i]->GetXaxis()->SetRangeUser(71,110.9);
@@ -254,22 +298,6 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         //    hRatio->GetXaxis()->SetRangeUser(-2.4,2.4);
 
         //}
-
-    if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
-      std::cout << __FILE__ << ":" << __LINE__ 
-		<< ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-      //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
-      //	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        hRatio->GetXaxis()->SetBinLabel(1, "= 0");
-        hRatio->GetXaxis()->SetBinLabel(2, "= 1");
-        hRatio->GetXaxis()->SetBinLabel(3, "= 2");
-        hRatio->GetXaxis()->SetBinLabel(4, "= 3");
-        hRatio->GetXaxis()->SetBinLabel(5, "= 4");
-        hRatio->GetXaxis()->SetBinLabel(6, "= 5");
-	hRatio->GetXaxis()->SetBinLabel(7, "= 6");
-        hRatio->GetXaxis()->SetLabelSize(0.18);
-        hRatio->SetLabelOffset(0.01);
-    }
 
 
         hSumMC[i]->SetTitle(""); 
@@ -291,11 +319,23 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 	  if(lumi>0) intLumi->DrawLatex(0.5,0.77, TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", lumi/1000.));
 	  else intLumi->DrawLatex(0.5,0.77, "#sqrt{s} = 13 TeV");
 	}
+
+
         if (vhNames[i].Index("inc0") < 0){
             ostringstream ptLegend;
-            ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
+
+
+            if(vhNames[i].Index("ZB") > 0 ) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
+            else if (vhNames[i].Index("inc1") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
+            else if (vhNames[i].Index("inc2") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 2";
+            else if (vhNames[i].Index("inc3") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 3";
+            else ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
+     
             jetCuts->DrawLatex(0.17,0.66, ptLegend.str().c_str());
             jetAlgo->DrawLatex(0.17,0.715, "anti-k_{t} jets,  R = 0.4");
+            if (vhNames[i].Index("ptLow") > 0 ) jetCuts->DrawLatex(0.17,0.61, " p_{T}(Z) #leq 50 GeV");
+            if (vhNames[i].Index("ptHigh") > 0 ) jetCuts->DrawLatex(0.17,0.61, " p_{T}(Z) > 50 GeV");
+
             pad1->Draw();
         }
         //-------------------------

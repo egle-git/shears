@@ -30,7 +30,8 @@ const processInfoStruct Samples[] = {
     /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W",   " #bar{t}W"},
     /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW",         " tW"},  
     /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single top", "Single top"},
-    /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " W",          " W"},
+//  /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " W",          " W"},
+    /* 7*/{"TauTau", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},
     /* 8*/{"ZZ",        '+',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ",         " ZZ"},
     /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW",         " WW"},
     /*10*/{"WZ",    	'+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ",         " WZ"},
@@ -62,7 +63,7 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
  */
 //
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 7, 11, 6, 1, 12};
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 7, 6, 11, 1, 12};
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 14};
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 2};
 

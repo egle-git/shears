@@ -740,10 +740,12 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
      table += "\\begin{tabular}{c|cc|ccccccccc}\n";
      //    table += "\\multicolumn{12}{c}{" + title + "} \\\\\n";
      table += var + " & " + dSigma + " & \\tiny{Tot. Unc [\\%]} & ";
-     table += "\\tiny{stat [\\%]} & \\tiny{Unf stat [\\%]} & \\tiny{JES [\\%]} & \\tiny{JER [\\%]} & ";
-     table += "\\tiny{PU [\\%]} & \\tiny{Bkg [\\%]} & \\tiny{Lumi [\\%]} & ";
+ 
+     table += "\\tiny{stat [\\%]} & \\tiny{JES [\\%]} & \\tiny{JER [\\%]} & \\tiny{Eff [\\%]} & ";
+     table += "\\tiny{Lumi [\\%]}  & \\tiny{Bkg [\\%]} & \\tiny{PU [\\%]} & ";
      //    table += "\\tiny{LES [\\%]} & \\tiny{LER [\\%]} & ";
-     table += "\\tiny{Unf sys [\\%]} & \\tiny{Eff [\\%]} \\\\\\hline\n";
+     table += "\\tiny{Unf sys [\\%]} & \\tiny{Unf stat [\\%]} \\\\\\hline\n";
+
 
      int start = 1;
      if (title.Index("multiplicity", 0, TString::ECaseCompare::kIgnoreCase) >= 0) {
@@ -775,10 +777,6 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	 if(hCov[0]) numbers.Form("%#.2g", sqrt(hCov[0]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
-	 // MC stat uncertainty
-	 if(hCov[1]) numbers.Form("%#.2g", sqrt(hCov[1]->GetBinContent(i,i))*100./xs);
-	 else numbers="-";
-	 table += numbers + " & ";
 	 // JES uncertainty
 	 if(hCov[2]) numbers.Form("%#.2g", sqrt(hCov[2]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
@@ -787,16 +785,20 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	 if(hCov[4]) numbers.Form("%#.2g", sqrt(hCov[4]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
-	 // PU uncertainty
-	 if(hCov[3]) numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
+	 // SF uncertinaty
+	 if(hCov[9]) numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
+	 else numbers="-";
+	 table += numbers + " & ";
+	 // Lumi uncertainty
+	 if(hCov[8]) numbers.Form("%#.2g", sqrt(hCov[8]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
 	 // XSec uncertainty
 	 if(hCov[5]) numbers.Form("%#.2g", sqrt(hCov[5]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
-	 // Lumi uncertainty
-	 if(hCov[8]) numbers.Form("%#.2g", sqrt(hCov[8]->GetBinContent(i,i))*100./xs);
+	 // PU uncertainty
+	 if(hCov[3]) numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
 	 //	// LES uncertainty
@@ -812,9 +814,8 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	     numbers.Form("%#.2g", sqrt(hCov[10]->GetBinContent(i,i))*100./xs);
 	 } else  numbers="-";
 	 table += numbers + " & ";
-
-	 // SF uncertinaty
-	 if(hCov[9]) numbers.Form("%#.2g", sqrt(hCov[9]->GetBinContent(i,i))*100./xs);
+	 // MC stat uncertainty
+	 if(hCov[1]) numbers.Form("%#.2g", sqrt(hCov[1]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " \\\\\n";
      }

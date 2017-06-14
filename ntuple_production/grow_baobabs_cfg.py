@@ -14,21 +14,24 @@ opt.register('maxRun', 999999, VarParsing.VarParsing.multiplicity.singleton, Var
 opt.register('prodEra', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Production run era. Label used to identify a run period whose data are processed together.')
 opt.register('recoTag', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Tag of the recontruction.')
 opt.register('dataTier', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Data tier of input dataset, typically AOD, AODSIM, MINIAOD or MINIAODSIM')
-opt.register('isMC',    -1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
+opt.register('isMC',    1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
 opt.register('makeEdm', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Switch for EDM output production. Use 0 (default) to disable it, 1 to enable it.')
 
 #input files. Can be changed on the command line with the option inputFiles=...
 opt.inputFiles = [
-"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
+#'/store/data/Run2016G/DoubleMuon/MINIAOD/23Sep2016-v1/100000/00993A51-DF90-E611-A4EE-7845C4FC3650.root'
+#'/store/data/Run2016B/DoubleMuon/MINIAOD/03Feb2017_ver1-v1/110000/02B27BFE-1BEB-E611-8D50-001EC9B20ECB.root'
+#"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
 #'/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/680BED0F-D919-E611-85E6-02163E01424F.root'
 #'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
+"file:/tmp/hbrun/theSimuToTest.root"
 #'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-opt.maxEvents = 10
+opt.maxEvents = 1000
 
 opt.parseArguments()
 
@@ -82,13 +85,17 @@ if opt.prodEra in [ "13TeV_25ns", "13TeV_25ns_silver", "13TeV_25ns_silver"]:
 
 else:
 #for 80x:
-  dataGlobalTag = '80X_dataRun2_2016SeptRepro_v4'
-  mcGlobalTag = '80X_mcRun2_asymptotic_2016_miniAODv2_v3'
+  #dataGlobalTag = '80X_dataRun2_ICHEP16_repro_v0'
+  dataGlobalTag = '80X_dataRun2_2016SeptRepro_v7'
+  #mcGlobalTag = '80X_mcRun2_asymptotic_2016_v3'
+  mcGlobalTag = '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
   triggerMenu = '2016'
   reapply_jec = False
   eg_corr = True
-  eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
-  eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
+  eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"  
+  eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"
+  #eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
+  #eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
 #endif
 
 include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
@@ -227,40 +234,53 @@ else:
 #
 
 if eg_corr:
-  process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
-    calibratedPatElectrons = cms.PSet(
-        initialSeed = cms.untracked.uint32(757132),
-        engineName = cms.untracked.string('TRandom3')
-    ),
-    calibratedPatPhotons = cms.PSet(
-        initialSeed = cms.untracked.uint32(1294),
-        engineName = cms.untracked.string('TRandom3')
-    ),
-  )
+  from EgammaAnalysis.ElectronTools.regressionWeights_cfi import regressionWeights
+  process = regressionWeights(process)
+  process.load("EgammaAnalysis.ElectronTools.regressionApplication_cff")
 
- # copied from  EgammaAnalysis/ElectronTools/python/calibratedPhotonsRun2_cfi.py:
-  process.calibratedPatPhotons = cms.EDProducer("CalibratedPatPhotonProducerRun2",
-                                                # input collections
-                                                photons = cms.InputTag('slimmedPhotons'),                                                                                     # data or MC corrections
-                                                # if isMC is false, data corrections are applied
-                                                isMC = cms.bool(opt.isMC != 0),
-                                                # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
-                                                isSynchronization = cms.bool(False),
-                                                correctionFile = cms.string(eg_corr_phot_file)
-                                                )
+  process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                     calibratedPatElectrons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                         engineName = cms.untracked.string('TRandom3'),
+                                                                                         ),
+                                                     calibratedPatPhotons  = cms.PSet( initialSeed = cms.untracked.uint32(81),
+                                                                                       engineName = cms.untracked.string('TRandom3'),
+                                                                                       ),
+                                                     )
+
+  process.load('EgammaAnalysis.ElectronTools.calibratedPatElectronsRun2_cfi')
+  process.calibratedPatElectrons.isMC = cms.bool(opt.isMC != 0)
+  process.calibratedPatElectrons.correctionFile = cms.string(eg_corr_el_file)
+
+  process.load('EgammaAnalysis.ElectronTools.calibratedPatPhotonsRun2_cfi')
+  process.calibratedPatPhotons.isMC = cms.bool(opt.isMC != 0)
+  process.calibratedPatPhotons.correctionFile = cms.string(eg_corr_phot_file)
+
+
+  #Old Version
+  # copied from  EgammaAnalysis/ElectronTools/python/calibratedPhotonsRun2_cfi.py:
+  #process.calibratedPatPhotons = cms.EDProducer("CalibratedPatPhotonProducerRun2",
+  #                                              # input collections
+  #                                              photons = cms.InputTag('slimmedPhotons'),                                                                                     # data or MC corrections
+  #                                              # if isMC is false, data corrections are applied
+  #                                              isMC = cms.bool(opt.isMC != 0),
+  #                                              # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
+  #                                              isSynchronization = cms.bool(False),
+  #                                              correctionFile = cms.string(eg_corr_phot_file)
+  #                                              )
   
+  #Old Version
   #copied from  EgammaAnalysis/ElectronTools/python/calibratedElectronsRun2_cfi.py')
-  process.calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2", 
-                                                  # input collections
-                                                  electrons = cms.InputTag('slimmedElectrons'),
-                                                  gbrForestName = cms.string("gedelectron_p4combination_25ns"),
-                                                  # data or MC corrections
-                                                  # if isMC is false, data corrections are applied
-                                                  isMC = cms.bool(opt.isMC != 0),
-                                                  # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
-                                                  isSynchronization = cms.bool(False),
-                                                  correctionFile = cms.string(eg_corr_el_file)
-                                                  )
+  #process.calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2", 
+  #                                                # input collections
+  #                                                electrons = cms.InputTag('slimmedElectrons'),
+  #                                                gbrForestName = cms.string("gedelectron_p4combination_25ns"),
+  #                                                # data or MC corrections
+  #                                                # if isMC is false, data corrections are applied
+  #                                                isMC = cms.bool(opt.isMC != 0),
+  #                                                # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
+  #                                                isSynchronization = cms.bool(False),
+  #                                                correctionFile = cms.string(eg_corr_el_file)
+  #                                                )
   electronSrc = "calibratedPatElectrons"
   photonSrc   = "calibratedPatPhotons"
 else:
@@ -317,8 +337,10 @@ if reapply_jec:
 #endif reapply_jec
 
 if eg_corr:
+  process.p += process.regressionApplication
   process.p += process.calibratedPatElectrons 
   process.p += process.calibratedPatPhotons
+
 
 process.p += process.goodOfflinePrimaryVertices
 process.p += process.tupel

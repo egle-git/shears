@@ -3,7 +3,7 @@
 Commmand to launch baobab ntuple production
 """
 
-#TODO: 
+#TODO:
 #  1. Make a function to restore/repair production database
 #  2. Add a --report-error option similar than --report but for errors.
 #  3. Evaluate the use of json file diff to determine the list of top-up runs instead of querying DAS.
@@ -229,7 +229,7 @@ def eos_mount():
 
 def eos_to_local_path(path):
     myusername = pwd.getpwuid(os.getuid())[0]
-    
+
     if re.match('^/+store/', path): #path: /store/...
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
@@ -313,7 +313,7 @@ def print_table(table, header = [], out = sys.stdout, format="org"):
     org and twiki."""
     table = [ map(format_cell, row) for row in table]
     if format == "twiki":
-        header = [ map(lambda x: "*" + str(x) + "*", r) for r in header] 
+        header = [ map(lambda x: "*" + str(x) + "*", r) for r in header]
     else:
         header = map(str, header)
     #calculates column widths:
@@ -328,7 +328,7 @@ def print_table(table, header = [], out = sys.stdout, format="org"):
         sep_line = "|-" + "-+-".join([ '-' * x for x in w ]) + "-|\n"
     else:
         sep_line = None
-        
+
     if len(header) > 0:
         if format == "twiki":
             out.write(cgi.escape(fmt % tple(header)))
@@ -339,7 +339,7 @@ def print_table(table, header = [], out = sys.stdout, format="org"):
 
     if len(header) > 0 and sep_line:
         out.write(sep_line)
-        
+
     for r in table:
         if format == "twiki":
             out.write(cgi.escape(fmt % tuple(map(str, r))))
@@ -365,7 +365,7 @@ def exec_on(func, nargs, filename):
             continue
         #endif
 
-        if table is None: 
+        if table is None:
             table = (l[0] == '|')
         #endif
 
@@ -377,7 +377,7 @@ def exec_on(func, nargs, filename):
                 header_found = True
                 continue
         #endif
-        
+
         m = line_pat.match(l)
 
         if m and len(m.groups()) == nargs:
@@ -395,7 +395,7 @@ def exec_on(func, nargs, filename):
             sys.stderr.write("\nWarning: line %d of file %s will be ignored.\n") % (iline, filename)
         #endif
     #next l
-            
+
     for arg in arg_list:
         if args.verbosity > 0:
             print "Calling %s(%s)." % (func.__name__, str(arg)[1:-1])
@@ -513,7 +513,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     config.section_('General')
 #----------------------------------------------------------------------
 
-#Request name. Used to identify task and to name the result directory    
+#Request name. Used to identify task and to name the result directory
     config.General.requestName = dataset.split('/')[1] + ("-%04d" % task_id)
 
 #Switch for the copy of the results to the storage site.
@@ -539,7 +539,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 
 # List of parameters to pass to the CMSSW configuration file
     config.JobType.pyCfgParams = [ 'minRun=%d' % minRun, 'maxRun=%d' % maxRun, 'prodEra=%s' % prodEra, 'recoTag=%s' % recoTag, 'isMC=%d' % isMC, 'dataTier=%s' % dataTier ]
-    
+
     config.section_('Data')
 #----------------------------------------------------------------------
 # Name of the dataset to analyze
@@ -548,7 +548,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 # Output directory on the storage site (storage site defined in the Site section)
     config.Data.outLFNDirBase = outDir
 
-#Mode to use to split the task in jobs. 
+#Mode to use to split the task in jobs.
 # for 'Analysis' job type: 'FileBased', 'LumiBased' (recommended for real data), or 'EventAwareLumiBased'
 # for 'PrivateMC' job type: 'EventBased'
     config.Data.splitting = 'EventAwareLumiBased'
@@ -572,18 +572,18 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 
     config.section_('User')
 #----------------------------------------------------------------------
-    
+
     config.section_('Site')
 #----------------------------------------------------------------------
 
 #A list of sites where the jobs should not run.
 #    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_Demokritos', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T2_BR_SPRACE']
-    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T3_IT_Napoli', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T2_BR_SPRACE']
-    
-#Site where the output should be copied. 
+    config.Site.blacklist = ['T3_US_UMD', 'T3_TW_NTU_HEP', 'T3_GR_IASA', 'T2_GR_Ioannina', 'T3_MX_Cinvestav', 'T2_DE_RWTH', 'T2_UK_SGrid_RALPP', 'T3_RU_FIAN', 'T2_FI_HIP', 'T2_BR_SPRACE']
+
+#Site where the output should be copied.
 # See https://cmsweb.cern.ch/sitedb/prod/sites/ for the list of site names
     config.Site.storageSite = 'T2_CH_CERN'
-    
+
     return config
 
 #
@@ -594,7 +594,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
 
 ######################################################################
 # Database interface: local and DAS databases
-# 
+#
 def db_das_query(query):
     """Performs a query to the DAQ database"""
     host='https://cmsweb.cern.ch'
@@ -602,7 +602,7 @@ def db_das_query(query):
     limit=0
     debug=False
     if args.verbosity > 0:
-        sys.stderr.write("\nDAS query: %s\n" % query)  
+        sys.stderr.write("\nDAS query: %s\n" % query)
     das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     data=das_res['data']
     res=[]
@@ -619,10 +619,10 @@ def db_das_query2(query, att):
     debug=False
     obj, item = att.split(".")
     if args.verbosity > 0:
-        sys.stderr.write("\nDAS query: %s\n" % query)  
+        sys.stderr.write("\nDAS query: %s\n" % query)
     das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     res = []
-    
+
     if not das_res.has_key('data'):
         sys.stderr.write("\nWarning: das query '%s% failed." % query)
         return res
@@ -649,10 +649,10 @@ def db_das_query3(query, att_list):
         fields.append([obj, item])
 
     if args.verbosity > 0:
-        sys.stderr.write("\nDAS query: %s\n" % query)  
+        sys.stderr.write("\nDAS query: %s\n" % query)
     das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
     res = {}
-    
+
     if not das_res.has_key('data'):
         sys.stderr.write("\nWarning: das query '%s% failed." % query)
         return res
@@ -799,7 +799,7 @@ def db_print_jobs():
         if prim_dataset != toks[1]:
             system.stderr.write("Internal error: found an inconsistentcy in the local production database.")
         table.append([ prim_dataset, task_id, status, processed_dataset, run_spec, time2str(submit_ts)])
-    
+
     print_table(table, header)
     if not args.terse:
         print "\nStatus statistics (number of jobs): C: finished (completed), R: running, F: failed, T: transferring, O: other statuses"
@@ -931,21 +931,22 @@ def db_update_processing_stat(prim_dataset, task_id, jobList):
     transferring = 0
     other = 0
     for r in jobList:
-        if r[0] == 'finished':
+        theRstatus=jobList[r]["State"]
+        if theRstatus == 'finished':
             finished += 1
-        elif r[0] == 'running':
+        elif theRstatus == 'running':
             running += 1
-        elif r[0] == 'failed':
+        elif theRstatus == 'failed':
             failed += 1
-        elif r[0] == 'transferring':
+        elif theRstatus == 'transferring':
             transferring += 1
         else:
             other += 1
-    return db_update_task_record(prim_dataset, task_id, 
-                                 {"finished": finished, 
-                                 "running": running, 
-                                 "failed": failed, 
-                                 "transferring": transferring, 
+    return db_update_task_record(prim_dataset, task_id,
+                                 {"finished": finished,
+                                 "running": running,
+                                 "failed": failed,
+                                 "transferring": transferring,
                                  "other": other})
 #enddef
 
@@ -955,7 +956,7 @@ def db_info():
     c.execute("SELECT dataset_catalog, description FROM production")
     r = c.fetchone()
     conn.close()
-    
+
     if len(r) != 2:
         return
 
@@ -1126,7 +1127,7 @@ def catalog_read(filepath):
             #endif validateRunSpec
             continue
         sys.stderr.write("\nWarning: line %d of %s was not understood and will be ignored!\n"  % (i+1, filepath))
-    #next line 
+    #next line
     return (outDir, jsonFile, datasets)
 
 def catalog_get_out_dir(catalog):
@@ -1170,7 +1171,7 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
         sys.stderr("\nNot EOS mount point found. A mount point is needed to access the %d directory\n" % dirpath)
         conn.close()
         return None
-    
+
     cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs"
     ntuple_dir_path += "/" + ntuple_subdir
 
@@ -1275,14 +1276,14 @@ def catalog_make_ntuple_catalog(prim_dataset, task_id):
                         m = task_nevents_line.match(l)
                         if m and tot_events >= 0:
                             tot_events += int(m.groups()[0])
-                        m = task_nfiles_line.match(l)                        
+                        m = task_nfiles_line.match(l)
                         if m and tot_files >= 0:
                             tot_files += int(m.groups()[0])
                     #endif file_section_task_id > ...
                 #next l
-                
+
                 write_file_header(fout, prim_dataset, datatype, tot_events, tot_files, tot_lumi, xsec)
-                
+
                 #read a second time the file to copy its content
                 file_section_task_id = -1
                 fin.seek(0)
@@ -1411,7 +1412,7 @@ def runspec_truncate(run_spec, min_run, max_run):
     #next r
     return new_run_spec
 #enddef
-            
+
 
 def runspec_prettify(run_spec):
     """Converts a run specification (list of runs) to a string suitable to display."""
@@ -1443,7 +1444,7 @@ def runspec_does_overlap(run_list_1, run_list_2):
     """Checks if two run lists have some overlap. A run list is a list of individual runs and run ranges"""
     for r1 in run_list_1:
         for r2 in run_list_2:
-            #Turns the case to the case of two intervals r1, r2 with 
+            #Turns the case to the case of two intervals r1, r2 with
             #lower bound of r1 <= lower bound of r2
             if len(r1) == 1:
                 r1 = [r1, r1]
@@ -1453,7 +1454,7 @@ def runspec_does_overlap(run_list_1, run_list_2):
                 tmp = r2
                 r2 = r1
                 r1 = tmp
-            #At the stage we have two intervals [r1[0],r1[1]] and 
+            #At the stage we have two intervals [r1[0],r1[1]] and
             #[r2[0],r2[1]] with r1[0] <= r2[0]
             if r2[0] <=  r1[1]:
                 return True
@@ -1502,7 +1503,7 @@ def runspec_expand(runs, runMin = 0, runMax = 999999):
                 return None
             #endif not run.match
         #next bound
-        
+
         # Applies runMin and runMax requirement and resolves open intervals:
         if len(bounds) == 1:
             single_run = int(bounds[0])
@@ -1664,10 +1665,10 @@ def tasks_submit_task(prim_dataset, task_id, resubmission = False):
                 #next k
                 props["status"] = "submitted"
                 props['ntuple_subdir'] = prim_dataset + "/" + props['requestname'] + "/" + props['uniquerequestname'].split(":")[0];
-                db_update_task_record(prim_dataset, task_id, props)                
+                db_update_task_record(prim_dataset, task_id, props)
             except KeyError:
                 sys.stderr.write("\nError while submitting job for dataset %s. No requestname was returned.\n" % prim_dataset)
-                sys.stderr.write("Submission result: %s\n\n" % str(res)) 
+                sys.stderr.write("Submission result: %s\n\n" % str(res))
                 db_update_task_record(prim_dataset, task_id, { "status": "submission_error"})
 
 
@@ -1690,8 +1691,8 @@ def tasks_forced_close(prim_dataset, task_id):
         sys.stderr.write("\nCould not find the job status for primary dataset %s. Check dataset name.\n" % prim_dataset)
     elif status in ['CLOSED_WITH_FAILURES', 'report_done']:
         sys.stderr.write("\ntask for primary dataset %s is already closed.\n" % prim_dataset)
-    elif status not in ['FAILED', 'RESUBMITFAILED', 'KILLED']:
-        sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED or RESUBMITFAILED can be closed with this command.\n" % (prim_dataset, status))
+#    elif status not in ['FAILED', 'RESUBMITFAILED', 'KILLED']:
+#        sys.stderr.write("\ntask for primary dataset %s is in status %s. Only task with status FAILED or RESUBMITFAILED can be closed with this command.\n" % (prim_dataset, status))
     else:
         if db_update_task_record(prim_dataset, task_id, {"status": "CLOSED_WITH_FAILURES"}):
             print "\nThe task for dataset %s has closed." % prim_dataset
@@ -1739,10 +1740,10 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
             if not os.path.isfile(crab_dir + "/.requestcache"):
                 continue
 #        if not ntuple_subdir:
-#            sys.stderr.write("Ntuple subdirectory path (ntuple_subdir) is not set for task #%d of primary dataset %s. This can happen if the job was submitted directly with the crab command. The ntuple_subdir must be set by hand with sqlite3 command (for expert). Check directory %s.\n" % (task_id, prim_dataset, ntuple_dir)) 
+#            sys.stderr.write("Ntuple subdirectory path (ntuple_subdir) is not set for task #%d of primary dataset %s. This can happen if the job was submitted directly with the crab command. The ntuple_subdir must be set by hand with sqlite3 command (for expert). Check directory %s.\n" % (task_id, prim_dataset, ntuple_dir))
 #            continue
 #        #endif
-
+        print "the status is",status
         if status not in  ['REPORT_DONE', 'REPORT_DONE_WITH_FAILURES', 'CAT_WRITTEN', 'CAT_WRITTEN_WITH_FAILURES']:
             if status == 'CLOSED_WITH_FAILURES':
                 target_status="REPORT_DONE_WITH_FAILURES"
@@ -1752,7 +1753,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                 for itry in range(0, ntries):
                     try:
                         if itry > 0:
-                            #problems experienced with crabCommand. Can it be improved by waiting a bit 
+                            #problems experienced with crabCommand. Can it be improved by waiting a bit
                             #between two calls?
                             time.sleep(1)
                         if not requestname:
@@ -1767,6 +1768,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                             crab_status_args += [ '--long' ]
                         res, jobSetID = crab_status(crab_status_args)
 #                        print "Status of request %s: " % requestname, res, request_name
+                        print "theCrabReply=",res
                         if not ntuple_subdir:
                             #jobSetID example: 150930_085838:pgras_crab_DoubleMuon-0001
                             # ->  ntuple dir: crab_DoubleMuon-0001/150930_085838
@@ -1778,7 +1780,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                                 db_update_task_record(prim_dataset, task_id, {'ntuple_subdir': ntuple_subdir});
                         if not ntuple_subdir:
                             print "Nutple subdir was missing in database and we failed to fix it."
-                        db_update_processing_stat(prim_dataset, task_id, res["jobList"]);
+                        db_update_processing_stat(prim_dataset, task_id, res["jobs"]);
                         break
                     except HTTPException, e:
                         delay=3
@@ -1798,22 +1800,28 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                 if failed:
                     continue
                 target_status="REPORT_DONE"
-                
+                theJobList=res["jobs"]
+                allOK=True
+                for r in theJobList:
+                    if theJobList[r]["State"] != 'finished':
+                        allOK=False
+                if (res["status"]=="SUBMITTED" and allOK):
+                    print "seems that the crab server is stucked in SUBMITTED status, will overide the status"
+                    res["status"] = 'COMPLETED'
+
 #Check COMPLETED status
                 if res["status"] == 'COMPLETED':
                     ok = True;
-                    for i, r in enumerate(res["jobList"]):
-                        if r[0] != 'finished':
-                            sys.stdout.write("Job %d in state %s" % (i, r[0]))
-                            ok = False
-                            break;
+                    for r in theJobList:
+                        if theJobList[r]["State"] != 'finished':
+                            allOK=False
                         #endif
                     #next r
-                    if not ok:
-                        crab_dir = "crab_%s-%04d" % (prim_dataset, task_id)
-                        os.system("/afs/cern.ch/user/p/pgras/public/crab_check_hook " + crab_dir)
-                        sys.stderr.write("Inconsistency between task status and job status. Task status ignored, log uploaded and mail sent to philippe.gras@cern.ch.\n")
-                        res["status"] = status
+                    #if not ok:
+                    #    crab_dir = "crab_%s-%04d" % (prim_dataset, task_id)
+                    #    os.system("/afs/cern.ch/user/p/pgras/public/crab_check_hook " + crab_dir)
+                    #    sys.stderr.write("Inconsistency between task status and job status. Task status ignored, log uploaded and mail sent to philippe.gras@cern.ch.\n")
+                    #    res["status"] = status
                 #endif
 
                 if res["status"] != status:
@@ -1822,7 +1830,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                 else:
                     dt_hours = (time.time() - status_ts)/3600
                     if dt_hours > 10 and res["status"] not in ["FAILED", "COMPLETED", "CLOSED_WITH_FAILURE", ]:
-                        sys.stderr.write("\ntask %d of primary dataset %s is stuck in state %s for %d hour(s).\n" % 
+                        sys.stderr.write("\ntask %d of primary dataset %s is stuck in state %s for %d hour(s).\n" %
                                          (task_id, prim_dataset, status, int(dt_hours+0.5)))
                     #endif dt_hours
                 #endif res["status"]
@@ -1851,7 +1859,7 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                                 sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
                         except IOError, e:
                             sys.stderr.write("%s\n" % str(e))
-                            
+
                     if datatype != 'mc':
                         lumiFile = requestname + "/results/lumi"
                         os.system(getlumi + " -r " + lumiSummaryFile + " > " + lumiFile)
@@ -1870,14 +1878,14 @@ def tasks_baby_sitting(prim_dataset = None, task_id = None):
                                 sys.stderr.write("\nError/ Failed to copy luminosity summary file into EOS for primary dataset '%s'\n"  % prim_dataset)
                         except IOError, e:
                             sys.stderr.write("%s\n" % str(e))
-                            
-                        
+
+
                         db_update_task_record(prim_dataset, task_id, {"n_events": res["numEventsRead"], "n_files": res["numFilesProcessed"], "lumi_file": lumiSummaryFileEosCpy, "lumi_file_md5sum": md5sum, "lumi": lumi})
                     else:
                         db_update_task_record(prim_dataset, task_id, {"n_events": -1, "n_files": -1, "lumi_file": "", "lumi_file_md5sum": -1, "lumi": -1})
                         res['numEventsRead'] = -1
                     #endif
-                        
+
                     catalog = catalog_make_ntuple_catalog(prim_dataset, task_id)
 
                     if catalog:
@@ -1949,7 +1957,7 @@ inserts the task in the database. Return the task_id or None."""
             return None
         datatype = str(res['dataset.datatype'])
         if datatype not in ["mc", "data"]:
-            sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
+            sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset))
             return None
     #endif datatype
 #    runs_in_str = runspec_prettify(run_spec)
@@ -1976,8 +1984,8 @@ inserts the task in the database. Return the task_id or None."""
                 return None
             #endif
         #endif
-        runs =  [ run_to_process ] 
-    else:    
+        runs =  [ run_to_process ]
+    else:
         runs =  db_get_list_of_new_runs(dataset, jsonFile, run_spec)
 
     if len(runs) > 0:
@@ -2022,7 +2030,7 @@ inserts the task in the database. Return the task_id or None."""
 def prod_process_ds_catalogs():
     outDirLine = re.compile(r'#\s*output directory[:\s=]+\s*([^\s]+)')
     commentLine = re.compile(r'^\s*^#')
-    
+
     if args.catalog:
         try:
             f = open(eos_to_local_path(args.catalog))
@@ -2108,7 +2116,7 @@ def prod_new_version():
         return
 
     #basedir = os.path.dirname(os.path.dirname(catalog_get_out_dir(datasets)))
-    basedir = re.sub(r'(/v\d+)?/Ntuple$', '', catalog_get_out_dir(datasets))    
+    basedir = re.sub(r'(/v\d+)?/Ntuple$', '', catalog_get_out_dir(datasets))
     basedir = eos_to_local_path(basedir)
 
     if not basedir:
@@ -2135,11 +2143,11 @@ def prod_new_version():
         last_vers=0
     else:
         last_vers = max(dirs_)
-    
+
     new_vers = last_vers + 1
 
     rep = raw_input('Create version %s? (y/n)' % new_vers)
-    
+
     if rep != 'y' and rep != 'Y':
         return
 
@@ -2163,7 +2171,7 @@ def prod_new_version():
 
 datasets.txt
 
-This file contains the list of datasets (MINIAOD or MINIAODSIM) 
+This file contains the list of datasets (MINIAOD or MINIAODSIM)
 together with some production parameters (output directory and
 json file). The file is filled before the production starts and
 can therefore list dataset whose production is not completed yet.
@@ -2181,18 +2189,18 @@ starting at one for each primary dataset. These file contains
 the same as the <primary_dataset>-all.txt file but split per
 task.
 
-The description of the format of the file contents can be found in 
+The description of the format of the file contents can be found in
 https://twiki.cern.ch/twiki/bin/view/CMS/SmpVjBaobabProduction.
 
 ''')
         #endwith
         os.mkdir(newdir + "/Ntuple")
         os.system("rm output; ln -sf %s output" % ntuple_newdir_local)
-        
+
     if fake or args.verbosity > 0:
         print "Catalog copied from %s to %s." % (datasets, datasets_newfile)
     #endif fake
-    
+
     catalog_copy(datasets, datasets_newfile, ntuple_newdir)
 
     if not fake:
@@ -2246,7 +2254,7 @@ def prod_report_close_datasets(prim_dataset = None, task_id = None):
         return
 
     sql = "SELECT prim_dataset, task_id, status, notified, dataset, ntuple_cat, lumi_file, n_events, status, submit_ts FROM jobs"
-    
+
     where = False
     if prim_dataset:
         if where:
@@ -2274,7 +2282,7 @@ def prod_report_close_datasets(prim_dataset = None, task_id = None):
 
     try:
         f = open(os.path.expanduser(args.report), "a")
-        for i, r in enumerate(c):        
+        for i, r in enumerate(c):
             (prim_dataset, task_id, status, notified, dataset, catalog, json_file, nevents, status, submit_ts) = r
 
             if status not in ["REPORT_DONE", "REPORT_DONE_WITH_FAILURES"]:
@@ -2316,7 +2324,7 @@ def prod_report_close_datasets(prim_dataset = None, task_id = None):
     finally:
         f.close()
 #enddef
-    
+
 # Upper level production management tools
 ######################################################################
 
@@ -2424,7 +2432,7 @@ def parse_command_line():
 
     parser.add_argument('--new-jobs', action='store_true',
                         help="Creates and submits jobs to process new datasets")
-    
+
     parser.add_argument('--new-version', action='store_true',
                         help="Sets a new production version up. A production description an be entered with the --description option. It can be entered or changed later using the same option.")
 

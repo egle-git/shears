@@ -20,6 +20,39 @@ Repository organisation
 
 *The code that produces the ntuple (Boabab) from CMS EDM dataset (MINIAOD) and used by the tools in ntuple\_production folder can be found in the [Tuple repository](https://github.com/UGent/Tupel/tree/Tupel_MiniAOD), under the git branch Tuple_MiniAOD.*
 
+Installation recipe
+------------------
+
+**a) install the additionnal packages**
+
+```
+cmsrel CMSSW_8_0_26_patch1 
+cd CMSSW_8_0_26_patch1/src 
+cmsenv 
+git cms-init #add the repository with the updated Egamma package 
+git cms-merge-topic cms-egamma:EGM_gain_v1 
+cd EgammaAnalysis/ElectronTools/data # download the txt files with the corrections 
+git clone https://github.com/ECALELFS/ScalesSmearings.git
+cd ScalesSmearings 
+git checkout Moriond17_23Jan_v2 #compile 
+cd $CMSSW_BASE/src 
+scram b -j 8
+```
+
+**b) install and compile the Hzz code** 
+```
+cd CMSSW_8_0_26_patch1/src
+git clone ssh://git@gitlab.cern.ch:7999/HZZ-IIHE/shears.git
+git clone -b Tupel_MiniAOD ssh://git@gitlab.cern.ch:7999/HZZ-IIHE/NTuple-Producer.git
+scram b -j 10
+```
+
+**c) load the environement** 
+```
+cd shears/ntuple_production
+PATH=$PATH:`pwd`
+```
+
 References
 ----------
 

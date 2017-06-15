@@ -90,6 +90,7 @@ class table{
         vector<record> recd;
 };
 
+std::string GetRun(int runNumber);
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
 double SmearJetPt(double, double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);

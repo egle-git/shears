@@ -100,9 +100,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //==========================================================================================================//
     //       Load efficiency tables        //
     //====================================//
-    //table TableJESunc("EfficiencyTables/JESUnce_FT_53_V21_AN4_Uncertainty_AK5PFchs.txt");
+
+    std::map<std::string,table> JESUnc;
+    table TableJESuncAC("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
+    table TableJESuncDF("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
+    table TableJESuncG("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
     table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
-    //table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV6_AK4PF.txt");
+    JESUnc.insert( std::pair<std::string,table>("B",TableJESuncAC) );
+    JESUnc.insert( std::pair<std::string,table>("C",TableJESuncAC) );
+    JESUnc.insert( std::pair<std::string,table>("D",TableJESuncDF) );
+    JESUnc.insert( std::pair<std::string,table>("E",TableJESuncDF) );
+    JESUnc.insert( std::pair<std::string,table>("F",TableJESuncDF) );
+    JESUnc.insert( std::pair<std::string,table>("G",TableJESuncG) );
+    JESUnc.insert( std::pair<std::string,table>("G",TableJESunc) );
 
     // muon SF
     table TrigMu17Mu8SF("EfficiencyTables/Efficiency_SF_Mu17Mu8.txt");

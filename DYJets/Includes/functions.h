@@ -7,6 +7,15 @@
 #include <TLorentzVector.h>
 #include <RooUnfoldResponse.h>
 
+//Beginning of run for 2016
+#define RUNB_2016 273150
+#define RUNC_2016 275656
+#define RUND_2016 276315
+#define RUNE_2016 276831
+#define RUNF_2016 277932
+#define RUNG_2016 278820
+#define RUNH_2016 281613
+
 class TCanvas;
 
 using namespace std;

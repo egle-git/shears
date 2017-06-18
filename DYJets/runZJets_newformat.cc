@@ -178,6 +178,7 @@ int main(int argc, char **argv)
     
     if (!histoDir.EndsWith("/")) histoDir += "/";
 
+    std::cout<<"To Upper.\n";
     doWhat.ToUpper();
 
     //-----------------------------------------------------------------------------
@@ -202,7 +203,8 @@ int main(int argc, char **argv)
     int pdfMember = -1;
     
     //----------------------------------------------------------------------
-    
+    std::cout<<"Int lumi from data file.\n";
+
     //Reads integrated luminosity from data file catalog:
     if(lumi < 0){
 	TString input = cfg.getS("sample_Data");
@@ -337,7 +339,10 @@ int main(int argc, char **argv)
 		      lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
 		      maxEvents, histoDir, bonzaiDir, maxFiles);
 	    ana.Loop(hasRecoInfo, hasGenInfo, jobNum, nJobs, pdfSet, pdfMember, muR, muF, yieldScale);
-	    if(Samples[iSample].merge == '+') tomerge.push_back(ana.outputFileName.Data());
+	    if(Samples[iSample].merge == '+'){
+		std::string tmpString(ana.outputFileName.Data());
+		tomerge.push_back(tmpString);
+	    }
 	}//next sample, iSample      
     }//next systematic, iSyst
     return 0;

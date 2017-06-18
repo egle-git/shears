@@ -529,6 +529,9 @@ class ZJets: public HistoSetZJets {
         TString lepSel;
         bool rejectBTagEvents;
 
+	uint64_t triggerMaskRunB, triggerMaskRunC, triggerMaskRunD, triggerMaskRunE,
+		triggerMaskRunF, triggerMaskRunG, triggerMaskRunH,triggerMaskMCA,triggerMaskMCB;
+
 	std::vector<Double_t> InEvtWeightSums_;
 	std::vector<Double_t> EvtWeightSums_;
 	/** Baobab->Bonzai acceptance

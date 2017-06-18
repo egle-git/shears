@@ -110,7 +110,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     return;
 	 }
 
-	 std::unique_ptr<TFile> fAltUnf(new TFile(histoDir + lepSel + "_13TeV_" + "DYJets_UNFOLDING_UNC" + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root"));
+	 TFile *fAltUnf = 0;
+	 //std::unique_ptr<TFile> fAltUnf(new TFile(histoDir + lepSel + "_13TeV_" + "DYJets_UNFOLDING_UNC" + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root"));
 	 
 	 variable = VAROFINTERESTZJETS[i].name;
 	 TString outputFileName = getUnfoldedFileName(unfoldDir, lepSel, variable, algo,
@@ -170,7 +171,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 	 if(fAltUnf && withUnfUnc){
 	     //--- Get Sherpa Unfolding response ---	  
-	     respDYJets[17] = getResp(fAltUnf.get(), variable);
+	     respDYJets[17] = getResp(fAltUnf, variable);
 	     if(respDYJets[17] == 0){
 		 std::cerr << "Response matrix was not found in the file " << fAltUnf->GetName() << ". Aborts.\n";
 		 abort();

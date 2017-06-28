@@ -50,7 +50,7 @@ CXXFLAGS      += -MD -Wall
 SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
-RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc \
+RecoComparison.cc PlotSettings.cc muresolution_run2.cc RoccoR.cc BLUEMeth.cc Combination.cc \
 printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))

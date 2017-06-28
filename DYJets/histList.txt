@@ -58,6 +58,7 @@ VisPt_Zinc2jetQun
 VisPt_Zinc3jetQun
 ZAbsRapidity_Zinc1jet
 ZMass_Zinc0jet
+Mass_Zinc0jet
 ZMass_Zinc1jet
 ZNGoodJetsBeta_Zexc
 ZNGoodJetsNVtx_Zexc
@@ -65,9 +66,18 @@ ZNGoodJets_Zexc
 ZNGoodJets_Zexc_NoWeight
 ZNGoodJets_Zinc
 ZNGoodJets_Zinc_NoWeight
+Phistar_Zinc0jet
+Phistar_Zinc1jet
 ZPt_Zinc0jet
+ZPt_Zinc0jetM115_135 
+ZPt_Zinc0jetM111_130
+ZPt_Zinc0jetM130_3
 ZPt_Zinc1jet
 ZRapidity_Zinc0jet
 ZRapidity_Zinc1jet
 lepPt_Zinc0jet
 lepPt_Zinc1jet
+lepPhi_Zinc0jet
+lepEta_Zinc0jet
+dRLeptons_Zinc0jet
+dPhiLeptons_Zinc0jet

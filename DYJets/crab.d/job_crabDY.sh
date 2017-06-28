@@ -102,39 +102,51 @@ mkdir RooUnfold
 mv libRooUnfold.so RooUnfold/
 mv RooUnfoldDict_rdict.pcm RooUnfold/
 
+
 tar xzf EfficiencyTables.tgz
+tar xzf rcdata.2016.v3.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
-echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"
+echo "$cfg" | grep -q lepSel  && lepSels="DMu" || lepSels="dummy"
 
-iJob=0
-the_cmd=""
-nJobs=8
-echo "Job list:"
-for lepSel_ in $lepSels; do
-    for jobNum in `seq 1 $nJobs`; do
-	for whichSyst in `seq 0 8`; do
-	    iJob=$((iJob+1))
-	    cmd="./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=$whichSyst nJobs=$nJobs jobNum=$jobNum"
-	    if [ $iJob -eq $NJob ]; then
-		echo "* $iJob	$cmd"
-		the_cmd="$cmd"
-		lepSel="${lepSel_}"
-	    else
-		echo "  $iJob	$cmd"
-	    fi
-	done
-    done
-done
-echo "Number of jobs: $iJob"
+nRuns=20
+#if [ $NJob -gt $nRuns ]; then
+#    iRun=$((NJob-nRuns))
+#    lepSel=DE
+#else
+iRun=$NJob
+lepSel=DMu
+#fi
 
 export VJETS_CONFIG="`echo "$cfg" | sed "s/lepSel/${lepSel}/"`"
 echo "Running with configuraion file $VJETS_CONFIG..."
-eval "$the_cmd"
+    
+case "$iRun" in
+    1)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=1 ;;
+    2)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=2 ;;
+    3)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=3 ;;
+    4)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=4 ;;
+    5)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=5 ;;
+    6)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=6 ;;
+    7)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=7 ;;
+    8)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=8 ;;
+    9)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=9 ;;
+    10)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=10 ;;
+    11)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=11 ;;
+    12)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=12 ;;
+    13)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=13 ;;
+    14)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=14 ;;
+    15)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=15 ;;
+    16)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=16 ;;
+    17)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 nJobs=17 jobNum=17 ;;
+
+esac
+
 tar czf HistoFiles.tgz HistoFiles*
 
 echo "List of files:"
 ls
+
 
 date 
 t2=`date +%s`

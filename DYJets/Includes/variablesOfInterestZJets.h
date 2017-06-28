@@ -44,6 +44,9 @@ const variableStruct VAROFINTERESTZJETS[] = {
   //-- Jets Mass distribution
   //{"JetsMass_Zinc2jet",            0, 0,      1,           9,              5,            13,           11 ,               5    }, // 16
   {"ZPt_Zinc0jet",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM115_135",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM111_130",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM130_3",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
   //{"ZAbsRapidity_Zinc1jet",        0, 0,      1,           9,              5,            13,           11 ,               5    }, // 18
   //    {"SumZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,           11 ,               5    }, // 19
   //    {"DifZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,           11 ,               5    }, // 20

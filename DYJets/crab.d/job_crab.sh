@@ -103,43 +103,49 @@ mv libRooUnfold.so RooUnfold/
 mv RooUnfoldDict_rdict.pcm RooUnfold/
 
 tar xzf EfficiencyTables.tgz
+tar xzf rcdata.2016.v3.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
-echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"
+echo "$cfg" | grep -q lepSel  && lepSels="DMu" || lepSels="dummy"
 
 nRuns=20
-if [ $NJob -gt $nRuns ]; then
-    iRun=$((NJob-nRuns))
-    lepSel=DE
-else
-    iRun=$NJob
-    lepSel=DMu
-fi
+#if [ $NJob -gt $nRuns ]; then
+#    iRun=$((NJob-nRuns))
+#    lepSel=DE
+#else
+iRun=$NJob
+lepSel=DMu
+#fi
 
 export VJETS_CONFIG="`echo "$cfg" | sed "s/lepSel/${lepSel}/"`"
 echo "Running with configuraion file $VJETS_CONFIG..."
     
 case "$iRun" in
-    1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0;;
-    2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=1;;
-    3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=2;;
-    4)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0;;
-    5)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=1;;
-    6)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=2;;
-    7)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=3;;
-    8)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=4;;
-    9)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=5;;
-    10) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=6;;
-    11) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=7;;
-    12) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=8;;
-    13) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0;;
-    14) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=1;;
-    15) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=2;;
-    16) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=3;;
-    17) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=4;;
-    18) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=5;;
-    19) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=6;;
-    20) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
+    1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=1 ;;
+    2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=2 ;;
+    3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=3 ;;
+    4)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=4 ;;
+    5)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=5 ;;
+    6)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=6 ;;
+    7)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=7 ;;
+    8)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=8 ;;
+    9)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=9 ;;
+    10)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=10 ;;
+    11)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=11 ;;
+    12)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=12 ;;
+    13)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=13 ;;
+    14)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=14 ;;
+    15)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=15 ;;
+#    2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=1;;
+#    3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=2;;
+    16) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0;;
+#    14) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=1;;
+#    15) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=2;;
+#    16) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=3;;
+#    17) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=4;;
+#    18) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=5;;
+#    19) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=6;;
+#     17) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
 esac
 
 tar czf HistoFiles.tgz HistoFiles*

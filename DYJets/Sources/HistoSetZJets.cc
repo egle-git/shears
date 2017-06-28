@@ -185,11 +185,12 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
     readHistList();
     
     string ZpT = "p_{T}(Z) [GeV]", Zrap = "y(Z)", Zeta = "#eta(Z)";
+    string phistar = "#phi_{#eta}^{*}";
     string ZpTVis = "p_{T} balance [GeV]";
     string HRecoi = "Hadronic Recoil [GeV]";
     string JZb = "JZB [GeV]";
-    string JZb_low = "JZB at low Z_{pT} [GeV]";
-    string JZb_high = "JZB at high Z_{pT} [GeV]";
+    string JZb_low = "JZB [GeV]";
+    string JZb_high = "JZB [GeV]";
     string HT = "H_{T}(jets) [GeV]", Mjj = "M_{j_{1}j_{2}} [GeV]", jSpt = "#Delta_{pT}^{rel}(j_{1}j_{2})", jdPhi = "#Delta#phi(j_{1}j_{2})", jdEta = "#Delta#eta(j_{1}j_{2})";
     string Mll = "M_{#mu#mu} [GeV]", leta = "#eta(#mu)", lphi = "#phi(#mu)",lpT = "p_{T}(#mu) [GeV]", ldPhi = "#Delta#phi(#mu_{1}#mu_{2})", ldEta = "#Delta#eta(#mu_{1}#mu_{2})", ldR = "#DeltaR(#mu_{1}#mu_{2})";
     string lSpt = "#Delta_{pT}^{rel}(#mu_{1}#mu_{2})";
@@ -236,28 +237,35 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
         lJetdEta = "#Delta#eta(#mu,j_{1})";
     }
 
-   //   int nZPt_Zinc0jet(25);
-   //   double zPt_Zinc0jet[26] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300};
+//----------- 2016 analysis ----------------
 
+    int nPhistar_Zinc0jet(34);
+    double phistar_Zinc0jet[35] = {0.001, 0.004, 0.008, 0.012, 0.016, 0.020, 0.024, 0.029, 0.034, 0.039, 0.045, 0.051, 0.057, 0.064, 0.072, 0.081, 0.091, 0.102, 0.114, 0.128, 0.145, 0.165, 0.189, 0.219, 0.258, 0.312, 0.391, 0.524, 0.695, 0.918, 1.153, 1.496, 1.947, 2.522, 3.277};  // first bin 
 
-   // double zPt_Zinc0jet[23] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220};
-    //  binning from SMP-15-011  
+    // double mass_Zinc0jet[] = {116,130,150,175,200,230,260,300,380,500,700,1000,1500,2000}
+    int nMass_Zinc0jet(81);
+    double mass_Zinc0jet[82] = {20, 35, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 630, 660, 690, 720, 750, 780, 810, 840, 870, 900, 940, 980, 1020, 1060, 1100, 1140, 1180, 1220, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1660, 1720, 1780, 1840, 1900, 1980, 2060, 2140}; //  , 2220, 2300, 2380, 2460, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000
+
+    // int nZPt_Zinc0jet(25);
+    // double zPt_Zinc0jet[26] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300};
+
     int nZPt_Zinc0jet(33);
-    double zPt_Zinc0jet[34] ={0,1.25,2.5,3.75,5,6.25,7.5,8.75,10,11.25,12.5,15,17.5,20,25,30,35,40,45,50,60,70,80,90,100,110,130,150,170,190,220,250,400,1000};
-    vector<double> zPt_2_Zinc0jet = buildVecFineBin(nZPt_Zinc0jet, zPt_Zinc0jet, 5);
+    double zPt_Zinc0jet[34] = {0., 1.25, 2.5, 3.75, 5, 6.25, 7.5, 8.75, 10, 11.25, 12.5, 15, 17.5, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 130, 150, 170, 190, 220, 250, 400, 1000};
 
-    int nZPt_Zinc1jet_SMP15011(33);
-    double zPt_Zinc1jet_SMP15011[34] ={0,1.25,2.5,3.75,5,6.25,7.5,8.75,10,11.25,12.5,15,17.5,20,25,30,35,40,45,50,60,70,80,90,100,110,130,150,170,190,220,250,400,1000};
-    vector<double> zPt_2_Zinc1jet_SMP15011 = buildVecFineBin(nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011, 5);
+    int nZPt_Zinc0jetM115_135(7);
+    double zPt_Zinc0jetM115_135[8] = {0., 15., 30., 45., 85., 125., 200., 350.};
 
-    int nZPt_Zinc1jet(33);
-    double zPt_Zinc1jet[34] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 590, 700, 1000};
+
+    int nZPt_Zinc1jet(33);   // 0,2.5,5,7.5,10,12.5,17.5,25,35,45,60,80,100,130,170,220,400,600
+    double zPt_Zinc1jet[34] = {0., 1.25, 2.5, 3.75, 5, 6.25, 7.5, 8.75, 10, 11.25, 12.5, 15, 17.5, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 130, 150, 170, 190, 220, 250, 400, 1000};
+   // double zPt_Zinc1jet[25] = {0., 2.5, 5, 7.5, 10, 12.5, 17.5, 25, 35, 45, 50, 60, 70, 80, 90, 100, 110, 130, 150, 170, 190, 220, 250, 400, 1000};
     vector<double> zPt_2_Zinc1jet = buildVecFineBin(nZPt_Zinc1jet, zPt_Zinc1jet, 5);
 
-    int nZPt_Zinc2jet(32);
-    double zPt_Zinc2jet[33] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 220, 240, 260, 280, 300, 320, 360, 400, 450, 500, 590, 800};
+    int nZPt_Zinc2jet(24);
+    double zPt_Zinc2jet[25] = {0., 2.5, 5, 7.5, 10, 12.5, 17.5, 25, 35, 45, 50, 60, 70, 80, 90, 100, 110, 130, 150, 170, 190, 220, 250, 400, 1000};
     vector<double> zPt_2_Zinc2jet = buildVecFineBin(nZPt_Zinc2jet, zPt_Zinc2jet, 5);
 
+//----------------------
     int nZPt_Zinc2jetQun(11);
     double zPt_Zinc2jetQun[12] = {0, 10, 20, 35, 50, 65, 80, 100, 125, 150, 175, 200};//, 260, 400};// 240, 260, 280, 300, 400, 800};
     vector<double> zPt_2_Zinc2jetQun = buildVecFineBin(nZPt_Zinc2jetQun, zPt_Zinc2jetQun, 5);
@@ -387,26 +395,38 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
     ZMassFrom60_Zinc0jet                = newTH1D("ZMassFrom60_Zinc0jet",                "Z Invariant Mass (N_{jets} #geq 0)",          Mll,    300, 60, 660 );
 
     genZMass_Zinc0jet                   = newTH1D("genZMass_Zinc0jet",                   "Z Invariant Mass (N_{jets} #geq 0)",          Mll,    111, 50, 260 );
-//0-----------------
+
+    Mass_Zinc0jet                      = newTH1D("Mass_Zinc0jet",                        "Invariant Mass (N_{jets} #geq 0)",          Mll,    nMass_Zinc0jet, mass_Zinc0jet);
+
+    Phistar_Zinc0jet                    = newTH1D("Phistar_Zinc0jet",                     "#phi^{*}_{#eta} (N_{jets} #geq 0)",        phistar,    nPhistar_Zinc0jet,   phistar_Zinc0jet);
+
+    Phistar_Zinc1jet                    = newTH1D("Phistar_Zinc1jet",                     "#phi^{*}_{#eta} (N_{jets} #geq 1)",        phistar,    nPhistar_Zinc0jet,   phistar_Zinc0jet);
+
     ZPt_Zinc0jet                        = newTH1D("ZPt_Zinc0jet",                        "Z p_{T} (N_{jets} #geq 0)",                   ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
-    ZPt_Zinc0jet_Odd                        = newTH1D("ZPt_Zinc0jet_Odd",                        "Z p_{T} (N_{jets} #geq 0)",                   ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
-    ZPt_Zinc0jet_Even                        = newTH1D("ZPt_Zinc0jet_Even",                        "Z p_{T} (N_{jets} #geq 0)",                   ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
- 
-  ZPt_2_Zinc0jet                        = newTH1D("ZPt_2_Zinc0jet",                        "Z p_{T} (N_{jets} #geq 0)2",                   ZpT,    zPt_2_Zinc0jet);
-
     genZPt_Zinc0jet                     = newTH1D("genZPt_Zinc0jet",                     "gen Z p_{T} (N_{jets} #geq 0)",               ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
+    hresponseZPt_Zinc0jet               = newTH2D("hresponseZPt_Zinc0jet",               "response Z p_{T} (N_{jets} #geq 0)",      nZPt_Zinc0jet,   zPt_Zinc0jet,   nZPt_Zinc0jet,   zPt_Zinc0jet);
 
-    hresponseZPt_Zinc0jet               = newTH2D("hresponseZPt_Zinc0jet",                "response Z p_{T} (N_{jets} #geq 0)",      nZPt_Zinc0jet,   zPt_Zinc0jet,   nZPt_Zinc0jet,   zPt_Zinc0jet);
+// nZPt_Zinc0jetM111_130
+    ZPt_Zinc0jetM111_130                        = newTH1D("ZPt_Zinc0jetM111_130",                        "Z p_{T} (N_{jets} #geq 0 111 < M < 130 GeV)",                   ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
+    genZPt_Zinc0jetM111_130                     = newTH1D("genZPt_Zinc0jetM111_130",                     "gen Z p_{T} (N_{jets} #geq 0 111 < M < 130 GeV)",               ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
+    hresponseZPt_Zinc0jetM111_130               = newTH2D("hresponseZPt_Zinc0jetM111_130",               "response Z p_{T} (N_{jets} #geq 0 111 < M < 130 GeV)",      nZPt_Zinc0jet,   zPt_Zinc0jet,   nZPt_Zinc0jet,   zPt_Zinc0jet);
+
+// nZPt_Zinc0jetM130_3
+    ZPt_Zinc0jetM130_3                        = newTH1D("ZPt_Zinc0jetM130_3",                        "Z p_{T} (N_{jets} #geq 0 130 < M < 3000 GeV)",                   ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
+    genZPt_Zinc0jetM130_3                     = newTH1D("genZPt_Zinc0jetM130_3",                     "gen Z p_{T} (N_{jets} #geq 0 130 < M < 3000 GeV)",               ZpT,    nZPt_Zinc0jet,   zPt_Zinc0jet);
+    hresponseZPt_Zinc0jetM130_3               = newTH2D("hresponseZPt_Zinc0jetM130_3",               "response Z p_{T} (N_{jets} #geq 0 130 < M < 3000 GeV)",      nZPt_Zinc0jet,   zPt_Zinc0jet,   nZPt_Zinc0jet,   zPt_Zinc0jet);
 
 
-//--------------------------------------
-    ZPt_Zinc1jet                        = newTH1D("ZPt_Zinc1jet",                        "Z p_{T} (N_{jets} #geq 1)",                   ZpT,    nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011);
-    ZPt_Zinc1jet_Odd                        = newTH1D("ZPt_Zinc1jet_Odd",                        "Z p_{T} (N_{jets} #geq 1)",                   ZpT,    nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011);
-    ZPt_Zinc1jet_Even                        = newTH1D("ZPt_Zinc1jet_Even",                        "Z p_{T} (N_{jets} #geq 1)",                   ZpT,    nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011);
 
-    ZPt_2_Zinc1jet                        = newTH1D("ZPt_2_Zinc1jet",                        "Z p_{T} (N_{jets} #geq 1)2",                   ZpT,  zPt_2_Zinc1jet_SMP15011);
+   
+//nZPt_Zinc0jetM115_135 (for Higgs comparison)
+    ZPt_Zinc0jetM115_135                        = newTH1D("ZPt_Zinc0jetM115_135",                        "Z p_{T} (N_{jets} #geq 0 115 < M < 135 GeV)",                   ZpT,    nZPt_Zinc0jetM115_135,   zPt_Zinc0jetM115_135);
+    genZPt_Zinc0jetM115_135                     = newTH1D("genZPt_Zinc0jetM115_135",                     "gen Z p_{T} (N_{jets} #geq 0 115 < M < 135 GeV)",               ZpT,    nZPt_Zinc0jetM115_135,   zPt_Zinc0jetM115_135);
+    hresponseZPt_Zinc0jetM115_135               = newTH2D("hresponseZPt_Zinc0jetM115_135",               "response Z p_{T} (N_{jets} #geq 0 115 < M < 135 GeV)",      nZPt_Zinc0jetM115_135,   zPt_Zinc0jetM115_135,   nZPt_Zinc0jetM115_135,   zPt_Zinc0jetM115_135);
 
-    genZPt_Zinc1jet                     = newTH1D("genZPt_Zinc1jet",                     "gen Z p_{T} (N_{jets} #geq 1)",               ZpT,    nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011);
+
+    ZPt_Zinc1jet                        = newTH1D("ZPt_Zinc1jet",                        "Z p_{T} (N_{jets} #geq 1)",                   ZpT,    nZPt_Zinc1jet, zPt_Zinc1jet);
+    genZPt_Zinc1jet                     = newTH1D("genZPt_Zinc1jet",                     "gen Z p_{T} (N_{jets} #geq 1)",               ZpT,    nZPt_Zinc1jet, zPt_Zinc1jet);
     HadRecoil                           = newTH1D("HadRecoil",                           "hadRecoil p_{T} (N_{jets} #geq 1)",           HRecoi,    nZPt_Zinc1jet, zPt_Zinc1jet);
     genHadRecoil                        = newTH1D("genHadRecoil",                        "genHadRecoil p_{T} (N_{jets} #geq 1)",        HRecoi,    nZPt_Zinc1jet, zPt_Zinc1jet);
     JZB                                 = newTH1D("JZB", 		                 "JZB p_{T} (N_{jets} #geq 1)",                 JZb,    nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
@@ -763,7 +783,7 @@ HistoSetZJets::HistoSetZJets(TString leptonFlavor)
 
     hresponseZNGoodJets_Zexc = newTH2D("hresponseZNGoodJets_Zexc", "hresp ZNGoodJets_Zexc", 7, -0.5, 6.5, 7, -0.5, 6.5);
 
-    hresponseZPt_Zinc1jet = newTH2D("hresponseZPt_Zinc1jet","hresponseZPt_Zinc1jet",nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011, nZPt_Zinc1jet_SMP15011, zPt_Zinc1jet_SMP15011);
+    hresponseZPt_Zinc1jet = newTH2D("hresponseZPt_Zinc1jet","hresponseZPt_Zinc1jet",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseHadRecoil = newTH2D("hresponseHadRecoil","hresponseHadRecoil",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
     hresponseJZB        = newTH2D("hresponseJZB",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB, nZPt_Zinc2jetQunJZB, zPt_Zinc2jetQunJZB);
     hresponseJZB_ptLow        = newTH2D("hresponseJZB_ptLow",   "hresp Scalar JZB  p_{T} (N_{jets} #geq 1)", nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB, nZPt_Zinc1jetQunJZB, zPt_Zinc1jetQunJZB);
@@ -845,27 +865,6 @@ jetPt_2_Zinc3jet);
 //	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
 //	ZNGoodJetsNVtx_Zexc->GetXaxis()->SetBinLabel(11,"= 10");
     }
-
-/*
-    ZNGoodJets20NVtx_Zexc = newTH2D("ZNGoodJets20NVtx_Zexc","NVtx vs Jet20 Counter (excl.)", 11, -0.5, 10.5, 45, 0.5, 45.5);
-    if(ZNGoodJetsNVtx_Zexc){
-	for(int ibin = 1; ibin < ZNGoodJets20NVtx_Zexc->GetNbinsX(); ++ibin){
-	    ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(ibin, TString::Format("= %d", ibin - 1));
-         }
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(1, "= 0");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(2, "= 1");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(3, "= 2");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(4, "= 3");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(5, "= 4");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(6, "= 5");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(7, "= 6");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(8, "= 7");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(9, "= 8");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(10,"= 9");
-//	ZNGoodJets20NVtx_Zexc->GetXaxis()->SetBinLabel(11,"= 10");	}
-
-    }
-*/
 
     ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
     if(ZNGoodJets_Zinc){

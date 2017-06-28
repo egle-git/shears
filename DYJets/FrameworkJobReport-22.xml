@@ -1,0 +1,112 @@
+<FrameworkJobReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="ApplicationMemory">
+    <Metric Name="AverageGrowthRateRss" Value="0.03125"/>
+    <Metric Name="AverageGrowthRateVsize" Value="0"/>
+    <Metric Name="HEAP_ARENA_N_UNUSED_CHUNKS" Value="1"/>
+    <Metric Name="HEAP_ARENA_SIZE_BYTES" Value="0"/>
+    <Metric Name="HEAP_MAPPED_N_CHUNKS" Value="0"/>
+    <Metric Name="HEAP_MAPPED_SIZE_BYTES" Value="0"/>
+    <Metric Name="HEAP_TOP_FREE_BYTES" Value="0"/>
+    <Metric Name="HEAP_UNUSED_BYTES" Value="0"/>
+    <Metric Name="HEAP_USED_BYTES" Value="0"/>
+    <Metric Name="LargestRssEvent-a-COUNT" Value="1"/>
+    <Metric Name="LargestRssEvent-b-RUN" Value="1"/>
+    <Metric Name="LargestRssEvent-c-EVENT" Value="22"/>
+    <Metric Name="LargestRssEvent-d-VSIZE" Value="299.332"/>
+    <Metric Name="LargestRssEvent-e-DELTV" Value="0"/>
+    <Metric Name="LargestRssEvent-f-RSS" Value="127.633"/>
+    <Metric Name="LargestVsizeEventT1-a-COUNT" Value="1"/>
+    <Metric Name="LargestVsizeEventT1-b-RUN" Value="1"/>
+    <Metric Name="LargestVsizeEventT1-c-EVENT" Value="22"/>
+    <Metric Name="LargestVsizeEventT1-d-VSIZE" Value="299.332"/>
+    <Metric Name="LargestVsizeEventT1-e-DELTV" Value="0"/>
+    <Metric Name="LargestVsizeEventT1-f-RSS" Value="127.633"/>
+    <Metric Name="LargestVsizeIncreaseEvent-a-COUNT" Value="1"/>
+    <Metric Name="LargestVsizeIncreaseEvent-b-RUN" Value="1"/>
+    <Metric Name="LargestVsizeIncreaseEvent-c-EVENT" Value="22"/>
+    <Metric Name="LargestVsizeIncreaseEvent-d-VSIZE" Value="299.332"/>
+    <Metric Name="LargestVsizeIncreaseEvent-e-DELTV" Value="0"/>
+    <Metric Name="LargestVsizeIncreaseEvent-f-RSS" Value="127.633"/>
+    <Metric Name="PeakValueRss" Value="127.633"/>
+    <Metric Name="PeakValueVsize" Value="299.332"/>
+  </PerformanceSummary>
+</PerformanceReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="SystemMemory">
+    <Metric Name="Active" Value="13096404"/>
+    <Metric Name="Active(anon)" Value="7606876"/>
+    <Metric Name="Active(file)" Value="5489528"/>
+    <Metric Name="AnonHugePages" Value="3954688"/>
+    <Metric Name="AnonPages" Value="9161184"/>
+    <Metric Name="Bounce" Value="0"/>
+    <Metric Name="Buffers" Value="223100"/>
+    <Metric Name="Cached" Value="9525048"/>
+    <Metric Name="CommitLimit" Value="35521344"/>
+    <Metric Name="Committed_AS" Value="10094368"/>
+    <Metric Name="DirectMap1G" Value="28311552"/>
+    <Metric Name="DirectMap2M" Value="2402304"/>
+    <Metric Name="DirectMap4k" Value="6012"/>
+    <Metric Name="Dirty" Value="694164"/>
+    <Metric Name="HardwareCorrupted" Value="0"/>
+    <Metric Name="HugePages_Free" Value="0"/>
+    <Metric Name="HugePages_Rsvd" Value="0"/>
+    <Metric Name="HugePages_Surp" Value="0"/>
+    <Metric Name="HugePages_Total" Value="0"/>
+    <Metric Name="Hugepagesize" Value="2048"/>
+    <Metric Name="Inactive" Value="5817528"/>
+    <Metric Name="Inactive(anon)" Value="1564676"/>
+    <Metric Name="Inactive(file)" Value="4252852"/>
+    <Metric Name="KernelStack" Value="12912"/>
+    <Metric Name="Mapped" Value="423280"/>
+    <Metric Name="MemFree" Value="9681008"/>
+    <Metric Name="MemTotal" Value="30082696"/>
+    <Metric Name="Mlocked" Value="2088"/>
+    <Metric Name="NFS_Unstable" Value="0"/>
+    <Metric Name="PageTables" Value="53612"/>
+    <Metric Name="SReclaimable" Value="440272"/>
+    <Metric Name="SUnreclaim" Value="189464"/>
+    <Metric Name="Shmem" Value="4176"/>
+    <Metric Name="Slab" Value="629736"/>
+    <Metric Name="SwapCached" Value="8208"/>
+    <Metric Name="SwapFree" Value="20290228"/>
+    <Metric Name="SwapTotal" Value="20479996"/>
+    <Metric Name="Unevictable" Value="2088"/>
+    <Metric Name="VmallocChunk" Value="-772040"/>
+    <Metric Name="VmallocTotal" Value="-1"/>
+    <Metric Name="VmallocUsed" Value="618104"/>
+    <Metric Name="Writeback" Value="0"/>
+    <Metric Name="WritebackTmp" Value="0"/>
+  </PerformanceSummary>
+</PerformanceReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="StorageStatistics">
+    <Metric Name="Parameter-untracked-bool-enabled" Value="true"/>
+    <Metric Name="Parameter-untracked-bool-prefetching" Value="false"/>
+    <Metric Name="Parameter-untracked-bool-stats" Value="true"/>
+    <Metric Name="Parameter-untracked-string-cacheHint" Value="auto-detect"/>
+    <Metric Name="Parameter-untracked-string-readHint" Value="auto-detect"/>
+    <Metric Name="ROOT-tfile-read-totalMegabytes" Value="0.0577736"/>
+    <Metric Name="ROOT-tfile-write-totalMegabytes" Value="0"/>
+  </PerformanceSummary>
+</PerformanceReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="SystemCPU">
+    <Metric Name="CPUModels" Value="Intel(R) Xeon(R) CPU E5-2630 v3 @ 2.40GHz"/>
+    <Metric Name="averageCoreSpeed" Value="2394.45"/>
+    <Metric Name="cpusetCount" Value="16"/>
+    <Metric Name="totalCPUs" Value="16"/>
+  </PerformanceSummary>
+</PerformanceReport>
+<PerformanceReport>
+  <PerformanceSummary Metric="Timing">
+    <Metric Name="AvgEventTime" Value="8.2016e-05"/>
+    <Metric Name="EventThroughput" Value="4.53593"/>
+    <Metric Name="MaxEventTime" Value="8.2016e-05"/>
+    <Metric Name="MinEventTime" Value="8.2016e-05"/>
+    <Metric Name="TotalJobCPU" Value="0.302952"/>
+    <Metric Name="TotalJobTime" Value="0.401973"/>
+    <Metric Name="TotalLoopCPU" Value="0.167974"/>
+  </PerformanceSummary>
+</PerformanceReport>
+</FrameworkJobReport>

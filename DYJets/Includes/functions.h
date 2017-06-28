@@ -16,18 +16,18 @@ void barre_de_progression(int);
 struct leptonStruct{
 
     leptonStruct();
-    leptonStruct(double pt_, double eta_, double phi_, double en_, double charge_, double id_, double iso_, double scEta_, double trigger_) {
+    leptonStruct(double pt_, double eta_, double phi_, double en_, double charge_, double id_, double iso_, double scEta_, int MuTkLayer_) {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
         id = id_;
         iso = iso_;
         scEta = scEta_;
-        trigger = trigger_;
+        MuTkLayer = MuTkLayer_;
     }
 
     TLorentzVector v;
     double charge, iso, scEta;
-    int id, trigger;
+    int id, trigger, MuTkLayer;
 };
 
 struct jetStruct{
@@ -71,6 +71,7 @@ class record{
         double ptLow, ptHi, etaLow, etaHi, effi, effiErrorLow, effiErrorHigh;
         record();
         record(double, double, double, double, double, double, double);
+        bool belongToEta(double);
         bool belongTo(double, double);
 	bool equalTo(int num);
 };
@@ -79,6 +80,7 @@ class table{
     public:
         table();
         table(string);
+//        double getEfficiencyEta(double);  
         double getEfficiency(double, double);  
         double getEfficiencyLow(double, double);  
         double getEfficiencyHigh(double, double);  
@@ -92,6 +94,7 @@ class table{
 
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
 double SmearJetPt(double, double, double, int);
+double MuTracking(double);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
@@ -138,6 +141,5 @@ bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
  * parameters mainFormat and extraFormats
  */
 void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName);
-
 
 #endif

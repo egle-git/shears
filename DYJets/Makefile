@@ -38,6 +38,7 @@ LIBDIRLISTRTL = $(addprefix $(RTL), $(LIBDIR))
 
 SRCDIR = Sources/
 INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
+MAINDIR = Main/
 
 CXX           = g++ -std=c++0x
 CXXFLAGS      = -fPIC
@@ -53,21 +54,28 @@ ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
 RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc \
 printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc
 
+PLOTRESPMATRIX_O=Sources/plotRespMatrix.o
+PLOTRESPMATRIX=Main/plotRespMatrix
+
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
+MAINLIST = runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d \
+	Sources/testDecompVar.d Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d \
+	testSectionConfig.d
+MAINDEPS = $(addprefix $(MAINDIR), $(MAINLIST))
 DEPS    = $(SRCLIST:.cc=.d)
-DEPS    += runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d Sources/testDecompVar.d \
-Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d
+DEPS    += $(MAINDEPS)
 
 .PHONY: all clean
 
-all: runRecoComparison \
-runZJets_newformat \
-runUnfoldingZJets  \
-runCombination \
-testDecompVar \
-runIntegralCheck \
-plotCrossSections
+all: Main/runRecoComparison \
+Main/runZJets_newformat \
+Main/runUnfoldingZJets  \
+Main/runCombination \
+Main/testDecompVar \
+Main/runIntegralCheck \
+Main/plotCrossSections \
+$(PLOTRESPMATRIX)
 
 #in untested branch:
 # runCombination \
@@ -84,29 +92,32 @@ plotCrossSections
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runZJets_newformat: runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so
+Main/runZJets_newformat: Main/runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runRecoComparison: runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so
+Main/runRecoComparison: Main/runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runUnfoldingZJets: runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
+Main/runUnfoldingZJets: Main/runUnfoldingZJets.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runCombination: runCombination.o $(OBJLIST) RooUnfold/libRooUnfold.so 
+Main/runCombination: Main/runCombination.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-plotCrossSections: plotCrossSections.o $(OBJLIST) RooUnfold/libRooUnfold.so 
+Main/plotCrossSections: Main/plotCrossSections.o $(OBJLIST) RooUnfold/libRooUnfold.so 
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-testDecompVar: Sources/testDecompVar.o Sources/variablesOfInterestZJets.o
+Main/testDecompVar: Sources/testDecompVar.o Sources/variablesOfInterestZJets.o
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 testPrintTable: Sources/testPrintTable.o Sources/printTable.o
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-runIntegralCheck: runIntegralCheck.o $(OBJLIST) RooUnfold/libRooUnfold.so
+Main/runIntegralCheck: Main/runIntegralCheck.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+Main/plotRespMatrix: $(PLOTRESPMATRIX_O) 
+	$(CXX) $(ROOTGLIBS) $^ -o $@  
 
 RooUnfold/libRooUnfold.so:
 	$(MAKE) -C RooUnfold

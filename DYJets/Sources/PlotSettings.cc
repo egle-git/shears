@@ -1739,7 +1739,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     //double minimum = hGen1->GetMinimum();
     double maximum = hStat->GetMaximum();
     double minimum = hStat->GetMinimum();
-    TString canvasName = "canvas" + variable;
+    TString canvasName(hStat->GetName());
+    canvasName = "canvas" + canvasName;
     TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 800);
     //-------------------
 
@@ -1785,8 +1786,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	}
 	hSyst->SetStats(0);
 	hSyst->DrawCopy("e");
-	grCentralSyst->SetName("grCentralSyst");
-	grCentralSyst->Draw("2");
+	if(grCentralSyst){
+	    grCentralSyst->SetName("grCentralSyst");
+	    grCentralSyst->Draw("2");
+	}
     }
 
     igen = -1;

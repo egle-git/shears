@@ -67,9 +67,10 @@ TVectorD* RooUnfoldBinByBin::Impl()
 void
 RooUnfoldBinByBin::Unfold()
 {
-    const TVectorD& vmeas=  Vmeasured();
-    const TVectorD& vtrain= _res->Vmeasured();
-    const TVectorD& vtruth= _res->Vtruth();
+  //printf("Im in RooUnfoldBinByBin::Unfold\n");
+  const TVectorD& vmeas=  Vmeasured();
+  const TVectorD& vtrain= _res->Vmeasured();
+	 const TVectorD& vtruth= _res->Vtruth();
 
     TVectorD fakes= _res->Vfakes();
     Double_t fac= 0.0;

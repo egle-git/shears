@@ -134,6 +134,7 @@ RooUnfoldSvd::Impl()
 void
 RooUnfoldSvd::Unfold()
 {
+  printf("Im in RooUnfoldSvd::Unfold\n");
   if (_res->GetDimensionTruth() != 1 || _res->GetDimensionMeasured() != 1) {
     cerr << "RooUnfoldSvd may not work very well for multi-dimensional distributions" << endl;
   }

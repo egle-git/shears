@@ -91,6 +91,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
      //--- Now run on the different variables ---
      for (int i = start; i < end; ++i) {
+	 printf("run over variable\n");
 	 timeval t0, t1;
 	 gettimeofday(&t0,0);
 
@@ -207,21 +208,22 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 			   "XSECUp", "XSECDown", "LESUp", "LESDown", "LERUp", "LERDown",
 			   "LumiUp", "LumiDown", "SFUp", "SFDown", "AltUnf"};
 	 TH1D *hUnfData[18] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+	 std::vector<TH1D> hUnfDataBBB;
 	 TH2D *hUnfDataStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
 	 TH2D *hUnfMCStatCov[18] =  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-
+	 
 	 int nIter[18] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; 
- //	int svdKterm(0);
- //	if (lepSel == "DMu")  
- //	    svdKterm = VAROFINTERESTZJETS[i].MuSVDkterm;
- //	else if (lepSel == "DE")   
- //	    svdKterm = VAROFINTERESTZJETS[i].ESVDkterm;
- //	else {
- //	    cerr << "Error: algo " << algo << " or lepSel " << lepSel << "invalid\n"; 
- //	    cerr << "Aborting...\n";
- //	    return;
- //	}
-
+	 //	int svdKterm(0);
+	 //	if (lepSel == "DMu")  
+	 //	    svdKterm = VAROFINTERESTZJETS[i].MuSVDkterm;
+	 //	else if (lepSel == "DE")   
+	 //	    svdKterm = VAROFINTERESTZJETS[i].ESVDkterm;
+	 //	else {
+	 //	    cerr << "Error: algo " << algo << " or lepSel " << lepSel << "invalid\n"; 
+	 //	    cerr << "Aborting...\n";
+	 //	    return;
+	 //	}
+	 
 	 bool logy = VAROFINTERESTZJETS[i].logy;
 
 	 //      int nSysts = DYSHERPA14FILENAME.Length()? 18 : 17;
@@ -326,7 +328,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     }
 
 	     nIter[iSyst] = UnfoldData(unfCfg, lepSel, variable, respDYJets[iSyst],
-				       hRecDataMinusFakes, hUnfData[iSyst], hUnfDataStatCov[iSyst], hUnfMCStatCov[iSyst],
+				       hRecDataMinusFakes, hUnfData[iSyst], hUnfDataStatCov[iSyst], 
+				       hUnfMCStatCov[iSyst], hUnfDataBBB,
 				       name[iSyst], integratedLumi, unfoldDir,
 				       hRecDYJets[iSyst], hGenDYJets[iSyst], logy,
 				       hRecDataMinusFakesOdd, hRecDataMinusFakesEven, fixNIterTo,
@@ -409,9 +412,28 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     }
 	 }
 
-	 TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, integratedLumi, variable, doNormalized, 
-							  hUnfData[0], hCov[11],
-							  predictions, nFirstBinsToSkip, nLastBinsToSkip);
+	 TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, integratedLumi, variable, 
+							  doNormalized, hUnfData[0], hCov[11],
+							  predictions, nFirstBinsToSkip, 
+							  nLastBinsToSkip);
+
+
+	 printf("Trying to make the BBB cross section plot\n");
+	 printf("Quick test size = %ldn",hUnfDataBBB.size());
+	 std::cout<<"hUnfDataBBB.at(1)->GetName() = "<<hUnfDataBBB.at(1).GetName()<<std::endl;
+	 printf("Now running make cross\n");
+
+	 TCanvas *crossSectionPlotBBB[NCYCLES/2];
+	 for(size_t i=0;i<hUnfDataBBB.size();i++){
+	     if(!(i%2)){
+		 crossSectionPlotBBB[i] = makeCrossSectionPlot(lepSel, integratedLumi, variable, 
+							       doNormalized, &hUnfDataBBB[i], 0,
+							       predictions, nFirstBinsToSkip, 
+							       nLastBinsToSkip);
+	     }
+	 }
+	 
+	 //crossSectionPlotBBB->Draw();
 	 crossSectionPlot->Draw();
 	 crossSectionPlot->SaveAs(outputFileName + ".png");
 	 crossSectionPlot->SaveAs(outputFileName + ".pdf");
@@ -463,7 +485,11 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 TParameter<int> pNIter("nIter", nIter[0]);
 	 pNIter.Write();
 	 std::cout << "number of iterations: " << nIter[0] << "\n";
+	 printf("Cross Section Plot name = %s\n",crossSectionPlot->GetName());
 	 crossSectionPlot->Write();
+	 for(size_t i=0;i<hUnfDataBBB.size();i+=2){
+	     crossSectionPlotBBB[i]->Write();
+	 }
 	 //----------------------------------------------------------------------------------------- 
 
 	 outputRootFile->Close();
@@ -478,14 +504,20 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 		   << " ms.\n";
 
 	 //--- Close all files ----------------------------------------------------------------------
+	 printf("1\n");
 	 closeAllFiles(fData, fDYJets, fBg, NBGDYJETS);
+	 printf("2\n");
      }
 
      //------------------------------------------------------------------------------------------ 
 
+     printf("3\n");
      std::ofstream f(unfoldDir + "/" + "lastUnfConfig.txt");
+     printf("4\n");
      f << "#Files automatically genertaed by UnfoldingZJets. The file will be overwritten at next execution.\n\n";
+     printf("5\n");
      unfCfg.dumpRetrieved(f);
+     printf("6\n");
  }
 
  void createSystPlots(TString outputFileName, TString sysPlotDir, TString variable, 
@@ -830,10 +862,11 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
      if(verbosity > 0) cout << table << endl;
  }
 
-int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, RooUnfoldResponse *resp,
+int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, 
+	       RooUnfoldResponse *resp,
 	       TH1D* hRecDataMinusFakes, TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov,
-	       TString name, double integratedLumi, const TString& unfoldDir,
-	       TH1* hRecDYJets, TH1* hGenDYJets, bool logy,
+	       std::vector<TH1D> & hUnfDataBBB, TString name, double integratedLumi, 
+	       const TString& unfoldDir,TH1* hRecDYJets, TH1* hGenDYJets, bool logy,
 	       TH1D *hRecDataMinusFakesOdd, TH1D *hRecDataMinusFakesEven, int fixNIterTo,
 	       const char* outputFileName){
     
@@ -991,7 +1024,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	hchi2Toy->GetXaxis()->CenterTitle();
 	hchi2Toy->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
 	hchi2Toy->GetXaxis()->SetLabelSize(0.03);
-	hchi2Toy->SetLineWidth(2);    
+	hchi2Toy->SetLineWidth(2);
 
 	TH1D *hchi2ToyMcErr = new TH1D("hchi2ToyMcErr", "hchi2ToyMcErr", nTestIterMax + 1, -0.5, nTestIterMax + .5);
 	hchi2ToyMcErr->SetTitle(TString::Format("Reco #chi^{2}/ndf for %s",
@@ -1002,7 +1035,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	hchi2ToyMcErr->GetXaxis()->CenterTitle();
 	hchi2ToyMcErr->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
 	hchi2ToyMcErr->GetXaxis()->SetLabelSize(0.03);
-	hchi2ToyMcErr->SetLineWidth(2);    
+	hchi2ToyMcErr->SetLineWidth(2);
 
 
 	TH1D *hchi2ToyII = new TH1D("hchi2ToyII", "hchi2ToyII", nTestIterMax + 1, -0.5, nTestIterMax + .5);
@@ -1014,7 +1047,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	hchi2ToyII->GetXaxis()->CenterTitle();
 	hchi2ToyII->GetXaxis()->SetNdivisions(nTestIterMax, 0, 0);
 	hchi2ToyII->GetXaxis()->SetLabelSize(0.03);
-	hchi2ToyII->SetLineWidth(2);    
+	hchi2ToyII->SetLineWidth(2);
 
 	TH1D* hchi2Xval = 0;
 	TH1* hResMaxXval = 0;
@@ -1052,7 +1085,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	double chosenAlgoThr = 0.;
 
 	std::cout << "Bayes unfolding, number of first bins to skip: " << nFirstBinsToSkip << "\n";
-	std::cout << "Bayes unfolding, number of last bins to skip: " << nLastBinsToSkip << "\n";    
+	std::cout << "Bayes unfolding, number of last bins to skip: " << nLastBinsToSkip << "\n";
 
 	RooUnfoldResponse *respBis = (RooUnfoldResponse*) resp->Clone();
 	TH1D *hRecDataMinusFakesBis = (TH1D*) hRecDataMinusFakes->Clone();
@@ -1063,7 +1096,10 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get(), &covs, 2);
 	//unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get());
 
-	TH1* hResMax = new TH1D("hResMax", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})", 
+	unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get(), &covs, 2);
+	//unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get());
+
+	TH1* hResMax = new TH1D("hResMax", TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
 							   variable),
 				hUnfs->size(), -.5, hUnfs->size() - 0.5);
 	hResMax->SetLineWidth(2);
@@ -1072,7 +1108,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 								 variable),
 				   hUnfs->size(), -.5, hUnfs->size() - 0.5);
 	hResMaxToy->SetLineWidth(2);
-
+	
 	TH1* hResMaxToyII = new TH1D("hResMaxToyII", TString::Format("Gen. Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})",
 								     variable),
 				     hUnfs->size(), -.5, hUnfs->size() - 0.5);
@@ -1082,11 +1118,12 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 				      hUnfs->size(), -.5, hUnfs->size() - 0.5);
 	hBiasMaxToyII->SetLineWidth(2);
 
-	
+
 	double chi2dataMCThr = TH1Chi2Test(hRecDataMinusFakes, hRecDYJets, nFirstBinsToSkip, nLastBinsToSkip);
 
 	double prevChi2 = -1;
 	
+
 	for (unsigned i = 0; i < hUnfs->size(); ++i) {
 	    (*hUnfs)[i]->SetName(TString::Format("hUnf_%d", i));
 	    if(i==0){
@@ -1100,7 +1137,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    hfoldUnfData->SetName(TString::Format("hDatafoldedBack_%d", i));
 	    hfoldUnfData->SetTitle(TString::Format("hDataFoldedBack_%d", i));
 	    hfoldUnfData->Write();
-	    
+
 	    if(i>0){
 		TH1* hUnf2 = unfold(alg, resp, hfoldUnfData, i, smoothPrior);
 		hUnf2->SetName(TString::Format("hUfu_%d", i));
@@ -1117,7 +1154,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    Double_t res[nRes];
 	    double mychi2 = MyChi2Test(hRecDataMinusFakesBis, hfoldUnfData, nFirstBinsToSkip, nLastBinsToSkip,
 				       res, hRecDataMinusFakesBis, false);
-	    if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
+	    if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n";
 	    if(i > 0) hchi2->SetBinContent(i + 1, mychi2);
 	    if (mychi2 < chi2Thr && finalNIter < 0) {
 		if(i > 1 && fabs(prevChi2 - chi2Thr) < fabs(mychi2 - chi2Thr)){
@@ -1137,7 +1174,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		dataMcChi2 =  TH1Chi2Test(hGenDYJets, (*hUnfs)[i], nFirstBinsToSkip, nLastBinsToSkip);
 	    }
 	    hchi2dataMC->SetBinContent(i + 1, dataMcChi2);
-	    
+
 	    double maxRes = -1.;
 	    for(int j = nFirstBinsToSkip; j < nRes - nLastBinsToSkip; ++j){
 		double x = pow((res[j]),2);
@@ -1149,13 +1186,12 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    if(nIterResMax < 0  && maxRes < resMaxThr) nIterResMax = i;
 	}
 	hResMax->Write();
-
 	TH1D *hgen = (TH1D*) respBis->Htruth();
 	TString tmpName = "mcGen" + name;
 	hgen->SetName(tmpName);
 	hgen->SetTitle(tmpName);
 	hgen->Write();
-    
+
 	TH1D *hfoldgen = foldUnfData(hgen, 0, respBis);
 	tmpName = "mcGenFolded" + name;
 	hfoldgen->SetName(tmpName);
@@ -1167,25 +1203,24 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	hmes->SetName(tmpName);
 	hmes->SetTitle(tmpName);
 	hmes->Write();
-    
+
 	//hRecDataMinusFakes->Write("Unf" + name + "_000");
 	hRecDataMinusFakes->Write("hBkgSubData");
 
 	if(hRecDataMinusFakesOdd && hRecDataMinusFakesEven){
-	    
 	    //hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
 	    //hchi2Xval->Reset();
-      
+
 	    RooUnfoldResponse *respBis2 = (RooUnfoldResponse*) resp->Clone();
 	    TH1D *hRecDataMinusFakesBisOdd = (TH1D*) hRecDataMinusFakesOdd->Clone();
 	    TH1D *hRecDataMinusFakesBisEven = (TH1D*) hRecDataMinusFakesEven->Clone();
 
 	    std::auto_ptr<std::vector<TH1*> > hUnfs2 (new std::vector<TH1*>);
-      
+
 	    //Unfolds the data:
-	    //	    unfoldWithErr(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax, smoothPrior, hUnfs2.get(), &covs, 2);
+	    //    unfoldWithErr(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax, smoothPrior, hUnfs2.get(), &covs, 2);
 	    unfoldWithErr(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax, smoothPrior, hUnfs2.get());
-      
+
 	    for (unsigned i = 0; i < hUnfs2->size(); ++i) {
 		(*hUnfs2)[i]->SetName(TString::Format("hUnfXval%d", i));
 		if(i==0){
@@ -1199,7 +1234,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		hfoldUnfDataOdd->SetName(TString::Format("dataOddfoldedBack%s_%d", name.Data(), i));
 		hfoldUnfDataOdd->SetTitle(TString::Format("dataOddFoldedBack%s_%d", name.Data(), i));
 		hfoldUnfDataOdd->Write();
-	
+
 		TH1* hResXval = (TH1*) hRecDataMinusFakes->Clone(TString::Format("hResXval%s_%d", name.Data(), i+1));
 		hResXval->Reset();
 		hResXval->SetTitle(TString::Format("%s %s residuals - iteration %d, cross validation",
@@ -1211,11 +1246,11 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		double mychi2 = TH1Chi2Test(hRecDataMinusFakesBisEven,
 					    i == 0 ? hRecDataMinusFakesBisOdd : hfoldUnfDataOdd,
 					    nFirstBinsToSkip, nLastBinsToSkip, resXval);
-		
-		if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n"; 
+
+		if(verbosity) std::cout << "Chi2/nbins of data / folded-unfolded distributions: " << mychi2 << "\n";
 
 		hchi2Xval->SetBinContent(hchi2Xval->GetXaxis()->FindBin(i), mychi2);
-	
+
 		if (i > 0 && mychi2 < chi2XvalThr && nIterXval < 0) {
 		    nIterXval = i;
 		    //finalNIterXval = i;
@@ -1225,7 +1260,6 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		    nIterXvalMin =  i;
 		    chi2XvalMin = mychi2;
 		}
-	
 		double maxRes = -1.;
 		for(int j = nFirstBinsToSkip; j < nRes - nLastBinsToSkip; ++j){
 		    double x = pow(resXval[j], 2);
@@ -1245,13 +1279,13 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    hgen->SetName(tmpName);
 	    hgen->SetTitle(tmpName);
 	    hgen->Write();
-      
+
 	    TH1D *hfoldgen = foldUnfData(hgen, 0, respBis);
 	    tmpName = "mcGenFolded" + name;
 	    hfoldgen->SetName(tmpName);
 	    hfoldgen->SetTitle(tmpName);
 	    hfoldgen->Write();
-      
+
 	    TH1D *hmes = (TH1D*) respBis->Hmeasured();
 	    tmpName = "mcReco" + name;
 	    hmes->SetName(tmpName);
@@ -1260,7 +1294,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    hRecDataMinusFakesOdd->Write("UnfOdd" + name + "_0");
 	    hRecDataMinusFakesEven->Write("UnfEven" + name + "_0");
 	}//cross-validation
-    
+
 	std::vector<double> rms(nTestIterMax+1, 0);
 	std::vector<double> chi2ToyMcErrs(nTestIterMax + 1, 0);
 	std::vector<TH1*> hChi2s(nTestIterMax+1);
@@ -1269,8 +1303,6 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	std::vector<double> rmsII(nTestIterMax+1, 0);
 	std::vector<TH1*> hChi2IIs(nTestIterMax+1);
 	std::vector<double> chi2ToyII(nTestIterMax+1, 0);
-
-
 	for(int i = 0; i < nTestIterMax + 1; ++i){
 	    hChi2s[i] = new TH1D(TString::Format("hChi2_%d", i),
 				 TString::Format("#chi2/ndf distribution for %d iteration", i),
@@ -1286,7 +1318,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 					   hRecDataMinusFakes->GetXaxis()->GetBinLowEdge(1),
 					   hRecDataMinusFakes->GetXaxis()->GetBinUpEdge(hRecDataMinusFakes->GetNbinsX()));
 	    }
-	    //	    hResToysII[i] = (TProfile*) hResToys[i]->Clone(n+"II");
+	    //    hResToysII[i] = (TProfile*) hResToys[i]->Clone(n+"II");
 	    n += "II";
 	    if(bins){
 		hResToysII[i] = new TProfile(n, t, hRecDataMinusFakes->GetNbinsX(), bins->GetArray(), "S");
@@ -1300,7 +1332,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    hChi2IIs[i] = new TH1D(TString::Format("hChi2II_%d", i),
 				   TString::Format("#chi2/ndf distribution for %d iteration%s", i, (i>1?"s":"")),
 				   100, 0, 10);
-      
+
 	}
 
 	std::vector<double> chi2Toy = chi2FromToy(alg, smoothPrior, resp, hRecDataMinusFakes, nFirstBinsToSkip,
@@ -1330,7 +1362,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	}
 
 	hResMaxToy->Write();
-    
+
 	for(int iter = 1; iter <= nTestIterMax; ++iter){
 	    double x = hResMax->GetBinContent(hResMax->GetXaxis()->FindBin(iter));
 	    double xtoy = hResMaxToy->GetBinContent(hResMaxToy->GetXaxis()->FindBin(iter));
@@ -1338,7 +1370,6 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		nIterResMaxToyCmp = iter;
 	    }
 	}
-
 	for(int iter = 1; iter <= nTestIterMax; ++iter){
 	    double bias = 0;
 	    double ebias = 0;
@@ -1369,16 +1400,16 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		nIterBiasToyIIMin = iter;
 		biasToyIIMin= bias;
 	    }
-	    
+
 	    h->Write();
 	}
-	
+
 	hResMaxToyII->Write();
 	hBiasMaxToyII->Write();
-	
-	
+
+
 	for(int iter = 0; iter < nTestIterMax + 1; ++iter){
-      
+
 	    if(iter> 0 && chi2Toy[iter] < chi2ToyThr && nIterToy < 0) {
 		nIterToy = iter;
 		std::cout << "Toy method lead to " << nIterToy << " iterations with a final Chi2/ndf of: " << chi2Toy[iter] << std::endl;
@@ -1397,11 +1428,11 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    if(nIterToyIIMin > 0 && chi2ToyIIMin < chi2ToyII[iter]) {//local minimum found
 		nIterToyIIMinFound = true;
 	    }
-	    
+
 	    if(iter > 0 && nIterToyII < 0 && chi2ToyII[iter] < chi2ToyIIThr){
 		nIterToyII = iter;
 	    }
-	    
+
 	    hChi2s[iter]->Write();
 	    hChi2IIs[iter]->Write();
 	    //if(iter>0){ //skip prior
@@ -1412,7 +1443,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    hchi2ToyII->SetBinError(hchi2ToyII->FindBin(iter), rmsII[iter]/ntoys);
 	    //}
 	}
-     
+
 	if(nIterXval < 0){
 	    std::cout << "Chi2/ndf from xval is always larger than 1. Using minimum as number of iterations.\n";
 	    nIterXval = nIterXvalMin;
@@ -1422,12 +1453,11 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	    std::cout << "Chi2/ndf from toy is always larger than 1. Using minimum as number of iterations.\n";
 	    nIterToy = nIterToyMin;
 	}
-
 	if(nIterToyII < 0){
 	    std::cout << "Chi2/ndf of Toy II is always larger than 1. Using minimum as number of iterations\n";
 	    nIterToyII = nIterToyIIMin;
 	}
-	
+
 	if(xvalIter == 9){
 	    chosenIter = nIterToyII;
 	    chosenAlgoThr = -1;
@@ -1471,7 +1501,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	}
 
 	const char* mode_names[] = {"chi2", "chi2 xval", "chi2 toy",
-				    "max res", "max res xval", "max res toy", 
+				    "max res", "max res xval", "max res toy",
 				    "fixed", "max res cmp", "min of max res toy",
 				    "chi2 toy II min"};
 	if((unsigned)xvalIter >= sizeof(mode_names)/sizeof(mode_names[0])){
@@ -1496,9 +1526,8 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		   << "\t" << nIterResMax << "\t" << nIterResMaxXval << "\t" << nIterResMaxToy
 		   << "\t" << nIterResMaxToyCmp << "\t" << nIterResMaxToyII << "\t" << chosenIter << "\n";
 	}
-
 	int chi2Ylog = cfg.getUnf(lepSel, variable, "unfChi2LogScale", 0);
-	
+
 	makeChi2Plot(hchi2, xvalIter == 0 ? -1 : nIter, chosenIter,
 		     chi2Thr, chosenAlgoThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2", "cChi2", chi2Ylog);
@@ -1513,7 +1542,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 
 	hchi2Toy->Write();
 	hchi2ToyMcErr->Write();
-	std::cout << nIterToy << ", " << chosenIter << ", " << 		 chi2ToyThr << ", " << chosenAlgoThr << "\n";
+	std::cout << nIterToy << ", " << chosenIter << ", " <<  chi2ToyThr << ", " << chosenAlgoThr << "\n";
 	makeChi2Plot(hchi2Toy, xvalIter == 2 ? -1 : nIterToy, chosenIter,
 		     chi2ToyThr, chosenAlgoThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2Toy", "cChi2Toy", chi2Ylog);
@@ -1551,7 +1580,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	makeChi2Plot(hResMaxToy, narr1 , chosenIter, -1, thrline,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_hResMaxToyCmp", "cResMaxToyCmp",
 		     chi2Ylog, altH, labels);
-    
+
 	hchi2ToyII->Write();
 	makeChi2Plot(hchi2ToyII, nIterToyII, chosenIter,
 		     chi2ToyIIThr, chosenAlgoThr,
@@ -1570,13 +1599,13 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	TH1* hchi2ToyIICpy = (TH1*) hchi2ToyII->Clone();
 	hchi2ToyIICpy->SetTitle(TString::Format("Gen. #chi^{2} for %s", variable));
 	hchi2ToyIICpy->GetYaxis()->SetTitle("#chi^{2}/ndf or max(#chi^{2}_{bin})");
-				
+
 	makeChi2Plot(hchi2ToyIICpy, nIterToyII, chosenIter,
 		     chi2ToyIIThr, chosenAlgoThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2AndResMaxToyII",
 		     "cChi2AndResMaxToyII", chi2Ylog,
-		     altH, labels, true);	
-	
+		     altH, labels, true);
+
 	altH.resize(2);
 	altH[0] = hchi2;
 	altH[1] = hchi2Xval;
@@ -1600,7 +1629,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		     chi2Ylog, altH, labels);
 
 
-	
+
 	altH.resize(0);
 	labels.resize(altH.size() + 1);
 	labels[0] = "Data vs MC";
@@ -1608,18 +1637,48 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		     chi2dataMCThr, chi2ToyThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_chi2DataMC", "cChi2DataMC",
 		     chi2Ylog, altH, labels);
-	
+
 	makeChi2Plot(hBiasMaxToyII, nIterBiasToyIIMin, chosenIter, -1, chosenAlgoThr,
 		     unfoldCheckDir, lepSel + "_" + variable + "_" + name + "_" + algo + "_bias", "bias", chi2Ylog);
     } //end of test of number of iterations
 
+
     if(binByBin_unfold){
-	std::unique_ptr<RooUnfold> RObjectForDataBinByBin(RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes));
-	RObjectForDataBinByBin->SetVerbose(verbosity);
-	TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
-	hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
-	hUnfDataBinByBin->Write();
+	TH1D *hFoldedDataBinByBin = 0;
+	RooUnfoldBinByBin* RObjectForDataBinByBin = 0;
+	TH1D * tmpHisto = 0;
+	printf("Starting Bin by Bin, creating roounfold object\n");
+	for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
+	    printf("Cycle = %d\n",iCycle);
+	    if(iCycle == 0)
+		RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hRecDataMinusFakes);
+	    else
+		RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hFoldedDataBinByBin);
+	    //RObjectForDataBinByBin->SetVerbose(verbosity);
+	    RObjectForDataBinByBin->RooUnfoldBinByBin::Unfold();
+	    tmpHisto = (TH1D*)RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+	    hUnfDataBBB.push_back(*(TH1D*)tmpHisto->Clone());
+	    hFoldedDataBinByBin = foldUnfData(&hUnfDataBBB[iCycle],0,resp);
+	    
+	    char cycleChar[10];
+	    sprintf(cycleChar, "%d",iCycle);
+	    TString cycleString = string(cycleChar);
+	    hUnfDataBBB[iCycle].SetName("UnfDataBinByBin_Cycle_"+cycleString+"_"+ name);
+	    hUnfDataBBB[iCycle].SetTitle("Data Truth Bin By Bin Cycle "+cycleString);
+	    hUnfDataBBB[iCycle].Scale(1./integratedLumi);
+	    
+	    int nBins = hUnfDataBBB[iCycle].GetNbinsX();
+	    for (int i = 1; i <= nBins; ++i) {
+		double binWidth = hUnfDataBBB[iCycle].GetBinWidth(i);
+		hUnfDataBBB[iCycle].SetBinContent(i,hUnfDataBBB[iCycle].GetBinContent(i)*1./binWidth);
+		hUnfDataBBB[iCycle].SetBinError(i,hUnfDataBBB[iCycle].GetBinError(i)*1./binWidth);
+	    }
+	    if((iCycle%2)==0){
+		hUnfDataBBB[iCycle].Write();
+	    }
+	}
     }
+
     
     //    std::unique_ptr<RooUnfold> RObjectForDataBayes(RooUnfold::New(RooUnfold::kBayes, resp, hRecDataMinusFakes, chosenIter));
     //    RObjectForDataBayes->SetVerbose(verbosity);
@@ -1628,9 +1687,11 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     //    hUnfDataBayes->Write();
     
     if(svd_unfold){
+	printf("Running SVD Unfold\n");
 	for (int iter(1); iter <= nTestIterMax; iter++) {
-	    std::unique_ptr<RooUnfold> RObjectForDataSVD(RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, iter));
+	    RooUnfoldSvd * RObjectForDataSVD = new RooUnfoldSvd(resp, hRecDataMinusFakes, iter);
 	    RObjectForDataSVD->SetVerbose(verbosity);
+	    RObjectForDataSVD->RooUnfoldSvd::Unfold();
 	    TH1D *hUnfDataSVD = (TH1D*) RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
 	    hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", iter) + "_" + name);
 	    hUnfDataSVD->Write();
@@ -1830,8 +1891,7 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, 
 }
 
 
-TH1D* foldUnfData(const TH1 *hUnfData, const TMatrixD* cov, const RooUnfoldResponse *hresp)
-{
+TH1D* foldUnfData(const TH1 *hUnfData, const TMatrixD* cov, const RooUnfoldResponse *hresp){
     TH1D* hfoldUnfData = (TH1D*) hUnfData->Clone();
     std::unique_ptr<RooUnfoldResponse> resp((RooUnfoldResponse*) hresp->Clone());
     TH2D *hres = (TH2D*) resp->Hresponse();

@@ -100,6 +100,7 @@ void RooUnfoldBayes::CopyData (const RooUnfoldBayes& rhs)
 
 void RooUnfoldBayes::Unfold(std::vector<TH1*>* hUnf_i)
 {
+  printf("Im in fucking RooUnfoldBayes::Unfold\n");
   setup();
   if (verbose() >= 2) {
     Print();

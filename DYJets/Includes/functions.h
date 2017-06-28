@@ -16,6 +16,16 @@
 #define RUNG_2016 278820
 #define RUNH_2016 281613
 
+//Integrated Lumi for each run 2016
+#define LUMI_RUNB_2016 5.748
+#define LUMI_RUNC_2016 2.573
+#define LUMI_RUND_2016 4.248
+#define LUMI_RUNE_2016 4.009
+#define LUMI_RUNF_2016 3.102
+#define LUMI_RUNG_2016 7.540
+#define LUMI_RUNH_2016 8.606
+
+
 class TCanvas;
 
 using namespace std;
@@ -99,7 +109,8 @@ class table{
         vector<record> recd;
 };
 
-std::string GetRun(int runNumber);
+char GetRunData(int runNumber);
+char GetRunMC(Long64_t * mcEraBoundary, Long64_t eventNumber);
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
 double SmearJetPt(double, double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);

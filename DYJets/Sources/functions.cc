@@ -240,18 +240,27 @@ double table::getTTbarSFHigh(int NJets){
     return 1;
 }
 
-std::string GetRun(int runNumber){
-  std::string Run;
-  if( (RUNB_2016 <= runNumber) && (runNumber < RUNC_2016) ){ Run = "B"; return Run; }
-  if( (RUNC_2016 <= runNumber) && (runNumber < RUND_2016) ){ Run = "C"; return Run; }
-  if( (RUND_2016 <= runNumber) && (runNumber < RUNE_2016) ){ Run = "D"; return Run; }
-  if( (RUNE_2016 <= runNumber) && (runNumber < RUNF_2016) ){ Run = "E"; return Run; }
-  if( (RUNF_2016 <= runNumber) && (runNumber < RUNG_2016) ){ Run = "F"; return Run; }
-  if( (RUNG_2016 <= runNumber) && (runNumber < RUNH_2016) ){ Run = "G"; return Run; }
-  if(  RUNH_2016 <= runNumber ){ Run = "H"; return Run; }
-  Run = "No run found";
-  return Run;
+char GetRunData(int runNumber){
+  if( (RUNB_2016 <= runNumber) && (runNumber < RUNC_2016) ){return 'B';}
+  if( (RUNC_2016 <= runNumber) && (runNumber < RUND_2016) ){return 'C';}
+  if( (RUND_2016 <= runNumber) && (runNumber < RUNE_2016) ){return 'D';}
+  if( (RUNE_2016 <= runNumber) && (runNumber < RUNF_2016) ){return 'E';}
+  if( (RUNF_2016 <= runNumber) && (runNumber < RUNG_2016) ){return 'F';}
+  if( (RUNG_2016 <= runNumber) && (runNumber < RUNH_2016) ){return 'G';}
+  if(  RUNH_2016 <= runNumber ){return 'H';}
+  return 'Z';
 }
+
+char GetRunMC(Long64_t * mcEraBoundary, Long64_t eventNumber){
+  const size_t _nLetters = 7;
+  const std::string _runLettersAll = "BCDEFGH";
+  for(size_t iLetter=0;iLetter<_nLetters;iLetter++){
+    if( eventNumber <= mcEraBoundary[iLetter] )
+      return _runLettersAll[iLetter];
+  }
+  return 'Z';
+}
+
 
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor){
 

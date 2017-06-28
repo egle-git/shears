@@ -60,7 +60,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    double nEffGenEventsWithTwoGoodLeptons(0), nEffGenEventsWithTwoGoodLeptonsWithOppCharge(0), nEffGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass(0);
    unsigned int nEventsPassingTrigger(0);
    double nEffEventsPassingTrigger(0);
-         
+
+   const std::string runLettersAll = "BCDEFGH";
+   std::map<char,double> nLetterEvents;  
+   for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
+      std::cout<<runLettersAll[iLetter]<<std::endl;
+      nLetterEvents.insert( std::pair<char,double>(runLettersAll[iLetter],0.0) );
+   }
+
    bool UnfoldUnc = cfg.getB("unfoldUnc", false);
    if(UnfoldUnc){
       std::cout << "Reweighting mode. MC will be reweighted to compute an alternative response matrix to be used for the estimation of the model dependency.\n";
@@ -95,61 +102,61 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //       Load efficiency tables        //
    //====================================//
 
-   std::map<std::string,table> JESUnc;
+   std::map<char,table> JESUnc;
    table TableJESUncBD("EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt");
    table TableJESUncEF("EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt");
    table TableJESUncG("EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt");
    table TableJESUncH("EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt");
-   JESUnc.insert( std::pair<std::string,table>("B",TableJESUncBD) );
-   JESUnc.insert( std::pair<std::string,table>("C",TableJESUncBD) );
-   JESUnc.insert( std::pair<std::string,table>("D",TableJESUncBD) );
-   JESUnc.insert( std::pair<std::string,table>("E",TableJESUncEF) );
-   JESUnc.insert( std::pair<std::string,table>("F",TableJESUncEF) );
-   JESUnc.insert( std::pair<std::string,table>("G",TableJESUncG) );
-   JESUnc.insert( std::pair<std::string,table>("H",TableJESUncH) );
+   JESUnc.insert( std::pair<char,table>('B',TableJESUncBD) );
+   JESUnc.insert( std::pair<char,table>('C',TableJESUncBD) );
+   JESUnc.insert( std::pair<char,table>('D',TableJESUncBD) );
+   JESUnc.insert( std::pair<char,table>('E',TableJESUncEF) );
+   JESUnc.insert( std::pair<char,table>('F',TableJESUncEF) );
+   JESUnc.insert( std::pair<char,table>('G',TableJESUncG) );
+   JESUnc.insert( std::pair<char,table>('H',TableJESUncH) );
 
-   std::map<std::string,table> IdSF;
+   std::map<char,table> IdSF;
    table TableMuIdBF("EfficiencyTables/Eff_SF_ID_BF_6_16_2017.txt");
    table TableMuIdGH("EfficiencyTables/Eff_SF_ID_GH_6_16_2017.txt");
-   IdSF.insert( std::pair<std::string,table>("B",TableMuIdBF) );
-   IdSF.insert( std::pair<std::string,table>("C",TableMuIdBF) );
-   IdSF.insert( std::pair<std::string,table>("D",TableMuIdBF) );
-   IdSF.insert( std::pair<std::string,table>("E",TableMuIdBF) );
-   IdSF.insert( std::pair<std::string,table>("F",TableMuIdBF) );
-   IdSF.insert( std::pair<std::string,table>("G",TableMuIdGH) );
-   IdSF.insert( std::pair<std::string,table>("H",TableMuIdGH) );
+   IdSF.insert( std::pair<char,table>('B',TableMuIdBF) );
+   IdSF.insert( std::pair<char,table>('C',TableMuIdBF) );
+   IdSF.insert( std::pair<char,table>('D',TableMuIdBF) );
+   IdSF.insert( std::pair<char,table>('E',TableMuIdBF) );
+   IdSF.insert( std::pair<char,table>('F',TableMuIdBF) );
+   IdSF.insert( std::pair<char,table>('G',TableMuIdGH) );
+   IdSF.insert( std::pair<char,table>('H',TableMuIdGH) );
 
-   std::map<std::string,table> IsoSF;
+   std::map<char,table> IsoSF;
    table TableMuIsoBF("EfficiencyTables/Eff_SF_ISO_BF_6_16_2017.txt");
    table TableMuIsoGH("EfficiencyTables/Eff_SF_ISO_GH_6_16_2017.txt");
-   IsoSF.insert( std::pair<std::string,table>("B",TableMuIsoBF) );
-   IsoSF.insert( std::pair<std::string,table>("C",TableMuIsoBF) );
-   IsoSF.insert( std::pair<std::string,table>("D",TableMuIsoBF) );
-   IsoSF.insert( std::pair<std::string,table>("E",TableMuIsoBF) );
-   IsoSF.insert( std::pair<std::string,table>("F",TableMuIsoBF) );
-   IsoSF.insert( std::pair<std::string,table>("G",TableMuIsoGH) );
-   IsoSF.insert( std::pair<std::string,table>("H",TableMuIsoGH) );
+   IsoSF.insert( std::pair<char,table>('B',TableMuIsoBF) );
+   IsoSF.insert( std::pair<char,table>('C',TableMuIsoBF) );
+   IsoSF.insert( std::pair<char,table>('D',TableMuIsoBF) );
+   IsoSF.insert( std::pair<char,table>('E',TableMuIsoBF) );
+   IsoSF.insert( std::pair<char,table>('F',TableMuIsoBF) );
+   IsoSF.insert( std::pair<char,table>('G',TableMuIsoGH) );
+   IsoSF.insert( std::pair<char,table>('H',TableMuIsoGH) );
 
-   std::map<std::string,table> TrigSF;
+   std::map<char,table> TrigSF;
    table TableMuTriggerBG("EfficiencyTables/ScaleFactors_TriggerMu17Mu8_RunBG_2_03_28_2017.txt");
    table TableMuTriggerH("EfficiencyTables/ScaleFactors_TriggerMu17Mu8_RunBG_2_03_28_2017.txt");
-   TrigSF.insert( std::pair<std::string,table>("B",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("C",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("D",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("E",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("F",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("G",TableMuTriggerBG) );
-   TrigSF.insert( std::pair<std::string,table>("H",TableMuTriggerH) );
+   TrigSF.insert( std::pair<char,table>('B',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('C',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('D',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('E',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('F',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('G',TableMuTriggerBG) );
+   TrigSF.insert( std::pair<char,table>('H',TableMuTriggerH) );
 
-   std::map<std::string,uint64_t> triggerMask;
-   triggerMask.insert( std::pair<std::string,uint64_t>("B",triggerMaskRunB) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("C",triggerMaskRunC) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("D",triggerMaskRunD) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("E",triggerMaskRunE) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("F",triggerMaskRunF) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("G",triggerMaskRunG) );
-   triggerMask.insert( std::pair<std::string,uint64_t>("H",triggerMaskRunH) );
-    
+   std::map<char,uint64_t> triggerMask;
+   triggerMask.insert( std::pair<char,uint64_t>('B',triggerMaskRunB) );
+   triggerMask.insert( std::pair<char,uint64_t>('C',triggerMaskRunC) );
+   triggerMask.insert( std::pair<char,uint64_t>('D',triggerMaskRunD) );
+   triggerMask.insert( std::pair<char,uint64_t>('E',triggerMaskRunE) );
+   triggerMask.insert( std::pair<char,uint64_t>('F',triggerMaskRunF) );
+   triggerMask.insert( std::pair<char,uint64_t>('G',triggerMaskRunG) );
+   triggerMask.insert( std::pair<char,uint64_t>('H',triggerMaskRunH) );
+
    //table for electron SF
    table ElId("EfficiencyTables/Electron_Id_2015D_SF.txt");
    table ElReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
@@ -171,7 +178,13 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
    int year = cfg.getI("LumiReweightYear", 2016);
    int mode = (systematics == 1) ? direction : 0;
-   standalone_LumiReWeighting puWeight(year, mode);
+   int nBin = 75;
+   standalone_LumiReWeighting puWeight(year, mode, nBin);
+
+   //printf("PU weights\n");
+   //for(int iBin=0;iBin<50;iBin++){
+   //   printf("%F\n",puWeight.weight(iBin));
+   //}
 
    int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
    if (systematics == 2) scale =  direction;
@@ -353,7 +366,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    if(nMaxEvents >= 0 && nEventsToProcessTot > nMaxEvents) 
       nEventsToProcessTot = nMaxEvents;    
 
+   TString doWhat = cfg.getS("doWhat", ""); doWhat.ToUpper();
    Long64_t entry_start = cfg.getL("entry_start", 0);
+   if( doWhat != "DATA")  //Dont skip events in MC, since they are all the same
+      entry_start = 0;
    Long64_t entry_stop = 0;
    if( (nMaxEvents >= 0) && ((entry_start+nMaxEvents) < nentries) )
       entry_stop = entry_start + nMaxEvents;
@@ -372,10 +388,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
    cout << "We will run on " << nEventsToProcess << " events" << endl;
 
-   std::string runLetters = cfg.getS("runLetters", "BCDEFGH");   
-   double mcTriggerFraction = cfg.getD("mcTriggerFraction", 1.0);
-   Long64_t mcEraBoundary = mcTriggerFraction * nEventsToProcess;
-
+   std::string runLetters = cfg.getS("runLetters", runLettersAll);   
+   Long64_t mcEraBoundary[runLettersAll.size()];
+   
    processedEventMcWeightSum_ = 0.;
    nEvents = 0;
    double weightSum = 0;
@@ -384,6 +399,29 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    if(!GLepBarePrompt){
       std::cout << "Warning: tau gen veto was not found in the ntuple. It is fine if the samples is not DY or if it does not contains Z->\\tau\\tau.\n" ;
    }
+
+
+   std::string fileLetterName(outputDirectory);
+   fileLetterName += "/.LetterFractions";
+   ifstream fileLetter (fileLetterName);
+   std::string line;
+   size_t iLine = 0;
+   double runPercent = 0.0;
+   if (fileLetter.is_open()){
+      while(getline(fileLetter,line)){
+	 if(line[0] == runLettersAll[iLine]){
+	    runPercent+=atof((line.substr((line.find(';')+1),(line.size()-line.find(';')-1))).c_str());
+	    mcEraBoundary[iLine] = nEventsToProcess*runPercent;
+	    std::cout << "Percent = "<<runPercent << std::endl;
+	    std::cout << "MC Era Boundary = "<<mcEraBoundary[iLine]<<std::endl; 
+	    iLine++;
+	 }
+      }
+      fileLetter.close();
+   }
+
+
+
 
    bool DJALOG = cfg.getB("DJALOG", false);
    entry_stop = nentries;
@@ -418,8 +456,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 int rem_m = rem_s / 60;
 	 rem_s -= rem_m *60;
 	 cout << "\r" << TString::Format("%4.1f%%", (100. * nEvents) / nEventsToProcess)
-	      << " " << std::setw(11) << nEvents << "/" << nEventsToProcess
-	      << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/evt"
+	      << " " << std::setw(11) << nEvents << "/" << nEventsToProcess;
+	 if(EvtIsRealData)
+	    cout<<"  Letter "<<GetRunData(EvtRunNum);
+	 else
+	    cout<<"Letter "<<GetRunMC(mcEraBoundary,nEvents);
+	 cout << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/evt"
 	      << "Entry: "<<jentry<<" Time Left: " 
 	      << std::setw(2) << rem_h << " h "
 	      << std::setw(2) << rem_m << " m "
@@ -454,11 +496,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //         Continue Statements        //
       //====================================//
       if(EvtIsRealData){
-	 if( runLetters.find(GetRun(EvtRunNum)) == string::npos)
+	 if( runLetters.find(GetRunData(EvtRunNum)) == string::npos)
 	    continue;
+	 else
+	    nLetterEvents[GetRunData(EvtRunNum)] = nLetterEvents[GetRunData(EvtRunNum)] + 1.0;
       }
       //=======================================================================================================//
 
+      //Set up MC psuedo Run Letter
+      
       nEvents++;
 
 
@@ -477,7 +523,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
       if(addPuWeights){
 	 double add_w_ = addPuWeights->GetBinContent(addPuWeights->GetXaxis()->FindBin(EvtVtxCnt));
-	 if(add_w_ > 0) weight *= add_w_;
+	 if(add_w_ > 0) 
+	    weight *= add_w_;
       }
 
       if (fileName.Index("DYJets") >= 0 
@@ -560,16 +607,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       bool passesTrigger = false;
 
       if(EvtIsRealData){
-	 passesTrigger = ((*ourTrig_) & (triggerMask[GetRun(EvtRunNum)]) );
+	 passesTrigger = ((*ourTrig_) & (triggerMask[GetRunData(EvtRunNum)]) );
       }else{
-	 if(nEvents <= mcEraBoundary){
-	    //if(DJALOG) printf("{DJA LOG}        This is from Runs B-G\n");
-	    passesTrigger = ((*ourTrig_) & triggerMaskMCA);
-	 }
-	 if(nEvents > mcEraBoundary){
-	    //if(DJALOG) printf("{DJA LOG}        This is from Run H\n");
-	    passesTrigger = ((*ourTrig_) & triggerMaskMCB);
-	 }	 
+	 passesTrigger = ((*ourTrig_) & (triggerMask[GetRunMC(mcEraBoundary,nEvents)]) );
       }
 
       if(passesTrigger){
@@ -657,17 +697,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    // CommentAG: comment this out since don't enter 'lepton energy smearing' block
 	    // build Electroweak boson candidate: here it is expected to be a Z
 
+
+
 	    if (!EvtIsRealData) {
 	       double effWeight = 1.;
 	       if (lepSel == "DMu") {
 		  if(pogSF){
-		     effWeight*=IdSF[GetRun(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
-								      fabs(leptons[0].v.Eta()));
-		     effWeight*=IdSF[GetRun(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
+		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
+										    fabs(leptons[0].v.Eta()));
+		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
 								      fabs(leptons[1].v.Eta()));
-		     effWeight*=IsoSF[GetRun(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
+		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
 								       fabs(leptons[0].v.Eta()));
-		     effWeight*=IsoSF[GetRun(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
+		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
 								       fabs(leptons[1].v.Eta()));
 		     //effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 		     //effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
@@ -675,7 +717,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     //effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 		  }
 		  if (useTriggerCorrection) 
-		     effWeight *= TrigSF[GetRun(EvtRunNum)].getEfficiency(fabs(leptons[0].v.Eta()), 
+		     effWeight *= TrigSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(fabs(leptons[0].v.Eta()), 
 									  fabs(leptons[1].v.Eta()));
 	       }
 	       if (lepSel == "DE") {
@@ -736,13 +778,13 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       double effWeight = 1.;
 	       if (lepSel == "SMu") {
 		  if(pogSF){
-		     effWeight*=IdSF[GetRun(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
+		     effWeight*=IdSF[GetRunData(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
 								      fabs(leptons[0].v.Eta()));
-		     effWeight*=IdSF[GetRun(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
+		     effWeight*=IdSF[GetRunData(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
 								      fabs(leptons[1].v.Eta()));
-		     effWeight*=IsoSF[GetRun(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
+		     effWeight*=IsoSF[GetRunData(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
 								       fabs(leptons[0].v.Eta()));
-		     effWeight*=IsoSF[GetRun(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
+		     effWeight*=IsoSF[GetRunData(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
 								       fabs(leptons[1].v.Eta()));
 		     //effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 		     //effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
@@ -750,7 +792,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     //effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 		  }
 		  if (useTriggerCorrection) 
-		     effWeight *= TrigSF[GetRun(EvtRunNum)].getEfficiency(fabs(leptons[0].v.Eta()), 
+		     effWeight *= TrigSF[GetRunData(EvtRunNum)].getEfficiency(fabs(leptons[0].v.Eta()), 
 									  fabs(leptons[1].v.Eta()));
 	       }
 	       else if (lepSel == "SE") {
@@ -1000,7 +1042,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    //-- apply jet energy scale uncertainty (need to change the scale when initiating the object)
 	    double jetEnergyCorr = 0.; 
 	    bool jetPassesPtCut(jet.v.Pt() >= 10); 
-	    jetEnergyCorr = JESUnc[GetRun(EvtRunNum)].getEfficiency(jet.v.Pt(), jet.v.Eta());
+	    
+	    if(EvtIsRealData)
+	       jetEnergyCorr = JESUnc[GetRunData(EvtRunNum)].getEfficiency(jet.v.Pt(), jet.v.Eta());
+	    else
+	       jetEnergyCorr = JESUnc[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(jet.v.Pt(), jet.v.Eta());
 
 	    jet.v.SetPtEtaPhiE(jet.v.Pt() * (1 + scale * jetEnergyCorr), jet.v.Eta(),
 			       jet.v.Phi(), jet.v.E() * (1 + scale * jetEnergyCorr));
@@ -3260,7 +3306,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       if(EvtWeightSums_.size()) a = EvtWeightSums_[0];
       JobInfo->SetBinContent(kJobWeight, processedEventMcWeightSum_ / a);
    }
-    
+
    for (unsigned short i(0); i < numbOfHistograms; i++){
       string hName = listOfHistograms[i]->GetName();
       if ((!hasGenInfo && hName.find("gen") != string::npos)
@@ -3269,7 +3315,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       if(!EvtIsRealData && !listOfHistograms[i]->TestBit(TH1::kIsAverage)){
 	 listOfHistograms[i]->Scale(norm_);
       }
-	
+      
       listOfHistograms[i]->Write();        
    }
 
@@ -3311,6 +3357,25 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 f << data_frac << "\n";
 	 f.close();
 	 rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
+	 
+	 //Saving the fractions for each Run Letter
+	 FILE * filePointer;
+	 std::string fileName(outputDirectory);
+	 fileName += "/.LetterFractions";
+	 filePointer = fopen (fileName.c_str(),"w");
+	 for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
+	    fprintf (filePointer, "%c;%F\n",runLettersAll[iLetter],
+		     nLetterEvents[runLettersAll[iLetter]] / nEvents);
+	 }
+	 /*
+	 fprintf (filePointer, "C;%\n",letterFractionC);
+	 fprintf (filePointer, "D;%\n",letterFractionD);
+	 fprintf (filePointer, "E;%\n",letterFractionE);
+	 fprintf (filePointer, "F;%\n",letterFractionF);
+	 fprintf (filePointer, "G;%\n",letterFractionG);
+	 fprintf (filePointer, "H;%\n",letterFractionH);
+	 */
+	 fclose (filePointer);
       }
    }
    cout << "Number of events passing the trigger                      : " << nEventsPassingTrigger << "\n";
@@ -3601,7 +3666,6 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
    printf("Trigger Data masks: 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx 0x%lx\n", triggerMaskRunB,
 	  triggerMaskRunC,triggerMaskRunD,triggerMaskRunE,triggerMaskRunF,triggerMaskRunG,
 	  triggerMaskRunH);
-   printf("Trigger MC mask: 0x%lx 0x%lx\n", triggerMaskMCA, triggerMaskMCB);
 }
 
 void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
@@ -4129,8 +4193,6 @@ bool ZJets::setTriggerMask(){
    std::vector<std::string> triggersRunF = cfg.getVS("triggersRunF");
    std::vector<std::string> triggersRunG = cfg.getVS("triggersRunG");
    std::vector<std::string> triggersRunH = cfg.getVS("triggersRunH");
-   std::vector<std::string> triggersMCA = cfg.getVS("triggersMCA");
-   std::vector<std::string> triggersMCB = cfg.getVS("triggersMCB");
    triggerMaskRunB = 0;
    triggerMaskRunC = 0;
    triggerMaskRunD = 0;
@@ -4138,8 +4200,6 @@ bool ZJets::setTriggerMask(){
    triggerMaskRunF = 0;
    triggerMaskRunG = 0;
    triggerMaskRunH = 0;
-   triggerMaskMCA = 0;
-   triggerMaskMCB = 0;
 
    /*
    if(triggers.size()){
@@ -4211,10 +4271,6 @@ bool ZJets::setTriggerMask(){
 	    triggerMaskRunG |= (1 <<bit);
 	 if(triggersRunH[i] == (*TrigHlt)[bit])
 	    triggerMaskRunH |= (1 <<bit);
-	 if(triggersMCA[i] == (*TrigHlt)[bit])
-            triggerMaskMCA |= (1 <<bit);
-         if(triggersMCB[i] == (*TrigHlt)[bit])
-            triggerMaskMCB |= (1 <<bit);
       }
    }
    return rc;

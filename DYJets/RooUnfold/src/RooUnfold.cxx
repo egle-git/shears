@@ -331,11 +331,17 @@ void RooUnfold::SetResponse (RooUnfoldResponse* res, Bool_t takeOwnership)
 
 void RooUnfold::Unfold(std::vector<TH1*>* hUnf_i)
 {
+  //printf("Hello im in RooUnfold::Unfold\n");
   // Dummy unfolding - just copies input
-  cout << "********************** " << ClassName() << ": dummy unfolding - just copy input **********************" << endl;
+
+  cout << "************* " << ClassName() << ": dummy unfolding - just copy input ********" << endl;
+  
+  //printf("Resizing TVectorD\n");
   _rec.ResizeTo (_nt);
-  Int_t nb= _nm < _nt ? _nm : _nt;
-  for (Int_t i= 0; i < nb; i++) {
+  //printf("In Unfold, Vmeasured length=%d\n", Vmeasured().GetNoElements());
+  Int_t nBins = _nm < _nt ? _nm : _nt;
+  for (Int_t i= 0; i < nBins; i++) {
+    //printf("i=%d\n",i);
     _rec(i)= Vmeasured()(i);
   }
   _unfolded= true;
@@ -403,8 +409,11 @@ void RooUnfold::GetErrMat()
 
 Bool_t RooUnfold::UnfoldWithErrors (ErrorTreatment withError, bool getWeights, std::vector<TH1*>* hUnf_i)
 {
+  //printf("Calling UnfoldWithErrors\n");
   if (!_unfolded) {
+    //printf("Not unfolded\n");
     if (_fail) return false;
+    //printf("Hmeasured\n");
     const TH1* rmeas= _res->Hmeasured();
     if (_meas->GetDimension() != rmeas->GetDimension() ||
         _meas->GetNbinsX()    != rmeas->GetNbinsX()    ||
@@ -418,7 +427,9 @@ Bool_t RooUnfold::UnfoldWithErrors (ErrorTreatment withError, bool getWeights, s
       if (rmeas->GetDimension()>=3) cerr << "x" << rmeas->GetNbinsZ();
       cerr << "-bin measured histogram from RooUnfoldResponse" << endl;
     }
+    //printf("Im going into unfolding now Unfold!\n");
     Unfold(hUnf_i);
+    //printf("I just finished Unfold!\n");
     if (!_unfolded) {
       _fail= true;
       return false;
@@ -668,12 +679,20 @@ TH1* RooUnfold::Hreco (ErrorTreatment withError, std::vector<TH1*>* hUnf_i)
     2: Errors from the square root of of the covariance matrix given by the unfolding
     3: Errors from the square root of the covariance matrix from the variation of the results in toy MC tests
     */
-  TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());
-  reco->Reset();
-  reco->SetTitle (GetTitle());
-  if (!UnfoldWithErrors (withError, false, hUnf_i)) withError= kNoError;
-  if (!_unfolded) return reco;
+  cout << "********************************************" << endl;
 
+  //printf("Starting Hreco\n");
+  TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());
+  //printf("Reset\n");
+  reco->Reset();
+  //printf("Set title\n");
+  reco->SetTitle (GetTitle());
+  //printf("If statement\n");
+  if (!UnfoldWithErrors (withError, false, hUnf_i)) 
+    withError= kNoError;
+  if (!_unfolded) 
+    return reco;
+  //printf("for loop\n");
   for (Int_t i= 0; i < _nt; i++) {
     Int_t j= RooUnfoldResponse::GetBin (reco, i, _overflow);
     reco->SetBinContent (j,             _rec(i));
@@ -685,7 +704,7 @@ TH1* RooUnfold::Hreco (ErrorTreatment withError, std::vector<TH1*>* hUnf_i)
       reco->SetBinError (j, sqrt (fabs (_err_mat(i,i))));
     }
   }
-
+  //printf("return reco\n");
   return reco;
 }
 

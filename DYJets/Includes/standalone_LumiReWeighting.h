@@ -27,21 +27,31 @@
 class standalone_LumiReWeighting {
  public:
 
-  standalone_LumiReWeighting(int year=2016,int mode=0); // 0: central, -1: down, +1: up
+  standalone_LumiReWeighting(int year=2016,int mode=0,int nBin=50); // 0: central, -1: down, +1: up
   virtual ~standalone_LumiReWeighting();
   double weight( int npv) ;
   void weightOOT_init();
 
   //Make a map to use for accessing different arrays using a string  
-  std::map<std::string,float*> pileupMap;
+  std::map<std::string,double*> pileupMap;
   
  protected:
 
-  TH1F*      weights_;
+  TH1D*      weights_;
 };
 
 //Set the pileup numbers here
-float Data_2016[75] = {238796,837457,2.2762e+06,3.08988e+06,4.41555e+06,5.92832e+06,6.9546e+06,
+
+double Data_2016_50Bin[50] = {6.47328e-06,2.2704e-05,6.25767e-05,8.48423e-05,0.000121463,0.000163068,
+			     0.000234489,0.00066196,0.00119512,0.0021577,0.00479954,0.0097697,
+			     0.0163688,0.0238365,0.0319656,0.0405244,0.0478945,0.0529775,0.0558863,
+			     0.0573049,0.0581333,0.0585749,0.0580522,0.0563036,0.0536791,0.0505037,
+			     0.0468805,0.0429096,0.0387376,0.0344764,0.0301956,0.025971,0.0219089,
+			     0.0181256,0.0147155,0.0117309,0.00918171,0.00704638,0.00528755,
+			     0.00386476,0.00273991,0.00187658,0.00123743,0.000783447,0.000475257,
+			     0.000275812,0.000152974,8.10415e-05,4.10129e-05,1.98489e-05};
+
+double Data_2016_75Bin[75] = {238796,837457,2.2762e+06,3.08988e+06,4.41555e+06,5.92832e+06,6.9546e+06,
 		       1.28649e+07, 3.52032e+07,7.8591e+07,1.76697e+08,3.59658e+08,6.02165e+08,
 		       8.75557e+08,1.1726e+09, 1.48464e+09,1.74864e+09,1.92425e+09,2.02409e+09,
 		       2.07661e+09,2.10911e+09,2.12551e+09, 2.10558e+09,2.04057e+09,1.94292e+09,
@@ -53,7 +63,7 @@ float Data_2016[75] = {238796,837457,2.2762e+06,3.08988e+06,4.41555e+06,5.92832e
 		       4889.96,4521.72,4208.46,3909.76, 3614.27,3320.72,3031.1,2748.24,2474.98,
 		       2213.82,1966.82,1735.55,1521.11,1324.15,1144.9, 983.22,838.668};
 
-float Data_2016_up[75] = {368012, 795684, 2.23314e+06, 2.81877e+06, 4.09679e+06, 5.45164e+06, 
+double Data_2016_75Bin_up[75] = {368012, 795684, 2.23314e+06, 2.81877e+06, 4.09679e+06, 5.45164e+06, 
 			  6.46557e+06,9.08515e+06, 2.38236e+07, 5.40126e+07, 1.15968e+08, 
 			  2.45968e+08,4.43247e+08, 6.79951e+08, 9.38361e+08, 1.22239e+09, 
 			  1.5117e+09, 1.74649e+09,1.89874e+09, 1.97905e+09, 2.01631e+09, 
@@ -67,7 +77,7 @@ float Data_2016_up[75] = {368012, 795684, 2.23314e+06, 2.81877e+06, 4.09679e+06,
 			  7272.61, 6011.04, 5229.59, 4675.1, 4236.42, 3862.1, 3526.81, 3217.5, 
 			  2927.42, 2653.28, 2393.73, 2148.47, 1917.75, 1702, 1501.63, 1316.91};
 
-float Data_2016_dn[75] = {404870, 1.19368e+06, 2.48715e+06, 3.63587e+06, 5.01113e+06, 6.69087e+06,
+double Data_2016_75Bin_dn[75]={404870, 1.19368e+06, 2.48715e+06, 3.63587e+06, 5.01113e+06, 6.69087e+06,
 		8.14958e+06, 2.00073e+07, 5.19315e+07, 1.19723e+08, 2.72659e+08, 5.12976e+08,
 		8.02162e+08, 1.11991e+09, 1.46933e+09, 1.79485e+09, 2.02364e+09, 2.14872e+09,
 		2.2039e+09, 2.23361e+09, 2.25007e+09, 2.22729e+09, 2.15269e+09, 2.04119e+09,
@@ -80,50 +90,70 @@ float Data_2016_dn[75] = {404870, 1.19368e+06, 2.48715e+06, 3.63587e+06, 5.01113
 		2298.73, 2026.15, 1773.48, 1541.25, 1329.74, 1138.86, 968.204, 817.048,
 		684.391, 569.028, 469.605};
 
-float MC_2016[75] = {0.000829312873542, 0.00124276120498,  0.00339329181587,  0.00408224735376,
-	   0.00383036590008,  0.00659159288946,  0.00816022734493,  0.00943640833116,
-	   0.0137777376066,   0.017059392038,    0.0213193035468,   0.0247343174676,
-	   0.0280848773878,   0.0323308476564,   0.0370394341409,   0.0456917721191,
-	   0.0558762890594,   0.0576956187107,   0.0625325287017,   0.0591603758776,
-	   0.0656650815128,   0.0678329011676,   0.0625142146389,   0.0548068448797,
-	   0.0503893295063,   0.040209818868,    0.0374446988111,   0.0299661572042,
-	   0.0272024759921,   0.0219328403791,   0.0179586571619,   0.0142926728247,
-	   0.00839941654725,  0.00522366397213,  0.00224457976761,  0.000779274977993,
-	   0.000197066585944, 7.16031761328e-05, 0.0,   0.0, 0.0,   0.0,
-	   0.0,   0.0,  0.0,   0.0,  0.0,   0.0,  0.0,  0.0};
 
+//Spring MC
+double MC_2016_50Bin[50] = {0.000829312873542, 0.00124276120498,  0.00339329181587,  0.00408224735376,
+			    0.00383036590008,  0.00659159288946,  0.00816022734493,  0.00943640833116,
+			    0.0137777376066,   0.017059392038,    0.0213193035468,   0.0247343174676,
+			    0.0280848773878,   0.0323308476564,   0.0370394341409,   0.0456917721191,
+			    0.0558762890594,   0.0576956187107,   0.0625325287017,   0.0591603758776,
+			    0.0656650815128,   0.0678329011676,   0.0625142146389,   0.0548068448797,
+			    0.0503893295063,   0.040209818868,    0.0374446988111,   0.0299661572042,
+			    0.0272024759921,   0.0219328403791,   0.0179586571619,   0.0142926728247,
+			    0.00839941654725,  0.00522366397213,  0.00224457976761,  0.000779274977993,
+			    0.000197066585944, 7.16031761328e-05, 0.0,   0.0, 0.0,   0.0,
+			    0.0,   0.0,  0.0,   0.0,  0.0,   0.0,  0.0,  0.0};
 
-standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
+//Summer MC
+double MC_2016_75Bin[75]= {1.78653e-05,2.56602e-05,5.27857e-05,8.88954e-05,0.000109362,
+			   0.000140973,0.000240998,0.00071209,0.00130121,0.00245255,
+			   0.00502589,0.00919534,0.0146697,0.0204126,0.0267586,
+			   0.0337697,0.0401478,0.0450159,0.0490577,0.0524855,
+			   0.0548159,0.0559937,0.0554468,0.0537687,0.0512055,
+			   0.0476713,0.0435312,0.0393107,0.0349812,0.0307413,
+			   0.0272425,0.0237115,0.0208329,0.0182459,0.0160712,
+			   0.0142498,0.012804,0.011571,0.010547,0.00959489,0.00891718,
+			   0.00829292,0.0076195,0.0069806,0.0062025,0.00546581,
+			   0.00484127,0.00407168,0.00337681,0.00269893,0.00212473,
+			   0.00160208,0.00117884,0.000859662,0.000569085,0.000365431,
+			   0.000243565,0.00015688,9.88128e-05,6.53783e-05,3.73924e-05,
+			   2.61382e-05,2.0307e-05,1.73032e-05,1.435e-05,1.36486e-05,
+			   1.35555e-05,1.37491e-05,1.34255e-05,1.33987e-05,1.34061e-05,
+			   1.34211e-05,1.34177e-05,1.32959e-05,1.33287e-05};
+
+standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode,int nBin) {
 
   std::string test;
   std::cout<<test;
   
   //Add the pileup distributions to the map
-  pileupMap.insert( std::pair<std::string,float*>("Data_2016",Data_2016) );
-  pileupMap.insert( std::pair<std::string,float*>("Data_2016_up",Data_2016_up) );
-  pileupMap.insert( std::pair<std::string,float*>("Data_2016_dn",Data_2016_dn) );
-  pileupMap.insert( std::pair<std::string,float*>("MC_2016",MC_2016) );
+  pileupMap.insert( std::pair<std::string,double*>("Data_2016_50Bin",Data_2016_50Bin) );
+  pileupMap.insert( std::pair<std::string,double*>("Data_2016_75Bin",Data_2016_75Bin) );
+  pileupMap.insert( std::pair<std::string,double*>("Data_2016_75Bin_up",Data_2016_75Bin_up) );
+  pileupMap.insert( std::pair<std::string,double*>("Data_2016_75Bin_dn",Data_2016_75Bin_dn) );
+  pileupMap.insert( std::pair<std::string,double*>("MC_2016_50Bin",MC_2016_50Bin) );
+  pileupMap.insert( std::pair<std::string,double*>("MC_2016_75Bin",MC_2016_75Bin) );
   
-  std::vector<float> MC_distr;
-  std::vector<float> Lumi_distr;
+  std::vector<double> MC_distr;
+  std::vector<double> Lumi_distr;
 
   MC_distr.clear();
   Lumi_distr.clear();
 
-  printf("mode = %d\n",mode);
+  printf("standalone_LumiReWeighting Mode = %d\n",mode);
 
   char tmpName[50];
   char tmpNameMC[50];
-  snprintf(tmpNameMC,50,"%d",year);
+  snprintf(tmpNameMC,50,"%d_%dBin",year,nBin);
   switch(mode){
   case 0:
-    snprintf(tmpName,50,"%d",year);
+    snprintf(tmpName,50,"%d_%dBin",year,nBin);
     break;
   case 1:
-    snprintf(tmpName,50,"%d_up",year);
+    snprintf(tmpName,50,"%d_%dBin_up",year,nBin);
     break;
   case -1:
-    snprintf(tmpName,50,"%d_dn",year);
+    snprintf(tmpName,50,"%d_%dBin_dn",year,nBin);
     break;
   default:
     printf("Mode for standalone lumi reweighting is incorrect\n");
@@ -135,11 +165,10 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
   std::string mcName = "MC_";
   mcName += tmpNameMC;
 
-  std::cout<<dataName<<std::endl;
-  std::cout<<mcName<<std::endl;
+  std::cout<<"standalone_LumiReWeighting dataName = "<<dataName<<std::endl;
+  std::cout<<"standalone_LumiReWeighting mcName = "<<mcName<<std::endl;
 
-  Int_t NBins = 75;
-  for( int i=0; i< NBins; ++i) {  
+  for( int i=0; i< nBin; ++i) {  
     Lumi_distr.push_back( pileupMap[dataName][i] );
     MC_distr.push_back( pileupMap[mcName][i] );
   }
@@ -151,58 +180,73 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode) {
     std::cerr <<"ERROR:standalone_LumiReWeighting: input vectors have different sizes. Quitting... \n";
   }
 
-  weights_ = new TH1F(Form("luminumer_%d",mode),
+  weights_ = new TH1D(Form("luminumer_%d",mode),
 		      Form("luminumer_%d",mode),
-		      NBins,0., float(NBins));
+		      nBin,0., double(nBin));
 
   weights_->SetBit(TH1::kIsAverage);
 
-  TH1F* den = new TH1F(Form("lumidenom_%d",mode),
+  TH1D* tmp = new TH1D(Form("lumidenom_%d",mode),
 		       Form("lumidenom_%d",mode),
-		       NBins,0., float(NBins));
+		       nBin,0., double(nBin));
+
+  TH1D* den = new TH1D(Form("lumidenom_%d",mode),
+		       Form("lumidenom_%d",mode),
+		       nBin,0., double(nBin));
 
   den->SetBit(TH1::kIsAverage);
 
-  for(int ibin = 1; ibin<NBins+1; ++ibin ) {
+  for(int ibin = 1; ibin<nBin+1; ++ibin ) {
     weights_->SetBinContent(ibin, Lumi_distr[ibin-1]);
     den->SetBinContent(ibin,MC_distr[ibin-1]);
   }
 
-  //std::cout << "Data Input " << std::endl;
-  //for(int ibin = 1; ibin<NBins+1; ++ibin){
-    //std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
-  //}
-  //std::cout << "MC Input " << std::endl;
-  //for(int ibin = 1; ibin<NBins+1; ++ibin){
-    //std::cout << "   " << ibin-1 << " " << den->GetBinContent(ibin) << std::endl;
-  //}
+  tmp = (TH1D*) weights_->Clone("tmp");
 
   // check integrals, make sure things are normalized
 
-  float deltaH = weights_->Integral();
+  double deltaH = weights_->Integral();
   if(fabs(1.0 - deltaH) > 0.02 ) { //*OOPS*...
+    printf("Normalizing Data PU: %F\n",weights_->Integral());
     weights_->Scale( 1.0/ weights_->Integral() );
+    tmp->Scale( 1.0/ tmp->Integral() );
   }
-  float deltaMC = den->Integral();
+  double deltaMC = den->Integral();
   if(fabs(1.0 - deltaMC) > 0.02 ) {
+    printf("Normalizing MC PU: %F\n",den->Integral());
     den->Scale(1.0/ den->Integral());
   }
 
-  weights_->Divide( den );  // so now the average weight should be 1.0    
+ 
+  printf("Data norm = %F  |||  MC norm = %F  |||  tmp norm = %F\n",weights_->Integral(),den->Integral(),tmp->Integral());
 
-  double inte = 0;
-  for(int ibin = 1; ibin < NBins+1; ++ibin){
-    inte += weights_->GetBinContent(ibin) * MC_distr[ibin-1];
+  std::cout << "      Data Input        MC Input         tmp Input" << std::endl;
+  for(int ibin = 1; ibin<nBin+1; ++ibin){
+    std::cout <<ibin-1 << "     " << weights_->GetBinContent(ibin) <<"       "<< den->GetBinContent(ibin) << "         "<<tmp->GetBinContent(ibin)<<std::endl;
   }
 
-  std::cout << "PU weight normalisation: " << inte << "\n";
+  weights_->Divide( den );
+  for(int ibin = 1; ibin <= nBin; ++ibin){
+    tmp->SetBinContent(ibin, tmp->GetBinContent(ibin) / den->GetBinContent(ibin));
+  }
+ 
+  double inte = 0;
+  double int2 = 0;
+  printf("MC_distr       den\n");
+  for(int ibin = 1; ibin <= nBin; ++ibin){
+    printf("%F  |||  %F\n",MC_distr[ibin-1],den->GetBinContent(ibin));
+    inte += weights_->GetBinContent(ibin) * MC_distr[ibin-1];
+    int2 += tmp->GetBinContent(ibin) * MC_distr[ibin-1];
+  }
+
+  std::cout << "PU weight normalisation: " << inte <<"   tmp="<<int2<<"\n";
 
 //  weights_->Scale(1/weights_->Integral());//Bugra Bilin, added this to normalize weigts.
 
   //std::cout << "Reweighting: Computed Weights per In-Time Nint " << std::endl;
 
 
-  //for(int ibin = 1; ibin<NBins+1; ++ibin){
+  //for(int ibin = 1; ibin<nBin+1; ++ibin){
     //std::cout << "   " << ibin-1 << " " << weights_->GetBinContent(ibin) << std::endl;
   //}
 

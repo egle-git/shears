@@ -34,8 +34,9 @@ public:
 
   TVectorD* Impl();
 
-protected:
   virtual void Unfold();
+protected:
+
   virtual void GetCov();
   virtual void GetSettings();
 

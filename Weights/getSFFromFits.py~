@@ -1,0 +1,150 @@
+import ROOT
+from optparse import OptionParser
+import math
+
+def main(options):
+    
+    #ptbins = [80, 100, 180, 1000]
+    #etabins = [0.0,0.9,1.2,1.7,2.1,2.4]
+    ptbins = [20.0, 25.0, 30.0, 40.0, 50.0, 60.0, 120.0]
+    etabins = [0.0,0.9,1.2,2.1,2.4]
+    #etabins = [0.0,0.9,1.2,1.7,2.4]
+
+    ptlow = []
+    pthigh = []
+    etalow = []
+    etahigh = []
+
+    for x in range(len(ptbins)-1):
+        ptlow.append(ptbins[x])
+        pthigh.append(ptbins[x+1])
+    for x in range(len(etabins)-1):
+        etalow.append(etabins[x])
+        etahigh.append(etabins[x+1])
+
+    fitvalsNum = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsNumE = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsNumEL = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsNumEH = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsDen = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsDenE = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsDenEL = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+    fitvalsDenEH = [[0 for j in range(len(etalow))] for i in range(len(ptlow))]
+
+    fd = ROOT.TFile(options.data)
+    #print fd.GetName()
+    directory = fd.Get(options.directory)
+    #print directory.GetName()
+    directory.cd()
+    keys = directory.GetListOfKeys()
+    i = 0
+    j = 0
+    for k in keys:
+        if ("vpvPlusCMS" in k.GetName()):
+            #print k.GetName()
+            directory = fd.Get(options.directory+"/"+k.GetName())
+            directory.cd()
+            results = directory.Get("fitresults")
+            if (results):
+                params = results.floatParsFinal()
+                for p in xrange(params.getSize()):
+                    if (params.at(p).GetName()!="efficiency"): continue; 
+                    myPar = params.at(p)
+                    fitvalsNum[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getVal()
+                    #fitvalsNumE[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getError()
+                    fitvalsNumEL[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorLo()
+                    fitvalsNumEH[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorHi()
+                    if ((-params.at(p).getErrorLo())>params.at(p).getErrorHi()): fitvalsNumE[j%(len(ptlow))][i%(len(etalow))] = -params.at(p).getErrorLo()
+                    else: fitvalsNumE[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorHi()
+                    i=i+1
+                    if (i%(len(etalow))==0): j=j+1
+
+    #print fitvalsNum
+    #print fitvalsNumE
+    #print fitvalsNumEL
+    #print fitvalsNumEH
+
+    fm = ROOT.TFile(options.mc)
+    directory = fm.Get(options.directory)
+    directory.cd()
+    keys = directory.GetListOfKeys()
+    i = 0
+    j = 0
+    for k in keys:
+        if ("vpvPlusCMS" in k.GetName()):
+            #print k.GetName()
+            directory = fm.Get(options.directory+"/"+k.GetName())
+            directory.cd()
+            if (not directory.GetListOfKeys().Contains("fitresults")):
+                fitvalsDen[j%(len(ptlow))][i%(len(etalow))] = 1.
+                fitvalsDenE[j%(len(ptlow))][i%(len(etalow))] = 1.
+                fitvalsDenEL[j%(len(ptlow))][i%(len(etalow))] = 1.
+                fitvalsDenEH[j%(len(ptlow))][i%(len(etalow))] = 1.
+                i=i+1
+                if (i%(len(etalow))==0): j=j+1
+                continue
+            results = directory.Get("fitresults")
+            params = results.floatParsFinal()
+
+            for p in xrange(params.getSize()):
+                if (params.at(p).GetName()!="efficiency"): continue; 
+                myPar = params.at(p)
+                fitvalsDen[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getVal()
+                #fitvalsDenE[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getError()
+                fitvalsDenEL[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorLo()
+                fitvalsDenEH[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorHi()
+                if ((-params.at(p).getErrorLo())>params.at(p).getErrorHi()): fitvalsDenE[j%(len(ptlow))][i%(len(etalow))] = -params.at(p).getErrorLo()
+                else: fitvalsDenE[j%(len(ptlow))][i%(len(etalow))] = params.at(p).getErrorHi()
+                i=i+1
+                if (i%(len(etalow))==0): j=j+1
+
+    #print fitvalsDen
+    #print fitvalsDenE
+    import time
+            
+    dataOutput = "Efficiencies_"+options.output+"_data_"+(time.strftime("%m_%d_%Y"))+".txt"
+    mcOutput = "Efficiencies_"+options.output+"_mc_"+(time.strftime("%m_%d_%Y"))+".txt"
+    SFOutput = "ScaleFactors_"+options.output+"_"+(time.strftime("%m_%d_%Y"))+".txt"
+
+    outData = open(dataOutput, "w+")
+
+    print "\n DATA"
+    for i in range(len(etalow)):
+        for j in range(len(ptlow)):
+            fitvalsNumEL[j][i] = abs(fitvalsNumEL[j][i])
+            fitvalsNumEH[j][i] = abs(fitvalsNumEH[j][i])
+            print "%4.1f  %4.1f   %6.4f   %6.4f  %6.4f   %6.4f   %6.4f \n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], fitvalsNum[j][i], fitvalsNumEL[j][i], fitvalsNumEH[j][i])
+            outData.write("%4.1f  %4.1f   %6.4f   %6.4f  %6.4f   %6.4f   %6.4f \n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], fitvalsNum[j][i], fitvalsNumEL[j][i], fitvalsNumEH[j][i]))
+
+    print "\n MC"
+    outMC = open(mcOutput, "w+")
+    for i in range(len(etalow)):
+        for j in range(len(ptlow)):
+            fitvalsDenEL[j][i] = abs(fitvalsDenEL[j][i])
+            fitvalsDenEH[j][i] = abs(fitvalsDenEH[j][i])
+            print "%4.1f  %4.1f   %6.4f   %6.4f  %6.4f   %6.4f   %6.4f \n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], fitvalsDen[j][i], fitvalsDenEL[j][i], fitvalsDenEH[j][i])
+            outMC.write("%4.1f  %4.1f   %6.4f   %6.4f  %6.4f   %6.4f   %6.4f \n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], fitvalsDen[j][i], fitvalsDenEL[j][i], fitvalsDenEH[j][i]))
+            #out.write("%4.1f  %4.1f   %+6.4f   %+6.4f  %6.4f   %6.4f \n"%(eta0, eta1, pT0, pT1, fitvalsDen[i][j], fitvalsDenE[i][j]))
+        
+    #out.write("-------------^MC^-------------\n")
+    outSF = open(SFOutput, "w+")
+    print "\n SF"
+    for i in range(len(etalow)):
+        for j in range(len(ptlow)):       
+            SF = fitvalsNum[j][i]/fitvalsDen[j][i]
+            SFEL = SF * math.sqrt(pow(fitvalsNumEL[j][i]/fitvalsNum[j][i],2) + pow(fitvalsDenEL[j][i]/fitvalsDen[j][i],2))
+            SFEH = SF * math.sqrt(pow(fitvalsNumEH[j][i]/fitvalsNum[j][i],2) + pow(fitvalsDenEH[j][i]/fitvalsDen[j][i],2))
+            print "%4.1f  %4.1f   %4.1f   %4.1f  %6.4f  %6.4f  %6.4f\n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], SF, SFEL, SFEH)
+            outSF.write("%4.1f  %4.1f   %4.1f   %4.1f  %6.4f  %6.4f  %6.4f\n"%(etalow[i], etahigh[i], ptlow[j], pthigh[j], SF, SFEL, SFEH))
+        
+
+if __name__ == "__main__":  
+    parser = OptionParser()
+    parser.add_option("-d", "--data", default="test.root", help="Input filename data")
+    parser.add_option("-m", "--mc", default="test.root", help="Input filename mc")
+    parser.add_option("-f", "--directory", default="GsfElectronToRECO/Medium", help="Directory with workspace")
+    parser.add_option("-o", "--output", default="ID", help="Output filename")
+
+    (options, arg) = parser.parse_args()
+     
+    main(options)

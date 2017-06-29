@@ -155,6 +155,10 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     //--- get res DYJets histograms ---
     getHistos(hResDYJets, fDYJets, "hresponse" + variable);
 
+    for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+      hRecSumBg[iSyst] = 0;
+    }
+
     //--- get rec Bg histograms ---
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
       std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
@@ -168,16 +172,17 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 	      //exit(1);
 	      continue;
 	  }	  
-	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  //	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  if (hRecSumBg[iSyst]==0) hRecSumBg[iSyst] = (TH1D*) hRecBg[iBg][iSyst]->Clone();
 	  else{
-	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+	    if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
 		  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
 			    << "Histogram " << hRecSumBg[iSyst]->GetName()
 			    << "for systematic index " << iSyst
 			    << " and background index " << iBg
 			    << " has a different bining than the background #0.\n";
-	      }
-	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+	    }
+	    hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
 	  }
       }
     }

@@ -41,6 +41,9 @@ public :
    ULong64_t       TrigHltPhot;
    ULong64_t       TrigHltMu;
    ULong64_t       TrigHltDiMu;
+   ULong64_t       TrigHltDiEl;
+   ULong64_t       TrigHltEl;
+   ULong64_t       TrigHltElMu;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -240,6 +243,9 @@ public :
    TBranch        *b_TrigHltPhot;   //!
    TBranch        *b_TrigHltMu;   //!
    TBranch        *b_TrigHltDiMu;   //!
+   TBranch        *b_TrigHltDiEl;   //!
+   TBranch        *b_TrigHltEl;   //!
+   TBranch        *b_TrigHltElMu;   //!
    TBranch        *b_METPt;   //!
    TBranch        *b_METPx;   //!
    TBranch        *b_METPy;   //!
@@ -691,6 +697,9 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("TrigHltPhot", &TrigHltPhot, &b_TrigHltPhot);
    fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
    fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
+   fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
+   fChain->SetBranchAddress("TrigHltEl", &TrigHltEl, &b_TrigHltEl);
+   fChain->SetBranchAddress("TrigHltElMu", &TrigHltElMu, &b_TrigHltElMu);
    fChain->SetBranchAddress("METPt", &METPt, &b_METPt);
    fChain->SetBranchAddress("METPx", &METPx, &b_METPx);
    fChain->SetBranchAddress("METPy", &METPy, &b_METPy);

@@ -9,7 +9,7 @@
 
 void fixYscale(double linfact, double logfact, double logMaxRange){
 
-  const int verbosity  = 2;
+  const int verbosity  = 0;
 
   if(logfact <= 0) logfact = linfact;
   

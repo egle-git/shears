@@ -922,12 +922,6 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	      continue;
 	    }
 	    double lumi = hLumi->GetBinContent(1);
-	    if(lumi < 2000.){
-	      lumi = 2191.78;
-	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
-			<< ". Integrated luminosity forced to " << lumi << " pb-1"
-			<< "\n";
-	    }
 	    h_->Scale(1./lumi);
 	  }
 	  
@@ -937,6 +931,7 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	  delete f;
 	}
       }
+
       if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
 	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
 	h[i]->Scale(1./ich);

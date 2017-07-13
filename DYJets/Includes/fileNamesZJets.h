@@ -38,9 +38,10 @@ const processInfoStruct Samples[] = {
     /*11*/{"VV",    	'=',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " VV",         "VV"},
     /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS)"},
     /*13*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10, " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 4j LO + PS)"},
-    /*14*/{"DYJets_GE", ' ',     1.,       1.,      1,  0.00,     kBlue-5,   kBlue-5,  " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
-    /*15*/{"DYJets_GEas1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
+    /*14*/{"DYJets_GE", ' ',     1.,       1.,      1,  0.00,     kBlue-5,   kBlue-5,  " Z/#gamma^{*} #rightarrow ll", "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
+    /*15*/{"DYJets_GEas1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
     /*16*/{"DYJets_ZjNNLO", ' ',1.,       1.,       1,  0.00,     kOrange,   kOrange, " Z/#gamma^{*} #rightarrow ll", "N_{jetti} NNLO (1j NNLO)"},
+    /*17*/{"DYJets_GE10as1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE 1.0 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
     };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);

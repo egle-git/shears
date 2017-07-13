@@ -105,9 +105,10 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     plot->SetPad(0.01, y1, 0.99, y0);
     if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0)) plot->SetLogy();
     if (plotNumber == 1 && canvasName.Index("DPhiZFirstJet") > 0) plot->SetLogy();
-    //    if (canvasName.Index("ZPt_") > 0){
-    //	plot->SetLogx();
-    //}
+    if (canvasName.Index("ZPt_") > 0){
+	plot->SetLogx();
+	plot->SetLogy(0);
+    }
     plot->SetLeftMargin(0.13);
     plot->SetRightMargin(0.07);
     plot->SetFillStyle(0);
@@ -259,8 +260,7 @@ void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString leg
 
     grCentral->SetTitle();
     grCentral->GetXaxis()->SetTitle();
-    if (legend) legend->AddEntry(grCentral, legText, "PLEF");
-
+    //    if (legend) legend->AddEntry(grCentral, legText, "PLEF");
 }
 
 TGraphAsymmErrors* createGrFromHist(const TH1 *h)
@@ -852,19 +852,6 @@ void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *
         hSyst->GetXaxis()->SetTitleFont(ts.defaultFont);
         hSyst->GetXaxis()->SetTitleSize(ts.xTitleSize);
         hSyst->GetXaxis()->SetTitleOffset(3.0);
-//        hSyst->GetYaxis()->SetLabelSize(0.09);
-//        if (numbOfGenerator == 2) hSyst->GetYaxis()->SetLabelSize(0.105);
-//        if (numbOfGenerator == 3) hSyst->GetYaxis()->SetLabelSize(0.115);
-//        hSyst->GetYaxis()->SetTitleSize(0.08);
-//        if (numbOfGenerator == 2) hSyst->GetYaxis()->SetTitleSize(0.100);
-//        if (numbOfGenerator == 3) hSyst->GetYaxis()->SetTitleSize(0.10);
-//        hSyst->GetYaxis()->SetTitleOffset(0.8);
-//        if (numbOfGenerator == 2) hSyst->GetYaxis()->SetTitleOffset(0.63);
-//        if (numbOfGenerator == 3) hSyst->GetYaxis()->SetTitleOffset(0.60);
-//-->
-//	hSyst->GetXaxis()->SetLabelSize(0.12);
-//        hSyst->GetXaxis()->SetTitleSize(0.12);
-//        hSyst->GetXaxis()->SetTitleOffset(1.0);
     }
     else if(hSyst){
         hSyst->GetXaxis()->SetTitle();
@@ -1643,6 +1630,12 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
 
     std::vector<std::string> predictions = cfg.getVS("predictions");
 
+    std::vector<std::string> tmp;
+    for(auto v: predictions){
+	if(v.size() != 0) tmp.push_back(v);
+    }
+    std::swap(tmp, predictions);
+
     TString unfCfgFile = cfg.getS("unfConf");
     static SectionedConfig unfCfg;
     unfCfg.read(unfCfgFile, true);
@@ -1703,15 +1696,30 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
 	 }
 	delete fdata;
     } else{
-	hRef = getGenHistos(std::vector<std::string>(1, ref), lepSel.c_str(), variable, true, true)[0];
-	hRef->SetZTitle(getLegendGen(ref));
+	hRef = (TH1*)getGenHistos(std::vector<std::string>(1, ref), lepSel.c_str(), variable, true, true)[0];
+	if(hRef){
+	    //to avoid double rescale (see Scale(fac) below and in makeCrossSectionPlot method)
+	    //FIXME: use a smart pointer
+	    hRef = (TH1*) hRef->Clone();
+	    hRef->SetZTitle(getLegendGen(ref));
+	} 
     }
 
+    if(hRef){
+	double fac = cfg.getF(TString("scale_") + ref, 1.);
+	if(fac != 1.){
+	    std::cout << "Scaling " << ref << " by factor " << fac << std::endl;
+	    hRef->Scale(fac);
+	}
 
-    TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, lumi, variable, doNormalized,
-						     hRef, hCov,
-						     predictions, nFirstBinsToSkip, nLastBinsToSkip);
-    saveCanvas(crossSectionPlot, dir, fname);
+	TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, lumi, variable, doNormalized,
+							 hRef, hCov,
+							 predictions, nFirstBinsToSkip, nLastBinsToSkip);
+	saveCanvas(crossSectionPlot, dir, fname);
+    } else{
+	std::cerr << "Warning: no reference histogram was found for variable " << variable << ", channel "
+		      << lepSel << "\n";
+    }
     delete hRef;
     delete hCov;
 }
@@ -1751,6 +1759,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 
     bool isPrel = cfg.getB("preliminaryTag", true);    
     std::vector<TH1*> hGens = getGenHistos(gens, lepSel, variable);
+
     std::vector<TH1*> tmp1;
     std::vector<std::string> tmp2;
     
@@ -1792,10 +1801,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	for (int i = 1; i <= nBins; ++i) {
 	    hSyst->SetBinError(i, sqrt(pow(hStat->GetBinError(i), 2) + hCovSyst->GetBinContent(i, i)));
 	}
-	grCentralSyst = createGrFromHist(hSyst);
-	grCentralSystRatio = createRatioGraph(grCentralSyst);
-	grCentralSyst->SetName("gr" + variable + "CentralTotError"); 
     }
+    grCentralSyst = createGrFromHist(hSyst);
+    grCentralSystRatio = createRatioGraph(grCentralSyst);
+    grCentralSyst->SetName("gr" + variable + "CentralTotError"); 
   
     std::vector<TGraphAsymmErrors*> grGen1ToCentral(hGens.size(), 0);
     std::vector<TGraphAsymmErrors*> grGen1ScaleSyst(hGens.size(), 0);
@@ -1836,12 +1845,17 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
     customizeLegend(canvasName, legend, numbOfGenerator);
+    if(grCentralSyst){
+	legend->AddEntry(grCentralSyst, hStat->GetZaxis()->GetTitle(), "PLEF");
+    } else{
+	legend->AddEntry(grCentralStat, hStat->GetZaxis()->GetTitle(), "PLE");	
+    }
     //------------------
-
-    if(grCentralSyst) customizeCentral(grCentralSyst, legend, hStat->GetZaxis()->GetTitle());
+    if(grCentralSyst) customizeCentral(grCentralSyst, 0, hStat->GetZaxis()->GetTitle());
     customizeCentral(grCentralStat, false);
+    //customizeCentral(grCentralStat, legend, hStat->GetZaxis()->GetTitle());
     if(grCentralSystRatio) customizeCentral(grCentralSystRatio, true);
-    if(grCentralSystRatio) customizeCentral(grCentralStatRatio, true);
+    if(grCentralStatRatio) customizeCentral(grCentralStatRatio, true);
     if(hSyst){
 	hSyst->SetLineColor(kWhite);
 	hSyst->SetMarkerColor(kWhite);
@@ -1875,8 +1889,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	hSyst->SetStats(0);
 	configXaxis(hSyst, 0, variable);
 	hSyst->DrawCopy("e");
-	grCentralSyst->SetName("grCentralSyst");
-	grCentralSyst->Draw("2");
+	if(grCentralSyst){
+	    grCentralSyst->SetName("grCentralSyst");
+	    grCentralSyst->Draw("2");
+	}
     }
 
     igen = -1;
@@ -1900,7 +1916,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 
     fixYscale(1.2, 1.1);
     //    if (canvasName.Contains("JZB")) fixYscale(1.2, 1.2);
-
+    if(canvasName.Contains("ZPt")>=0) fixYscale(1.5, 1.5);
     //--- TLatex stuff ---
     //TLatex *latexLabel = new TLatex(); 
     //latexLabel->SetNDC();
@@ -1955,6 +1971,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     } else if (canvasName.Contains("JZB_ptHigh")){
 	xlabel = 0.35;
 	ylabel = 0.23;
+	//	descLabel.DrawLatex(0.4,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
+    } else if (canvasName.Contains("ZPt_Zinc1jet")){
+	xlabel = 0.18;
+	ylabel = 0.60;
 	//	descLabel.DrawLatex(0.4,0.21-0.05,"anti-k_{T} (R = 0.4) Jets");
     } else{
 	xlabel = 0.18;

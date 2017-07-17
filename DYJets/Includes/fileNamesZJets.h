@@ -41,7 +41,7 @@ const processInfoStruct Samples[] = {
     /*14*/{"DYJets_GE", ' ',     1.,       1.,      1,  0.00,     kBlue-5,   kBlue-5,  " Z/#gamma^{*} #rightarrow ll", "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
     /*15*/{"DYJets_GEas1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
     /*16*/{"DYJets_ZjNNLO", ' ',1.,       1.,       1,  0.00,     kOrange,   kOrange, " Z/#gamma^{*} #rightarrow ll", "N_{jetti} NNLO (1j NNLO)"},
-    /*17*/{"DYJets_GE10as1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE 1.0 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
+    /*17*/{"DYJets_GE10as1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
     };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);

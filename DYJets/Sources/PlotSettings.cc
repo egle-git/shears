@@ -482,6 +482,99 @@ TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString 
 
 }
 
+// --- This function is dedicated for Geneva theoretical prediction (inclusive) ---
+TGraphAsymmErrors* createGenevaIncScaleSystGraph(TString sample, TString lepSel, TString variable,
+					const TGraphAsymmErrors *grGenToCentral)
+{
+    int nPoints = grGenToCentral->GetN();
+    double *xCoor    = new double[nPoints];
+    double *yCoor    = new double[nPoints];
+    double *xErr     = new double[nPoints];
+    double *yErrUp   = new double[nPoints];
+    double *yErrDown = new double[nPoints];
+
+    TString histoDir = cfg.getS("histoDir");
+    TFile *fDE;
+    if (lepSel == "DE" || lepSel == "") {
+        fDE = new TFile(histoDir + "/DE_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	if(!fDE || fDE->IsZombie()){
+	    std::cerr << "Fatal error. Failed to open file  " << fDE->GetName()  << ".\n";
+	    abort();
+	}
+    }
+
+    TFile *fDMu;
+    if (lepSel == "DMu" || lepSel == "") {
+        fDMu = new TFile(histoDir + "/DMu_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+	if(!fDMu || fDMu->IsZombie()){
+	    std::cerr << "Fatal error. Failed to open file  " << fDMu->GetName()  << ".\n";
+	    abort();
+	}
+    }
+
+    TGraphAsymmErrors *grDE, *grDMu;
+    if (lepSel == "DE" || lepSel == "") {
+        grDE = (TGraphAsymmErrors*) fDE->Get("gen" + variable + "_scaleUncInc");
+	//FIXME mem. leak
+	if(!grDE) return 0;
+    }
+    if (lepSel == "DMu" || lepSel == "") {
+        grDMu = (TGraphAsymmErrors*) fDMu->Get("gen" + variable + "_scaleUncInc");
+	//FIXME mem. leak
+	if(!grDMu) return 0;
+    }
+
+    // ---- this variable is used to fetch the TGraph of scale uncertainty from input file ----
+    double *xMeanDMu  = new double[nPoints];
+    double *yMeanDMu  = new double[nPoints];
+    double *xMeanDE   = new double[nPoints];
+    double *yMeanDE   = new double[nPoints];
+
+    for (int i(0); i < nPoints; i++) {
+        grGenToCentral->GetPoint(i, xCoor[i], yCoor[i]);
+
+        xErr[i] = grGenToCentral->GetErrorXlow(i);
+
+        yErrUp[i] = pow(grGenToCentral->GetErrorYhigh(i), 2);
+        yErrDown[i] = pow(grGenToCentral->GetErrorYlow(i), 2);
+
+        if ((lepSel == "DMu" && grDMu) || (lepSel == "DMu" && grDMu && !grDE)) {
+            grDMu->GetPoint(i, xMeanDMu[i], yMeanDMu[i]);
+            yErrUp[i] += pow((grDMu->GetErrorYhigh(i)/yMeanDMu[i]) * yCoor[i], 2);
+            yErrDown[i] += pow((grDMu->GetErrorYlow(i)/yMeanDMu[i]) * yCoor[i], 2);
+        }
+
+        if ((lepSel == "DE" && grDE) || (lepSel == "DMu" && !grDMu && grDE)) {
+            grDE->GetPoint(i, xMeanDE[i], yMeanDE[i]);
+            yErrUp[i] += pow((grDE->GetErrorYhigh(i)/yMeanDE[i]) * yCoor[i], 2);
+            yErrDown[i] += pow((grDE->GetErrorYlow(i)/yMeanDE[i]) * yCoor[i], 2);
+        }
+
+        if (lepSel == "" && grDE && grDMu) {
+            grDMu->GetPoint(i, xMeanDMu[i], yMeanDMu[i]);
+            grDE->GetPoint(i, xMeanDE[i], yMeanDE[i]);
+            yErrUp[i] += pow(((grDMu->GetErrorYhigh(i) + grDE->GetErrorYhigh(i)) / (yMeanDMu[i] + yMeanDE[i])) * yCoor[i], 2);
+            yErrDown[i] += pow(((grDMu->GetErrorYhigh(i) + grDE->GetErrorYhigh(i)) / (yMeanDMu[i] + yMeanDE[i])) * yCoor[i], 2);
+        }
+
+        yErrUp[i] = sqrt(yErrUp[i]);
+        yErrDown[i] = sqrt(yErrDown[i]);
+
+    }
+
+    TGraphAsymmErrors *grScaleSyst = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErrDown, yErrUp);
+    delete [] xCoor; delete [] yCoor; delete [] xErr; delete [] yErrDown; delete [] yErrUp;
+    delete [] xMeanDMu; delete [] yMeanDMu; delete [] xMeanDE; delete [] yMeanDE;
+    if (lepSel == "DE" || lepSel == "") {
+        fDE->Close();
+    }
+    if (lepSel == "DMu" || lepSel == "") {
+        fDMu->Close();
+    }
+    return grScaleSyst;
+
+}
+
 // --- This function is dedicated for NNLO theoretical prediction ---
 TGraphAsymmErrors* createNNLOScaleSystGraph(TString lepSel, TString variable, const TGraphAsymmErrors *grGenToCentral)
 {
@@ -1821,7 +1914,11 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	    
 	} else if(showSys == 2){
 	    grGen1ScaleSyst[igen] = createNNLOScaleSystGraph(lepSel, variable, grGen1ToCentral[igen]);
-	}
+	} else if(showSys == 3){
+	    grGen1ScaleSyst[igen] = createScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
+    } else if(showSys == 4){
+	    grGen1ScaleSyst[igen] = createGenevaIncScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
+    }
     }
 
     //--- Main Canvas ---

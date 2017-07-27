@@ -155,6 +155,10 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     //--- get res DYJets histograms ---
     getHistos(hResDYJets, fDYJets, "hresponse" + variable);
 
+    for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+      hRecSumBg[iSyst] = 0;
+    }
+
     //--- get rec Bg histograms ---
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
       std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
@@ -168,16 +172,17 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 	      //exit(1);
 	      continue;
 	  }	  
-	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  //	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  if (hRecSumBg[iSyst]==0) hRecSumBg[iSyst] = (TH1D*) hRecBg[iBg][iSyst]->Clone();
 	  else{
-	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+	    if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
 		  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
 			    << "Histogram " << hRecSumBg[iSyst]->GetName()
 			    << "for systematic index " << iSyst
 			    << " and background index " << iBg
 			    << " has a different bining than the background #0.\n";
-	      }
-	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+	    }
+	    hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
 	  }
       }
     }
@@ -917,12 +922,8 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	      continue;
 	    }
 	    double lumi = hLumi->GetBinContent(1);
-	    if(lumi < 2000.){
-	      lumi = 36773.78;
-	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
-			<< ". Integrated luminosity forced to " << lumi << " pb-1"
-			<< "\n";
-	    }
+            //cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" <<lumi << "\n";
+            //lumi = 35290.;
 	    h_->Scale(1./lumi);
 	  }
 	  
@@ -932,6 +933,7 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	  delete f;
 	}
       }
+
       if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
 	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
 	h[i]->Scale(1./ich);

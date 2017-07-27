@@ -111,7 +111,15 @@ void fixYscale(double linfact, double logfact, double logMaxRange){
     }
 
     double y_leg_min = std::min(tl->GetY1NDC(), tl->GetY2NDC());
-    y_leg_min = ymin + (ymax-ymin) * y_leg_min;
+    if(gPad->GetLogy()){
+      y_leg_min = ymin * std::pow(ymax/ymin, y_leg_min);
+    } else{
+      y_leg_min = ymin + (ymax-ymin) * y_leg_min;
+    }
+    if(verbosity > 0) std::cout << "tl->GetY1NDC(), tl->GetY2NDC(): "
+				<< tl->GetY1NDC() << "," << tl->GetY2NDC() << "\n";
+
+    //    y_leg_min = gPad->PixeltoY(gPad->VtoPixel(y_leg_min) - gPad->GetWh());
     
     if(verbosity > 0 ) std::cout << "ymax_in_leg_area = " << ymax_in_leg_area 
 				 << ", y_leg_min = " << y_leg_min << "\n";

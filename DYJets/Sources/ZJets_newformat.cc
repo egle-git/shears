@@ -751,7 +751,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		    	   nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
 			   nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass += weight;
 			   passesLeptonCut = 1;
-			   //passesLeptonMassCut = 1;
+/*			   //passesLeptonMassCut = 1;
 
                             //  ----  code Phi* AG
                             phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
@@ -761,6 +761,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                             //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
                             phistar = tan(phi_acop/2.) * sinthetastar;
                            //  cout << "phistar = " << phistar << "\n";
+*/
                         }
 		    }
 		}
@@ -822,6 +823,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         vector<int> usedGenPho;
         TLorentzVector genMET;
         double genMT = -99;
+        double genPhi_acop= -99; 
+        double genSinthetastar= -99, genCosthetastar=-99;
+        double genPhistar= -99;
         TLorentzVector genEWKBoson;
         int countTauS3 = 0;
 	
@@ -1014,6 +1018,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                   if (leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) passesLeptonCutNoMass = 1;
                   else passesLeptonCutNoMass = 0;
 
+
                   if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh && leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
 		  // cout <<  "AndGoodMass" << "\n";
 		  passesLeptonCut = 1;
@@ -1022,7 +1027,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			  passesLeptonCut = 0;
 			}
 		   } // end if re-selection of leptons
-
+                   
+                   // boosted Z
+                   //if(abs(leptons[1].v.Eta())<0.9 && abs(leptons[0].v.Eta())< 0.9 && deltaPhi(leptons[0].v,leptons[1].v) < 1.22)  passesLeptonCut = 0; 
 
           }  // if((lepSel == "DMu"  
        } // if (hasRecoInfo && doRochester)
@@ -1070,6 +1077,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			    passesLeptonCut = 0;
 			}
 		    } // end if re-selection of leptons
+                     // boosted Z
+                    //if(abs(leptons[1].v.Eta())<0.9 && abs(leptons[0].v.Eta())< 0.9 && deltaPhi(leptons[0].v,leptons[1].v) < 1.22) passesLeptonCut = 0;
 		}
             } // end if DMu/DE channel
 
@@ -1110,7 +1119,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                 bool jetPassesEtaCut(fabs(jet.v.Rapidity()) <= 0.1*jetEtaCutMax); 
                 bool jetPassesIdCut(JetAk04Id->at(i) > 0);
-                bool jetPassesMVACut(JetAk04PuMva->at(i) > -0.2);
+                bool jetPassesMVACut(JetAk04PuMva->at(i) > -0.2); ///// check it!!!!!!
 
                 bool jetPassesdRCut(1);
                 unsigned short nRemovedLep = min(int(nLeptons), 2);
@@ -1124,7 +1133,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (passesLeptonCut && jet.v.Pt() >= 30 && jetPassesEtaCut && jetPassesIdCut && jetPassesdRCut)  // no MVA cut
                 fill(puMVA, JetAk04PuMva->at(i), weight);
 
-                if (jetPassesPtCut && jetPassesEtaCut && jetPassesIdCut && jetPassesMVACut && jetPassesdRCut) {
+                if (jetPassesPtCut && jetPassesEtaCut && jetPassesMVACut && jetPassesIdCut  && jetPassesdRCut) {  // jetPassesMVACut 
                     jets.push_back(jet);
                     // as soon as one selected jet is a b-jet, turn bTagJetFound to true
                     bTagJetFound = (bTagJetFound || passesBJets); 
@@ -1327,11 +1336,38 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
      
         if (hasGenInfo){
 
+            // 2016 
+            if(ngenLeptons >= 2){
+                 genPhi_acop = PI - deltaPhi(genLeptons[0].v, genLeptons[1].v);
+                 if(genLeptons[0].charge < 0) genCosthetastar = tanh( (genLeptons[0].v.Eta() - genLeptons[1].v.Eta())/2. );
+                 else genCosthetastar = tanh( (genLeptons[1].v.Eta() - genLeptons[0].v.Eta())/2. );
+                 genSinthetastar = sqrt(1. - genCosthetastar*genCosthetastar);
+                 //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+                 genPhistar = tan(genPhi_acop/2.) * genSinthetastar;
+                 // cout << genPhistar << "\n";
+            }
+
             if(passesgenLeptonCutNoMass){
                if(genEWKBoson.M() > 115. && genEWKBoson.M() < 135.) fill(genZPt_Zinc0jetM115_135, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
-               if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130.) fill(genZPt_Zinc0jetM111_130, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
-               if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000.) fill(genZPt_Zinc0jetM130_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
-            }
+               if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130.) { 
+                    fill(genZPt_Zinc0jetM111_130, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc0jetM111_130, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000.) {
+                    fill(genZPt_Zinc0jetM130_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc0jetM130_3, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if (nGoodGenJets >= 1){
+                     if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130.) { 
+                        fill(genZPt_Zinc1jetM111_130, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM111_130, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                     if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000.) {
+                        fill(genZPt_Zinc1jetM130_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM130_3, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                }
+            } // no mass cut
 
             if (passesgenLeptonCut){
                 //cout << "Selected at gen level" << endl;
@@ -1347,6 +1383,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(genZNGoodJets_Zexc, nGoodGenJets, commonGenWeight*RatioValue, EvtWeights);
                 fill(genZNGoodJets_Zinc, 0., commonGenWeight, EvtWeights);
                 fill(genZMass_Zinc0jet, genEWKBoson.M(), commonGenWeight, EvtWeights);
+                fill(genPhistar_Zinc0jet, genPhistar, commonGenWeight, EvtWeights);
                 fill(genZPt_Zinc0jet, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
                 fill(genZRapidity_Zinc0jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
                 fill(genZEta_Zinc0jet, genEWKBoson.Eta(), commonGenWeight, EvtWeights);
@@ -1462,6 +1499,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     }
 
                     fill(genZNGoodJets_Zinc, 1., commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc1jet, genPhistar, commonGenWeight, EvtWeights);
                     fill(genZPt_Zinc1jet, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
                     fill(genZRapidity_Zinc1jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
                     fill(genZAbsRapidity_Zinc1jet, fabs(genEWKBoson.Rapidity()), commonGenWeight, EvtWeights);
@@ -1939,12 +1977,38 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         if (hasRecoInfo && passesLeptonChargeCut && passesTauCut) {
             fill(ZMassFrom60_Zinc0jet, (leptons[0].v + leptons[1].v).M(), weight);
         }
+
+        // 2016 
+        if(nLeptons >= 2){
+            phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
+            if(leptons[0].charge < 0) costhetastar = tanh( (leptons[0].v.Eta() - leptons[1].v.Eta())/2. );
+            else costhetastar = tanh( (leptons[1].v.Eta() - leptons[0].v.Eta())/2. );
+            sinthetastar = sqrt(1. - costhetastar*costhetastar);
+            //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+            phistar = tan(phi_acop/2.) * sinthetastar;
+        }
         //  cout << passesLeptonCut << " , " << (!bTagJetFound || !rejectBTagEvents)  << "\n";
         if (hasRecoInfo && passesLeptonCutNoMass && (!bTagJetFound || !rejectBTagEvents)) {   // no Mass cut, fill the whole range
             fill(Mass_Zinc0jet, EWKBoson.M(), weight);  
             if(EWKBoson.M() > 115. && EWKBoson.M() < 135.) fill(ZPt_Zinc0jetM115_135, EWKBoson.Pt(), weight);
-            if(EWKBoson.M() >= 111. && EWKBoson.M() < 130.) fill(ZPt_Zinc0jetM111_130, EWKBoson.Pt(), weight);
-            if(EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.) fill(ZPt_Zinc0jetM130_3, EWKBoson.Pt(), weight);
+            if(EWKBoson.M() >= 111. && EWKBoson.M() < 130.) { 
+                 fill(ZPt_Zinc0jetM111_130, EWKBoson.Pt(), weight);
+                 fill(Phistar_Zinc0jetM111_130, phistar, weight);
+             }
+            if(EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.) {
+                  fill(ZPt_Zinc0jetM130_3, EWKBoson.Pt(), weight);
+                  fill(Phistar_Zinc0jetM130_3, phistar, weight);
+             }
+            if (nGoodJets >= 1){ 
+                  if(EWKBoson.M() >= 111. && EWKBoson.M() < 130.) { 
+                      fill(ZPt_Zinc1jetM111_130, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM111_130, phistar, weight);
+                  }
+                  if(EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.) {
+                      fill(ZPt_Zinc1jetM130_3, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM130_3, phistar, weight);
+                  }    
+            } //if (nGoodJets >= 1)
         }
 
         if (hasRecoInfo && passesLeptonCut && (!bTagJetFound || !rejectBTagEvents)) { 
@@ -1966,7 +2030,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             nEventsVInc0Jets++;
             nEffEventsVInc0Jets += weight;
             fill(ZNGoodJetsNVtx_Zexc, nGoodJets, EvtVtxCnt  , weight);
+            fill(ZNGoodJets20NVtx_Zexc, nGoodJets_20, EvtVtxCnt, weight);
             fill(ZNGoodJets_Zinc, 0., weight);
+            if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 0., weight);
+            if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 0., weight);
+            if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 0., weight);
+            if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 0., weight);
 
 	    double RatioValue = 1;
 	    if(UnfoldUnc){
@@ -1995,7 +2064,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             fill(VisPt_2_Zinc0jetQun, EWKBoson.Pt(), weight);
 	    if(nEvents % 2) fill(VisPt_Zinc0jetQun_Odd, EWKBoson.Pt(), weight);
 	    else fill(VisPt_Zinc0jetQun_Even, EWKBoson.Pt(), weight);
+/*
             // 2016 
+            phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
+            if(leptons[0].charge < 0) costhetastar = tanh( (leptons[0].v.Eta() - leptons[1].v.Eta())/2. );
+            else costhetastar = tanh( (leptons[1].v.Eta() - leptons[0].v.Eta())/2. );
+            sinthetastar = sqrt(1. - costhetastar*costhetastar);
+            //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+            phistar = tan(phi_acop/2.) * sinthetastar;
+*/             
             fill(Phistar_Zinc0jet, phistar, weight);
 
             if (nGoodJets == 0){
@@ -2094,6 +2171,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 }
 
                 fill(ZNGoodJets_Zinc, 1., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 1., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 1., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 1., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 1., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 1.);
                 fill(ZPt_Zinc1jet, EWKBoson.Pt(), weight);
                 fill(lepPt_Zinc1jet, leptons[0].v.Pt(), weight);
@@ -2294,6 +2376,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                 TLorentzVector jet1Plus2PlusZ = jet1Plus2 + EWKBoson;
                 fill(ZNGoodJets_Zinc, 2., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 2., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 2., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 2., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 2., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 2.);
                 fill(TwoJetsPtDiff_Zinc2jet, jet1Minus2.Pt(), weight);
                 fill(BestTwoJetsPtDiff_Zinc2jet, bestJet1Minus2.Pt(), weight);
@@ -2571,6 +2658,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 nEventsVInc3Jets++;
                 nEffEventsVInc3Jets += weight;
                 fill(ZNGoodJets_Zinc, 3., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 3., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 3., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 3., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 3., weight);
                 fill(ZNGoodJets_Zinc_NoWeight, 3.);
 
 		double RatioValue = 1.;
@@ -2661,6 +2752,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 4) fill(FourthJetPt_Zinc4jet, jets_20[3].v.Pt(), weight);
             if (nGoodJets >= 4){
                 fill(ZNGoodJets_Zinc, 4., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 4., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 4., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 4., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 4., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 4.);
                 fill(FourthJetEta_Zinc4jet, fabs(jets[3].v.Eta()), weight);
                 fill(FourthJetAbsRapidity_Zinc4jet, fabs(jets[3].v.Rapidity()), weight);
@@ -2679,6 +2775,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 5) fill(FifthJetPt_Zinc5jet, jets_20[4].v.Pt(), weight);
             if (nGoodJets >= 5){
                 fill(ZNGoodJets_Zinc, 5., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 5., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 5., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 5., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 5., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 5.);
                 fill(FifthJetEta_Zinc5jet, fabs(jets[4].v.Eta()), weight);
                 fill(FifthJetAbsRapidity_Zinc5jet, fabs(jets[4].v.Rapidity()), weight);
@@ -2697,6 +2798,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 6) fill(SixthJetPt_Zinc6jet, jets_20[5].v.Pt(), weight);
             if (nGoodJets >= 6){
                 fill(ZNGoodJets_Zinc, 6., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 6., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 6., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 6., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 6., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 6.);
                 fill(SixthJetEta_Zinc6jet, fabs(jets[5].v.Eta()), weight);
                 fill(SixthJetEtaHigh_Zinc6jet, fabs(jets[5].v.Eta()), weight);
@@ -2713,6 +2819,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
             if (nGoodJets >= 7){
                 fill(ZNGoodJets_Zinc, 7., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 7., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 7., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 7., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 7., weight);
                 if (nGoodJets == 7 ){
                     //fill(TruePU_7, EvtPuCntTruth, weight);
                     //fill(PU_7, EvtPuCnt, weight);
@@ -2721,6 +2831,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
             if (nGoodJets >= 8){
                 fill(ZNGoodJets_Zinc, 8., weight);
+               if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 8., weight);
+               if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 8., weight);
+               if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 8., weight);
+               if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 8., weight);
             }
 	    
 	    if (nGoodJets >= 1){
@@ -2790,12 +2904,28 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                  if(genEWKBoson.M() > 115. && genEWKBoson.M() < 135. && EWKBoson.M() > 115. && EWKBoson.M() < 135.)
                  fill(hresponseZPt_Zinc0jetM115_135, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
 
-                 if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130. && EWKBoson.M() >= 111. && EWKBoson.M() < 130.)
-                 fill(hresponseZPt_Zinc0jetM111_130, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                 if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130. && EWKBoson.M() >= 111. && EWKBoson.M() < 130.){
+ 
+                    fill(hresponseZPt_Zinc0jetM111_130, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    fill(hresponsePhistar_Zinc0jetM111_130, phistar, genPhistar, weight);
+                 }
 
-                 if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000. && EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.)
-                 fill(hresponseZPt_Zinc0jetM130_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
-            }
+                 if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000. && EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.){
+                    fill(hresponseZPt_Zinc0jetM130_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    fill(hresponsePhistar_Zinc0jetM130_3, phistar, genPhistar, weight);
+                 }
+
+                 if (nGoodGenJets >= 1 && nGoodJets >= 1){ // inclusive one jet
+                       if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130. && EWKBoson.M() >= 111. && EWKBoson.M() < 130.){ 
+                          fill(hresponseZPt_Zinc1jetM111_130, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM111_130, phistar, genPhistar, weight);
+                       }
+                       if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 3000. && EWKBoson.M() >= 130. && EWKBoson.M() <= 3000.){
+                          fill(hresponseZPt_Zinc1jetM130_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM130_3, phistar, genPhistar, weight);
+                       }
+                 }
+            } // pass gen and reco lep cuts
 
 
             if (passesgenLeptonCut && passesLeptonCut) {
@@ -2807,6 +2937,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		}
 
                 fill(hresponseZNGoodJets_Zexc, nGoodJets, nGoodGenJets, weight*RatioValue);
+                fill(hresponsePhistar_Zinc0jet, phistar, genPhistar, weight);
                 fill(hresponseZPt_Zinc0jet, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
 		fill(hresponseVisPt_Zinc0jetQun, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
             }
@@ -2815,6 +2946,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodGenJets >= 1 && passesgenLeptonCut && nGoodJets >= 1 && passesLeptonCut) {
 
                 fill(hresponseZPt_Zinc1jet, EWKBoson.Pt(),genEWKBoson.Pt(),weight);
+                fill(hresponsePhistar_Zinc1jet, phistar, genPhistar, weight);
                 fill(hresponseZAbsRapidity_Zinc1jet, fabs(EWKBoson.Rapidity()), fabs(genEWKBoson.Rapidity()), weight);      
 
 		double RatioValue = 1.;
@@ -3293,14 +3425,27 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     JobInfo->SetBinContent(kNEvts, nEventsToProcess);
     JobInfo->SetBinContent(kNEvtsSample, nentries);
     JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
-   // double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nentries)): yieldScale;
-     double data_frac = EvtIsRealData ? (nEventsToProcess / double(nentries)): yieldScale;
-    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
+
+    cout << "nEventsToProcessTot = " << nEventsToProcessTot << " , nEventsToProcess = " << nEventsToProcess << " , double(nentries) = " << double(nentries) << "\n" << " , yieldScale = " << yieldScale << " , nJobs = " << nJobs <<   "\n";
+
+    // nEventsToProcessTot is defined by maxevt in the cfg file. If one indicated maxevt then nEventsToProcessTot=nEventsToProcess, if not and split the full sample by Njobs
+    // then nEventsToProcessTot = netries and nEventsToProcess corresponds to jobNum statistics (yieldScale is calulated using this fraction of full stat)
+    double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nentries)): yieldScale;
+
+    if(nJobs > 1){  // AG: in one run on full stat with division nJobs then yieldScale =1
+        //  1./nJobs = nEventsToProcess / double(nentries)
+        double  data_frac_njob = EvtIsRealData ? (nEventsToProcess / double(nentries)): yieldScale*1./nJobs;
+        Lumi->SetBinContent(1., lumi_ *  data_frac_njob);
+    }
+    else Lumi->SetBinContent(1., lumi_ *  data_frac);
+ 
     //store integrated luminosity in Lumi histogram:
-   // cout << "!!!! data_frac = " << data_frac << " , " << nEventsToProcess << " , " << double(nentries) << "\n";
-   // cout << " !!!!!!!! lumi = " << lumi_ << " , " << lumi_ *  data_frac << "\n";
+    //cout << "!!!! data_frac = " << data_frac << " , " << nEventsToProcess << " , " << double(nentries) << "\n";
+    //cout << " !!!!!!!! lumi = " << lumi_ << " , " << lumi_ *  data_frac << "\n";
     
-    Lumi->SetBinContent(1., lumi_ *  data_frac);
+ 
+    //else Lumi->SetBinContent(1., lumi_ *  data_frac*);
+    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
     JobInfo->SetBinContent(kXsec, xsec_);
 
     

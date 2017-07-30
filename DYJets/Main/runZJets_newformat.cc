@@ -296,13 +296,14 @@ int main(int argc, char **argv)
 		bonzaiDir = mcBonzaiDir;
 		yieldScale = mcYieldScale;
 	    }
-
+	
 	    //read the MC yield scale from file in case of auto scale mode
 	    //this is done in the loop as the file is created at the
 	    //first iteration in the case of the doWhat=ALL option
 	    if(yieldScale == -1.){
-		std::cout << TString("Reading mc yield from file ") + histoDir + ".mcYieldScale...";
-		std::ifstream f(histoDir + ".mcYieldScale");
+		std::cout << TString("Reading mc yield from file ") + histoDir + "mcYieldScale.txt...";
+		//std::ifstream f(histoDir + ".mcYieldScale");
+		std::ifstream f("mcYieldScale.txt");
 		if(!f.good()) {
 		    std::cout << "  FAILED.\n";
 		    exit(1);
@@ -335,14 +336,32 @@ int main(int argc, char **argv)
 			  << " needs to be defined in configuration file with sample_Data parameter.";
 		return 1;
 	    }
-	    ZJets ana(lepSel, Samples[iSample].name, TString::Format(input, lepSel.Data()), lumi,  trigCorr,
-		      syst[iSyst], systDir[iSyst], Samples[iSample].xsecError,
-		      lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
-		      maxEvents, histoDir, bonzaiDir, maxFiles);
-	    ana.Loop(hasRecoInfo, hasGenInfo, jobNum, nJobs, pdfSet, pdfMember, muR, muF, yieldScale);
-	    if(Samples[iSample].merge == '+'){
-		std::string tmpString(ana.outputFileName.Data());
-		tomerge.push_back(tmpString);
+
+	    
+	    std::cout<<TString::Format(input, lepSel.Data())<<std::endl;
+
+	    
+
+	    for(int i=1;i<=nJobs;i++){
+		printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
+		printf("++++++++++++  Trying job %d  ++++++++++++++++\n",i);
+		printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
+
+		ZJets ana(lepSel, Samples[iSample].name, TString::Format(input, lepSel.Data()), lumi,
+			  trigCorr,
+			  syst[iSyst], systDir[iSyst], Samples[iSample].xsecError,
+			  lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
+			  maxEvents, histoDir, bonzaiDir, maxFiles);
+		
+		ana.Loop(hasRecoInfo, hasGenInfo, i, nJobs, 
+			 pdfSet, pdfMember, muR, muF, yieldScale);
+	
+		if(i==1){
+		    if(Samples[iSample].merge == '+'){
+			std::string tmpString(ana.outputFileName.Data());
+			tomerge.push_back(tmpString);
+		    }
+		}
 	    }
 	}//next sample, iSample      
     }//next systematic, iSyst

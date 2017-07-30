@@ -516,20 +516,64 @@ the MC stuff. Basically a file is created after it runs on Data with the percent
 it used. This file is then used by MC to set up what percentage of runs to do letter based 
 corrections. 
 
+Going to run with the new data/mc with 10M events and all the new map stuff:
+
+$ nohup runZJets_newformat doWhat=DATA &> ZJets_Data_1_06_28_2017.log &
+  - lxplus007
+$ nohup runZJets_newformat doWhat=DYJETS &> ZJets_DYJets_1_06_28_2017.log &
+  - lxplus007
+$ nohup runZJets_newformat doWhat=BACKGROUND &> ZJets_Background_1_06_28_2017.log &
+  - lxplus007
+
+_________________07_15_2017
+
+Trying to get things running with crab. I will put all the outputs in the smp area since it will be 
+very small files and it makes sense to be there anyways. All of this will be done in DYJetss/crab.d 
+as usual for now. 
+
+Changed the two files around a lot. There is a crab config files and a shell script that actually does
+the real work. There may be an issue trying to get the files such as mcYieldScale into the jobs but for
+now I will just run with Data and see what comes out.
+
+crab submit
+Will use CRAB configuration file crabConfig.py
+Importing CMSSW configuration donothing_cfg.py
+Finished importing CMSSW configuration donothing_cfg.py
+Sending the request to the server
+Success: Your task has been delivered to the CRAB3 server.
+Task name: 170715_153039:darcaro_crab_ZJetsAna
+Please use 'crab status' to check how the submission process proceeds.
+Log file is /afs/cern.ch/work/d/darcaro/private/CMSSW_8_0_26_patch2/src/shears/DYJets/crab.d/crab_ZJetsAna/crab.log
+
+_________________07_15_2017
+
+Crab is going for the data sample. The one with all three failed due to timeout. I will run the other
+two locally and hopefully the crab one is successful.
+
+$ nohup runZJets_newformat doWhat=DYJETS &> ZJets_DYJets_1_07_20_2017.log &
+ - lxplus084
+$ nohup runZJets_newformat doWhat=BACKGROUND &> ZJets_Background_1_07_20_2017.log &
+ - 
 
 
+_________________07_27_2017
 
+Crab is not working because the phys_smp space is filling up again. Running the MC locally.
 
+Test run:
+$ nohup runZJets_newformat doWhat=DYJETS whichSyst=0 &> ZJets_DYJets_1_07_27_2017.log &
+$ nohup runZJets_newformat doWhat=BACKGROUND whichSyst=0 &> ZJets_Background_1_07_27_2017.log &
 
+Going for the full thing:
+$ nohup runZJets_newformat doWhat=DYJETS whichSyst=0 &> ZJets_DYJets_1_07_27_2017.log &
+ - lxplus010
+$ nohup runZJets_newformat doWhat=BACKGROUND whichSyst=0 &> ZJets_Background_1_07_27_2017.log &
+ - lxplus096
 
+_________________07_30_2017
 
-
-
-
-
-
-
-
+Making sure using runZJets works with multiple job inputs. It looks like it works properly for any
+nJobs greater than 1. Checking out now why 1 does not work (Thinks there are 0 events to process).
 
 
 

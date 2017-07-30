@@ -31,7 +31,8 @@ using namespace std;
 void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		 TString pdfSet, int pdfMember, double muR, double muF, double yieldScale)
 {
-   
+   bool DJALOG = cfg.getB("DJALOG", false);
+   if(DJALOG) printf("Starting ZJets::Loop\n");
    //--- Random generator necessary for BTagging ---
    TRandom3* RandGen = new TRandom3();
    //--------------------------------------------
@@ -44,10 +45,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
    //store job id
    //using unique name for jobinfo to prevent hadd to merge them
+   /*
+   if(DJALOG) printf("JobInfo->SetName\n");
+   std::cout<<"Job info Name: "<<JobInfo->GetName()<<std::endl;
    if(jobNum > 0) JobInfo->SetName(TString::Format("%s_%d", JobInfo->GetName(), jobNum));
+   if(DJALOG) printf("JobInfo->SetBinContent(kJobNum, jobNum);\n");
    JobInfo->SetBinContent(kJobNum, jobNum);
    JobInfo->SetBinContent(kNJobs, nJobs);    
-    
+   */    
+
    //--- Counters to check the yields ---
    Long64_t nEvents(0);
    unsigned int nEventsVInc0Jets(0),  nEventsVInc0JetsNoTrig(0), nEventsVInc1Jets(0), nEventsVInc2Jets(0), nEventsVInc3Jets(0);
@@ -90,8 +96,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    bool doPuReweight = cfg.getB("doPuReweight", true);
 
    //==========================================================================================================//
-   //         Output file name           //
+    //         Output file name          //
    //===================================//
+   if(DJALOG) printf("CreateOutputFileName\n");   
    CreateOutputFileName(pdfSet, pdfMember, muR, muF, nJobs == 1 ? 0 : jobNum);
    std::cerr << "Histogram file name " << outputFileName << " for sample " << sampleLabel_ << "\n";
    TFile *outputFile = new TFile(outputFileName, "RECREATE");
@@ -342,16 +349,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << s.str();
    for(unsigned i = 0 ; i < s.str().size(); ++i) cout << "-";
    cout << "\n\n" << flush;
-    
-   //--- Initialize the tree branches ---
-   Init(hasRecoInfo, hasGenInfo);
-   if (fChain == 0) return;
-   Long64_t nentries = fChain->GetEntries();
 
-   //------------------------------------
-   struct timeval t0;
-   int mess_every_n =  std::min(1000LL, nentries/10);
-   if(mess_every_n < 1) mess_every_n = 1;
+ //------------------------------------
 
    // ------ Random number for lepton energy resolution smearing -----
    //TRandom* RamMu = new TRandom(10);
@@ -360,33 +359,46 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
    //event yield normalisation for MC
    //norm_ = yieldScale;
-
+  
    double prev_rate = 0;
-   Long64_t nEventsToProcessTot = nentries;
-   if(nMaxEvents >= 0 && nEventsToProcessTot > nMaxEvents) 
-      nEventsToProcessTot = nMaxEvents;    
-
    TString doWhat = cfg.getS("doWhat", ""); doWhat.ToUpper();
-   Long64_t entry_start = cfg.getL("entry_start", 0);
-   if( doWhat != "DATA")  //Dont skip events in MC, since they are all the same
-      entry_start = 0;
+  
+   //--- Initialize the tree branches ---
+   Init(hasRecoInfo, hasGenInfo);
+   if (fChain == 0) return;
+   Long64_t nEntries = fChain->GetEntries();  
+   Long64_t nEventsToProcessTot = 0;
+   Long64_t eventStart = cfg.getL("entry_start", 0); //eventStart+eventStop govern the full run independent of nJobs
    Long64_t entry_stop = 0;
-   if( (nMaxEvents >= 0) && ((entry_start+nMaxEvents) < nentries) )
-      entry_stop = entry_start + nMaxEvents;
-   else
-      entry_stop = nentries;
+   Long64_t entry_start = 0; //This and entry_stop will be what the event loop uses since it can change depending on the nJobs    
 
-
-   if(nJobs > 1){
-      Long64_t eventsPerJob = nEventsToProcessTot / nJobs;
-      entry_start = eventsPerJob * (jobNum - 1);
-      if(jobNum < nJobs)  entry_stop = entry_start + eventsPerJob;
-      else entry_stop = nEventsToProcessTot;
+   if( doWhat != "DATA")  //Dont skip events in MC, since they are all the same
+      eventStart = 0;
+   if(nMaxEvents >= 0){
+      if( (nEntries - eventStart) < nMaxEvents) 
+	 nEventsToProcessTot = nEntries - eventStart;
+      else
+	 nEventsToProcessTot = nMaxEvents;
+   }else{
+      nEventsToProcessTot = nEntries - eventStart;
    }
+   Long64_t eventStop = eventStart + nEventsToProcessTot;
+   
+   Long64_t eventsPerJob = nEventsToProcessTot / nJobs;
+   entry_start = eventStart + eventsPerJob * (jobNum - 1);
+   if(jobNum < nJobs)  
+      entry_stop = entry_start + eventsPerJob;
+   else 
+      entry_stop = eventStop;
 
    Long64_t nEventsToProcess = entry_stop - entry_start;
+
+   struct timeval t0;
+   int mess_every_n =  std::min(1000LL, nEntries/10);
+   if(mess_every_n < 1) mess_every_n = 1;
+
    //if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
-   cout << "We will run on " << nEventsToProcess << " events" << endl;
+   cout << "We will run on " << (entry_stop - entry_start) << " events" << endl;
 
    std::string runLetters = cfg.getS("runLetters", runLettersAll);   
    Long64_t mcEraBoundary[runLettersAll.size()];
@@ -401,8 +413,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    }
 
 
-   std::string fileLetterName(outputDirectory);
-   fileLetterName += "/.LetterFractions";
+   //std::string fileLetterName(outputDirectory);
+   //fileLetterName += "/LetterFractions.txt";
+   std::string fileLetterName = "LetterFractions.txt";
    ifstream fileLetter (fileLetterName);
    std::string line;
    size_t iLine = 0;
@@ -418,18 +431,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 }
       }
       fileLetter.close();
+   }else{
+      std::cout << "Letter file was not found\n";
    }
 
 
-
-
-   bool DJALOG = cfg.getB("DJALOG", false);
-   entry_stop = nentries;
    if(DJALOG)    printf("{DJA LOG}    nEventsToProcess = %lld\n",nEventsToProcess);
    if(DJALOG)    printf("{DJA LOG}    nMaxEvents = %ld\n",nMaxEvents);
    if(DJALOG)    printf("{DJA LOG}    entry_start = %lld\n",entry_start);
    if(DJALOG)    printf("{DJA LOG}    entry_stop = %lld\n",entry_stop);
-   if(DJALOG)    printf("{DJA LOG}    nentries = %lld\n",nentries);
+   if(DJALOG)    printf("{DJA LOG}    nEntries = %lld\n",nEntries);
    //======================================================================
    // Event loop starts here
    //======================================================================
@@ -439,7 +450,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       //cout << "---------------------------------------------------------------------" << endl;
-	
+      
       if(jentry == mess_every_n) gettimeofday(&t0, 0);
       if (jentry % mess_every_n == 0 && jentry > mess_every_n){
 	 timeval t1;
@@ -466,7 +477,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	      << std::setw(2) << rem_h << " h "
 	      << std::setw(2) << rem_m << " m "
 	      << std::setw(2) << rem_s << " s"
-	      << std::flush;
+	      << std::endl;
+	    //<< std::flush;
       }
 
       if(fChain->GetEntry(jentry) == 0){
@@ -1270,12 +1282,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    nGenEventsVInc0Jets++;
 	    nEffGenEventsVInc0Jets += genWeight;
 
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
 	    double RatioValue = 1.;
 	    if(UnfoldUnc){
 	       int binNumber = ZNGoodJets_ZexcHratio_fit->GetXaxis()->FindBin(nGoodJets);
 	       RatioValue =  ZNGoodJets_ZexcHratio_fit->GetBinContent(binNumber);
 	    } 
 
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
+	    
 	    fill(genZNGoodJets_Zexc, nGoodGenJets, commonGenWeight*RatioValue, EvtWeights);
 	    fill(genZNGoodJets_Zinc, 0., commonGenWeight, EvtWeights);
 	    fill(genZMass_Zinc0jet, genEWKBoson.M(), commonGenWeight, EvtWeights);
@@ -1287,6 +1304,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(genlepEta_Zinc0jet, genLeptons[0].v.Eta(), commonGenWeight, EvtWeights);
 	    fill(genlepEta_Zinc0jet, genLeptons[1].v.Eta(), commonGenWeight, EvtWeights);
 	    fill(genVisPt_Zinc0jetQun, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 	    if (nGoodGenJets_20 >= 1) {
 
@@ -1361,6 +1380,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     fill(genDifZFirstJetRapidity_FirstJetPt80_Zinc1jet, fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 
 		  }
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 
 	       for (unsigned short i(0); i < nGoodGenJets; i++) {
@@ -1398,6 +1418,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       fill(genZRapidity_Zinc1jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
 	       fill(genZAbsRapidity_Zinc1jet, fabs(genEWKBoson.Rapidity()), commonGenWeight, EvtWeights);
 	       fill(genZEta_Zinc1jet, genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 	       double RatioValue = 1.;
 	       double RatioValue1 = 1.;
@@ -1450,6 +1472,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 	       }
 	    }
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
 	    if (nGoodGenJets_20 >= 2) {
 
 	       double RatioValue = 1.;
@@ -1487,6 +1511,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       fill(genDPhiZSecondJet_Zinc2jet, fabs(genEWKBoson.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
 	       fill(genDPhiFirstSecondJet_Zinc2jet, fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
 
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 	       if(genEWKBoson.Pt()>100.)
 		  {
@@ -1529,6 +1554,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     fill(genDifZFirstJetRapidity_DifJetRapiditys2_Zinc2jet, fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity())/2.0,commonGenWeight, EvtWeights);
 		  }
 
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
 
 	       fill(genZNGoodJets_Zinc, 2., commonGenWeight, EvtWeights);
 	       fill(genTwoJetsPtDiff_Zinc2jet, genJet1Minus2.Pt(), commonGenWeight, EvtWeights);
@@ -1557,6 +1584,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       fill(genZPt_Zinc2jet, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
 	       fill(genZRapidity_Zinc2jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
 	       fill(genZEta_Zinc2jet, genEWKBoson.Eta(), commonGenWeight, EvtWeights);
+
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 	       double RatioValue =1.;
 	       double RatioValue1 = 1.;
@@ -1715,6 +1744,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       }
 
 	    }
+
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
 	    if (nGoodGenJets_20 >= 3) {
 
 	       double RatioValue = 1.;
@@ -1766,6 +1798,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       fill(genDPhiFirstSecondJet_Zinc3jet, fabs(genJets[0].v.DeltaPhi(genJets[1].v)),commonGenWeight, EvtWeights);
 	       fill(genDPhiFirstThirdJet_Zinc3jet, fabs(genJets[0].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
 	       fill(genDPhiSecondThirdJet_Zinc3jet, fabs(genJets[1].v.DeltaPhi(genJets[2].v)),commonGenWeight, EvtWeights);
+
+	       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
 	       if(genEWKBoson.Pt()>150.)
 		  {
@@ -1827,6 +1861,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodGenJets >= 8) {
 	       fill(genZNGoodJets_Zinc, 8., commonGenWeight, EvtWeights);
 	    }
+
+	    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+
 	    if (nGoodGenJets >= 1) {
 
 	       double RatioValue = 1.;
@@ -3213,16 +3250,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << endl;
    //==========================================================================================================//
 
-
+   double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nEntries)): yieldScale;
+   /*
    JobInfo->SetBinContent(kNEvts, nEventsToProcess);
-   JobInfo->SetBinContent(kNEvtsSample, nentries);
+   JobInfo->SetBinContent(kNEvtsSample, nEntries);
    JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
-   double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nentries)): yieldScale;
+   
    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
    //store integrated luminosity in Lumi histogram:
    Lumi->SetBinContent(1., lumi_ *  data_frac);
    JobInfo->SetBinContent(kXsec, xsec_);
-
+   */
     
    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
    //==========================================================================================================//
@@ -3245,11 +3283,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		   << " weights are normalizes such that the cross section on pb "
 		   << " is equal to the sum of weights divivided by the numnber of events\n";
 	 if(InEvtCount_  > 0){
-	    norm_ = data_frac * lumi_ * xsecFactor_ / InEvtCount_ * (nentries / nEventsToProcessTot);
+	    norm_ = data_frac * lumi_ * xsecFactor_ / InEvtCount_ * (nEntries / nEventsToProcessTot);
 	    std::cout << "Used norm_: data_frac * lumi_ * xsecFactor_  / InEvtCount_ "
-		      << "* (nentries / nEventsToProcessTot)"
+		      << "* (nEntries / nEventsToProcessTot)"
 		      << data_frac << " * " <<  lumi_ << " * " <<  xsecFactor_  << " / " << InEvtCount_
-		      << " * (" << nentries << " / " << nEventsToProcessTot << ")"
+		      << " * (" << nEntries << " / " << nEventsToProcessTot << ")"
 		      << " = " << norm_ << "\n";
 
 	 } else{
@@ -3271,11 +3309,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    //the fraction of processed events.
 	    //
 	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / InEvtWeightSums_[0]
-	       * nentries / nEventsToProcessTot;
+	       * nEntries / nEventsToProcessTot;
 	    std::cout << "Used norm_: data_frac * lumi_ * xsec * xsecFactor_  / nEvtWeightSums_[0] "
-	       "* nentries / nEventsToProcessTot = "
+	       "* nEntries / nEventsToProcessTot = "
 		      <<  data_frac << " * " << lumi_ << " * " << xsec << " * " << xsecFactor_  << " / " << InEvtWeightSums_[0]
-		      << " * " << nentries << " / " <<  nEventsToProcessTot << "=" << norm_ << "\n";
+		      << " * " << nEntries << " / " <<  nEventsToProcessTot << "=" << norm_ << "\n";
 	 } else{
 	    norm_ = data_frac * lumi_ * xsec * xsecFactor_  / processedEventMcWeightSum_
 	       * nEventsToProcess / nEventsToProcessTot;
@@ -3299,13 +3337,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       norm_ = 1;
    }
 	
-
+   /*
    if(!EvtIsRealData){
       JobInfo->SetBinContent(kXsec, xsec_ * xsecFactor_);
       double a = 1.;
       if(EvtWeightSums_.size()) a = EvtWeightSums_[0];
       JobInfo->SetBinContent(kJobWeight, processedEventMcWeightSum_ / a);
    }
+   */
 
    for (unsigned short i(0); i < numbOfHistograms; i++){
       string hName = listOfHistograms[i]->GetName();
@@ -3352,16 +3391,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       cout << "Fraction of processed events from dataset                 : " << nEvents << " / " << EvtCount_
 	   << " = " << (nEvents/double(EvtCount_)) << endl;
       if(EvtIsRealData){
-	 cout << "\tvalue stored in file .mcYieldScale for the '--mcYieldScale -1' auto normalisation option.\n";
-	 std::ofstream f(outputDirectory + "/.mcYieldScale#");
+	 cout << "\tvalue stored in file mcYieldScale.txt for the '--mcYieldScale -1' auto normalisation option.\n";
+	 //std::ofstream f(outputDirectory + "/mcYieldScale.txt");
+	 //std::ofstream f("/mcYieldScale.txt");
+	 std::ofstream f("mcYieldScale.txt");
 	 f << data_frac << "\n";
 	 f.close();
-	 rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
+	 //rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
 	 
 	 //Saving the fractions for each Run Letter
 	 FILE * filePointer;
-	 std::string fileName(outputDirectory);
-	 fileName += "/.LetterFractions";
+	 //std::string fileName(outputDirectory);
+	 //fileName += "/LetterFractions.txt";
+	 std::string fileName = "LetterFractions.txt";
 	 filePointer = fopen (fileName.c_str(),"w");
 	 for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
 	    fprintf (filePointer, "%c;%F\n",runLettersAll[iLetter],
@@ -3974,6 +4016,7 @@ Int_t ZJets::GetEntry(Long64_t entry){
 
 Long64_t ZJets::LoadTree(Long64_t entry){
    // Set the environment to read one entry
+   //if(debug) printf("Begin ZJets::LoadTree\n");
    if (!fChain) return -5;
    Long64_t centry = fChain->LoadTree(entry);
    if (centry < 0) return centry;

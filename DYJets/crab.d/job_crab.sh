@@ -37,7 +37,6 @@ die(){
     exit 1
 }
 
-
 date;
 t1=`date +%s`
 
@@ -81,9 +80,9 @@ while [ $# -gt 0 ]; do
     [ $? = 0 ] && eval "$1"
     shift
 done
-
-echo "cfg=$cfg"
-echo "maxEvents=$maxEvents"
+cfg=vjets_DMu_crab.cfg
+echo "cfg=$cfg" >> analysis.log
+echo "maxEvents=$maxEvents" >> analysis.log
 [ -n "$cfg" ] || die "Parameter cfg was not found!"
 
 unset maxEventsOpt
@@ -91,7 +90,7 @@ unset maxEventsOpt
 
 [ -n "$NJob" ] || die "Missing job ID"
 
-echo "Job id: $NJob"
+echo "Job id: $NJob" >> analysis.log
 
 #note: when using --dryrun option of crab submit, the job is run twice in the same directory, we therefore
 #need to look for libRooUnfold.so both in local directory and RooUnfold one, where it is moved to by this
@@ -102,52 +101,61 @@ mkdir RooUnfold
 mv libRooUnfold.so RooUnfold/
 mv RooUnfoldDict_rdict.pcm RooUnfold/
 
-tar xzf EfficiencyTables.tgz
+echo "Doing the tar now" >> analysis.log
+tar -xzf EfficiencyTables.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
 echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"
 
-nRuns=20
-if [ $NJob -gt $nRuns ]; then
-    iRun=$((NJob-nRuns))
-    lepSel=DE
-else
-    iRun=$NJob
-    lepSel=DMu
-fi
+#echo "nRuns=$nRuns before">> analysis.log
+iRun=$NJob
+#echo "nRuns=$nRuns after">> analysis.log
+#if [ $NJob -gt $nRuns ]; then
+#    iRun=$((NJob-nRuns))
+#    lepSel=DE
+#else
+#    iRun=$NJob
+lepSel=DMu
+#fi
 
 export VJETS_CONFIG="`echo "$cfg" | sed "s/lepSel/${lepSel}/"`"
-echo "Running with configuraion file $VJETS_CONFIG..."
+echo "Running with configuraion file $VJETS_CONFIG..." >> analysis.log
+
+echo "iRun = $iRun" >> analysis.log
     
 case "$iRun" in
-    1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0;;
-    2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=1;;
-    3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=2;;
-    4)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0;;
-    5)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=1;;
-    6)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=2;;
-    7)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=3;;
-    8)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=4;;
-    9)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=5;;
-    10) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=6;;
-    11) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=7;;
-    12) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=8;;
-    13) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0;;
-    14) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=1;;
-    15) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=2;;
-    16) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=3;;
-    17) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=4;;
-    18) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=5;;
-    19) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=6;;
-    20) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
+#    1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 &>> analysis.log;;
+#    2)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=1;;
+#    3)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=2;;
+    1)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 &>> analysis.log;;
+#    5)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=1;;
+#    6)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=2;;
+#    7)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=3;;
+#    8)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=4;;
+#    9)  ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=5;;
+#    10) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=6;;
+#    11) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=7;;
+#    12) ./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=8;;
+    2) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0 &>> analysis.log;;
+#    14) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=1;;
+#    15) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=2;;
+#    16) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=3;;
+#    17) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=4;;
+#    18) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=5;;
+#    19) ./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=6;;
+#    20) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
 esac
+
+#./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 &>> analysis.log
+#./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 &>> analysis.log
+#./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0 &>> analysis.log
 
 tar czf HistoFiles.tgz HistoFiles*
 
-echo "List of files:"
-ls
+echo "List of files:" >> analysis.log
+ls -la >> analysis.log
 
 date 
 t2=`date +%s`
-echo "Duration:  $(((t2*10-t1*10+300)/600)) mn"
+echo "Duration:  $(((t2*10-t1*10+300)/600)) mn" >> analysis.log
 

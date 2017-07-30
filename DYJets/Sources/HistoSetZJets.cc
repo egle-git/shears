@@ -361,7 +361,7 @@ int nZPt_Zinc0jet(22);
     const char* JobInfo_Labels[] = { "JobNum","nJobs", "JobWeight", "nEvtsJob", "nEvtsAllJobs", "nEvtsSample",
 				     "Xsec", "Lumi" };
     unsigned nBins = sizeof(JobInfo_Labels)/sizeof(JobInfo_Labels[0]);
-    JobInfo                = newTH1D("JobInfo", "", "", nBins, -0.5, -0.5 + nBins);
+    JobInfo = newTH1D("JobInfo", "", "", nBins, -0.5, -0.5 + nBins);
     JobInfo->SetTitle("Information to merge histograms produced in multi job mode");
     JobInfo->SetBit(TH1::kIsAverage);
     for(unsigned i = 0; i < nBins; ++i){

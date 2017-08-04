@@ -5,6 +5,7 @@
 #include "ArgParser.h"
 #include "ConfigVJets.h"
 #include "ZJets_newformat.h"
+#include "time.h"
 
 //--- Load configuration ---
 ConfigVJets cfg;
@@ -62,6 +63,15 @@ int main(int argc, char **argv)
     //    TString mcSampleLabel_WZ       = cfg.getS("mcSampleLabel_WZ"      , "WZJets");
     //    TString mcSampleLabel_W        = cfg.getS("mcSampleLabel_W"       , "WJetsToLN");
     //    TString mcSampleLabel_DY       = cfg.getS("mcSampleLabel_DY"      , "DYJets");
+
+
+    time_t timer;
+    char buffer[26];
+    struct tm* tm_info;
+    time(&timer);
+    tm_info = localtime(&timer);
+    strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+    std::cout<<buffer<<std::endl;
 
     //--- save config to .vjets.cfg ---
     cfg.write(".vjets.cfg");
@@ -342,27 +352,27 @@ int main(int argc, char **argv)
 
 	    
 
-	    for(int i=1;i<=nJobs;i++){
-		printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
-		printf("++++++++++++  Trying job %d  ++++++++++++++++\n",i);
-		printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
-
-		ZJets ana(lepSel, Samples[iSample].name, TString::Format(input, lepSel.Data()), lumi,
-			  trigCorr,
-			  syst[iSyst], systDir[iSyst], Samples[iSample].xsecError,
-			  lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
-			  maxEvents, histoDir, bonzaiDir, maxFiles);
-		
-		ana.Loop(hasRecoInfo, hasGenInfo, i, nJobs, 
-			 pdfSet, pdfMember, muR, muF, yieldScale);
-	
-		if(i==1){
-		    if(Samples[iSample].merge == '+'){
-			std::string tmpString(ana.outputFileName.Data());
-			tomerge.push_back(tmpString);
-		    }
-		}
+	    //for(int i=1;i<=nJobs;i++){
+	    printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
+	    printf("++++++++++++  Trying job %d  ++++++++++++++++\n",jobNum);
+	    printf("+++++++++++++++++++++++++++++++++++++++++++++\n");
+	    
+	    ZJets ana(lepSel, Samples[iSample].name, TString::Format(input, lepSel.Data()), lumi,
+		      trigCorr,
+		      syst[iSyst], systDir[iSyst], Samples[iSample].xsecError,
+		      lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
+		      maxEvents, histoDir, bonzaiDir, maxFiles);
+	    
+	    ana.Loop(hasRecoInfo, hasGenInfo, jobNum, nJobs, 
+		     pdfSet, pdfMember, muR, muF, yieldScale);
+	    
+	    //if(i==1){
+	    if(Samples[iSample].merge == '+'){
+		std::string tmpString(ana.outputFileName.Data());
+		tomerge.push_back(tmpString);
 	    }
+	    //}
+	    //}
 	}//next sample, iSample      
     }//next systematic, iSyst
     return 0;

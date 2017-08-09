@@ -24,7 +24,7 @@
 #include "functions.h"
 #include "getFilesAndHistogramsZJets.h"
 #include "HistoSetZJets.h"
-#include "rochcor2015.h"
+#include "RoccoR.h"
 
 
 using namespace std;
@@ -33,7 +33,7 @@ using namespace std;
 class ZJets: public HistoSetZJets {
  public :
         bool doRochester;
-        rochcor2015 *rmcor;
+        RoccoR * rochCorr2016;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 	TChain          fBonzaiHeaderChain;
@@ -138,7 +138,7 @@ class ZJets: public HistoSetZJets {
 	vector<float>   *MuMatchedStationCnt;
 	vector<float>   *MuDz;
 	vector<float>   *MuPixelHitCnt;
-	vector<float>   *MuTkLayerCnt;
+	vector<int>     *MuTkLayerCnt;
 	vector<float>   *MuPfIsoChHad;
 	vector<float>   *MuPfIsoNeutralHad;
 	vector<float>   *MuPfIsoRawRel;

@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <regex.h>
 #include "ConfigVJets.h"
-#include "rochcor2015.h"
+//#include "RoccoR.h"
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
@@ -37,7 +37,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    TRandom3* RandGen = new TRandom3();
    //--------------------------------------------
    doRochester = true;
-   rmcor = new rochcor2015();
+   rochCorr2016 = new RoccoR("EfficiencyTables/rcdata.2016.v3");
    
    //--- Initialize PDF from LHAPDF if needed ---
    if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
@@ -154,6 +154,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    TrigSF.insert( std::pair<char,table>('F',TableMuTriggerBG) );
    TrigSF.insert( std::pair<char,table>('G',TableMuTriggerBG) );
    TrigSF.insert( std::pair<char,table>('H',TableMuTriggerH) );
+
+   std::map<char,table> TrackSF;
+   table TableMuTrackBF("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
+   table TableMuTrackGH("EfficiencyTables/Eff_SF_Tracking_GH_08_07_2017.txt");
+   TrackSF.insert( std::pair<char,table>('B',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('C',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('D',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('E',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('F',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('G',TableMuTrackGH) );
+   TrackSF.insert( std::pair<char,table>('H',TableMuTrackGH) );
 
    std::map<char,uint64_t> triggerMask;
    triggerMask.insert( std::pair<char,uint64_t>('B',triggerMaskRunB) );
@@ -718,12 +729,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
 										    fabs(leptons[0].v.Eta()));
 		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
-								      fabs(leptons[1].v.Eta()));
+										    fabs(leptons[1].v.Eta()));
 		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
-								       fabs(leptons[0].v.Eta()));
+										     fabs(leptons[0].v.Eta()));
 		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
-								       fabs(leptons[1].v.Eta()));
-		     //effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+										     fabs(leptons[1].v.Eta()));
+		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(),
+										       fabs(leptons[0].v.Eta()));
+		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(),
+										       fabs(leptons[1].v.Eta()));
+
 		     //effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 		     //effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 		     //effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
@@ -3550,14 +3565,19 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
 		      0);  // CommentAG
 
 
-      float qter = 1.0;
       if (doRochester) {
+	 double SF = 1;
 	 if (!EvtIsRealData) {
-	    rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
+	    //	    SF = rochCorr2016->kScaleAndSmearMC(MuCh->at(i), MuPt->at(i), MuEta->at(i), MuPhi->at(i), 
+	    //						MuTkLayerCnt->at(i), gRandom->Rndm(), gRandom->Rndm(), 
+	    //					0, 0);	   
 	 }
 	 else {
-	    rmcor->momcor_data(mu.v, (float)mu.charge, 0, qter);
+	    SF = rochCorr2016->kScaleDT(MuCh->at(i), MuPt->at(i), MuEta->at(i), MuPhi->at(i), 
+					0, 0);
 	 }
+	 mu.v.SetPtEtaPhiE(mu.v.Pt()*SF, mu.v.Eta(), mu.v.Phi(),
+			   mu.v.E()*mu.v.Pt()*SF/mu.v.Pt());
       }
 
       bool muPassesPtCut(mu.v.Pt() >= (lepPtCutMin*0.8));
@@ -4074,6 +4094,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
    // patMuonCombId_Double = 0;
    // patMuonTrig_ = 0;
    MuPfIso = 0;
+   MuTkLayerCnt = 0;
 
    JetAk04E = 0;
    JetAk04Pt = 0;
@@ -4158,6 +4179,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
 	 //  }
          //   fChain->SetBranchAddress("patMuonTrig_", &patMuonTrig_, &b_patMuonTrig_);
 	 fChain->SetBranchAddress("MuPfIso", &MuPfIso, &b_MuPfIso);
+	 fChain->SetBranchAddress("MuTkLayerCnt", &MuTkLayerCnt, &b_MuTkLayerCnt);
       }
    }
    if (hasGenInfo){

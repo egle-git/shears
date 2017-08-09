@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <regex.h>
 #include "ConfigVJets.h"
-//#include "RoccoR.h"
+#include "time.h"
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
@@ -33,6 +33,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 {
    bool DJALOG = cfg.getB("DJALOG", false);
    if(DJALOG) printf("Starting ZJets::Loop\n");
+
+   time_t timer;
+   char buffer[26];
+   struct tm* tm_info;
+   time(&timer);
+   tm_info = localtime(&timer);
+   strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+   std::cout<<buffer<<std::endl;
+
    //--- Random generator necessary for BTagging ---
    TRandom3* RandGen = new TRandom3();
    //--------------------------------------------
@@ -379,37 +388,38 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    if (fChain == 0) return;
    Long64_t nEntries = fChain->GetEntries();  
    Long64_t nEventsToProcessTot = 0;
-   Long64_t eventStart = cfg.getL("entry_start", 0); //eventStart+eventStop govern the full run independent of nJobs
+   Long64_t skipEvents = cfg.getL("skipEvents", 0); //eventStart+eventStop govern the full run independent of nJobs
    Long64_t entry_stop = 0;
    Long64_t entry_start = 0; //This and entry_stop will be what the event loop uses since it can change depending on the nJobs    
 
    if( doWhat != "DATA")  //Dont skip events in MC, since they are all the same
-      eventStart = 0;
+      skipEvents = 0;
    if(nMaxEvents >= 0){
-      if( (nEntries - eventStart) < nMaxEvents) 
-	 nEventsToProcessTot = nEntries - eventStart;
+      if( (nEntries - skipEvents) < nMaxEvents) 
+	 nEventsToProcessTot = nEntries - skipEvents;
       else
 	 nEventsToProcessTot = nMaxEvents;
    }else{
-      nEventsToProcessTot = nEntries - eventStart;
+      nEventsToProcessTot = nEntries - skipEvents;
    }
-   Long64_t eventStop = eventStart + nEventsToProcessTot;
+   Long64_t eventStart = skipEvents; 
+   Long64_t eventStop = eventStart + nEventsToProcessTot - 1;
    
    Long64_t eventsPerJob = nEventsToProcessTot / nJobs;
    entry_start = eventStart + eventsPerJob * (jobNum - 1);
    if(jobNum < nJobs)  
-      entry_stop = entry_start + eventsPerJob;
+      entry_stop = entry_start + eventsPerJob - 1;
    else 
       entry_stop = eventStop;
 
-   Long64_t nEventsToProcess = entry_stop - entry_start;
+   Long64_t nEventsToProcess = entry_stop - entry_start + 1;
 
    struct timeval t0;
    int mess_every_n =  std::min(1000LL, nEntries/10);
    if(mess_every_n < 1) mess_every_n = 1;
 
    //if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
-   cout << "We will run on " << (entry_stop - entry_start) << " events" << endl;
+   cout << "We will run on " << nEventsToProcess << " events" << endl;
 
    std::string runLetters = cfg.getS("runLetters", runLettersAll);   
    Long64_t mcEraBoundary[runLettersAll.size()];
@@ -435,7 +445,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       while(getline(fileLetter,line)){
 	 if(line[0] == runLettersAll[iLine]){
 	    runPercent+=atof((line.substr((line.find(';')+1),(line.size()-line.find(';')-1))).c_str());
-	    mcEraBoundary[iLine] = nEventsToProcess*runPercent;
+	    mcEraBoundary[iLine] = entry_start + nEventsToProcess*runPercent;
 	    std::cout << "Percent = "<<runPercent << std::endl;
 	    std::cout << "MC Era Boundary = "<<mcEraBoundary[iLine]<<std::endl; 
 	    iLine++;
@@ -455,7 +465,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //======================================================================
    // Event loop starts here
    //======================================================================
-   for (Long64_t jentry = entry_start; jentry < entry_stop; jentry += 1) {
+   for (Long64_t jentry = entry_start; jentry <= entry_stop; jentry += 1) {
       if (0 <= nMaxEvents && nMaxEvents <= nEvents) break;
 	
       Long64_t ientry = LoadTree(jentry);
@@ -482,14 +492,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 if(EvtIsRealData)
 	    cout<<"  Letter "<<GetRunData(EvtRunNum);
 	 else
-	    cout<<"Letter "<<GetRunMC(mcEraBoundary,nEvents);
-	 cout << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/evt"
+	    cout<<"  Letter "<<GetRunMC(mcEraBoundary,nEvents);
+	 /*
+	 cout << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/evt "
 	      << "Entry: "<<jentry<<" Time Left: " 
 	      << std::setw(2) << rem_h << " h "
 	      << std::setw(2) << rem_m << " m "
 	      << std::setw(2) << rem_s << " s"
 	      << std::endl;
-	    //<< std::flush;
+	 */
+	      //<< std::flush;
       }
 
       if(fChain->GetEntry(jentry) == 0){
@@ -3481,6 +3493,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	      << " * " << xsecFactor_ << " = " << norm_ / nEvents << endl;
       }
    }
+   
+   time(&timer);
+   tm_info = localtime(&timer);
+   strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
+   std::cout<<buffer<<std::endl;
+
 }
 
 void ZJets::initLHAPDF(TString pdfSet, int pdfMember)

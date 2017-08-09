@@ -575,8 +575,19 @@ _________________07_30_2017
 Making sure using runZJets works with multiple job inputs. It looks like it works properly for any
 nJobs greater than 1. Checking out now why 1 does not work (Thinks there are 0 events to process).
 
+_________________08_01_2017
 
+Copied over the MC background and data histograms here to run recocompare. The MC signal finished
+yesterday in about 30min with the multithread (I should probably tell people how to do this). I
+tried the comparison and the data and mc background looked good but the mc signal was not visible. I
+looked at the log files and it was pulling the mcYieldScale from some histogram folder that was E-05
+instead of 1. I will have to run it again (of course this is no problem because it only takes 30min
+now).
 
+$ runZJets_newformat.sh 25 1
 
+Ok the comparison is now perfect with the adjustment to mcYieldScale. I will run another time with the
+new value that I got from Ken Long:
+XSec = 1921.8*3 = 5765.4 pb
 
-
+$ runZJets_newformat.sh 25 2

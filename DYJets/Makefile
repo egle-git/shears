@@ -7,7 +7,7 @@ HOST = $(shell hostname -f | grep cern)
 ifneq ($(HOST),)
     HOST = "lxplus"
 else
-    HOST = "iihe"
+    HOST = "net3"
 endif
 
 # define LHAPDF library Path accroding to the host
@@ -18,10 +18,12 @@ ifeq ($(HOST), "lxplus")
     LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
   endif
 else
-  ifeq ($(HOST), "iihe")
-    LHAPDFPATH = /user/aleonard/LHAPDF/
+  ifeq ($(HOST), "net3")
+    LHAPDFPATH = /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/lhapdf/6.1.6-ikhhed2/
   endif
 endif
+
+# $(info $$LHAPDFPATH is [${LHAPDFPATH}])
 
 # get Root compiler flags
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
@@ -127,7 +129,7 @@ testSectionConfig: testSectionConfig.cc
 
 # ===========================================================================
 clean:
-	rm -f *.o Sources/*.o Sources/*.d
+	rm -f *.o Sources/*.o Sources/*.d Main/*.o Main/*.d Main/plotRespMatrix Main/runIntegralCheck testPrintTable Main/testDecompVar Main/plotCrossSections Main/runCombination Main/runUnfoldingZJets Main/runRecoComparison Main/runZJets_newformat
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:

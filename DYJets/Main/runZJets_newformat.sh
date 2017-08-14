@@ -5,10 +5,11 @@
 source /data/djarcaro/CMSSW_8_0_25/src/shears/DYJets/setup.sh
 nJobs=$1
 
+SAMPLE="BACKGROUND"
+
 for (( iJob=1; iJob<=nJobs; iJob++ ))
 do  
     echo "Trying job = $iJob"
-    SAMPLE="DYJETS"
     date=$(date +%m_%d_%y)
     TRY=$2
     outputFile="ZJets_$(echo $SAMPLE)_JOB$(echo $iJob)_$(echo $TRY)_$date.log"
@@ -16,3 +17,4 @@ do
     echo "runZJets_newformat doWhat=$SAMPLE nJobs=$nJobs jobNum=$iJob &> $outputFile &"
     runZJets_newformat doWhat=$SAMPLE nJobs=$nJobs jobNum=$iJob &> $outputFile &
 done
+

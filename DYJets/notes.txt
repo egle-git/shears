@@ -591,3 +591,13 @@ new value that I got from Ken Long:
 XSec = 1921.8*3 = 5765.4 pb
 
 $ runZJets_newformat.sh 25 2
+
+_________________08_09_2017
+
+Testing out the Rochester corrections and tracking SF.
+
+$ runZJets_newformat.sh 25 2
+
+_________________08_10_2017
+
+Trying again.

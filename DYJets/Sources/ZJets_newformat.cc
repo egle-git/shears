@@ -80,7 +80,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    const std::string runLettersAll = "BCDEFGH";
    std::map<char,double> nLetterEvents;  
    for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
-      std::cout<<runLettersAll[iLetter]<<std::endl;
+      if(DJALOG) std::cout<<runLettersAll[iLetter]<<std::endl;
       nLetterEvents.insert( std::pair<char,double>(runLettersAll[iLetter],0.0) );
    }
 
@@ -416,7 +416,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    Long64_t nEventsToProcess = entry_stop - entry_start + 1;
 
    struct timeval t0;
-   int mess_every_n =  std::min(1000LL, nEntries/10);
+   Long64_t mess_every_n = (nEventsToProcess/10 < 1000) ? nEventsToProcess/10 : 1000;
    if(mess_every_n < 1) mess_every_n = 1;
 
    //if(nMaxEvents >= 0 && nEventsToProcess > nMaxEvents) nEventsToProcess = nMaxEvents;
@@ -500,8 +500,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	      << std::setw(2) << rem_h << " h "
 	      << std::setw(2) << rem_m << " m "
 	      << std::setw(2) << rem_s << " s"
-	      << std::endl;
+	      
 	 */
+	 printf("\n");
 	      //<< std::flush;
       }
 
@@ -3428,15 +3429,30 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 //rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
 	 
 	 //Saving the fractions for each Run Letter
-	 FILE * filePointer;
 	 //std::string fileName(outputDirectory);
 	 //fileName += "/LetterFractions.txt";
-	 std::string fileName = "LetterFractions.txt";
-	 filePointer = fopen (fileName.c_str(),"w");
-	 for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
-	    fprintf (filePointer, "%c;%F\n",runLettersAll[iLetter],
-		     nLetterEvents[runLettersAll[iLetter]] / nEvents);
-	 }
+	 char tmpName [50];
+	 snprintf(tmpName,50,"LetterFractions_%d.txt",jobNum);
+	 std::string fileLetterOutName(tmpName);
+	 ofstream fileLetterOut;
+	 fileLetterOut.open(fileLetterOutName);
+	 if(fileLetterOut.is_open()){
+	    for(size_t iLetter=0;iLetter<runLettersAll.size();iLetter++){
+	       fileLetterOut<<runLettersAll[iLetter]<<";";
+	       fileLetterOut<<nLetterEvents[runLettersAll[iLetter]]<<std::endl;
+	       std::cout<<runLettersAll[iLetter]<<";";
+	       std::cout<<nLetterEvents[runLettersAll[iLetter]]<<std::endl;
+	       
+	       //		     fprintf (filePointer, "%c;%F\n",runLettersAll[iLetter],
+		  //	      nLetterEvents[runLettersAll[iLetter]] / nEvents);
+	       }
+	       fileLetterOut<<"Total="<<nEventsToProcessTot<<std::endl;
+	    }else{
+	       std::cout<<"Letter file output had a problem opening jobNum 1\n";
+	    }
+	    fileLetterOut.close();
+
+
 	 /*
 	 fprintf (filePointer, "C;%\n",letterFractionC);
 	 fprintf (filePointer, "D;%\n",letterFractionD);
@@ -3445,7 +3461,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 fprintf (filePointer, "G;%\n",letterFractionG);
 	 fprintf (filePointer, "H;%\n",letterFractionH);
 	 */
-	 fclose (filePointer);
+	 
+	 //fclose (filePointer);
       }
    }
    cout << "Number of events passing the trigger                      : " << nEventsPassingTrigger << "\n";
@@ -3583,17 +3600,19 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
 		      MuEta->at(i),
 		      0);  // CommentAG
 
-
+      //printf("Rochester Correction\n");
       if (doRochester) {
 	 double SF = 1;
 	 if (!EvtIsRealData) {
-	    //	    SF = rochCorr2016->kScaleAndSmearMC(MuCh->at(i), MuPt->at(i), MuEta->at(i), MuPhi->at(i), 
-	    //						MuTkLayerCnt->at(i), gRandom->Rndm(), gRandom->Rndm(), 
-	    //					0, 0);	   
+	    SF = rochCorr2016->kScaleAndSmearMC(MuCh->at(i), MuPt->at(i), MuEta->at(i), MuPhi->at(i), 
+						MuTkLayerCnt->at(i), gRandom->Rndm(), gRandom->Rndm(), 
+	    					0, 0);	   
+	    //printf("MC SF = %F\n",SF);
 	 }
 	 else {
 	    SF = rochCorr2016->kScaleDT(MuCh->at(i), MuPt->at(i), MuEta->at(i), MuPhi->at(i), 
 					0, 0);
+	    //printf("Date SF = %F\n",SF);
 	 }
 	 mu.v.SetPtEtaPhiE(mu.v.Pt()*SF, mu.v.Eta(), mu.v.Phi(),
 			   mu.v.E()*mu.v.Pt()*SF/mu.v.Pt());

@@ -232,7 +232,7 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode,int nBi
  
   double inte = 0;
   double int2 = 0;
-  printf("MC_distr       den\n");
+  //printf("MC_distr       den\n");
   for(int ibin = 1; ibin <= nBin; ++ibin){
     //printf("%F  |||  %F\n",MC_distr[ibin-1],den->GetBinContent(ibin));
     inte += weights_->GetBinContent(ibin) * MC_distr[ibin-1];

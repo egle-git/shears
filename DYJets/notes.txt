@@ -598,6 +598,8 @@ Testing out the Rochester corrections and tracking SF.
 
 $ runZJets_newformat.sh 25 2
 
-_________________08_10_2017
+_________________08_14_2017
 
-Trying again.
+Going to run through the tracking SF and rochester corrections and compare the changes. I will start 
+putting the log files into the histogram folder so that all the information can be looked up easily.
+

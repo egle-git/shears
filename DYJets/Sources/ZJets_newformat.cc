@@ -46,7 +46,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //--- Random generator necessary for BTagging ---
    TRandom3* RandGen = new TRandom3();
    //--------------------------------------------
-   doRochester = true;
+   doRochester = cfg.getB("doRochester", true);
    rochCorr2016 = new RoccoR("EfficiencyTables/rcdata.2016.v3");
    
    //--- Initialize PDF from LHAPDF if needed ---
@@ -102,7 +102,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    if (lepSel == "DMu" || lepSel == "SMu") LeptonID = 13;
    muIso_ = cfg.getD("muRelIso");
    eIso_ = cfg.getD("elRelIso");
-   bool pogSF = cfg.getB("pogSF", true);
+   bool TrackSFBool = cfg.getB("TrackSFBool", true);
+   bool IdSFBool = cfg.getB("IdSFBool", true);
+   bool IsoSFBool = cfg.getB("IsoSFBool", true);
+   bool TriggerSFBool = useTriggerCorrection;
    bool doPuReweight = cfg.getB("doPuReweight", true);
 
    //==========================================================================================================//
@@ -131,6 +134,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    JESUnc.insert( std::pair<char,table>('F',TableJESUncEF) );
    JESUnc.insert( std::pair<char,table>('G',TableJESUncG) );
    JESUnc.insert( std::pair<char,table>('H',TableJESUncH) );
+
+   std::map<char,table> TrackSF;
+   table TableMuTrackBF("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
+   table TableMuTrackGH("EfficiencyTables/Eff_SF_Tracking_GH_08_07_2017.txt");
+   TrackSF.insert( std::pair<char,table>('B',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('C',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('D',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('E',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('F',TableMuTrackBF) );
+   TrackSF.insert( std::pair<char,table>('G',TableMuTrackGH) );
+   TrackSF.insert( std::pair<char,table>('H',TableMuTrackGH) );
 
    std::map<char,table> IdSF;
    table TableMuIdBF("EfficiencyTables/Eff_SF_ID_BF_6_16_2017.txt");
@@ -165,16 +179,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    TrigSF.insert( std::pair<char,table>('G',TableMuTriggerBG) );
    TrigSF.insert( std::pair<char,table>('H',TableMuTriggerH) );
 
-   std::map<char,table> TrackSF;
-   table TableMuTrackBF("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
-   table TableMuTrackGH("EfficiencyTables/Eff_SF_Tracking_GH_08_07_2017.txt");
-   TrackSF.insert( std::pair<char,table>('B',TableMuTrackBF) );
-   TrackSF.insert( std::pair<char,table>('C',TableMuTrackBF) );
-   TrackSF.insert( std::pair<char,table>('D',TableMuTrackBF) );
-   TrackSF.insert( std::pair<char,table>('E',TableMuTrackBF) );
-   TrackSF.insert( std::pair<char,table>('F',TableMuTrackBF) );
-   TrackSF.insert( std::pair<char,table>('G',TableMuTrackGH) );
-   TrackSF.insert( std::pair<char,table>('H',TableMuTrackGH) );
 
    std::map<char,uint64_t> triggerMask;
    triggerMask.insert( std::pair<char,uint64_t>('B',triggerMaskRunB) );
@@ -739,25 +743,25 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (!EvtIsRealData) {
 	       double effWeight = 1.;
 	       if (lepSel == "DMu") {
-		  if(pogSF){
+		  if(IdSFBool){
 		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
 										    fabs(leptons[0].v.Eta()));
 		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
 										    fabs(leptons[1].v.Eta()));
+		  }
+		  if(IsoSFBool){
 		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
 										     fabs(leptons[0].v.Eta()));
 		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
 										     fabs(leptons[1].v.Eta()));
+		  }
+		  if(TrackSFBool){
 		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(),
 										       fabs(leptons[0].v.Eta()));
 		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(),
 										       fabs(leptons[1].v.Eta()));
-
-		     //effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
-		     //effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-		     //effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 		  }
-		  if (useTriggerCorrection) 
+		  if (TriggerSFBool) 
 		     effWeight *= TrigSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(fabs(leptons[0].v.Eta()), 
 									  fabs(leptons[1].v.Eta()));
 	       }
@@ -818,23 +822,27 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (!EvtIsRealData) {
 	       double effWeight = 1.;
 	       if (lepSel == "SMu") {
-		  if(pogSF){
-		     effWeight*=IdSF[GetRunData(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
-								      fabs(leptons[0].v.Eta()));
-		     effWeight*=IdSF[GetRunData(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
-								      fabs(leptons[1].v.Eta()));
-		     effWeight*=IsoSF[GetRunData(EvtRunNum)].getEfficiency(leptons[0].v.Pt(), 
-								       fabs(leptons[0].v.Eta()));
-		     effWeight*=IsoSF[GetRunData(EvtRunNum)].getEfficiency(leptons[1].v.Pt(), 
-								       fabs(leptons[1].v.Eta()));
-		     //effWeight *= MuId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-		     //effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
-		     //effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
-		     //effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+		  if(IdSFBool){
+		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
+										    fabs(leptons[0].v.Eta()));
+		     effWeight*=IdSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
+										    fabs(leptons[1].v.Eta()));
 		  }
-		  if (useTriggerCorrection) 
-		     effWeight *= TrigSF[GetRunData(EvtRunNum)].getEfficiency(fabs(leptons[0].v.Eta()), 
-									  fabs(leptons[1].v.Eta()));
+		  if(IsoSFBool){
+		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(), 
+										     fabs(leptons[0].v.Eta()));
+		     effWeight*=IsoSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(), 
+										     fabs(leptons[1].v.Eta()));
+		  }
+		  if(TrackSFBool){
+		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[0].v.Pt(),
+										       fabs(leptons[0].v.Eta()));
+		     effWeight*=TrackSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(leptons[1].v.Pt(),
+										       fabs(leptons[1].v.Eta()));
+		  }
+		  if (TriggerSFBool) 
+		     effWeight *= TrigSF[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(fabs(leptons[0].v.Eta()), 
+											fabs(leptons[1].v.Eta()));
 	       }
 	       else if (lepSel == "SE") {
 		  effWeight *= ElReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));

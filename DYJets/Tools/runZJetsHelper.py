@@ -71,3 +71,15 @@ def CombineLetters():
         fileLetterOut.write("%s;%F\n" % (letters[i],nEvents[i]/Total))
     print Total
     fileLetterOut.write("Total=%d" % Total)
+
+
+def MoveLogs(logFileBase,histoDir):
+    ls = subprocess.check_output('ls').splitlines()
+    logDir = histoDir+"/logs"
+    subprocess.call(['mkdir',logDir])
+    for i in range(0,len(ls)):
+        if ls[i].find(logFileBase) == 0:
+            #Need to read the files and combine the nEvents
+            print ls[i]
+            subprocess.call(['mv',ls[i],logDir])
+    

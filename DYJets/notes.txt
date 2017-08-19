@@ -624,3 +624,23 @@ $ ../../Tools/CompareHistos
   ../HistoFiles_2_08_15_2017/DMu_13TeV_Data_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root 
   ../HistoFiles_3_08_15_2017/DMu_13TeV_Data_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root
 
+_________________08_17_2017
+
+The scale factors for the triggers seems hard to computer for DZ (used with run GH) so I copied the 
+ones from Brussels.
+
+Rochester corrections look good, track SFs are in. Running a new set of histograms to see how things
+look. I will first modify the python script runZJets_newformat a bit so that it can do all of the
+samples with one call.
+
+_________________08_18_2017
+
+The new python script to run the full set works very well. I should keep track of the times somehow
+and the number of threads. 
+
+All graphs look good with recocompare but there is still an offset. This is most likely due to the 
+signal mc xsec value. I will try the others now just to see how all three values look:
+
+HistoFiles_1_08_17_2017 = * sample xsec: 5765.4 
+HistoFiles_1_08_18_2017 = * sample xsec: 5931.0
+HistoFiles_2_08_18_2017 = * sample xsec: 6104.0

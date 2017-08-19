@@ -168,6 +168,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    IsoSF.insert( std::pair<char,table>('G',TableMuIsoGH) );
    IsoSF.insert( std::pair<char,table>('H',TableMuIsoGH) );
 
+   /*
    std::map<char,table> TrigSF;
    table TableMuTriggerBG("EfficiencyTables/ScaleFactors_TriggerMu17Mu8_RunBG_2_03_28_2017.txt");
    table TableMuTriggerH("EfficiencyTables/ScaleFactors_TriggerMu17Mu8_RunBG_2_03_28_2017.txt");
@@ -178,6 +179,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    TrigSF.insert( std::pair<char,table>('F',TableMuTriggerBG) );
    TrigSF.insert( std::pair<char,table>('G',TableMuTriggerBG) );
    TrigSF.insert( std::pair<char,table>('H',TableMuTriggerH) );
+   */
+
+   std::map<char,table> TrigSF;
+   table TableMuTriggerBF("EfficiencyTables/ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt");
+   table TableMuTriggerGH("EfficiencyTables/ScaleFactors_TriggerMu17Mu8DZ_RunGH_Brussels.txt");
+   TrigSF.insert( std::pair<char,table>('B',TableMuTriggerBF) );
+   TrigSF.insert( std::pair<char,table>('C',TableMuTriggerBF) );
+   TrigSF.insert( std::pair<char,table>('D',TableMuTriggerBF) );
+   TrigSF.insert( std::pair<char,table>('E',TableMuTriggerBF) );
+   TrigSF.insert( std::pair<char,table>('F',TableMuTriggerBF) );
+   TrigSF.insert( std::pair<char,table>('G',TableMuTriggerGH) );
+   TrigSF.insert( std::pair<char,table>('H',TableMuTriggerGH) );
 
 
    std::map<char,uint64_t> triggerMask;

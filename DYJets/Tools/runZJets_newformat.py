@@ -23,44 +23,61 @@ def main(arguments):
     args = parser.parse_args(arguments)
 
     debug=False
-    SAMPLE = "DATA"
+    SAMPLES = ["DATA","DYJETS","BACKGROUND"]
+    SYST = 0
     runZCommand = "/data/djarcaro/CMSSW_8_0_25/src/shears/DYJets/Main/runZJets_newformat"
     processes = []
+    startTime = time.time()
     date=time.strftime("%m_%d_%y",time.localtime())
 
-    #Main loop for starting the processes for each job
-    for iJob in range(1,args.threads+1):
-        command = []
-        print "Trying job = %d" % iJob
-        outputFileName = "ZJets_%s_%d_JOB%d_%s.log" % (SAMPLE,args.log,iJob,date)
-        print outputFileName
-        outputFile = open(outputFileName,"w")
-        print "runZJets_newformat histoDir=%s doWhat=%s nJobs=%d jobNum=%d" % (args.outputDir,
-                                                                               SAMPLE,
-                                                                               args.threads,
-                                                                               iJob)
-                                                                   
-        command.append(runZCommand)
-        command.append("histoDir=%s" % args.outputDir)
-        command.append("doWhat=%s" % SAMPLE)
-        command.append("nJobs=%d" % args.threads)
-        command.append("jobNum=%d" % iJob)
+    for iSample in range(0,len(SAMPLES)):
+        if(iSample=="Data"):
+            NSYST=3
+        if(iSample=="DYJETS"):
+            NSYST=9
+        if(iSample=="BACKGROUND"):
+            NSYST=7
+            
+        for iSyst in range(0,NSYST):
+
+            #Main loop for starting the processes for each job
+            for iJob in range(1,args.threads+1):
+                command = []
+                print "Trying job = %d" % iJob
+                outputFileName = "ZJets_%s_%d_Syst%d_JOB%d_%s.log" % (SAMPLES[iSample],
+                                                                      args.log,iSyst,iJob,date)
+                print outputFileName
+                outputFile = open(outputFileName,"w")
+                print "runZJets_newformat histoDir=%s doWhat=%s whichSyst=%d nJobs=%d jobNum=%d" %(args.outputDir, SAMPLES[iSample], iSyst, args.threads, iJob)
+                
+                command.append(runZCommand)
+                command.append("histoDir=%s" % args.outputDir)
+                command.append("doWhat=%s" % SAMPLES[iSample])
+                command.append("whichSyst=%d" % iSyst)
+                command.append("nJobs=%d" % args.threads)
+                command.append("jobNum=%d" % iJob)
         
-        if debug: print command
-        processes.append(subprocess.Popen(command,stdout=outputFile,stderr=outputFile))
+                if debug: print command
+                processes.append(subprocess.Popen(command,stdout=outputFile,stderr=outputFile))
         
 
-    exitCodes = [p.wait() for p in processes]
-    print exitCodes
+            exitCodes = [p.wait() for p in processes]
+            print exitCodes
 
-    #Do anything here that needs to be done once all processes (jobs) are finished
-    print "Running hadd to combine histos"
-    runZJetsHelper.CombineHistos(args.outputDir)
-    if SAMPLE == "DATA":
-        print "Combining letter fraction for Data"
-        runZJetsHelper.CombineLetters()
-    runZJetsHelper.MoveLogs("ZJets_%s_%d_" % (SAMPLE,args.log),args.outputDir)
+            #Do anything here that needs to be done once all processes (jobs) are finished
+            print "Running hadd to combine histos"
+            runZJetsHelper.CombineHistos(args.outputDir)
+            if SAMPLES[iSample] == "DATA":
+                print "Combining letter fraction for Data"
+                runZJetsHelper.CombineLetters()
+            runZJetsHelper.MoveLogs("ZJets_%s_%d_" % (SAMPLES[iSample],args.log),args.outputDir)
 
+
+        timerFile = open("StopWatch.log","a")
+        endTime = time.time()
+        totalTime = endTime - startTime
+        timerFile.write("%s   threads=%d   time(m)=%d\n" % (date,args.threads,totalTime/60))
+        timerFile.close()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

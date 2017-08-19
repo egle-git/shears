@@ -21,23 +21,33 @@ def CombineHistos(histoDir):
                 "DMu_13TeV_ZZ_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_"
                 ]
 
-    ls = subprocess.check_output(['ls',histoDir]).splitlines()
+    HistoBase = "DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_"
+    HistoSyst = "Syst_%d_" % iSyst
+    HistoDirection = ["Down_","up_"]
+    HistoEnd = "JetPtMin_30_JetEtaMax_24"
 
+
+
+
+    ls = subprocess.check_output(['ls',histoDir]).splitlines()
+    #First step: find same sample histos
     for iHisto in range(0,len(HistoNames)):
         haddHistos=[]
         haddTarget=[]
         haddCommand=["hadd","-f"]
-        haddTarget=histoDir+"/"+HistoNames[iHisto][0:len(HistoNames[iHisto])-1]+".root"
+        #haddTarget=histoDir+"/"+HistoNames[iHisto][0:len(HistoNames[iHisto])-1]+".root"
         for i in range(0,len(ls)):
             if ls[i].find(HistoNames[iHisto]) == 0:
+                for iSyst in range(0,10):
+                    
                 haddHistos.append(histoDir+"/"+ls[i])
 
         if len(haddHistos) > 0:
             haddCommand.append(haddTarget)
             haddCommand += haddHistos
-            subprocess.call(haddCommand);
+            #subprocess.call(haddCommand);
             removeCommand = ["rm"] + haddHistos
-            subprocess.call(removeCommand)
+            #subprocess.call(removeCommand)
         #print "\nNext one\n"
 
 

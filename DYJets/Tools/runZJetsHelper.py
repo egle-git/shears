@@ -6,49 +6,68 @@ import subprocess
 
 def CombineHistos(histoDir):
 
-    HistoNames=["DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_Data_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_ST_sch_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_ST_tW_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_ST_tch_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_STbar_tW_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_TT_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_Top_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_VV_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_WToLNu_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_WWTo2L2Nu_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_WZ_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_",
-                "DMu_13TeV_ZZ_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24_"
-                ]
-
-    HistoBase = "DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_"
-    HistoSyst = "Syst_%d_" % iSyst
-    HistoDirection = ["Down_","up_"]
+    HistoBase = ["DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_",
+                 "DMu_13TeV_Data_TrigCorr_1_",
+                 "DMu_13TeV_ST_sch_TrigCorr_1_",
+                 "DMu_13TeV_ST_tW_TrigCorr_1_",
+                 "DMu_13TeV_ST_tch_TrigCorr_1_",
+                 "DMu_13TeV_STbar_tW_TrigCorr_1_",
+                 "DMu_13TeV_TT_TrigCorr_1_",
+                 "DMu_13TeV_Top_TrigCorr_1_",
+                 "DMu_13TeV_VV_TrigCorr_1_",
+                 "DMu_13TeV_WToLNu_TrigCorr_1_",
+                 "DMu_13TeV_WWTo2L2Nu_TrigCorr_1_",
+                 "DMu_13TeV_WZ_TrigCorr_1_",
+                 "DMu_13TeV_ZZ_TrigCorr_1_"]
+    HistoDirection = ["",
+                      "Down_",
+                      "Up_"]
     HistoEnd = "JetPtMin_30_JetEtaMax_24"
-
-
-
-
+    
     ls = subprocess.check_output(['ls',histoDir]).splitlines()
-    #First step: find same sample histos
-    for iHisto in range(0,len(HistoNames)):
-        haddHistos=[]
-        haddTarget=[]
-        haddCommand=["hadd","-f"]
-        #haddTarget=histoDir+"/"+HistoNames[iHisto][0:len(HistoNames[iHisto])-1]+".root"
-        for i in range(0,len(ls)):
-            if ls[i].find(HistoNames[iHisto]) == 0:
-                for iSyst in range(0,10):
-                    
-                haddHistos.append(histoDir+"/"+ls[i])
 
-        if len(haddHistos) > 0:
-            haddCommand.append(haddTarget)
-            haddCommand += haddHistos
-            #subprocess.call(haddCommand);
-            removeCommand = ["rm"] + haddHistos
-            #subprocess.call(removeCommand)
-        #print "\nNext one\n"
+    HistoName = ""
+    tmpHisto1 = ""
+    tmpHisto2 = ""
+    haddTarget = ""
+    haddHistos = []
+    
+    for iHistoBase in HistoBase:
+        HistoName = ""
+        haddTarget = ""
+        haddHistos = []
+        HistoName += iHistoBase
+        for iHistoSyst in range(0,10):
+            if(iHistoSyst == 0):
+                tmpHisto1 = HistoName
+            HistoName = tmpHisto1
+            HistoName += "Syst_%d_" % iHistoSyst
+            for iHistoDirection in HistoDirection:
+                if(iHistoDirection == HistoDirection[0]):
+                    tmpHisto2 = HistoName
+                HistoName = tmpHisto2
+                HistoName += iHistoDirection
+                HistoName += HistoEnd
+                haddHistos = []
+                haddTarget = histoDir+"/"+HistoName+".root"
+                
+                for i in range(0,len(ls)):
+                    if (ls[i].find(HistoName) != -1) and (ls[i].find("24.root") == -1):
+                        print "found: %s" % ls[i]
+                        haddHistos.append(histoDir+"/"+ls[i])
+
+                if len(haddHistos) > 0:
+                    haddCommand=["hadd","-f"]
+                    haddCommand.append(haddTarget)
+                    haddCommand += haddHistos
+                    subprocess.call(haddCommand);
+                    removeCommand = ["rm"] + haddHistos
+                    subprocess.call(removeCommand)
+                    #print "\n"
+                    print haddCommand
+                    #print removeCommand
+                    #print "\n"
+
 
 
 
@@ -90,6 +109,6 @@ def MoveLogs(logFileBase,histoDir):
     for i in range(0,len(ls)):
         if ls[i].find(logFileBase) == 0:
             #Need to read the files and combine the nEvents
-            print ls[i]
+            #print ls[i]
             subprocess.call(['mv',ls[i],logDir])
     

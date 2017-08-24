@@ -23,19 +23,20 @@ def main(arguments):
     args = parser.parse_args(arguments)
 
     debug=False
+    #SAMPLES = ["DATA"]
     SAMPLES = ["DATA","DYJETS","BACKGROUND"]
-    SYST = 0
+    NSYST = 0
     runZCommand = "/data/djarcaro/CMSSW_8_0_25/src/shears/DYJets/Main/runZJets_newformat"
     processes = []
     startTime = time.time()
     date=time.strftime("%m_%d_%y",time.localtime())
 
     for iSample in range(0,len(SAMPLES)):
-        if(iSample=="Data"):
+        if(SAMPLES[iSample]=="DATA"):
             NSYST=3
-        if(iSample=="DYJETS"):
+        if(SAMPLES[iSample]=="DYJETS"):
             NSYST=9
-        if(iSample=="BACKGROUND"):
+        if(SAMPLES[iSample]=="BACKGROUND"):
             NSYST=7
             
         for iSyst in range(0,NSYST):
@@ -64,20 +65,27 @@ def main(arguments):
             exitCodes = [p.wait() for p in processes]
             print exitCodes
 
-            #Do anything here that needs to be done once all processes (jobs) are finished
-            print "Running hadd to combine histos"
-            runZJetsHelper.CombineHistos(args.outputDir)
-            if SAMPLES[iSample] == "DATA":
+            if (SAMPLES[iSample] == "DATA") and (iSyst == NSYST-1):
                 print "Combining letter fraction for Data"
                 runZJetsHelper.CombineLetters()
-            runZJetsHelper.MoveLogs("ZJets_%s_%d_" % (SAMPLES[iSample],args.log),args.outputDir)
+    
+
+        runZJetsHelper.MoveLogs("ZJets_%s_%d_" % (SAMPLES[iSample],args.log),args.outputDir)
+       
+
+    print "Running hadd to combine histos"
+    runZJetsHelper.CombineHistos(args.outputDir)
+    #print "ZJets_%s_%d_" % (SAMPLES[iSample],args.log)
+    #print args.outputDir
+                            
 
 
-        timerFile = open("StopWatch.log","a")
-        endTime = time.time()
-        totalTime = endTime - startTime
-        timerFile.write("%s   threads=%d   time(m)=%d\n" % (date,args.threads,totalTime/60))
-        timerFile.close()
+
+    timerFile = open("StopWatch.log","a")
+    endTime = time.time()
+    totalTime = endTime - startTime
+    timerFile.write("%s   threads=%d   time(m)=%d\n" % (date,args.threads,totalTime/60))
+    timerFile.close()
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

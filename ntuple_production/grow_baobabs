@@ -60,7 +60,7 @@ eos_cmd="/afs/cern.ch/project/eos/installation/pro/bin/eos.select"
 myself=os.path.realpath(__file__)
 mydir=os.path.dirname(myself)
 getlumi=mydir + "/getlumi"
-eos_mount_point=None
+eos_mount_point="/data/djarcaro/eos/"
 das_ckey = das_client.x509()
 das_cert = das_ckey
 
@@ -228,11 +228,14 @@ def eos_mount():
 #enddef
 
 def eos_to_local_path(path):
+    print "eos_to_local_path(path)"
     myusername = pwd.getpwuid(os.getuid())[0]
     
     if re.match('^/+store/', path): #path: /store/...
+        print "Matches store"
         if not eos_mount_point:
             raise RuntimeError("Error: cannot proceed because of the EOS file system mounting failure.")
+        print "return = %s" % eos_mount_point.rstrip("/") + "/cms" + path
         return eos_mount_point.rstrip("/") + "/cms" + path
     elif re.match('^/+eos/', path): #path: /eos/...
         #an eos path
@@ -1144,12 +1147,17 @@ def catalog_get_out_dir(catalog):
     return outDir
 
 def catalog_make_ntuple_catalog(prim_dataset, task_id):
+    print "catalog_make_ntuple_catalog"
     conn, c = db_get_conn()
     c.execute("SELECT dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, n_events, n_files, lumi_file, lumi_file_md5sum, lumi, submit_ts FROM jobs WHERE prim_dataset='%s' AND task_id='%s'" % (prim_dataset, task_id))
     r = c.fetchone()
-    if not r:
-        conn.close()
-        return None
+    #if not r:
+    #    conn.close()
+    #    return None
+
+    ntuple_dir = "/store/group/phys_smp/AnalysisFramework/Baobab/13TeV_2016/Data/v5"
+    ntuple_dir_path = eos_to_local_path(ntuple_dir)
+
 
     dataset, datatype, ntuple_dir, ntuple_subdir, status, task_id, nevents, nfiles, lumi_file, lumi_file_md5sum, lumi, submit_ts = r
 
@@ -2481,10 +2489,15 @@ def main():
 #FIXME: lock is deadlocking. Disabled until the issue is fixed.
 #        with lock_acquire() as lock_ok:
 #            if lock_ok:
-              with eos_mount() as eos_mount_point:
-                  if not eos_mount_point:
-                      sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
-                  run()
+        print "First eos mount point: %s" % eos_mount_point
+        if eos_mount_point:
+            run()
+        else:
+            with eos_mount() as eos_mount_point:
+                print "Second eos mount point: %s" % eos_mount_point          
+                if not eos_mount_point:
+                    sys.stderr.write("\nWarning: failed to mount the EOS file system. Some functionnalities will not work.\n\n")
+                    run()
               #endwith
 #            #endif
     except KeyboardInterrupt, e:

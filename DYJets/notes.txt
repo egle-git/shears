@@ -644,3 +644,14 @@ signal mc xsec value. I will try the others now just to see how all three values
 HistoFiles_1_08_17_2017 = * sample xsec: 5765.4 
 HistoFiles_1_08_18_2017 = * sample xsec: 5931.0
 HistoFiles_2_08_18_2017 = * sample xsec: 6104.0
+
+_________________08_22_2017
+
+Fixed the bugs with the new loops over systematics. All files should be created and combined correctly.
+Trying a test run:
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_08_22_2017 &
+
+Trying a full run now. Should take 6 hours or so.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_08_22_2017 &

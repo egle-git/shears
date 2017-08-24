@@ -1648,7 +1648,8 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	RooUnfoldBinByBin* RObjectForDataBinByBin = 0;
 	TH1D * tmpHisto = 0;
 	printf("Starting Bin by Bin, creating roounfold object\n");
-	for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
+	for(int iCycle = 0;iCycle<1;iCycle++){
+	//for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
 	    printf("Cycle = %d\n",iCycle);
 	    if(iCycle == 0)
 		RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hRecDataMinusFakes);

@@ -917,9 +917,8 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	      continue;
 	    }
 	    double lumi = hLumi->GetBinContent(1);
-	    if(lumi < 0.0){
-	    //if(lumi < 2000.){
-	      lumi = 2191.78;
+	    if(lumi <= 0.0){
+	      lumi = 35290.0;
 	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
 			<< ". Integrated luminosity forced to " << lumi << " pb-1"
 			<< "\n";

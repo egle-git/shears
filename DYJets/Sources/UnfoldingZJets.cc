@@ -110,6 +110,13 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     cerr << "Error: Lumi histogram was not found.\n";
 	     return;
 	 }
+	
+	 if(integratedLumi <= 0.0){
+	     integratedLumi = 35290.0;
+	     std::cerr << "Warning. Problem with lumi value"
+		       << ". Integrated luminosity forced to " << integratedLumi << " pb-1"
+		       << "\n";
+	 }
 
 	 TFile *fAltUnf = 0;
 	 //std::unique_ptr<TFile> fAltUnf(new TFile(histoDir + lepSel + "_13TeV_" + "DYJets_UNFOLDING_UNC" + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root"));
@@ -238,8 +245,6 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 
 	     if(iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 
-
-
 	     //--- only JES up and down (iSyst = 1 and 2) is applied on data ---
 	     unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
 	     unsigned short iBg = 0;
@@ -255,20 +260,20 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	     //		    <<  " " << hRecDataMinusFakes->GetBinError(1)
 	     //	    / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
 	     //	}
-	     //	std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
-	     //		  << hRecDataMinusFakes->GetEntries()
-	     //		  << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
-	     //		  <<"\n"
-	     //		  << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = "
-	     //		  << hRecSumBg[iData]->GetEntries()
-	     //		  << ", nbins: " << hRecSumBg[iData]->GetNbinsX()
-	     //		  <<"\n"
-	     //		  << "DEBUG: hPurity[" << iData << "]->GetEntries() = "
-	     //		  << hPurity[iData]->GetEntries()
-	     //		  << ", nbins: " << hPurity[iData]->GetNbinsX()
-	     //		  <<"\n"
-	     //		  << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX()
-	     //		  << std::endl;
+	     //std::cout << "DEBUG: hRecData[" << iData << "]->GetEntries() = ";
+	     //std::cout	       << hRecDataMinusFakes->GetEntries();
+	     //std::cout      << ", nbins: " << hRecDataMinusFakes->GetNbinsX();
+	     //std::cout     <<"\n";
+	     //std::cout     << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = ";
+	     //std::cout   << hRecSumBg[iData]->GetEntries();
+	     //std::cout     << ", nbins: " << hRecSumBg[iData]->GetNbinsX();
+	     //std::cout		       <<"\n";
+	     //	     std::cout	       << "DEBUG: hPurity[" << iData << "]->GetEntries() = ";
+	     //std::cout      << hPurity[iData]->GetEntries();
+	     //std::cout     << ", nbins: " << hPurity[iData]->GetNbinsX();
+	     //std::cout  <<"\n";
+	     //std::cout    << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX();
+
 
 	     hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
 	     //	if(hRecDataMinusFakes->GetBinContent(1) > 0){
@@ -334,6 +339,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 				       hRecDYJets[iSyst], hGenDYJets[iSyst], logy,
 				       hRecDataMinusFakesOdd, hRecDataMinusFakesEven, fixNIterTo,
 				       outputFileName + "_niters.txt");
+	     
 	     //The number of unfolding iterations is fixed to the value used for the central value.
 	     if(iSyst == 0){
 		 fixNIterTo = nIter[0];
@@ -417,30 +423,13 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 							  predictions, nFirstBinsToSkip, 
 							  nLastBinsToSkip);
 
-
-	 printf("Trying to make the BBB cross section plot\n");
-	 printf("Quick test size = %ldn",hUnfDataBBB.size());
-	 std::cout<<"hUnfDataBBB.at(1)->GetName() = "<<hUnfDataBBB.at(1).GetName()<<std::endl;
-	 printf("Now running make cross\n");
-
-	 TCanvas *crossSectionPlotBBB[NCYCLES/2];
-	 for(size_t i=0;i<hUnfDataBBB.size();i++){
-	     if(!(i%2)){
-		 crossSectionPlotBBB[i] = makeCrossSectionPlot(lepSel, integratedLumi, variable, 
-							       doNormalized, &hUnfDataBBB[i], 0,
-							       predictions, nFirstBinsToSkip, 
-							       nLastBinsToSkip);
-	     }
-	 }
-	 
-	 //crossSectionPlotBBB->Draw();
 	 crossSectionPlot->Draw();
-	 crossSectionPlot->SaveAs(outputFileName + ".png");
+	 //crossSectionPlot->SaveAs(outputFileName + ".png");
 	 crossSectionPlot->SaveAs(outputFileName + ".pdf");
-	 crossSectionPlot->SaveAs(outputFileName + ".eps");
-	 crossSectionPlot->SaveAs(outputFileName + ".ps");
-	 crossSectionPlot->SaveAs(outputFileName + ".C");
-	 crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+	 //crossSectionPlot->SaveAs(outputFileName + ".eps");
+	 //crossSectionPlot->SaveAs(outputFileName + ".ps");
+	 //crossSectionPlot->SaveAs(outputFileName + ".C");
+	 //crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
 
 
 	 if(whichSyst < 0){
@@ -487,9 +476,9 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 std::cout << "number of iterations: " << nIter[0] << "\n";
 	 printf("Cross Section Plot name = %s\n",crossSectionPlot->GetName());
 	 crossSectionPlot->Write();
-	 for(size_t i=0;i<hUnfDataBBB.size();i+=2){
-	     crossSectionPlotBBB[i]->Write();
-	 }
+	 //for(size_t i=0;i<hUnfDataBBB.size();i+=2){
+	 //    crossSectionPlotBBB[i]->Write();
+	 //}
 	 //----------------------------------------------------------------------------------------- 
 
 	 outputRootFile->Close();
@@ -504,20 +493,14 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 		   << " ms.\n";
 
 	 //--- Close all files ----------------------------------------------------------------------
-	 printf("1\n");
 	 closeAllFiles(fData, fDYJets, fBg, NBGDYJETS);
-	 printf("2\n");
      }
 
      //------------------------------------------------------------------------------------------ 
 
-     printf("3\n");
      std::ofstream f(unfoldDir + "/" + "lastUnfConfig.txt");
-     printf("4\n");
      f << "#Files automatically genertaed by UnfoldingZJets. The file will be overwritten at next execution.\n\n";
-     printf("5\n");
      unfCfg.dumpRetrieved(f);
-     printf("6\n");
  }
 
  void createSystPlots(TString outputFileName, TString sysPlotDir, TString variable, 
@@ -626,12 +609,12 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 TString systStr = syst[i/2];
 	 if (systStr == "S.F.") systStr = "SF";
 	 system("mkdir " + sysPlotDir);
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".png");
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".ps");
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
+	 //c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".png");
+	 //c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".ps");
+	 //c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
 	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".pdf");
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
-	 c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");	 
+	 //c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
+	 //c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");	 
      }
  }
 
@@ -739,12 +722,12 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
     //  TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc[11], hIncMad); 
     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
     crossSectionPlot->Draw();
-    crossSectionPlot->SaveAs(outputFileName + ".png");
+    //crossSectionPlot->SaveAs(outputFileName + ".png");
     crossSectionPlot->SaveAs(outputFileName + ".pdf");
-    crossSectionPlot->SaveAs(outputFileName + ".eps");
-    crossSectionPlot->SaveAs(outputFileName + ".ps");
-    crossSectionPlot->SaveAs(outputFileName + ".C");
-    crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+    //crossSectionPlot->SaveAs(outputFileName + ".eps");
+    //crossSectionPlot->SaveAs(outputFileName + ".ps");
+    //crossSectionPlot->SaveAs(outputFileName + ".C");
+    //crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
     createTable(outputFileName, lepSel, TString("ZNGoodJets_Zinc"), doNormalized, hInc, hCovInc);
 }
 
@@ -915,7 +898,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     TH2D* hresp = (TH2D*) resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable, name.Data()));
     hresp->Write();
     //    std::cout << "Response matrix dimensions: " << resp->Mresponse().GetNrows()
-    //	      << "x" << resp->Mresponse().GetNcols() << "\n";
+    //		  << "x" << resp->Mresponse().GetNcols() << "\n";
     TDecompSVD svd(resp->Mresponse());
     svd.Decompose();
     double matrixCond = svd.Condition();
@@ -1644,11 +1627,25 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 
 
     if(binByBin_unfold){
+	TH1D *hUnfDataBinByBin = 0;
+	RooUnfoldBinByBin* RObjectForDataBinByBin = 0;
+	RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hRecDataMinusFakes);
+	RObjectForDataBinByBin->RooUnfoldBinByBin::Unfold();
+	hUnfDataBinByBin = (TH1D*)RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+	//std::unique_ptr<RooUnfold> RObjectForDataBinByBin(RooUnfold::New(RooUnfold::kBinByBin, 
+	//								 resp, hRecDataMinusFakes));
+	//RObjectForDataBinByBin->SetVerbose(verbosity);
+	//TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+	hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
+	hUnfDataBinByBin->Write();
+   
+
+	/*
 	TH1D *hFoldedDataBinByBin = 0;
 	RooUnfoldBinByBin* RObjectForDataBinByBin = 0;
 	TH1D * tmpHisto = 0;
 	printf("Starting Bin by Bin, creating roounfold object\n");
-	for(int iCycle = 0;iCycle<1;iCycle++){
+	for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
 	//for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
 	    printf("Cycle = %d\n",iCycle);
 	    if(iCycle == 0)
@@ -1678,6 +1675,7 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 		hUnfDataBBB[iCycle].Write();
 	    }
 	}
+	*/
     }
 
     

@@ -723,6 +723,7 @@ void customizeGenGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gS
         TLegendEntry *statEntry;
         TLegendEntry *pdfEntry;
 	//   if(/*genNum == 3 ||*/ genNum == 1) {
+	legend->SetTextSize(0.070);
 	legend->SetX2(0.64);
 	legend->SetNColumns(3);
 	//statEntry = legend->AddEntry(gen, "Stat", "f");
@@ -1626,7 +1627,7 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
 	hRef->SetZTitle(getLegendGen(ref));
     }
 
-
+    
     TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, lumi, variable, doNormalized,
 						     hRef, hCov,
 						     predictions, nFirstBinsToSkip, nLastBinsToSkip);
@@ -1706,6 +1707,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     TGraphAsymmErrors *grCentralSyst = 0;
     TGraphAsymmErrors *grCentralSystRatio = 0;
     TH1* hSyst = (TH1*) hStat->Clone("hSyst");
+
     if(hCovSyst){
 	int nBins = hSyst->GetNbinsX();
 	for (int i = 1; i <= nBins; ++i) {
@@ -1784,7 +1786,9 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	if (canvasName.Contains("Vis")) {
 	    hSyst->GetYaxis()->SetRangeUser(0.2*minimum, 1.3*maximum);
 	}
+	
 	hSyst->SetStats(0);
+		
 	hSyst->DrawCopy("e");
 	if(grCentralSyst){
 	    grCentralSyst->SetName("grCentralSyst");
@@ -1807,6 +1811,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     grCentralStat->SetName("grCentralStat");
     grCentralStat->Draw("p");
 
+    
     legend->SetName("mainLegend");
     legend->Draw("same");
 
@@ -1965,26 +1970,41 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	TString ref_shortname = hStat->GetZaxis()->GetTitle();
 	ref_shortname = ref_shortname(0, ref_shortname.Index(" "));
 	if(ref_shortname.Length()==0) ref_shortname = "Measurement";
-	customizeGenGraph(hSyst, grGen1ToCentral[igen], grGen1ScaleSyst[igen], grGen1PDFSyst[igen], igen + 1,
+
+	
+	customizeGenGraph(hSyst, grGen1ToCentral[igen], grGen1ScaleSyst[igen], grGen1PDFSyst[igen], 
+			  igen + 1,
 			  //TString("#frac{") + generator + "}{" + ref_shortname + "}", numbOfGenerator, legend);
 			  TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()), numbOfGenerator, legend);
-									    
+	
+
 	configXaxis(hSyst, hGen, variable);
 	hSyst->DrawCopy("e");
+
 	if(grGen1ToCentral[igen]){
 	    grGen1ToCentral[igen]->SetName("grGen1ToCentral");
 	    grGen1ToCentral[igen]->Draw("2");
 	}
-	if(grGen1ScaleSyst[igen]) grGen1ScaleSyst[igen]->Draw("2");
-	if(grGen1ToCentral[igen]) grGen1ToCentral[igen]->Draw("2");
+	if(grGen1ScaleSyst[igen]) {
+	    grGen1ScaleSyst[igen]->Draw("2");
+	}
+	if(grGen1ToCentral[igen]) {
+	    grGen1ToCentral[igen]->Draw("2");
+	}
 	if(grCentralSystRatio){
 	    grCentralSystRatio->SetName("grCentralSystRatio");
 	    grCentralSystRatio->Draw("2");
 	}
 	
-	if(grCentralSystRatio) grCentralStatRatio->Draw("p");
-	if(grGen1ToCentral[igen])    grGen1ToCentral[igen]->Draw("Xp");
-	if(grGen1PDFSyst[igen])      grGen1PDFSyst[igen]->Draw("2");
+	if(grCentralSystRatio){ 
+	    grCentralStatRatio->Draw("p");
+	}
+	if(grGen1ToCentral[igen]){
+	    grGen1ToCentral[igen]->Draw("Xp");
+	}
+	if(grGen1PDFSyst[igen]){
+	    grGen1PDFSyst[igen]->Draw("2");
+	}
 	legend->Draw("same");
 	
 	//if (canvasName.Contains("JetPt_Zinc")) {

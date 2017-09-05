@@ -20,7 +20,8 @@ int main(int argc, char **argv)
     TString generator1 = cfg.getS("generator1", "mgpythia8");
     TString generator2 = cfg.getS("generator2", "");
 
-    TString variable = "ZNGoodJets_Zinc";
+    TString variable = "";
+    //TString variable = "ZNGoodJets_Zinc";
     //TString variable = "ZPt_Zinc0jet";
     bool doNormalized(false);
 

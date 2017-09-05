@@ -11,7 +11,7 @@
 #include "TGraphAsymmErrors.h"
 #include <vector>
 
-#define NCYCLES 100
+#define NCYCLES 1
 
 //void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable = "", bool noramlized = false);
 void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,

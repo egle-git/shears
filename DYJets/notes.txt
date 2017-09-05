@@ -655,3 +655,15 @@ $ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_08_22_2017 &
 Trying a full run now. Should take 6 hours or so.
 
 $ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_08_22_2017 &
+
+_________________08_24_2017
+
+Plotting response matrix:
+$ plotRespMatrix DMu ZNGoodJets_Zexc
+
+_________________08_29_2017
+
+Adjusting some unfolding plots. Mostly done in Sources/PlotSettings.cc makeCrossSectionPlot
+$ runUnfoldingZJets &> Unfold_1_08_29_2017.log
+
+

@@ -11,8 +11,11 @@
 
 using namespace std;
 
+
+
 int main(int argc, char **argv) {
-    gROOT->SetBatch();
+  //gROOT->SetBatch();
+  bool DJALOG = true;
 
     if (argc < 3) {
         cout << "You need to provide lepSel and variable." << endl;
@@ -20,19 +23,37 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    TApplication *myApp = new TApplication("myApp", &argc, argv);
+    //TApplication *myApp = new TApplication("myApp", &argc, argv);
 
     TString lepSel(argv[1]);
     TString variable(argv[2]);
     gStyle->SetOptStat(0);
     gStyle->SetPaintTextFormat("4.0f");
 
-    TString outputFileName = "ResponseMatrixPtZ/" + lepSel + "_" + variable + "_ResponseMatrix";
+    TString outputFileName = "ResponseMatrix/" + lepSel + "_" + variable + "_ResponseMatrix";
     TString respName = "hresponse" + variable;
 
-    TFile *fMad = new TFile("HistoFiles_1_06_13_2017_1000000evts/" + lepSel + "_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+    TFile *fMad = new TFile("Histos/HistoFiles_1_08_22_2017/" + lepSel + "_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+    if(fMad->IsZombie() || !fMad->IsOpen()){
+      printf("Problem with rootfile\n");
+      return 0;
+    }
+    std::cout<<"File Open:"<<fMad->GetName()<<std::endl;
+
+    if(DJALOG) printf("Getting histograms\n");
     TH1D *hMad = (TH1D*) fMad->Get(variable);
     TH2D *hrespMad = (TH2D*) fMad->Get(respName);
+    if(hMad == 0){
+      printf("Problem getting the histograms from the rootfile\n");
+      std::cout<<"Variable = "<<variable<<std::endl;
+      return 0;
+    }
+    if(hrespMad == 0){
+      printf("Problem getting the histograms from the rootfile\n");
+      std::cout<<"respName = "<<respName<<std::endl;
+      return 0;
+    }
+    
     TH2D *hrespNormMad = (TH2D*) hrespMad->Clone();
 
 /*    TFile *fShe = new TFile("../HistoFiles/" + lepSel + "_13TeV_DYJets_Sherpa_Bugra_1_13_UNFOLDING_dR_TrigCorr_0_Syst_0_JetPtMin_30_JetEtaMax_24.root");
@@ -44,6 +65,7 @@ int main(int argc, char **argv) {
     TString xTitle(hMad->GetXaxis()->GetTitle());
     TString yTitle("gen " + xTitle);
 
+    if(DJALOG) printf("Formatting the histograms\n");
     hrespNormMad->SetTitle("aMC@NLO+Pythia8 Resp. Matrix for " + title);
     hrespNormMad->GetXaxis()->SetTitle(xTitle);
     hrespNormMad->GetXaxis()->SetTitleOffset(1.4);
@@ -51,7 +73,7 @@ int main(int argc, char **argv) {
     hrespNormMad->GetYaxis()->SetTitleOffset(1.6);
     hrespNormMad->GetZaxis()->SetTitle("");
     hrespNormMad->GetZaxis()->SetRangeUser(0,100);
-    hrespNormMad->SetMarkerSize(0.0);
+    hrespNormMad->SetMarkerSize(1.0);
 /*
     hrespNormShe->SetTitle("Sherpa Resp. Matrix for " + title);
     hrespNormShe->GetXaxis()->SetTitle(xTitle);
@@ -61,13 +83,12 @@ int main(int argc, char **argv) {
     hrespNormShe->GetZaxis()->SetTitle("");
     hrespNormShe->GetZaxis()->SetRangeUser(0,100);
 */
-
+    if(DJALOG) printf("Copying and normalizing content\n");
     int nBinsX = hrespMad->GetNbinsX();
     int nBinsY = hrespMad->GetNbinsY();
     //printf("Bins X = %d, Bins Y = %d\n",nBinsX, nBinsY); 
     //nBinsX = 10;
     //nBinsY = 10;
-
     for (int i(0); i <= nBinsY + 1; i++) {
         double totRowMad(0);
 //        double totRowShe(0);
@@ -83,9 +104,9 @@ int main(int argc, char **argv) {
         }
     }
 
-
+    if(DJALOG) printf("Creating the canvas\n");
     TCanvas *cMad = new TCanvas("cMad", "MadGraph", 800, 800);
-    cMad->Connect("Closed()", "TApplication", myApp,  "Terminate()"); 
+    //cMad->Connect("Closed()", "TApplication", myApp,  "Terminate()"); 
     cMad->cd();
     
     TPad *padMad = new TPad("padMad", "padMad", 0, 0, 1, 1);
@@ -99,14 +120,15 @@ int main(int argc, char **argv) {
     padMad->Draw();
     padMad->cd();
     hrespNormMad->DrawCopy("colztext");
+    hrespNormMad->Draw("COLZ TEXT");
     padMad->Draw();
     cMad->Update();
     cMad->cd();
-    cMad->SaveAs(outputFileName + "_MadGraph.png");
-    cMad->SaveAs(outputFileName + "_MadGraph.pdf");
-    cMad->SaveAs(outputFileName + "_MadGraph.ps");
-    cMad->SaveAs(outputFileName + "_MadGraph.eps");
-    cMad->SaveAs(outputFileName + "_MadGraph.root");
+    //cMad->SaveAs(outputFileName + "_MadGraph.png");
+    cMad->Print(outputFileName + "_MadGraph.pdf","pdf");
+    //cMad->SaveAs(outputFileName + "_MadGraph.ps");
+    //cMad->SaveAs(outputFileName + "_MadGraph.eps");
+    //cMad->SaveAs(outputFileName + "_MadGraph.root");
 /*
     TCanvas *cShe = new TCanvas("cShe", "Sherpa", 800, 800);
     cShe->Connect("Closed()", "TApplication", myApp,  "Terminate()"); 

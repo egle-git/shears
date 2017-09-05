@@ -423,12 +423,12 @@ TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString 
     if (lepSel == "DE" || lepSel == "") {
         grDE = (TGraphAsymmErrors*) fDE->Get("gen" + variable + "_scaleUnc");
 	//FIXME mem. leak
-	if(!grDE) return 0;
+	//if(!grDE) return 0;
     }
     if (lepSel == "DMu" || lepSel == "") {
         grDMu = (TGraphAsymmErrors*) fDMu->Get("gen" + variable + "_scaleUnc");
 	//FIXME mem. leak
-	if(!grDMu) return 0;
+	//if(!grDMu) return 0;
     }
 
     // ---- this variable is used to fetch the TGraph of scale uncertainty from input file ----
@@ -1916,9 +1916,9 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	    grGen1ScaleSyst[igen] = createNNLOScaleSystGraph(lepSel, variable, grGen1ToCentral[igen]);
 	} else if(showSys == 3){
 	    grGen1ScaleSyst[igen] = createScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
-    } else if(showSys == 4){
+	} else if(showSys == 4){
 	    grGen1ScaleSyst[igen] = createGenevaIncScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
-    }
+	}
     }
 
     //--- Main Canvas ---

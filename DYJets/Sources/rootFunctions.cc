@@ -4,6 +4,11 @@
 #include "TVirtualPad.h"
 #include "TLine.h"
 #include "TCanvas.h"
+#include "TPolyLine.h"
+#include "TGraphAsymmErrors.h"
+#include <vector>
+#include <algorithm>
+#include <iostream>
 
 void draw_axis_labels( TAxis* a){
    TLatex* txt_ = new TLatex();
@@ -66,3 +71,41 @@ void draw_axis_labels( TAxis* a){
    }
 }
 
+void graph_draw_stairs(TGraphAsymmErrors* g, double ymin, double ymax){
+  //  TVirtualPad* pad = TVirtualPad::Pad();
+  int n = g->GetN();
+  //  double ymin = pad->GetUymin();
+  //  double ymax = pad->GetUymax();
+  std::cout << "XXX: " << ymin << "\t" << ymax << "\n";
+  std::vector<Double_t> x(3);
+  std::vector<Double_t> y(3);
+  for(int i = 0 ; i < n; ++i){
+    x[0] = g->GetX()[i] - g->GetEXlow()[i];
+    x[2] = x[1] = g->GetX()[i] + g->GetEXhigh()[i];
+    y[0] = g->GetY()[i];
+    bool out = false;
+    if(y[0] > ymax) { y[0] = ymax; out = true; }
+    if(y[0] < ymin) { y[0] = ymin; out = true; }
+    y[1] = y[0];
+    int np;
+    if(i < n - 1){
+      y[2] = g->GetY()[i+1];
+      if(y[2] > ymax) y[2] = ymax;
+      if(y[2] < ymin) y[2] = ymin;
+      np = 3;
+    } else{
+      np = 2;
+    }
+
+    TPolyLine* pl;
+    if(out){
+      pl = new TPolyLine(np-1, &x[1], &y[1]);
+    } else{
+      pl = new TPolyLine(np, &x[0], &y[0]);
+    }
+    pl->SetLineColor(g->GetLineColor());
+    pl->SetLineStyle(g->GetLineStyle());
+    pl->SetLineWidth(g->GetLineWidth());
+    pl->Draw();    
+  }
+}

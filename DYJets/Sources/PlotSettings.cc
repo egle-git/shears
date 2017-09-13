@@ -26,6 +26,13 @@ extern ConfigVJets cfg;
 
 const static double padHeightRatio = 0.3; //height ration of a ratio frame to the top frame.
 
+static double ratioYaxisExtend = 1.;
+
+static void extendAxis(double& minY, double& maxY){
+    double mid = 0.5 * (minY + maxY);
+    minY = mid - ratioYaxisExtend * (mid - minY);
+    maxY = mid + ratioYaxisExtend * (maxY - mid);
+}
 
 static struct shearsTextStyles {
     const int defaultFont = 43;    
@@ -36,7 +43,7 @@ static struct shearsTextStyles {
     const int mainYTitleSize = 24;
     const int ratioYTitleSize = 15;
     const int cmsLabelFont = 63;
-    const int cmsLabelSize = 20;
+    const int cmsLabelSize = 30;
     const int prelimLabelFont = 53;
     const int prelimLabelSize = 16;
     const int lumiLabelFont = 43;
@@ -47,16 +54,20 @@ static struct shearsTextStyles {
 } ts;
 
 #ifdef NEW_PLOTS
+static double hratio = 1.;
 static double hbottomratio = 1.;
 void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGenerator){
     if(numbOfGenerator<=1) numbOfGenerator = 1;
     plot->SetNumber(plotNumber);
+
+    double actualPadHeightRatio = padHeightRatio * ratioYaxisExtend;
+    
     double margin0 = 0.11;   //margin on top of main subframe
     double margin1 = 0.005;  //margin between main subframe and ratio plot frames
     double margin2 = 0.35;    //margin at bottom of all frames (bottom margin of bottom subframe)
 
     double htop = 1. * (1. + margin0 + margin1);
-    double hratio = htop * padHeightRatio;
+    hratio = htop * actualPadHeightRatio;
     hbottomratio = hratio / (1. - margin2);
     double htot = htop + hratio * (numbOfGenerator -1) + hbottomratio;
 
@@ -72,10 +83,10 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
 	      << (htop + (numbOfGenerator-1) * hratio + hbottomratio) << "\n";
 
 //    double htop   = 0.98 / (1. + margin0 + margin1
-//			    + padHeightRatio*(numbOfGenerator - 1) 
-//			    + padHeightRatio * (1. + margin2)
+//			    + actualPadHeightRatio*(numbOfGenerator - 1) 
+//			    + actualPadHeightRatio * (1. + margin2)
 //			    );
-//    double hratio = htop * padHeightRatio;
+//    double hratio = htop * actualPadHeightRatio;
 //    double hbottomratio = hratio * (1. + margin2);
     double y0 = 0;
     double y1 = 0;
@@ -97,10 +108,10 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
 	 plot->SetBottomMargin(margin2);
 	 //	 y0 = 0.99 - htop * (1 + margin0 + margin1) - hratio * (plotNumber - 2);
 	 y0 = 0.99 - htop - hratio * (plotNumber - 2);
-	 std::cout << "-----> bottom y0 = " << y0 << "\n";
+	 //	 std::cout << "-----> bottom y0 = " << y0 << "\n";
 	 //y1 = y0 - hratio * ( 1. + margin2);
 	 y1 = y0 - hbottomratio;
-	 std::cout << "-----> bottom y = " << y1 << "\n";
+	 //	 std::cout << "-----> bottom y = " << y1 << "\n";
     }
     plot->SetPad(0.01, y1, 0.99, y0);
     if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0)) plot->SetLogy();
@@ -182,7 +193,7 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
 #endif //defined NEW_PLOTS
 
 
-void customizeLegend(TString canvasName, TLegend *legend, int numbOfGenerator)
+void customizeMainLegend(TString canvasName, TLegend *legend, int numbOfGenerator)
 {
     legend->SetFillColor(0);
     legend->SetFillStyle(1001);
@@ -197,18 +208,19 @@ void customizeLegend(TString canvasName, TLegend *legend, int numbOfGenerator)
     legend->SetY2(0.98);
 }
 
-void customizeLegend(TString canvasName, TLegend *legend, int genNumb, int numbOfGenerator)
+void customizeRatioLegend(TString canvasName, TLegend *legend, int genNumb, int numbOfGenerator)
 {
 
     legend->SetFillColor(0);
     legend->SetFillStyle(ZJetsFillStyle);
     legend->SetBorderSize(0);
-    legend->SetMargin(0.15);
+    legend->SetMargin(0.3);
+    legend->SetTextAlign(12);
 
     legend->SetX1(0.15);
-    legend->SetY1(0.05);
+    legend->SetY1(0.01);
     legend->SetX2(0.5);
-    legend->SetY2(0.15);
+    legend->SetY2(0.18);
 
     legend->SetTextFont(ts.defaultFont);
     legend->SetTextSize(ts.mainLegendTextSize);
@@ -224,8 +236,10 @@ void customizeLegend(TString canvasName, TLegend *legend, int genNumb, int numbO
 
 
    if (genNumb == numbOfGenerator) {
-	legend->SetY1(legend->GetY1() + 0.3);
-	legend->SetY2(legend->GetY2() + 0.3);
+       //legend->SetY1(legend->GetY1() + 0.3);
+       //legend->SetY2(legend->GetY2() + 0.3);
+       legend->SetY1(1 - (1 - legend->GetY1()) * hratio / hbottomratio);
+       legend->SetY2(1 - (1 - legend->GetY2()) * hratio / hbottomratio);
    }
 }
 
@@ -815,24 +829,42 @@ TGraphAsymmErrors* createPDFSystGraph(TString sample, TString lepSel, TString va
 //    return grPDFSyst;
 //}
 
-void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gScale, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
-{
+void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen,
+			 TGraphAsymmErrors *gScale, TGraphAsymmErrors *gPDF,
+			 int genNum, TString yTitle, int numbOfGenerator,
+			 TLegend *legend){
 
     double minRatioY = cfg.getD("minRatioYUnf", 0.2);
     double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
+    extendAxis(minRatioY, maxRatioY);
 
-    if(hSyst){
-	hSyst->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
-	hSyst->GetYaxis()->SetNdivisions(507);
-	hSyst->GetYaxis()->SetLabelFont(ts.defaultFont);
-	hSyst->GetYaxis()->SetLabelSize(ts.yLabelSize);
-	hSyst->GetYaxis()->SetTitle(yTitle);	
-	hSyst->GetYaxis()->SetTitleFont(ts.defaultFont);
-	hSyst->GetYaxis()->SetTitleSize(ts.ratioYTitleSize);
-	hSyst->GetYaxis()->SetTitleOffset(3.);
-	hSyst->GetYaxis()->CenterTitle();
-	//hSyst->SetTitle();
+    if(hAxis){
+	hAxis->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
+	hAxis->GetYaxis()->SetNdivisions(507);
+	hAxis->GetYaxis()->SetLabelFont(ts.defaultFont);
+	hAxis->GetYaxis()->SetLabelSize(ts.yLabelSize);
+	hAxis->GetYaxis()->SetTitle(yTitle);	
+	hAxis->GetYaxis()->SetTitleFont(ts.defaultFont);
+	hAxis->GetYaxis()->SetTitleSize(ts.ratioYTitleSize);
+	hAxis->GetYaxis()->SetTitleOffset(3.);
+	hAxis->GetYaxis()->CenterTitle();
+	hAxis->SetTitle("");
+	
+	if (genNum == numbOfGenerator) {
+	    hAxis->GetXaxis()->SetLabelFont(ts.defaultFont);
+	    hAxis->GetXaxis()->SetLabelSize(ts.xLabelSize);
+	    hAxis->GetXaxis()->SetLabelOffset(0.02);
+	    std::cout << "==> " << hAxis->GetXaxis()->GetLabelOffset() << "\t" << hbottomratio << "\n";
+	    //   hAxis->GetXaxis()->SetTitleFont(ts.defaultFont);
+	    //hAxis->GetXaxis()->SetTitleSize(ts.xTitleSize);
+	    //	    hAxis->GetXaxis()->SetTitleOffset(1.0);
+	}
+	    //	} else{
+//	    hAxis->GetXaxis()->SetLabelSize(0);
+//	    hAxis->GetXaxis()->SetTitleSize(0);
+//	}
     }
+
     if(gen){
 	gen->SetFillColor(ZJetsFillColor[genNum-1]);
 	gen->SetFillStyle(ZJetsFillStyle);
@@ -855,21 +887,14 @@ void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *
 	gPDF->SetLineWidth(2);
     }
     
-    if (genNum == numbOfGenerator && hSyst) {
-        hSyst->GetXaxis()->SetLabelFont(ts.defaultFont);
-        hSyst->GetXaxis()->SetLabelSize(ts.xLabelSize);
-        hSyst->GetXaxis()->SetTitleFont(ts.defaultFont);
-        hSyst->GetXaxis()->SetTitleSize(ts.xTitleSize);
-        hSyst->GetXaxis()->SetTitleOffset(1.0);
-    }
-    else if(hSyst){
-        hSyst->GetXaxis()->SetTitle();
-    }
-
     if (legend) {
         TLegendEntry *leEntry;
         TLegendEntry *statEntry;
         TLegendEntry *pdfEntry;
+	int nentries = 1;
+	if(gScale) ++nentries;
+	if(gPDF) ++nentries;
+	
 	//   if(/*genNum == 3 ||*/ genNum == 1) {
 	legend->SetX2(0.64);
 	legend->SetNColumns(3);
@@ -881,20 +906,22 @@ void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *
 	statEntry->SetFillColor(ZJetsFillColor[genNum-1]);
 	statEntry->SetLineColor(ZJetsFillColor[genNum-1]);
 
+	l = "#oplus theo.";
 	if(gScale){
 	    //leEntry = legend->AddEntry(gScale, "#oplus Theory", "f");
-	    TString l = "#oplus theo.";
-	    if(!gPDF) l += " unc.";
+	    if(!gPDF) l += " unc.                            ";
 	    leEntry = legend->AddEntry((TObject*)0, l, "f");
 	    leEntry->SetFillColor(ZJetsScaleFillColor[genNum-1]);
 	    leEntry->SetFillStyle(ZJetsFillStyle);
 	    leEntry->SetLineColor(ZJetsScaleFillColor[genNum-1]);
-	}
+	} 
 
 	if(gPDF){
-            pdfEntry = legend->AddEntry(gPDF, "#oplus PDF #oplus #alpha_{s} unc.", "f");
+            pdfEntry = legend->AddEntry(gPDF, "#oplus PDF #oplus #alpha_{s} unc.   ", "f");
             pdfEntry->SetFillStyle(0);
-	}
+	}   
+	
+	
 	//        }
 	//        else {
 	//            //leEntry = legend->AddEntry(gen, "Stat. unc.", "f");
@@ -907,58 +934,60 @@ void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *
 }
 
 
-void customizeRatioGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF, int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
-{
-    double minRatioY = cfg.getD("minRatioYUnf", 0.2);
-    double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
+//void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF,
+//			 int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
+//{
+//    double minRatioY = cfg.getD("minRatioYUnf", 0.2);
+//    double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
+//
+//    if(hAxis){
+//	hAxis->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
+//	hAxis->GetYaxis()->SetNdivisions(507);
+//	hAxis->GetYaxis()->SetLabelFont(ts.defaultFont);
+//	hAxis->GetYaxis()->SetLabelSize(ts.yLabelSize);
+//	hAxis->GetYaxis()->SetTitle(yTitle);
+//	hAxis->GetYaxis()->SetTitleFont(ts.defaultFont);
+//	hAxis->GetYaxis()->SetTitleSize(ts.ratioYTitleSize);
+//	hAxis->GetYaxis()->SetTitleOffset(3.);
+//	hAxis->GetYaxis()->CenterTitle();
+//    }
+//
+//    if(gen){
+//	gen->SetFillColor(ZJetsFillColor[genNum-1]);
+//	gen->SetFillStyle(ZJetsFillStyle);
+//	gen->SetLineColor(ZJetsLineColor[genNum-1]);
+//	gen->SetLineWidth(2);
+//	gen->SetMarkerColor(ZJetsLineColor[genNum-1]);
+//	gen->SetMarkerStyle(ZJetsMarkerStyle[genNum-1]);
+//    }
+//
+//    if(gPDF){
+//	gPDF->SetFillStyle(0);
+//	gPDF->SetLineColor(ZJetsLineColor[genNum-1]);
+//	gPDF->SetLineWidth(2);
+//    }
+//    
+//    if (genNum == numbOfGenerator && hAxis) {
+//        hAxis->GetXaxis()->SetLabelFont(ts.defaultFont);
+//        hAxis->GetXaxis()->SetLabelSize(ts.xLabelSize);
+//        hAxis->GetXaxis()->SetTitleFont(ts.defaultFont);
+//        hAxis->GetXaxis()->SetTitleSize(ts.xTitleSize);
+//        hAxis->GetXaxis()->SetTitleOffset(3.0);
+//    }
+//    else if(hAxis){
+//        hAxis->GetXaxis()->SetTitle();
+//    }
+//
+//    if (legend) {
+//        TLegendEntry *leEntry;
+//        //leEntry = legend->AddEntry(gen, "Stat. unc.", "f");
+//        leEntry = legend->AddEntry((TObject*)0, "Stat. unc.", "f");
+//        leEntry->SetFillColor(ZJetsFillColor[genNum-1]);
+//        leEntry->SetFillStyle(ZJetsFillStyle);
+//        leEntry->SetLineColor(ZJetsFillColor[genNum-1]);
+//    }
+//}
 
-    if(hSyst){
-	hSyst->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
-	hSyst->GetYaxis()->SetNdivisions(507);
-	hSyst->GetYaxis()->SetLabelFont(ts.defaultFont);
-	hSyst->GetYaxis()->SetLabelSize(ts.yLabelSize);
-	hSyst->GetYaxis()->SetTitle(yTitle);
-	hSyst->GetYaxis()->SetTitleFont(ts.defaultFont);
-	hSyst->GetYaxis()->SetTitleSize(ts.ratioYTitleSize);
-	hSyst->GetYaxis()->SetTitleOffset(3.);
-	hSyst->GetYaxis()->CenterTitle();
-    }
-
-    if(gen){
-	gen->SetFillColor(ZJetsFillColor[genNum-1]);
-	gen->SetFillStyle(ZJetsFillStyle);
-	gen->SetLineColor(ZJetsLineColor[genNum-1]);
-	gen->SetLineWidth(2);
-	gen->SetMarkerColor(ZJetsLineColor[genNum-1]);
-	gen->SetMarkerStyle(ZJetsMarkerStyle[genNum-1]);
-    }
-
-    if(gPDF){
-	gPDF->SetFillStyle(0);
-	gPDF->SetLineColor(ZJetsLineColor[genNum-1]);
-	gPDF->SetLineWidth(2);
-    }
-    
-    if (genNum == numbOfGenerator && hSyst) {
-        hSyst->GetXaxis()->SetLabelFont(ts.defaultFont);
-        hSyst->GetXaxis()->SetLabelSize(ts.xLabelSize);
-        hSyst->GetXaxis()->SetTitleFont(ts.defaultFont);
-        hSyst->GetXaxis()->SetTitleSize(ts.xTitleSize);
-        hSyst->GetXaxis()->SetTitleOffset(3.0);
-    }
-    else if(hSyst){
-        hSyst->GetXaxis()->SetTitle();
-    }
-
-    if (legend) {
-        TLegendEntry *leEntry;
-        //leEntry = legend->AddEntry(gen, "Stat. unc.", "f");
-        leEntry = legend->AddEntry((TObject*)0, "Stat. unc.", "f");
-        leEntry->SetFillColor(ZJetsFillColor[genNum-1]);
-        leEntry->SetFillStyle(ZJetsFillStyle);
-        leEntry->SetLineColor(ZJetsFillColor[genNum-1]);
-    }
-}
 
 void customizeGenHist(TH1 *gen, int genNumb, TLegend *legend, TString legText)
 {
@@ -1011,28 +1040,27 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
     //grCentralSyst->GetPoint(grCentralSyst->GetN()-1, maxX, tmp);
     //minX -= grCentralSyst->GetErrorXlow(firstBin); 
     //maxX += grCentralSyst->GetErrorXhigh(grCentralSyst->GetN()-1);
-    if (variable.Index("ZNGoodJets_Zexc") >= 0) {
-	std::cout << __FILE__ << ":" << __LINE__ 
-		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	//grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
-	//	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        grCentralSyst->GetXaxis()->SetBinLabel(1, "= 0");
-        grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
-        grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
-        grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
-        grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
-        grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
-	grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
-        //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
-	//     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
-	//-->
-	//        grCentralSyst->GetXaxis()->SetLabelSize(0.18);
-	//        grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
-    }
-    else if (variable.Index("ZNGoodJets_Zinc") >= 0) {
-	std::cout << __FILE__ << ":" << __LINE__ 
-		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	if(grCentralSyst){
+    if(grCentralSyst){	
+	if (variable.Index("ZNGoodJets_Zexc") >= 0) {	
+	    std::cout << __FILE__ << ":" << __LINE__ 
+		      << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	    //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
+	    //	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
+	    grCentralSyst->GetXaxis()->SetBinLabel(1, "= 0");
+	    grCentralSyst->GetXaxis()->SetBinLabel(2, "= 1");
+	    grCentralSyst->GetXaxis()->SetBinLabel(3, "= 2");
+	    grCentralSyst->GetXaxis()->SetBinLabel(4, "= 3");
+	    grCentralSyst->GetXaxis()->SetBinLabel(5, "= 4");
+	    grCentralSyst->GetXaxis()->SetBinLabel(6, "= 5");
+	    grCentralSyst->GetXaxis()->SetBinLabel(7, "= 6");
+	    //grCentralSyst->GetXaxis()->SetBinLabel(8, "= 7");
+	    //     grCentralSyst->GetXaxis()->SetBinLabel(9, "= 8");
+	    //-->
+	    //        grCentralSyst->GetXaxis()->SetLabelSize(0.18);
+	    //        grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
+	}  else if (variable.Index("ZNGoodJets_Zinc") >= 0) {
+	    std::cout << __FILE__ << ":" << __LINE__ 
+		      << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
 	    //	grCentralSyst->GetXaxis()->SetRangeUser(-0.5, 4.5);
 	    //grCentralSyst->GetXaxis()->Set(maxX-minX, minX, maxX);
 	    grCentralSyst->GetXaxis()->SetBinLabel(1, "#geq 0");
@@ -1047,26 +1075,30 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
 	    //	    grCentralSyst->GetXaxis()->SetLabelSize(0.18);
 	    //	    grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
 	}
+	//grCentralSyst->GetXaxis()->SetRangeUser(minX, maxX);
     }
-    //grCentralSyst->GetXaxis()->SetRangeUser(minX, maxX);
     TString xtitle;
     if(gen1){
 	xtitle = gen1->GetXaxis()->GetTitle();
-	if (xtitle.Index("^{gen}") >= 0) xtitle = xtitle.ReplaceAll("^{gen}","");
-	if (xtitle.Index("H_{T}") >= 0) {
-	    TString njets;
-	    if (variable.Index("Zinc1jet") >= 0) njets = "1";
-	    else if (variable.Index("Zinc2jet") >= 0) njets = "2";
-	    else if (variable.Index("Zinc3jet") >= 0) njets = "3";
-	    else if (variable.Index("Zinc4jet") >= 0) njets = "4";
-	    else if (variable.Index("Zinc5jet") >= 0) njets = "5";
-	    else if (variable.Index("Zinc6jet") >= 0) njets = "6";
-	    else if (variable.Index("Zinc7jet") >= 0) njets = "7";
-	    else if (variable.Index("Zinc8jet") >= 0) njets = "8";
-	    xtitle = "H_{T} [GeV]";
-	}
-	if (xtitle.Index("JZB") >= 0) xtitle = "JZB [GeV]";
+    } else if(grCentralSyst){	
+	xtitle = grCentralSyst->GetXaxis()->GetTitle();
     }
+
+    if (xtitle.Index("^{gen}") >= 0) xtitle = xtitle.ReplaceAll("^{gen}","");
+    if (xtitle.Index("H_{T}") >= 0) {
+	//	    TString njets;
+	//	    if (variable.Index("Zinc1jet") >= 0) njets = "1";
+	//	    else if (variable.Index("Zinc2jet") >= 0) njets = "2";
+	//	    else if (variable.Index("Zinc3jet") >= 0) njets = "3";
+	//	    else if (variable.Index("Zinc4jet") >= 0) njets = "4";
+	//	    else if (variable.Index("Zinc5jet") >= 0) njets = "5";
+	//	    else if (variable.Index("Zinc6jet") >= 0) njets = "6";
+	//	    else if (variable.Index("Zinc7jet") >= 0) njets = "7";
+	//	    else if (variable.Index("Zinc8jet") >= 0) njets = "8";
+	xtitle = "H_{T} [GeV]";
+    }
+    if (xtitle.Index("JZB") >= 0) xtitle = "JZB [GeV]";
+    if (xtitle.Index("p_{T} balance [GeV]") >=0) xtitle = "p_{T}^{bal}";
    
 //   if(variable.Index("ZPt_") >= 0){
 //       TAxis* a = grCentralSyst->GetXaxis();
@@ -1078,6 +1110,8 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
        grCentralSyst->GetXaxis()->SetTitleFont(ts.defaultFont);
        grCentralSyst->GetXaxis()->SetTitleSize(ts.xTitleSize);
        grCentralSyst->GetXaxis()->SetTitleOffset(1.2/hbottomratio);
+       grCentralSyst->GetXaxis()->SetLabelSize(ts.xLabelSize);
+       grCentralSyst->GetXaxis()->SetTitleFont(ts.defaultFont);
    }
     //    if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitleSize(0.12);
     
@@ -1837,8 +1871,8 @@ TH1* makeCrossSectionHist(TH1* hGenDYJets, double integratedLumi)
 //======
 
 
-TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, bool doNormalized,
-			      TH1* hStat, TH2* hCovSyst,
+TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
+			      bool doNormalized, TH1* hStat, TH2* hCovSyst,
 			      std::vector<std::string> gens,
 			      int nFirstBinsToSkip, int nLastBinsToSkip){
 
@@ -1847,8 +1881,13 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 //		  << " (" << __FILE__ << ":" << __LINE__ << ").\n";
 //	gens.resize(3);
 //    }
-  
-    //gStyle->SetOptStat(0);
+
+
+    double savedRatioYaxisExtend = ratioYaxisExtend;
+    if(variable.BeginsWith("JZB")) ratioYaxisExtend = 1.67;
+    if(variable.BeginsWith("VisPt")) ratioYaxisExtend = 1.67;
+    
+    gStyle->SetOptStat(0);
 
     bool isPrel = cfg.getB("preliminaryTag", true);    
     std::vector<TH1*> hGens = getGenHistos(gens, lepSel, variable);
@@ -1856,10 +1895,40 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     std::vector<TH1*> tmp1;
     std::vector<std::string> tmp2;
     
+    struct GenRcd {
+	GenRcd(const std::string& n, TH1* h, TGraphAsymmErrors* ratio = 0,
+	       TGraphAsymmErrors* pdf = 0, TGraphAsymmErrors* scale = 0):
+	    name(n), histo(h), dataRatio(ratio), dataRatioPDFSyst(pdf),
+	    dataRatioScaleSyst(scale){}
+	GenRcd(const GenRcd& a){
+	    this->name = a.name;
+	    this->histo = a.histo;
+	    this->dataRatio = a.dataRatio;
+	    this->dataRatioPDFSyst = a.dataRatioPDFSyst;
+	    this->dataRatioScaleSyst = a.dataRatioScaleSyst;
+	}
+	std::string name;
+	TH1* histo;
+	TGraphAsymmErrors* dataRatio;	
+	TGraphAsymmErrors* dataRatioPDFSyst;
+	TGraphAsymmErrors* dataRatioScaleSyst;
+    };
+
+    //Predictions to show in the main frame
+    std::vector<GenRcd> mainFrame;
+    //Predictions to show on ratio plots. Several
+    //predictions can be superimposed in the same frame
+    // [iframe][ipred]
+    std::vector<std::vector<GenRcd> > ratioFrames;
+
+    std::map<std::string, std::vector<GenRcd> > genRatiosToSuperimposed;
+
     int ipred = -1;
     for(auto g: hGens){
 	++ipred;
 	if(!g) continue;
+	tmp1.push_back(g);
+	tmp2.push_back(gens[ipred]);
 	if(g) g->SetZTitle(getLegendGen(gens[ipred].c_str()));
 	//if(TString(gens[ipred]).BeginsWith("DYJets_GE")){
 	//    g->Scale(2.);
@@ -1869,15 +1938,43 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	    std::cout << "Scaling " << gens[ipred] << " by factor " << fac << std::endl;
 	    g->Scale(fac);
 	}
-	tmp1.push_back(g);
-	tmp2.push_back(gens[ipred]);
+	std::string display = cfg.getS(TString(gens[ipred]) + "_display");
+	if(TString(display.c_str()).BeginsWith("on-top-of_")){
+	    std::string altGen = display.substr(strlen("on-top-of_"));
+	    if(std::find(gens.begin(), gens.end(), altGen) == gens.end()){
+		std::cerr << "Warning: prediction " << altGen 
+			  << " indicated in the parameter " << display
+			  << " is not listed by the parameter predictions. "
+			  << "None of the two predictions will be displayed.\n";
+	    } else {
+		genRatiosToSuperimposed[altGen].push_back(GenRcd(gens[ipred], g));
+	    }
+		    
+	} else{
+	    mainFrame.push_back(GenRcd(gens[ipred], g));
+	}
+    }
+
+    for(auto g: mainFrame){
+	//FIXME: should go in the configuration file
+	if(TString(g.name).BeginsWith("DYJets_GE") && variable == "VisPt_Zinc2jetQun"){
+	    continue;
+	}
+
+	ratioFrames.push_back(std::vector<GenRcd>(1, g));
+	auto it = genRatiosToSuperimposed.find(g.name);
+	if(it != genRatiosToSuperimposed.end()){
+	    for(auto r: it->second){
+		ratioFrames.back().push_back(r);
+	    }
+	}
     }
 
     //drops missing predictions (we have ZjNNLO for only few distributions):
     hGens = tmp1;
     gens = tmp2;
 
-    int numbOfGenerator = gens.size(); 
+    //    int nRatioPlots = ratioFrames.size(); 
     
     //    hGens.resize(3, 0);
 
@@ -1903,21 +2000,22 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     std::vector<TGraphAsymmErrors*> grGen1ScaleSyst(hGens.size(), 0);
     std::vector<TGraphAsymmErrors*> grGen1PDFSyst(hGens.size(), 0);
 
-    int igen = -1;
-    for(auto h: hGens){
-	++igen;
-	grGen1ToCentral[igen] = createGenToCentral(h, grCentralStat);
-	int showSys = cfg.getI(TString::Format("%s_unc", gens[igen].c_str()));
-	if(showSys == 1){
-	    grGen1ScaleSyst[igen] = createScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
-	    grGen1PDFSyst[igen]   = createPDFSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen], grGen1ScaleSyst[igen]);
-	    
-	} else if(showSys == 2){
-	    grGen1ScaleSyst[igen] = createNNLOScaleSystGraph(lepSel, variable, grGen1ToCentral[igen]);
-	} else if(showSys == 3){
-	    grGen1ScaleSyst[igen] = createScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
-	} else if(showSys == 4){
-	    grGen1ScaleSyst[igen] = createGenevaIncScaleSystGraph(gens[igen], lepSel, variable, grGen1ToCentral[igen]);
+    //create ratio plots
+    for(auto& f: ratioFrames){
+	for(auto& g: f){
+	    g.dataRatio = createGenToCentral(g.histo, grCentralStat);
+	    int showSys = cfg.getI(TString::Format("%s_unc", g.name.c_str()));
+	    if(showSys == 1){
+		g.dataRatioScaleSyst = createScaleSystGraph(g.name, lepSel, variable, g.dataRatio);
+		g.dataRatioPDFSyst   = createPDFSystGraph(g.name, lepSel, variable, g.dataRatio, g.dataRatioScaleSyst);
+		
+	    } else if(showSys == 2){
+		g.dataRatioScaleSyst = createNNLOScaleSystGraph(lepSel, variable, g.dataRatio);
+	    } else if(showSys == 3){
+		g.dataRatioScaleSyst = createScaleSystGraph(g.name, lepSel, variable, g.dataRatio);
+	    } else if(showSys == 4){
+		g.dataRatioScaleSyst = createGenevaIncScaleSystGraph(g.name, lepSel, variable, g.dataRatio);
+	    }
 	}
     }
 
@@ -1928,7 +2026,7 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     double minimum = hStat->GetMinimum();
     TString canvasName = "canvas" + variable;
 #ifdef NEW_PLOTS
-    TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 400*(1+padHeightRatio*numbOfGenerator));
+    TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 400*(1 + padHeightRatio*ratioYaxisExtend*ratioFrames.size()));
 #else
     TCanvas *plots = new TCanvas(canvasName, hStat->GetTitle(), 600, 800);
 #endif
@@ -1937,11 +2035,11 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     //--- First Pad ---
     plots->cd();
     TPad *plot1 = new TPad("plot1", "plot1", 0., 0., 0., 0.);
-    setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator);
+    setAndDrawTPad(canvasName, plot1, 1, ratioFrames.size());
 
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
-    customizeLegend(canvasName, legend, numbOfGenerator);
+    customizeMainLegend(canvasName, legend, ratioFrames.size());
     if(grCentralSyst){
 	legend->AddEntry(grCentralSyst, hStat->GetZaxis()->GetTitle(), "PLEF");
     } else{
@@ -1966,15 +2064,14 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     }
 
     if(hSyst){
-	if (canvasName.Contains("ZNGoodJets")) {
-	    hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
-	}
+//DEBUG	if (canvasName.Contains("ZNGoodJets")) {
+//DEBUG	    hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
+//DEBUG	}
 	//if (canvasName.Contains("JetPt_Zinc")) {
 	//hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
 	//}
 	hSyst->GetXaxis()->SetRange(nFirstBinsToSkip + 1, hSyst->GetNbinsX() - nLastBinsToSkip);
 	if (canvasName.Contains("Eta") || canvasName.Contains("AbsRapidity")) {
-	    std::cout << "123---> " << canvasName << "\n";
 	    hSyst->GetYaxis()->SetRangeUser(0.001, 1.4*maximum);
 	}
 	if (canvasName.Contains("DPhi")) {
@@ -1992,16 +2089,14 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	}
     }
 
-    igen = -1;
-    for(auto hGen: hGens){
+    //    for(auto hGen: hGens){
+    int igen = -1;
+    for(auto& g: mainFrame){
 	++igen;
-	if(!hGen) continue;
-	//configXaxis(hSyst, hGen, variable);
-	//configYaxis(hSyst, hGen1, hGen2, hGen3);
-	customizeGenHist(hGen, igen + 1, legend, TString::Format("%s", hGen->GetZaxis()->GetTitle()));
-	//hGen1->SetName("hGen1");
-    	hGen->SetStats(0);
-	hGen->DrawCopy("ESAME");
+	if(!g.histo) continue;
+	customizeGenHist(g.histo, igen + 1, legend, TString::Format("%s", g.histo->GetZaxis()->GetTitle()));
+    	g.histo->SetStats(0);
+	g.histo->DrawCopy("ESAME");
     }
 
     grCentralStat->SetName("grCentralStat");
@@ -2038,7 +2133,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 
     if(TString(hStat->GetZaxis()->GetTitle()).BeginsWith("data", TString::kIgnoreCase)
        || TString(hStat->GetZaxis()->GetTitle()).BeginsWith("meas", TString::kIgnoreCase)){
-	cmsLabel.DrawLatex(0.16,0.835,"CMS");	
+	cmsLabel.SetTextAlign(12);
+	cmsLabel.DrawLatex(0.17,0.833,"CMS");
 	if(isPrel) prelimLabel.DrawLatex(0.20,0.95,"Preliminary");
 	if(lumi > 0) lumiLabel.DrawLatex(0.13,0.95-0.045, TString::Format("%.3g fb^{-1} (13 TeV)", lumi/1000.));
     } else{
@@ -2162,47 +2258,97 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     //--- End Of first Pad ---
 
     //--- Ratio Pads ---
+    //    igen = -1;
+    int ipad = 1;
     igen = -1;
-    for(auto hGen: hGens){
-	++igen;
-	int ipad = igen + 2;
+    //Histogram to draw axis of ratio plots
+    TH1* hAxis = (TH1*) hStat->Clone("hAxis");
+    hAxis->Reset();
+    double minRatioY = cfg.getD("minRatioYUnf", 0.2);
+    double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
+    extendAxis(minRatioY, maxRatioY);
+    
+    for(auto& f: ratioFrames){
+	++ipad;
+	    //	    ++igen;
+	    //	    int ipad = igen + 2;
 	plots->cd();
 	TString padName = TString::Format("plot%d", ipad);
 	TPad *pad = new TPad(padName, padName, 0., 0., 0., 0.);
-	setAndDrawTPad(canvasName, pad, ipad, numbOfGenerator);
+	setAndDrawTPad(canvasName, pad, ipad, ratioFrames.size());
 
 	//--- TLegend ---
 	TLegend *legend = new TLegend(0.16, 0.05, 0.42, 0.20);
-	customizeLegend(canvasName,legend, 1 + igen, numbOfGenerator);
-	TString generator = hGen->GetZaxis()->GetTitle();
-	generator = generator(0, generator.Index(" "));
+	//	customizeRatioLegend(canvasName, legend, 1 + igen, ratioFrames.size());
+	customizeRatioLegend(canvasName, legend, ipad - 1, ratioFrames.size());
+	//TString generator = hGen->GetZaxis()->GetTitle();
+	//generator = generator(0, generator.Index(" "));
 	TString ref_shortname = hStat->GetZaxis()->GetTitle();
 	ref_shortname = ref_shortname(0, ref_shortname.Index(" "));
 	if(ref_shortname.Length()==0) ref_shortname = "Measurement";
-	customizeRatioGraph(hSyst, grGen1ToCentral[igen], grGen1ScaleSyst[igen], grGen1PDFSyst[igen], igen + 1,
-			  //TString("#frac{") + generator + "}{" + ref_shortname + "}", numbOfGenerator, legend);
-			  TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()), numbOfGenerator, legend);
+//	customizeRatioGraph(hSyst, dataRatioToCentral[igen], dataRatioScaleSyst[igen], dataRatioPDFSyst[igen], igen + 1,
+//			    //TString("#frac{") + generator + "}{" + ref_shortname + "}", ratioFrames.size(), legend);
+//			    TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()), ratioFrames.size(), legend);
 									    
-	configXaxis(hSyst, hGen, variable);
-	hSyst->DrawCopy("e");
-	if(grGen1ToCentral[igen]){
-	    grGen1ToCentral[igen]->SetName("grGen1ToCentral");
-	    grGen1ToCentral[igen]->Draw("2");
-	}
-	if(grGen1ScaleSyst[igen]) grGen1ScaleSyst[igen]->Draw("2");
-	if(grGen1ToCentral[igen]) grGen1ToCentral[igen]->Draw("2");
-	if(grCentralSystRatio){
-	    grCentralSystRatio->SetName("grCentralSystRatio");
-	    grCentralSystRatio->Draw("2");
-	}
-	
-	if(grCentralSystRatio) grCentralStatRatio->Draw("p");
-	if(grGen1ToCentral[igen])    grGen1ToCentral[igen]->Draw("Xp");
-	if(grGen1PDFSyst[igen])      grGen1PDFSyst[igen]->Draw("2");
-	legend->Draw("same");
+	configXaxis(hAxis, 0, variable);
+	hAxis->Draw("");
+	customizeRatioGraph(hAxis, 0, 0, 0, ipad - 1,
+			    TString::Format("#frac{Prediction}{%s}",
+					    ref_shortname.Data()),
+			    ratioFrames.size(), 0);
+	// hSyst->DrawCopy("e");
+	bool mainGen = true;
+	std::vector<TGraphAsymmErrors*> stairs_to_draw;
+	std::vector<int> stairs_to_draw_maxPoints;
+	for(auto& g: f){
+	    ++igen;
+	    customizeRatioGraph(mainGen ? hAxis : 0, g.dataRatio, g.dataRatioScaleSyst,
+				g.dataRatioPDFSyst, ipad - 1,
+				TString::Format("#frac{Prediction}{%s}",
+						ref_shortname.Data()),
+				ratioFrames.size(), mainGen ? legend : 0);
+	    int showSys = cfg.getI(TString::Format("%s_unc", g.name.c_str()));
+	    if(g.dataRatioScaleSyst) g.dataRatioScaleSyst->Draw("2");
+	    if(g.dataRatioPDFSyst)   g.dataRatioPDFSyst->Draw("2");
+
+	    //FIXME: should go in configuration file
+	    if(!mainGen && g.dataRatio && TString(g.name).Contains("as1135")){
+		TLegend* l = new TLegend(0.65, 0.05, 0.8, 0.15);
+		l->SetFillColor(legend->GetFillColor());
+		l->SetBorderSize(legend->GetBorderSize());
+		l->SetMargin(legend->GetMargin());
+		l->SetTextFont(legend->GetTextFont());
+		l->SetTextSize(legend->GetTextSize()*1.2);
+		l->SetTextAlign(legend->GetTextAlign());
+		l->SetY1(legend->GetY1());
+		l->SetY2(legend->GetY2());
+
+		l->AddEntry(g.dataRatio, "#alpha_{s} = 0.1135", "l");
+		l->Draw();
+	    }
+	    
+	    if(g.dataRatio){
+		g.dataRatio->SetName("grGen1ToCentral");
+		if(showSys >= 0){
+		    g.dataRatio->Draw("2p");
+		} else{
+		    g.dataRatio->SetLineStyle(kDashed);
+		    g.dataRatio->SetLineWidth(4.);
+		    int maxPoints = 99999;
+		    if(variable.BeginsWith("ZNGoodJet")){
+			maxPoints = 3;
+		    }
+		    stairs_to_draw.push_back(g.dataRatio);
+		    stairs_to_draw_maxPoints.push_back(maxPoints);
+		}
+		//FIXME: replace by one call to draw with the combined X2p option?
+		//g.dataRatio->Draw("Xp");
+	    }
+	    //	    legend->Draw("same");
+	    legend->Draw();
 	
 	//if (canvasName.Contains("JetPt_Zinc")) {
-	//    grGen1ToCentral->GetXaxis()->SetRangeUser(30, x + ex);
+	//    dataRatioToCentral->GetXaxis()->SetRangeUser(30, x + ex);
 	//}
 
 	//	if(variable.Contains("ZPt_") && igen == 0){
@@ -2210,11 +2356,33 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	//	    plots->Update();
 	//	} 
 	
+	    mainGen = false;
+	}//next gen of the ratio frame
+	
+	//draw data/data:
+	if(grCentralSystRatio){
+	    grCentralSystRatio->SetName("grCentralSystRatio");
+	    //TODO: replace with one draw with "2p" option?
+	    grCentralSystRatio->Draw("2");
+	    grCentralStatRatio->Draw("p");
+	}
+
+	int i = 0;
+	for(auto g: stairs_to_draw){
+	    // graph_draw_stairs(g, stairs_to_draw_maxPoints[i]);
+	    graph_draw_stairs(g, minRatioY, maxRatioY);
+	    ++i;
+	}
+
+	
 	pad->RedrawAxis();
     }
     //--- End of Ratio Pads ---
     
     plots->Update();
+
+    ratioYaxisExtend = savedRatioYaxisExtend;
+    
     return plots;
 }
 

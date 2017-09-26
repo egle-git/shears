@@ -8,8 +8,9 @@
 #include "TH1.h"
 #include "TSystem.h"
 #include "printTable.h"
-#include "PlotSettings.h"
+//#include "PlotSettings.h"
 #include "SectionedConfig.h"
+#include "TextTools.h"
 
 ConfigVJets cfg;
 
@@ -176,9 +177,10 @@ public:
 	  TString title;
 	  TString var;
 	  TString dSigma;
+	  bool sepLumiUnc = false;
 	  createTitleVariableAnddSigma(VAROFINTERESTZJETS[i].name, false,
 				       xtitle, title,
-				       var, dSigma);
+				       var, dSigma, sepLumiUnc);
 	  if(var.Length() > 0) obsLabels[obs] = var.Data();
 	  obsLabels["JZB_ptLow"] = "JZB, low $p_\\text{T}$";
 	  obsLabels["JZB_ptHigh"] = "JZB, high $p_\\text{T}$";

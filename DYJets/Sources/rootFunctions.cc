@@ -109,3 +109,27 @@ void graph_draw_stairs(TGraphAsymmErrors* g, double ymin, double ymax){
     pl->Draw();    
   }
 }
+
+bool alignRanges(const TAxis* axref, TAxis* ax){
+  double xmin = axref->GetBinLowEdge(axref->GetFirst());
+  int first = 1;
+  double eps = 1e-9;
+  while(first < ax->GetNbins() + 1
+	&& fabs(ax->GetBinLowEdge(first)-xmin)
+	/ axref->GetBinWidth(axref->GetFirst()) > eps) ++first;
+  if(first > ax->GetNbins() + 1) return false;
+  int last = first + axref->GetLast() - axref->GetFirst();
+  if(last > ax->GetNbins() + 1) return false;
+  ax->SetRange(first, last);
+  
+  //check bin consistency:
+  for(int i = 0; i <= axref->GetLast() - axref->GetFirst() + 1; ++i){
+    if(fabs(ax->GetBinLowEdge(ax->GetFirst() + i)
+	    - axref->GetBinLowEdge(axref->GetFirst() + i))
+       / axref->GetBinWidth(axref->GetFirst() + i) > eps){
+      return false;
+    }
+  }
+  
+  return true;
+}

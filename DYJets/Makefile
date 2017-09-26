@@ -51,7 +51,7 @@ SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
 RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc \
-printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc
+printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc ResultTables.cc TextTools.cc Uncertainties.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)

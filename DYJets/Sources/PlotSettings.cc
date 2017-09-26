@@ -77,10 +77,10 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     hratio *= fac;
     hbottomratio *= fac;
 
-    std::cout << "fac, htop, hratio, hborromratio, sum: "
-	      << fac << ", " << htop << ", " << hratio << ", " 
-	      << hbottomratio << ", "
-	      << (htop + (numbOfGenerator-1) * hratio + hbottomratio) << "\n";
+    //    std::cout << "fac, htop, hratio, hborromratio, sum: "
+    //	      << fac << ", " << htop << ", " << hratio << ", " 
+    //	      << hbottomratio << ", "
+    //	      << (htop + (numbOfGenerator-1) * hratio + hbottomratio) << "\n";
 
 //    double htop   = 0.98 / (1. + margin0 + margin1
 //			    + actualPadHeightRatio*(numbOfGenerator - 1) 
@@ -279,22 +279,24 @@ void customizeCentral(TGraphAsymmErrors *grCentral, TLegend *legend, TString leg
 
 TGraphAsymmErrors* createGrFromHist(const TH1 *h)
 {
-    int nPoints = h->GetNbinsX();
-    double *xCoor = new double[nPoints];
-    double *yCoor = new double[nPoints];
-    double *xErr  = new double[nPoints];
-    double *yErr = new double[nPoints];
+    const TAxis* ax = h->GetXaxis();
+    int nPoints = std::max(0, ax->GetLast() - ax->GetFirst() + 1);
 
-    for (int i(0); i < nPoints; i++) {
-        xCoor[i] = h->GetBinCenter(i+1);
-        xErr[i]  = 0.5*h->GetBinWidth(i+1);
-        yCoor[i] = h->GetBinContent(i+1);
-        yErr[i] = h->GetBinError(i+1);
+    std::vector<double> xCoor(nPoints);
+    std::vector<double> yCoor(nPoints);
+    std::vector<double> xErr(nPoints);
+    std::vector<double> yErr(nPoints);
+
+    for(int i = 0; i < nPoints;  ++i){
+        xCoor[i] = h->GetBinCenter(ax->GetFirst() + i);
+        xErr[i]  = 0.5*h->GetBinWidth(ax->GetFirst() + i);
+        yCoor[i] = h->GetBinContent(ax->GetFirst() + i);
+        yErr[i] = h->GetBinError(ax->GetFirst() + i);
     }
 
-    TGraphAsymmErrors *gr = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErr, yErr);
+    TGraphAsymmErrors *gr = new TGraphAsymmErrors(nPoints, &xCoor[0], &yCoor[0],
+						  &xErr[0], &xErr[0], &yErr[0], &yErr[0]);
 
-    delete [] xCoor; delete [] yCoor; delete [] xErr; delete [] yErr; 
     return gr;
 }
 
@@ -356,51 +358,35 @@ TGraphErrors* createRatioGraph(const TGraphErrors* grCentral)
 // This function creates a TGraphAsymmErrors from a TH1 and a TGraphAsymmErrors.
 // The output TGraph is the ratio of the TH1 by the TGraphAsymmErrors.
 //================================================================================
-TGraphAsymmErrors *createGenToCentral(const TH1 *gen, const TGraphAsymmErrors *grCentral)
-{
+TGraphAsymmErrors *createGenToCentral(const TH1 *gen, const TGraphAsymmErrors *grCentral){
     if(!gen) return 0;
-    
+
+    const TAxis* ax = gen->GetXaxis();
     int nPoints = grCentral->GetN();
-    int nPoints2 = gen->GetNbinsX();
-    int diff = fabs(nPoints - nPoints2);
+    int nPoints2 = ax->GetLast() - ax->GetFirst() + 1;
     if (nPoints != nPoints2) {
-        nPoints = nPoints2;
+	std::cerr << "createGenToCentral() function called with inconsistent inputs. Aborts. ("
+		  << __FILE__ << ":" << __LINE__ << ").\n";
+	abort();
     }
-    double *xCoor = new double[nPoints];
-    double *yCoor = new double[nPoints];
-    double *xErr  = new double[nPoints];
-    double *yErr  = new double[nPoints];
+
+    std::vector<double> xCoor(nPoints);
+    std::vector<double> yCoor(nPoints);
+    std::vector<double> xErr(nPoints);
+    std::vector<double> yErr(nPoints);
 
 
     for (int i(0); i < nPoints; i++) {
-        grCentral->GetPoint(i+diff, xCoor[i], yCoor[i]);
-        xErr[i] = grCentral->GetErrorXlow(i+diff);
+        grCentral->GetPoint(i, xCoor[i], yCoor[i]);
+        xErr[i] = grCentral->GetErrorXlow(i);
         yErr[i] = 0.;
         if (yCoor[i] != 0) {
-            yErr[i]  = gen->GetBinError(i+1)/yCoor[i];
-            yCoor[i] = gen->GetBinContent(i+1)/yCoor[i];
+            yErr[i]  = gen->GetBinError(ax->GetFirst() + i) / yCoor[i];
+            yCoor[i] = gen->GetBinContent(ax->GetFirst() + i) / yCoor[i];
         }
     }
-    /*
-      int nPoints = grCentral->GetN();
-      double *xCoor = new double[nPoints];
-      double *yCoor = new double[nPoints];
-      double *xErr  = new double[nPoints];
-      double *yErr  = new double[nPoints];
-
-      for (int i(0); i < nPoints; i++) {
-      grCentral->GetPoint(i, xCoor[i], yCoor[i]);
-      xErr[i] = grCentral->GetErrorXlow(i);
-      yErr[i] = 0.;
-      if (yCoor[i] != 0) {
-      yErr[i]  = gen->GetBinError(i+1)/yCoor[i];
-      yCoor[i] = gen->GetBinContent(i+1)/yCoor[i];
-      }
-      }
-
-    */
-    TGraphAsymmErrors *grGenToCentral = new TGraphAsymmErrors(nPoints, xCoor, yCoor, xErr, xErr, yErr, yErr);
-    delete [] xCoor; delete [] yCoor; delete [] xErr; delete [] yErr; 
+    TGraphAsymmErrors *grGenToCentral = new TGraphAsymmErrors(nPoints, &xCoor[0], &yCoor[0],
+							      &xErr[0], &xErr[0], &yErr[0], &yErr[0]);
     return grGenToCentral;
 }
 
@@ -854,7 +840,6 @@ void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen,
 	    hAxis->GetXaxis()->SetLabelFont(ts.defaultFont);
 	    hAxis->GetXaxis()->SetLabelSize(ts.xLabelSize);
 	    hAxis->GetXaxis()->SetLabelOffset(0.02);
-	    std::cout << "==> " << hAxis->GetXaxis()->GetLabelOffset() << "\t" << hbottomratio << "\n";
 	    //   hAxis->GetXaxis()->SetTitleFont(ts.defaultFont);
 	    //hAxis->GetXaxis()->SetTitleSize(ts.xTitleSize);
 	    //	    hAxis->GetXaxis()->SetTitleOffset(1.0);
@@ -1146,597 +1131,6 @@ std::string getYaxisTitle(bool doNormalized, const TH1 *gen1)
 }
 
 
-void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString& title, TString& var, TString& dSigma)
-{
-
-    // jet multiplicity
-    if (variable.Index("ZNGoodJets_Zexc") >= 0) {
-        title = "Exclusive jet multiplicity";
-        var = "$N_{\\text{jets}}$";
-        dSigma = "$\\frac{d\\sigma}{dN_{\\text{jets}}}$ \\tiny{[\\text{pb}]}";
-    }
-    if (variable.Index("ZNGoodJets_Zinc") >= 0) {
-        title = "Inclusive jet multiplicity";
-        var = "$N_{\\text{jets}}$";
-        dSigma = "$\\frac{d\\sigma}{dN_{\\text{jets}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (xtitle.Index("p_{T}(Z)") >= 0) {
-        title = "$p_{T}^{Z}$";
-        var = "$p_{\\text{T}}(Z)$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(Z)}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    if (xtitle.Index("p_{T} balance") >= 0) {
-        title = "$p_{T}^{balance}$";
-        var = "$p_{\\text{T}}(balance)$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(balance)}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    if (xtitle.Index("Recoil") >= 0) {
-        title = "$Hadronic recoil$";
-        var = "Hadronic recoil \\tiny{[GeV]}";//"$p_{\\text{T}}(balance)$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(hadronic recoil)}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    if (xtitle.Index("JZB") >= 0) {
-        title = "$p_{T}^{JZB}$";
-        var = "$p_{\\text{T}}(JZB)$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(JZB)}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    // Z Boson and Jet rapidity
-    if (variable.Index("AbsZRapidity_Zexc1jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} = 1$)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_Zinc1jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsJetRapidity_Zexc1jet") >= 0) {
-        title = "$|y_\\text{jet}|$ ($N_{\\text{jets}} = 1$)";
-        var = "$|y_{\\text{jet}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_Zinc1jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZJetRapidity_Zexc1jet") >= 0) {
-        title = "$y_\\text{sum}$ ($N_{\\text{jets}} = 1$)";
-        var = "$y_{\\text{sum}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_Zinc1jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZJetRapidity_Zexc1jet") >= 0) {
-        title = "$y_\\text{diff}$ ($N_{\\text{jets}} = 1$)";
-        var = "$y_{\\text{diff}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_Zinc1jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_Zinc2jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_Zinc2jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsSecondJetRapidity_Zinc2jet") >= 0) {
-        title = "$|y_\\text{jet2}|$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$|y_{\\text{jet2}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet2}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZSecondJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{sum(Z,jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumFirstSecondJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(jet1,jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{sum(jet1,jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(jet1,jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZSecondJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{diff(Z,jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifFirstSecondJetRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(jet1,jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{diff(jet1,jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(jet1,jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZTwoJetsRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1+jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{sum(Z,jet1+jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1+jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZTwoJetsRapidity_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1+jet2)}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$y_{\\text{diff(Z,jet1+jet2)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1+jet2)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_ZPt150_Zinc1jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_ZPt300_Zinc1jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_ZPt150_Zinc1jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_ZPt300_Zinc1jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_ZPt150_Zinc1jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_ZPt300_Zinc1jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_ZPt150_Zinc1jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_ZPt300_Zinc1jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_FirstJetPt50_Zinc1jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{jet1}} \\geq 50 \\text{GeV}$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_FirstJetPt80_Zinc1jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{jet1}} \\geq 80 \\text{GeV}$)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_FirstJetPt50_Zinc1jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{jet1}} \\geq 50 \\text{GeV}$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_FirstJetPt80_Zinc1jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{jet1}} \\geq 80 \\text{GeV}$)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_DifJetRapiditys2_Zinc2jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\leq 2 $)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsZRapidity_DifJetRapidityl2_Zinc2jet") >= 0) {
-        title = "$|y_\\text{Z}|$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\geq 2 $)";
-        var = "$|y_{\\text{Z}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{Z}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_DifJetRapiditys2_Zinc2jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\leq 2 $)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("AbsFirstJetRapidity_DifJetRapidityl2_Zinc2jet") >= 0) {
-        title = "$|y_\\text{jet1}|$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\geq 2 $)";
-        var = "$|y_{\\text{jet1}}|$";
-        dSigma = "$\\frac{d\\sigma}{d|y_{\\text{jet1}}|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_DifJetRapiditys2_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\leq 2 $)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetRapidity_DifJetRapidityl2_Zinc2jet") >= 0) {
-        title = "$y_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\geq 2 $)";
-        var = "$y_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_DifJetRapiditys2_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\leq 2 $)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetRapidity_DifJetRapidityl2_Zinc2jet") >= 0) {
-        title = "$y_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 2, |y_{jet1} - y_{jet2}| \\geq 2 $)";
-        var = "$y_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{dy_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("SumZFirstJetEta_Zinc1jet") >= 0) {
-        title = "$\\eta_\\text{sum(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1 $)";
-        var = "$\\eta_{\\text{sum(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta_{\\text{sum(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DifZFirstJetEta_Zinc1jet") >= 0) {
-        title = "$\\eta_\\text{diff(Z,jet1)}$ ($N_{\\text{jets}} \\geq 1 $)";
-        var = "$\\eta_{\\text{diff(Z,jet1)}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta_{\\text{diff(Z,jet1)}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_Zinc1jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 1 $)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_Zinc2jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 2 $)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt150_Zinc1jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt150_Zinc2jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 2, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt300_Zinc1jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 1, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt300_Zinc2jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 2, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZSecondJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet2}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{Z,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZThirdJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet3}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{Z,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZSecondJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet2}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZThirdJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZSecondJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet2}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZThirdJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstSecondJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet2}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstThirdJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet3}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiSecondThirdJet_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet2,jet3}$ ($N_{\\text{jets}} \\geq 3 $)";
-        var = "$\\Delta\\phi_{\\text{jet2,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet2,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstSecondJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet2}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstThirdJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiSecondThirdJet_ZPt150_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet2,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet2,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet2,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstSecondJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet2}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiFirstThirdJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet1,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet1,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet1,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiSecondThirdJet_ZPt300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{jet2,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{jet2,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{jet2,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZFirstJet_ZPt150_HT300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet1}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}, H_{\\text{T}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet1}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet1}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZSecondJet_ZPt150_HT300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet2}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}, H_{\\text{T}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet2}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet2}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    if (variable.Index("DPhiZThirdJet_ZPt150_HT300_Zinc3jet") >= 0) {
-        title = "$\\Delta\\phi_\\text{Z,jet3}$ ($N_{\\text{jets}} \\geq 3, p_{\\text{T}}^{\\text{Z}} \\geq 150 \\text{GeV}, H_{\\text{T}} \\geq 300 \\text{GeV}$)";
-        var = "$\\Delta\\phi_{\\text{Z,jet3}}$";
-        dSigma = "$\\frac{d\\sigma}{d\\Delta\\phi_{\\text{Z,jet3}}}$ \\tiny{[\\text{pb}]}";
-    }
-
-    // jet pt distributions
-    if (xtitle.Index("p_{T}(j_{1})") >= 0) {
-        title = "$1^{\\text{st}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$p_{\\text{T}}(j_{1})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{1})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("p_{T}(j_{2})") >= 0) {
-        title = "$2^{\\text{nd}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$p_{\\text{T}}(j_{2})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{2})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("p_{T}(j_{3})") >= 0) {
-        title = "$3^{\\text{rd}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 3$)";
-        var = "$p_{\\text{T}}(j_{3})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{3})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("p_{T}(j_{4})") >= 0) {
-        title = "$4^{\\text{th}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 4$)";
-        var = "$p_{\\text{T}}(j_{4})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{4})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("p_{T}(j_{5})") >= 0) {
-        title = "$5^{\\text{th}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 5$)";
-        var = "$p_{\\text{T}}(j_{5})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{5})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("p_{T}(j_{6})") >= 0) {
-        title = "$6^{\\text{th}}$ jet $p_{\\text{T}}$ ($N_{\\text{jets}} \\geq 6$)";
-        var = "$p_{\\text{T}}(j_{6})$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dp_{\\text{T}}(j_{6})}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    // jet HT distributions
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 1") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 2") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 3") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 3$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 4") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 4$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 5") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 5$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-    if (xtitle.Index("H_{T}") >= 0 && title.Index("N_{jets} #geq 6") >= 0) {
-        title = "$H_{\\text{T}}$ ($N_{\\text{jets}} \\geq 6$)";
-        var = "$H_{\\text{T}}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dH_{\\text{T}}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    // jet eta distributions
-    if (xtitle.Index("eta(j_{1})") >= 0) {
-        title = "$1^{\\text{st}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$\\eta(j_{1})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{1})}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("eta(j_{2})") >= 0) {
-        title = "$2^{\\text{nd}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$\\eta(j_{2})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{2})}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("eta(j_{3})") >= 0) {
-        title = "$3^{\\text{rd}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 3$)";
-        var = "$\\eta(j_{3})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{3})}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("eta(j_{4})") >= 0) {
-        title = "$4^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 4$)";
-        var = "$\\eta(j_{4})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{4})}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("eta(j_{5})") >= 0) {
-        title = "$5^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 5$)";
-        var = "$\\eta(j_{5})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{5})}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("eta(j_{6})") >= 0) {
-        title = "$6^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 6$)";
-        var = "$\\eta(j_{6})$";
-        dSigma = "$\\frac{d\\sigma}{d\\eta(j_{6})}$ \\tiny{[\\text{pb}]}";
-    }
-
-    //abs rapidity distributions
-    if (xtitle.Index("|y(j_{1})|") >= 0) {
-        title = "$1^{\\text{st}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 1$)";
-        var = "$|y(j_{1})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{1})|}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("|y(j_{2})|") >= 0) {
-        title = "$2^{\\text{nd}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$|y(j_{2})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{2})|}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("|y(j_{3})|") >= 0) {
-        title = "$3^{\\text{rd}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 3$)";
-        var = "$|y(j_{3})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{3})|}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("|y(j_{4})|") >= 0) {
-        title = "$4^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 4$)";
-        var = "$|y(j_{4})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{4})|}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("|y(j_{5})|") >= 0) {
-        title = "$5^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 5$)";
-        var = "$|y(j_{5})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{5})|}$ \\tiny{[\\text{pb}]}";
-    }
-    if (xtitle.Index("|y(j_{6})|") >= 0) {
-        title = "$6^{\\text{th}}$ jet $\\vert\\eta\\vert$ ($N_{\\text{jets}} \\geq 6$)";
-        var = "$|y(j_{6})|$";
-        dSigma = "$\\frac{d\\sigma}{d|y(j_{6})|}$ \\tiny{[\\text{pb}]}";
-    }
-
-    
-    // dijet mass distribution
-    if (xtitle.Index("M_{j_{1}j_{2}}") >= 0) {
-        title = "dijet mass $M_{jj}$ ($N_{\\text{jets}} \\geq 2$)";
-        var = "$M_{jj}$ \\tiny{[GeV]}";
-        dSigma = "$\\frac{d\\sigma}{dM_{jj}}$ ${\\scriptstyle [\\frac{\\text{pb}}{\\text{GeV}}]}$";
-    }
-
-    if (doNormalized) {
-        dSigma = "$\\frac{1}{\\sigma}$ " + dSigma;
-        dSigma.ReplaceAll("\\frac{\\text{pb}}", "\\frac{1}");
-        dSigma.ReplaceAll("\\tiny{\\left[\\text{pb}\\right]}", "");
-    }
-
-}
 
 
 void makeCrossSectionPlot(const char* variable, const char* ref){
@@ -1838,10 +1232,13 @@ void makeCrossSectionPlot(const char* variable, const char* ref){
 	    std::cout << "Scaling " << ref << " by factor " << fac << std::endl;
 	    hRef->Scale(fac);
 	}
-
+	
+	int upperBin = hRef->GetXaxis()->GetNbins() -  nLastBinsToSkip;
+	int lowerBin = 1 + nFirstBinsToSkip;
+	hRef->GetXaxis()->SetRange(lowerBin, upperBin);
 	TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, lumi, variable, doNormalized,
 							 hRef, hCov,
-							 predictions, nFirstBinsToSkip, nLastBinsToSkip);
+							 predictions);
 	saveCanvas(crossSectionPlot, dir, fname);
     } else{
 	std::cerr << "Warning: no reference histogram was found for variable " << variable << ", channel "
@@ -1873,9 +1270,7 @@ TH1* makeCrossSectionHist(TH1* hGenDYJets, double integratedLumi)
 
 TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
 			      bool doNormalized, TH1* hStat, TH2* hCovSyst,
-			      std::vector<std::string> gens,
-			      int nFirstBinsToSkip, int nLastBinsToSkip){
-
+			      std::vector<std::string> gens){
 //    if(gens.size() > 3){
 //	std::cerr << "Warning. Maxium three generator comparison is supported. Only the first three will be considered."
 //		  << " (" << __FILE__ << ":" << __LINE__ << ").\n";
@@ -1927,6 +1322,22 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
     for(auto g: hGens){
 	++ipred;
 	if(!g) continue;
+	if(!alignRanges(hStat->GetXaxis(), g->GetXaxis())){
+	    std::cerr << "Fatal error. X-axis range of " << hStat->GetName() << " and "
+		      << g->GetName() << " are inconsistent. Aborts. ("
+		      << __FILE__ << ":" << __LINE__ << ")\n";
+	    std::cerr << "\t" << hStat->GetXaxis()->GetNbins() << "bins:";
+	    for(int i = 1; i <= hStat->GetNbinsX() + 1; ++i){
+		std::cerr << "\t" << hStat->GetXaxis()->GetBinLowEdge(i);
+	    }
+	    std::cerr << "\n\t" << g->GetXaxis()->GetNbins() << "bins:";
+	    for(int i = 1; i <= g->GetXaxis()->GetNbins() + 1; ++i){
+		std::cerr << "\t" << g->GetXaxis()->GetBinLowEdge(i);
+	    }
+
+	    abort();
+	}
+	    
 	tmp1.push_back(g);
 	tmp2.push_back(gens[ipred]);
 	if(g) g->SetZTitle(getLegendGen(gens[ipred].c_str()));
@@ -2064,13 +1475,6 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
     }
 
     if(hSyst){
-//DEBUG	if (canvasName.Contains("ZNGoodJets")) {
-//DEBUG	    hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
-//DEBUG	}
-	//if (canvasName.Contains("JetPt_Zinc")) {
-	//hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
-	//}
-	hSyst->GetXaxis()->SetRange(nFirstBinsToSkip + 1, hSyst->GetNbinsX() - nLastBinsToSkip);
 	if (canvasName.Contains("Eta") || canvasName.Contains("AbsRapidity")) {
 	    hSyst->GetYaxis()->SetRangeUser(0.001, 1.4*maximum);
 	}

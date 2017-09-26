@@ -140,4 +140,16 @@ bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
 void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName);
 
 
+///@{
+/** Rounds figures of a measurement according to CMS convention
+ * https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/PubGuidelines#Significant_figures_for_measurem
+ * rev. 188 and matching the precision of the central value to the precision of the largest uncertainty.
+ */
+void pground(double val, const std::vector<double>& unc, std::string& sVal, 
+	     std::vector<std::string>& sUnc, bool matchUncPrecOnCentralValue);
+
+void pground(double val, double unc, std::string& sVal, std::string& sUnc);
+
+///@}
+
 #endif

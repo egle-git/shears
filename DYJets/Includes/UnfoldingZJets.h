@@ -23,9 +23,9 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
 	       TH1D *hRecDataMinusFakesOdd = 0, TH1D *hRecDataMinusFakesEven = 0, int fixNIterTo = -1,
 	       const char* outputFileName = 0);
 TH2D* M2H(TMatrixD m);
-TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name);
+TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp, const TH1D* hUnfDataDown, TString name,
+			   bool noNull = true);
 TH1D* foldUnfData(const TH1 *hUnfData, const TMatrixD* cov, const RooUnfoldResponse *resp);
-void createTable(TString outputFileName, TString lepSel, TString variable, bool doNormalized, TH1 *hUnfData, TH2 *hCov[]);
 void test();
 void createSystPlots(TString outputFileName, TString sysPlotDir, TString lepSel, TString variable, TH1D* hUnf[], bool logy = false);
 double MyChi2Test(const TH1 *h1, const TH1 *h2, int nFirstBinsToSkip = 0, int nLastBinsToSkip = 0,

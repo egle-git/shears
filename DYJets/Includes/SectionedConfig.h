@@ -170,7 +170,6 @@ public:
       sval = buf.str();
 
       //check for consistency of default values used within the code
-      std::cout << "Looking for " << param << "\n";
       auto it1 = retrievedConfig.find(section);
       if(it1!=retrievedConfig.end()){
 	auto it2 = it1->second.find(param);

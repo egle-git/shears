@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     int whichSyst      = cfg.getI("whichSyst");
     TString generator1 = cfg.getS("generator1", "mgpythia8");
     TString generator2 = cfg.getS("generator2", "");
-
+    
     TString variable = "";
     bool doNormalized(false);
 
@@ -83,6 +83,11 @@ int main(int argc, char **argv)
 		getArg(currentArg, nIters);
 		cfg.set("minIter", nIters);
 		cfg.set("maxIter", nIters);
+	    }
+	    else if(currentArg.BeginsWith("cachedNIters=")){
+	      int sw;
+	      getArg(currentArg, sw);
+	      cfg.set("cachedNIters", sw);
 	    }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {

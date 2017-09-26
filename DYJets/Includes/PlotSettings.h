@@ -40,12 +40,16 @@ TGraphAsymmErrors* createPDFSystGraph(TString sample, TString lepSel, TString va
 				      const TGraphAsymmErrors *grGen3ScaleSyst =0);
 TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString variable,
 					const TGraphAsymmErrors *grGenToCentral);
+
+/** Produce cross section plots.
+ * Note: old nFirstBinsToSkip and nLastBinsToSkip parameters were removed
+ * To x-axis range used for the plots can be limited by calling
+ * hStat->SetRange() or hStatRangeUser() before calling this method.
+ */
 TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, bool doNormalized,
 			      TH1* hStat, TH2* hCovSyst,
-			      std::vector<std::string> gens,
-			      int nFirstBinsToSkip, int nLastBinsToSkip);
+			      std::vector<std::string> gens);
 //TCanvas* makeCrossSectionPlot(TString lepSel, TString variable, bool doNormalized, TH1 *hData, TH2D *hCovSyst, TH1 *hGen, TH1 *hGen1 = NULL, TH1 *hGen2 = NULL, double integratedLumi = -1);
-void createTitleVariableAnddSigma(TString variable, bool doNormalized, TString xtitle, TString &title, TString &var, TString &dSigma) ;
 void makeCrossSectionPlot(const char* variable = 0, const char* ref = "Data");
 TH1* makeCrossSectionHist(TH1* hGenDYJets, double integratedLumi);
 #endif

@@ -557,7 +557,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         //if (!s) wmes= nmes;
         hFakDYJets->SetBinContent (i, factor*fake);
 	double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes;
-	if(err2 < 0) {
+	if(err2 < - 1.e-6 * (pow(hRecDYJets->GetBinError(i),2) + wmes)) {
 	  std::cerr << __FILE__ << ":"  << __LINE__ 
 		    << ". " << hRecDYJets->GetTitle() << ", bin " << i << ": "
 		    << "Uncertainty on n_tot (" << hRecDYJets->GetBinError(i)

@@ -261,11 +261,11 @@ TH1* BLUEMeth::GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCov
 
 
 
-    std::cout << "HERE IS THE LAMBDA" << std::endl;
-
-    lambdaai->Print();
-
-    std::cout << "END OF THE LAMBDA" << std::endl;
+//    std::cout << "HERE IS THE LAMBDA" << std::endl;
+//
+//    lambdaai->Print();
+//
+//    std::cout << "END OF THE LAMBDA" << std::endl;
 
     for (unsigned int iCov = 0; iCov < _nCovariances; ++iCov) {
         if (modifiedSWA) {

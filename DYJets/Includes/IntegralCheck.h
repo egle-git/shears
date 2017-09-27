@@ -175,12 +175,13 @@ public:
 	} else{
 	  TString xtitle  = hUnfDataCentral->GetXaxis()->GetTitle();
 	  TString title;
-	  TString var;
-	  TString dSigma;
+	  TString var, varUnit;
+	  TString dSigma, dSigmaUnit;
 	  bool sepLumiUnc = false;
 	  createTitleVariableAnddSigma(VAROFINTERESTZJETS[i].name, false,
 				       xtitle, title,
-				       var, dSigma, sepLumiUnc);
+				       var, varUnit,
+				       dSigma, dSigmaUnit, sepLumiUnc);
 	  if(var.Length() > 0) obsLabels[obs] = var.Data();
 	  obsLabels["JZB_ptLow"] = "JZB, low $p_\\text{T}$";
 	  obsLabels["JZB_ptHigh"] = "JZB, high $p_\\text{T}$";

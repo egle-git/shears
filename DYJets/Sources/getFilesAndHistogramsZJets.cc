@@ -140,7 +140,11 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
     //------------------------------------------------------------------------------------------ 
 }
 
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18])
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], 
+		  TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], 
+		  TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], 
+		  TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], 
+		  TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18])
 {
 
     //--- get rec Data histograms ---
@@ -317,7 +321,6 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
         //    for lumi up and down systematics. It is just a rescaliing
         //    since it is a global effect. 
         double lumiErr = dataDriven ? 0 : cfg.getD("lumiUnc");
-
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH1D*) histograms[0]->Clone();
@@ -326,9 +329,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
             //--- lumi scale down ---
             histograms[10] = (TH1D*) histograms[0]->Clone();
             histograms[10]->Scale(1. - lumiErr);
-        }
-
-        else{
+        } else{
             //--- lumi scale up ---
             histograms[7] = (TH1D*) histograms[0]->Clone();
             histograms[7]->Scale(1. + lumiErr);
@@ -350,7 +351,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 	double elEffUnc = cfg.getD("elEffUnc");
 	double muEffUnc = cfg.getD("muEffUnc");
         double errSF = (lepSel == "DMu") ? muEffUnc : elEffUnc;
-        if (variable.Index("gen") < 0) {
+        if (variable.Index("gen") < 0) { //reco
             if (isSignal) {
                 //--- SF up ---
                 histograms[11] = (TH1D*) histograms[0]->Clone();
@@ -419,9 +420,12 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
             //--- lumi scale down ---
             histograms[10] = (TH2D*) histograms[0]->Clone();
             histograms[10]->Scale(1. - lumiErr);
-        }
+        } else{
 
-        else{
+	  //This methods is to retrieve response matrices, which are
+	  //for signal only
+	  abort();
+
             //--- lumi scale up ---
             histograms[7] = (TH2D*) histograms[0]->Clone();
             histograms[7]->Scale(1. + lumiErr);
@@ -463,7 +467,11 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
                 histograms[10] = (TH2D*) histograms[0]->Clone();
                 histograms[10]->Scale(1. - errSF);
             }
-        }
+        } else {
+	  //This methods is to retrieve response matrices, which are
+	  //for signal only
+	  abort();
+	}
     }
 }
 
@@ -578,24 +586,24 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {
 
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
+    hFakDYJets[0]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[1]  = getFakes(hRecDYJets[0],  hRecData[1], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[2]  = getFakes(hRecDYJets[0],  hRecData[2], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[3]  = getFakes(hRecDYJets[1],  hRecData[0], hRecSumBg[1],  hResDYJets[1]);
+    hFakDYJets[4]  = getFakes(hRecDYJets[2],  hRecData[0], hRecSumBg[2],  hResDYJets[2]);
+    hFakDYJets[5]  = getFakes(hRecDYJets[3],  hRecData[0], hRecSumBg[0],  hResDYJets[3]);
+    hFakDYJets[6]  = getFakes(hRecDYJets[4],  hRecData[0], hRecSumBg[0],  hResDYJets[4]);
+    hFakDYJets[7]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[3],  hResDYJets[0]);
+    hFakDYJets[8]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[4],  hResDYJets[0]);
+    hFakDYJets[9]  = getFakes(hRecDYJets[5],  hRecData[0], hRecSumBg[5],  hResDYJets[5]);
+    hFakDYJets[10] = getFakes(hRecDYJets[6],  hRecData[0], hRecSumBg[6],  hResDYJets[6]);
+    hFakDYJets[11] = getFakes(hRecDYJets[7],  hRecData[0], hRecSumBg[0],  hResDYJets[7]);
+    hFakDYJets[12] = getFakes(hRecDYJets[8],  hRecData[0], hRecSumBg[0],  hResDYJets[8]);
+    hFakDYJets[13] = getFakes(hRecDYJets[9],  hRecData[0], hRecSumBg[7],  hResDYJets[9]);
+    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8],  hResDYJets[10]);
+    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9],  hResDYJets[11]);
     hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
+    hFakDYJets[17] = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0]);
 }
 
 TH1D* getPurities(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)

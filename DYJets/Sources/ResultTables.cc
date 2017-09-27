@@ -28,11 +28,14 @@ void createTable(TString outputFilePath, TString lepSel, TString variable, bool 
 
     TString title = hCombination->GetTitle();
     int nBins = hCombination->GetNbinsX();
-    TString var = "";
-    TString dSigma = "";
+    TString var;
+    TString varUnit;
+    TString dSigma;
+    TString dSigmaUnit;
     TString xtitle = hCombination->GetXaxis()->GetTitle();
     bool sepLumiUnc = false;
-    createTitleVariableAnddSigma(variable, doNormalized, xtitle, title, var, dSigma, sepLumiUnc);
+    createTitleVariableAnddSigma(variable, doNormalized, xtitle, title, 
+				 var, varUnit, dSigma, dSigmaUnit, sepLumiUnc);
 
     bool withJEC = true;
     if(variable.EndsWith("Zinc0jet")) withJEC = 0;
@@ -71,21 +74,36 @@ void createTable(TString outputFilePath, TString lepSel, TString variable, bool 
     TString ul;
     table += var + " & " + dSigma + " & ";
     //FIXME: need to separtate unit.....
-    ul    += " & & ";
+    ul    += varUnit + " & " + dSigmaUnit + " & ";
     if(sepLumiUnc){
-	 table += "\\tiny{Subtot. Unc [\\%]} & \\tiny{Lumi [\\%]} & ";
+	 table += "\\tiny{Subtot. Unc} & \\tiny{Lumi} & ";
+	 ul += "\\tiny{[\\%]} & \\tiny{[\\%]} & ";
      } else{
-	 table += "\\tiny{Tot. Unc [\\%]} & ";
+	 table += "\\tiny{Tot. Unc} & ";
+	 ul += "\\tiny{[\\%]}& ";
      }
-    table += "\\tiny{stat [\\%]} & ";
-    if(withJEC) table += "\\tiny{JES [\\%]} & \\tiny{JER [\\%]} & ";
-    table += "\\tiny{Eff [\\%]} & ";
-    if(!sepLumiUnc) table += "\\tiny{Lumi [\\%]} & ";
-    table += "\\tiny{Bkg [\\%]} &";
-    if(withLERS){
-      table += "\\tiny{LES [\\%]} & \\tiny{LER [\\%]} & ";
+    table += "\\tiny{Stat} & ";
+    ul += "\\tiny{[\\%]} & ";
+    if(withJEC){
+      table += "\\tiny{JES} & \\tiny{JER} & ";
+      ul += "\\tiny{[\\%]} & \\tiny{[\\%]} & ";
     }
-    table += "\\tiny{PU [\\%]} & \\tiny{Unf model [\\%]} & \\tiny{Unf stat [\\%]} \\\\\\hline\n";
+    table += "\\tiny{Eff} & ";
+    ul += "\\tiny{[\\%]} & ";
+    if(!sepLumiUnc){
+      table += "\\tiny{Lumi} & ";
+      ul += "\\tiny{[\\%]} & ";
+    }
+    table += "\\tiny{Bkg} & ";
+    ul += "\\tiny{[\\%]} & ";
+    if(withLERS){
+      table += "\\tiny{LES} & \\tiny{LER} & ";
+      ul += "\\tiny{[\\%]} & \\tiny{[\\%]} & ";
+    }
+    table += "\\tiny{PU} & \\tiny{Unf model} & \\tiny{Unf stat}\\\\\n";
+    ul += "\\tiny{[\\%]} & \\tiny{[\\%]} & \\tiny{[\\%]}";
+
+    table += ul + "\\\\\n\\hline\n";
 
     int start = 1;
     /*if (title.Index("multiplicity", 0, TString::ECaseCompare::kIgnoreCase) >= 0) {

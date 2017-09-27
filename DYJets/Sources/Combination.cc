@@ -164,8 +164,6 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         TH2* covxaxb = NULL; // total covariance matrix
         TH1* hTotComUnc = NULL; // total uncertainty if combined cross section
         TH1* hCombination = NULL; // combined cross section
-	//        TH1* hMadGenCombined = NULL;
-        TH1* hGen1Combined = NULL;
         //---------------------------------------------------------------------
 
         //--- create the BLUEMeth object to compute the covariance ---
@@ -259,10 +257,7 @@ void Combination(TString unfoldDir, TString combDir, TString algo,
         crossSectionPlot->Write();
         hCombination->Write("CombDataCentral");
         hTotComUnc->Write("CombTotUnc");
-	//hMadGenCombined->Write();
-        hGen1Combined->Write();
-        //hGen2Combined->Write();
-        covxaxb->Write("CombCovTot");
+	covxaxb->Write("CombCovTot");
         covuxaxb[kTotSys]->Write("CombCovTotSyst");
         for (unsigned int i = 0; i < covuxaxb.size(); ++i) {
 	  if(covuxaxb[i]) covuxaxb[i]->Write();

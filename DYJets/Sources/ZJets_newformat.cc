@@ -1145,7 +1145,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             jets.clear(); 
             jets = tmpJets; 
             nGoodJets = jets.size();
-	    //if(fileName.Index("TT") >= 0) cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQTTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
 	    if(fileName.Index("TT") >= 0 && (systematics == 3)) {
 		if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
 		else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);

@@ -843,11 +843,8 @@ void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen,
 	    //   hAxis->GetXaxis()->SetTitleFont(ts.defaultFont);
 	    //hAxis->GetXaxis()->SetTitleSize(ts.xTitleSize);
 	    //	    hAxis->GetXaxis()->SetTitleOffset(1.0);
-	}
-	    //	} else{
-//	    hAxis->GetXaxis()->SetLabelSize(0);
-//	    hAxis->GetXaxis()->SetTitleSize(0);
-//	}
+	    //}
+       	}
     }
 
     if(gen){
@@ -1486,6 +1483,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
 	}
 	hSyst->SetStats(0);
 	configXaxis(hSyst, 0, variable);
+	hSyst->GetXaxis()->SetLabelSize(0.);
+	hSyst->GetXaxis()->SetTitleSize(0.);
 	hSyst->DrawCopy("e");
 	if(grCentralSyst){
 	    grCentralSyst->SetName("grCentralSyst");
@@ -1695,6 +1694,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
 //			    TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()), ratioFrames.size(), legend);
 									    
 	configXaxis(hAxis, 0, variable);
+	hAxis->GetXaxis()->SetLabelSize(0);
+	hAxis->GetXaxis()->SetTitleSize(0);
 	hAxis->Draw("");
 	customizeRatioGraph(hAxis, 0, 0, 0, ipad - 1,
 			    TString::Format("#frac{Prediction}{%s}",

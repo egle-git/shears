@@ -415,6 +415,13 @@ void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,
 	 if(hUnfData[kLESup])  hCov[kLES]    = makeCovFromUpAndDown(hUnfData[0], hUnfData[kLESup], hUnfData[kLESdwn], covName(kLES), noNull);
 	 if(hUnfData[kLERup]) hCov[kLER]    = makeCovFromUpAndDown(hUnfData[0], hUnfData[kLERup], hUnfData[kLERdwn], covName(kLER), noNull);
 	 if(hUnfData[kLumiUp]) hCov[kLumi]   = makeCovFromUpAndDown(hUnfData[0], hUnfData[kLumiUp], hUnfData[kLumiDwn], covName(kLumi), noNull);
+	 
+////	 //DEBUG>>
+////	 std::cerr << ">>> " << (hUnfData[kLumiUp]->GetBinContent(4) - hUnfData[kLumiDwn]->GetBinContent(4))
+////	     / 2. / hUnfData[0]->GetBinContent(4) << "\n";
+////	 std::cerr << sqrt(hCov[kLumi]->GetBinContent(4,4)) /  hUnfData[0]->GetBinContent(4) << "\n";
+	 //<<<<
+
 	 if(hUnfData[kSFup]) hCov[kSF]     = makeCovFromUpAndDown(hUnfData[0], hUnfData[kSFup], hUnfData[kSFdwn], covName(kSF), noNull);
 	 if(hUnfData[kAltUnf]) hCov[kUnfSys] = makeCovFromUpAndDown(hUnfData[0], hUnfData[kAltUnf], 0, covName(kUnfSys), noNull);
 
@@ -465,7 +472,12 @@ void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,
 	     //	     }
 	     //	 }
 	     //	 cout << endl;
-	     //}	     
+	     //}
+////	     for(int i = 1; i <= hCov[kLumi]->GetNbinsX(); ++i){
+////		 std::cout << ">>>> " << i << "\t" << sqrt(hCov[kLumi]->GetBinContent(i,i)) 
+////			   << "\t" << sqrt(hCov[kLumi]->GetBinContent(i,i))  / hUnfData[0]->GetBinContent(i)
+////			   << "\n";
+////	     }
 	     createTable(outputFileName + "_withLERS", lepSel, variable,
 			 doNormalized, hUnfData[0], hCov, true);
 	     createTable(outputFileName, lepSel, variable,
@@ -1643,16 +1655,6 @@ int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* 
     hUnfData->Scale(1./integratedLumi);
     if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./(integratedLumi*integratedLumi));
     if(hUnfDataStatCov) hUnfMCStatCov->Scale(1./(integratedLumi*integratedLumi));
-    //if ("LumiUp" == name) {
-    //    hUnfData->Scale(1./1.026);
-    //    hUnfDataStatCov->Scale(1./(1.026*1.026));
-    //    hUnfMCStatCov->Scale(1./(1.026*1.026));
-    //}
-    //else if ("LumiDown" == name) {
-    //    hUnfData->Scale(1./0.974);
-    //    hUnfDataStatCov->Scale(1./(0.974*0.974));
-    //    hUnfMCStatCov->Scale(1./(0.974*0.974));
-    //}
     if ("LumiUp" == name) {
         hUnfData->Scale(1./(1+lumiUnc));
         if(hUnfDataStatCov) hUnfDataStatCov->Scale(1./((1+lumiUnc)*(1+lumiUnc)));
@@ -1708,13 +1710,19 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp,
     int nBins = hUnfDataCentral->GetNbinsX();
     TH2D* h = new TH2D(name, name, nBins, 0, nBins, nBins, 0, nBins);
 
-    float scale = 1.;
+    double scale = 1.;
     //if no down variations we substitute to the diff. between up and down, twice the
     //diff. between up and central:
     if(hUnfDataDown == 0){
 	hUnfDataDown = hUnfDataCentral;
 	scale  = 2.;
     }
+////    if(name == "CovLumi"){
+////	std::cerr << ">>>> " << hUnfDataCentral->GetBinContent(4)
+////		  << "\t"  << hUnfDataUp->GetBinContent(4)
+////		  << "\t"  << hUnfDataDown->GetBinContent(4)
+////		  << "\t"  << 0.5*(hUnfDataUp->GetBinContent(4)-hUnfDataDown->GetBinContent(4))/hUnfDataCentral->GetBinContent(4) <<"\n";
+////    }
     
     //1. if noNull is set to true, in case of crossing of up- and down- variation
     //   distribution,  we take for the uncertainty of the bin where the crossing
@@ -1726,11 +1734,11 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp,
 	double sigma_i = 0.5*scale*fabs(hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i));
 	//variation directions used later to determine the sign of the correlation coefficient:
 	int sign_i = (hUnfDataUp->GetBinContent(i) - hUnfDataDown->GetBinContent(i) < 0) ? -1 : 1;
-	if (noNull && i > 1 && i < nBins && hUnfDataDown) {
+	if (noNull && i > 1 && i < nBins) {
 	    if ((hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1))
 		* (hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)) < 0) {
-		sigma_i = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1))
-				  + 0.5*fabs(hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)));
+		sigma_i =   0.5*scale*(  0.5*fabs(hUnfDataUp->GetBinContent(i-1) - hUnfDataDown->GetBinContent(i-1))
+			               + 0.5*fabs(hUnfDataUp->GetBinContent(i+1) - hUnfDataDown->GetBinContent(i+1)));
 		//		if (name.Index("Sherpa") >= 0) sigma_i *= 2;
 	    }
 	}
@@ -1738,12 +1746,11 @@ TH2D* makeCovFromUpAndDown(const TH1D* hUnfDataCentral, const TH1D* hUnfDataUp,
 	    double sigma_j = 0.5*scale*fabs(hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j));
 	    //variation directions used together with sign_i to determine the sign of the correlation coefficient:
 	    int sign_j = (hUnfDataUp->GetBinContent(j) - hUnfDataDown->GetBinContent(j) < 0) ? -1 : 1;
-	    if (noNull && j > 1 && j < nBins && hUnfDataDown) {
-		if ((hUnfDataUp->GetBinContent(j-2) - hUnfDataDown->GetBinContent(j-1))
-
+	    if (noNull && j > 1 && j < nBins) {
+		if ((hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1))
 		    * (hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)) < 0) {
-		    sigma_j = 0.5*(0.5*fabs(hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1))
-				      + 0.5*fabs(hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)));
+		    sigma_j = 0.5*scale*(  0.5*fabs(hUnfDataUp->GetBinContent(j-1) - hUnfDataDown->GetBinContent(j-1))
+					   + 0.5*fabs(hUnfDataUp->GetBinContent(j+1) - hUnfDataDown->GetBinContent(j+1)));
 		    //		    if (name.Index("Sherpa") >= 0) sigma_j *= 2;
 		}
 	    }
@@ -2163,13 +2170,6 @@ chi2FromToy(RooUnfold::Algorithm algo, bool smoothPrior, const RooUnfoldResponse
 #                       endif   
 #               endif
 
-		//DEBUG>>>
-		if(iter==50){
-		    hRefs->at(iter)->Write(TString::Format("hRef_%d", itoy));
-		    newUnf2->Write(TString::Format("newUnf2_%d", itoy));
-		    newUnf->Write(TString::Format("newUnf_%d", itoy));
-		}
-		//<<<DEBUG
 		accII[iter] += chi2II;
 		acc2II[iter] += pow(chi2II, 2);
 		for(int iRes = 0; iRes < nRes; ++iRes){

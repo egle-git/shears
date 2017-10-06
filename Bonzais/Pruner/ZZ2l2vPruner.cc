@@ -41,6 +41,8 @@ protected:
   
   bool filterEl(int iEl);
   bool filterMu(int iMu);
+
+  bool passLepPt(vector<float> lepPt);
   
   void makeFilterMask(bool (ZZ2l2vPruner::*filter)(int), std::vector<bool>& mask);
   void skimCollections();
@@ -87,10 +89,11 @@ void ZZ2l2vPruner::makeFilterMask(bool (ZZ2l2vPruner::*filter)(int), std::vector
 }
 
 bool ZZ2l2vPruner::filterEvent(){
-  skimCollections();
+  //skimCollections(); //We don't want to run skimCollections because we need to keep all "bad" leptons in order to be able to apply a 3rd-lepton veto at the level of the analysis. However, if needed, this option can be reactivated simply by uncommenting this line.
   return eventSelection() && Pruner::filterEvent();
 }
   
+
 void ZZ2l2vPruner::skimCollections(){
   std::vector<bool> mask;
   
@@ -161,44 +164,43 @@ void ZZ2l2vPruner::skimCollections(){
 
 //to be run after skimCollections
 bool ZZ2l2vPruner::eventSelection(){
-  //if(!ZZ2l2vPruner::passTrigger(Ntrig)) return false;
   switch(iSubSelection_){
   case MC_DLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(Ntrig); //For MC, requires any trigger to pass.
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(Ntrig); //For MC, requires any trigger to pass.
   case DataDoubleMuDLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(DoubleMu);
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(DoubleMu);
   case DataSingleMuDLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(SingleMu);
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(SingleMu);
   case DataDoubleElDLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(DoubleE);
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(DoubleE);
   case DataSingleElDLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(SingleE);
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(SingleE);
   case DataElMuDLep:
-    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(EMu);
+    return (passLepPt(*MuPt) || passLepPt(*ElPt)) && passTrigger(EMu);
   case MC_DMu:
-    return MuPt->size() > 1 && passTrigger(Ntrig);
+    return passLepPt(*MuPt) && passTrigger(Ntrig);
   case DataDoubleMuDMu:
-    return MuPt->size() > 1 && passTrigger(DoubleMu);
+    return passLepPt(*MuPt) && passTrigger(DoubleMu);
   case DataSingleMuDMu:
-    return MuPt->size() > 1 && passTrigger(SingleMu);
+    return passLepPt(*MuPt) && passTrigger(SingleMu);
   case DataDoubleElDMu:
-    return MuPt->size() > 1 && passTrigger(DoubleE);
+    return passLepPt(*MuPt) && passTrigger(DoubleE);
   case DataSingleElDMu:
-    return MuPt->size() > 1 && passTrigger(SingleE);
+    return passLepPt(*MuPt) && passTrigger(SingleE);
   case DataElMuDMu:
-    return MuPt->size() > 1 && passTrigger(EMu);
+    return passLepPt(*MuPt) && passTrigger(EMu);
   case MC_DE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(Ntrig);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(Ntrig);
   case DataDoubleMuDE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(DoubleMu);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(DoubleMu);
   case DataSingleMuDE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(SingleMu);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(SingleMu);
   case DataDoubleElDE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(DoubleE);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(DoubleE);
   case DataSingleElDE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(SingleE);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(SingleE);
   case DataElMuDE:
-    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(EMu);
+    return passLepPt(*ElPt) && !passLepPt(*MuPt) && passTrigger(EMu);
   case DataSinglePhoton:
     return passTrigger(SinglePhoton);
   case NSubSels:
@@ -213,6 +215,14 @@ bool ZZ2l2vPruner::filterMu(int iMu){
 
 bool ZZ2l2vPruner::filterEl(int iEl){
   return ((*ElPt)[iEl] > minLepPt);
+}
+
+bool ZZ2l2vPruner::passLepPt(vector<float> lepPt){
+  int goodLeptons = 0;
+  for(unsigned int iLep = 0 ; iLep < lepPt.size() ; iLep++){
+    if(lepPt[iLep] > minLepPt) goodLeptons ++;
+  }
+  return goodLeptons > 1;
 }
 
 bool ZZ2l2vPruner::passTrigger(int trig){

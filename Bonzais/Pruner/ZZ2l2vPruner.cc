@@ -46,15 +46,21 @@ protected:
   void skimCollections();
   bool eventSelection();
   bool passTrigger(int trig);
-  enum { DMu, DE, DataDoubleMuDMu, DataDoubleMuDE, DataSingleMuDMu, DataSingleMuDE, DataDoubleElDMu, DataDoubleElDE, DataSingleElDMu, DataSingleElDE, DataElMuDMu, DataElMuDE, DataSinglePhotonDMu, DataSinglePhotonDE, NSubSels};
+  enum {MC_DLep, DataDoubleMuDLep, DataSingleMuDLep, DataDoubleElDLep, DataSingleElDLep, DataElMuDLep, MC_DMu, MC_DE, DataDoubleMuDMu, DataDoubleMuDE, DataSingleMuDMu, DataSingleMuDE, DataDoubleElDMu, DataDoubleElDE, DataSingleElDMu, DataSingleElDE, DataElMuDMu, DataElMuDE, DataSinglePhoton, NSubSels};
 };
 
 DECLARE_PRUNER(ZZ2l2vPruner, "Pruner of ZZ2l2v analysis")
 
 void ZZ2l2vPruner::declareSubSelections(){
   subSelections_.resize(NSubSels);
-  subSelections_[DMu]    = SubSelection("DMu", "Dimuon selection for ZZ2l2v analysis, for MC samples");
-  subSelections_[DE]     = SubSelection("DE","Dielectron selection for ZZ2l2v analysis, for MC samples");
+  subSelections_[MC_DLep]    = SubSelection("MC_DLep", "Dilepton selection for ZZ2l2v analysis, for MC samples.");
+  subSelections_[DataDoubleMuDLep]     = SubSelection("DataDoubleMuDLep","Dilepton selection for ZZ2l2v analysis, for DoubleMu data");
+  subSelections_[DataSingleMuDLep]     = SubSelection("DataSingleMuDLep","Dilepton selection for ZZ2l2v analysis, for SingleMu data");
+  subSelections_[DataDoubleElDLep]     = SubSelection("DataDoubleElDLep","Dilepton selection for ZZ2l2v analysis, for DoubleEl data");
+  subSelections_[DataSingleElDLep]     = SubSelection("DataSingleElDLep","Dilepton selection for ZZ2l2v analysis, for SingleEl data");
+  subSelections_[DataElMuDLep]     = SubSelection("DataElMuDMu","Dilepton selection for ZZ2l2v analysis, for ElMu data");
+  subSelections_[MC_DMu]    = SubSelection("MC_DMu", "Dimuon selection for ZZ2l2v analysis, for MC samples");
+  subSelections_[MC_DE]     = SubSelection("MC_DE","Dielectron selection for ZZ2l2v analysis, for MC samples");
   subSelections_[DataDoubleMuDMu]     = SubSelection("DataDoubleMuDMu","Dimuon selection for ZZ2l2v analysis, for DoubleMu data");
   subSelections_[DataDoubleMuDE]     = SubSelection("DataDoubleMuDE","Dielectron selection for ZZ2l2v analysis, for DoubleMu data");
   subSelections_[DataSingleMuDMu]     = SubSelection("DataSingleMuDMu","Dimuon selection for ZZ2l2v analysis, for SingleMu data");
@@ -65,8 +71,7 @@ void ZZ2l2vPruner::declareSubSelections(){
   subSelections_[DataSingleElDE]     = SubSelection("DataSingleElDE","Dielectron selection for ZZ2l2v analysis, for SingleEl data");
   subSelections_[DataElMuDMu]     = SubSelection("DataElMuDMu","Dimuon selection for ZZ2l2v analysis, for ElMu data");
   subSelections_[DataElMuDE]     = SubSelection("DataElMuDE","Dielectron selection for ZZ2l2v analysis, for ElMu data");
-  subSelections_[DataSinglePhotonDMu]     = SubSelection("DataSinglePhotonDMu","Dimuon selection for ZZ2l2v analysis, for SinglePhoton data");
-  subSelections_[DataSinglePhotonDE]     = SubSelection("DataSinglePhotonDE","Dielectron selection for ZZ2l2v analysis, for SinglePhoton data");
+  subSelections_[DataSinglePhoton]     = SubSelection("DataSinglePhoton","Data passing only the SinglePhoton trigger");
 }
 
 bool ZZ2l2vPruner::init(TChain* tree){
@@ -158,7 +163,19 @@ void ZZ2l2vPruner::skimCollections(){
 bool ZZ2l2vPruner::eventSelection(){
   //if(!ZZ2l2vPruner::passTrigger(Ntrig)) return false;
   switch(iSubSelection_){
-  case DMu:
+  case MC_DLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(Ntrig); //For MC, requires any trigger to pass.
+  case DataDoubleMuDLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(DoubleMu);
+  case DataSingleMuDLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(SingleMu);
+  case DataDoubleElDLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(DoubleE);
+  case DataSingleElDLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(SingleE);
+  case DataElMuDLep:
+    return (MuPt->size() > 1 || ElPt->size() > 1) && passTrigger(EMu);
+  case MC_DMu:
     return MuPt->size() > 1 && passTrigger(Ntrig);
   case DataDoubleMuDMu:
     return MuPt->size() > 1 && passTrigger(DoubleMu);
@@ -170,22 +187,20 @@ bool ZZ2l2vPruner::eventSelection(){
     return MuPt->size() > 1 && passTrigger(SingleE);
   case DataElMuDMu:
     return MuPt->size() > 1 && passTrigger(EMu);
-  case DataSinglePhotonDMu:
-    return MuPt->size() > 1 && passTrigger(SinglePhoton);
-  case DE:
-    return ElPt->size() > 1 && passTrigger(Ntrig);
+  case MC_DE:
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(Ntrig);
   case DataDoubleMuDE:
-    return ElPt->size() > 1 && passTrigger(DoubleMu);
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(DoubleMu);
   case DataSingleMuDE:
-    return ElPt->size() > 1 && passTrigger(SingleMu);
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(SingleMu);
   case DataDoubleElDE:
-    return ElPt->size() > 1 && passTrigger(DoubleE);
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(DoubleE);
   case DataSingleElDE:
-    return ElPt->size() > 1 && passTrigger(SingleE);
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(SingleE);
   case DataElMuDE:
-    return ElPt->size() > 1 && passTrigger(EMu);
-  case DataSinglePhotonDE:
-    return ElPt->size() > 1 && passTrigger(SinglePhoton);
+    return ElPt->size() > 1 && MuPt->size() < 2 && passTrigger(EMu);
+  case DataSinglePhoton:
+    return passTrigger(SinglePhoton);
   case NSubSels:
   default:
     return false;

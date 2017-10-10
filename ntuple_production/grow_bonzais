@@ -520,6 +520,9 @@ def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
     ntuple_dir_path = eos_to_local_path(ntuple_dir)
     print("ntuple_dir_path="+ntuple_dir_path)
 
+    subCatalogDir= re.split("/",ntuple_dir_path)[-1:][0]
+
+    print("baobab_catalog="+baobab_catalog)
     info = catalog_read_boabab_catalog_header(baobab_catalog)
     print("info=")
     print(info)
@@ -529,8 +532,10 @@ def _catalog_make_bonzai_catalog(baobab_catalog, ntuple_dir, sel, subsel):
         conn.close()
         return None
 
-    cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs"
+    cat_dir_path = os.path.dirname(os.path.dirname(ntuple_dir_path + "/")) + "/Catalogs/"+subCatalogDir
     print("cat_dir_path="+cat_dir_path)
+
+
 
     ntuple_subdir = 'CRAB_PrivateMC/crab_%s-%s-%s' % (info['primary_dataset'], sel, subsel)
     print("ntuple_subdir="+ntuple_subdir)
@@ -627,6 +632,7 @@ def catalog_make_bonzai_catalog(task_list_file):
     tasks = read_bonzai_task_list(task_list_file)
     for t in tasks:
         (catalog, selection, subselection, filesPerJob, outDir) = t
+        print("outDir"+outDir)
         catname = _catalog_make_bonzai_catalog(catalog, outDir, selection, subselection)
         print "Catalog %s created." % catname
 #endef catalog_make_bonzai_catalog

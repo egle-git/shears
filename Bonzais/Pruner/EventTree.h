@@ -156,12 +156,6 @@ public :
    vector<float>   *ElPfIsoDbeta;
    vector<float>   *ElPfIsoRho;
    vector<float>   *ElAEff;
-   vector<float>   *charged;
-   vector<float>   *photon;
-   vector<float>   *neutral;
-   vector<float>   *charged_Tom;
-   vector<float>   *photon_Tom;
-   vector<float>   *neutral_Tom;
    vector<float>   *PhotPt;
    vector<float>   *PhotEta;
    vector<float>   *PhotPhi;
@@ -204,10 +198,6 @@ public :
    vector<float>   *JetAk04NeutralEmFrac;
    vector<float>   *JetAk04ChMult;
    vector<float>   *JetAk04ConstCnt;
-   vector<float>   *JetAk04JetBeta;
-   vector<float>   *JetAk04JetBetaClassic;
-   vector<float>   *JetAk04JetBetaStar;
-   vector<float>   *JetAk04JetBetaStarClassic;
    vector<float>   *JetAk04BTagCsv;
    vector<float>   *JetAk04BTagCsvV1;
    vector<float>   *JetAk04BTagCsvSLV1;
@@ -358,12 +348,6 @@ public :
    TBranch        *b_ElPfIsoDbeta;   //!
    TBranch        *b_ElPfIsoRho;   //!
    TBranch        *b_ElAEff;   //!
-   TBranch        *b_charged;   //!
-   TBranch        *b_photon;   //!
-   TBranch        *b_neutral;   //!
-   TBranch        *b_charged_Tom;   //!
-   TBranch        *b_photon_Tom;   //!
-   TBranch        *b_neutral_Tom;   //!
    TBranch        *b_PhotPt;   //!
    TBranch        *b_PhotEta;   //!
    TBranch        *b_PhotPhi;   //!
@@ -406,10 +390,6 @@ public :
    TBranch        *b_JetAk04NeutralEmFrac;   //!
    TBranch        *b_JetAk04ChMult;   //!
    TBranch        *b_JetAk04ConstCnt;   //!
-   TBranch        *b_JetAk04JetBeta;   //!
-   TBranch        *b_JetAk04JetBetaClassic;   //!
-   TBranch        *b_JetAk04JetBetaStar;   //!
-   TBranch        *b_JetAk04JetBetaStarClassic;   //!
    TBranch        *b_JetAk04BTagCsv;   //!
    TBranch        *b_JetAk04BTagCsvV1;   //!
    TBranch        *b_JetAk04BTagCsvSLV1;   //!
@@ -606,12 +586,6 @@ void EventTree::Init(TTree *tree)
    ElPfIsoDbeta = 0;
    ElPfIsoRho = 0;
    ElAEff = 0;
-   charged = 0;
-   photon = 0;
-   neutral = 0;
-   charged_Tom = 0;
-   photon_Tom = 0;
-   neutral_Tom = 0;
    PhotPt = 0;
    PhotEta = 0;
    PhotPhi = 0;
@@ -654,10 +628,6 @@ void EventTree::Init(TTree *tree)
    JetAk04NeutralEmFrac = 0;
    JetAk04ChMult = 0;
    JetAk04ConstCnt = 0;
-   JetAk04JetBeta = 0;
-   JetAk04JetBetaClassic = 0;
-   JetAk04JetBetaStar = 0;
-   JetAk04JetBetaStarClassic = 0;
    JetAk04BTagCsv = 0;
    JetAk04BTagCsvV1 = 0;
    JetAk04BTagCsvSLV1 = 0;
@@ -812,12 +782,6 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("ElPfIsoDbeta", &ElPfIsoDbeta, &b_ElPfIsoDbeta);
    fChain->SetBranchAddress("ElPfIsoRho", &ElPfIsoRho, &b_ElPfIsoRho);
    fChain->SetBranchAddress("ElAEff", &ElAEff, &b_ElAEff);
-   fChain->SetBranchAddress("charged", &charged, &b_charged);
-   fChain->SetBranchAddress("photon", &photon, &b_photon);
-   fChain->SetBranchAddress("neutral", &neutral, &b_neutral);
-   fChain->SetBranchAddress("charged_Tom", &charged_Tom, &b_charged_Tom);
-   fChain->SetBranchAddress("photon_Tom", &photon_Tom, &b_photon_Tom);
-   fChain->SetBranchAddress("neutral_Tom", &neutral_Tom, &b_neutral_Tom);
    fChain->SetBranchAddress("PhotPt", &PhotPt, &b_PhotPt);
    fChain->SetBranchAddress("PhotEta", &PhotEta, &b_PhotEta);
    fChain->SetBranchAddress("PhotPhi", &PhotPhi, &b_PhotPhi);
@@ -860,10 +824,6 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("JetAk04NeutralEmFrac", &JetAk04NeutralEmFrac, &b_JetAk04NeutralEmFrac);
    fChain->SetBranchAddress("JetAk04ChMult", &JetAk04ChMult, &b_JetAk04ChMult);
    fChain->SetBranchAddress("JetAk04ConstCnt", &JetAk04ConstCnt, &b_JetAk04ConstCnt);
-   fChain->SetBranchAddress("JetAk04JetBeta", &JetAk04JetBeta, &b_JetAk04JetBeta);
-   fChain->SetBranchAddress("JetAk04JetBetaClassic", &JetAk04JetBetaClassic, &b_JetAk04JetBetaClassic);
-   fChain->SetBranchAddress("JetAk04JetBetaStar", &JetAk04JetBetaStar, &b_JetAk04JetBetaStar);
-   fChain->SetBranchAddress("JetAk04JetBetaStarClassic", &JetAk04JetBetaStarClassic, &b_JetAk04JetBetaStarClassic);
    fChain->SetBranchAddress("JetAk04BTagCsv", &JetAk04BTagCsv, &b_JetAk04BTagCsv);
    fChain->SetBranchAddress("JetAk04BTagCsvV1", &JetAk04BTagCsvV1, &b_JetAk04BTagCsvV1);
    fChain->SetBranchAddress("JetAk04BTagCsvSLV1", &JetAk04BTagCsvSLV1, &b_JetAk04BTagCsvSLV1);

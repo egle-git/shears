@@ -25,8 +25,8 @@ static int trigSingleE[1] = {9};
 
 static float minLepPt = 10;
 
-static float mll_low = 60;
-static float mll_high = 120;
+
+
 
 static const unsigned elIdMask = (1 <<10); //that is 1024;
 
@@ -54,9 +54,9 @@ protected:
   	bool eventSelection();
 
   	bool passTrigger(int trig);
-  	double mll(std::vector<float>* lepColPt, std::vector<float>* lepColEta,
-	     std::vector<float>* lepColPhi, std::vector<float>* lepColE,
-	     std::vector<int>* lepColId = 0, int pid = 0);
+
+
+
   	enum { Mu, Ele,NSubSels};
 
   static const int kEl = 11;
@@ -69,8 +69,8 @@ void TagProbePruner::declareSubSelections(){
 	subSelections_.resize(NSubSels);
 	subSelections_[Mu]		= SubSelection("Mu","muon selection for Tag & Probe");
 	subSelections_[Ele]		= SubSelection("Ele","electron selection for Tag & Probe");
-//	subSelections_[SMu]		= SubSelections("SMu","single muon selection for Tag & Probe");
-//	subSelections_[SE]		= SubSelections("SE","single electron selection for Tag & Probe");
+
+
 	
 }
 
@@ -158,31 +158,8 @@ void TagProbePruner::skimCollections(){
   filter(ElAEff, mask);
 }
 
-double TagProbePruner::mll(std::vector<float>* lepColPt, std::vector<float>* lepColEta,
-		       std::vector<float>* lepColPhi, std::vector<float>* lepColE, 
-		       std::vector<int>* lepColId, int pid){
-  int i0 = -1; double pt0 = 0;
-  int i1 = -1; double pt1 = 0;
-  //look for the two highest pt leptons:
-  for(size_t i = 0; i < lepColPt->size(); ++i){
-    if(lepColId && abs((*lepColId)[i]) != pid) continue;
-    if((*lepColPt)[i] > pt0) {
-      i1 = i0;
-      pt1 = pt0;
-      i0 = i;
-      pt0 = (*lepColPt)[i];
-    } else if((*lepColPt)[i] > pt1) {i1 = i; pt1 = (*lepColPt)[i]; }
-  }
- // std::cerr << __FILE__ << ":" << __LINE__ << ": " << i0 << i1 << "\n";
-  if(i1 <0) return -1;
-  else{
-    TLorentzVector v0;
-    v0.SetPtEtaPhiE((*lepColPt)[i0],(*lepColEta)[i0],(*lepColPhi)[i0],(*lepColE)[i0]);
-    TLorentzVector v1;
-    v1.SetPtEtaPhiE((*lepColPt)[i1],(*lepColEta)[i1],(*lepColPhi)[i1],(*lepColE)[i1]);
-    return (v0 + v1).M();
-  }
-}
+
+
 bool TagProbePruner::isTightEle(std::vector<float> *ElPt, std::vector<float> *ElEta, std::vector<float> *ElPhi, std::vector<float> *ElE, std::vector<unsigned int> *ElId, std::vector<float> *ElEtaSc, std::vector<float> *ElPfIsoRho)
 {
 	bool Eallpass= false;
@@ -253,19 +230,19 @@ return false; //If nothing found.
 
 bool TagProbePruner::eventSelection(){
 
-	float m;
+
 	bool passtightEle;
 	bool passtightMu;
 	switch(iSubSelection_){
   	case Mu:
-   		m = mll(MuPt,MuEta,MuPhi,MuE);
+
    		passtightMu = isTightMuon(MuPt,MuEta,MuPhi,MuE,MuId,MuIdTight,MuPfIso);
-    	return MuPt->size() > 1 && mll_low < m && m < mll_high  && passtightMu && passTrigger(SingleMu);
+    	return MuPt->size() > 1 && passtightMu && passTrigger(SingleMu);
 
  	case Ele:
-   		m = mll(ElPt,ElEta,ElPhi,ElE);
+
    		passtightEle = isTightEle(ElPt,ElEta,ElPhi,ElE,ElId,ElEtaSc,ElPfIsoRho);
-    	return ElPt->size() > 1 && mll_low < m && m < mll_high && passtightEle && passTrigger(SingleE);
+    	return ElPt->size() > 1 && passtightEle && passTrigger(SingleE);
 
     
  	default:

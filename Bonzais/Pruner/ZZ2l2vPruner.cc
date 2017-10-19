@@ -27,7 +27,7 @@ static int trigDoubleE[2] = {12,13};
 static int trigHighPtE[1] = {17};//Located in DoubleElectron
 static int trigSingleE[2] = {11,12};
 static int trigEMu[2] = {0,3}; //all DZ paths are still missing, as well as Mu12Ele23
-static int trigSinglePhoton[10] = {20,21,25,26,27,28,29,30,31,32};
+static int trigSinglePhoton[10] = {0,1,20,21,25,26,27,28,29,30,31,32};
 
 
 /**************************/

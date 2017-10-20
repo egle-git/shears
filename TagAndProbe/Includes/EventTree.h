@@ -25,7 +25,9 @@ public :
    Int_t           fCurrent; //!current Tree number in a TChain
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
-
+   //global variables
+   TString outputFile_;
+   TString leptongeneration_;
    // Declaration of leaf types
    Int_t           EvtIsRealData;
    UInt_t          EvtNum;
@@ -648,7 +650,7 @@ public :
    TBranch        *b_JetAk08Tau2;   //!
    TBranch        *b_JetAk08Tau3;   //!
 
-   EventTree(TString fileName);
+   EventTree(TString fileName, TString outputFile, TString Lepton);
    virtual ~EventTree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -662,8 +664,10 @@ public :
 #endif
 
 #ifdef EventTree_cxx
-EventTree::EventTree(TString fileName) : fChain(0) 
+EventTree::EventTree(TString fileName, TString outputFile, TString Lepton) : fChain(0) 
 {
+   outputFile_ = outputFile;
+   leptongeneration_ = Lepton;
 TChain * chain = new TChain("tupel/EventTree","");
   chain->Add(fileName);
   TTree *tree = chain;

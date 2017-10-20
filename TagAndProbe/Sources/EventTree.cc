@@ -16,7 +16,7 @@ void EventTree::Loop()
    //###############################################################
    //################## DECLARATION OF HISTOGRAMS ##################
    //###############################################################
-   TFile *outFile = new TFile("tpTree.root","RECREATE");
+   TFile *outFile = new TFile(outputFile_,"RECREATE");
    TTree *tpTree = new TTree("tpTree","tpTree");
    std::vector<Electron>  tagElectrons ;
    std::vector<Electron>  probeElectrons;
@@ -35,8 +35,10 @@ void EventTree::Loop()
    TBranch *branch4 = tpTree->Branch("probeElectrons",& probeElectronsforfill,"Pt/F:Eta/F:Phi/F:E/F:EtaSc/F:PfIsoRho/F:Id/I");
   
   */
-   Muonforfill temp;
+
+   Forfill temp;
    TBranch *branch = tpTree->Branch("Muons",& temp,"Zmass:Pt_tag:Pt_probe:Eta_tag:Eta_probe:Phi_tag:Phi_probe:E_tag:E_probe:Id_tag:Id_probe:IdTight_tag:IdTight_probe:PfIso_probe");
+
    Long64_t nentries = fChain->GetEntries();
 
    Long64_t nbytes = 0, nb = 0;
@@ -50,26 +52,33 @@ void EventTree::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
       if(jentry % 10 ==0) cout << jentry << " of " << nentries << endl;
-
-      //objectSelection::selectElectrons(tagElectrons, probeElectrons, ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc, ElPfIsoRho);
-      objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
-      
-      
-     /* for(int i=0;i<tagElectrons.size();i++)
+	if (leptongeneration_ =="El"){
+      objectSelection::selectElectrons(tagElectrons, probeElectrons, ElCh,ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc,ElPfIsoRho);
+      for(int i=0;i<tagElectrons.size();i++)
          for(int j=0;j<probeElectrons.size();j++)
          {
-            if(tagElectrons[i].Seq == probeElectrons[j].Seq) continue;// avoiding a pair containing 2 same lep
+         if(tagElectrons[i].Ch== probeElectrons[j].Ch) continue;  
+	  if(tagElectrons[i].Seq == probeElectrons[j].Seq) continue;// avoiding a pair containing 2 same lep
             float mll;
             mll= (tagElectrons[i].lvector+probeElectrons[j].lvector).M();
             if(mll<60||mll>120) continue;
-           tagElectronsforfill = tagElectrons[i];
-           probeElectronsforfill = probeElectrons[j];
-           branch3->Fill();
-            branch4->Fill();
+	    temp.Zmass = mll;
+	    temp.Pt_tag = tagElectrons[i].Pt;
+	 temp.Pt_probe = probeElectrons[j].Pt;	
+	temp.Eta_tag = tagElectrons[i].Eta;
+	temp.Eta_probe = probeElectrons[j].Eta;
+	temp.Phi_tag = tagElectrons[i].Phi;
+	temp.Phi_probe = probeElectrons[j].Phi;
+	temp.E_tag = tagElectrons[i].E;
+	temp.E_probe = probeElectrons[j].E;
+	temp.Id_tag =tagElectrons[i].Id;
+	temp.Id_probe = probeElectrons[j].Id;
+	temp.PfIso_probe = probeElectrons[j].PfIsoRho;
             tpTree->Fill();
          }
-      
-      */
+      }
+      if(leptongeneration_ == "Mu"){
+	objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
       for(int i=0;i<tagMuons.size();i++)
          for(int j=0;j<probeMuons.size();j++)
          {
@@ -103,13 +112,13 @@ void EventTree::Loop()
 
             tpTree->Fill();
          }
-         
+         }
         
 
          tagMuons.clear();
          probeMuons.clear();
-        // tagElectrons.clear();
-        // probeElectrons.clear();
+         tagElectrons.clear();
+         probeElectrons.clear();
          
 
    }

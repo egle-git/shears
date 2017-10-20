@@ -52,7 +52,7 @@ void EventTree::Loop()
       if(jentry % 10 ==0) cout << jentry << " of " << nentries << endl;
 
       //objectSelection::selectElectrons(tagElectrons, probeElectrons, ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc, ElPfIsoRho);
-      objectSelection::selectMuons(tagMuons, probeMuons, MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
+      objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
       
       
      /* for(int i=0;i<tagElectrons.size();i++)
@@ -74,6 +74,7 @@ void EventTree::Loop()
          for(int j=0;j<probeMuons.size();j++)
          {
             if(tagMuons[i].Seq == probeMuons[j].Seq) continue;// avoiding a pair containing 2 same lep
+            if(tagMuons[i].Ch == probeMuons[j].Ch) continue;
             float mll;
             mll= (tagMuons[i].lvector+probeMuons[j].lvector).M();
             if(mll<60||mll>120) continue;

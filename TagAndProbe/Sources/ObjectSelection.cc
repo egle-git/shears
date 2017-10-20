@@ -7,7 +7,7 @@ namespace objectSelection
 {
   
 
-  bool selectElectrons(std::vector<Electron> & tagElectrons, std::vector<Electron> & probeElectrons, std::vector<float> *ElPt, std::vector<float> *ElEta, std::vector<float> *ElPhi, std::vector<float> *ElE, std::vector<unsigned int> *ElId, std::vector<float> *ElEtaSc, std::vector<float> *ElPfIsoRho)
+  bool selectElectrons(std::vector<Electron> & tagElectrons, std::vector<Electron> & probeElectrons,std::vector<float> *ElCh, std::vector<float> *ElPt, std::vector<float> *ElEta, std::vector<float> *ElPhi, std::vector<float> *ElE, std::vector<unsigned int> *ElId, std::vector<float> *ElEtaSc, std::vector<float> *ElPfIsoRho)
   {
     for(int i = 0 ; i<ElPt->size() ; i++){
       bool passEta = false, passIso = false, passId = false, passPt = false, passLoosePt = false, passLooseId = false;
@@ -20,6 +20,7 @@ namespace objectSelection
       currentLepton.PfIsoRho = ElPfIsoRho->at(i);
       currentLepton.EtaSc = ElEtaSc->at(i);
       currentLepton.Id = ElId->at(i);
+      currentLepton.Ch = ElCh->at(i);
       currentLepton.Seq = i;
        //Id //Very temporary!!! Used without much cross-checking.
       passId = ElId->at(i) & (1<<17);
@@ -40,7 +41,7 @@ namespace objectSelection
     return true;
   }
 
-  bool selectMuons(std::vector<Muon> & tagMuons, std::vector<Muon> & probeMuons, std::vector<float> *MuPt, std::vector<float> *MuEta, std::vector<float> *MuPhi, std::vector<float> *MuE, std::vector<unsigned int> *MuId, std::vector<unsigned int> *MuIdTight, std::vector<float> *MuPfIso)
+  bool selectMuons(std::vector<Muon> & tagMuons, std::vector<Muon> & probeMuons,std::vector<float> *MuCh, std::vector<float> *MuPt, std::vector<float> *MuEta, std::vector<float> *MuPhi, std::vector<float> *MuE, std::vector<unsigned int> *MuId, std::vector<unsigned int> *MuIdTight, std::vector<float> *MuPfIso)
   {
     for(int i = 0 ; i<MuPt->size() ; i++){
       bool passEta = false, passIso = false, passId = false, passPt = false, passLoosePt = false, passLooseId = false, passSoftId = false, passSoftPt = false;
@@ -54,6 +55,7 @@ namespace objectSelection
       currentLepton.PfIso = MuPfIso->at(i);
       currentLepton.Id = MuId->at(i);
       currentLepton.IdTight = MuIdTight->at(i);
+      currentLepton.Ch = MuCh->at(i);
       currentLepton.Seq = i;
       //Id //Very temporary!!! Used without much cross-checking.
       passId = MuIdTight->at(i) & (1<<0); //Look at the first vertex, hence the bit 0.

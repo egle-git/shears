@@ -29,13 +29,8 @@ struct Electron
     int Seq;// avoiding a pair containing 2 same lep
 	 TLorentzVector lvector;
   };
-struct Forfill
-  {
-	float Zmass,Pt_tag,Pt_probe,Eta_tag,Eta_probe,Phi_tag,Phi_probe,E_tag,E_probe;
-	float PfIso_probe;
-    int Charge;
-  	int Id_tag,Id_probe,IdTight_tag,IdTight_probe;
-  };
+
+
 
 namespace objectSelection
 {

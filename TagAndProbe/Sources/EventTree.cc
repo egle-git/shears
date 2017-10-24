@@ -8,6 +8,7 @@
 #include <TCanvas.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
+#include <TString.h>
 
 void EventTree::Loop()
 {
@@ -17,28 +18,38 @@ void EventTree::Loop()
    //################## DECLARATION OF HISTOGRAMS ##################
    //###############################################################
    TFile *outFile = new TFile(outputFile_,"RECREATE");
-   TTree *tpTree = new TTree("tpTree","tpTree");
+   TDirectoryFile *dir = new TDirectoryFile("tpTree","tpTree","",outFile);
+   gDirectory->cd("tpTree");
+   TTree *tpTree = new TTree("fitter_tree","fitter_tree");
    std::vector<Electron>  tagElectrons ;
    std::vector<Electron>  probeElectrons;
    std::vector<Muon>  tagMuons ;
    std::vector<Muon>  probeMuons ;
-/*
-   Electron tagElectronsforfill ;
-   Electron  probeElectronsforfill;
-   Muon tagMuonsforfill ;
-   Muon probeMuonsforfill ;
-  // float Ptofmu;
-   TBranch *branch1 = tpTree->Branch("tagMuons", & tagMuonsforfill,"Pt/F:Eta/F:Phi/F:E/F:PfIso/F:Id/I/IdTight/I");
-   //TBranch *branch1 = tpTree->Branch("tagMuons", & tagMuonsforfill,"Pt/F:Eta/F:Phi/F:E/F");
-   TBranch *branch2 = tpTree->Branch("probeMuons",& probeMuonsforfill,"Pt/F:Eta/F:Phi/F:E/F:PfIso/F:Id/I:IdTight/I");
-   TBranch *branch3 = tpTree->Branch("tagElectrons",& tagElectronsforfill,"Pt/F:Eta/F:Phi/F:E/F:EtaSc/F:PfIsoRho/F:Id/I");
-   TBranch *branch4 = tpTree->Branch("probeElectrons",& probeElectronsforfill,"Pt/F:Eta/F:Phi/F:E/F:EtaSc/F:PfIsoRho/F:Id/I");
+
+   
+   
+   TString variables[]={"mass","tag_pt","pt","tag_eta","eta","tag_phi","phi","tag_emEnergy","emEnergy","tag_charge","charge","tkIso","Tight2012"};
   
-  */
-
-   Forfill temp;
-   TBranch *branch = tpTree->Branch("Muons",& temp,"Zmass:Pt_tag:Pt_probe:Eta_tag:Eta_probe:Phi_tag:Phi_probe:E_tag:E_probe:Id_tag:Id_probe:IdTight_tag:IdTight_probe:PfIso_probe");
-
+   Int_t varnum = sizeof(variables) / sizeof(variables[0]);
+   enum varnames
+   {mass,tag_pt,pt,tag_eta,eta,tag_phi,phi,tag_emEnergy,emEnergy,tag_charge,charge,tkIso,Tight2012
+      
+   };
+   
+   
+   int name = Tight2012;
+   Float_t fill_float[Tight2012];
+   
+   Int_t fill_int[1];
+   
+   for(int i=0;i<varnum;i++){
+      
+     if (i<name) tpTree->Branch(variables[i],&fill_float[i],variables[i]+"/F");
+   
+     else tpTree->Branch(variables[i],&fill_int[i-name],variables[i]+"/I");
+  
+   }
+   
    Long64_t nentries = fChain->GetEntries();
 
    Long64_t nbytes = 0, nb = 0;
@@ -51,67 +62,62 @@ void EventTree::Loop()
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      if(jentry % 10 ==0) cout << jentry << " of " << nentries << endl;
-	if (leptongeneration_ =="El"){
-      objectSelection::selectElectrons(tagElectrons, probeElectrons, ElCh,ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc,ElPfIsoRho);
-      for(int i=0;i<tagElectrons.size();i++)
-         for(int j=0;j<probeElectrons.size();j++)
-         {
-         if(tagElectrons[i].Ch== probeElectrons[j].Ch) continue;  
-	  if(tagElectrons[i].Seq == probeElectrons[j].Seq) continue;// avoiding a pair containing 2 same lep
-            float mll;
-            mll= (tagElectrons[i].lvector+probeElectrons[j].lvector).M();
-            if(mll<60||mll>120) continue;
-	    temp.Zmass = mll;
-	    temp.Pt_tag = tagElectrons[i].Pt;
-	 temp.Pt_probe = probeElectrons[j].Pt;	
-	temp.Eta_tag = tagElectrons[i].Eta;
-	temp.Eta_probe = probeElectrons[j].Eta;
-	temp.Phi_tag = tagElectrons[i].Phi;
-	temp.Phi_probe = probeElectrons[j].Phi;
-	temp.E_tag = tagElectrons[i].E;
-	temp.E_probe = probeElectrons[j].E;
-	temp.Id_tag =tagElectrons[i].Id;
-	temp.Id_probe = probeElectrons[j].Id;
-	temp.PfIso_probe = probeElectrons[j].PfIsoRho;
-            tpTree->Fill();
+      if(jentry % 10000 ==0) cout << jentry << " of " << nentries << endl;
+      if (leptongeneration_ =="El"){
+         objectSelection::selectElectrons(tagElectrons, probeElectrons, ElCh,ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc,ElPfIsoRho);
+         for(int i=0;i<tagElectrons.size();i++)
+            for(int j=0;j<probeElectrons.size();j++)
+            {
+               if(tagElectrons[i].Ch== probeElectrons[j].Ch) continue;  
+               if(tagElectrons[i].Seq == probeElectrons[j].Seq) continue;// avoiding a pair containing 2 same lepton
+               float mll;
+               mll= (tagElectrons[i].lvector+probeElectrons[j].lvector).M();
+               if(mll<60||mll>120) continue;
+               fill_float[mass        ] = mll;
+               fill_float[tag_pt      ] = tagElectrons  [i].Pt   ;
+               fill_float[pt          ] = probeElectrons[j].Pt   ;
+               fill_float[tag_eta     ] = tagElectrons  [i].Eta  ;
+               fill_float[eta         ] = probeElectrons[j].Eta  ;
+               fill_float[tag_phi     ] = tagElectrons  [i].Phi  ;
+               fill_float[phi         ] = probeElectrons[j].Phi  ;
+               fill_float[tag_emEnergy] = tagElectrons  [i].E    ;
+               fill_float[emEnergy    ] = probeElectrons[j].E    ;
+               fill_float[tag_charge  ] = tagElectrons  [i].Ch   ;
+               fill_float[charge      ] = probeElectrons[j].Ch   ;
+               fill_float[tkIso       ] = probeElectrons[j].PfIsoRho;
+               fill_int  [Tight2012   ] = probeElectrons[j].Id   ;
+               tpTree->Fill();
+            }
          }
-      }
       if(leptongeneration_ == "Mu"){
-	objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
-      for(int i=0;i<tagMuons.size();i++)
-         for(int j=0;j<probeMuons.size();j++)
-         {
-            if(tagMuons[i].Seq == probeMuons[j].Seq) continue;// avoiding a pair containing 2 same lep
-            if(tagMuons[i].Ch == probeMuons[j].Ch) continue;
-            float mll;
-            mll= (tagMuons[i].lvector+probeMuons[j].lvector).M();
-            if(mll<60||mll>120) continue;
-            //tagMuonsforfill.push_back(tagMuons[i]);
-            // probeMuonsforfill.push_back(probeMuons[j]);
-            //  std::cout << "Muon pt ===" <<tagMuonsforfill[0]->Pt<<endl;
-            // tagMuonsforfill = tagMuons[i] ;
-            // probeMuonsforfill = probeMuons[j];
-            //branch1->Fill();
-            //branch2->Fill();
-            temp.Zmass = mll;
-            temp.Pt_tag = tagMuons[i].Pt;
-            temp.Eta_tag = tagMuons[i].Eta;
-            temp.Phi_tag = tagMuons[i].Phi;
-            temp.E_tag = tagMuons[i].E;
-            temp.Pt_probe = probeMuons[j].Pt;
-            temp.Eta_probe = probeMuons[j].Eta;
-            temp.Phi_probe = probeMuons[j].Phi;
-            temp.E_probe = probeMuons[j].E;
-            temp.Id_tag = tagMuons[i].Id;
-            temp.Id_probe = probeMuons[j].Id;
-            temp.IdTight_tag = tagMuons[i].IdTight;
-            temp.IdTight_probe = probeMuons[j].IdTight;
-            temp.PfIso_probe = probeMuons[j].PfIso;
-
-
-            tpTree->Fill();
-         }
+        objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
+        for(int i=0;i<tagMuons.size();i++)
+           for(int j=0;j<probeMuons.size();j++)
+           {
+              if(tagMuons[i].Seq == probeMuons[j].Seq) continue;// avoiding a pair containing 2 same lep
+              if(tagMuons[i].Ch == probeMuons[j].Ch) continue;
+              float mll;
+              mll= (tagMuons[i].lvector+probeMuons[j].lvector).M();
+              if(mll<60||mll>120) continue;
+       
+               fill_float[mass        ] = mll;
+               fill_float[tag_pt      ] = tagMuons  [i].Pt   ;
+               fill_float[pt          ] = probeMuons[j].Pt   ;
+               fill_float[tag_eta     ] = tagMuons  [i].Eta  ;
+               fill_float[eta         ] = probeMuons[j].Eta  ;
+               fill_float[tag_phi     ] = tagMuons  [i].Phi  ;
+               fill_float[phi         ] = probeMuons[j].Phi  ;
+               fill_float[tag_emEnergy] = tagMuons  [i].E    ;
+               fill_float[emEnergy] = probeMuons[j].E;
+               fill_float[tag_charge  ] = tagMuons  [i].Ch   ;
+               fill_float[charge      ] = probeMuons[j].Ch   ;
+               fill_float[tkIso       ] = probeMuons[j].PfIso;
+               fill_int  [Tight2012   ] = probeMuons[j].Id   ;
+               
+   
+   
+              tpTree->Fill();
+           }
          }
         
 
@@ -126,6 +132,7 @@ void EventTree::Loop()
    //###############################################################
    //##################        END OF LOOP        ##################
    //###############################################################
+   
    tpTree->Write();
    outFile->Close();
 

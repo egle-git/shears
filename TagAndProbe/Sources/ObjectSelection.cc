@@ -19,11 +19,12 @@ namespace objectSelection
       currentLepton.E = ElE->at(i);
       currentLepton.PfIsoRho = ElPfIsoRho->at(i);
       currentLepton.EtaSc = ElEtaSc->at(i);
-      currentLepton.Id = ElId->at(i);
+
       currentLepton.Ch = ElCh->at(i);
       currentLepton.Seq = i;
        //Id //Very temporary!!! Used without much cross-checking.
       passId = ElId->at(i) & (1<<17);
+      currentLepton.Id = ElId->at(i) & (1<<17);
       passLooseId = ElId->at(i) & (1<<16);
       int eta = fabs(ElEtaSc->at(i));//I took the supercluster eta since it's really the geometry which is taken here.
       passEta = (eta<=2.5 && (eta>=1.5660 || eta<=1.4442));
@@ -54,7 +55,8 @@ namespace objectSelection
       currentLepton.E = MuE->at(i);
       currentLepton.PfIso = MuPfIso->at(i);
       currentLepton.Id = MuId->at(i);
-      currentLepton.IdTight = MuIdTight->at(i);
+      currentLepton.IdTight = MuIdTight->at(i)& (1<<0);
+
       currentLepton.Ch = MuCh->at(i);
       currentLepton.Seq = i;
       //Id //Very temporary!!! Used without much cross-checking.

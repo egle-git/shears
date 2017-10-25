@@ -85,7 +85,7 @@ void EventTree::Loop()
                fill_float[tag_charge  ] = tagElectrons  [i].Ch   ;
                fill_float[charge      ] = probeElectrons[j].Ch   ;
                fill_float[tkIso       ] = probeElectrons[j].PfIsoRho;
-               fill_int  [Tight2012   ] = probeElectrons[j].Id   ;
+               fill_int  [0] = probeElectrons[j].Id   ;
                tpTree->Fill();
             }
          }
@@ -112,8 +112,9 @@ void EventTree::Loop()
                fill_float[tag_charge  ] = tagMuons  [i].Ch   ;
                fill_float[charge      ] = probeMuons[j].Ch   ;
                fill_float[tkIso       ] = probeMuons[j].PfIso;
-               fill_int  [Tight2012   ] = probeMuons[j].Id   ;
-               
+               fill_int[0] = probeMuons[j].IdTight   ;
+
+
    
    
               tpTree->Fill();

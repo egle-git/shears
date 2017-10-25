@@ -24,7 +24,11 @@ opt.inputFiles = [
 #"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
 #'/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/680BED0F-D919-E611-85E6-02163E01424F.root'
 #'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
+<<<<<<< HEAD
 "file:/tmp/hbrun/theSimuToTest.root"
+=======
+"/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_HCALDebug_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/5E794AD1-FCBD-E611-8FDB-00266CF91A18.root"
+>>>>>>> mainShear/master
 #'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
@@ -81,9 +85,8 @@ if opt.prodEra in [ "13TeV_25ns", "13TeV_25ns_silver", "13TeV_25ns_silver"]:
     eg_corr = True   #photon and electron correction
     eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"
     eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"
-
-
 else:
+<<<<<<< HEAD
 #for 80x:
   #dataGlobalTag = '80X_dataRun2_ICHEP16_repro_v0'
   dataGlobalTag = '80X_dataRun2_2016SeptRepro_v7'
@@ -96,6 +99,27 @@ else:
   eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"
   #eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
   #eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
+=======
+    #2016 data
+
+    if opt.maxRun <= 280385: 
+        #run B-G period
+        dataGlobalTag = '80X_dataRun2_2016SeptRepro_v7'
+    else:
+        #run H period
+        dataGlobalTag ='80X_dataRun2_Prompt_v16'
+    #endif
+
+    #mcGlobalTag = '80X_mcRun2_asymptotic_2016_v3'
+    mcGlobalTag = '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
+    triggerMenu = '2016'
+    reapply_jec = False
+    eg_corr = True
+    eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"  
+    eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"
+    #eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
+    #eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
+>>>>>>> mainShear/master
 #endif
 
 include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
@@ -365,3 +389,4 @@ opt.recoTag  = %s
 opt.isMC     = %d
 ''' % (opt.minRun, opt.maxRun, opt.prodEra, opt.recoTag, opt.isMC))
 file.close()
+

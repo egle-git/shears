@@ -19,8 +19,11 @@ class GenH1D: public TH1D {
     TH1* hPdfRejRate;
     TH1* hEvtCnt;
     static const int nScales = 6;
+    static const int nGenevaScales = 11;
     std::vector<TH1*> hScales;
+    std::vector<TH1*> hGenevaScales;
     bool uncHistBooked;
+    bool genevaUncHistBooked;
     const static int scaleWeightMinIndex = 1; //index of 1st scale weight muR=muF=1 -> same value as nominal weight.
     const static int pdfWeightMinIndex  =  scaleWeightMinIndex + 9; //weight index of 1st PDF replica
     const static int alphasIndex = pdfWeightMinIndex + 100;
@@ -30,21 +33,24 @@ class GenH1D: public TH1D {
     GenH1D(const char *name, const char *title, Int_t nbinsx, Double_t xlow, Double_t xup):
         TH1D (name, title,  nbinsx, xlow, xup),
         pdfWeightRatioMin(.5), pdfWeightRatioMax(2), hPdfsCut(100), hPdfs(100),
-        hPdfEvtCnts(100), hScales(nScales), uncHistBooked(false)
+        hPdfEvtCnts(100), hScales(nScales), hGenevaScales(nGenevaScales), uncHistBooked(false), 
+        genevaUncHistBooked(false)
     {
     }
 
     GenH1D(const char *name, const char *title, Int_t nbinsx, const Float_t *xbins):
         TH1D (name, title,  nbinsx, xbins),
         pdfWeightRatioMin(.5), pdfWeightRatioMax(2), hPdfsCut(100), hPdfs(100),
-        hPdfEvtCnts(100), hScales(nScales), uncHistBooked(false)
+        hPdfEvtCnts(100), hScales(nScales), hGenevaScales(nGenevaScales), uncHistBooked(false), 
+        genevaUncHistBooked(false)
     {
     }
 
     GenH1D(const char *name, const char *title, Int_t nbinsx, const Double_t *xbins):
         TH1D (name, title,  nbinsx, xbins),
         pdfWeightRatioMin(.5), pdfWeightRatioMax(2), hPdfsCut(100), hPdfs(100),
-        hPdfEvtCnts(100), hScales(nScales), uncHistBooked(false)
+        hPdfEvtCnts(100), hScales(nScales), hGenevaScales(nGenevaScales), uncHistBooked(false),
+        genevaUncHistBooked(false)
     {
     }
 
@@ -60,6 +66,7 @@ class GenH1D: public TH1D {
 
     Int_t Fill(double x, double commonWeight, const std::vector<double>& weights){
         if(weights.size() < 6) return Fill(x, commonWeight * weights.at(0)); // for sherpa2 compatibility
+	    if(weights.size() == 11) return FillGeneva(x, commonWeight, weights); // for Geneva 
         if(!uncHistBooked) bookUncHist();
         if((weights.size() != pdfWeightMinIndex + hPdfs.size())
                 && (weights.size() != pdfWeightMinIndex + hPdfs.size() + 2)){
@@ -71,15 +78,15 @@ class GenH1D: public TH1D {
         Int_t rc  = TH1D::Fill(x, commonWeight *  weights.at(0)); // for the new multiplicity binning sample
         hEvtCnt->Fill(x, 1.);
         for(unsigned i = 0; i < hPdfsCut.size(); ++i){
-            double wr = weights.at(pdfWeightMinIndex + i) / weights.at(1); // for the new multiplicity binning sample
-            if(pdfWeightRatioMin < wr && wr < pdfWeightRatioMax){
-                hPdfsCut[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
-                hPdfEvtCnts[i]->Fill(x, 1.);
+          double wr = weights.at(pdfWeightMinIndex + i) / weights.at(1); // for the new multiplicity binning sample
+          if(pdfWeightRatioMin < wr && wr < pdfWeightRatioMax){
+              hPdfsCut[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
+              hPdfEvtCnts[i]->Fill(x, 1.);
             } else{
-                //std::cout << "Rejecting weight " << weights.at(pdfWeightMinIndex + i) << "\n";
-                hPdfRejRate->Fill(x, 1);
-            }
-            hPdfs[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
+              //std::cout << "Rejecting weight " << weights.at(pdfWeightMinIndex + i) << "\n";
+              hPdfRejRate->Fill(x, 1);
+         }
+         hPdfs[i]->Fill(x, commonWeight * weights.at(pdfWeightMinIndex + i));
         }
 
 
@@ -122,6 +129,18 @@ class GenH1D: public TH1D {
     }
 
 
+    Int_t FillGeneva(double x, double commonWeight, const std::vector<double>& weights){
+        if(!genevaUncHistBooked) bookGenevaUncHist();
+        Int_t rc  = TH1D::Fill(x, commonWeight *  weights.at(0));
+        hEvtCnt->Fill(x, 1.);
+
+        int scaleIds[nGenevaScales] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};//offset wrt to scaleWeightMinIndex;
+        for(unsigned i = 0; i < nGenevaScales; ++i){
+            hGenevaScales[i]->Fill(x, commonWeight * weights.at(scaleIds[i]));
+        }
+
+        return rc;
+    }
 
 
     TGraphAsymmErrors* getPdfUnc(bool withCut){
@@ -219,6 +238,72 @@ class GenH1D: public TH1D {
         return r;
     }
 
+    TGraphAsymmErrors* getGenevaScaleUnc(bool inclusive){
+        std::vector<double> x(GetNbinsX(), 0);
+        std::vector<double> y(GetNbinsX(), 0);
+        std::vector<double> ehx(GetNbinsX(), 0);
+        std::vector<double> elx(GetNbinsX(), 0);
+        std::vector<double> ehy(GetNbinsX(), 0);
+        std::vector<double> ely(GetNbinsX(), 0);
+        for(int i = 0; i < GetNbinsX(); ++i){
+            x[i] = GetXaxis()->GetBinCenter(i+1);
+            elx[i] = ehx[i] = 0.5 * GetXaxis()->GetBinWidth(i+1);
+            y[i] = GetBinContent(i+1);
+            //calculate uncertainty with scale variation:
+            double down = y[i];
+            double up = y[i];
+            unsigned nGenevaScales = hGenevaScales.size();
+            if (inclusive == false){
+                for(unsigned iScale = 0; iScale < (nGenevaScales - 4); ++iScale){ // envelope of weights 0 - 6
+                    double thisScaleY = hGenevaScales[iScale]->GetBinContent(i+1);
+                    if(thisScaleY < down) down = thisScaleY;
+                    if(thisScaleY > up)   up = thisScaleY;
+                }
+                if ((up - y[i]) >= (y[i] - down)){
+                    ehy[i] = up - y[i];
+                    ely[i] = up - y[i];
+                }
+                else{
+                    ehy[i] = y[i] - down;
+                    ely[i] = y[i] - down;
+                }
+
+                // envelope of 0, 7, 8 to sum quadrature
+                up = y[i];
+                down = y[i];
+                for(unsigned iScale = (nGenevaScales - 4); iScale < (nGenevaScales - 2); ++iScale){
+                    double thisScaleY = hGenevaScales[iScale]->GetBinContent(i+1);
+                    if(thisScaleY < down) down = thisScaleY;
+                    if(thisScaleY > up)   up = thisScaleY;
+                }
+                ehy[i] = sqrt(pow(ehy[i],2) + pow(up - y[i],2));
+                ely[i] = sqrt(pow(ely[i],2) + pow(y[i] - down,2));
+            }
+            else{
+                for(unsigned iScale = (nGenevaScales - 2); iScale < nGenevaScales; ++iScale){
+                    double thisScaleY = hGenevaScales[iScale]->GetBinContent(i+1);
+                    if(thisScaleY < down) down = thisScaleY;
+                    if(thisScaleY > up)   up = thisScaleY;
+                }
+                ehy[i] = up - y[i];
+                ely[i] = y[i] - down;
+            }
+        }
+
+        TGraphAsymmErrors* r = new TGraphAsymmErrors(GetNbinsX(), &x[0], &y[0], &elx[0], &ehx[0], &ely[0], &ehy[0]);
+
+        if(inclusive){
+            r->SetName(TString::Format("%s_scaleUncInc", GetName()));
+            r->SetTitle(TString::Format("%s Scale Unc. (inclusive)", GetTitle()));
+        }
+        else{
+            r->SetName(TString::Format("%s_scaleUnc", GetName()));
+            r->SetTitle(TString::Format("%s Scale Unc.", GetTitle()));
+        }
+        return r;
+    }
+
+
     Int_t Write ( const char *  name = 0,
             Int_t  option = 0,
             Int_t  bufsize = 0
@@ -246,6 +331,15 @@ class GenH1D: public TH1D {
             hPdfRejRate->Write();
         }
 
+        if(genevaUncHistBooked){
+            TGraphAsymmErrors* scaleUncInc = getGenevaScaleUnc(true);
+            scaleUncInc->Write();
+            delete scaleUncInc;
+            TGraphAsymmErrors* scaleUnc = getGenevaScaleUnc(false);
+            scaleUnc->Write();
+            delete scaleUnc;
+        }
+
         return rc;
     }
 
@@ -262,6 +356,12 @@ class GenH1D: public TH1D {
             }
             hAlphasDwn->Scale(c1, option);
             hAlphasUp->Scale(c1, option);
+        }
+
+        if(genevaUncHistBooked){
+            for(unsigned i = 0; i < nGenevaScales; ++i){
+                hGenevaScales[i]->Scale(c1, option);
+            }
         }
     }
 
@@ -302,6 +402,21 @@ class GenH1D: public TH1D {
         hAlphasDwn->SetName(TString::Format("%s_alphasDwn", GetName()));
         hAlphasDwn->SetTitle(TString::Format("%s #alpha_s -1#sigma", GetTitle()));
         //	hAlphasDwn->SetDirectory(0);
+    }
+
+    void bookGenevaUncHist(){
+        genevaUncHistBooked = true;
+        hEvtCnt = (TH1D*) Clone();
+        hEvtCnt->SetDirectory(0);
+        hEvtCnt->SetName(TString::Format("%s_evtcnt", GetName()));
+        hEvtCnt->SetTitle(TString::Format("%s Evt Cnt", GetName()));
+
+        for(unsigned i = 0; i < hGenevaScales.size(); ++i){
+            hGenevaScales[i] = (TH1D*) Clone();
+            hGenevaScales[i]->SetDirectory(0);
+            hGenevaScales[i]->SetName(TString::Format("%s_scale%d", GetName(), i));
+        }
+
     }
 
 };

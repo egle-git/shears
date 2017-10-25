@@ -78,7 +78,7 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy,
 		 int jetPtMin, int jetEtaMax, TFile *fData[3], 
 		 TFile *fDYJets[9], TFile *fBg[][7], int nBg);
 
-void closeFile(TFile*);
+void closeFile(TFile*& File);
 void closeFiles(TFile *Files[]);
 void closeFiles(TFile *Files[], int nFiles);
 void closeAllFiles(TFile *fData[3], TFile *fDYJets[9], TFile *fBg[][7], int nBg);
@@ -95,5 +95,14 @@ void getPurities(TH1D *hPurityDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11]
 TH1D* getPurities(TH1D *hRecDYJets, TH2D *hResDYJets);
 void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D *hFakDYJets[18], TH1D *hPurityDYJets[18]);
 void getStatistics(TString lepSel = "DMu",  int jetPtMin = 30, int jetEtaMax = 24, const TString& variable = "ZNGoodJets_Zexc");
+TString getUnfoldedFileName(TString unfoldDir, const TString& lepSel, 
+			    const TString& variable, const TString& algo,
+			    int jetPtMin, int jetEtaMax, const TString& genList,
+			    bool doNormalized);
+
+TFile* getHistoFile(const char* sample, const char* lepSel, int sys = 0, bool verbose = true);
+std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const char* lepSel,
+			       const char* variable, bool xsec = true, bool verbose = true);
+TString getLegendGen(const char* sample);
 #endif
 

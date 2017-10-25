@@ -15,7 +15,7 @@ using namespace std;
 
 //ClassImp(BLUEMeth);
 
-BLUEMeth::BLUEMeth(const vector<TH1D*> &measurements, const vector<vector<TH2D*>> &covariances, const char *name, const char *title) 
+BLUEMeth::BLUEMeth(const vector<TH1*> &measurements, const vector<vector<TH2*>> &covariances, const char *name, const char *title) 
     : TNamed (name, title)
 {
     _variable = name;
@@ -73,7 +73,7 @@ void BLUEMeth::Init()
     _diagCrossChannelCov = _fullCrossChannelCov = _fullIndivChannelCov = false;
 }
 
-BLUEMeth& BLUEMeth::Setup (const vector<TH1D*> &measurements, const vector<vector<TH2D*>> &covariances)
+BLUEMeth& BLUEMeth::Setup (const vector<TH1*> &measurements, const vector<vector<TH2*>> &covariances)
 {
     Reset();
     SetMeasurements (measurements);
@@ -81,7 +81,7 @@ BLUEMeth& BLUEMeth::Setup (const vector<TH1D*> &measurements, const vector<vecto
     return *this;
 }
 
-void BLUEMeth::SetMeasurements (const vector<TH1D*> &measurements)
+void BLUEMeth::SetMeasurements (const vector<TH1*> &measurements)
 {
     _measurements = measurements;
     if (!_nMeasurements) {
@@ -122,7 +122,7 @@ void BLUEMeth::SetMeasurements (const vector<TH1D*> &measurements)
 
 }
 
-void BLUEMeth::SetCovariances(const vector<vector<TH2D*>> &covariances)
+void BLUEMeth::SetCovariances(const vector<vector<TH2*>> &covariances)
 {
     _covariances = covariances;
     _nCovariances = _covariances[0].size();
@@ -162,7 +162,11 @@ void BLUEMeth::ComputeFullCovariance()
                     //--- only diagonal if not _fullIndivChannelCov
                     if (i == j || _fullIndivChannelCov) {
                         //--- watch out the +1 in the GetBinContent method ---
+		      if(_covariances[iMeas][iCov]){
                         _Muij[iCov](i+iMeas*_N, j+iMeas*_N) = _covariances[iMeas][iCov]->GetBinContent(i+1, j+1);
+		      } else{
+			_Muij[iCov](i+iMeas*_N, j+iMeas*_N) = 0;
+		      }
                     }
                 }
             }
@@ -171,7 +175,7 @@ void BLUEMeth::ComputeFullCovariance()
         // for fully correlated systematics (JES, JER, PU, Lumi, XSec) between channels 
         // the off diagonal blocks are filed with sigma(i, j+N) = sign(sigma(i,j)) * sqrt(sigma(i,i) * sigma(j+N,j+N))
         // to exhibit the same behavior than individual channel covariance matrix
-        TString syst = _covariances[0][iCov]->GetName();
+        TString syst = _covariances[0][iCov] ? _covariances[0][iCov]->GetName() : "";
         if ((syst.Contains("JES") || syst.Contains("JER") || syst.Contains("PU") || syst.Contains("Lumi") || syst.Contains("XSec")) && (_diagCrossChannelCov || _fullCrossChannelCov)) {
             //--- loop on each pair of channels to add correlation between each pair of measurements ---
             for (unsigned int iMeas1 = 0; iMeas1 < _nMeasurements; ++iMeas1) {
@@ -198,7 +202,7 @@ void BLUEMeth::ComputeFullCovariance()
     }
 }
 
-TH1D* BLUEMeth::GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCov, bool fullIndivChannelCov, bool modifiedSWA, vector<TH2D*> &covuxaxb, TH2D* &covxaxb)
+TH1* BLUEMeth::GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCov, bool fullIndivChannelCov, bool modifiedSWA, vector<TH2*> &covuxaxb, TH2* &covxaxb)
 {
     //--- it is time to compute the lambda coefficients of the BLUE ---
 
@@ -257,11 +261,11 @@ TH1D* BLUEMeth::GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCo
 
 
 
-    std::cout << "HERE IS THE LAMBDA" << std::endl;
-
-    lambdaai->Print();
-
-    std::cout << "END OF THE LAMBDA" << std::endl;
+//    std::cout << "HERE IS THE LAMBDA" << std::endl;
+//
+//    lambdaai->Print();
+//
+//    std::cout << "END OF THE LAMBDA" << std::endl;
 
     for (unsigned int iCov = 0; iCov < _nCovariances; ++iCov) {
         if (modifiedSWA) {
@@ -275,11 +279,15 @@ TH1D* BLUEMeth::GetCombination(bool diagCrossChannelCov, bool fullCrossChannelCo
             TDecompSVD svdcovuxaxb = _covuxaxb[iCov];
             _covuxaxb[iCov] = svdcovuxaxb.Invert();
         }
-        covuxaxb[iCov] = new TH2D(_covuxaxb[iCov]);
-        covuxaxb[iCov]->SetName(_covariances[0][iCov]->GetName() + _variable);
+	if(_covariances[0][iCov]){
+	  covuxaxb[iCov] = new TH2D(_covuxaxb[iCov]);
+	  covuxaxb[iCov]->SetName(_covariances[0][iCov]->GetName() + _variable);
+	} else{
+	  covuxaxb[iCov] = 0;
+	}
     }
 
-    TH1D *h = (TH1D*) _measurements[0]->Clone("hCombination");
+    TH1 *h = (TH1*) _measurements[0]->Clone("hCombination");
     for (unsigned int i = 0; i < _N; ++i) {
         h->SetBinContent(i+1, _xa(i));
         h->SetBinError(i+1, sqrt(_covuxaxb[0](i, i)));

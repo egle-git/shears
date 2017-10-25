@@ -62,9 +62,11 @@ class HistoSetZJets {
         TH1D *ZPt_Zinc0jet;
         TH1D *ZPt_Zinc0jet_Odd;;
         TH1D *ZPt_Zinc0jet_Even;
+        TH1D *ZPt_2_Zinc0jet;
         TH1D *ZPt_Zinc1jet;
         TH1D *ZPt_Zinc1jet_Odd;;
         TH1D *ZPt_Zinc1jet_Even;
+        TH1D *ZPt_2_Zinc1jet;
         TH1D *HadRecoil;
         TH1D *JZB;
         TH1D *JZB_Odd;;
@@ -328,6 +330,7 @@ class HistoSetZJets {
         TH1D *ZNGoodJets_Zexc_Odd;
         TH1D *ZNGoodJets_Zexc_Even;
         TH2D *ZNGoodJetsNVtx_Zexc;
+        TH2D *ZNGoodJets20NVtx_Zexc;
         TH1D *ZNGoodJets_Zinc;
        // TH1D *ZNGoodJets_test;
         TH1D *ZNGoodJets_Zinc_5;

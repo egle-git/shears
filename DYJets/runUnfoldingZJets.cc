@@ -17,11 +17,13 @@ int main(int argc, char **argv)
     int jetPtMin       = cfg.getI("jetPtMin");
     int jetEtaMax      = cfg.getI("jetEtaMax");
     int whichSyst      = cfg.getI("whichSyst");
-    TString generator1 = cfg.getS("generator1", "sherpa2");
-   // TString generator2 = cfg.getS("generator2", "amcatnlo");
-
+    TString generator1 = cfg.getS("generator1", "mgpythia8");
+    TString generator2 = cfg.getS("generator2", "");
+    
     TString variable = "";
     bool doNormalized(false);
+
+    int nIters = 0;
 
     //-----------------------------------------------------------------------------
 
@@ -77,9 +79,19 @@ int main(int argc, char **argv)
                 getArg(currentArg, whichSyst);
 		cfg.set("whichSyst", whichSyst);
             }
+	    else if(currentArg.BeginsWith("nIters=")){
+		getArg(currentArg, nIters);
+		cfg.set("minIter", nIters);
+		cfg.set("maxIter", nIters);
+	    }
+	    else if(currentArg.BeginsWith("cachedNIters=")){
+	      int sw;
+	      getArg(currentArg, sw);
+	      cfg.set("cachedNIters", sw);
+	    }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
-                std::cout << "\nUsage: \n\t./runUnfolding [lepSel=(DMu, DE)] [algo=(Bayes, SVD)] [jetPtMin=(int)] [jetEtaMax=(int*10)] [histoDir=(path)] [unfoldDir=(path)] [variable=(variableName)] [doNormalized=(0, 1)] [whichSyst=(-1)] [--help]" << std::endl;
+                std::cout << "\nUsage: \n\t./runUnfolding [lepSel=(DMu, DE)] [algo=(Bayes, SVD)] [jetPtMin=(int)] [jetEtaMax=(int*10)] [histoDir=(path)] [unfoldDir=(path)] [variable=(var1),(var2),...] [doNormalized=(0, 1)] [whichSyst=(-1)] [--help]" << std::endl;
                 std::cout << "\neg: ./runUnfolding lepSel=DMu jetEtaMax=24" << std::endl;
                 std::cout << "\nunspecified options will be read from vjets.cfg\n" << std::endl;
                 return 0;
@@ -96,12 +108,30 @@ int main(int argc, char **argv)
     if (!histoDir.EndsWith("/")) histoDir += "/";
     if (!unfoldDir.EndsWith("/")) unfoldDir += "/";
 
-    std::cout << "\n executing UnfoldingZJets(\"" << lepSel << "\", \"" <<  algo << "\", \"" << histoDir << "\", \"" << unfoldDir << "\", " << jetPtMin << ", " << jetEtaMax << ", &argc, argv);" << std::endl;
-    //-----------------------------------------------------------------------------
+
+    TString unfCfgFile = cfg.getS("unfConf");
+    static SectionedConfig unfCfg;
+    unfCfg.read(unfCfgFile);
 
     //UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, generator1, generator2, variable, doNormalized);
     // UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, variable, doNormalized, whichSyst);
-     UnfoldingZJets(lepSel, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, generator1, variable, doNormalized, whichSyst);
+
+    //support lepSel list DE,DMu:
+    TString lepSel_;
+    Ssiz_t from0 = 0;
+    while(lepSel.Tokenize(lepSel_, from0, "[ \\t]*[, ][ \\t]*")){    
+      if(variable.Length() > 0){
+	TString variable_;
+	Ssiz_t from1 = 0;
+	//support for variable list like JetPt_Zinc2jet,JetAbsRapidity_Zinc2jet
+	while(variable.Tokenize(variable_, from1, "[ \\t]*[, ][ \\t]*")){
+	  UnfoldingZJets(unfCfg, lepSel_, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax,
+			 variable_, doNormalized, whichSyst);
+	}
+      } else{
+	UnfoldingZJets(unfCfg, lepSel_, algo, histoDir, unfoldDir, jetPtMin, jetEtaMax, "", doNormalized, whichSyst);
+      }
+    }
 
     return 0;
 }

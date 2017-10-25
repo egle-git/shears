@@ -7,14 +7,22 @@
 #include <algorithm>
 #include <cstdarg>
 #include <cstring>
+#include <set>
+#include <stdlib.h>
 #include "TH1.h"
 #include "TH2.h"
 #include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TSystem.h"
 #include "RooUnfoldResponse.h"
+#include "TCanvas.h"
+#include "TROOT.h"
+#include "TString.h"
+#include "ConfigVJets.h"
 
+extern ConfigVJets cfg;
 
 using namespace std;
 
@@ -657,7 +665,7 @@ bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest
 
 //Check that two Root TAxis have indentical boudaries and binning:
 bool isSameBinning(const TAxis& ax1, const TAxis& ax2){
-  const static bool verbose = true;
+  const static bool verbose = false;
   //check number of bins
   if(ax1.GetNbins() != ax2.GetNbins()) return false;
 
@@ -671,4 +679,115 @@ bool isSameBinning(const TAxis& ax1, const TAxis& ax2){
   if(ax1.GetBinUpEdge(ax1.GetNbins()) != ax2.GetBinUpEdge(ax2.GetNbins())) return false;
   
   return true;
+}
+
+#if 0
+void saveCanvas(const char* fileBaseName, const TCanvas* c){
+  if(!c){
+    TVirtualPad* pad = gROOT->GetSelectedPad();
+    if(!pad){
+      c = pad->GetCanvas();
+    }
+  }
+  if(!c) return;
+  c->Print(TString(fileBaseName) + ".pdf");
+  c->Print(TString(fileBaseName) + ".C");
+  c->Print(TString(fileBaseName) + ".root");
+  c->Print(TString(fileBaseName) + ".png");
+}
+#else
+void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName){
+    std::string mainFormat = cfg.getS("mainFormat", "pdf");
+    std::vector<std::string> extraFormats_ = cfg.getVS("extraFormats", std::vector<std::string>(1, "root"));
+    //remove duplicates if any:
+    std::set<std::string> extraFormats;
+    for(auto s: extraFormats_){
+	extraFormats.insert(s);
+    }
+    c->SaveAs(TString(outputDir) + "/" + baseName + "." + mainFormat.c_str());
+    for(auto ext: extraFormats){
+	gSystem->mkdir(TString(outputDir) + "/" + ext);
+	//extra tag for .root file to distinguish with the file containing all the histograms:
+	const char* canvas = (ext == "root" ? "_canvas" : "");
+	c->SaveAs(TString(outputDir) + "/" + ext + "/" + baseName + canvas + "." + ext.c_str());    
+    }
+}
+#endif
+
+/** Round a number to n digits before or after the decimal point.
+ * @param val: input and value.
+ * @param l10: log10 of the precisison, i.e. position of the least 
+ * significant digit position:
+ *     1-> tens, 0->unit, -1-> tenth, -2 -> hundredth, etc.
+ * @param sVal: output value as a string with proper formatting.
+ * @return rounded value
+ */
+double ndec_round(double val, int l10, std::string& sVal){
+  //following rounding step is needed for l10 > 0
+  //(precisions of unit, tens, hundreds,...)
+  double a = pow(10, l10);
+  double rounded = round(val / a) * a; 
+  int ndecimals = std::max(0, -l10);
+  //  std::cout << "(" << ndecimals << " decimals)\n";
+  sVal = TString::Format("%#.*f", ndecimals, rounded);
+  return strtod(sVal.c_str(), 0);
+}
+
+double nsignif_round(double val, int nsignif, std::string& sVal){
+  sVal = TString::Format("%#.*g", nsignif, val);
+  return strtod(sVal.c_str(), 0);
+}
+
+
+/** Rounds figures of a measurement according to CMS convention
+ * https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/PubGuidelines#Significant_figures_for_measurem
+ * rev. 188 and matching the precision of the central value to the precision of the largest uncertainty.
+ */
+void pground(double val, const std::vector<double>& unc, std::string& sVal, 
+	     std::vector<std::string>& sUnc, bool matchUncPrecOnCentralValue){
+
+  const bool verbose = false;
+
+  int nsignif = 2;
+
+  double maxUnc = 0;
+  for(auto u: unc){
+    if(u > maxUnc) maxUnc = u;
+  }
+
+  //Precision to keep (see ndec_round), 2 significant digits on the largest uncertainty:
+  int l10 = floor(log10(maxUnc)) - nsignif + 1;
+
+  //round central value:
+  ndec_round(val, l10, sVal);
+
+  sUnc.resize(unc.size());
+
+  std::string s;
+  int i = 0;
+  for(auto& u: unc){
+    if(matchUncPrecOnCentralValue){
+      ndec_round(u, l10, sUnc[i]);
+    } else{
+      nsignif_round(u, nsignif, sUnc[i]);
+    }
+    ++i;
+  }
+  
+  if(verbose){
+    std::cout << val;
+    for(auto u: unc) std::cout << "\t\\pm " << u;
+    std::cout << "\nrounded to:\n";
+    std::cout << sVal;
+    for(auto u: sUnc) std::cout << "\t\\pm " << u;
+    std::cout << "\n";
+  }
+}
+
+
+void pground(double val, double unc, std::string& sVal, std::string& sUnc){
+  std::vector<double> uncs(1, unc);
+  std::vector<std::string> sUncs;
+  pground(val, uncs, sVal, sUncs, false);
+  sUnc = sUncs[0];
 }

@@ -16,9 +16,9 @@ Repository organisation
 
 **ntuple_production** Tools to produce the Boabab ROOT ntuple.
 
-*Documentation can be found in the respective directories (README.md file displayed when browsing the directory with gitlab as for the one you are reading).*
+**Baobabs** The code that produces the ntuple (Boabab) from CMS EDM dataset (MINIAOD) and used by the tools in ntuple\_production
 
-*The code that produces the ntuple (Boabab) from CMS EDM dataset (MINIAOD) and used by the tools in ntuple\_production folder can be found in the [Tuple repository](https://github.com/UGent/Tupel/tree/Tupel_MiniAOD), under the git branch Tuple_MiniAOD.*
+*Documentation can be found in the respective directories (README.md file displayed when browsing the directory with gitlab as for the one you are reading).*
 
 Installation recipe
 ------------------

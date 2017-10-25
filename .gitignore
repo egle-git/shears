@@ -14,6 +14,8 @@ DYJets/runDE.sh
 # git will not consider the following files:
 *.root
 *.o
+*.pyc
+__init__.py
 DYJets/RooUnfold-1.1.1/libRooUnfold.rootmap
 DYJets/RooUnfold-1.1.1/tmp
 DYJets/RooUnfold/libRooUnfold.rootmap

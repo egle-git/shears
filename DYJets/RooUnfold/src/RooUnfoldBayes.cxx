@@ -393,8 +393,10 @@ void RooUnfoldBayes::getCovariance()
       v.Sqr();
       ABAT (Dprop, v, _cov);
     }
-    cout << "data cov: " << endl;
-    _cov.Print();
+    if(verbose() >= 1){
+      cout << "data cov: " << endl;
+      _cov.Print();
+    }
   }
 
   if (_dosys) {
@@ -417,6 +419,8 @@ void RooUnfoldBayes::getCovariance()
     } else {
       _cov.ResizeTo (_nc, _nc);
       ABAT (_dnCidPjk, Vjk, _cov);
+    }
+    if(verbose() >= 1){
       cout << "dy cov: " << endl;
       _cov.Print();
     }

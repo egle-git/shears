@@ -42,7 +42,6 @@ scram b -j 8
 **b) install and compile the Hzz code** 
 ```
 git clone ssh://git@gitlab.cern.ch:7999/HZZ-IIHE/shears.git
-git clone -b Tupel_MiniAOD ssh://git@gitlab.cern.ch:7999/HZZ-IIHE/NTuple-Producer.git
 scramv1 b -j 16
 ```
 

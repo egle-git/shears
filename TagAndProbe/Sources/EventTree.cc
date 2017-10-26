@@ -28,11 +28,11 @@ void EventTree::Loop()
 
    
    
-   TString variables[]={"mass","tag_pt","pt","tag_eta","eta","tag_phi","phi","tag_emEnergy","emEnergy","tag_charge","charge","tkIso","Tight2012"};
+   TString variables[]={"mass","tag_pt","pt","tag_eta","eta","tag_phi","phi","tag_e","e","tag_charge","charge","tkIso","Tight2012"};
   
    Int_t varnum = sizeof(variables) / sizeof(variables[0]);
    enum varnames
-   {mass,tag_pt,pt,tag_eta,eta,tag_phi,phi,tag_emEnergy,emEnergy,tag_charge,charge,tkIso,Tight2012
+   {mass,tag_pt,pt,tag_eta,eta,tag_phi,phi,tag_e,e,tag_charge,charge,tkIso,Tight2012
       
    };
    
@@ -63,7 +63,7 @@ void EventTree::Loop()
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
       if(jentry % 10000 ==0) cout << jentry << " of " << nentries << endl;
-      if (leptongeneration_ =="El"){
+      if (leptongeneration_ =="electron"){
          objectSelection::selectElectrons(tagElectrons, probeElectrons, ElCh,ElPt, ElEta, ElPhi, ElE, ElId, ElEtaSc,ElPfIsoRho);
          for(int i=0;i<tagElectrons.size();i++)
             for(int j=0;j<probeElectrons.size();j++)
@@ -80,8 +80,8 @@ void EventTree::Loop()
                fill_float[eta         ] = probeElectrons[j].Eta  ;
                fill_float[tag_phi     ] = tagElectrons  [i].Phi  ;
                fill_float[phi         ] = probeElectrons[j].Phi  ;
-               fill_float[tag_emEnergy] = tagElectrons  [i].E    ;
-               fill_float[emEnergy    ] = probeElectrons[j].E    ;
+               fill_float[tag_e       ] = tagElectrons  [i].E    ;
+               fill_float[e           ] = probeElectrons[j].E    ;
                fill_float[tag_charge  ] = tagElectrons  [i].Ch   ;
                fill_float[charge      ] = probeElectrons[j].Ch   ;
                fill_float[tkIso       ] = probeElectrons[j].PfIsoRho;
@@ -89,7 +89,7 @@ void EventTree::Loop()
                tpTree->Fill();
             }
          }
-      if(leptongeneration_ == "Mu"){
+      if(leptongeneration_ == "muon"){
         objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
         for(int i=0;i<tagMuons.size();i++)
            for(int j=0;j<probeMuons.size();j++)
@@ -107,12 +107,12 @@ void EventTree::Loop()
                fill_float[eta         ] = probeMuons[j].Eta  ;
                fill_float[tag_phi     ] = tagMuons  [i].Phi  ;
                fill_float[phi         ] = probeMuons[j].Phi  ;
-               fill_float[tag_emEnergy] = tagMuons  [i].E    ;
-               fill_float[emEnergy] = probeMuons[j].E;
+               fill_float[tag_e       ] = tagMuons  [i].E    ;
+               fill_float[e           ] = probeMuons[j].E    ;
                fill_float[tag_charge  ] = tagMuons  [i].Ch   ;
                fill_float[charge      ] = probeMuons[j].Ch   ;
                fill_float[tkIso       ] = probeMuons[j].PfIso;
-               fill_int[0] = probeMuons[j].IdTight   ;
+               fill_int  [0] = probeMuons[j].IdTight           ;
 
 
    

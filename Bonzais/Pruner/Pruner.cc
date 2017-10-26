@@ -25,7 +25,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-std::map<std::string, Pruner::ClassRecord> Pruner::daughters_;
+std::map<std::string, Pruner::ClassRecord> *Pruner::daughters_;
 
 void Pruner::listEvents(std::ostream& o, const char* const catalog){
   if(setInput(catalog)){
@@ -550,8 +550,8 @@ bool Pruner::nextEvent(){
 
 void Pruner::listSelections(std::ostream& o){
   o << "\nList of available selections (--selection) and subselections (--subselections)\n\n";
-  for(std::map<std::string, ClassRecord>::const_iterator it = daughters_.begin();
-      it != daughters_.end(); ++it){
+  for(std::map<std::string, ClassRecord>::const_iterator it = daughters_->begin();
+      it != daughters_->end(); ++it){
     const ClassRecord& rcd = it->second;
     o << rcd.className;
     if(rcd.description.size() > 0){

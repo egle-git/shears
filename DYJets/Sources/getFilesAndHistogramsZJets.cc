@@ -140,7 +140,11 @@ void getAllFiles(TString histoDir, TString lepSel, TString energy, int jetPtMin,
     //------------------------------------------------------------------------------------------ 
 }
 
-void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18])
+void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], 
+		  TH1D *hRecDYJets[13], TH1D *hGenDYJets[11], TH2D *hResDYJets[13], 
+		  TFile *fDYJets[9], TH1D *hRecBg[][11], TH1D *hRecSumBg[11], 
+		  TFile *fBg[][7], int nBg, RooUnfoldResponse *respDYJets[], 
+		  TH1D* hFakDYJets[18], TH1D *hPurityDYJets[18])
 {
 
     //--- get rec Data histograms ---
@@ -155,6 +159,10 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
     //--- get res DYJets histograms ---
     getHistos(hResDYJets, fDYJets, "hresponse" + variable);
 
+    for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
+      hRecSumBg[iSyst] = 0;
+    }
+
     //--- get rec Bg histograms ---
     for (unsigned short iBg = 0; iBg < nBg; ++iBg) {
       std::cout << __FILE__ << ":" << __LINE__ << ". variable = " << variable <<"\n"
@@ -168,16 +176,17 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 	      //exit(1);
 	      continue;
 	  }	  
-	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  //	  if (iBg == 0) hRecSumBg[iSyst] = (TH1D*) hRecBg[0][iSyst]->Clone();
+	  if (hRecSumBg[iSyst]==0) hRecSumBg[iSyst] = (TH1D*) hRecBg[iBg][iSyst]->Clone();
 	  else{
-	      if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
+	    if(hRecSumBg[iSyst]->GetXaxis()->GetNbins()!=hRecBg[iBg][iSyst]->GetXaxis()->GetNbins()){
 		  std::cerr << __FILE__ << ":" <<  __LINE__ << ". "
 			    << "Histogram " << hRecSumBg[iSyst]->GetName()
 			    << "for systematic index " << iSyst
 			    << " and background index " << iBg
 			    << " has a different bining than the background #0.\n";
-	      }
-	      hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
+	    }
+	    hRecSumBg[iSyst]->Add(hRecBg[iBg][iSyst]);
 	  }
       }
     }
@@ -195,11 +204,13 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3], TH1D *hR
 //------------------------------------------------------------
 // Close the file if open and delete the pointer
 //------------------------------------------------------------
-void closeFile(TFile *File)
+void closeFile(TFile*& File)
 {
     if (File) {
-        if (File->IsOpen()) File->Close();
-        if(cfg.getI("verbosity") > 1) cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+      if (File->IsOpen()) File->Close();
+      if(cfg.getI("verbosity") > 1) cout << "Closing: " << File->GetName() << "   --->   Closed ? " << (!(File->IsOpen())) << endl;
+      delete File;
+      File = 0;
     }
 }
 
@@ -297,13 +308,19 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
     } 
 
+    bool dataDriven = TString(Files[0]->GetName()).Contains("_TT_");
+    if(dataDriven){
+      std::cout << "File " << Files[0]->GetName() << " is expected to contain ttbar contribution estimated from data. " 
+		<< " Event yield estimate of this contribution is assumed to be independant of"
+		<< " the integrated luminosity measurement accuracy.\n";
+    } 
+    
     if (!isData && histograms[0]) {
         Files[0]->cd();
         //--- From central histograms, we simulate the histograms
         //    for lumi up and down systematics. It is just a rescaliing
         //    since it is a global effect. 
-        double lumiErr = cfg.getD("lumiUnc");
-
+        double lumiErr = dataDriven ? 0 : cfg.getD("lumiUnc");
         if (isSignal) {
             //--- lumi scale up ---
             histograms[9] = (TH1D*) histograms[0]->Clone();
@@ -312,9 +329,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
             //--- lumi scale down ---
             histograms[10] = (TH1D*) histograms[0]->Clone();
             histograms[10]->Scale(1. - lumiErr);
-        }
-
-        else{
+        } else{
             //--- lumi scale up ---
             histograms[7] = (TH1D*) histograms[0]->Clone();
             histograms[7]->Scale(1. + lumiErr);
@@ -336,7 +351,7 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 	double elEffUnc = cfg.getD("elEffUnc");
 	double muEffUnc = cfg.getD("muEffUnc");
         double errSF = (lepSel == "DMu") ? muEffUnc : elEffUnc;
-        if (variable.Index("gen") < 0) {
+        if (variable.Index("gen") < 0) { //reco
             if (isSignal) {
                 //--- SF up ---
                 histograms[11] = (TH1D*) histograms[0]->Clone();
@@ -405,9 +420,12 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
             //--- lumi scale down ---
             histograms[10] = (TH2D*) histograms[0]->Clone();
             histograms[10]->Scale(1. - lumiErr);
-        }
+        } else{
 
-        else{
+	  //This methods is to retrieve response matrices, which are
+	  //for signal only
+	  abort();
+
             //--- lumi scale up ---
             histograms[7] = (TH2D*) histograms[0]->Clone();
             histograms[7]->Scale(1. + lumiErr);
@@ -449,7 +467,11 @@ void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
                 histograms[10] = (TH2D*) histograms[0]->Clone();
                 histograms[10]->Scale(1. - errSF);
             }
-        }
+        } else {
+	  //This methods is to retrieve response matrices, which are
+	  //for signal only
+	  abort();
+	}
     }
 }
 
@@ -512,6 +534,11 @@ void getResps(RooUnfoldResponse *responses[], TFile *Files[], TString variable)
 
 TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
 {
+  if(hResDYJets && !hRecDYJets){
+    std::cerr << "No reco histo for response matrix " << hResDYJets->GetName() << "\n";
+    abort();
+  }
+  
     if (!hResDYJets || !hRecData || !hRecSumBg || !hResDYJets) return 0;
 
     TH1D *hFakDYJets = (TH1D*) hRecDYJets->Clone();
@@ -538,7 +565,7 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
         //if (!s) wmes= nmes;
         hFakDYJets->SetBinContent (i, factor*fake);
 	double err2 = pow(hRecDYJets->GetBinError(i),2) - wmes;
-	if(err2 < 0) {
+	if(err2 < - 1.e-6 * (pow(hRecDYJets->GetBinError(i),2) + wmes)) {
 	  std::cerr << __FILE__ << ":"  << __LINE__ 
 		    << ". " << hRecDYJets->GetTitle() << ", bin " << i << ": "
 		    << "Uncertainty on n_tot (" << hRecDYJets->GetBinError(i)
@@ -559,24 +586,24 @@ TH1D* getFakes(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJe
 void getFakes(TH1D *hFakDYJets[18], TH1D *hRecData[3], TH1D *hRecSumBg[11], TH1D *hRecDYJets[13], TH2D *hResDYJets[13])
 {
 
-    hFakDYJets[0] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[1] = getFakes(hRecDYJets[0], hRecData[1], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[2] = getFakes(hRecDYJets[0], hRecData[2], hRecSumBg[0], hResDYJets[0]);
-    hFakDYJets[3] = getFakes(hRecDYJets[1], hRecData[0], hRecSumBg[1], hResDYJets[1]);
-    hFakDYJets[4] = getFakes(hRecDYJets[2], hRecData[0], hRecSumBg[2], hResDYJets[2]);
-    hFakDYJets[5] = getFakes(hRecDYJets[3], hRecData[0], hRecSumBg[0], hResDYJets[3]);
-    hFakDYJets[6] = getFakes(hRecDYJets[4], hRecData[0], hRecSumBg[0], hResDYJets[4]);
-    hFakDYJets[7] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[3], hResDYJets[0]);
-    hFakDYJets[8] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[4], hResDYJets[0]);
-    hFakDYJets[9] = getFakes(hRecDYJets[5], hRecData[0], hRecSumBg[5], hResDYJets[5]);
-    hFakDYJets[10] = getFakes(hRecDYJets[6], hRecData[0], hRecSumBg[6], hResDYJets[6]);
-    hFakDYJets[11] = getFakes(hRecDYJets[7], hRecData[0], hRecSumBg[0], hResDYJets[7]);
-    hFakDYJets[12] = getFakes(hRecDYJets[8], hRecData[0], hRecSumBg[0], hResDYJets[8]);
-    hFakDYJets[13] = getFakes(hRecDYJets[9], hRecData[0], hRecSumBg[7], hResDYJets[9]);
-    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8], hResDYJets[10]);
-    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9], hResDYJets[11]);
+    hFakDYJets[0]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[1]  = getFakes(hRecDYJets[0],  hRecData[1], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[2]  = getFakes(hRecDYJets[0],  hRecData[2], hRecSumBg[0],  hResDYJets[0]);
+    hFakDYJets[3]  = getFakes(hRecDYJets[1],  hRecData[0], hRecSumBg[1],  hResDYJets[1]);
+    hFakDYJets[4]  = getFakes(hRecDYJets[2],  hRecData[0], hRecSumBg[2],  hResDYJets[2]);
+    hFakDYJets[5]  = getFakes(hRecDYJets[3],  hRecData[0], hRecSumBg[0],  hResDYJets[3]);
+    hFakDYJets[6]  = getFakes(hRecDYJets[4],  hRecData[0], hRecSumBg[0],  hResDYJets[4]);
+    hFakDYJets[7]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[3],  hResDYJets[0]);
+    hFakDYJets[8]  = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[4],  hResDYJets[0]);
+    hFakDYJets[9]  = getFakes(hRecDYJets[5],  hRecData[0], hRecSumBg[5],  hResDYJets[5]);
+    hFakDYJets[10] = getFakes(hRecDYJets[6],  hRecData[0], hRecSumBg[6],  hResDYJets[6]);
+    hFakDYJets[11] = getFakes(hRecDYJets[7],  hRecData[0], hRecSumBg[0],  hResDYJets[7]);
+    hFakDYJets[12] = getFakes(hRecDYJets[8],  hRecData[0], hRecSumBg[0],  hResDYJets[8]);
+    hFakDYJets[13] = getFakes(hRecDYJets[9],  hRecData[0], hRecSumBg[7],  hResDYJets[9]);
+    hFakDYJets[14] = getFakes(hRecDYJets[10], hRecData[0], hRecSumBg[8],  hResDYJets[10]);
+    hFakDYJets[15] = getFakes(hRecDYJets[11], hRecData[0], hRecSumBg[9],  hResDYJets[11]);
     hFakDYJets[16] = getFakes(hRecDYJets[12], hRecData[0], hRecSumBg[10], hResDYJets[12]);
-    hFakDYJets[17] = getFakes(hRecDYJets[0], hRecData[0], hRecSumBg[0], hResDYJets[0]);
+    hFakDYJets[17] = getFakes(hRecDYJets[0],  hRecData[0], hRecSumBg[0],  hResDYJets[0]);
 }
 
 TH1D* getPurities(TH1D *hRecDYJets, TH1D *hRecData, TH1D *hRecSumBg, TH2D *hResDYJets)
@@ -804,7 +831,7 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
     for (int i=1; i< usedFiles + 1 ; i++){
         int sel = FilesDYJets[i];
 
-        if (i < usedFiles) fprintf(outFile, " %s        & ", Samples[sel].legendAN.Data());
+        if (i < usedFiles) fprintf(outFile, " %s        & ", Samples[sel].legendReco.Data());
         else {
             fprintf( outFile, "\\hline \n");
             fprintf( outFile, " TOTAL & ");
@@ -837,5 +864,104 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString& v
     fclose(outFile);
 }
 
+TString getUnfoldedFileName(TString unfoldDir, const TString& lepSel, 
+			    const TString& variable, const TString& algo,
+			    int jetPtMin, int jetEtaMax, const TString& genList,
+			    bool doNormalized){
+  if(!unfoldDir.EndsWith("/")) unfoldDir += "/";
+  std::cout << "++++ " << lepSel << "\n";
+  TString fname = unfoldDir + lepSel; 
+  fname += "_unfolded_" + variable + "_" + algo;
+  fname += "_JetPtMin_";
+  fname += jetPtMin;
+  fname += "_JetEtaMax_";
+  fname += jetEtaMax;
+  fname += genList;
+  fname += doNormalized ? "_normalized" : "";
+  return fname;
+}
 
+TFile* getHistoFile(const char* sample, const char* lepSel, int sys, bool verbose){
+  TString histoDir(cfg.getS("histoDir").c_str());
+  std::string jetPtMin = cfg.getS("jetPtMin");
+  std::string jetEtaMax = cfg.getS("jetEtaMax");
+  
+  TString fname = histoDir + "/" + lepSel + "_13TeV_" + sample + TString::Format("_TrigCorr_1_Syst_%d_JetPtMin_", sys);
+  fname += jetPtMin;
+  fname += "_JetEtaMax_";
+  fname += jetEtaMax;
+  fname += ".root";
+  TFile* f = new TFile(fname);
+  if(f && f->IsZombie()){
+    delete f;
+    f = 0;
+  }
+  
+  if(!f && verbose) std::cerr << "Failed to open file " << fname << "\n";
 
+  return f;
+}
+
+std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const char* lepSel,
+			       const char* variable, bool xsec, bool verbose){
+  std::vector<TH1*> h(samples.size(), 0);
+  int i = -1;
+  TString lepSel_(lepSel);
+  for(auto s: samples){
+    ++i;
+    if(s.size() > 0){
+      int ich = 0;
+      for(auto l: {"DMu", "DE"}){
+	if(lepSel_ == l || lepSel_.Length() == 0){ //empty string used for ee/mumu channel average
+	  TFile* f = getHistoFile(s.c_str(), l);
+	  if(!f) continue;
+	  TH1* h_ = (TH1*) f->Get(TString("gen") + variable);
+	  if(!h_ && verbose){
+	    std::cerr << "Histogram " << (TString("gen") + variable)
+		      << " was not found in " << f->GetName() << " file.\n";
+	    continue;
+	  }
+
+	  if(xsec  && s != "DYJets_ZjNNLO"){
+	    TH1* hLumi = (TH1*) f->Get("Lumi");
+	    if(!hLumi && verbose){
+	      std::cerr << "Error. Luminosity histogram required to normalized the histograms was not found in the file "
+			<< f->GetName() << ".\n";
+	      continue;
+	    }
+	    double lumi = hLumi->GetBinContent(1);
+	    h_->Scale(1./lumi);
+	  }
+	  
+	  if(h[i]) h[i]->Add(h_);
+	  else {h[i] = h_; h_->SetDirectory(0); }
+	  ++ich;
+	  delete f;
+	}
+      }
+
+      if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
+	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
+	h[i]->Scale(1./ich);
+	//for xsec plots bin contents are divided by the bin width:
+	int nBins = h[i]->GetNbinsX();
+	for (int ibin = 1; ibin <= nBins; ++ibin) {
+	  double binWidth = h[i]->GetBinWidth(ibin);
+	  double binContent = h[i]->GetBinContent(ibin)/binWidth;
+	  h[i]->SetBinContent(ibin, binContent);
+	  h[i]->SetBinError(ibin, h[i]->GetBinError(ibin)/binWidth);
+	}
+      }
+    }
+  }
+  return h;
+}
+
+TString getLegendGen(const char* sample){
+  for(int i = 0; i < NSamples; ++i){
+    if(Samples[i].name == sample){
+      return Samples[i].legendGen;
+    }
+  }
+  return TString();
+}

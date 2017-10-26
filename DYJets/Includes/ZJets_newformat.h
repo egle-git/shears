@@ -81,6 +81,7 @@ class ZJets: public HistoSetZJets {
    vector<float>   *GLepBareE;
    vector<int>     *GLepBareId;
    vector<bool>    *GLepBarePrompt;
+   vector<bool>    *GLepBareTauProd;
    vector<int>     *GLepBareSt;
    vector<int>     *GLepBareMomId;
    vector<float>   *GLepSt3Pt;
@@ -276,6 +277,7 @@ class ZJets: public HistoSetZJets {
    TBranch        *b_GLepBareE;   //!
    TBranch        *b_GLepBareId;   //!
    TBranch        *b_GLepBarePrompt;   //!
+   TBranch        *b_GLepBareTauProd;   //!
    TBranch        *b_GLepBareSt;   //!
    TBranch        *b_GLepBareMomId;   //!
    TBranch        *b_GLepSt3Pt;   //!

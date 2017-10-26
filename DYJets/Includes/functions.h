@@ -7,6 +7,8 @@
 #include <TLorentzVector.h>
 #include <RooUnfoldResponse.h>
 
+class TCanvas;
+
 using namespace std;
 
 void barre_de_progression(int);
@@ -129,5 +131,25 @@ bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest
  */
 
 bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
+
+//void saveCanvas(const char* fileBaseName, const TCanvas* c = 0);
+
+/** Save a root canvas in the file formats defined in the configuration
+ * parameters mainFormat and extraFormats
+ */
+void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName);
+
+
+///@{
+/** Rounds figures of a measurement according to CMS convention
+ * https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/PubGuidelines#Significant_figures_for_measurem
+ * rev. 188 and matching the precision of the central value to the precision of the largest uncertainty.
+ */
+void pground(double val, const std::vector<double>& unc, std::string& sVal, 
+	     std::vector<std::string>& sUnc, bool matchUncPrecOnCentralValue);
+
+void pground(double val, double unc, std::string& sVal, std::string& sUnc);
+
+///@}
 
 #endif

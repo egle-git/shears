@@ -14,10 +14,6 @@
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
-#include "vector"
-#include "vector"
-#include "vector"
-#include "vector"
 using namespace std;
 class EventTree {
 public :

@@ -1,0 +1,23 @@
+stages:
+  - build
+
+before_script:
+  - .gitlab-ci/setup_cmssw.sh
+
+pruner:
+  stage: build
+  tags: [ cvmfs ]
+  script: .gitlab-ci/compile.sh Bonzais/Pruner
+
+hzz2l2nu:
+  stage: build
+  tags: [ cvmfs ]
+  script:
+    - yum -q -y install boost-devel
+    - .gitlab-ci/compile.sh DYJets
+
+baobabs:
+  stage: build
+  tags: [ cvmfs ]
+  script: .gitlab-ci/compile-scram.sh Baobabs
+

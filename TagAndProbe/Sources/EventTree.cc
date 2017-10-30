@@ -28,11 +28,11 @@ void EventTree::Loop()
 
    
    
-   TString variables[]={"mass","tag_pt","pt","tag_eta","eta","tag_phi","phi","tag_e","e","tag_charge","charge","tkIso","Tight2012"};
+   TString variables[]={"mass","tag_pt","pt","tag_eta","eta","tag_phi","phi","tag_abseta","abseta","tag_charge","charge","tkIso","Tight2012","tag_HltMatch","HltMatch","IsoMu22","IsoTkMu22","IsoMu24","IsoTkMu24","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_leg17","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_leg8","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_filter","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_leg17","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_leg8","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_filter"};
   
    Int_t varnum = sizeof(variables) / sizeof(variables[0]);
    enum varnames
-   {mass,tag_pt,pt,tag_eta,eta,tag_phi,phi,tag_e,e,tag_charge,charge,tkIso,Tight2012
+   {mass,tag_pt,pt,tag_eta,eta,tag_phi,phi,tag_abseta,abseta,tag_charge,charge,tkIso,Tight2012,tag_HltMatch,HltMatch,IsoMu22,IsoTkMu22,IsoMu24,IsoTkMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_leg17,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_leg8,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_filter,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_leg17,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_leg8,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_filter
       
    };
    
@@ -40,7 +40,7 @@ void EventTree::Loop()
    int name = Tight2012;
    Float_t fill_float[Tight2012];
    
-   Int_t fill_int[1];
+   Int_t fill_int[13];
    
    for(int i=0;i<varnum;i++){
       
@@ -80,8 +80,8 @@ void EventTree::Loop()
                fill_float[eta         ] = probeElectrons[j].Eta  ;
                fill_float[tag_phi     ] = tagElectrons  [i].Phi  ;
                fill_float[phi         ] = probeElectrons[j].Phi  ;
-               fill_float[tag_e       ] = tagElectrons  [i].E    ;
-               fill_float[e           ] = probeElectrons[j].E    ;
+               fill_float[tag_abseta  ] = tagElectrons  [i].E    ;
+               fill_float[abseta      ] = probeElectrons[j].E    ;
                fill_float[tag_charge  ] = tagElectrons  [i].Ch   ;
                fill_float[charge      ] = probeElectrons[j].Ch   ;
                fill_float[tkIso       ] = probeElectrons[j].PfIsoRho;
@@ -90,7 +90,7 @@ void EventTree::Loop()
             }
          }
       if(leptongeneration_ == "muon"){
-        objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso);
+        objectSelection::selectMuons(tagMuons, probeMuons, MuCh,MuPt, MuEta, MuPhi, MuE, MuId, MuIdTight, MuPfIso,MuHltMatch);
         for(int i=0;i<tagMuons.size();i++)
            for(int j=0;j<probeMuons.size();j++)
            {
@@ -107,13 +107,15 @@ void EventTree::Loop()
                fill_float[eta         ] = probeMuons[j].Eta  ;
                fill_float[tag_phi     ] = tagMuons  [i].Phi  ;
                fill_float[phi         ] = probeMuons[j].Phi  ;
-               fill_float[tag_e       ] = tagMuons  [i].E    ;
-               fill_float[e           ] = probeMuons[j].E    ;
+               fill_float[tag_abseta  ] = tagMuons  [i].E    ;
+               fill_float[abseta      ] = probeMuons[j].E    ;
                fill_float[tag_charge  ] = tagMuons  [i].Ch   ;
                fill_float[charge      ] = probeMuons[j].Ch   ;
                fill_float[tkIso       ] = probeMuons[j].PfIso;
                fill_int  [0] = probeMuons[j].IdTight           ;
-
+               fill_int  [1] = tagMuons[i].HltMatch           ;
+               fill_int  [2] = probeMuons[j].HltMatch         ;
+               for(int k=0;k<sizeof(probeMuons[j].TriggerInf)/sizeof(probeMuons[j].TriggerInf[0]);k++){fill_int[k+3]=probeMuons[j].TriggerInf[k];}
 
    
    

@@ -163,7 +163,7 @@ public :
    vector<float>   *MuPfIsoChHad;
    vector<float>   *MuPfIsoNeutralHad;
    vector<float>   *MuPfIsoRawRel;
-   vector<unsigned int> *MuHltMatch;
+   vector<ULong64_t> *MuHltMatch;
    vector<float>   *ElPt;
    vector<float>   *ElEta;
    vector<float>   *ElEtaSc;

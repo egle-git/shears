@@ -14,7 +14,7 @@ hzz2l2nu:
   tags: [ cvmfs ]
   script:
     - yum -q -y install boost-devel
-    - .gitlab-ci/compile.sh DYJets
+    - .gitlab-ci/compile.sh HZZ2l2nu
 
 baobabs:
   stage: build

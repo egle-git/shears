@@ -675,6 +675,7 @@ private:
   std::auto_ptr<std::vector<float> > JetAk04ChEmFrac_;
   std::auto_ptr<std::vector<float> > JetAk04NeutralEmFrac_;
   std::auto_ptr<std::vector<float> > JetAk04ChMult_;
+  std::auto_ptr<std::vector<float> > JetAk04NeutMult_;
   std::auto_ptr<std::vector<float> > JetAk04ConstCnt_;
   std::auto_ptr<std::vector<float> > JetAk04BTagCsv_;
   std::auto_ptr<std::vector<float> > JetAk04BTagCsvV1_;
@@ -1928,6 +1929,7 @@ void Tupel::processJets(){
   double nemf = 0;
   double cmult = 0;
   double nconst = 0;
+  double nneut = 0;
     
   for ( unsigned int i=0; i<jets->size(); ++i ) {
     const pat::Jet & jet = jets->at(i);
@@ -1959,6 +1961,7 @@ void Tupel::processJets(){
     nemf = jet.neutralEmEnergyFraction();
     cmult = jet.chargedMultiplicity();
     nconst = jet.numberOfDaughters();
+    nneut = jet.neutralMultiplicity();
 
     // cout<<"jet.bDiscriminator(combinedSecondaryVertexBJetTags)=  "<<jet.bDiscriminator("combinedSecondaryVertexBJetTags")<<endl;
     //  cout<<"jet.bDiscriminator(combinedSecondaryVertexV1BJetTags)=  "<<jet.bDiscriminator("combinedSecondaryVertexV1BJetTags")<<endl;
@@ -1992,6 +1995,7 @@ void Tupel::processJets(){
     JetAk04ChEmFrac_->push_back(cemf);
     JetAk04NeutralEmFrac_->push_back(nemf);
     JetAk04ChMult_->push_back(cmult);
+    JetAk04NeutMult_->push_back(nneut);
     JetAk04ConstCnt_->push_back(nconst);
 
     for(unsigned int idx =0; idx<jet.numberOfDaughters();idx++){
@@ -2779,6 +2783,7 @@ Tupel::beginJob()
   ADD_BRANCH(JetAk04ChEmFrac);
   ADD_BRANCH(JetAk04NeutralEmFrac);
   ADD_BRANCH(JetAk04ChMult);
+  ADD_BRANCH(JetAk04NeutMult);
   ADD_BRANCH(JetAk04ConstCnt);
   ADD_BRANCH(JetAk04Beta);
   ADD_BRANCH(JetAk04BetaClassic);

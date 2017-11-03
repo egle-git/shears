@@ -69,6 +69,8 @@
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+
 
 typedef std::vector<reco::GenParticle> GenParticleCollection;
 using reco::GenParticleCollection;
@@ -222,7 +224,7 @@ private:
    * HLT trigger considered to be stored and if it is set
    * the corresponding bit.
    */
-  void fillTrig(const std::string& trigname);
+  void fillTrig(const std::string& trigname, int triggerPrescalesForThisIndex);
 
   void writeTriggerStat();
 
@@ -272,6 +274,7 @@ private:
 
   std::vector<edm::EDGetTokenT<edm::View<pat::MET> >  > metSrcsToken;
 
+  edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken_;
   edm::EDGetTokenT<edm::TriggerResults> HLTTagToken_;
 
   edm::EDGetTokenT<edm::TriggerResults> metFilTagToken_;
@@ -342,30 +345,38 @@ private:
   std::unique_ptr<ULong64_t>         TrigMET_;
 
   //Trigger
-  std::unique_ptr<unsigned>          TrigHlt_;
-  std::map<std::string, unsigned>  TrigHltMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltPhot_;
-  std::map<std::string, ULong64_t> TrigHltPhotMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltDiPhot_;
-  std::map<std::string, ULong64_t> TrigHltDiPhotMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltMu_;
-  std::map<std::string, ULong64_t> TrigHltMuMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltDiMu_;
-  std::map<std::string, ULong64_t> TrigHltDiMuMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltEl_;
-  std::map<std::string, ULong64_t> TrigHltElMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltDiEl_;
-  std::map<std::string, ULong64_t> TrigHltDiElMap_; //bit assignment
-  std::unique_ptr<ULong64_t>         TrigHltElMu_;
+  std::unique_ptr<unsigned>               TrigHlt_;
+  std::map<std::string, unsigned>         TrigHltMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltPhot_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltPhot_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltPhotMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiPhot_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiPhot_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiPhotMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltMu_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltMuMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiMu_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiMuMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltEl_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltEl_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltElMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiEl_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiEl_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiElMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltElMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltElMu_prescale_;
   std::map<std::string, ULong64_t> TrigHltElMuMap_; //bit assignment
   struct  TrigHltMapRcd {
-    TrigHltMapRcd(): pMap(0), pTrig(0) {}
-    TrigHltMapRcd(std::map<std::string, ULong64_t>* pMap_, ULong64_t* pTrig_): pMap(pMap_), pTrig(pTrig_) {
+    TrigHltMapRcd(): pMap(0), pTrig(0), pPrescale(0) {}
+    TrigHltMapRcd(std::map<std::string, ULong64_t>* pMap_, ULong64_t* pTrig_, std::vector<unsigned>* pPrescale_): pMap(pMap_), pTrig(pTrig_), pPrescale(pPrescale_) {
       assert(pTrig_);
     }
     //    TrigHltMapRcd(const TrigHltMapRcd& a){ this->pMap = a.pMap; this->pTrig = a.pTrig; }
     std::map<std::string, ULong64_t>* pMap;
     ULong64_t* pTrig;
+    std::vector<unsigned>* pPrescale;
   };
   std::vector<TrigHltMapRcd> trigHltMapList_; //list of trigger maps.
 
@@ -870,6 +881,7 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
     vertexToken_ = consumes<std::vector<reco::Vertex> >(iConfig.getUntrackedParameter<edm::InputTag>("pvSrc"));
     mSrcRhoToken_ = consumes<double>(iConfig.getUntrackedParameter<edm::InputTag>("mSrcRho" ));
     beamSpotToken_ = consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+    triggerPrescalesToken_ = consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
     HLTTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"));
     metFilTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "PAT"));
     metFilTagRECOToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "RECO"));
@@ -919,13 +931,13 @@ Tupel::~Tupel()
 }
 
 void Tupel::defineBitFields(){
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltPhotMap_, TrigHltPhot_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiPhotMap_, TrigHltDiPhot_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltMuMap_,   TrigHltMu_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiMuMap_, TrigHltDiMu_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,   TrigHltEl_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_, TrigHltDiEl_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_, TrigHltElMu_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltPhotMap_,   TrigHltPhot_.get(),   TrigHltPhot_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiPhotMap_, TrigHltDiPhot_.get(), TrigHltDiPhot_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltMuMap_,     TrigHltMu_.get(),     TrigHltMu_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiMuMap_,   TrigHltDiMu_.get(),   TrigHltDiMu_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,     TrigHltEl_.get(),     TrigHltEl_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_,   TrigHltDiEl_.get(),   TrigHltDiEl_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_,   TrigHltElMu_.get(),   TrigHltElMu_prescale_.get()));
 
   if(triggerMenu_ == "2015"){
     #include "trigger2015.h"
@@ -1528,9 +1540,11 @@ void Tupel::processMETFilter(const edm::Event& iEvent){
 void Tupel::processTrigger(const edm::Event& iEvent){
   bool trigNameFilled = trigNames_.size();
   int ntrigs;
+  edm::Handle< pat::PackedTriggerPrescales > triggerPrescales;
   edm::Handle< edm::TriggerResults > HLTResHandle;
   std::vector<int> trigIndexList;
   if(triggerStat_) trigIndexList.reserve(30);
+  iEvent.getByToken(triggerPrescalesToken_, triggerPrescales);
   iEvent.getByToken(HLTTagToken_, HLTResHandle);  
 
   std::ofstream f;
@@ -1546,47 +1560,47 @@ void Tupel::processTrigger(const edm::Event& iEvent){
     for (int i = 0; i < ntrigs; i++) {
       if(analyzedEventCnt_==1) f << trigNames->triggerName(i) << "\n";
       if(triggerStat_){
-	if(!trigNameFilled) trigNames_[i] = trigNames->triggerName(i);
-	else if(trigNames_[i] != trigNames->triggerName(i)) trigStatValid_ = false;
+        if(!trigNameFilled) trigNames_[i] = trigNames->triggerName(i);
+        else if(trigNames_[i] != trigNames->triggerName(i)) trigStatValid_ = false;
       }
       //insert trigger name in the acceptance map if not yet in:
       if (HLTResHandle->accept(i)){
-	if(triggerStat_) trigIndexList.push_back(i);
-	if(trigNames->triggerName(i).find("HLT_Mu17_Mu8") != std::string::npos) *TrigHlt_ |= kMu17_Mu8_;
-	if(trigNames->triggerName(i).find("HLT_Mu17_TkMu8") != std::string::npos) *TrigHlt_ |= kMu17_TkMu8_;
-	if(trigNames->triggerName(i).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) *TrigHlt_ |= kElec17_Elec8_;
-	std::string thisTrigger = trigNames->triggerName(i);
-	fillTrig(std::string(trigNames->triggerName(i)));
+        if(triggerStat_) trigIndexList.push_back(i);
+        if(trigNames->triggerName(i).find("HLT_Mu17_Mu8") != std::string::npos) *TrigHlt_ |= kMu17_Mu8_;
+        if(trigNames->triggerName(i).find("HLT_Mu17_TkMu8") != std::string::npos) *TrigHlt_ |= kMu17_TkMu8_;
+        if(trigNames->triggerName(i).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) *TrigHlt_ |= kElec17_Elec8_;
+        std::string thisTrigger = trigNames->triggerName(i);
+        fillTrig(std::string(trigNames->triggerName(i)), triggerPrescales->getPrescaleForIndex(i));
       }
     }
 
     if(triggerStat_){
       if(trigIndexList.size()==0) trigAccept_[0][0] += 1;
-      for(std::vector<int>::iterator it1 = trigIndexList.begin();
-	  it1 != trigIndexList.end();
-	  ++it1){
-	trigAccept_[1 + *it1][0] += 1;
-	if(trigIndexList.size()==1) trigAccept_[1+*it1][1] += 1;
-	for(std::vector<int>::iterator it2 = trigIndexList.begin();
-	    it2 != trigIndexList.end();
-	    ++it2){
-	  trigAccept_[1 + *it1][2 + *it2] += 1;
-	}
+      for(std::vector<int>::iterator it1 = trigIndexList.begin(); it1 != trigIndexList.end(); ++it1){
+        trigAccept_[1 + *it1][0] += 1;
+        if(trigIndexList.size()==1) trigAccept_[1+*it1][1] += 1;
+        for(std::vector<int>::iterator it2 = trigIndexList.begin(); it2 != trigIndexList.end(); ++it2){
+          trigAccept_[1 + *it1][2 + *it2] += 1;
+        }
       }
     }
   }
 }
 
-void Tupel::fillTrig(const std::string& trigname){
-  for(std::vector<TrigHltMapRcd>::iterator itTrigHltMap = trigHltMapList_.begin();
-      itTrigHltMap != trigHltMapList_.end(); ++itTrigHltMap){
+void Tupel::fillTrig(const std::string& trigname, int triggerPrescalesForThisIndex){
+  for(std::vector<TrigHltMapRcd>::iterator itTrigHltMap = trigHltMapList_.begin(); itTrigHltMap != trigHltMapList_.end(); ++itTrigHltMap){ //loop on the list of all triggers
     const std::map<std::string, ULong64_t>& trigHltMap = *(itTrigHltMap->pMap);
     ULong64_t* pTrig = itTrigHltMap->pTrig;
-    for(std::map<std::string, ULong64_t>::const_iterator it = trigHltMap.begin();
-	it != trigHltMap.end(); ++it){
-      if(compTrigger(it->first.c_str(), trigname.c_str()))  *pTrig |= it->second;
+    std::vector<unsigned>* pPrescale = itTrigHltMap->pPrescale;
+    for(std::map<std::string, ULong64_t>::const_iterator it = trigHltMap.begin(); it != trigHltMap.end(); ++it){ //loop on the map with all trigger of one type (e.g. Photon)
+      if(compTrigger(it->first.c_str(), trigname.c_str())){
+        *pTrig |= it->second; //to this 'all type of a kind of trigger' we have one list with bit fields where we enable some while looking at the value
+        unsigned int bitPosition = log2(it->second);
+        if(pPrescale->size() <= bitPosition) pPrescale->resize(bitPosition+1); 
+        pPrescale->at(bitPosition) = triggerPrescalesForThisIndex; //And at the same position we add the prescale
       //      std::cout << it->first.c_str() << ", " <<  trigname.c_str() << " -> "
-      //		<< (compTrigger(it->first.c_str(), trigname.c_str()) ? "identical" : "different") << "\n";
+      //    << (compTrigger(it->first.c_str(), trigname.c_str()) ? "identical" : "different") << "\n";
+      }
     }
   }
 }
@@ -2477,6 +2491,14 @@ Tupel::beginJob()
   ADD_BRANCH_D(TrigHltDiEl, "HLT Dielectron triggger bits. See BitField.TrigHltDiEl for bit description.");
   ADD_BRANCH_D(TrigHltElMu, "HLT Muon + Electron triggger bits. See BitField.TrigHltElMu for bit description.");
 
+  ADD_BRANCH_D(TrigHltPhot_prescale, "HLT Photon triggger prescales for the corresponding trigger bits. See BitField.TrigHltPhot for bit description.");
+  ADD_BRANCH_D(TrigHltDiPhot_prescale, "HLT Diphoton triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiPhot for bit description.");
+  ADD_BRANCH_D(TrigHltMu_prescale, "HLT Muon triggger prescales for the corresponding trigger bits. See BitField.TrigHltMu for bit description.");
+  ADD_BRANCH_D(TrigHltDiMu_prescale, "HLT Dimuon triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiMu for bit description.");
+  ADD_BRANCH_D(TrigHltEl_prescale, "HLT Electron triggger prescales for the corresponding trigger bits. See BitField.TrigHltEl for bit description.");
+  ADD_BRANCH_D(TrigHltDiEl_prescale, "HLT Dielectron triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiEl for bit description.");
+  ADD_BRANCH_D(TrigHltElMu_prescale, "HLT Muon + Electron triggger prescales for the corresponding trigger bits. See BitField.TrigHltElMu for bit description.");
+
   //Missing Energy
   treeHelper_->addDescription("MET", "PF MET");
   ADD_BRANCH(METPt);
@@ -2588,7 +2610,7 @@ Tupel::beginJob()
     ADD_BRANCH(GJetAk08MatchedPartonDR);
   }
 
-  //Exta generator information
+  //Extra generator information
   ADD_BRANCH_D(GPdfId1, "PDF Id for beam 1");
   ADD_BRANCH_D(GPdfId2, "PDF Id for beam 2");
   ADD_BRANCH_D(GPdfx1, "PDF x for beam 1");

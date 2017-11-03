@@ -14,7 +14,7 @@
 #include "TObject.h"
 #include "ShearsTChain.h"
 
-#define DECLARE_PRUNER(Class, description)        \
+#define DECLARE_PRUNER(Class, description)				\
   static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description);
 
 class TFile;
@@ -91,193 +91,193 @@ class TFile;
  *
  *
  * The filterBranch can be overidden for a custom branch selection. The default
-* one can optionally copy all the branches or read the list of branches to copy
-* from a text file.
-*
-* To use the custom class with the pruner application specified the class name
-* with the option --pruner.
-*
-*/
+ * one can optionally copy all the branches or read the list of branches to copy
+ * from a text file.
+ *
+ * To use the custom class with the pruner application specified the class name
+ * with the option --pruner.
+ *
+ */
 
 class Pruner{
-  protected:
-    /** Data types
-    */
-    ///@{
-    struct SubSelection{
-      std::string tag;
-      std::string description;
-      SubSelection(const std::string& tag_, const std::string& description_):
-        tag(tag_), description(description_){}
-      SubSelection(){}
-    };
+protected:
+  /** Data types
+   */
+  ///@{
+  struct SubSelection{
+    std::string tag;
+    std::string description;
+    SubSelection(const std::string& tag_, const std::string& description_):
+      tag(tag_), description(description_){}
+    SubSelection(){}
+  };
 
-    std::string className_;
+  std::string className_;
+  
+  //Event tree index within the input TChain
+  Long64_t treeNum_;
+  
+  TTree* outEventTree_;
+  TTree* outHeaderTree_;
+  TTree* outDescriptionTree_;
+  TTree* outBitFieldsTree_;
+  //};
+  ///@}
 
-    //Event tree index within the input TChain
-    Long64_t treeNum_;
+  /** To be field by the daughter class
+   */
+  ///@{
+  /** List of supported subselection tags. To be
+   * filled in the init(TTree*) method if several
+   * subselections are supported.
+   */
+  std::vector<SubSelection> subSelections_;
+  ///@}
 
-    TTree* outEventTree_;
-    TTree* outHeaderTree_;
-    TTree* outDescriptionTree_;
-    TTree* outBitFieldsTree_;
-    //};
-    ///@}
+  
+  ShearsTChain chain_;
+  std::auto_ptr<TFile> fout_;
+  TDirectory* foutDir_;
 
-    /** To be field by the daughter class
-    */
-    ///@{
-    /** List of supported subselection tags. To be
-     * filled in the init(TTree*) method if several
-     * subselections are supported.
-     */
-    std::vector<SubSelection> subSelections_;
-    ///@}
+  //  TreeRcd eventTree_;
 
+  Int_t maxEvents_;
+  Int_t skipEvents_;
 
-    ShearsTChain chain_;
-    std::auto_ptr<TFile> fout_;
-    TDirectory* foutDir_;
+  Int_t ievent_;
 
-    //  TreeRcd eventTree_;
+  /** Primary dataset of the processed data.
+   * This information is provided as argument
+   * of the constructor or create() method
+   */
+  std::string primaryDataset_;
 
-    Int_t maxEvents_;
-    Int_t skipEvents_;
+  /** Type of selection. A same filter (Pruner class daughter)
+   * can support several selection flavours, whose list must be
+   * declared by the declareSubSelections() hook function. 
+   * This index refers to the subSelections_ list.
+   */
+  size_t iSubSelection_;
+  
+  /** Pointer the run number of last read event
+   */
+  UInt_t* runNum_;
 
-    Int_t ievent_;
+  /** Pointer the event number of last read event
+   */
+  UInt_t* eventNum_;
 
-    /** Primary dataset of the processed data.
-     * This information is provided as argument
-     * of the constructor or create() method
-     */
-    std::string primaryDataset_;
+  /** Pointer to the event weight vector
+   */
+  std::vector<Double_t>* evtWeights_;
 
-    /** Type of selection. A same filter (Pruner class daughter)
-     * can support several selection flavours, whose list must be
-     * declared by the declareSubSelections() hook function. 
-     * This index refers to the subSelections_ list.
-     */
-    size_t iSubSelection_;
+  /** Sums of input event weights
+   */
+  std::vector<Double_t> evtWeightSums_;
 
-    /** Pointer the run number of last read event
-    */
-    UInt_t* runNum_;
+  /** Sums of output event weights
+   */
+  std::vector<Double_t> passedEvtWeightSums_;
 
-    /** Pointer the event number of last read event
-    */
-    UInt_t* eventNum_;
+  
+  /** Current input file base name
+   */
+  std::string fileBaseName_;
+  
+  struct EventRcd{
+    EventRcd(unsigned run_, unsigned event_, const std::string& filename_):
+      run(run_), event(event_), filename(filename_) {}
+    unsigned run;
+    unsigned event;
+    std::string filename;
+    bool operator<(const EventRcd&a){
+      if(run == a.run) return event < a.event;
+      else return run < a.run;
+    }
+    bool operator==(const EventRcd& a){
+      return run == a.run && event == a.event
+	&& (filename.size() == 0 || a.filename.size() == 0 || filename == a.filename);
+    }
+  };
+    
+  std::vector<EventRcd> eventList_;
 
-    /** Pointer to the event weight vector
-    */
-    std::vector<Double_t>* evtWeights_;
+  std::vector<std::string> branchList_;
 
-    /** Sums of input event weights
-    */
-    std::vector<Double_t> evtWeightSums_;
+  static const int RUN_OFFSET = 32;
 
-    /** Sums of output event weights
-    */
-    std::vector<Double_t> passedEvtWeightSums_;
+  bool allEvent_;
 
+  //number of copied events:
+  int nCopied_;
 
-    /** Current input file base name
-    */
-    std::string fileBaseName_;
-
-    struct EventRcd{
-      EventRcd(unsigned run_, unsigned event_, const std::string& filename_):
-        run(run_), event(event_), filename(filename_) {}
-      unsigned run;
-      unsigned event;
-      std::string filename;
-      bool operator<(const EventRcd&a){
-        if(run == a.run) return event < a.event;
-        else return run < a.run;
-      }
-      bool operator==(const EventRcd& a){
-        return run == a.run && event == a.event
-          && (filename.size() == 0 || a.filename.size() == 0 || filename == a.filename);
-      }
-    };
-
-std::vector<EventRcd> eventList_;
-
-std::vector<std::string> branchList_;
-
-static const int RUN_OFFSET = 32;
-
-bool allEvent_;
-
-//number of copied events:
-int nCopied_;
-
-//number of processed events:
-int nRead_;
-
+  //number of processed events:
+  int nRead_;
+  
 public:
 
-int verbose_;
+  int verbose_;
+    
+  virtual ~Pruner(){
+  }
 
-virtual ~Pruner(){
-}
-
-/** Constructor
-*/
-Pruner(const char* subSelection = 0,
-       const char* primary_dataset =0): treeNum_(-1), outEventTree_(0), outHeaderTree_(0),
-  outDescriptionTree_(0), outBitFieldsTree_(0),
-  chain_("tupel/EventTree"),
-  foutDir_(0), maxEvents_(-1), skipEvents_(0),
-  ievent_(-1), runNum_(0), eventNum_(0),
-  allEvent_(true), nCopied_(0), verbose_(0){
+  /** Constructor
+   */
+  Pruner(const char* subSelection = 0,
+	 const char* primary_dataset =0): treeNum_(-1), outEventTree_(0), outHeaderTree_(0),
+					  outDescriptionTree_(0), outBitFieldsTree_(0),
+					  chain_("tupel/EventTree"),
+					  foutDir_(0), maxEvents_(-1), skipEvents_(0),
+					  ievent_(-1), runNum_(0), eventNum_(0),
+					  allEvent_(true), nCopied_(0), verbose_(0){
     chain_.SetDirectory(0);
-
+    
     if(subSelection){
       setSubSelection(subSelection);
     }
-
+    
     if(primary_dataset){
       primaryDataset_ = primary_dataset;
     }
   }
-
-/** Creates a Pruner instance
- * @param className, name of the selection class. It
- * must be a class inherited from Pruner and
- * registered with the macro DECLARE_PRUNER(class, description)
- * @param subSelection selection tag to select a paritcular selection flavour
- * of a selection class
- * @param primaryDataset primary dataset name of the data to process, which
- * can also be used by the selection class to use different selections depending
- * on the dataset.
- */
-static Pruner* create(const char* className, const char* subSelection = 0, const char* primary_dataset = 0){
-  //TODO: all selectors are created on registration.
-  //Memory footprint can be optimised by creating the
-  //instance on demand.
-  Pruner* pruner = 0;
-  if(!className){
-    pruner = new Pruner;
-    pruner->className_ = "Pruner";
-  } else{
-    std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
-    if(res != daughtersMap().end()) pruner = res->second.instance;
-    else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
-  }
-
-  if(pruner){
-    pruner->declareSubSelections();
-    if(subSelection){
-      if(!pruner->setSubSelection(subSelection)){
-        std::cerr << "Subselection " << subSelection << " was not found. Available subselections can be listed with the option --list-selections\n";
-        pruner = 0;
-      }
+  
+  /** Creates a Pruner instance
+   * @param className, name of the selection class. It
+   * must be a class inherited from Pruner and
+   * registered with the macro DECLARE_PRUNER(class, description)
+   * @param subSelection selection tag to select a paritcular selection flavour
+   * of a selection class
+   * @param primaryDataset primary dataset name of the data to process, which
+   * can also be used by the selection class to use different selections depending
+   * on the dataset.
+   */
+  static Pruner* create(const char* className, const char* subSelection = 0, const char* primary_dataset = 0){
+    //TODO: all selectors are created on registration.
+    //Memory footprint can be optimised by creating the
+    //instance on demand.
+    Pruner* pruner = 0;
+    if(!className){
+      pruner = new Pruner;
+      pruner->className_ = "Pruner";
+    } else{
+      std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
+      if(res != daughtersMap().end()) pruner = res->second.instance;
+      else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
     }
-    if(primary_dataset) pruner->primaryDataset_ = primary_dataset;
-  }
-  return pruner;
-}
 
+    if(pruner){
+      pruner->declareSubSelections();
+      if(subSelection){
+	if(!pruner->setSubSelection(subSelection)){
+	  std::cerr << "Subselection " << subSelection << " was not found. Available subselections can be listed with the option --list-selections\n";
+	  pruner = 0;
+	}
+      }
+      if(primary_dataset) pruner->primaryDataset_ = primary_dataset;
+    }
+    return pruner;
+  }
+  
 //  /** Limits the number of events to copy.
 //   * @param val maximum number of events
 //   */
@@ -288,129 +288,129 @@ static Pruner* create(const char* className, const char* subSelection = 0, const
 //   */
 //  void setSkipEvents(int val) { skipEvents_ = val; }
 
-/** List the events in the format which can be read back
- * the specify the list of events to copy.
- * @param o output stream to write the list.
- * @param nInputFiles number of ROOT files to read.
- * @param inputFiles ROOT files to read the events from.
- */
-void listEvents(std::ostream& o, size_t nInputFiles,
-                const char* const inputFiles[]);
+  /** List the events in the format which can be read back
+   * the specify the list of events to copy.
+   * @param o output stream to write the list.
+   * @param nInputFiles number of ROOT files to read.
+   * @param inputFiles ROOT files to read the events from.
+   */
+  void listEvents(std::ostream& o, size_t nInputFiles,
+		  const char* const inputFiles[]);
 
 
-/** List the events in the format which can be read back
- * the specify the list of events to copy.
- * @param o output stream to write the list.
- * @param catalog Shears catalog of the input files.
- */
-void listEvents(std::ostream& o, const char* catalog);
+  /** List the events in the format which can be read back
+   * the specify the list of events to copy.
+   * @param o output stream to write the list.
+   * @param catalog Shears catalog of the input files.
+   */
+  void listEvents(std::ostream& o, const char* catalog);
 
 
-/** List the event tree branched in the format which can
- * be read back the specify the list of branch to copy.
- * @param o output stream to write the list.
- * @param inputDataFile ROOT file to read the events from.
- */
-void listBranches(std::ostream& o, const char* inputDataFile);
+  /** List the event tree branched in the format which can
+   * be read back the specify the list of branch to copy.
+   * @param o output stream to write the list.
+   * @param inputDataFile ROOT file to read the events from.
+   */
+  void listBranches(std::ostream& o, const char* inputDataFile);
 
-/** List the event tree branched in the format which can
- * be read back the specify the list of branch to copy.
- * @param o output stream to write the list.
- * @param catalog Shears catalog. First file of the catalog is
- * used to extract the lis of branches,
- */
-void listBranchesFromCat(std::ostream& o, const char* catalog);
+  /** List the event tree branched in the format which can
+   * be read back the specify the list of branch to copy.
+   * @param o output stream to write the list.
+   * @param catalog Shears catalog. First file of the catalog is
+   * used to extract the lis of branches,
+   */
+  void listBranchesFromCat(std::ostream& o, const char* catalog);
 
-/** List available selections: Pruner modules and supported
- * subselectoins
- */
-void listSelections(std::ostream& o);
+  /** List available selections: Pruner modules and supported
+   * subselectoins
+   */
+  void listSelections(std::ostream& o);
+  
+  void fillPerInputSummary();
 
-void fillPerInputSummary();
+  void fillGlobalSummary();
+  
+  /** Perform the event copy from multiple files.
+   * @param nInputs number of input files.
+   * @param inputDataFiles input files the events must be read from.
+   * @param outputDataFile ouput file the events must be written to.
+   * @maxEvents maximum number of events to process. The value -1 indicates
+   * to process all events.
+   * @skipEvents number of events to skip. Processing will start from
+   * (skipEvents + 1) th event.
+   */  
+  void run(size_t nInputs, const char* const inputDataFiles[], const char* outputDataFile,
+	   int maxEvents = -1, int skipEvents = 0);
 
-void fillGlobalSummary();
+  /** Perform the event copy from multiple files.
+   * @param catalogFile catalog containing the list of files to process.
+   * @param outputDataFile ouput file the events must be written to.
+   * @maxEvents maximum number of events to process. The value -1 indicates
+   * to process all events.
+   * @skipEvents number of events to skip in addition to the events of the
+   * first skipFiles files.
+   * @maxFiles maximum number of files to process.
+   * @skipFiles number of files to skip.
+   */
+  void run(const char* catalogFile, const char* outputDataFile,
+	   int maxEvents = -1, int skipEvents = 0,
+	   int maxFiles = -1, int skipFiles = 0);
+  
+  /** Perform the event copy.
+   * @param inputDataFile input file the events must be read from.
+   * @param outputDataFile ouput file the events must be written to.
+   */
+  //  void run(char* inputDataFile, char* outputDataFile){
+  //    run(1, &inputDataFile, outputDataFile);
+  // }
 
-/** Perform the event copy from multiple files.
- * @param nInputs number of input files.
- * @param inputDataFiles input files the events must be read from.
- * @param outputDataFile ouput file the events must be written to.
- * @maxEvents maximum number of events to process. The value -1 indicates
- * to process all events.
- * @skipEvents number of events to skip. Processing will start from
- * (skipEvents + 1) th event.
- */  
-void run(size_t nInputs, const char* const inputDataFiles[], const char* outputDataFile,
-         int maxEvents = -1, int skipEvents = 0);
+  /** Read the list of events to copy from a text file.
+   * If this method is not called, then all the branches are copied.
+   * @fileName path to the text file.
+   */
+  virtual void readEventList(const char* fileName);
 
-/** Perform the event copy from multiple files.
- * @param catalogFile catalog containing the list of files to process.
- * @param outputDataFile ouput file the events must be written to.
- * @maxEvents maximum number of events to process. The value -1 indicates
- * to process all events.
- * @skipEvents number of events to skip in addition to the events of the
- * first skipFiles files.
- * @maxFiles maximum number of files to process.
- * @skipFiles number of files to skip.
- */
-void run(const char* catalogFile, const char* outputDataFile,
-         int maxEvents = -1, int skipEvents = 0,
-         int maxFiles = -1, int skipFiles = 0);
-
-/** Perform the event copy.
- * @param inputDataFile input file the events must be read from.
- * @param outputDataFile ouput file the events must be written to.
- */
-//  void run(char* inputDataFile, char* outputDataFile){
-//    run(1, &inputDataFile, outputDataFile);
-// }
-
-/** Read the list of events to copy from a text file.
- * If this method is not called, then all the branches are copied.
- * @fileName path to the text file.
- */
-virtual void readEventList(const char* fileName);
-
-/** Read the list of branches to not copy from a text file.
- * @fileName path to the text file.
- */
-void readBranchList(const char* fileName);
+  /** Read the list of branches to not copy from a text file.
+   * @fileName path to the text file.
+   */
+  void readBranchList(const char* fileName);
 
 
-/** Sets subselection.
- * @param subselection subselection name
- * @return true iff the subselection was found
- */
-virtual bool setSubSelection(const char* subSelection){
-  size_t i = 0;
-  for(size_t i; i < subSelections_.size(); ++i){
-    if(subSelections_[i].tag == subSelection){
-      iSubSelection_ = i;
-      break;
+  /** Sets subselection.
+   * @param subselection subselection name
+   * @return true iff the subselection was found
+   */
+  virtual bool setSubSelection(const char* subSelection){
+    size_t i = 0;
+    for(size_t i; i < subSelections_.size(); ++i){
+      if(subSelections_[i].tag == subSelection){
+	iSubSelection_ = i;
+	break;
+      }
     }
+    return i  < subSelections_.size();
   }
-  return i  < subSelections_.size();
-}
 
-/** Sets message verbosity level
- * @param val verbosity level, 0 for the quiest mode
- */
-void setVerbosity(int val){ verbose_ = val; chain_.setVerbosity(val);}
+  /** Sets message verbosity level
+   * @param val verbosity level, 0 for the quiest mode
+   */
+  void setVerbosity(int val){ verbose_ = val; chain_.setVerbosity(val);}
+  
+  struct ClassRecord{
+    ClassRecord(): instance(0){}
+    std::string className;
+    std::string description;
+    Pruner* instance;
+  };
 
-struct ClassRecord{
-  ClassRecord(): instance(0){}
-  std::string className;
-  std::string description;
-  Pruner* instance;
-};
+  // Returns the (unique) map of daughters.
+  static std::map<std::string, Pruner::ClassRecord> &daughtersMap() {
+    static std::map<std::string, Pruner::ClassRecord> instance;
+    return instance;
+  }
 
-// Returns the (unique) map of daughters.
-static std::map<std::string, Pruner::ClassRecord> &daughtersMap() {
-  static std::map<std::string, Pruner::ClassRecord> instance;
-  return instance;
-}
-
-template<typename T>
-class Registrator{
+  template<typename T>
+  class Registrator{
   public:
     Registrator(const char* className, const char* description){
       ClassRecord rcd;
@@ -420,160 +420,160 @@ class Registrator{
       rcd.instance->className_ = className;
       daughtersMap()[className] = rcd;
     }
-};
-
+  };
+  
 protected:
-/** Hoock methods to override in the derived classes.
-*/
-///@{
+  /** Hoock methods to override in the derived classes.
+   */
+  ///@{
+  
+  /** Hook function, where a derived class supporting subselections
+   * should fill the subSelections_ field with the list of offered
+   * subselections. There is not need to override this method
+   * if the class does not provide subselections.
+   */
+  virtual void declareSubSelections() { /*NOOP*/ }
+  
+  /** Called before the event loop. When implementing a selector inheriting
+   * from Pruner class, the SetBranch() method should be called to set the
+   * tree branch address and have access to them in the filterEvent() method.
+   * If the class inherits from EventTree class generated with TTree::MakeClass
+   * then EventTree::Init(tree) should be called here.
+   * @param tree pointer to the EventTree tree.
+   * @return true if the initialisation succeeded.
+   */
+  virtual bool init(TChain* tree){ return true;};
 
-/** Hook function, where a derived class supporting subselections
- * should fill the subSelections_ field with the list of offered
- * subselections. There is not need to override this method
- * if the class does not provide subselections.
- */
-virtual void declareSubSelections() { /*NOOP*/ }
-
-/** Called before the event loop. When implementing a selector inheriting
- * from Pruner class, the SetBranch() method should be called to set the
- * tree branch address and have access to them in the filterEvent() method.
- * If the class inherits from EventTree class generated with TTree::MakeClass
- * then EventTree::Init(tree) should be called here.
- * @param tree pointer to the EventTree tree.
- * @return true if the initialisation succeeded.
- */
-virtual bool init(TChain* tree){ return true;};
-
-
-/** Check if curren event must be used. Typically use eventNum_ and runNum_
- * fields which contain the event and the run numbers. Return true if event
- * must be copied
- */
-virtual bool filterEvent(){
-  if(allEvent_) return true; //copy every event
-  bool selected = (std::find(eventList_.begin(), eventList_.end(),
-                             EventRcd(*runNum_, *eventNum_, fileBaseName_))
-                   != eventList_.end());
-  return selected;
-}
-
-/** Check if a branch must be copied. Return true if the branch must copied,
- * false otherwise.
- * Can be overridden in a derived class to customize the selection. The
- * default implementation is typically sufficient.
- */
-virtual bool filterBranch( const char* branchName){
-  if(branchList_.size() == 0) return true;
-  return std::find(branchList_.begin(), branchList_.end(),
-                   std::string(branchName))
-    != branchList_.end();
-}
-///@}
-
-/** Utility functions to filter collections.
-*/
-///@{
-
-/** Filter a collection. This method remove elements from a vector.
- * The mask vector indicates which element to keep.
- * The method makeFilterMask can be used to build the mask vector.
- * @param pointer to the coll collection to filter. If the pointer
- * is null the function has no effect
- * @param mask flags indicating the vector elements to keep
- */
-template<typename T>
-void filter(std::vector<T>* coll, std::vector<bool> mask){
-  if(coll==0 || coll->size() == 0) return;
-  std::vector<T> tmp;
-  tmp.reserve(coll->size());
-  for(unsigned i = 0; i < mask.size(); ++i){
-    if(mask[i]) tmp.push_back((*coll)[i]);
+  
+  /** Check if curren event must be used. Typically use eventNum_ and runNum_
+   * fields which contain the event and the run numbers. Return true if event
+   * must be copied
+   */
+  virtual bool filterEvent(){
+    if(allEvent_) return true; //copy every event
+    bool selected = (std::find(eventList_.begin(), eventList_.end(),
+			       EventRcd(*runNum_, *eventNum_, fileBaseName_))
+		     != eventList_.end());
+    return selected;
   }
-  //efficient way to move tmp content into coll:
-  coll->swap(tmp);
-}
 
-/** Build a mask vector to be provided to the filter function. A filter method
- * is provided. For each collection element index the filter method is called
- * and should return true iff the element should be kept.
- * @param filter. Pointer to the filter function. The function prototype must
- * be: bool filter(int)
- * @param mask. The vector of flags to set.
- */
-void makeFilterMask(bool (Pruner::*filter)(int), std::vector<bool>& mask){
-  for(unsigned i = 0; i < mask.size(); ++i){
-    mask[i] = (this->*filter)(i);
+  /** Check if a branch must be copied. Return true if the branch must copied,
+   * false otherwise.
+   * Can be overridden in a derived class to customize the selection. The
+   * default implementation is typically sufficient.
+   */
+  virtual bool filterBranch( const char* branchName){
+    if(branchList_.size() == 0) return true;
+    return std::find(branchList_.begin(), branchList_.end(),
+		     std::string(branchName))
+      != branchList_.end();
   }
-}
-///@}
+  ///@}
+  
+  /** Utility functions to filter collections.
+   */
+  ///@{
 
+  /** Filter a collection. This method remove elements from a vector.
+   * The mask vector indicates which element to keep.
+   * The method makeFilterMask can be used to build the mask vector.
+   * @param pointer to the coll collection to filter. If the pointer
+   * is null the function has no effect
+   * @param mask flags indicating the vector elements to keep
+   */
+  template<typename T>
+  void filter(std::vector<T>* coll, std::vector<bool> mask){
+    if(coll==0 || coll->size() == 0) return;
+    std::vector<T> tmp;
+    tmp.reserve(coll->size());
+    for(unsigned i = 0; i < mask.size(); ++i){
+      if(mask[i]) tmp.push_back((*coll)[i]);
+    }
+    //efficient way to move tmp content into coll:
+    coll->swap(tmp);
+  }
+
+  /** Build a mask vector to be provided to the filter function. A filter method
+   * is provided. For each collection element index the filter method is called
+   * and should return true iff the element should be kept.
+   * @param filter. Pointer to the filter function. The function prototype must
+   * be: bool filter(int)
+   * @param mask. The vector of flags to set.
+   */
+  void makeFilterMask(bool (Pruner::*filter)(int), std::vector<bool>& mask){
+    for(unsigned i = 0; i < mask.size(); ++i){
+      mask[i] = (this->*filter)(i);
+    }
+  }
+  ///@}
+  
 private:
+    
+  /** initialized event summary tree. This method is already called by
+   * init() method.
+   */
+  void setEventSummaryTree();
 
-/** initialized event summary tree. This method is already called by
- * init() method.
- */
-void setEventSummaryTree();
-
-//  /** Initialize input and output files and trees
-//   */
-//  bool init(size_t nInputDataFiles, const char* const inputDataFiles[],
-//      const char* outputDataFile = 0);
-
-
-/** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
- * @param nInputFiles number of input files
- * @param inputDataFiles list of input files
- * @return false in case of failure
- */
-bool setInput(size_t nInputFiles, const char* const inputDataFiles[]);
-
-/** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
- * @param catalog input file catalog
- * @param maxFiles maximum number of files to process
- * @param skipFiles number of files to skip. Processing will start from the (skipFiles+1) th file
- * of the catalog
- * @return false in case of failure
- */
-bool setInput(const char* catalog, int maxFiles = -1, int skipFiles = 0);
-
-/** Sets output file. Called by run(...) methods. Seed also setInput(const char* catalog)
- * @return true in case of success, false otherwise
- */
-bool setOutput(const char* outputDataFile);
-
-/** Links variables to the branches we need to access
-*/
-void setBranchAdd();
-
-/** Copy an event.
-*/
-void copyEvent();
-
-/** Pass to the next event.
-*/
-bool nextEvent();
+  //  /** Initialize input and output files and trees
+  //   */
+  //  bool init(size_t nInputDataFiles, const char* const inputDataFiles[],
+  //	    const char* outputDataFile = 0);
 
 
-/** Copies tree entries. Called by run(const char*) and run(size_t, const
- *  char*[], const char*).
- */
-void run();
+  /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
+   * @param nInputFiles number of input files
+   * @param inputDataFiles list of input files
+   * @return false in case of failure
+   */
+  bool setInput(size_t nInputFiles, const char* const inputDataFiles[]);
 
-/** Lists the event tree branched in the format which can
- * be read back the specify the list of branch to copy.
- * Called by public listBranches(...) methods.
- * @param o output stream to write the list.
- */
-void listBranches(std::ostream& o);
+  /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)
+   * @param catalog input file catalog
+   * @param maxFiles maximum number of files to process
+   * @param skipFiles number of files to skip. Processing will start from the (skipFiles+1) th file
+   * of the catalog
+   * @return false in case of failure
+   */
+  bool setInput(const char* catalog, int maxFiles = -1, int skipFiles = 0);
+
+  /** Sets output file. Called by run(...) methods. Seed also setInput(const char* catalog)
+   * @return true in case of success, false otherwise
+   */
+  bool setOutput(const char* outputDataFile);
+
+  /** Links variables to the branches we need to access
+   */
+  void setBranchAdd();
+  
+  /** Copy an event.
+   */
+  void copyEvent();
+
+  /** Pass to the next event.
+   */
+  bool nextEvent();
 
 
-/** List the events in the format which can be read back
- * the specify the list of events to copy. Called by the
- * public listEvents(...) methods.
- * @param o output stream to write the list.
- */
-void listEvents(std::ostream& o);
+  /** Copies tree entries. Called by run(const char*) and run(size_t, const
+   *  char*[], const char*).
+   */
+  void run();
 
+  /** Lists the event tree branched in the format which can
+   * be read back the specify the list of branch to copy.
+   * Called by public listBranches(...) methods.
+   * @param o output stream to write the list.
+   */
+  void listBranches(std::ostream& o);
+
+  
+  /** List the events in the format which can be read back
+   * the specify the list of events to copy. Called by the
+   * public listEvents(...) methods.
+   * @param o output stream to write the list.
+   */
+  void listEvents(std::ostream& o);
+  
 };
 
 #endif //PRUNER_H not defined

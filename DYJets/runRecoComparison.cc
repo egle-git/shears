@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     TString lepSel      = cfg.getS("lepSel");
     int jetPtMin        = cfg.getI("jetPtMin");
     int jetEtaMax       = cfg.getI("jetEtaMax");
-    bool doPASPlots     = cfg.getB("doPASPlots");
+    //    bool doPASPlots     = cfg.getB("doPASPlots");
     
     //-----------------------------------------------------------------------------
 
@@ -49,13 +49,13 @@ int main(int argc, char **argv)
                 getArg(currentArg, jetEtaMax);
 		cfg.set("jetEtaMax", jetEtaMax);
             }
-            else if (currentArg.BeginsWith("doPASPlots=")) {
-                getArg(currentArg, doPASPlots);
-		cfg.set("doPASPlots", doPASPlots);
-            }
+//            else if (currentArg.BeginsWith("doPASPlots=")) {
+//                getArg(currentArg, doPASPlots);
+//		cfg.set("doPASPlots", doPASPlots);
+//            }
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
-                std::cout << "\nUsage: \n\t./runRecoComparison [lepSel=(DMu, DE)] [jetPtMin=(int)] [jetEtaMax=(int*10)] [histoDir=(path)] [recoCompDir=(path)] [doPASPlots=(0,1)] [--help]" << std::endl;
+                std::cout << "\nUsage: \n\t./runRecoComparison [lepSel=(DMu, DE)] [jetPtMin=(int)] [jetEtaMax=(int*10)] [histoDir=(path)] [recoCompDir=(path)] [--help]" << std::endl;
                 std::cout << "\neg: ./runRecoComparison lepSel=DMu jetEtaMax=24" << std::endl;
                 std::cout << "\nunspecified options will be read from vjets.cfg\n" << std::endl;
                 return 0;
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     if (!histoDir.EndsWith("/")) histoDir += "/";
     if (!recoCompDir.EndsWith("/")) recoCompDir += "/";
 
-    RecoComparison(doPASPlots, lepSel, histoDir, recoCompDir, jetPtMin, jetEtaMax);
+    RecoComparison(lepSel, histoDir, recoCompDir, jetPtMin, jetEtaMax);
 
     std::cout << "Produce event yield table for p_T(jet) > " << jetPtMin << " GeV, |y(jet)| < " << jetEtaMax
 	      << "\n";

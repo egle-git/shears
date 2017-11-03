@@ -1,0 +1,36 @@
+include Makefile.arch
+#----------------------------------------------------------------------------------
+#TESTS           := nTuple_analyzer_emu.C
+#TESTS           := nTuple_analyzer_muon.C
+TESTS           := multiple_xsec_analyzer.C
+#TESTS           := zjanalyzr.C
+#TESTS           := npileup.C
+#TESTS           := parton_analyzer.C
+TESTO           := $(TESTS:.C=.o)
+#TEST            := nTuple_analyzer_emu
+#TEST            := nTuple_analyzer_muon
+TEST            := multiple_xsec_analyzer
+#TEST            := zjanalyzr
+#TEST            := npileup
+#TEST            := parton_analyzer
+LHAPDFPATH = /afs/cern.ch/user/b/bbilin/LHAPDF.so
+
+OBJ             = $(TESTO)
+PROGRAMS        = $(TEST)
+CXXFLAGS      += 
+CXXFLAGS      += 
+GLIBS         +=-L$(LHAPDFPATH)/lib -lLHAPDF
+#----------------------------------------------------------------------------------
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+
+all:            $(PROGRAMS)
+
+$(TEST):        $(TESTO)
+		$(LD) $(LDFLAGS) $^ $(GLIBS) $(OutPutOpt)$@
+		@echo "$@ done"
+
+clean:
+		@rm -f $(OBJ) $(TESTO) core *~ src/*~ include/*~
+
+.$(SrcSuf).$(ObjSuf):
+		$(CXX) $(CXXFLAGS) -c $< -o $@

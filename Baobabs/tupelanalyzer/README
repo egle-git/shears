@@ -1,0 +1,32 @@
+Usage:
+make
+./tupelanalyzer
+
+PU Weight usage:
+
+1) Extracting Data Vertex multiplicity distribution:
+
+--> input_json is the ison file extracted from data crab jobs by following steps.
+
+	--> crab -get all -c <crab_folder>
+	--> crab -report -c <crab_folder>
+
+--> Generate data.root using pileupCalc.py:
+
+pileupCalc.py -i <input_json>  --inputLumiJSON pileup_JSON_DCSONLY_190389-208686_corr.txt --calcMode true --minBiasXsec 69400 --maxPileupBin 60 --pileupHistName pup  
+--numPileupBins 60 data.root
+
+pileup json files can be found in /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/PileUp/
+
+n-vertex distributions for different MC scenarios: https://twiki.cern.ch/twiki/bin/viewauth/CMS/Pileup_MC_Gen_Scenarios
+
+--> Copy data.root to tupelanalyzer folder and run the macro macro_extract_data.C
+
+root -l -q macro_extract_data.C
+  
+2) To extract the proper weights
+
+--> In standalone_LumiReWeighting.h change the Data2012_1601[60] line with the generated numbers
+
+--> Run the analyzer and fill the histograms with the weight.
+

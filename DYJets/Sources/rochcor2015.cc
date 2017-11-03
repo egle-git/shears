@@ -282,7 +282,6 @@ void rochcor2015::momcor_mc( TLorentzVector& mu, float charge, int ntrk, float& 
 
   int mu_phibin = phibin(muphi);
   int mu_etabin = etabin(mueta);
-  int mu_aetabin = aetabin(mueta);
   
   if(mu_phibin>=0 && mu_etabin>=0){
     
@@ -347,7 +346,6 @@ void rochcor2015::momcor_data( TLorentzVector& mu, float charge, int runopt, flo
   
   int mu_phibin = phibin(muphi);
   int mu_etabin = etabin(mueta);
-  int mu_aetabin = aetabin(mueta);
 
   if(mu_phibin>=0 && mu_etabin>=0){
 

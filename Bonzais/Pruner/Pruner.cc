@@ -25,8 +25,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-std::map<std::string, Pruner::ClassRecord> Pruner::daughters_;
-
 void Pruner::listEvents(std::ostream& o, const char* const catalog){
   if(setInput(catalog)){
     listEvents(o);
@@ -54,10 +52,10 @@ void Pruner::listEvents(std::ostream& o){
     if(treeNum != chain_.LoadTree(i)){
       char* f = strdup(chain_.GetFile()->GetName());
       if(f){
-	f_basename = basename(f);
-	free(f);
+  f_basename = basename(f);
+  free(f);
       } else{
-	f_basename = "";
+  f_basename = "";
       }
     }
     if(0 == chain_.GetEntry(i)) break;
@@ -92,8 +90,8 @@ void Pruner::fillPerInputSummary(){
     TTree** ppTree;
     bool singleEntry;
   } outTrees [] = {{"Header", &outHeaderTree_, false},
-		   {"Description", &outDescriptionTree_, true},
-		   {"BitFields", &outBitFieldsTree_, true}};
+       {"Description", &outDescriptionTree_, true},
+       {"BitFields", &outBitFieldsTree_, true}};
 
   TFile* fin = chain_.GetFile();
   fin->cd();
@@ -152,15 +150,15 @@ void Pruner::fillGlobalSummary(){
 }
 
 void Pruner::run(const char* inputCatalog, const char* outputDataFile,
-		 int maxEvents, int skipEvents,
-		 int maxFiles, int skipFiles){
+     int maxEvents, int skipEvents,
+     int maxFiles, int skipFiles){
   maxEvents_ = maxEvents;
   skipEvents_ = skipEvents;
   if(!setInput(inputCatalog, maxFiles, skipFiles)) return;
   if(!init((TChain*) &chain_)){
     std::cerr << "Failed to initialize the event filter. Method "
-	      << (className_.size() > 0 ? className_ + "::" : "")
-	      << "init(TChain*) returned code false.\n";
+        << (className_.size() > 0 ? className_ + "::" : "")
+        << "init(TChain*) returned code false.\n";
     return;
   }
   if(!setOutput(outputDataFile)) return;
@@ -169,13 +167,13 @@ void Pruner::run(const char* inputCatalog, const char* outputDataFile,
 }
 
 void Pruner::run(size_t nInputFiles, const char* const inputDataFiles[],
-		 const char* outputDataFile, int maxEvents, int skipEvents){
+     const char* outputDataFile, int maxEvents, int skipEvents){
   maxEvents_ = maxEvents;
   skipEvents_ = skipEvents;
   if(!setInput(nInputFiles, inputDataFiles)) return;
   if(!init((TChain*) &chain_)){
     std::cerr << "Failed to initialize the event filter. Method "
-	      << className_ << "::init(TChain*) returned code false.\n";
+        << className_ << "::init(TChain*) returned code false.\n";
     return;
   }
   if(!setOutput(outputDataFile)) return;
@@ -233,8 +231,8 @@ void Pruner::run(){
     
     if(evtWeights_){
       for(unsigned i = 0; i < evtWeights_->size(); ++i){
-	evtWeightSums_[i] += (*evtWeights_)[i];
-	if(passed) passedEvtWeightSums_[i] += (*evtWeights_)[i];
+  evtWeightSums_[i] += (*evtWeights_)[i];
+  if(passed) passedEvtWeightSums_[i] += (*evtWeights_)[i];
       }
     }
     
@@ -245,22 +243,22 @@ void Pruner::run(){
     
     if(i%step==0 || i == nevts){
       cout << bol << "Read: " << std::setw(8) << i << " Copied: "
-	   << std::setw(8) << nCopied_
-	   << " Acc.: " << std::setw(5) << int(10000*(nCopied_ / double(i)))/100. << "%"
-	   << " Rem.: " << std::setw(8) << (nevts-i)
-	   << " Total: " << std::setw(8) << nevts; // << std::flush;
+     << std::setw(8) << nCopied_
+     << " Acc.: " << std::setw(5) << int(10000*(nCopied_ / double(i)))/100. << "%"
+     << " Rem.: " << std::setw(8) << (nevts-i)
+     << " Total: " << std::setw(8) << nevts; // << std::flush;
       timeval t0;
       if(i==step) gettimeofday(&t0, 0);
       else if(i >= 2 * step) {
-	gettimeofday(&t, 0);
-	double remaining = double(nevts - step) / (i - step)
-	  * ((t.tv_sec - t0.tv_sec) + 1.e-6 * (t.tv_usec - t0.tv_usec));
-	time_t eat = int(t0.tv_sec +  1.e-6 * t0.tv_usec + remaining + 0.5);
-	if(smoothed_eat == 0) smoothed_eat = eat;
-	if(abs(smoothed_eat - eat) > 0.1 * remaining) smoothed_eat = 0.5 * (smoothed_eat + eat);
-	char buf[256];
-	strftime(buf, sizeof(buf),  "%a, %d %b %Y %T", localtime(&smoothed_eat));
-	cout << " ETA: " << std::setw(16) << buf;
+  gettimeofday(&t, 0);
+  double remaining = double(nevts - step) / (i - step)
+    * ((t.tv_sec - t0.tv_sec) + 1.e-6 * (t.tv_usec - t0.tv_usec));
+  time_t eat = int(t0.tv_sec +  1.e-6 * t0.tv_usec + remaining + 0.5);
+  if(smoothed_eat == 0) smoothed_eat = eat;
+  if(abs(smoothed_eat - eat) > 0.1 * remaining) smoothed_eat = 0.5 * (smoothed_eat + eat);
+  char buf[256];
+  strftime(buf, sizeof(buf),  "%a, %d %b %Y %T", localtime(&smoothed_eat));
+  cout << " ETA: " << std::setw(16) << buf;
       }
       cout << std::flush;
     }
@@ -309,7 +307,7 @@ void Pruner::readEventList(const char* fileName){
     cout << "Event to select: \n";
     for(size_t i = 0; i < eventList_.size(); ++i){
       cout << "Run " << eventList_[i].event << " event "
-	   << eventList_[i].run << "\n";
+     << eventList_[i].run << "\n";
     }
   }
 }
@@ -318,7 +316,7 @@ void Pruner::readBranchList(const char* fileName){
   FILE* f = fopen(fileName, "r");
   if(f==0) {
     cout << "Failed to open exluded tree list file "
-	 << fileName << endl; abort();
+   << fileName << endl; abort();
   }
   branchList_.clear();
   int nerr = 0;
@@ -550,8 +548,8 @@ bool Pruner::nextEvent(){
 
 void Pruner::listSelections(std::ostream& o){
   o << "\nList of available selections (--selection) and subselections (--subselections)\n\n";
-  for(std::map<std::string, ClassRecord>::const_iterator it = daughters_.begin();
-      it != daughters_.end(); ++it){
+  for(std::map<std::string, ClassRecord>::const_iterator it = daughtersMap().begin();
+      it != daughtersMap().end(); ++it){
     const ClassRecord& rcd = it->second;
     o << rcd.className;
     if(rcd.description.size() > 0){
@@ -563,8 +561,8 @@ void Pruner::listSelections(std::ostream& o){
     if(subSels.size() > 0){
       o << "\n\t"<< rcd.className << " Subselections:\n\n";
       for(unsigned i = 0; i < subSels.size(); ++i){
-	o << "\t" << subSels[i].tag << "\t"
-	  << subSels[i].description << "\n";
+  o << "\t" << subSels[i].tag << "\t"
+    << subSels[i].description << "\n";
       }
     }
   }

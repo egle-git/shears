@@ -14,7 +14,7 @@
 #include "TObject.h"
 #include "ShearsTChain.h"
 
-#define DECLARE_PRUNER(Class, description)				\
+#define DECLARE_PRUNER(Class, description)        \
   static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description);
 
 class TFile;
@@ -196,7 +196,7 @@ protected:
     }
     bool operator==(const EventRcd& a){
       return run == a.run && event == a.event
-	&& (filename.size() == 0 || a.filename.size() == 0 || filename == a.filename);
+  && (filename.size() == 0 || a.filename.size() == 0 || filename == a.filename);
     }
   };
     
@@ -224,12 +224,12 @@ public:
   /** Constructor
    */
   Pruner(const char* subSelection = 0,
-	 const char* primary_dataset =0): treeNum_(-1), outEventTree_(0), outHeaderTree_(0),
-					  outDescriptionTree_(0), outBitFieldsTree_(0),
-					  chain_("tupel/EventTree"),
-					  foutDir_(0), maxEvents_(-1), skipEvents_(0),
-					  ievent_(-1), runNum_(0), eventNum_(0),
-					  allEvent_(true), nCopied_(0), verbose_(0){
+   const char* primary_dataset =0): treeNum_(-1), outEventTree_(0), outHeaderTree_(0),
+            outDescriptionTree_(0), outBitFieldsTree_(0),
+            chain_("tupel/EventTree"),
+            foutDir_(0), maxEvents_(-1), skipEvents_(0),
+            ievent_(-1), runNum_(0), eventNum_(0),
+            allEvent_(true), nCopied_(0), verbose_(0){
     chain_.SetDirectory(0);
     
     if(subSelection){
@@ -260,18 +260,18 @@ public:
       pruner = new Pruner;
       pruner->className_ = "Pruner";
     } else{
-      std::map<std::string, Pruner::ClassRecord>::iterator res = daughters_.find(className);
-      if(res != daughters_.end()) pruner = res->second.instance;
+      std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
+      if(res != daughtersMap().end()) pruner = res->second.instance;
       else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
     }
 
     if(pruner){
       pruner->declareSubSelections();
       if(subSelection){
-	if(!pruner->setSubSelection(subSelection)){
-	  std::cerr << "Subselection " << subSelection << " was not found. Available subselections can be listed with the option --list-selections\n";
-	  pruner = 0;
-	}
+  if(!pruner->setSubSelection(subSelection)){
+    std::cerr << "Subselection " << subSelection << " was not found. Available subselections can be listed with the option --list-selections\n";
+    pruner = 0;
+  }
       }
       if(primary_dataset) pruner->primaryDataset_ = primary_dataset;
     }
@@ -295,7 +295,7 @@ public:
    * @param inputFiles ROOT files to read the events from.
    */
   void listEvents(std::ostream& o, size_t nInputFiles,
-		  const char* const inputFiles[]);
+      const char* const inputFiles[]);
 
 
   /** List the events in the format which can be read back
@@ -340,7 +340,7 @@ public:
    * (skipEvents + 1) th event.
    */  
   void run(size_t nInputs, const char* const inputDataFiles[], const char* outputDataFile,
-	   int maxEvents = -1, int skipEvents = 0);
+     int maxEvents = -1, int skipEvents = 0);
 
   /** Perform the event copy from multiple files.
    * @param catalogFile catalog containing the list of files to process.
@@ -353,8 +353,8 @@ public:
    * @skipFiles number of files to skip.
    */
   void run(const char* catalogFile, const char* outputDataFile,
-	   int maxEvents = -1, int skipEvents = 0,
-	   int maxFiles = -1, int skipFiles = 0);
+     int maxEvents = -1, int skipEvents = 0,
+     int maxFiles = -1, int skipFiles = 0);
   
   /** Perform the event copy.
    * @param inputDataFile input file the events must be read from.
@@ -384,8 +384,8 @@ public:
     size_t i = 0;
     for(size_t i; i < subSelections_.size(); ++i){
       if(subSelections_[i].tag == subSelection){
-	iSubSelection_ = i;
-	break;
+  iSubSelection_ = i;
+  break;
       }
     }
     return i  < subSelections_.size();
@@ -403,6 +403,12 @@ public:
     Pruner* instance;
   };
 
+  // Returns the (unique) map of daughters.
+  static std::map<std::string, Pruner::ClassRecord> &daughtersMap() {
+    static std::map<std::string, Pruner::ClassRecord> instance;
+    return instance;
+  }
+
   template<typename T>
   class Registrator{
   public:
@@ -412,11 +418,9 @@ public:
       rcd.description = description;
       rcd.instance = new T();
       rcd.instance->className_ = className;
-      daughters_[className] = rcd;
+      daughtersMap()[className] = rcd;
     }
   };
-
-  static std::map<std::string, Pruner::ClassRecord> daughters_;
   
 protected:
   /** Hoock methods to override in the derived classes.
@@ -448,8 +452,8 @@ protected:
   virtual bool filterEvent(){
     if(allEvent_) return true; //copy every event
     bool selected = (std::find(eventList_.begin(), eventList_.end(),
-			       EventRcd(*runNum_, *eventNum_, fileBaseName_))
-		     != eventList_.end());
+             EventRcd(*runNum_, *eventNum_, fileBaseName_))
+         != eventList_.end());
     return selected;
   }
 
@@ -461,7 +465,7 @@ protected:
   virtual bool filterBranch( const char* branchName){
     if(branchList_.size() == 0) return true;
     return std::find(branchList_.begin(), branchList_.end(),
-		     std::string(branchName))
+         std::string(branchName))
       != branchList_.end();
   }
   ///@}
@@ -513,7 +517,7 @@ private:
   //  /** Initialize input and output files and trees
   //   */
   //  bool init(size_t nInputDataFiles, const char* const inputDataFiles[],
-  //	    const char* outputDataFile = 0);
+  //      const char* outputDataFile = 0);
 
 
   /** Sets input files. Called by run(...) methods. Seed also setInput(const char* catalog)

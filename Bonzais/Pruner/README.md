@@ -61,7 +61,7 @@ After having edited the `branch_list.txt` to keep only the branch to be copied, 
 
 `./pruner --branches-from branch_list.txt -o skim.root -c CATALOG`
 
-with the same remark than above for `-s CATALOG`
+with the same remark than above for `-c CATALOG`
 
 *Note 1*: the `--branches-from` option can be combined with a selector (`--selection` and `--sub-selection` options) to filter at the same time events and the content of the selected events.
 

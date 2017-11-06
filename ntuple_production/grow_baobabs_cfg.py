@@ -292,6 +292,25 @@ else:
   electronSrc = "slimmedElectrons"
   photonSrc   = "slimmedPhotons"
 #--------------------------------------------
+
+# Photon and Electron VID
+#
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+
+
+# define which IDs we want to produce
+my_id_modules = [
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Summer16_80X_V1_cff'
+                 ]
+
+for idmod in my_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
+#--------------------------------------------
+
   
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(

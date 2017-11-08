@@ -29,7 +29,8 @@ Installation recipe
 cmsrel CMSSW_8_0_26_patch1 
 cd CMSSW_8_0_26_patch1/src 
 cmsenv 
-git cms-init #add the repository with the updated Egamma package 
+git cms-init #add the repository with the updated Egamma packages
+git cms-merge-topic ikrav:egm_id_80X_v3_photons
 git cms-merge-topic cms-egamma:EGM_gain_v1 
 cd EgammaAnalysis/ElectronTools/data  
 git clone https://github.com/ECALELFS/ScalesSmearings.git

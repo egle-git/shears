@@ -1481,6 +1481,7 @@ void Tupel::processPdfInfo(const edm::Event& iEvent){
 
 //https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2
 void Tupel::processMETFilter(const edm::Event& iEvent){
+    *TrigMET_ = 0;
     edm::Handle< edm::TriggerResults > metFilHandle;
     iEvent.getByToken(metFilTagToken_, metFilHandle);
 	edm::Handle< edm::TriggerResults >     metFilHandleRECO;

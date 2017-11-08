@@ -7,16 +7,17 @@
 SOURCES=$(shell ls *.cc)
 OBJS=$(addsuffix .o, $(basename $(SOURCES)))
 DEPS=$(addsuffix .d, $(basename $(SOURCES)))
+SO=$(addsuffix .so, $(shell cat pruners.txt))
 
 CPPFLAGS+=-MD -Wall
 CXXFLAGS+=$(shell root-config --cflags) -I.
-CXXFLAGS+=-g -O0
+CXXFLAGS+=-g -fPIC
 LDFLAGS+=$(shell root-config --libs --ldflags)
 LINK.o = $(CXX) $(LDFLAGS) $(TARGET_ARCH)
 ROOTCINT=rootcint
 CINT_INCDIR=$(shell root-config --incdir)
 EXE=pruner
-all: $(EXE)
+all: $(EXE) $(SO)
 
 clean:
 	-rm $(EXE) $(OBJS) $(DEPS)
@@ -28,6 +29,9 @@ $(EXE): $(OBJS)
 
 %Dict.cc : %.h  %LinkDef.h
 	$(ROOTCINT) -f $@ -c -I. -I$(CINT_INCDIR) $(DEFINES) $^
+
+%.so: %.o
+	$(LINK.cc) $(CXXFLAGS) -shared -o $@ $^
 
 echo_%:
 	@echo $* = $($*)

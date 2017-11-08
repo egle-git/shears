@@ -312,6 +312,11 @@ private:
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitEBToken_;
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitEEToken_;
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitESToken_;
+    
+  //tokens to the met filters
+  edm::EDGetTokenT<bool> BadChCandFilterToken_;
+  edm::EDGetTokenT<bool> BadPFMuonFilterToken_;
+
 
 
   /** Selection of list of trigger to copy
@@ -819,6 +824,9 @@ private:
 
   //keep track if the input file contained LHE weights:
   bool weightsFromLhe_;
+    
+  std::string checkOnTheFlyMetFilters_;
+
 
   //keep track if GenRunInfoProduct weights which were found:
   enum {UNKNOWN, YES, NO, MIXTURE} weightFromGenEventInfo_ = UNKNOWN;
@@ -868,7 +876,9 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   elecIdsListed_(false),
   hltListed_(false),
   trigStatValid_(true),
-  weightsFromLhe_(false)
+  weightsFromLhe_(false),
+  checkOnTheFlyMetFilters_(iConfig.getUntrackedParameter<std::string>("checkOnFlyMETfilters","off"))
+
 {
 
   genParticleToken_ = consumes<std::vector<reco::GenParticle> >(iConfig.getUntrackedParameter<edm::InputTag>("genSrc"));
@@ -876,6 +886,10 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   generatorToken_ = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
   lheEventToken_ = consumes<LHEEventProduct>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
   lheRunToken_ = consumes<LHERunInfoProduct, edm::InRun>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
+  if(checkOnTheFlyMetFilters_==std::string("on")){
+    BadChCandFilterToken_ = consumes<bool>(edm::InputTag("BadChargedCandidateFilter"));
+    BadPFMuonFilterToken_ =consumes<bool>(edm::InputTag("BadPFMuonFilter"));
+  }
   elecidNames_ = iConfig.getParameter<std::vector<edm::InputTag>>("elecIDsMap");
   for (unsigned int iteElecID = 0 ; iteElecID < elecidNames_.size() ; iteElecID++){
     eleVIdMapTokens_.push_back(consumes<edm::ValueMap<bool> >(elecidNames_.at(iteElecID)));
@@ -1471,67 +1485,94 @@ void Tupel::processMETFilter(const edm::Event& iEvent){
     iEvent.getByToken(metFilTagToken_, metFilHandle);
 	edm::Handle< edm::TriggerResults >     metFilHandleRECO;
 	iEvent.getByToken(metFilTagRECOToken_, metFilHandleRECO);
+    //additionnal filter to reRun on the fly
+    edm::Handle<bool> ifilterbadPFMuon;
+    if (! BadPFMuonFilterToken_.isUninitialized()) iEvent.getByToken(BadPFMuonFilterToken_, ifilterbadPFMuon);
+    edm::Handle<bool> ifilterbadChCand;
+    if (! BadChCandFilterToken_.isUninitialized()) iEvent.getByToken(BadChCandFilterToken_, ifilterbadChCand);
+
 
     if ( metFilHandle.isValid() && !metFilHandle.failedToGet() ) {
         edm::RefProd<edm::TriggerNames> metFilNames( &(iEvent.triggerNames( *metFilHandle )) );
         int nMetFil = (int)metFilNames->size();
 		//-- for MC
-		// 0	Flag_HBHENoiseFilter                    # TO BE USED
-		// 1	Flag_HBHENoiseIsoFilter                 # TO BE USED
-		// 2	Flag_CSCTightHaloFilter
-		// 3	Flag_CSCTightHaloTrkMuUnvetoFilter
-		// 4	Flag_CSCTightHalo2015Filter             # TO BE USED
-		// 5	Flag_HcalStripHaloFilter
-		// 6	Flag_hcalLaserEventFilter
-		// 7	Flag_EcalDeadCellTriggerPrimitiveFilter # TO BE USED
-		// 8	Flag_EcalDeadCellBoundaryEnergyFilter
-		// 9	Flag_goodVertices                       # TO BE USED
-		// 10	Flag_eeBadScFilter                      # TO BE USED
-		// 11	Flag_ecalLaserCorrFilter
-		// 12	Flag_trkPOGFilters
-		// 13	Flag_chargedHadronTrackResolutionFilter
-		// 14	Flag_muonBadTrackFilter
-		// 15	Flag_trkPOG_manystripclus53X
-		// 16	Flag_trkPOG_toomanystripclus53X
-		// 17	Flag_trkPOG_logErrorTooManyClusters
-		// 18	Flag_METFilters
+        //0
+        //1
+        //2
+        //3 Flag_HBHENoiseFilter
+        //4 Flag_HBHENoiseIsoFilter
+        //5 Flag_CSCTightHaloFilter
+        //6 Flag_CSCTightHaloTrkMuUnvetoFilter
+        //7 Flag_CSCTightHalo2015Filter
+        //8 Flag_globalTightHalo2016Filter
+        //9 Flag_globalSuperTightHalo2016Filter
+        //10 Flag_HcalStripHaloFilter
+        //11 Flag_hcalLaserEventFilter
+        //12 Flag_EcalDeadCellTriggerPrimitiveFilter
+        //13 Flag_EcalDeadCellBoundaryEnergyFilter
+        //14 Flag_goodVertices
+        //15 Flag_eeBadScFilter
+        //16 Flag_ecalLaserCorrFilter
+        //17 Flag_trkPOGFilters
+        //18 Flag_chargedHadronTrackResolutionFilter
+        //19 Flag_muonBadTrackFilter
+        //20 Flag_trkPOG_manystripclus53X
+        //21 Flag_trkPOG_toomanystripclus53X
+        //22 Flag_trkPOG_logErrorTooManyClusters
+        //23 Flag_METFilters
+
 		
         for (int i = 0; i < nMetFil; i++) {
 			//std::cout << i << " " << metFilNames->triggerName(i) << "  " <<  metFilHandle->accept(i) << " " << metFilHandle.product()->accept(i) <<  "  ";
-            if (metFilHandle->accept(i)) *TrigMET_ |= 1LL <<i;
+            if (metFilHandle->accept(i)) *TrigMET_ |= 1LL <<(i+3);
 			//std::cout << *TrigMET_ << std::endl;
         }
     }
 	else if ( metFilHandleRECO.isValid() && !metFilHandleRECO.failedToGet() ){
 		edm::RefProd<edm::TriggerNames> metFilNames( &(iEvent.triggerNames( *metFilHandleRECO )) );
-		//int nMetFil = (int)metFilNames->size();
-		//-- for DATA
-		// 10	Flag_HBHENoiseFilter                    # TO BE USED
-		// 11	Flag_HBHENoiseIsoFilter                 # TO BE USED
-		// 12	Flag_CSCTightHaloFilter
-		// 13	Flag_CSCTightHaloTrkMuUnvetoFilter
-		// 14	Flag_CSCTightHalo2015Filter             # TO BE USED
-		// 15	Flag_HcalStripHaloFilter
-		// 16	Flag_hcalLaserEventFilter
-		// 17	Flag_EcalDeadCellTriggerPrimitiveFilter # TO BE USED
-		// 18	Flag_EcalDeadCellBoundaryEnergyFilter
-		// 19	Flag_goodVertices                       # TO BE USED
-		// 20	Flag_eeBadScFilter                      # TO BE USED
-		// 21	Flag_ecalLaserCorrFilter
-		// 22	Flag_trkPOGFilters
-		// 23	Flag_chargedHadronTrackResolutionFilter
-		// 24	Flag_muonBadTrackFilter
-		// 25	Flag_trkPOG_manystripclus53X
-		// 26	Flag_trkPOG_toomanystripclus53X
-		// 27	Flag_trkPOG_logErrorTooManyClusters
-		// 28	Flag_METFilters
-		
-		for (int i = 10; i < 29; i++) {
+        //-- for DATA reminiAOD
+        /*0 Flag_duplicateMuons
+         1 Flag_badMuons
+         2 Flag_noBadMuons
+         3 Flag_HBHENoiseFilter
+         4 Flag_HBHENoiseIsoFilter
+         5 Flag_CSCTightHaloFilter
+         6 Flag_CSCTightHaloTrkMuUnvetoFilter
+         7 Flag_CSCTightHalo2015Filter
+         8 Flag_globalTightHalo2016Filter
+         9 Flag_globalSuperTightHalo2016Filter
+         10 Flag_HcalStripHaloFilter
+         11 Flag_hcalLaserEventFilter
+         12 Flag_EcalDeadCellTriggerPrimitiveFilter
+         13 Flag_EcalDeadCellBoundaryEnergyFilter
+         14 Flag_goodVertices
+         15 Flag_eeBadScFilter
+         16 Flag_ecalLaserCorrFilter
+         17 Flag_trkPOGFilters
+         18 Flag_chargedHadronTrackResolutionFilter
+         19 Flag_muonBadTrackFilter
+         20 Flag_trkPOG_manystripclus53X
+         21 Flag_trkPOG_toomanystripclus53X
+         22 Flag_trkPOG_logErrorTooManyClusters
+         23 Flag_METFilters*/
+        
+        for (int i = 0; i < 24; i++) {
+
 			//std::cout << i << " " << metFilNames->triggerName(i) << "  " <<  metFilHandleRECO->accept(i) << " " << metFilHandleRECO.product()->accept(i) <<  "  ";
-			if (metFilHandleRECO->accept(i)) *TrigMET_ |= 1LL << (i-10);
+			if (metFilHandleRECO->accept(i)) *TrigMET_ |= 1LL << i;
 			//std::cout << *TrigMET_ << std::endl;
 		}
 	}
+    if (ifilterbadPFMuon.isValid()){ //on fly bad pf muon stored on the bit 50
+        bool filterbadPFMuon = *ifilterbadPFMuon;
+        //std::cout << "is bad pf muons="<< filterbadPFMuon << std::endl;
+        if (filterbadPFMuon ) *TrigMET_ |= 1LL << 24;
+    }
+    if (ifilterbadChCand.isValid()){ //on fly bad pf muon stored on the bit 50
+        bool filterbadChCandidate = *ifilterbadChCand;
+        //std::cout << "is bad pf ch hadron="<< filterbadChCandidate << std::endl;
+        if (filterbadChCandidate ) *TrigMET_ |= 1LL << 25;
+    }
 }
 
 

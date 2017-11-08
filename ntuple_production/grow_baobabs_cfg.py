@@ -24,14 +24,14 @@ opt.inputFiles = [
 #"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
 #'/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/680BED0F-D919-E611-85E6-02163E01424F.root'
 #'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
-"/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_HCALDebug_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/5E794AD1-FCBD-E611-8FDB-00266CF91A18.root"
+"file:/tmp/hbrun/theDYfile.root"
 #'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-opt.maxEvents = 1000
+opt.maxEvents = 10000
 
 opt.parseArguments()
 
@@ -298,6 +298,7 @@ else:
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 
 switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
 
 
 # define which IDs we want to produce
@@ -306,8 +307,18 @@ my_id_modules = [
                  'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Summer16_80X_V1_cff'
                  ]
 
+my_id_modulesPhotons = [
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
+                 ]
+
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
+for idmod in my_id_modulesPhotons:
+    setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
+
+process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(electronSrc) #we want to apply the selection on top of the calibrated photons and electrons
+#process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(photonSrc)
 
 #--------------------------------------------
 
@@ -348,6 +359,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   reducedBarrelRecHitCollection = cms.InputTag("reducedEgamma","reducedEBRecHits"),
   reducedEndcapRecHitCollection = cms.InputTag("reducedEgamma","reducedEERecHits"),
   reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits"),
+  elecIDsMap = cms.VInputTag("egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-veto"),
   triggerMenu = cms.untracked.string(triggerMenu)
 )
 
@@ -367,6 +379,8 @@ if eg_corr:
 
 
 process.p += process.goodOfflinePrimaryVertices
+process.p += process.egmGsfElectronIDSequence
+process.p += process.egmPhotonIDSequence
 process.p += process.tupel
 
 if opt.makeEdm:

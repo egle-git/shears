@@ -1789,10 +1789,7 @@ void Tupel::processElectrons(const edm::Event& iEvent){
       }
     }
     for (unsigned iteElecID=0 ; iteElecID<elecidNames_.size() ; iteElecID++){
-       //std::cout << "coucou=" << elecidNames_.at(iteElecID).instance() << std::endl;
         edm::Handle<edm::ValueMap<bool> > theIDdecision = ele_id_decisions.at(iteElecID);
-        //std::cout << theIDdecision.isValid() << std::endl;
-       // std::cout << "is passing=" << (*theIDdecision)[elRefForID] << std::endl;
         if ((*theIDdecision)[elRefForID]){
             std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(elecidNames_.at(iteElecID).instance());
             if(it != ElIdMap_.end()){

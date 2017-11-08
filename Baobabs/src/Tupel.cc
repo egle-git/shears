@@ -204,7 +204,7 @@ private:
 
   void processMuons();
 
-  void processElectrons();
+  void processElectrons(const edm::Event& iEvent);
 
   // Modified by Clement Leloup
   void processTaus();
@@ -240,7 +240,10 @@ private:
   std::string muonMatch2_;
 
   edm::EDGetTokenT<std::vector<pat::Electron> > elecToken_;
-
+  edm::EDGetToken elecForIDToken_;
+  std::vector <edm::InputTag> elecidNames_;
+  std::vector<edm::EDGetTokenT<edm::ValueMap<bool> > > eleVIdMapTokens_;
+ 
   edm::EDGetTokenT<std::vector<pat::Muon> > muonToken_;
 
   // Modified by Clement Leloup
@@ -258,6 +261,10 @@ private:
 
   std::string photonSw_;
   edm::EDGetTokenT<std::vector<pat::Photon> > photonToken_;
+  edm::EDGetToken photonForIDToken_;
+  std::vector <edm::InputTag> photonidNames_;
+  std::vector<edm::EDGetTokenT<edm::ValueMap<bool> > > phoVIdMapTokens_;
+
 
   std::string candidateSw_;
   edm::EDGetTokenT<std::vector<pat::PackedCandidate> > candidateToken_; 
@@ -763,6 +770,7 @@ private:
   const std::vector<pat::Muon> * muon;
   edm::Handle<std::vector<pat::Electron> > electrons;
   const std::vector<pat::Electron>  *electron;
+  edm::Handle<edm::View<reco::GsfElectron> > electronsForID;
 
   edm::Handle<reco::ConversionCollection> conversions_h;
   edm::Handle<std::vector<pat::Tau> > taus;
@@ -781,6 +789,8 @@ private:
   const edm::View<pat::Jet> * fatjettt;
 
   const std::vector<pat::Photon>  *photons;
+  edm::Handle<edm::View<reco::Photon> > photonsForID;
+
 
   const std::vector<pat::PackedCandidate> *candidates;
   edm::Handle<std::vector<reco::Vertex> >  pvHandle;
@@ -833,6 +843,7 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   muonMatch2_( iConfig.getParameter< std::string >( "muonMatch2" ) ),
 
   elecToken_(consumes<std::vector<pat::Electron> >(iConfig.getUntrackedParameter<edm::InputTag>("electronSrc"))),
+  elecForIDToken_(consumes<edm::View<reco::GsfElectron> >(iConfig.getUntrackedParameter<edm::InputTag>("electronSrc"))),
 
   muonToken_(consumes<std::vector<pat::Muon> >(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc"))),
 
@@ -865,6 +876,10 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   generatorToken_ = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
   lheEventToken_ = consumes<LHEEventProduct>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
   lheRunToken_ = consumes<LHERunInfoProduct, edm::InRun>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
+  elecidNames_ = iConfig.getParameter<std::vector<edm::InputTag>>("elecIDsMap");
+  for (unsigned int iteElecID = 0 ; iteElecID < elecidNames_.size() ; iteElecID++){
+    eleVIdMapTokens_.push_back(consumes<edm::ValueMap<bool> >(elecidNames_.at(iteElecID)));
+  }
 
   if(recoSw_==std::string("on")){
     vertexToken_ = consumes<std::vector<reco::Vertex> >(iConfig.getUntrackedParameter<edm::InputTag>("pvSrc"));
@@ -884,7 +899,13 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
     }
     if(photonSw_ == std::string("on")){
       photonMode_ = photonsOn;
-      photonToken_ = consumes<std::vector<pat::Photon> >(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc"));
+        photonToken_ = consumes<std::vector<pat::Photon> >(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc"));
+        photonForIDToken_ = consumes<edm::View<reco::Photon> >(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc"));
+        photonidNames_ = iConfig.getParameter<std::vector<edm::InputTag>>("phoIDsMap");
+        for (unsigned int itePhoID = 0 ; itePhoID < photonidNames_.size() ; itePhoID++){
+            phoVIdMapTokens_.push_back(consumes<edm::ValueMap<bool> >(photonidNames_.at(itePhoID)));
+        }
+        
     } else if(photonSw_ == std::string("off")){
       photonMode_ = photonsOff;
     } else{
@@ -951,33 +972,18 @@ void Tupel::defineBitFields(){
   DEF_BIT(MuType, 1, TkMu);
   DEF_BIT(MuType, 2, PfMu);
 
-  DEF_BIT2(ElId, 0, cutBasedElectronID-CSA14-50ns-V1-standalone-veto); 
-  DEF_BIT2(ElId, 1, cutBasedElectronID-CSA14-50ns-V1-standalone-loose);
-  DEF_BIT2(ElId, 2, cutBasedElectronID-CSA14-50ns-V1-standalone-medium);
-  DEF_BIT2(ElId, 3, cutBasedElectronID-CSA14-50ns-V1-standalone-tight);
+  DEF_BIT2(ElId, 0, cutBasedElectronHLTPreselection-Summer16-V1);
+  DEF_BIT2(ElId, 1, cutBasedElectronID-Summer16-80X-V1-loose);
+  DEF_BIT2(ElId, 2, cutBasedElectronID-Summer16-80X-V1-medium);
+  DEF_BIT2(ElId, 3, cutBasedElectronID-Summer16-80X-V1-tight);
+  DEF_BIT2(ElId, 4, cutBasedElectronID-Summer16-80X-V1-veto);
 
-  DEF_BIT2(ElId, 4, cutBasedElectronID-CSA14-PU20bx25-V0-standalone-loose);
-  DEF_BIT2(ElId, 5, cutBasedElectronID-CSA14-PU20bx25-V0-standalone-medium);
-  DEF_BIT2(ElId, 6, cutBasedElectronID-CSA14-PU20bx25-V0-standalone-tight);
-  DEF_BIT2(ElId, 7, cutBasedElectronID-CSA14-PU20bx25-V0-standalone-veto);
 
-  DEF_BIT2(ElId, 8,  cutBasedElectronID-Spring15-25ns-V1-standalone-loose);
-  DEF_BIT2(ElId, 9,  cutBasedElectronID-Spring15-25ns-V1-standalone-medium);
-  DEF_BIT2(ElId, 10, cutBasedElectronID-Spring15-25ns-V1-standalone-tight);
-  DEF_BIT2(ElId, 11, cutBasedElectronID-Spring15-25ns-V1-standalone-veto);
 
-  DEF_BIT2(ElId, 12, cutBasedElectronID-Spring15-50ns-V1-standalone-loose); 
-  DEF_BIT2(ElId, 13, cutBasedElectronID-Spring15-50ns-V1-standalone-medium);
-  DEF_BIT2(ElId, 14, cutBasedElectronID-Spring15-50ns-V1-standalone-tight);
-  DEF_BIT2(ElId, 15, cutBasedElectronID-Spring15-50ns-V1-standalone-veto);
+    DEF_BIT2(PhotId, 0, cutBasedPhotonID-Spring16-V2p2-loose);
+    DEF_BIT2(PhotId, 1, cutBasedPhotonID-Spring16-V2p2-medium);
+    DEF_BIT2(PhotId, 2, cutBasedPhotonID-Spring16-V2p2-tight);
 
-  DEF_BIT2(ElId, 16, eidLoose);
-  DEF_BIT2(ElId, 17, eidTight);
-  DEF_BIT2(ElId, 18, eidRobustLoose);
-  DEF_BIT2(ElId, 19, eidRobustTight);
-
-  DEF_BIT2(PhotId, 0, PhotonCutBasedIDLoose);
-  DEF_BIT2(PhotId, 2, PhotonCutBasedIDTight);
 }
 
 void Tupel::readEvent(const edm::Event& iEvent){
@@ -993,6 +999,8 @@ void Tupel::readEvent(const edm::Event& iEvent){
   // get gen particle collection
   iEvent.getByToken(genParticleToken_, genParticles_h);
   genParticles  = genParticles_h.failedToGet () ? 0 : &*genParticles_h;
+    
+
 
   if(recoSw_==std::string("on")){
     
@@ -1003,6 +1011,8 @@ void Tupel::readEvent(const edm::Event& iEvent){
     // get electron collection
     iEvent.getByToken(elecToken_,electrons);
     electron = electrons.failedToGet () ? 0 :  &*electrons;
+    iEvent.getByToken(elecForIDToken_,electronsForID);
+
     
     //Modified by Clement Leloup
     iEvent.getByToken(tauToken_, taus);
@@ -1033,6 +1043,7 @@ void Tupel::readEvent(const edm::Event& iEvent){
       edm::Handle<std::vector<pat::Photon> > hPhotons;  
       iEvent.getByToken(photonToken_, hPhotons);
       photons = hPhotons.failedToGet () ? 0 :  &*hPhotons;
+      iEvent.getByToken(photonForIDToken_,photonsForID);
     } else{
       photons = 0;
     }
@@ -1720,11 +1731,18 @@ void Tupel::processMuons(){
   }
 }
 
-void Tupel::processElectrons(){
+void Tupel::processElectrons(const edm::Event& iEvent){
+    
+  std::vector <edm::Handle<edm::ValueMap<bool> > > ele_id_decisions(elecidNames_.size());
+  for (unsigned iteElecID=0 ; iteElecID<elecidNames_.size() ; iteElecID++){
+    iEvent.getByToken(eleVIdMapTokens_.at(iteElecID) ,ele_id_decisions.at(iteElecID));
+  }
   int ElecFill=0;
   std::auto_ptr<std::vector<pat::Electron> > electronColl( new std::vector<pat::Electron> (*electrons) );
   for (unsigned int j=0; j < electronColl->size();++j){
     pat::Electron & el = (*electronColl)[j];
+    const auto elRefForID = electronsForID->ptrAt(j);
+
 
     double dEtaIn_;
     double dPhiIn_;
@@ -1744,28 +1762,40 @@ void Tupel::processElectrons(){
       f << "Autogenerated file. Electron id list.\n\n"
 	"Id name: bit # (mask)\n";
       for (unsigned k  = 0 ; k < idlist.size(); ++k){
-	std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(idlist[k].first);
-	f << idlist[k].first << ": ";
-	if(it == ElIdMap_.end()) f << "not supported by Tupel.\n";
-	else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
+         std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(idlist[k].first);
+	     f << idlist[k].first << ": ";
+	     if(it == ElIdMap_.end()) f << "not supported by Tupel.\n";
+	     else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
       }
-
+      for (unsigned iteElecID=0 ; iteElecID<elecidNames_.size() ; iteElecID++){
+          std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(elecidNames_.at(iteElecID).instance());
+          f << elecidNames_.at(iteElecID).instance() << ": ";
+          if(it == ElIdMap_.end()) f << "not supported by Tupel.\n";
+          else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
+      }
       f.close();
       elecIdsListed_ = true;
     }
+
+
     unsigned elecid = 0;
     
     for(unsigned i = 0; i < idlist.size(); ++i){
-      //const int idAndConvRejectMask = 0x3;
-      //if(int(idlist[i].second) & idAndConvRejectMask){
       if(int(idlist[i].second)){
-	std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(idlist[i].first);
-	if(it != ElIdMap_.end()){
-	  elecid  |= it->second;
-	  //std::cout << "Event " << analyzedEventCnt_ << ". " << idlist[i].first << ": " << idlist[i].second
-	  //	    << " / "  << it->first << ": " << it->second << " -> " << elecid << "\n";
-	}
+         std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(idlist[i].first);
+	     if(it != ElIdMap_.end()){
+	       elecid  |= it->second;
+     	 }
       }
+    }
+    for (unsigned iteElecID=0 ; iteElecID<elecidNames_.size() ; iteElecID++){
+        edm::Handle<edm::ValueMap<bool> > theIDdecision = ele_id_decisions.at(iteElecID);
+        if ((*theIDdecision)[elRefForID]){
+            std::map<std::string, unsigned>::const_iterator it = ElIdMap_.find(elecidNames_.at(iteElecID).instance());
+            if(it != ElIdMap_.end()){
+                elecid  |= it->second;
+            }
+        }
     }
       
     ElId_->push_back(elecid);
@@ -2243,6 +2273,8 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
   for (unsigned j = 0; j < photons->size(); ++j){
 
     const pat::Photon& photon = (*photons)[j];
+    const auto phoRefForID = photonsForID->ptrAt(j);
+
 
     const reco::CaloClusterPtr  seed_clu = photon.superCluster()->seed();
 
@@ -2292,20 +2324,35 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
     PhotR9Full5x5_->push_back(photon.full5x5_r9());   
 
     //photon ids:
+      
+    std::vector <edm::Handle<edm::ValueMap<bool> > > pho_id_decisions(photonidNames_.size());
+    for (unsigned itePhoID=0 ; itePhoID<photonidNames_.size() ; itePhoID++){
+       iEvent.getByToken(phoVIdMapTokens_.at(itePhoID) ,pho_id_decisions.at(itePhoID));
+    }
+
+      
     std::vector<std::pair<std::string,Bool_t> > idlist = photon.photonIDs();
     if(!photonIdsListed_) {
       std::ofstream f("photon_id_list.txt");
       f << "Autogenerated file. Photon id list\n\n"
-	"Id name: bit # (mask)\n";
+        "Id name: bit # (mask)\n";
       for (unsigned k  = 0 ; k < idlist.size(); ++k){
-	std::map<std::string, unsigned>::const_iterator it = PhotIdMap_.find(idlist[k].first);
-	f << idlist[k].first << ": ";
-	if(it == PhotIdMap_.end()) f << "not supported by Tupel\n";
-	else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
+         std::map<std::string, unsigned>::const_iterator it = PhotIdMap_.find(idlist[k].first);
+	     f << idlist[k].first << ": ";
+	     if(it == PhotIdMap_.end()) f << "not supported by Tupel\n";
+	     else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
+      }
+      for (unsigned itePhoID=0 ; itePhoID<photonidNames_.size() ; itePhoID++){
+         std::map<std::string, unsigned>::const_iterator it = PhotIdMap_.find(photonidNames_.at(itePhoID).instance());
+         f << photonidNames_.at(itePhoID).instance() << ": ";
+         if(it == PhotIdMap_.end()) f << "not supported by Tupel.\n";
+         else f << log(it->second)/log(2) << " (0x"  << std::hex << it->second  << std::dec << ")\n";
       }
       f.close();
       photonIdsListed_ = true;
     }
+
+
 
     int photonId = 0;
     //    if(photon.photonID(std::string("PhotonCutBasedIDLoose"))) photonId |= 1;
@@ -2320,6 +2367,16 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
 	  //          << " / "  << it->first << ": " << it->second << " -> " << photonId << "\n";
 	}
       }
+    }
+    for (unsigned itePhoID=0 ; itePhoID<photonidNames_.size() ; itePhoID++){
+          edm::Handle<edm::ValueMap<bool> > theIDdecision = pho_id_decisions.at(itePhoID);
+          if ((*theIDdecision)[phoRefForID]){
+            std::map<std::string, unsigned>::const_iterator it = PhotIdMap_.find(photonidNames_.at(itePhoID).instance());
+            if(it != PhotIdMap_.end()){
+                photonId  |= it->second;
+            }
+        }
+
     }
 
     PhotId_->push_back(photonId);
@@ -2389,7 +2446,7 @@ void Tupel::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     if(muon) processMuons();
     
     //electrons B.B.
-    if(electron) processElectrons();
+    if(electron) processElectrons(iEvent);
     
     //Modified by Clement Leloup
     if(tau) processTaus();

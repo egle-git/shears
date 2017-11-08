@@ -31,7 +31,7 @@ opt.inputFiles = [
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-opt.maxEvents = 10000
+opt.maxEvents = 100
 
 opt.parseArguments()
 
@@ -308,7 +308,7 @@ my_id_modules = [
                  ]
 
 my_id_modulesPhotons = [
-                 'RecoEgamma.ElectronIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
+                 'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
                  ]
 
 for idmod in my_id_modules:
@@ -317,8 +317,18 @@ for idmod in my_id_modules:
 for idmod in my_id_modulesPhotons:
     setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
 
+#process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+#                                       src = cms.InputTag(photonSrc),
+#                                       cut = cms.string('pt>5 && abs(eta)')
+#                                       )
+
 process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(electronSrc) #we want to apply the selection on top of the calibrated photons and electrons
-#process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(photonSrc)
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(photonSrc)
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag(photonSrc)
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+
 
 #--------------------------------------------
 
@@ -360,6 +370,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   reducedEndcapRecHitCollection = cms.InputTag("reducedEgamma","reducedEERecHits"),
   reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits"),
   elecIDsMap = cms.VInputTag("egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-veto"),
+  phoIDsMap = cms.VInputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-loose","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-tight"),
   triggerMenu = cms.untracked.string(triggerMenu)
 )
 

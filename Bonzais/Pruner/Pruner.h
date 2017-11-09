@@ -260,8 +260,8 @@ public:
       pruner = new Pruner;
       pruner->className_ = "Pruner";
     } else{
-      std::map<std::string, Pruner::ClassRecord>::iterator res = daughters_.find(className);
-      if(res != daughters_.end()) pruner = res->second.instance;
+      std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
+      if(res != daughtersMap().end()) pruner = res->second.instance;
       else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
     }
 
@@ -403,6 +403,12 @@ public:
     Pruner* instance;
   };
 
+  // Returns the (unique) map of daughters.
+  static std::map<std::string, Pruner::ClassRecord> &daughtersMap() {
+    static std::map<std::string, Pruner::ClassRecord> instance;
+    return instance;
+  }
+
   template<typename T>
   class Registrator{
   public:
@@ -412,11 +418,9 @@ public:
       rcd.description = description;
       rcd.instance = new T();
       rcd.instance->className_ = className;
-      daughters_[className] = rcd;
+      daughtersMap()[className] = rcd;
     }
   };
-
-  static std::map<std::string, Pruner::ClassRecord> daughters_;
   
 protected:
   /** Hoock methods to override in the derived classes.

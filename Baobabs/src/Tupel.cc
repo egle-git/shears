@@ -69,6 +69,8 @@
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+
 
 typedef std::vector<reco::GenParticle> GenParticleCollection;
 using reco::GenParticleCollection;
@@ -222,7 +224,7 @@ private:
    * HLT trigger considered to be stored and if it is set
    * the corresponding bit.
    */
-  void fillTrig(const std::string& trigname);
+  void fillTrig(const std::string& trigname, int triggerPrescalesForThisIndex);
 
   void writeTriggerStat();
 
@@ -279,6 +281,7 @@ private:
 
   std::vector<edm::EDGetTokenT<edm::View<pat::MET> >  > metSrcsToken;
 
+  edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescalesToken_;
   edm::EDGetTokenT<edm::TriggerResults> HLTTagToken_;
 
   edm::EDGetTokenT<edm::TriggerResults> metFilTagToken_;
@@ -331,425 +334,433 @@ private:
 
   // ----------member data ---------------------------
   TTree *myTree;
-  std::auto_ptr<TreeHelper> treeHelper_;
+  std::unique_ptr<TreeHelper> treeHelper_;
 
   //Event
-  std::auto_ptr<int>      EvtIsRealData_;
-  std::auto_ptr<unsigned> EvtNum_;
-  std::auto_ptr<unsigned> EvtRunNum_;
-  std::auto_ptr<int> 	  EvtLumiNum_;
-  std::auto_ptr<int> 	  EvtBxNum_;
-  std::auto_ptr<int> 	  EvtVtxCnt_;
-  std::auto_ptr<int> 	  EvtPuCnt_;
-  std::auto_ptr<int> 	  EvtPuCntTruth_;
-  std::auto_ptr<std::vector<double> > EvtWeights_;
-  std::auto_ptr<float>    EvtFastJetRho_;
+  std::unique_ptr<int>      EvtIsRealData_;
+  std::unique_ptr<unsigned> EvtNum_;
+  std::unique_ptr<unsigned> EvtRunNum_;
+  std::unique_ptr<int> 	  EvtLumiNum_;
+  std::unique_ptr<int> 	  EvtBxNum_;
+  std::unique_ptr<int> 	  EvtVtxCnt_;
+  std::unique_ptr<int> 	  EvtPuCnt_;
+  std::unique_ptr<int> 	  EvtPuCntTruth_;
+  std::unique_ptr<std::vector<double> > EvtWeights_;
+  std::unique_ptr<float>    EvtFastJetRho_;
     
   // MET Filter
-  std::auto_ptr<ULong64_t>         TrigMET_;
+  std::unique_ptr<ULong64_t>         TrigMET_;
 
   //Trigger
-  std::auto_ptr<unsigned>          TrigHlt_;
-  std::map<std::string, unsigned>  TrigHltMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltPhot_;
-  std::map<std::string, ULong64_t> TrigHltPhotMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltDiPhot_;
-  std::map<std::string, ULong64_t> TrigHltDiPhotMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltMu_;
-  std::map<std::string, ULong64_t> TrigHltMuMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltDiMu_;
-  std::map<std::string, ULong64_t> TrigHltDiMuMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltEl_;
-  std::map<std::string, ULong64_t> TrigHltElMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltDiEl_;
-  std::map<std::string, ULong64_t> TrigHltDiElMap_; //bit assignment
-  std::auto_ptr<ULong64_t>         TrigHltElMu_;
+  std::unique_ptr<unsigned>               TrigHlt_;
+  std::map<std::string, unsigned>         TrigHltMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltPhot_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltPhot_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltPhotMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiPhot_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiPhot_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiPhotMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltMu_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltMuMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiMu_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiMuMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltEl_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltEl_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltElMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltDiEl_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltDiEl_prescale_;
+  std::map<std::string, ULong64_t>        TrigHltDiElMap_; //bit assignment
+  std::unique_ptr<ULong64_t>              TrigHltElMu_;
+  std::unique_ptr<std::vector<unsigned> > TrigHltElMu_prescale_;
   std::map<std::string, ULong64_t> TrigHltElMuMap_; //bit assignment
   struct  TrigHltMapRcd {
-    TrigHltMapRcd(): pMap(0), pTrig(0) {}
-    TrigHltMapRcd(std::map<std::string, ULong64_t>* pMap_, ULong64_t* pTrig_): pMap(pMap_), pTrig(pTrig_) {
+    TrigHltMapRcd(): pMap(0), pTrig(0), pPrescale(0) {}
+    TrigHltMapRcd(std::map<std::string, ULong64_t>* pMap_, ULong64_t* pTrig_, std::vector<unsigned>* pPrescale_): pMap(pMap_), pTrig(pTrig_), pPrescale(pPrescale_) {
       assert(pTrig_);
     }
     //    TrigHltMapRcd(const TrigHltMapRcd& a){ this->pMap = a.pMap; this->pTrig = a.pTrig; }
     std::map<std::string, ULong64_t>* pMap;
     ULong64_t* pTrig;
+    std::vector<unsigned>* pPrescale;
   };
   std::vector<TrigHltMapRcd> trigHltMapList_; //list of trigger maps.
 
   //Missing energy
-  std::auto_ptr<std::vector<float> > METPt_;
-  std::auto_ptr<std::vector<float> > METPx_;
-  std::auto_ptr<std::vector<float> > METPy_;
-  std::auto_ptr<std::vector<float> > METPz_;
-  std::auto_ptr<std::vector<float> > METE_;
-  std::auto_ptr<std::vector<float> > GMETPt_;
-  std::auto_ptr<std::vector<float> > GMETPx_;
-  std::auto_ptr<std::vector<float> > GMETPy_;
-  std::auto_ptr<std::vector<float> > GMETPz_;
-  std::auto_ptr<std::vector<float> > GMETE_;
-  std::auto_ptr<std::vector<float> > METsigx2_;
-  std::auto_ptr<std::vector<float> > METsigxy_;
-  std::auto_ptr<std::vector<float> > METsigy2_;
-  std::auto_ptr<std::vector<float> > METsig_;
+  std::unique_ptr<std::vector<float> > METPt_;
+  std::unique_ptr<std::vector<float> > METPx_;
+  std::unique_ptr<std::vector<float> > METPy_;
+  std::unique_ptr<std::vector<float> > METPz_;
+  std::unique_ptr<std::vector<float> > METE_;
+  std::unique_ptr<std::vector<float> > GMETPt_;
+  std::unique_ptr<std::vector<float> > GMETPx_;
+  std::unique_ptr<std::vector<float> > GMETPy_;
+  std::unique_ptr<std::vector<float> > GMETPz_;
+  std::unique_ptr<std::vector<float> > GMETE_;
+  std::unique_ptr<std::vector<float> > METsigx2_;
+  std::unique_ptr<std::vector<float> > METsigxy_;
+  std::unique_ptr<std::vector<float> > METsigy2_;
+  std::unique_ptr<std::vector<float> > METsig_;
 
   //Generator level leptons, dressed
-  std::auto_ptr<std::vector<float> > 	GLepDr01Pt_;
-  std::auto_ptr<std::vector<float> > 	GLepDr01Eta_;
-  std::auto_ptr<std::vector<float> > 	GLepDr01Phi_;
-  std::auto_ptr<std::vector<float> > 	GLepDr01E_;
-  std::auto_ptr<std::vector<int> >      GLepDr01Id_;
-  std::auto_ptr<std::vector<int> >      GLepDr01St_;
-  std::auto_ptr<std::vector<int> >      GLepDr01MomId_;
-  std::auto_ptr<std::vector<bool> >     GLepDr01Prompt_;
-  std::auto_ptr<std::vector<bool> >     GLepDr01TauProd_;
+  std::unique_ptr<std::vector<float> > 	GLepDr01Pt_;
+  std::unique_ptr<std::vector<float> > 	GLepDr01Eta_;
+  std::unique_ptr<std::vector<float> > 	GLepDr01Phi_;
+  std::unique_ptr<std::vector<float> > 	GLepDr01E_;
+  std::unique_ptr<std::vector<int> >      GLepDr01Id_;
+  std::unique_ptr<std::vector<int> >      GLepDr01St_;
+  std::unique_ptr<std::vector<int> >      GLepDr01MomId_;
+  std::unique_ptr<std::vector<bool> >     GLepDr01Prompt_;
+  std::unique_ptr<std::vector<bool> >     GLepDr01TauProd_;
 
   //Generator level leptons, not-dressed
-  std::auto_ptr<std::vector<float> > 	GLepBarePt_;
-  std::auto_ptr<std::vector<float> > 	GLepBareEta_;
-  std::auto_ptr<std::vector<float> > 	GLepBarePhi_;
-  std::auto_ptr<std::vector<float> > 	GLepBareE_;
-  std::auto_ptr<std::vector<int> >      GLepBareId_;
-  std::auto_ptr<std::vector<int> > 	GLepBareSt_;
-  std::auto_ptr<std::vector<int> > 	GLepBareMomId_;
-  std::auto_ptr<std::vector<bool> >     GLepBarePrompt_;
-  std::auto_ptr<std::vector<bool> >     GLepBareTauProd_;
+  std::unique_ptr<std::vector<float> > 	GLepBarePt_;
+  std::unique_ptr<std::vector<float> > 	GLepBareEta_;
+  std::unique_ptr<std::vector<float> > 	GLepBarePhi_;
+  std::unique_ptr<std::vector<float> > 	GLepBareE_;
+  std::unique_ptr<std::vector<int> >      GLepBareId_;
+  std::unique_ptr<std::vector<int> > 	GLepBareSt_;
+  std::unique_ptr<std::vector<int> > 	GLepBareMomId_;
+  std::unique_ptr<std::vector<bool> >     GLepBarePrompt_;
+  std::unique_ptr<std::vector<bool> >     GLepBareTauProd_;
   
   //Generator level leptons, status 3
-  std::auto_ptr<std::vector<float> > GLepSt3Pt_;
-  std::auto_ptr<std::vector<float> > GLepSt3Eta_;
-  std::auto_ptr<std::vector<float> > GLepSt3Phi_;
-  std::auto_ptr<std::vector<float> > GLepSt3E_;
-  std::auto_ptr<std::vector<float> > GLepSt3M_;
-  std::auto_ptr<std::vector<int> >   GLepSt3Id_;
-  std::auto_ptr<std::vector<int> >   GLepSt3St_;
-  std::auto_ptr<std::vector<int> >   GLepSt3Mother0Id_;
-  std::auto_ptr<std::vector<int> >   GLepSt3MotherCnt_;
+  std::unique_ptr<std::vector<float> > GLepSt3Pt_;
+  std::unique_ptr<std::vector<float> > GLepSt3Eta_;
+  std::unique_ptr<std::vector<float> > GLepSt3Phi_;
+  std::unique_ptr<std::vector<float> > GLepSt3E_;
+  std::unique_ptr<std::vector<float> > GLepSt3M_;
+  std::unique_ptr<std::vector<int> >   GLepSt3Id_;
+  std::unique_ptr<std::vector<int> >   GLepSt3St_;
+  std::unique_ptr<std::vector<int> >   GLepSt3Mother0Id_;
+  std::unique_ptr<std::vector<int> >   GLepSt3MotherCnt_;
 
   //Generator level photons
-  std::auto_ptr<std::vector<float> > GPhotPt_;
-  std::auto_ptr<std::vector<float> > GPhotEta_;
-  std::auto_ptr<std::vector<float> > GPhotPhi_;
-  std::auto_ptr<std::vector<float> > GPhotE_;
-  std::auto_ptr<std::vector<int> >   GPhotMotherId_;
-  std::auto_ptr<std::vector<int> >   GPhotSt_;
-  std::auto_ptr<std::vector<float> > GPhotIsoEDR03_;
-  std::auto_ptr<std::vector<float> > GPhotIsoEDR04_;
-  std::auto_ptr<std::vector<float> > GPhotIsoEDR05_;
-  std::auto_ptr<std::vector<float> > GPhotIsoSumPtDR03_;
-  std::auto_ptr<std::vector<float> > GPhotIsoSumPtDR04_;
-  std::auto_ptr<std::vector<float> > GPhotIsoSumPtDR05_;
+  std::unique_ptr<std::vector<float> > GPhotPt_;
+  std::unique_ptr<std::vector<float> > GPhotEta_;
+  std::unique_ptr<std::vector<float> > GPhotPhi_;
+  std::unique_ptr<std::vector<float> > GPhotE_;
+  std::unique_ptr<std::vector<int> >   GPhotMotherId_;
+  std::unique_ptr<std::vector<int> >   GPhotSt_;
+  std::unique_ptr<std::vector<float> > GPhotIsoEDR03_;
+  std::unique_ptr<std::vector<float> > GPhotIsoEDR04_;
+  std::unique_ptr<std::vector<float> > GPhotIsoEDR05_;
+  std::unique_ptr<std::vector<float> > GPhotIsoSumPtDR03_;
+  std::unique_ptr<std::vector<float> > GPhotIsoSumPtDR04_;
+  std::unique_ptr<std::vector<float> > GPhotIsoSumPtDR05_;
 
   //Photons in the vicinity of the leptons
-  std::auto_ptr<std::vector<float> > GLepClosePhotPt_;
-  std::auto_ptr<std::vector<float> > GLepClosePhotEta_;
-  std::auto_ptr<std::vector<float> > GLepClosePhotPhi_;
-  std::auto_ptr<std::vector<float> > GLepClosePhotE_;
-  std::auto_ptr<std::vector<float> > GLepClosePhotM_;
-  std::auto_ptr<std::vector<int> >   GLepClosePhotId_;
-  std::auto_ptr<std::vector<int> >   GLepClosePhotMother0Id_;
-  std::auto_ptr<std::vector<int> >   GLepClosePhotMotherCnt_;
-  std::auto_ptr<std::vector<int> >   GLepClosePhotSt_;
+  std::unique_ptr<std::vector<float> > GLepClosePhotPt_;
+  std::unique_ptr<std::vector<float> > GLepClosePhotEta_;
+  std::unique_ptr<std::vector<float> > GLepClosePhotPhi_;
+  std::unique_ptr<std::vector<float> > GLepClosePhotE_;
+  std::unique_ptr<std::vector<float> > GLepClosePhotM_;
+  std::unique_ptr<std::vector<int> >   GLepClosePhotId_;
+  std::unique_ptr<std::vector<int> >   GLepClosePhotMother0Id_;
+  std::unique_ptr<std::vector<int> >   GLepClosePhotMotherCnt_;
+  std::unique_ptr<std::vector<int> >   GLepClosePhotSt_;
 
   //Gen Jets
-  std::auto_ptr<std::vector<float> > GJetAk04Pt_;
-  std::auto_ptr<std::vector<float> > GJetAk04Eta_;
-  std::auto_ptr<std::vector<float> > GJetAk04Phi_;
-  std::auto_ptr<std::vector<float> > GJetAk04E_;
-  std::auto_ptr<std::vector<float> > GJetAk04Id_;
-  std::auto_ptr<std::vector<float> > GJetAk04PuId_;
-  std::auto_ptr<std::vector<float> > GJetAk04ChFrac_;
-  std::auto_ptr<std::vector<int> >   GJetAk04ConstCnt_;
-  std::auto_ptr<std::vector<int> >   GJetAk04ConstId_;
-  std::auto_ptr<std::vector<float> > GJetAk04ConstPt_;
-  std::auto_ptr<std::vector<float> > GJetAk04ConstEta_;
-  std::auto_ptr<std::vector<float> > GJetAk04ConstPhi_;
-  std::auto_ptr<std::vector<float> > GJetAk04ConstE_;
-  std::auto_ptr<std::vector<float> > GJetAk04MatchedPartonID_;
-  std::auto_ptr<std::vector<float> > GJetAk04MatchedPartonDR_;
+  std::unique_ptr<std::vector<float> > GJetAk04Pt_;
+  std::unique_ptr<std::vector<float> > GJetAk04Eta_;
+  std::unique_ptr<std::vector<float> > GJetAk04Phi_;
+  std::unique_ptr<std::vector<float> > GJetAk04E_;
+  std::unique_ptr<std::vector<float> > GJetAk04Id_;
+  std::unique_ptr<std::vector<float> > GJetAk04PuId_;
+  std::unique_ptr<std::vector<float> > GJetAk04ChFrac_;
+  std::unique_ptr<std::vector<int> >   GJetAk04ConstCnt_;
+  std::unique_ptr<std::vector<int> >   GJetAk04ConstId_;
+  std::unique_ptr<std::vector<float> > GJetAk04ConstPt_;
+  std::unique_ptr<std::vector<float> > GJetAk04ConstEta_;
+  std::unique_ptr<std::vector<float> > GJetAk04ConstPhi_;
+  std::unique_ptr<std::vector<float> > GJetAk04ConstE_;
+  std::unique_ptr<std::vector<float> > GJetAk04MatchedPartonID_;
+  std::unique_ptr<std::vector<float> > GJetAk04MatchedPartonDR_;
 
   //Modified by Clement Leloup
   //Gen Fat Jets
-  std::auto_ptr<std::vector<float> > GJetAk08Pt_;
-  std::auto_ptr<std::vector<float> > GJetAk08Eta_;
-  std::auto_ptr<std::vector<float> > GJetAk08Phi_;
-  std::auto_ptr<std::vector<float> > GJetAk08E_;
-  std::auto_ptr<std::vector<float> > GJetAk08Id_;
-  std::auto_ptr<std::vector<float> > GJetAk08PuId_;
-  std::auto_ptr<std::vector<float> > GJetAk08ChFrac_;
-  std::auto_ptr<std::vector<int> >   GJetAk08ConstCnt_;
-  std::auto_ptr<std::vector<int> >   GJetAk08ConstId_;
-  std::auto_ptr<std::vector<float> > GJetAk08ConstPt_;
-  std::auto_ptr<std::vector<float> > GJetAk08ConstEta_;
-  std::auto_ptr<std::vector<float> > GJetAk08ConstPhi_;
-  std::auto_ptr<std::vector<float> > GJetAk08ConstE_;
-  std::auto_ptr<std::vector<float> > GJetAk08MatchedPartonID_;
-  std::auto_ptr<std::vector<float> > GJetAk08MatchedPartonDR_;
+  std::unique_ptr<std::vector<float> > GJetAk08Pt_;
+  std::unique_ptr<std::vector<float> > GJetAk08Eta_;
+  std::unique_ptr<std::vector<float> > GJetAk08Phi_;
+  std::unique_ptr<std::vector<float> > GJetAk08E_;
+  std::unique_ptr<std::vector<float> > GJetAk08Id_;
+  std::unique_ptr<std::vector<float> > GJetAk08PuId_;
+  std::unique_ptr<std::vector<float> > GJetAk08ChFrac_;
+  std::unique_ptr<std::vector<int> >   GJetAk08ConstCnt_;
+  std::unique_ptr<std::vector<int> >   GJetAk08ConstId_;
+  std::unique_ptr<std::vector<float> > GJetAk08ConstPt_;
+  std::unique_ptr<std::vector<float> > GJetAk08ConstEta_;
+  std::unique_ptr<std::vector<float> > GJetAk08ConstPhi_;
+  std::unique_ptr<std::vector<float> > GJetAk08ConstE_;
+  std::unique_ptr<std::vector<float> > GJetAk08MatchedPartonID_;
+  std::unique_ptr<std::vector<float> > GJetAk08MatchedPartonDR_;
 
   //Exta generator information
-  std::auto_ptr<std::vector<int> >   GPdfId1_;
-  std::auto_ptr<std::vector<int> >   GPdfId2_;
-  std::auto_ptr<std::vector<float> > GPdfx1_;
-  std::auto_ptr<std::vector<float> > GPdfx2_;
-  std::auto_ptr<std::vector<float> > GPdfScale_;
-  std::auto_ptr<float>               GBinningValue_;
-  std::auto_ptr<int>                 GNup_;
+  std::unique_ptr<std::vector<int> >   GPdfId1_;
+  std::unique_ptr<std::vector<int> >   GPdfId2_;
+  std::unique_ptr<std::vector<float> > GPdfx1_;
+  std::unique_ptr<std::vector<float> > GPdfx2_;
+  std::unique_ptr<std::vector<float> > GPdfScale_;
+  std::unique_ptr<float>               GBinningValue_;
+  std::unique_ptr<int>                 GNup_;
 
 
   ///Muons
-  std::auto_ptr<std::vector<float> > 	MuPt_;
-  std::auto_ptr<std::vector<float> > 	MuEta_;
-  std::auto_ptr<std::vector<float> > 	MuPhi_;
-  std::auto_ptr<std::vector<float> > 	MuE_;
-  std::auto_ptr<std::vector<unsigned> > MuId_;
+  std::unique_ptr<std::vector<float> > 	MuPt_;
+  std::unique_ptr<std::vector<float> > 	MuEta_;
+  std::unique_ptr<std::vector<float> > 	MuPhi_;
+  std::unique_ptr<std::vector<float> > 	MuE_;
+  std::unique_ptr<std::vector<unsigned> > MuId_;
   std::map<std::string, unsigned>       MuIdMap_; //bit assignment
-  std::auto_ptr<std::vector<unsigned> > MuIdTight_;
-  std::auto_ptr<std::vector<unsigned> > MuIdSoft_;
+  std::unique_ptr<std::vector<unsigned> > MuIdTight_;
+  std::unique_ptr<std::vector<unsigned> > MuIdSoft_;
   std::map<std::string, unsigned>    	MuIdTightMap_; //bit assignment
-  std::auto_ptr<std::vector<float> > 	MuCh_;
-  std::auto_ptr<std::vector<float> > 	MuVtxZ_;
-  std::auto_ptr<std::vector<float> > 	MuDxy_;
-  std::auto_ptr<std::vector<float> > 	MuIsoRho_;
-  std::auto_ptr<std::vector<float> > 	MuPfIso_;
-  std::auto_ptr<std::vector<float> > 	MuType_;
+  std::unique_ptr<std::vector<float> > 	MuCh_;
+  std::unique_ptr<std::vector<float> > 	MuVtxZ_;
+  std::unique_ptr<std::vector<float> > 	MuDxy_;
+  std::unique_ptr<std::vector<float> > 	MuIsoRho_;
+  std::unique_ptr<std::vector<float> > 	MuPfIso_;
+  std::unique_ptr<std::vector<float> > 	MuType_;
   std::map<std::string, unsigned>    	MuTypeMap_; //bit assignment
-  std::auto_ptr<std::vector<float> > 	MuIsoTkIsoAbs_;
-  std::auto_ptr<std::vector<float> > 	MuIsoTkIsoRel_;
-  std::auto_ptr<std::vector<float> > 	MuIsoCalAbs_;
-  std::auto_ptr<std::vector<float> > 	MuIsoCombRel_;
-  std::auto_ptr<std::vector<float> > 	MuTkNormChi2_;
-  std::auto_ptr<std::vector<int> > 	MuTkHitCnt_;
-  std::auto_ptr<std::vector<int> > 	MuMatchedStationCnt_;
-  std::auto_ptr<std::vector<float> > 	MuDz_;
-  std::auto_ptr<std::vector<int> > 	MuPixelHitCnt_;
-  std::auto_ptr<std::vector<int> > 	MuTkLayerCnt_;
-  std::auto_ptr<std::vector<float> > 	MuPfIsoChHad_;
-  std::auto_ptr<std::vector<float> > 	MuPfIsoNeutralHad_;
-  std::auto_ptr<std::vector<float> > 	MuPfIsoRawRel_;
-  std::auto_ptr<std::vector<unsigned> > MuHltMatch_;
+  std::unique_ptr<std::vector<float> > 	MuIsoTkIsoAbs_;
+  std::unique_ptr<std::vector<float> > 	MuIsoTkIsoRel_;
+  std::unique_ptr<std::vector<float> > 	MuIsoCalAbs_;
+  std::unique_ptr<std::vector<float> > 	MuIsoCombRel_;
+  std::unique_ptr<std::vector<float> > 	MuTkNormChi2_;
+  std::unique_ptr<std::vector<int> > 	MuTkHitCnt_;
+  std::unique_ptr<std::vector<int> > 	MuMatchedStationCnt_;
+  std::unique_ptr<std::vector<float> > 	MuDz_;
+  std::unique_ptr<std::vector<int> > 	MuPixelHitCnt_;
+  std::unique_ptr<std::vector<int> > 	MuTkLayerCnt_;
+  std::unique_ptr<std::vector<float> > 	MuPfIsoChHad_;
+  std::unique_ptr<std::vector<float> > 	MuPfIsoNeutralHad_;
+  std::unique_ptr<std::vector<float> > 	MuPfIsoRawRel_;
+  std::unique_ptr<std::vector<unsigned> > MuHltMatch_;
 
   //Electrons
-  std::auto_ptr<std::vector<float> > 	ElPt_;
-  std::auto_ptr<std::vector<float> > 	ElEta_;
-  std::auto_ptr<std::vector<float> > 	ElEtaSc_;
-  std::auto_ptr<std::vector<float> > 	ElPhi_;
-  std::auto_ptr<std::vector<float> > 	ElE_;
-  std::auto_ptr<std::vector<float> >    ElScRawE_;
-  std::auto_ptr<std::vector<float> >    ElCorrE_;
-  std::auto_ptr<std::vector<float> > 	ElCh_;
-  std::auto_ptr<std::vector<float> >    ElEcalIso_;
-  std::auto_ptr<std::vector<float> >    ElEcalPfIso_;
-  std::auto_ptr<std::vector<unsigned> > ElId_;
+  std::unique_ptr<std::vector<float> > 	ElPt_;
+  std::unique_ptr<std::vector<float> > 	ElEta_;
+  std::unique_ptr<std::vector<float> > 	ElEtaSc_;
+  std::unique_ptr<std::vector<float> > 	ElPhi_;
+  std::unique_ptr<std::vector<float> > 	ElE_;
+  std::unique_ptr<std::vector<float> >    ElScRawE_;
+  std::unique_ptr<std::vector<float> >    ElCorrE_;
+  std::unique_ptr<std::vector<float> > 	ElCh_;
+  std::unique_ptr<std::vector<float> >    ElEcalIso_;
+  std::unique_ptr<std::vector<float> >    ElEcalPfIso_;
+  std::unique_ptr<std::vector<unsigned> > ElId_;
   std::map<std::string, unsigned>    	ElIdMap_; //bit assignment
-  std::auto_ptr<std::vector<float> > 	ElMvaTrig_;
-  std::auto_ptr<std::vector<float> > 	ElMvaNonTrig_;
-  std::auto_ptr<std::vector<float> > 	ElMvaPresel_;
-  std::auto_ptr<std::vector<float> > 	ElDEtaTkScAtVtx_;
-  std::auto_ptr<std::vector<float> > 	ElDPhiTkScAtVtx_;
-  std::auto_ptr<std::vector<float> > 	ElHoE_;
-  std::auto_ptr<std::vector<float> > 	ElSigmaIetaIeta_;
-  std::auto_ptr<std::vector<float> > 	ElSigmaIetaIetaFull5x5_;
-  std::auto_ptr<std::vector<float> > 	ElEinvMinusPinv_;
-  std::auto_ptr<std::vector<float> > 	ElD0_;
-  std::auto_ptr<std::vector<float> > 	ElDz_;
-  std::auto_ptr<std::vector<int> >   	ElExpectedMissingInnerHitCnt_;
-  std::auto_ptr<std::vector<int> >   	ElPassConvVeto_;
-  std::auto_ptr<std::vector<unsigned> > ElHltMatch_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoChHad_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoNeutralHad_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoIso_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoPuChHad_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoRaw_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoDbeta_;
-  std::auto_ptr<std::vector<float> > 	ElPfIsoRho_;
-  std::auto_ptr<std::vector<float> > 	ElAEff_;
-  std::auto_ptr<std::vector<float> >    ElDr03TkSumPt_;
-  std::auto_ptr<std::vector<float> >    ElDr03EcalRecHitSumEt_;
-  std::auto_ptr<std::vector<float> >    ElDr03HcalTowerSumEt_;
+  std::unique_ptr<std::vector<float> > 	ElMvaTrig_;
+  std::unique_ptr<std::vector<float> > 	ElMvaNonTrig_;
+  std::unique_ptr<std::vector<float> > 	ElMvaPresel_;
+  std::unique_ptr<std::vector<float> > 	ElDEtaTkScAtVtx_;
+  std::unique_ptr<std::vector<float> > 	ElDPhiTkScAtVtx_;
+  std::unique_ptr<std::vector<float> > 	ElHoE_;
+  std::unique_ptr<std::vector<float> > 	ElSigmaIetaIeta_;
+  std::unique_ptr<std::vector<float> > 	ElSigmaIetaIetaFull5x5_;
+  std::unique_ptr<std::vector<float> > 	ElEinvMinusPinv_;
+  std::unique_ptr<std::vector<float> > 	ElD0_;
+  std::unique_ptr<std::vector<float> > 	ElDz_;
+  std::unique_ptr<std::vector<int> >   	ElExpectedMissingInnerHitCnt_;
+  std::unique_ptr<std::vector<int> >   	ElPassConvVeto_;
+  std::unique_ptr<std::vector<unsigned> > ElHltMatch_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoChHad_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoNeutralHad_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoIso_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoPuChHad_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoRaw_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoDbeta_;
+  std::unique_ptr<std::vector<float> > 	ElPfIsoRho_;
+  std::unique_ptr<std::vector<float> > 	ElAEff_;
+  std::unique_ptr<std::vector<float> >    ElDr03TkSumPt_;
+  std::unique_ptr<std::vector<float> >    ElDr03EcalRecHitSumEt_;
+  std::unique_ptr<std::vector<float> >    ElDr03HcalTowerSumEt_;
 
   //Modified by Clement Leloup
   // Taus
-  std::auto_ptr<std::vector<float> > 	TauPt_;
-  std::auto_ptr<std::vector<float> > 	TauEta_;
-  std::auto_ptr<std::vector<float> > 	TauPhi_;
-  std::auto_ptr<std::vector<float> > 	TauE_;
-  std::auto_ptr<std::vector<float> > 	TauCh_;
-  std::auto_ptr<std::vector<unsigned> > TauDecayModeFinding_;
-  std::auto_ptr<std::vector<float> >    TauCombinedIsolationDeltaBetaCorrRaw3Hits_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscMuonLoose_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscMuonTight_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscElVLoose_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscElLoose_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscElVTight_;
-  std::auto_ptr<std::vector<unsigned> > TauDiscElTight_;
+  std::unique_ptr<std::vector<float> > 	TauPt_;
+  std::unique_ptr<std::vector<float> > 	TauEta_;
+  std::unique_ptr<std::vector<float> > 	TauPhi_;
+  std::unique_ptr<std::vector<float> > 	TauE_;
+  std::unique_ptr<std::vector<float> > 	TauCh_;
+  std::unique_ptr<std::vector<unsigned> > TauDecayModeFinding_;
+  std::unique_ptr<std::vector<float> >    TauCombinedIsolationDeltaBetaCorrRaw3Hits_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscMuonLoose_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscMuonTight_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscElVLoose_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscElLoose_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscElVTight_;
+  std::unique_ptr<std::vector<unsigned> > TauDiscElTight_;
 
   //PF particle candidates
-  std::auto_ptr<std::vector<float> > PfCandPt_;
-  std::auto_ptr<std::vector<float> > PfCandEta_;
-  std::auto_ptr<std::vector<float> > PfCandPhi_;
-  std::auto_ptr<std::vector<float> > PfCandE_;  
-  std::auto_ptr<std::vector<float> > PfCandVx_;
-  std::auto_ptr<std::vector<float> > PfCandVy_;
-  std::auto_ptr<std::vector<float> > PfCandVz_;
-  std::auto_ptr<std::vector<float> > PfCandTkInPt_;
-  std::auto_ptr<std::vector<float> > PfCandTkInEta_;
-  std::auto_ptr<std::vector<float> > PfCandTkInPhi_;
-  std::auto_ptr<std::vector<float> > PfCandTkValidHitCnt_;
-  std::auto_ptr<std::vector<float> > PfCandTkValidFrac_;
-  std::auto_ptr<std::vector<float> > PfCandTkChi2_;
-  std::auto_ptr<std::vector<float> > PfCandDz_;
-  std::auto_ptr<std::vector<float> > PfCandDxy_;
-  std::auto_ptr<std::vector<float> > PfCandDz0_;
-  std::auto_ptr<std::vector<float> > PfCandDzPV_;  
-  std::auto_ptr<std::vector<float> > PfCandDxyPV_;
+  std::unique_ptr<std::vector<float> > PfCandPt_;
+  std::unique_ptr<std::vector<float> > PfCandEta_;
+  std::unique_ptr<std::vector<float> > PfCandPhi_;
+  std::unique_ptr<std::vector<float> > PfCandE_;  
+  std::unique_ptr<std::vector<float> > PfCandVx_;
+  std::unique_ptr<std::vector<float> > PfCandVy_;
+  std::unique_ptr<std::vector<float> > PfCandVz_;
+  std::unique_ptr<std::vector<float> > PfCandTkInPt_;
+  std::unique_ptr<std::vector<float> > PfCandTkInEta_;
+  std::unique_ptr<std::vector<float> > PfCandTkInPhi_;
+  std::unique_ptr<std::vector<float> > PfCandTkValidHitCnt_;
+  std::unique_ptr<std::vector<float> > PfCandTkValidFrac_;
+  std::unique_ptr<std::vector<float> > PfCandTkChi2_;
+  std::unique_ptr<std::vector<float> > PfCandDz_;
+  std::unique_ptr<std::vector<float> > PfCandDxy_;
+  std::unique_ptr<std::vector<float> > PfCandDz0_;
+  std::unique_ptr<std::vector<float> > PfCandDzPV_;  
+  std::unique_ptr<std::vector<float> > PfCandDxyPV_;
 
   //Photons
   //photon momenta
-  std::auto_ptr<std::vector<float> > PhotPt_;
-  std::auto_ptr<std::vector<float> > PhotEta_;
-  std::auto_ptr<std::vector<float> > PhotPhi_;
-  std::auto_ptr<std::vector<float> > PhotScRawE_;
-  std::auto_ptr<std::vector<float> > PhotScEta_;
-  std::auto_ptr<std::vector<float> > PhotScPhi_;
+  std::unique_ptr<std::vector<float> > PhotPt_;
+  std::unique_ptr<std::vector<float> > PhotEta_;
+  std::unique_ptr<std::vector<float> > PhotPhi_;
+  std::unique_ptr<std::vector<float> > PhotScRawE_;
+  std::unique_ptr<std::vector<float> > PhotScEta_;
+  std::unique_ptr<std::vector<float> > PhotScPhi_;
 
 
   //photon isolations
-  std::auto_ptr<std::vector<float> > PhotIsoEcal_;
-  std::auto_ptr<std::vector<float> > PhotIsoHcal_;
-  std::auto_ptr<std::vector<float> > PhotIsoTk_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoChHad_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoNeutralHad_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoPhot_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoPuChHad_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoEcalClus_;
-  std::auto_ptr<std::vector<float> > PhotPfIsoHcalClus_;
+  std::unique_ptr<std::vector<float> > PhotIsoEcal_;
+  std::unique_ptr<std::vector<float> > PhotIsoHcal_;
+  std::unique_ptr<std::vector<float> > PhotIsoTk_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoChHad_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoNeutralHad_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoPhot_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoPuChHad_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoEcalClus_;
+  std::unique_ptr<std::vector<float> > PhotPfIsoHcalClus_;
 
   //photon cluster shapes
-  std::auto_ptr<std::vector<float> > PhotE3x3_;
-  std::auto_ptr<std::vector<float> > PhotE1x5_;
-  std::auto_ptr<std::vector<float> > PhotE1x3_;
-  std::auto_ptr<std::vector<float> > PhotE2x2_;
-  std::auto_ptr<std::vector<float> > PhotE2x5_;
-  std::auto_ptr<std::vector<float> > PhotE5x5_;
-  std::auto_ptr<std::vector<float> > PhotSigmaIetaIeta_;
-  std::auto_ptr<std::vector<float> > PhotSigmaIetaIphi_;
-  std::auto_ptr<std::vector<float> > PhotSigmaIphiIphi_;
-  std::auto_ptr<std::vector<float> > PhotEtaWidth_;
-  std::auto_ptr<std::vector<float> > PhotPhiWidth_;
-  std::auto_ptr<std::vector<float> > PhotR9_;
-  std::auto_ptr<std::vector<float> > PhotS4_;
-  std::auto_ptr<std::vector<float> > PhotE1x5Full5x5_;    
-  std::auto_ptr<std::vector<float> > PhotE2x5Full5x5_;
-  std::auto_ptr<std::vector<float> > PhotE3x3Full5x5_;
-  std::auto_ptr<std::vector<float> > PhotE5x5Full5x5_;
-  std::auto_ptr<std::vector<float> > PhotSigmaIetaIetaFull5x5_;
-  std::auto_ptr<std::vector<float> > PhotR9Full5x5_; 
+  std::unique_ptr<std::vector<float> > PhotE3x3_;
+  std::unique_ptr<std::vector<float> > PhotE1x5_;
+  std::unique_ptr<std::vector<float> > PhotE1x3_;
+  std::unique_ptr<std::vector<float> > PhotE2x2_;
+  std::unique_ptr<std::vector<float> > PhotE2x5_;
+  std::unique_ptr<std::vector<float> > PhotE5x5_;
+  std::unique_ptr<std::vector<float> > PhotSigmaIetaIeta_;
+  std::unique_ptr<std::vector<float> > PhotSigmaIetaIphi_;
+  std::unique_ptr<std::vector<float> > PhotSigmaIphiIphi_;
+  std::unique_ptr<std::vector<float> > PhotEtaWidth_;
+  std::unique_ptr<std::vector<float> > PhotPhiWidth_;
+  std::unique_ptr<std::vector<float> > PhotR9_;
+  std::unique_ptr<std::vector<float> > PhotS4_;
+  std::unique_ptr<std::vector<float> > PhotE1x5Full5x5_;    
+  std::unique_ptr<std::vector<float> > PhotE2x5Full5x5_;
+  std::unique_ptr<std::vector<float> > PhotE3x3Full5x5_;
+  std::unique_ptr<std::vector<float> > PhotE5x5Full5x5_;
+  std::unique_ptr<std::vector<float> > PhotSigmaIetaIetaFull5x5_;
+  std::unique_ptr<std::vector<float> > PhotR9Full5x5_; 
 
   //photon preshower
-  std::auto_ptr<std::vector<float> > PhotEsE_;
-  std::auto_ptr<std::vector<float> > PhotEsSigmaIxIx_;
-  std::auto_ptr<std::vector<float> > PhotEsSigmaIyIy_;
-  std::auto_ptr<std::vector<float> > PhotEsSigmaIrIr_;
+  std::unique_ptr<std::vector<float> > PhotEsE_;
+  std::unique_ptr<std::vector<float> > PhotEsSigmaIxIx_;
+  std::unique_ptr<std::vector<float> > PhotEsSigmaIyIy_;
+  std::unique_ptr<std::vector<float> > PhotEsSigmaIrIr_;
 
   //photon id (bit field)
-  std::auto_ptr<std::vector<unsigned> > PhotId_;
+  std::unique_ptr<std::vector<unsigned> > PhotId_;
   std::map<std::string, unsigned>    	PhotIdMap_; //bit assignment
-  std::auto_ptr<std::vector<float> >    PhotHoE_;
-  std::auto_ptr<std::vector<bool> >     PhotHasPixelSeed_;
-  std::auto_ptr<std::vector<int> >      PhotPassElVeto_;
+  std::unique_ptr<std::vector<float> >    PhotHoE_;
+  std::unique_ptr<std::vector<bool> >     PhotHasPixelSeed_;
+  std::unique_ptr<std::vector<int> >      PhotPassElVeto_;
 
   //photon timing
-  std::auto_ptr<std::vector<float> > PhotTime_;
+  std::unique_ptr<std::vector<float> > PhotTime_;
 
   //PF Jets
-  std::auto_ptr<std::vector<float> > JetAk04Pt_;
-  std::auto_ptr<std::vector<float> > JetAk04Eta_;
-  std::auto_ptr<std::vector<float> > JetAk04Phi_;
-  std::auto_ptr<std::vector<float> > JetAk04E_;
-  std::auto_ptr<std::vector<float> > JetAk04Id_;
-  std::auto_ptr<std::vector<bool> >  JetAk04PuId_;
-  std::auto_ptr<std::vector<float> > JetAk04PuMva_;
-  std::auto_ptr<std::vector<float> > JetAk04RawPt_;
-  std::auto_ptr<std::vector<float> > JetAk04RawE_;
-  std::auto_ptr<std::vector<float> > JetAk04HfHadE_;
-  std::auto_ptr<std::vector<float> > JetAk04HfEmE_;
-  std::auto_ptr<std::vector<float> > JetAk04BetaClassic_;
-  std::auto_ptr<std::vector<float> > JetAk04Beta_;
-  std::auto_ptr<std::vector<float> > JetAk04BetaStar_;
-  std::auto_ptr<std::vector<float> > JetAk04BetaStarClassic_;
-  std::auto_ptr<std::vector<float> > JetAk04Rms_;
-  std::auto_ptr<std::vector<float> > JetAk04ChHadFrac_;
-  std::auto_ptr<std::vector<float> > JetAk04NeutralHadAndHfFrac_;
-  std::auto_ptr<std::vector<float> > JetAk04ChEmFrac_;
-  std::auto_ptr<std::vector<float> > JetAk04NeutralEmFrac_;
-  std::auto_ptr<std::vector<float> > JetAk04ChMult_;
-  std::auto_ptr<std::vector<float> > JetAk04NeutMult_;
-  std::auto_ptr<std::vector<float> > JetAk04ConstCnt_;
-  std::auto_ptr<std::vector<float> > JetAk04BTagCsv_;
-  std::auto_ptr<std::vector<float> > JetAk04BTagCsvV1_;
-  std::auto_ptr<std::vector<float> > JetAk04BTagCsvSLV1_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscCisvV2_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscJp_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscBjp_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscTche_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscTchp_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscSsvhe_;
-  std::auto_ptr<std::vector<float> > JetAk04BDiscSsvhp_;
-  std::auto_ptr<std::vector<float> > JetAk04PartFlav_;
-  std::auto_ptr<std::vector<float> > JetAk04HadFlav_;
-  std::auto_ptr<std::vector<float> > JetAk04JecUncUp_;
-  std::auto_ptr<std::vector<float> > JetAk04JecUncDwn_;
-  std::auto_ptr<std::vector<int> >   JetAk04ConstId_;
-  std::auto_ptr<std::vector<float> > JetAk04ConstPt_;
-  std::auto_ptr<std::vector<float> > JetAk04ConstEta_;
-  std::auto_ptr<std::vector<float> > JetAk04ConstPhi_;
-  std::auto_ptr<std::vector<float> > JetAk04ConstE_;
-  std::auto_ptr<std::vector<int> >   JetAk04GenJet_;
+  std::unique_ptr<std::vector<float> > JetAk04Pt_;
+  std::unique_ptr<std::vector<float> > JetAk04Eta_;
+  std::unique_ptr<std::vector<float> > JetAk04Phi_;
+  std::unique_ptr<std::vector<float> > JetAk04E_;
+  std::unique_ptr<std::vector<float> > JetAk04Id_;
+  std::unique_ptr<std::vector<bool> >  JetAk04PuId_;
+  std::unique_ptr<std::vector<float> > JetAk04PuMva_;
+  std::unique_ptr<std::vector<float> > JetAk04RawPt_;
+  std::unique_ptr<std::vector<float> > JetAk04RawE_;
+  std::unique_ptr<std::vector<float> > JetAk04HfHadE_;
+  std::unique_ptr<std::vector<float> > JetAk04HfEmE_;
+  std::unique_ptr<std::vector<float> > JetAk04BetaClassic_;
+  std::unique_ptr<std::vector<float> > JetAk04Beta_;
+  std::unique_ptr<std::vector<float> > JetAk04BetaStar_;
+  std::unique_ptr<std::vector<float> > JetAk04BetaStarClassic_;
+  std::unique_ptr<std::vector<float> > JetAk04Rms_;
+  std::unique_ptr<std::vector<float> > JetAk04ChHadFrac_;
+  std::unique_ptr<std::vector<float> > JetAk04NeutralHadAndHfFrac_;
+  std::unique_ptr<std::vector<float> > JetAk04ChEmFrac_;
+  std::unique_ptr<std::vector<float> > JetAk04NeutralEmFrac_;
+  std::unique_ptr<std::vector<float> > JetAk04ChMult_;
+  std::unique_ptr<std::vector<float> > JetAk04NeutMult_;
+  std::unique_ptr<std::vector<float> > JetAk04ConstCnt_;
+  std::unique_ptr<std::vector<float> > JetAk04BTagCsv_;
+  std::unique_ptr<std::vector<float> > JetAk04BTagCsvV1_;
+  std::unique_ptr<std::vector<float> > JetAk04BTagCsvSLV1_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscCisvV2_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscJp_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscBjp_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscTche_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscTchp_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscSsvhe_;
+  std::unique_ptr<std::vector<float> > JetAk04BDiscSsvhp_;
+  std::unique_ptr<std::vector<float> > JetAk04PartFlav_;
+  std::unique_ptr<std::vector<float> > JetAk04HadFlav_;
+  std::unique_ptr<std::vector<float> > JetAk04JecUncUp_;
+  std::unique_ptr<std::vector<float> > JetAk04JecUncDwn_;
+  std::unique_ptr<std::vector<int> >   JetAk04ConstId_;
+  std::unique_ptr<std::vector<float> > JetAk04ConstPt_;
+  std::unique_ptr<std::vector<float> > JetAk04ConstEta_;
+  std::unique_ptr<std::vector<float> > JetAk04ConstPhi_;
+  std::unique_ptr<std::vector<float> > JetAk04ConstE_;
+  std::unique_ptr<std::vector<int> >   JetAk04GenJet_;
 
   //Modified by Clement Leloup
   //PF ak08 Jets
-  std::auto_ptr<std::vector<float> > JetAk08Pt_;
-  std::auto_ptr<std::vector<float> > JetAk08Eta_;
-  std::auto_ptr<std::vector<float> > JetAk08Phi_;
-  std::auto_ptr<std::vector<float> > JetAk08E_;
-  std::auto_ptr<std::vector<float> > JetAk08Id_;
-  std::auto_ptr<std::vector<float> > JetAk08RawPt_;
-  std::auto_ptr<std::vector<float> > JetAk08RawE_;
-  std::auto_ptr<std::vector<float> > JetAk08HfHadE_;
-  std::auto_ptr<std::vector<float> > JetAk08HfEmE_;
-  std::auto_ptr<std::vector<float> > JetAk08ChHadFrac_;
-  std::auto_ptr<std::vector<float> > JetAk08NeutralHadAndHfFrac_;
-  std::auto_ptr<std::vector<float> > JetAk08ChEmFrac_;
-  std::auto_ptr<std::vector<float> > JetAk08NeutralEmFrac_;
-  std::auto_ptr<std::vector<float> > JetAk08ChMult_;
-  std::auto_ptr<std::vector<float> > JetAk08ConstCnt_;
-  std::auto_ptr<std::vector<float> > JetAk08BTagCsv_;
-  std::auto_ptr<std::vector<float> > JetAk08BTagCsvV1_;
-  std::auto_ptr<std::vector<float> > JetAk08BTagCsvV2_;
-  std::auto_ptr<std::vector<float> > JetAk08BTagCsvSLV1_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscCisvV2_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscJp_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscBjp_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscTche_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscTchp_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscSsvhe_;
-  std::auto_ptr<std::vector<float> > JetAk08BDiscSsvhp_;
-  std::auto_ptr<std::vector<float> > JetAk08PartFlav_;
-  std::auto_ptr<std::vector<float> > JetAk08HadFlav_;
-  std::auto_ptr<std::vector<float> > JetAk08JecUncUp_;
-  std::auto_ptr<std::vector<float> > JetAk08JecUncDwn_;
-  std::auto_ptr<std::vector<int> >   JetAk08ConstId_;
-  std::auto_ptr<std::vector<float> > JetAk08ConstPt_;
-  std::auto_ptr<std::vector<float> > JetAk08ConstEta_;
-  std::auto_ptr<std::vector<float> > JetAk08ConstPhi_;
-  std::auto_ptr<std::vector<float> > JetAk08ConstE_;
-  std::auto_ptr<std::vector<int> >   JetAk08GenJet_;
-  std::auto_ptr<std::vector<float> > JetAk08PrunedMass_;
-  std::auto_ptr<std::vector<float> > JetAk08FilteredMass_;
-  std::auto_ptr<std::vector<float> > JetAk08SoftDropMass_;
-  std::auto_ptr<std::vector<float> > JetAk08TrimmedMass_;
-  std::auto_ptr<std::vector<float> > JetAk08Tau1_;
-  std::auto_ptr<std::vector<float> > JetAk08Tau2_;
-  std::auto_ptr<std::vector<float> > JetAk08Tau3_;
+  std::unique_ptr<std::vector<float> > JetAk08Pt_;
+  std::unique_ptr<std::vector<float> > JetAk08Eta_;
+  std::unique_ptr<std::vector<float> > JetAk08Phi_;
+  std::unique_ptr<std::vector<float> > JetAk08E_;
+  std::unique_ptr<std::vector<float> > JetAk08Id_;
+  std::unique_ptr<std::vector<float> > JetAk08RawPt_;
+  std::unique_ptr<std::vector<float> > JetAk08RawE_;
+  std::unique_ptr<std::vector<float> > JetAk08HfHadE_;
+  std::unique_ptr<std::vector<float> > JetAk08HfEmE_;
+  std::unique_ptr<std::vector<float> > JetAk08ChHadFrac_;
+  std::unique_ptr<std::vector<float> > JetAk08NeutralHadAndHfFrac_;
+  std::unique_ptr<std::vector<float> > JetAk08ChEmFrac_;
+  std::unique_ptr<std::vector<float> > JetAk08NeutralEmFrac_;
+  std::unique_ptr<std::vector<float> > JetAk08ChMult_;
+  std::unique_ptr<std::vector<float> > JetAk08ConstCnt_;
+  std::unique_ptr<std::vector<float> > JetAk08BTagCsv_;
+  std::unique_ptr<std::vector<float> > JetAk08BTagCsvV1_;
+  std::unique_ptr<std::vector<float> > JetAk08BTagCsvV2_;
+  std::unique_ptr<std::vector<float> > JetAk08BTagCsvSLV1_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscCisvV2_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscJp_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscBjp_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscTche_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscTchp_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscSsvhe_;
+  std::unique_ptr<std::vector<float> > JetAk08BDiscSsvhp_;
+  std::unique_ptr<std::vector<float> > JetAk08PartFlav_;
+  std::unique_ptr<std::vector<float> > JetAk08HadFlav_;
+  std::unique_ptr<std::vector<float> > JetAk08JecUncUp_;
+  std::unique_ptr<std::vector<float> > JetAk08JecUncDwn_;
+  std::unique_ptr<std::vector<int> >   JetAk08ConstId_;
+  std::unique_ptr<std::vector<float> > JetAk08ConstPt_;
+  std::unique_ptr<std::vector<float> > JetAk08ConstEta_;
+  std::unique_ptr<std::vector<float> > JetAk08ConstPhi_;
+  std::unique_ptr<std::vector<float> > JetAk08ConstE_;
+  std::unique_ptr<std::vector<int> >   JetAk08GenJet_;
+  std::unique_ptr<std::vector<float> > JetAk08PrunedMass_;
+  std::unique_ptr<std::vector<float> > JetAk08FilteredMass_;
+  std::unique_ptr<std::vector<float> > JetAk08SoftDropMass_;
+  std::unique_ptr<std::vector<float> > JetAk08TrimmedMass_;
+  std::unique_ptr<std::vector<float> > JetAk08Tau1_;
+  std::unique_ptr<std::vector<float> > JetAk08Tau2_;
+  std::unique_ptr<std::vector<float> > JetAk08Tau3_;
   
 
   //bits
@@ -885,6 +896,7 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
     vertexToken_ = consumes<std::vector<reco::Vertex> >(iConfig.getUntrackedParameter<edm::InputTag>("pvSrc"));
     mSrcRhoToken_ = consumes<double>(iConfig.getUntrackedParameter<edm::InputTag>("mSrcRho" ));
     beamSpotToken_ = consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"));
+    triggerPrescalesToken_ = consumes<pat::PackedTriggerPrescales>(edm::InputTag("patTrigger"));
     HLTTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "HLT"));
     metFilTagToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "PAT"));
     metFilTagRECOToken_ = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults", "", "RECO"));
@@ -940,13 +952,13 @@ Tupel::~Tupel()
 }
 
 void Tupel::defineBitFields(){
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltPhotMap_, TrigHltPhot_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiPhotMap_, TrigHltDiPhot_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltMuMap_,   TrigHltMu_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiMuMap_, TrigHltDiMu_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,   TrigHltEl_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_, TrigHltDiEl_.get()));
-  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_, TrigHltElMu_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltPhotMap_,   TrigHltPhot_.get(),   TrigHltPhot_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiPhotMap_, TrigHltDiPhot_.get(), TrigHltDiPhot_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltMuMap_,     TrigHltMu_.get(),     TrigHltMu_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiMuMap_,   TrigHltDiMu_.get(),   TrigHltDiMu_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMap_,     TrigHltEl_.get(),     TrigHltEl_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltDiElMap_,   TrigHltDiEl_.get(),   TrigHltDiEl_prescale_.get()));
+  trigHltMapList_.push_back(TrigHltMapRcd(&TrigHltElMuMap_,   TrigHltElMu_.get(),   TrigHltElMu_prescale_.get()));
 
   if(triggerMenu_ == "2015"){
     #include "trigger2015.h"
@@ -1539,9 +1551,11 @@ void Tupel::processMETFilter(const edm::Event& iEvent){
 void Tupel::processTrigger(const edm::Event& iEvent){
   bool trigNameFilled = trigNames_.size();
   int ntrigs;
+  edm::Handle< pat::PackedTriggerPrescales > triggerPrescales;
   edm::Handle< edm::TriggerResults > HLTResHandle;
   std::vector<int> trigIndexList;
   if(triggerStat_) trigIndexList.reserve(30);
+  iEvent.getByToken(triggerPrescalesToken_, triggerPrescales);
   iEvent.getByToken(HLTTagToken_, HLTResHandle);  
 
   std::ofstream f;
@@ -1557,47 +1571,47 @@ void Tupel::processTrigger(const edm::Event& iEvent){
     for (int i = 0; i < ntrigs; i++) {
       if(analyzedEventCnt_==1) f << trigNames->triggerName(i) << "\n";
       if(triggerStat_){
-	if(!trigNameFilled) trigNames_[i] = trigNames->triggerName(i);
-	else if(trigNames_[i] != trigNames->triggerName(i)) trigStatValid_ = false;
+        if(!trigNameFilled) trigNames_[i] = trigNames->triggerName(i);
+        else if(trigNames_[i] != trigNames->triggerName(i)) trigStatValid_ = false;
       }
       //insert trigger name in the acceptance map if not yet in:
       if (HLTResHandle->accept(i)){
-	if(triggerStat_) trigIndexList.push_back(i);
-	if(trigNames->triggerName(i).find("HLT_Mu17_Mu8") != std::string::npos) *TrigHlt_ |= kMu17_Mu8_;
-	if(trigNames->triggerName(i).find("HLT_Mu17_TkMu8") != std::string::npos) *TrigHlt_ |= kMu17_TkMu8_;
-	if(trigNames->triggerName(i).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) *TrigHlt_ |= kElec17_Elec8_;
-	std::string thisTrigger = trigNames->triggerName(i);
-	fillTrig(std::string(trigNames->triggerName(i)));
+        if(triggerStat_) trigIndexList.push_back(i);
+        if(trigNames->triggerName(i).find("HLT_Mu17_Mu8") != std::string::npos) *TrigHlt_ |= kMu17_Mu8_;
+        if(trigNames->triggerName(i).find("HLT_Mu17_TkMu8") != std::string::npos) *TrigHlt_ |= kMu17_TkMu8_;
+        if(trigNames->triggerName(i).find("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL")!=std::string::npos) *TrigHlt_ |= kElec17_Elec8_;
+        std::string thisTrigger = trigNames->triggerName(i);
+        fillTrig(std::string(trigNames->triggerName(i)), triggerPrescales->getPrescaleForIndex(i));
       }
     }
 
     if(triggerStat_){
       if(trigIndexList.size()==0) trigAccept_[0][0] += 1;
-      for(std::vector<int>::iterator it1 = trigIndexList.begin();
-	  it1 != trigIndexList.end();
-	  ++it1){
-	trigAccept_[1 + *it1][0] += 1;
-	if(trigIndexList.size()==1) trigAccept_[1+*it1][1] += 1;
-	for(std::vector<int>::iterator it2 = trigIndexList.begin();
-	    it2 != trigIndexList.end();
-	    ++it2){
-	  trigAccept_[1 + *it1][2 + *it2] += 1;
-	}
+      for(std::vector<int>::iterator it1 = trigIndexList.begin(); it1 != trigIndexList.end(); ++it1){
+        trigAccept_[1 + *it1][0] += 1;
+        if(trigIndexList.size()==1) trigAccept_[1+*it1][1] += 1;
+        for(std::vector<int>::iterator it2 = trigIndexList.begin(); it2 != trigIndexList.end(); ++it2){
+          trigAccept_[1 + *it1][2 + *it2] += 1;
+        }
       }
     }
   }
 }
 
-void Tupel::fillTrig(const std::string& trigname){
-  for(std::vector<TrigHltMapRcd>::iterator itTrigHltMap = trigHltMapList_.begin();
-      itTrigHltMap != trigHltMapList_.end(); ++itTrigHltMap){
+void Tupel::fillTrig(const std::string& trigname, int triggerPrescalesForThisIndex){
+  for(std::vector<TrigHltMapRcd>::iterator itTrigHltMap = trigHltMapList_.begin(); itTrigHltMap != trigHltMapList_.end(); ++itTrigHltMap){ //loop on the list of all triggers
     const std::map<std::string, ULong64_t>& trigHltMap = *(itTrigHltMap->pMap);
     ULong64_t* pTrig = itTrigHltMap->pTrig;
-    for(std::map<std::string, ULong64_t>::const_iterator it = trigHltMap.begin();
-	it != trigHltMap.end(); ++it){
-      if(compTrigger(it->first.c_str(), trigname.c_str()))  *pTrig |= it->second;
+    std::vector<unsigned>* pPrescale = itTrigHltMap->pPrescale;
+    for(std::map<std::string, ULong64_t>::const_iterator it = trigHltMap.begin(); it != trigHltMap.end(); ++it){ //loop on the map with all trigger of one type (e.g. Photon)
+      if(compTrigger(it->first.c_str(), trigname.c_str())){
+        *pTrig |= it->second; //to this 'all type of a kind of trigger' we have one list with bit fields where we enable some while looking at the value
+        unsigned int bitPosition = log2(it->second);
+        if(pPrescale->size() <= bitPosition) pPrescale->resize(bitPosition+1); 
+        pPrescale->at(bitPosition) = triggerPrescalesForThisIndex; //And at the same position we add the prescale
       //      std::cout << it->first.c_str() << ", " <<  trigname.c_str() << " -> "
-      //		<< (compTrigger(it->first.c_str(), trigname.c_str()) ? "identical" : "different") << "\n";
+      //    << (compTrigger(it->first.c_str(), trigname.c_str()) ? "identical" : "different") << "\n";
+      }
     }
   }
 }
@@ -1738,7 +1752,7 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     iEvent.getByToken(eleVIdMapTokens_.at(iteElecID) ,ele_id_decisions.at(iteElecID));
   }
   int ElecFill=0;
-  std::auto_ptr<std::vector<pat::Electron> > electronColl( new std::vector<pat::Electron> (*electrons) );
+  std::unique_ptr<std::vector<pat::Electron> > electronColl( new std::vector<pat::Electron> (*electrons) );
   for (unsigned int j=0; j < electronColl->size();++j){
     pat::Electron & el = (*electronColl)[j];
     const auto elRefForID = electronsForID->ptrAt(j);
@@ -1930,7 +1944,7 @@ void Tupel::processElectrons(const edm::Event& iEvent){
 //Modified by Clement Leloup
 void Tupel::processTaus(){
 
-  std::auto_ptr<std::vector<pat::Tau> > tauColl( new std::vector<pat::Tau> (*taus) );
+  std::unique_ptr<std::vector<pat::Tau> > tauColl( new std::vector<pat::Tau> (*taus) );
   for (unsigned int j=0; j < tauColl->size();++j){
     pat::Tau & ta = (*tauColl)[j];
 
@@ -2268,7 +2282,7 @@ void Tupel::processPfCands()
 void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   EcalClusterLazyTools lazyTool(iEvent, iSetup, ecalHitEBToken_, ecalHitEEToken_, ecalHitESToken_ );
-  std::auto_ptr<std::vector<pat::Electron> > electronColl( new std::vector<pat::Electron> (*electrons) );
+  std::unique_ptr<std::vector<pat::Electron> > electronColl( new std::vector<pat::Electron> (*electrons) );
 
   for (unsigned j = 0; j < photons->size(); ++j){
 
@@ -2506,7 +2520,7 @@ Tupel::beginJob()
   writeHeader();
 
   myTree = new TTree("EventTree"," EventTree");
-  treeHelper_ = std::auto_ptr<TreeHelper>
+  treeHelper_ = std::unique_ptr<TreeHelper>
     (new TreeHelper(myTree, new TTree("Description", "Description"),
 		    new TTree("BitFields", "BitFields")));
 
@@ -2533,6 +2547,14 @@ Tupel::beginJob()
   ADD_BRANCH_D(TrigHltEl, "HLT Electron triggger bits. See BitField.TrigHltEl for bit description.");
   ADD_BRANCH_D(TrigHltDiEl, "HLT Dielectron triggger bits. See BitField.TrigHltDiEl for bit description.");
   ADD_BRANCH_D(TrigHltElMu, "HLT Muon + Electron triggger bits. See BitField.TrigHltElMu for bit description.");
+
+  ADD_BRANCH_D(TrigHltPhot_prescale, "HLT Photon triggger prescales for the corresponding trigger bits. See BitField.TrigHltPhot for bit description.");
+  ADD_BRANCH_D(TrigHltDiPhot_prescale, "HLT Diphoton triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiPhot for bit description.");
+  ADD_BRANCH_D(TrigHltMu_prescale, "HLT Muon triggger prescales for the corresponding trigger bits. See BitField.TrigHltMu for bit description.");
+  ADD_BRANCH_D(TrigHltDiMu_prescale, "HLT Dimuon triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiMu for bit description.");
+  ADD_BRANCH_D(TrigHltEl_prescale, "HLT Electron triggger prescales for the corresponding trigger bits. See BitField.TrigHltEl for bit description.");
+  ADD_BRANCH_D(TrigHltDiEl_prescale, "HLT Dielectron triggger prescales for the corresponding trigger bits. See BitField.TrigHltDiEl for bit description.");
+  ADD_BRANCH_D(TrigHltElMu_prescale, "HLT Muon + Electron triggger prescales for the corresponding trigger bits. See BitField.TrigHltElMu for bit description.");
 
   //Missing Energy
   treeHelper_->addDescription("MET", "PF MET");
@@ -2645,7 +2667,7 @@ Tupel::beginJob()
     ADD_BRANCH(GJetAk08MatchedPartonDR);
   }
 
-  //Exta generator information
+  //Extra generator information
   ADD_BRANCH_D(GPdfId1, "PDF Id for beam 1");
   ADD_BRANCH_D(GPdfId2, "PDF Id for beam 2");
   ADD_BRANCH_D(GPdfx1, "PDF x for beam 1");

@@ -16,14 +16,14 @@ using namespace std;
 
 /** Selection parameters **/
 
-static float minLepPt = 25;
+static float minLepPt = 20;
 
 
 enum {DoubleMu, SingleMu, DoubleE, HighPtE, SingleE, EMu, SinglePhoton, Ntrig}; //List of triggers used for our analysis
 //The lines below correspond to the triggerBits used in our analysis. These are all defined in the trigger2016.h file of the ntuple producer.
 static int trigDoubleMu[4] = {8,9,10,11};
 static int trigSingleMu[4] = {10,11,15,16};
-static int trigDoubleE[2] = {12,13};
+static int trigDoubleE[3] = {1,12,13};
 static int trigHighPtE[1] = {17};//Located in DoubleElectron
 static int trigSingleE[2] = {11,12};
 static int trigEMu[2] = {0,3}; //all DZ paths are still missing, as well as Mu12Ele23

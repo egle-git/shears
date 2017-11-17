@@ -16,7 +16,7 @@ using namespace std;
 
 /** Selection parameters **/
 
-static float minLepPt = 25;
+static float minLepPt = 20;
 
 
 enum {DoubleMu, SingleMu, DoubleE, HighPtE, SingleE, EMu, SinglePhoton, Ntrig}; //List of triggers used for our analysis

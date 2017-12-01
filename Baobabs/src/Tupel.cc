@@ -447,6 +447,7 @@ private:
   std::unique_ptr<std::vector<float> > GPhotPhi_;
   std::unique_ptr<std::vector<float> > GPhotE_;
   std::unique_ptr<std::vector<int> >   GPhotMotherId_;
+  std::unique_ptr<std::vector<float> > GPhotPrompt_;
   std::unique_ptr<std::vector<int> >   GPhotSt_;
   std::unique_ptr<std::vector<float> > GPhotIsoEDR03_;
   std::unique_ptr<std::vector<float> > GPhotIsoEDR04_;
@@ -1210,6 +1211,7 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
       GPhotE_->push_back(gen[i].energy());
       int motherId = gen[i].numberOfMothers() ? gen[i].mother()->pdgId() : 0 ;
       GPhotMotherId_->push_back(motherId);
+      GPhotPrompt_->push_back(gen[i].isPromptFinalState());
       GPhotSt_->push_back(gen[i].status());
 
       //--- search for stable particles around photon in DR=0.3,0.4 and 0.5 cone around the photon
@@ -2655,6 +2657,7 @@ Tupel::beginJob()
   ADD_BRANCH(GPhotPhi);
   ADD_BRANCH(GPhotE);
   ADD_BRANCH_D(GPhotMotherId, "Photon mother PDG Id. Filled only for first mother.");
+  ADD_BRANCH(GPhotPrompt);
   ADD_BRANCH(GPhotSt);
   ADD_BRANCH(GPhotIsoEDR03);
   ADD_BRANCH(GPhotIsoEDR04);

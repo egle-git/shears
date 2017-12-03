@@ -406,15 +406,15 @@ private:
 
   //Missing energy
   std::unique_ptr<std::vector<float> > METPt_;
-  std::unique_ptr<std::vector<float> > METPx_;
-  std::unique_ptr<std::vector<float> > METPy_;
-  std::unique_ptr<std::vector<float> > METPz_;
-  std::unique_ptr<std::vector<float> > METE_;
+  std::unique_ptr<std::vector<float> > METPhi_;
+  std::unique_ptr<std::vector<float> > METPtType1_;
+  std::unique_ptr<std::vector<float> > METPhiType1_;
+  std::unique_ptr<std::vector<float> > METPtType1XY_;
+  std::unique_ptr<std::vector<float> > METPhiType1XY_;
+  std::unique_ptr<std::vector<float> > METPtRaw_;
+  std::unique_ptr<std::vector<float> > METPhiRaw_;
   std::unique_ptr<std::vector<float> > GMETPt_;
-  std::unique_ptr<std::vector<float> > GMETPx_;
-  std::unique_ptr<std::vector<float> > GMETPy_;
-  std::unique_ptr<std::vector<float> > GMETPz_;
-  std::unique_ptr<std::vector<float> > GMETE_;
+  std::unique_ptr<std::vector<float> > GMETPhi_;
   std::unique_ptr<std::vector<float> > METsigx2_;
   std::unique_ptr<std::vector<float> > METsigxy_;
   std::unique_ptr<std::vector<float> > METsigy2_;
@@ -1154,34 +1154,25 @@ void Tupel::processMET(const edm::Event& iEvent){
 //      }
 
     if(!metH.isValid()) continue;
-    
-	//std::cout<<"MET"<<imet<<"  " /*<<*metSrcsToken[imet]<< "  " <<metH->ptrAt(0)->pt() */ <<std::endl;
-	//std::cout
-	/*<< " GMETE_ " << metH->ptrAt(0)->genMET()->energy()*/
-	/*<< " GMETPt_ " << metH->ptrAt(0)->genMET()->pt() << " GMETPx_ " << metH->ptrAt(0)->genMET()->px()*/
-	//<< " met.pt() " << metH->ptrAt(0)->pt() /*<< " met.px() " << metH->ptrAt(0)->px()*/
-	//<< " met.uncorPt() " << metH->ptrAt(0)->uncorPt()
-	//<< " corr Pt " << metH->ptrAt(0)->pt() - metH->ptrAt(0)->uncorPt()
-	/*<< " met.uncorPhi() " << metH->ptrAt(0)->uncorPhi()*/
-	/*<< " met.uncorPx() " << metH->ptrAt(0)->uncorPx()*/
-	//<< std::endl;
+        const pat::MET &met = metH->front();
+      
+      METPt_->push_back(met.pt());
+      METPhi_->push_back(met.phi());
+      METPtType1_->push_back(met.corPt(pat::MET::Type1));
+      METPhiType1_->push_back(met.corPhi(pat::MET::Type1));
+      METPtType1XY_->push_back(met.corPt(pat::MET::Type1XY));
+      METPhiType1XY_->push_back(met.corPhi(pat::MET::Type1XY));
+      METPtRaw_->push_back(met.uncorPt());
+      METPhiRaw_->push_back(met.uncorPhi());
 
-    METPt_->push_back(metH->ptrAt(0)->pt());
-    METPx_->push_back(metH->ptrAt(0)->px());
-    METPy_->push_back(metH->ptrAt(0)->py());
-    METPz_->push_back(metH->ptrAt(0)->pz());
-    METE_->push_back(metH->ptrAt(0)->energy());
-    METsigx2_->push_back(metH->ptrAt(0)->getSignificanceMatrix()(0,0));
-    METsigxy_->push_back(metH->ptrAt(0)->getSignificanceMatrix()(0,1));
-    METsigy2_->push_back(metH->ptrAt(0)->getSignificanceMatrix()(1,1));
-    METsig_->push_back(metH->ptrAt(0)->significance());
-    if(!*EvtIsRealData_){
-      GMETPt_->push_back(metH->ptrAt(0)->genMET()->pt());
-      GMETPx_->push_back(metH->ptrAt(0)->genMET()->px());
-      GMETPy_->push_back(metH->ptrAt(0)->genMET()->py());
-      GMETPz_->push_back(metH->ptrAt(0)->genMET()->pz());
-      GMETE_->push_back(metH->ptrAt(0)->genMET()->energy());
-    }
+      METsigx2_->push_back(met.getSignificanceMatrix()(0,0));
+      METsigxy_->push_back(met.getSignificanceMatrix()(0,1));
+      METsigy2_->push_back(met.getSignificanceMatrix()(1,1));
+      METsig_->push_back(met.significance());
+      if(!*EvtIsRealData_){
+        GMETPt_->push_back(met.genMET()->pt());
+        GMETPhi_->push_back(met.genMET()->phi());
+      }
   }
 }
 
@@ -2676,10 +2667,13 @@ Tupel::beginJob()
   //Missing Energy
   treeHelper_->addDescription("MET", "PF MET");
   ADD_BRANCH(METPt);
-  ADD_BRANCH(METPx);
-  ADD_BRANCH(METPy);
-  ADD_BRANCH(METPz);
-  ADD_BRANCH(METE);
+  ADD_BRANCH(METPhi);
+  ADD_BRANCH(METPtType1);
+  ADD_BRANCH(METPhiType1);
+  ADD_BRANCH(METPtType1XY);
+  ADD_BRANCH(METPhiType1XY);
+  ADD_BRANCH(METPtRaw);
+  ADD_BRANCH(METPhiRaw);
   ADD_BRANCH(METsigx2);
   ADD_BRANCH(METsigxy);
   ADD_BRANCH(METsigy2);
@@ -2688,10 +2682,7 @@ Tupel::beginJob()
   //Generator MET
   treeHelper_->addDescription("MET", "Generator level MET");
   ADD_BRANCH(GMETPt);
-  ADD_BRANCH(GMETPx);
-  ADD_BRANCH(GMETPy);
-  ADD_BRANCH(GMETPz);
-  ADD_BRANCH(GMETE);
+  ADD_BRANCH(GMETPhi);
 
   //Generator level leptons.
   treeHelper_->addDescription("GLepDr01", "Generator-level leptons. Muons and electrons and their antiparticles are dressed using a cone of radius R = 0.1");

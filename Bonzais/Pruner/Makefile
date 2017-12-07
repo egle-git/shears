@@ -20,7 +20,7 @@ EXE=pruner
 all: $(EXE) $(SO)
 
 clean:
-	-rm $(EXE) $(OBJS) $(DEPS)
+	-rm $(EXE) $(OBJS) $(DEPS) $(SO)
 
 $(EXE): $(OBJS)
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@

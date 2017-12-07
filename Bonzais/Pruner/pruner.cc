@@ -5,9 +5,17 @@
 
 #include "Pruner.h"
 
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 #include <getopt.h>
+#include <unistd.h> // readlink
+
+#include <TUnixSystem.h>
+#include <TSystemDirectory.h>
 
 using namespace std;
 
@@ -100,6 +108,8 @@ struct Options{
 };
 
 int parse_cmd_line(Options& cat, int argc, char* argv[]);
+std::string findShearsPath();
+std::vector<std::string> discoverPlugins(const std::string &shearsPath);
 
 int main(int argc, char* argv[]){
 
@@ -120,8 +130,17 @@ int main(int argc, char* argv[]){
     o.selection = 0;
   }
 
-  Pruner::load("./VJetPruner.so");
-  Pruner::load("./TagProbePruner.so");
+  const std::string shearsPath = findShearsPath();
+  if (o.verbose > 0) {
+    std::cerr << "Loading pruners from: " << shearsPath << std::endl;
+  }
+  const std::vector<std::string> plugins = discoverPlugins(shearsPath);
+  for (auto &path : plugins) {
+    if (o.verbose > 0) {
+      std::cerr << "Loading pruner: " << path << std::endl;
+    }
+    Pruner::load(path);
+  }
 
   Pruner* cat = Pruner::create(o.selection, o.subselection, o.primary_dataset);
 
@@ -318,3 +337,65 @@ int parse_cmd_line(Options& o, int argc, char* argv[]){
   return optind;
 }
 
+std::string parentDir(const std::string &path) {
+  // Remove everything after and including the last \ or /
+  return path.substr(0, path.find_last_of("/\\"));
+}
+
+std::string findShearsPath() {
+  // Find out where shears is located
+  std::string shearsPath = "."; // Fallback
+  if (std::getenv("SHEARS") != nullptr) {
+    // Try to get the path from the environment first
+    shearsPath = std::getenv("SHEARS");
+  } else {
+    // Try to discover it from the location of the program
+    char buffer[2048];
+    if (readlink("/proc/self/exe", buffer, sizeof(buffer)) > 0) {
+      // On success, find 3nd parent dir of the program
+      shearsPath = parentDir(parentDir(parentDir(buffer)));
+    }
+  }
+  return shearsPath;
+}
+
+std::vector<std::string> readIndex(const std::string &dir) {
+  // Reads the pruner index file for the given folder
+  std::vector<std::string> plugins;
+  std::ifstream in(dir + "/pruners.txt");
+  while (in) {
+    std::string line;
+    std::getline(in, line);
+    if (!line.empty()) {
+      plugins.push_back(dir + "/" + line + ".so");
+    }
+  }
+  in.close();
+  return plugins;
+}
+
+std::vector<std::string> discoverPlugins(const std::string &shearsPath) {
+  // Loop on all subdirs and read pruner index files
+  std::vector<std::string> plugins;
+
+  TSystemDirectory shearsDir(shearsPath.c_str(), shearsPath.c_str());
+  TIter next(shearsDir.GetListOfFiles());
+  while (const TObject *fileObject = next()) {
+    const TSystemFile *file = dynamic_cast<const TSystemFile *>(fileObject);
+    if (file->IsDirectory()) {
+
+      // We found a subdir!
+      const std::string name = file->GetName();
+      if (name[0] == '.') {
+        // Skip ., .. and hidden folders
+        continue;
+      }
+      const std::string dirPath = shearsPath + "/" + name;
+      std::vector<std::string> newPlugins = readIndex(dirPath);
+      std::move(newPlugins.begin(), newPlugins.end(),
+                std::back_inserter(plugins));
+    }
+  }
+
+  return plugins;
+}

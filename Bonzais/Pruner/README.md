@@ -80,7 +80,7 @@ selection. The description of the class to write follows:
 using namespace std;
 #define EventTree_cxx
 #include "EventTree.h"
-void EventTree::Loop(){} //To make the compiler/linker happy.
+void EventTree::Loop(){} //To make the linker happy.
 
 class MyPruner: public Pruner, EventTree{
 
@@ -138,10 +138,15 @@ one reads the list of branches to copy from a text file. This default branch
 filter covers most of the needs and its usage is described in the previous section "Using
 Pruner to skim event content".
 
-One the selection class written and compiled, it can be used from the pruner
-application using the --selection option. Note that the pruner application will
-need to be recompiled, which is done automatically when the make command is run
-in the Pruner folder. The new Pruner should appear in the selection list
+The selection class should be compiled to a shared library (`.so`). The pruner
+executable will search analysis folders for a file named `pruners.txt` that
+should contain a list of all available pruners (one per line, without the `.so`).
+The pruners are loaded dynamically and somewhat isolated from each other
+(function names won't clash). One can check that a pruner is loaded by checking
+the output of `pruner --verbose`.
+
+Once the selection class written, it can be used from the pruner application
+using the --selection option. The new Pruner should appear in the selection list
 displayed with the command,
 
 `./pruner --list-selections` .

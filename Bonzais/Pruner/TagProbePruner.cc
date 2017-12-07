@@ -10,8 +10,10 @@ using namespace std;
 //to access the EventTree contents. EventTree::Init(TTree*)
 //should be called by the init(Tree*) method to link these
 //fields to the EventTree contents.
-//#define EventTree_cxx
+#define EventTree_cxx
 #include "EventTree.h"
+void EventTree::Loop(){} //To make the linker happy.
+
 /** Selection parameters **/
 enum {SingleMu,SingleE, Ntrig}; //List of triggers used for our analysis
 //The lines below correspond to the triggerBits used in our analysis. These are all defined in the trigger2016.h file of the ntuple producer.

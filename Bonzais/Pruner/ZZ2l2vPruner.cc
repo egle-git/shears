@@ -10,9 +10,9 @@ using namespace std;
 //to access the EventTree contents. EventTree::Init(TTree*)
 //should be called by the init(Tree*) method to link these
 //fields to the EventTree contents.
-/////#define EventTree_cxx
+#define EventTree_cxx
 #include "EventTree.h"
-/////void EventTree::Loop(){} //To make the compiler/linker happy. ---> This line was apparently not necessary since it's already included in another file.
+void EventTree::Loop(){} //To make the linker happy.
 
 /** Selection parameters **/
 

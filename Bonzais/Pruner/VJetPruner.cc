@@ -12,7 +12,7 @@ using namespace std;
 //fields to the EventTree contents.
 #define EventTree_cxx
 #include "EventTree.h"
-void EventTree::Loop(){} //To make the compiler/linker happy.
+void EventTree::Loop(){} //To make the linker happy.
 
 /** Selection parameters **/
 

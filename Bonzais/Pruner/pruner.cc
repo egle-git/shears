@@ -120,6 +120,9 @@ int main(int argc, char* argv[]){
     o.selection = 0;
   }
 
+  Pruner::load("./VJetPruner.so");
+  Pruner::load("./TagProbePruner.so");
+
   Pruner* cat = Pruner::create(o.selection, o.subselection, o.primary_dataset);
 
   if(!cat){

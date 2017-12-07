@@ -20,6 +20,7 @@
 #include "Pruner.h"
 
 #include <stdio.h>
+#include <dlfcn.h> // dlopen
 
 using std::cout;
 using std::cerr;
@@ -544,6 +545,27 @@ bool Pruner::nextEvent(){
   }
 
   return chain_.GetEntry(ievent_);
+}
+
+void Pruner::load(const std::string &path) {
+  // Load the library
+  void *lib = dlopen(path.c_str(), RTLD_NOW);
+  if (lib == nullptr) {
+    std::cerr << "Warning: Could not load \'" << path << "\':" << std::endl;
+    std::cerr << dlerror() << std::endl;
+    return;
+  }
+  // Get a pointer to the shearsLoadPlugin() function
+  void (*shearsLoadPlugin)() = (void (*)()) dlsym(lib, "shearsLoadPlugin");
+  if (shearsLoadPlugin == nullptr) {
+    std::cerr << "Warning: Could not load \'" << path << "\':" << std::endl;
+    std::cerr << dlerror() << std::endl;
+    dlclose(lib);
+    return;
+  }
+  // Call the shearsLoadPlugin() function
+  shearsLoadPlugin();
+  std::cerr << "Info: Plugin \'" << path << "\' loaded" << std::endl;
 }
 
 void Pruner::listSelections(std::ostream& o){

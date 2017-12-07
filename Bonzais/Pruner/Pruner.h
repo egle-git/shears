@@ -15,7 +15,9 @@
 #include "ShearsTChain.h"
 
 #define DECLARE_PRUNER(Class, description)				\
-  static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description);
+  extern "C" void shearsLoadPlugin() { \
+    static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description); \
+  }
 
 class TFile;
 
@@ -240,6 +242,12 @@ public:
       primaryDataset_ = primary_dataset;
     }
   }
+
+  /**
+   * Loads a pruner from a shared object.
+   * @param path The path of the .so file to load the pruner from.
+   */
+  static void load(const std::string &path);
   
   /** Creates a Pruner instance
    * @param className, name of the selection class. It

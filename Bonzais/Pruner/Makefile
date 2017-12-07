@@ -4,7 +4,7 @@
 
 .PHONY: all clean
 
-SOURCES=$(shell ls *.cc)
+SOURCES=pruner.cc Pruner.cc ShearsTChain.cc
 OBJS=$(addsuffix .o, $(basename $(SOURCES)))
 DEPS=$(addsuffix .d, $(basename $(SOURCES)))
 SO=$(addsuffix .so, $(shell cat pruners.txt))

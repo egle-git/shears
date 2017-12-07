@@ -20,7 +20,7 @@ EXE=pruner
 all: $(EXE) $(SO)
 
 clean:
-	-rm $(EXE) $(OBJS) $(DEPS) $(SO)
+	$(RM) $(EXE) *.o *.d *.so
 
 $(EXE): $(OBJS)
 	$(LINK.cc) $^ $(LOADLIBES) $(LDLIBS) -o $@
@@ -31,7 +31,7 @@ $(EXE): $(OBJS)
 	$(ROOTCINT) -f $@ -c -I. -I$(CINT_INCDIR) $(DEFINES) $^
 
 %.so: %.o
-	$(LINK.cc) $(CXXFLAGS) -shared -o $@ $^
+	$(LINK.cc) $(LOADLIBES) $(LDLIBS) -shared -o $@ $^
 
 echo_%:
 	@echo $* = $($*)

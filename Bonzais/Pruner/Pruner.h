@@ -14,9 +14,13 @@
 #include "TObject.h"
 #include "ShearsTChain.h"
 
-#define DECLARE_PRUNER(Class, description)				\
-  extern "C" void shearsLoadPlugin() { \
-    static Pruner::Registrator<Class> prunerRegistration ## __LINE__  (#Class, description); \
+#define DECLARE_PRUNER(Class, Descr)				\
+  extern "C" Pruner::ClassRecord *shearsLoadPlugin() { \
+    Pruner::ClassRecord *rcd = new Pruner::ClassRecord; \
+    rcd->className = #Class; \
+    rcd->description = Descr; \
+    rcd->instance = new Class(); \
+    return rcd; \
   }
 
 class TFile;
@@ -416,19 +420,6 @@ public:
     static std::map<std::string, Pruner::ClassRecord> instance;
     return instance;
   }
-
-  template<typename T>
-  class Registrator{
-  public:
-    Registrator(const char* className, const char* description){
-      ClassRecord rcd;
-      rcd.className = className;
-      rcd.description = description;
-      rcd.instance = new T();
-      rcd.instance->className_ = className;
-      daughtersMap()[className] = rcd;
-    }
-  };
   
 protected:
   /** Hoock methods to override in the derived classes.

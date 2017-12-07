@@ -556,7 +556,7 @@ void Pruner::load(const std::string &path) {
     return;
   }
   // Get a pointer to the shearsLoadPlugin() function
-  void (*shearsLoadPlugin)() = (void (*)()) dlsym(lib, "shearsLoadPlugin");
+  auto shearsLoadPlugin = (ClassRecord * (*)()) dlsym(lib, "shearsLoadPlugin");
   if (shearsLoadPlugin == nullptr) {
     std::cerr << "Warning: Could not load \'" << path << "\':" << std::endl;
     std::cerr << dlerror() << std::endl;
@@ -564,8 +564,14 @@ void Pruner::load(const std::string &path) {
     return;
   }
   // Call the shearsLoadPlugin() function
-  shearsLoadPlugin();
-  std::cerr << "Info: Plugin \'" << path << "\' loaded" << std::endl;
+  ClassRecord *rcd = shearsLoadPlugin();
+  if (rcd == nullptr) {
+    std::cerr << "Warning: Could not load plugin from \'" << path << "\':" << std::endl;
+    std::cerr << "shearsLoadPlugin() returned a null pointer" << std::endl;
+    dlclose(lib);
+    return;
+  }
+  daughtersMap()[rcd->className] = *rcd;
 }
 
 void Pruner::listSelections(std::ostream& o){

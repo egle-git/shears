@@ -352,8 +352,8 @@ std::string findShearsPath() {
     // Try to discover it from the location of the program
     char buffer[2048];
     if (readlink("/proc/self/exe", buffer, sizeof(buffer)) > 0) {
-      // On success, find 3nd parent dir of the program
-      shearsPath = parentDir(parentDir(parentDir(buffer)));
+      // On success, find 2nd parent dir of the program
+      shearsPath = parentDir(parentDir(buffer));
     }
   }
   return shearsPath;

@@ -40,6 +40,8 @@
 #include "EgammaAnalysis/ElectronTools/interface/EGammaCutBasedEleId.h"
 #include "EgammaAnalysis/ElectronTools/interface/ElectronEffectiveArea.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
@@ -770,8 +772,8 @@ private:
   
 
   //bits
-  unsigned kMuIdLoose_;
-  unsigned kMuIdCustom_;
+  unsigned kMuIdLoose_ = 0;
+  unsigned kMuIdCustom_ = 1;
   unsigned kGlobMu_;
   unsigned kTkMu_;
   unsigned kPfMu_;
@@ -851,6 +853,8 @@ private:
     Tupel* tupel_;
   };
 
+  EffectiveAreas effectiveAreas_;
+
 };
 
 //using namespace std;
@@ -889,7 +893,8 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   hltListed_(false),
   trigStatValid_(true),
   weightsFromLhe_(false),
-  checkOnTheFlyMetFilters_(iConfig.getUntrackedParameter<std::string>("checkOnFlyMETfilters","off"))
+  checkOnTheFlyMetFilters_(iConfig.getUntrackedParameter<std::string>("checkOnFlyMETfilters","off")),
+  effectiveAreas_( (iConfig.getParameter<edm::FileInPath>("effAreasConfigFile")).fullPath() )
 
 {
 
@@ -1858,9 +1863,9 @@ void Tupel::processElectrons(const edm::Event& iEvent){
       
     ElId_->push_back(elecid);
 
-    dEtaIn_ = el.deltaEtaSuperClusterTrackAtVtx();
-    dPhiIn_ = el.deltaPhiSuperClusterTrackAtVtx();
-    hOverE_ = el.hcalOverEcal();
+    dEtaIn_ = std::abs(el.superCluster().isNonnull() && el.superCluster()->seed().isNonnull() ? el.deltaEtaSuperClusterTrackAtVtx() - el.superCluster()->eta() + el.superCluster()->seed()->eta() : std::numeric_limits<float>::max());
+    dPhiIn_ = std::abs(el.deltaPhiSuperClusterTrackAtVtx());
+    hOverE_ = el.hadronicOverEm();
     sigmaIetaIeta_ = el.sigmaIetaIeta();
     full5x5_sigmaIetaIeta_ =  el.full5x5_sigmaIetaIeta();
     if( el.ecalEnergy() == 0 ){
@@ -1936,9 +1941,11 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElEcalIso_->push_back(el.ecalIso());
     ElEcalPfIso_->push_back(el.ecalPFClusterIso());
 
-    double aeff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
+    //double aeff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
+    double aeff = effectiveAreas_.getEffectiveArea(abs(el.superCluster()->eta()));
     ElAEff_->push_back(aeff);
 
+/*
     const double chIso03_ = el.chargedHadronIso();
     const double nhIso03_ = el.neutralHadronIso();
     const double phIso03_ = el.photonIso();
@@ -1949,11 +1956,16 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElPfIsoPuChHad_->push_back(puChIso03_);
     ElPfIsoRaw_->push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
     ElPfIsoDbeta_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
+*/
+
+    reco::GsfElectron::PflowIsolationVariables pfIso = el.pfIsolationVariables();
+
 
     *EvtFastJetRho_ =  rhoIso;
     double rhoPrime = std::max(0., rhoIso);
 
-    ElPfIsoRho_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - rhoPrime*(aeff)) )/ el.pt());
+    //ElPfIsoRho_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - rhoPrime*(aeff)) )/ el.pt());
+    ElPfIsoRho_->push_back(( pfIso.sumChargedHadronPt + std::max(0.0, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rhoPrime*aeff) )/ el.pt());
 
 
     ElDr03TkSumPt_->push_back(el.dr03TkSumPt());

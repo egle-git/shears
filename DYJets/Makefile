@@ -37,7 +37,7 @@ RTL = -Wl,-rpath,
 LIBDIRLISTRTL = $(addprefix $(RTL), $(LIBDIR))
 
 SRCDIR = Sources/
-INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
+INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include -I../Bonzais
 
 CXX           = g++ -std=c++0x
 CXXFLAGS      = -fPIC
@@ -57,7 +57,9 @@ SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
 DEPS    = $(SRCLIST:.cc=.d)
 DEPS    += runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d Sources/testDecompVar.d \
-Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d
+Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d ZJetPruner.d
+
+PRUNERS = $(addsuffix .so, $(shell cat pruners.txt))
 
 .PHONY: all clean
 
@@ -67,7 +69,8 @@ runUnfoldingZJets  \
 runCombination \
 testDecompVar \
 runIntegralCheck \
-plotCrossSections
+plotCrossSections \
+$(PRUNERS)
 
 #in untested branch:
 # runCombination \
@@ -79,6 +82,9 @@ plotCrossSections
 # ===========================================================================
 %.o: %.cc
 	$(CXX) -c $< -o $@ $(CXXFLAGS) $(INCDIR)
+
+%.so: %.o
+	$(CXX) $(ROOTCFLAGS) -shared -o $@ $^
 
 #I'm not sure why this generic rule does not work...
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
@@ -116,11 +122,11 @@ testSectionConfig: testSectionConfig.cc
 
 # ===========================================================================
 clean:
-	rm -f *.o Sources/*.o
+	$(RM) *.o Sources/*.o
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:
-	rm -f *.d Sources/*.d
+	$(RM) *.d Sources/*.d
 	$(MAKE) -C RooUnfold clean
 
 echo_%:

@@ -1,3 +1,2 @@
-VJetPruner
 TagProbePruner
 ZZ2l2vPruner

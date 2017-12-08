@@ -26,19 +26,13 @@ opt.inputFiles = [
 #'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
 #"file:/tmp/hbrun/theDYfile.root",
 #"file:/tmp/hbrun/thePhotonData.root"
-#"file:/afs/cern.ch/work/n/npostiau/event_files/GGH1000/MC_GGH1000.root"
-#"file:/afs/cern.ch/work/n/npostiau/event_files/dataDoubleMu2016B/dataDoubleMu2016B.root"
-"file:/afs/cern.ch/work/n/npostiau/event_files/dataDoubleEle2016B/dataDoubleEle2016B.root"
-#"file:/afs/cern.ch/work/n/npostiau/event_files/codeDiscrepancies/missing_ggH1000_mumu.root"
-#"file:/afs/cern.ch/work/n/npostiau/event_files/dataSingleMu2016B/dataSingleMu2016B.root"
-#"file:/afs/cern.ch/work/n/npostiau/event_files/DYJetsLLM50/DYJetsLLM50.root"
 #'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-#opt.maxEvents = 10000
+opt.maxEvents = 10000
 
 opt.parseArguments()
 
@@ -61,7 +55,7 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(opt.maxEvents))
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('/afs/cern.ch/work/n/npostiau/event_files/dataDoubleEle2016B/ntuple_dataDoubleEle2016B.root' )
+                                   fileName = cms.string('ntuple.root' )
 )
 
 if opt.isMC < 0 and len(process.source.fileNames) > 0:

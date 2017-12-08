@@ -1941,30 +1941,14 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElEcalIso_->push_back(el.ecalIso());
     ElEcalPfIso_->push_back(el.ecalPFClusterIso());
 
-    //double aeff = ElectronEffectiveArea::GetElectronEffectiveArea(ElectronEffectiveArea::kEleGammaAndNeutralHadronIso03, el.superCluster()->eta(), ElectronEffectiveArea::kEleEAData2012);
     double aeff = effectiveAreas_.getEffectiveArea(abs(el.superCluster()->eta()));
     ElAEff_->push_back(aeff);
 
-/*
-    const double chIso03_ = el.chargedHadronIso();
-    const double nhIso03_ = el.neutralHadronIso();
-    const double phIso03_ = el.photonIso();
-    const double puChIso03_= el.puChargedHadronIso();
-    ElPfIsoChHad_->push_back(chIso03_);
-    ElPfIsoNeutralHad_->push_back(nhIso03_);
-    ElPfIsoIso_->push_back(phIso03_);
-    ElPfIsoPuChHad_->push_back(puChIso03_);
-    ElPfIsoRaw_->push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
-    ElPfIsoDbeta_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
-*/
-
     reco::GsfElectron::PflowIsolationVariables pfIso = el.pfIsolationVariables();
-
 
     *EvtFastJetRho_ =  rhoIso;
     double rhoPrime = std::max(0., rhoIso);
 
-    //ElPfIsoRho_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - rhoPrime*(aeff)) )/ el.pt());
     ElPfIsoRho_->push_back(( pfIso.sumChargedHadronPt + std::max(0.0, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rhoPrime*aeff) )/ el.pt());
 
 

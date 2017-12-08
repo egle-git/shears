@@ -36,6 +36,15 @@ copyToPNFS.sh
 # git will ignore the config files
 *.cfg
 
+# Ignore everything in the Bonzais directory...
+Bonzais/*
+# Except the following:
+!Bonzais/Makefile
+!Bonzais/README.md
+!Bonzais/*.h
+!Bonzais/*.cc
+!Bonzais/*.txt
+
 # git will not consider the following directory:
 
 # ignores input data files

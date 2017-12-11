@@ -1946,10 +1946,21 @@ void Tupel::processElectrons(const edm::Event& iEvent){
 
     reco::GsfElectron::PflowIsolationVariables pfIso = el.pfIsolationVariables();
 
+    const double chIso03_ = pfIso.sumChargedHadronPt;
+    const double nhIso03_ = pfIso.sumNeutralHadronEt;
+    const double phIso03_ = pfIso.sumPhotonEt;
+    const double puChIso03_= pfIso.sumPUPt;
+    ElPfIsoChHad_->push_back(chIso03_);
+    ElPfIsoNeutralHad_->push_back(nhIso03_);
+    ElPfIsoIso_->push_back(phIso03_);
+    ElPfIsoPuChHad_->push_back(puChIso03_);
+    ElPfIsoRaw_->push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
+    ElPfIsoDbeta_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
+
     *EvtFastJetRho_ =  rhoIso;
     double rhoPrime = std::max(0., rhoIso);
 
-    ElPfIsoRho_->push_back(( pfIso.sumChargedHadronPt + std::max(0.0, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rhoPrime*aeff) )/ el.pt());
+    ElPfIsoRho_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - rhoPrime*aeff) )/ el.pt());
 
 
     ElDr03TkSumPt_->push_back(el.dr03TkSumPt());

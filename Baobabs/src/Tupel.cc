@@ -2108,12 +2108,12 @@ void Tupel::processJets(){
     JetAk04JecUncUp_->push_back(unc);
     JetAk04JecUncDwn_->push_back(unc);
     double tempJetID=0;
-    if( abs(jet.eta())<2.4){
+    if( std::abs(jet.eta())<2.4){
       if(chf>0 && nhf<0.99 && cmult>0.0 && cemf<0.99 && nemf<0.99 && nconst>1) tempJetID=1;
       if((chf>0)&&(nhf<0.95)&&(cmult>0.0)&&(cemf<0.99)&&(nemf<0.95)&&(nconst>1)) tempJetID=2;
       if((chf>0)&&(nhf<0.9)&&(cmult>0.0)&&(cemf<0.99)&&(nemf<0.9)&&(nconst>1)) tempJetID=3;
     }
-    if( abs(jet.eta())>=2.4){
+    if( std::abs(jet.eta())>=2.4){
       if ((nhf<0.99)&&(nemf<0.99)&&(nconst>1))tempJetID=1;
       if ((nhf<0.95)&&(nemf<0.95)&&(nconst>1))tempJetID=2;
       if ((nhf<0.9)&&(nemf<0.9)&&(nconst>1))tempJetID=3;

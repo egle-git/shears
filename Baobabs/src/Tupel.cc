@@ -1941,7 +1941,7 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElEcalIso_->push_back(el.ecalIso());
     ElEcalPfIso_->push_back(el.ecalPFClusterIso());
 
-    double aeff = effectiveAreas_.getEffectiveArea(abs(el.superCluster()->eta()));
+    double aeff = effectiveAreas_.getEffectiveArea(std::abs(el.superCluster()->eta()));
     ElAEff_->push_back(aeff);
 
     reco::GsfElectron::PflowIsolationVariables pfIso = el.pfIsolationVariables();

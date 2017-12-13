@@ -1095,8 +1095,10 @@ void Tupel::readEvent(const edm::Event& iEvent){
     //get rho information
     iEvent.getByToken(mSrcRhoToken_, rho);
     
-    rhoIso=99;
+    rhoIso=-1;
     if(!rho.failedToGet()) rhoIso = *rho;
+    *EvtFastJetRho_ =  rhoIso;
+
     
     //get beam spot information
     iEvent.getByToken(beamSpotToken_, beamSpotHandle);
@@ -1763,8 +1765,7 @@ void Tupel::processMuons(){
 	Aecal = 0.074;   // substitute EB value
 	Ahcal = 0.023;   // substitute EE value
       }
-      double theRho = *rho;
-      float muonIsoRho = mu[j].isolationR03().sumPt + std::max(0.,(mu[j].isolationR03().emEt -Aecal*(theRho))) + std::max(0.,(mu[j].isolationR03().hadEt-Ahcal*(theRho)));
+      float muonIsoRho = mu[j].isolationR03().sumPt + std::max(0.,(mu[j].isolationR03().emEt -Aecal*(rhoIso))) + std::max(0.,(mu[j].isolationR03().hadEt-Ahcal*(rhoIso)));
       double dbeta = muonIsoRho/mu[j].pt();
       MuIsoRho_->push_back(dbeta);
 
@@ -1957,7 +1958,6 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElPfIsoRaw_->push_back(( chIso03_ + nhIso03_ + phIso03_ ) / el.pt());
     ElPfIsoDbeta_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - 0.5*puChIso03_) )/ el.pt());
 
-    *EvtFastJetRho_ =  rhoIso;
     double rhoPrime = std::max(0., rhoIso);
 
     ElPfIsoRho_->push_back(( chIso03_ + std::max(0.0, nhIso03_ + phIso03_ - rhoPrime*aeff) )/ el.pt());

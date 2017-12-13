@@ -221,6 +221,7 @@ protected:
   int nRead_;
   
 public:
+  struct ClassRecord;
 
   int verbose_;
     
@@ -253,6 +254,24 @@ public:
    */
   static void load(const std::string &path);
   
+  /** Finds the ClassRecord that corresponds to the requested className
+   * @param className, name of the selection class. It
+   * must be a class inherited from Pruner and
+   * registered with the macro DECLARE_PRUNER(class, description)
+   */
+  static ClassRecord *find(const std::string &className){
+    //TODO: all selectors are created on registration.
+    //Memory footprint can be optimised by creating the
+    //instance on demand.
+    std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
+    if (res != daughtersMap().end()) {
+      return &res->second;
+    } else {
+      std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
+      std::exit(EXIT_FAILURE);
+    }
+  }
+
   /** Creates a Pruner instance
    * @param className, name of the selection class. It
    * must be a class inherited from Pruner and
@@ -264,18 +283,7 @@ public:
    * on the dataset.
    */
   static Pruner* create(const char* className, const char* subSelection = 0, const char* primary_dataset = 0){
-    //TODO: all selectors are created on registration.
-    //Memory footprint can be optimised by creating the
-    //instance on demand.
-    Pruner* pruner = 0;
-    if(!className){
-      pruner = new Pruner;
-      pruner->className_ = "Pruner";
-    } else{
-      std::map<std::string, Pruner::ClassRecord>::iterator res = daughtersMap().find(className);
-      if(res != daughtersMap().end()) pruner = res->second.instance;
-      else std::cerr << "Selection " << className << " was not found. Available selections can be listed with the option --list-selections\n";
-    }
+    Pruner *pruner = className != nullptr ? find(className)->instance : new Pruner;
 
     if(pruner){
       pruner->declareSubSelections();
@@ -289,7 +297,7 @@ public:
     }
     return pruner;
   }
-  
+
 //  /** Limits the number of events to copy.
 //   * @param val maximum number of events
 //   */
@@ -410,6 +418,7 @@ public:
   
   struct ClassRecord{
     ClassRecord(): instance(0){}
+    std::string pluginPath;
     std::string className;
     std::string description;
     Pruner* instance;

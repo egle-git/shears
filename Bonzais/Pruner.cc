@@ -571,6 +571,7 @@ void Pruner::load(const std::string &path) {
     dlclose(lib);
     return;
   }
+  rcd->pluginPath = path;
   daughtersMap()[rcd->className] = *rcd;
 }
 

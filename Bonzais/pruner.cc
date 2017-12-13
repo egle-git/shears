@@ -54,6 +54,8 @@ void help(){
     "                             line must contain a run number followed by an event\n"
     "                             number. Line starting with a '#' sign are \n"
     "                             considered as comments and are ignored.\n"
+    "--list-deps                  Prints a list of the files that have to be present in\n"
+    "                             order to use the given selection.\n"
     "\n"
     "\n"
     "GENERAL OPTIONS\n"
@@ -83,13 +85,14 @@ void help(){
 }
 
 struct Options{
-  Options(): verbose(0), help(0), list_events(false), output_file(0),
+  Options(): verbose(0), help(0), list_deps(false), list_events(false), output_file(0),
 	     make_event_list(false), make_branch_list(false),
 	     event_list_from(0),  branches_from(0), selection(0),
 	     subselection(0), primary_dataset(0), list_selections(false), catalog(0),
 	     max_events(-1), skip_events(0), max_files(-1), skip_files(0){}
   int verbose;
   int help;
+  bool list_deps;
   bool list_events;
   char* output_file;
   bool make_event_list;
@@ -140,6 +143,12 @@ int main(int argc, char* argv[]){
       std::cerr << "Loading pruner: " << path << std::endl;
     }
     Pruner::load(path);
+  }
+
+  if (o.list_deps) {
+    Pruner::ClassRecord *rcd = Pruner::find(o.selection);
+    std::cout << rcd->pluginPath << std::endl;
+    std::exit(0);
   }
 
   Pruner* cat = Pruner::create(o.selection, o.subselection, o.primary_dataset);
@@ -231,12 +240,14 @@ int main(int argc, char* argv[]){
 int parse_cmd_line(Options& o, int argc, char* argv[]){
   typedef enum {no_arg=0, required_arg, optional_arg} has_arg_t;
   enum { make_event_list = 300, make_branch_list, event_list_from,
-	 selection, subselection, max_events, skip_events, max_files, skip_files
+	 selection, subselection, max_events, skip_events, max_files, skip_files,
+   list_deps
   };
   static struct option options[] = {
     {"verbose", no_arg, NULL, 'v'},
     {"output", required_arg, NULL, 'o'}, 
     {"help", no_arg, NULL, 'h'},
+    {"list-deps", no_arg, NULL, list_deps},
     {"max-events", required_arg, NULL, 'n'},
     {"skip-events", required_arg, NULL, skip_events},
     {"max-files", required_arg, NULL, max_files},
@@ -286,6 +297,9 @@ int parse_cmd_line(Options& o, int argc, char* argv[]){
       break;
     case 'v'://-v or --verbose
       ++o.verbose;
+      break;
+    case list_deps:
+      o.list_deps = true;
       break;
     case 'o':
       o.output_file = optarg;

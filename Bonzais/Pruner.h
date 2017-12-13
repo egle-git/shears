@@ -222,6 +222,7 @@ protected:
   
 public:
   struct ClassRecord;
+  struct Plugin;
 
   int verbose_;
     
@@ -252,7 +253,7 @@ public:
    * Loads a pruner from a shared object.
    * @param path The path of the .so file to load the pruner from.
    */
-  static void load(const std::string &path);
+  static void load(const Plugin &plugin);
   
   /** Finds the ClassRecord that corresponds to the requested className
    * @param className, name of the selection class. It
@@ -416,9 +417,15 @@ public:
    */
   void setVerbosity(int val){ verbose_ = val; chain_.setVerbosity(val);}
   
+  struct Plugin
+  {
+    std::string indexFile;
+    std::string path;
+  };
+
   struct ClassRecord{
     ClassRecord(): instance(0){}
-    std::string pluginPath;
+    Plugin plugin;
     std::string className;
     std::string description;
     Pruner* instance;

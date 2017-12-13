@@ -547,18 +547,18 @@ bool Pruner::nextEvent(){
   return chain_.GetEntry(ievent_);
 }
 
-void Pruner::load(const std::string &path) {
+void Pruner::load(const Plugin &plugin) {
   // Load the library
-  void *lib = dlopen(path.c_str(), RTLD_NOW);
+  void *lib = dlopen(plugin.path.c_str(), RTLD_NOW);
   if (lib == nullptr) {
-    std::cerr << "Warning: Could not load \'" << path << "\':" << std::endl;
+    std::cerr << "Warning: Could not load \'" << plugin.path << "\':" << std::endl;
     std::cerr << dlerror() << std::endl;
     return;
   }
   // Get a pointer to the shearsLoadPlugin() function
   auto shearsLoadPlugin = (ClassRecord * (*)()) dlsym(lib, "shearsLoadPlugin");
   if (shearsLoadPlugin == nullptr) {
-    std::cerr << "Warning: Could not load \'" << path << "\':" << std::endl;
+    std::cerr << "Warning: Could not load \'" << plugin.path << "\':" << std::endl;
     std::cerr << dlerror() << std::endl;
     dlclose(lib);
     return;
@@ -566,12 +566,12 @@ void Pruner::load(const std::string &path) {
   // Call the shearsLoadPlugin() function
   ClassRecord *rcd = shearsLoadPlugin();
   if (rcd == nullptr) {
-    std::cerr << "Warning: Could not load plugin from \'" << path << "\':" << std::endl;
+    std::cerr << "Warning: Could not load plugin from \'" << plugin.path << "\':" << std::endl;
     std::cerr << "shearsLoadPlugin() returned a null pointer" << std::endl;
     dlclose(lib);
     return;
   }
-  rcd->pluginPath = path;
+  rcd->plugin = plugin;
   daughtersMap()[rcd->className] = *rcd;
 }
 

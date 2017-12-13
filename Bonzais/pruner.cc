@@ -112,7 +112,7 @@ struct Options{
 
 int parse_cmd_line(Options& cat, int argc, char* argv[]);
 std::string findShearsPath();
-std::vector<std::string> discoverPlugins(const std::string &shearsPath);
+std::vector<Pruner::Plugin> discoverPlugins(const std::string &shearsPath);
 
 int main(int argc, char* argv[]){
 
@@ -137,17 +137,18 @@ int main(int argc, char* argv[]){
   if (o.verbose > 0) {
     std::cerr << "Loading pruners from: " << shearsPath << std::endl;
   }
-  const std::vector<std::string> plugins = discoverPlugins(shearsPath);
-  for (auto &path : plugins) {
+  const std::vector<Pruner::Plugin> plugins = discoverPlugins(shearsPath);
+  for (auto &plugin : plugins) {
     if (o.verbose > 0) {
-      std::cerr << "Loading pruner: " << path << std::endl;
+      std::cerr << "Loading pruner: " << plugin.path << std::endl;
     }
-    Pruner::load(path);
+    Pruner::load(plugin);
   }
 
   if (o.list_deps) {
     Pruner::ClassRecord *rcd = Pruner::find(o.selection);
-    std::cout << rcd->pluginPath << std::endl;
+    std::cout << rcd->plugin.indexFile << std::endl;
+    std::cout << rcd->plugin.path << std::endl;
     std::exit(0);
   }
 
@@ -373,24 +374,25 @@ std::string findShearsPath() {
   return shearsPath;
 }
 
-std::vector<std::string> readIndex(const std::string &dir) {
+std::vector<Pruner::Plugin> readIndex(const std::string &dir) {
   // Reads the pruner index file for the given folder
-  std::vector<std::string> plugins;
-  std::ifstream in(dir + "/pruners.txt");
+  std::vector<Pruner::Plugin> plugins;
+  const std::string &indexFile = dir + "/pruners.txt";
+  std::ifstream in(indexFile);
   while (in) {
     std::string line;
     std::getline(in, line);
     if (!line.empty()) {
-      plugins.push_back(dir + "/" + line + ".so");
+      plugins.push_back(Pruner::Plugin{ indexFile, dir + "/" + line + ".so" });
     }
   }
   in.close();
   return plugins;
 }
 
-std::vector<std::string> discoverPlugins(const std::string &shearsPath) {
+std::vector<Pruner::Plugin> discoverPlugins(const std::string &shearsPath) {
   // Loop on all subdirs and read pruner index files
-  std::vector<std::string> plugins;
+  std::vector<Pruner::Plugin> plugins;
 
   TSystemDirectory shearsDir(shearsPath.c_str(), shearsPath.c_str());
   TIter next(shearsDir.GetListOfFiles());
@@ -405,7 +407,7 @@ std::vector<std::string> discoverPlugins(const std::string &shearsPath) {
         continue;
       }
       const std::string dirPath = shearsPath + "/" + name;
-      std::vector<std::string> newPlugins = readIndex(dirPath);
+      std::vector<Pruner::Plugin> newPlugins = readIndex(dirPath);
       std::move(newPlugins.begin(), newPlugins.end(),
                 std::back_inserter(plugins));
     }

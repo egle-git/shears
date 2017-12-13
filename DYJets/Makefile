@@ -61,7 +61,7 @@ Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfi
 
 PRUNERS = $(addsuffix .so, $(shell cat pruners.txt))
 
-.PHONY: all clean
+.PHONY: all clean Pruners
 
 all: runRecoComparison \
 runZJets_newformat \
@@ -71,6 +71,8 @@ testDecompVar \
 runIntegralCheck \
 plotCrossSections \
 $(PRUNERS)
+
+Pruners: $(PRUNERS)
 
 #in untested branch:
 # runCombination \

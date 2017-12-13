@@ -45,7 +45,7 @@ myself=os.path.realpath(__file__)
 mydir=os.path.dirname(myself)
 getlumi=mydir + "/getlumi"
 
-pruner_path=os.path.realpath('%s/../Bonzais/Pruner/pruner' % mydir)
+pruner_path=os.path.realpath('%s/../Bonzais/pruner' % mydir)
 
 try:
     from CRABAPI.RawCommand import crabCommand
@@ -204,7 +204,7 @@ def cat_get_file_count(catalog):
 
 ######################################################################
 # CRAB interface
-def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, outDir):
+def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, outDir, deps):
     """Builds the crab configuration file."""
 
     catalog_basename = os.path.basename(catalog)
@@ -275,7 +275,9 @@ def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, o
     config.JobType.psetName = 'donothing_cfg.py'
 
 # Private input files and directories needed by the jobs. Must be < 100 MB.
-    config.JobType.inputFiles = [ input_file, pruner_path ]
+    deps.append(input_file);
+    deps.append(pruner_path);
+    config.JobType.inputFiles = deps
 
 # Output files that need to be collected, besides default CMSSW outputs
     config.JobType.outputFiles = [ output_file ]
@@ -331,6 +333,11 @@ def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, o
 ######################################################################
 # Job submission tools
 #
+def find_pruner_deps(selection)
+    """Finds the list of files that one must have to use the given selection"""
+    deps = subprocess.check_output([pruner_path, "--list-deps", "--selection", selection])
+    return deps.splitlines()
+
 def tasks_prepare_and_submit(catalog, selection, subselection, filesPerJob, outDir):
     """Submits crab jobs to produce the Bonzai ntuples."""
 
@@ -347,7 +354,9 @@ def tasks_prepare_and_submit(catalog, selection, subselection, filesPerJob, outD
         sys.stderr.write("%s\n" % e)
         return
 
-    crab_config = crab_get_config(catalog, selection, subselection, task_input_catalog, filesPerJob, outDir)
+    deps = find_pruner_deps(selection)
+
+    crab_config = crab_get_config(catalog, selection, subselection, task_input_catalog, filesPerJob, outDir, deps)
 
     crab_config_file = "crab_%s-%s-%s.py" % (ds, selection, subselection)
 

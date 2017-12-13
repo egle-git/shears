@@ -333,7 +333,7 @@ def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, o
 ######################################################################
 # Job submission tools
 #
-def find_pruner_deps(selection)
+def find_pruner_deps(selection):
     """Finds the list of files that one must have to use the given selection"""
     deps = subprocess.check_output([pruner_path, "--list-deps", "--selection", selection])
     return deps.splitlines()

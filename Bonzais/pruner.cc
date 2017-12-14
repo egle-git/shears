@@ -112,6 +112,7 @@ struct Options{
 
 int parse_cmd_line(Options& cat, int argc, char* argv[]);
 std::string findShearsPath();
+std::vector<Pruner::Plugin> readIndex(const std::string &dir);
 std::vector<Pruner::Plugin> discoverPlugins(const std::string &shearsPath);
 
 int main(int argc, char* argv[]){
@@ -137,7 +138,14 @@ int main(int argc, char* argv[]){
   if (o.verbose > 0) {
     std::cerr << "Loading pruners from: " << shearsPath << std::endl;
   }
-  const std::vector<Pruner::Plugin> plugins = discoverPlugins(shearsPath);
+  std::vector<Pruner::Plugin> plugins = discoverPlugins(shearsPath);
+  if (plugins.empty()) {
+    // Search current directory (needed for CRAB)
+    plugins = readIndex(".");
+    if (plugins.empty()) { // Warn
+      std::cerr << "Warning: no pruner found" << std::endl;
+    }
+  }
   for (auto &plugin : plugins) {
     if (o.verbose > 0) {
       std::cerr << "Loading pruner: " << plugin.path << std::endl;

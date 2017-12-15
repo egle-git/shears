@@ -61,7 +61,7 @@ Compiling
 ---------
 
 In addition to analysis' own `Makefile`s, the framework provides a `Makefile` at
-the root of the source tree. It works supports the following targets:
+the root of the source tree. It supports the following targets:
 
 ~~~{.sh}
 make            # Will build everything for all analysis. Probably not what you want
@@ -72,6 +72,9 @@ make Pruners    # Will build all pruners (by running `make Pruners` in every
 make <Analysis> # Will build everything related to the given analysis (ie the pruner
                 # executable, `make Pruners` and `make all` in the analysis folder)
 ~~~
+
+Other targets should be considered *internal* and not relied on (althrough they
+may work).
 
 References
 ----------

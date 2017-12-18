@@ -76,6 +76,17 @@ make <Analysis> # Will build everything related to the given analysis (ie the pr
 Other targets should be considered *internal* and not relied on (althrough they
 may work).
 
+Old code
+--------
+
+Old code is pruned off the repo from time to time, but is still available in the
+history. The table below lists the last commit at which such features were
+available.
+
+| Commit   | Comment                         |
+|----------|---------------------------------|
+| a0a6677b | Code for reading 8 TeV baobabs  |
+
 References
 ----------
 

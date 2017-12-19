@@ -1,4 +1,5 @@
 # git will ignore the executable files:
+Bonzais/pruner
 runVJets
 runZJets_newformat
 runRecoComparison

@@ -14,7 +14,7 @@ opt.register('maxRun', 999999, VarParsing.VarParsing.multiplicity.singleton, Var
 opt.register('prodEra', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Production run era. Label used to identify a run period whose data are processed together.')
 opt.register('recoTag', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Tag of the recontruction.')
 opt.register('dataTier', '', VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.string, 'Data tier of input dataset, typically AOD, AODSIM, MINIAOD or MINIAODSIM')
-opt.register('isMC',    -1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
+opt.register('isMC',    1, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Flag indicating if the input samples are from MC (1) or from the detector (0).')
 opt.register('makeEdm', 0, VarParsing.VarParsing.multiplicity.singleton, VarParsing.VarParsing.varType.int, 'Switch for EDM output production. Use 0 (default) to disable it, 1 to enable it.')
 
 #input files. Can be changed on the command line with the option inputFiles=...
@@ -24,14 +24,15 @@ opt.inputFiles = [
 #"/store/data/Run2016B/DoubleMuon/MINIAOD/23Sep2016-v1/70000/02477A4E-C586-E611-BC6F-02163E013D1C.root"
 #'/store/data/Run2016B/DoubleMuon/MINIAOD/PromptReco-v2/000/273/150/00000/680BED0F-D919-E611-85E6-02163E01424F.root'
 #'/store/mc/RunIIFall15MiniAODv2/TTbarDMJets_pseudoscalar_Mchi-1_Mphi-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/20000/0A4E9031-7CB9-E511-8ABE-02163E00EA21.root'
-"/store/mc/RunIISummer16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PUMoriond17_HCALDebug_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/5E794AD1-FCBD-E611-8FDB-00266CF91A18.root"
+#"file:/tmp/hbrun/theDYfile.root",
+#"file:/tmp/hbrun/thePhotonData.root"
 #'/store/mc/RunIIFall15MiniAODv2/WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0C765598-8BD1-E511-BF63-20CF3027A566.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/PromptReco-v4/000/258/159/00000/0C6D4AB0-6F6C-E511-8A64-02163E0133CD.root'
 #'/store/data/Run2015D/DoubleMuon/MINIAOD/16Dec2015-v1/10000/00039A2E-D7A7-E511-98EE-3417EBE64696.root'
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-opt.maxEvents = 10
+opt.maxEvents = 10000
 
 opt.parseArguments()
 
@@ -101,6 +102,8 @@ else:
     eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/Moriond17_23Jan_ele"
     #eg_corr_phot_file = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV2_2016_pho"
     #eg_corr_el_file   = "EgammaAnalysis/ElectronTools/data/ScalesSmearings/80X_ichepV1_2016_ele"
+    reRun_METfilter = True # reRun bad muons and bad charge hadrons filters
+
 #endif
 
 include_ak08 = True #switch to include anti-kt R=0.8 jets. ak(a) fatjet
@@ -292,6 +295,62 @@ else:
   electronSrc = "slimmedElectrons"
   photonSrc   = "slimmedPhotons"
 #--------------------------------------------
+#     MET filters (the 2 MET filters that need to be ruRun on top of the miniAOD for both data and MC)
+#                 (cf https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#Moriond_2017)
+if reRun_METfilter:
+    process.load('RecoMET.METFilters.BadPFMuonFilter_cfi')
+    process.BadPFMuonFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadPFMuonFilter.taggingMode = cms.bool(True)
+
+    process.load('RecoMET.METFilters.BadChargedCandidateFilter_cfi')
+    process.BadChargedCandidateFilter.muons = cms.InputTag("slimmedMuons")
+    process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    process.BadChargedCandidateFilter.taggingMode = cms.bool(True)
+
+
+
+#--------------------------------------------
+
+# Photon and Electron VID
+#
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+
+switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+switchOnVIDPhotonIdProducer(process, DataFormat.MiniAOD)
+
+
+# define which IDs we want to produce
+my_id_modules = [
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronHLTPreselecition_Summer16_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Summer16_80X_V1_cff'
+                 ]
+
+my_id_modulesPhotons = [
+                 'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
+                 ]
+
+for idmod in my_id_modules:
+    setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
+
+for idmod in my_id_modulesPhotons:
+    setupAllVIDIdsInModule(process,idmod,setupVIDPhotonSelection)
+
+#process.selectedPhotons = cms.EDFilter('PATPhotonSelector',
+#                                       src = cms.InputTag(photonSrc),
+#                                       cut = cms.string('pt>5 && abs(eta)')
+#                                       )
+
+process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(electronSrc) #we want to apply the selection on top of the calibrated photons and electrons
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(photonSrc)
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag(photonSrc)
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+
+
+#--------------------------------------------
+
   
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
@@ -329,6 +388,9 @@ process.tupel = cms.EDAnalyzer("Tupel",
   reducedBarrelRecHitCollection = cms.InputTag("reducedEgamma","reducedEBRecHits"),
   reducedEndcapRecHitCollection = cms.InputTag("reducedEgamma","reducedEERecHits"),
   reducedPreshowerRecHitCollection = cms.InputTag("reducedEgamma","reducedESRecHits"),
+  elecIDsMap = cms.VInputTag("egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-veto"),
+  phoIDsMap = cms.VInputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-loose","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-tight"),
+  checkOnFlyMETfilters = cms.untracked.string("off"),
   triggerMenu = cms.untracked.string(triggerMenu)
 )
 
@@ -346,8 +408,14 @@ if eg_corr:
   process.p += process.calibratedPatElectrons 
   process.p += process.calibratedPatPhotons
 
+if reRun_METfilter:
+  process.tupel.checkOnFlyMETfilters = cms.untracked.string("on")
+  process.p += process.BadPFMuonFilter
+  process.p += process.BadChargedCandidateFilter
 
 process.p += process.goodOfflinePrimaryVertices
+process.p += process.egmGsfElectronIDSequence
+process.p += process.egmPhotonIDSequence
 process.p += process.tupel
 
 if opt.makeEdm:

@@ -1,5 +1,0 @@
-Data/v7/Ntuple/DoubleMuon/crab_DoubleMuon-0002/150728_141110/0000/ntuple_1.root
-Data/v7/Ntuple/DoubleMuon/crab_DoubleMuon-0002/150728_141110/0000/ntuple_2.root
-Data/v7/Ntuple/DoubleMuon/crab_DoubleMuon-0002/150728_141110/0000/ntuple_3.root
-
-

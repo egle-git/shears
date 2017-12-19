@@ -54,20 +54,23 @@ RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.c
 printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc ResultTables.cc TextTools.cc Uncertainties.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
+EXELIST = \
+  runRecoComparison \
+  runZJets_newformat \
+  runUnfoldingZJets  \
+  runCombination \
+  testDecompVar \
+  runIntegralCheck \
+  plotCrossSections
+
 OBJLIST = $(SRCLIST:.cc=.o)
 DEPS    = $(SRCLIST:.cc=.d)
 DEPS    += runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d Sources/testDecompVar.d \
 Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d
 
-.PHONY: all clean
+.PHONY: all clean clean-dep Pruners
 
-all: runRecoComparison \
-runZJets_newformat \
-runUnfoldingZJets  \
-runCombination \
-testDecompVar \
-runIntegralCheck \
-plotCrossSections
+all: $(EXELIST)
 
 #in untested branch:
 # runCombination \
@@ -116,7 +119,8 @@ testSectionConfig: testSectionConfig.cc
 
 # ===========================================================================
 clean:
-	rm -f *.o Sources/*.o
+	$(RM) $(EXELIST)
+	$(RM) *.so *.o Sources/*.o
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:

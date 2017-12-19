@@ -1,3 +1,0 @@
-{
-   gROOT->ProcessLine("#include <vector>");
-}

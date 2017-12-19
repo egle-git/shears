@@ -51,13 +51,13 @@ public:
   
   /** Add a branch of one the supported vector types
    * @param branchName name of the new branch
-   * @param v auto pointer to store the variable attached to the branch
+   * @param v unique pointer to store the variable attached to the branch
    */
   template<typename T>
-  void addBranch(const char* branchName, std::auto_ptr<std::vector<T> >& v,
+  void addBranch(const char* branchName, std::unique_ptr<std::vector<T> >& v,
 		 const char* branchDescription = 0){
     std::vector<T>* p = new std::vector<T>;
-    v = std::auto_ptr<std::vector<T> >(p);
+    v = std::unique_ptr<std::vector<T> >(p);
     addVar(p);
     tree_->Branch(branchName, p);
     addDescription(branchName, branchDescription);
@@ -65,13 +65,13 @@ public:
 
   /** Add a branch of one the supported simple types
    * @param branchName name of the new branch
-   * @param v auto pointer to store the variable attached to the branch
+   * @param v unique pointer to store the variable attached to the branch
    */
   template<typename T>
-  void addBranch(const char* branchName, std::auto_ptr<T>& v,
+  void addBranch(const char* branchName, std::unique_ptr<T>& v,
 		 const char* branchDescription = 0){
     T* p = new T;
-    v = std::auto_ptr<T> (p);
+    v = std::unique_ptr<T> (p);
     *v = 0;
     addVar(p);
     tree_->Branch(branchName, v.get());

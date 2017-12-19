@@ -37,7 +37,7 @@ RTL = -Wl,-rpath,
 LIBDIRLISTRTL = $(addprefix $(RTL), $(LIBDIR))
 
 SRCDIR = Sources/
-INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include -I../Bonzais
+INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
 
 CXX           = g++ -std=c++0x
 CXXFLAGS      = -fPIC
@@ -66,15 +66,11 @@ EXELIST = \
 OBJLIST = $(SRCLIST:.cc=.o)
 DEPS    = $(SRCLIST:.cc=.d)
 DEPS    += runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d Sources/testDecompVar.d \
-Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d VJetPruner.d
-
-PRUNERS = $(addsuffix .so, $(shell cat pruners.txt))
+Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d testSectionConfig.d
 
 .PHONY: all clean clean-dep Pruners
 
-all: $(EXELIST) $(PRUNERS)
-
-Pruners: $(PRUNERS)
+all: $(EXELIST)
 
 #in untested branch:
 # runCombination \
@@ -86,9 +82,6 @@ Pruners: $(PRUNERS)
 # ===========================================================================
 %.o: %.cc
 	$(CXX) -c $< -o $@ $(CXXFLAGS) $(INCDIR)
-
-%.so: %.o
-	$(CXX) $(ROOTCFLAGS) -shared -o $@ $^
 
 #I'm not sure why this generic rule does not work...
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
@@ -131,7 +124,7 @@ clean:
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:
-	$(RM) *.d Sources/*.d
+	rm -f *.d Sources/*.d
 	$(MAKE) -C RooUnfold clean
 
 echo_%:

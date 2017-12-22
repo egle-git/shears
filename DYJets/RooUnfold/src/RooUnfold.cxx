@@ -679,7 +679,7 @@ TH1* RooUnfold::Hreco (ErrorTreatment withError, std::vector<TH1*>* hUnf_i)
     2: Errors from the square root of of the covariance matrix given by the unfolding
     3: Errors from the square root of the covariance matrix from the variation of the results in toy MC tests
     */
-  cout << "********************************************" << endl;
+  //cout << "********************************************" << endl;
 
   //printf("Starting Hreco\n");
   TH1* reco= (TH1*) _res->Htruth()->Clone(GetName());

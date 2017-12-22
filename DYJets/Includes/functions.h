@@ -57,9 +57,18 @@ struct jetStruct{
         isBJet = isBJet_;
     }
 
+  void setSmearMatch(bool match){
+    smearMatch = match;
+  }
+  void setGenMatchIndex(size_t match){
+    genMatchIndex = match;
+  }
+
     TLorentzVector v;
     int patIndex;
     bool isBJet;
+  bool smearMatch; //True implies a gen match was found for smearing, vs false is guassian smear.
+  size_t genMatchIndex;
 };
 
 bool LepDescendingOrder(leptonStruct, leptonStruct);
@@ -112,7 +121,10 @@ class table{
 char GetRunData(int runNumber);
 char GetRunMC(Long64_t * mcEraBoundary, Long64_t eventNumber);
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
+double GetJetSF(double,int);
+double GetJetResolution();
 double SmearJetPt(double, double, double, int);
+double SmearJetPt(double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);

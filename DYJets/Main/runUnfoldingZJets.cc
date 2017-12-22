@@ -23,6 +23,8 @@ int main(int argc, char **argv)
     TString variable = "";
     //TString variable = "ZNGoodJets_Zinc";
     //TString variable = "ZPt_Zinc0jet";
+    //TString variable = "FirstJetPt_Zinc1jet,FirstJetAbsRapidity_Zinc1jet,SecondJetPt_Zinc2jet,SecondJetAbsRapidity_Zinc2jet,ThirdJetPt_Zinc3jet,ThirdJetAbsRapidity_Zinc3jet,FourthJetPt_Zinc4jet,FourthJetAbsRapidity_Zinc4jet";
+    
     bool doNormalized(false);
 
     int nIters = 0;

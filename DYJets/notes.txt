@@ -667,3 +667,537 @@ Adjusting some unfolding plots. Mostly done in Sources/PlotSettings.cc makeCross
 $ runUnfoldingZJets &> Unfold_1_08_29_2017.log
 
 
+_________________09_05_2017
+
+Trying out fixes to lumi histogram and jobinfo. I am not sure if jobinfo is really used for anything (it did not look like merge
+uses it at all) but I might as well correctly fill it now.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_09_05_2017 &
+
+lumi histogram looks good now. Also the issue with the _24_24.root file is fixed. Running over the full set again so that
+all the files are corrently combined and lumi is propagated through.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_09_05_2017 &
+
+_________________09_06_2017
+
+Trying to replicate the study done for the jet matching where the eta response matrix is compared 
+with and without using the matched jets. Both eta and rapidity should be fairly obvious (assuming the 
+jet eta is about equal to the rapidity). All of the far off diagonal terms should be suppressed
+completely.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 4 -o HistoFiles_4_09_06_2017/ 
+
+_________________09_13_2017
+
+More on jet matching. I will run with the jet matching scheme and compare the unfolded results.
+First a test on 1M events just to make sure everything runs smoothly.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_09_13_2017/ 
+
+Had to adjust the axes on the first jet pt histograms. They all seems to be using the 20GeV jets and 
+I have no idea why. I will probably have to go in and change all of them eventually.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_09_13_2017/ 
+
+$ plotRespMatrix DMu FirstJetPt_Zinc1jet
+
+Reverted changes to the plots. I will fix them later, but they are definitely being filled with the
+over 30GeV jets. Running the full set of DY. I do not think I need to do anything with data, but I 
+will run over background. All of this can be changed in the python runZJets_newformat file.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_09_13_2017/
+
+_________________09_14_2017
+
+Running the unfolding now using the files from HistoFiles_1_09_05_2017 and using the data from HistoFiles_1_09_05_2017 + DY,background from HistoFiles_1_09_13_2017.
+Putting files into UnfoldedFiles_1_09_14_2017 (no matching) and UnfoldedFiles_2_09_14_2017 (matching).
+
+
+Making the response matrices for the matchign and no matching:
+ResponseMatrix_Matching_09_14_2017, ResponseMatrix_NoMatching_09_14_2017/
+
+$ plotRespMatrix DMu FirstJetAbsRapidity_Zinc1jet
+
+_________________09_19_2017
+
+Things to do:
+ - Go back to using the 20GeV jet collection since it is only used for the Pt distributions
+ - It is difficult to pick a scheme to fill the response matrix. Options:
+   - Only fill response matrix with matching jets and not worry about if some reco jets were
+     lost in the matching. Fill first jet reponse matrix with the first matched jet always, even
+     if it is not the first pt jet (first jet could have not found a match)
+   - Fill response matrix with matches and keep the ordering the same as the reco jets. If the
+     first reco jet find no match then do not fill the first jet response matrix.
+   - Make an response matrix for jets and do not distinguish based on pt. A jet hits the detector
+     and the detector effect is the same regardless of where in the pt descending order it is.
+ - Statistics on jet matching scheme 
+ - Rapidity response matrix of jets without matches
+ - Plot of: if the first jet does not get a match, which jet does the second pick
+
+_________________09_20_2017
+
+Running with some of the changes from above. Need to see if they make sense by adjusting the dR match
+value.
+
+dR = 0.15
+ - No double matches for any of the reco jets
+
+dR = 0.01 (test1)
+ - very few matches and all are from no dR matches (not redundant matches)
+ - No entries for dPt
+
+dR = 12.0 (test2)
+ - 
+
+Something is going wrong with the Eta histogram from the matches. It is showing pairs with huge dEta.
+ - Seems like the problem has cleared up when using the event weights. I am not sure why that would
+   cause the effect. Maybe the negative values is screwing up the rest.
+
+
+The weight factor was causing a lot of confusion. I need to see exactly how it is computed since it is huge (20k). It
+may have the factors to scale the DY and such already.
+ - Definitely has PU weight
+ - Scale factors
+ - Event weights (here is the large one)
+
+Trying a run with the event weights (test3). After I will do a test again with the weights set to 1
+so I can make sure changing dR cut makes sense. I will put norm_ back to its normal value since it
+just does an overall scale (versus the weights are event by event).
+
+All of the shapes look very similar with the weights so I will proceed with them. Before doing 
+larger number of events I need to test the plotRespMatrix code to make sure it can work with these
+new graphs.
+
+$ plotRespMatrix DMu hhJetMatching_FirstJetRap_NoMatch HistoFiles_test3_09_20_2017 ResponseMatrix_1_09_20_2017
+
+Corrected the use of jet matching after for getting rid of jets and genjets from the collections. It
+is now just used when the response matrices are being filled.
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_Match_1_09_20_2017 &
+
+Fixed and issue with some under 20 GeV jets making it into the matching. This caused a crash later
+since they get cut out of the collection. Trying again:
+
+$ python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_Match_1_09_20_2017 &
+
+_________________09_21_2017
+
+Done running with and without jet matching. I will try to make two unfolded distributions now.
+
+$ runUnfoldingZJets &> Unfold_Match_1_09_20_2017.log
+$ runUnfoldingZJets &> Unfold_NoMatch_1_09_21_2017.log
+
+
+There is an unexpected behavior in the number of matches histogram. 40% of the leading jets do not find a match
+in dR. A first test to make sure this isnt a coding error will be to adjust the dR boundary. For a large dR the
+number of matches should just be equal to the number of gen jets. 
+
+_________________09_24_2017
+
+Things to try to figure out what is happening with the failed jets:
+ - Only fill the histograms of matching jets and such if the lepton selecton is passed 
+   (passesLeptonCut).
+ - Check the dR between leading and sub muons to see if the jet is a muon.
+
+_________________09_26_2017
+
+Still working on getting all the jet matching histograms filled correctly.
+ - Histograms after the lepton selection (DONE)
+ - Histograms with dR between two leptons (DONE)
+ - Run through jet matching scheme again to see if there are any errors (Everything looks good)
+
+Everything looks good for a run with decent number of events. I should also do a run with low events
+and turn on DJALOG just to see how to pairing looks after the lepton selection.
+ - I need to add a bit more dialog to get an idea of why some matching failed to make sure that
+   works as intended.
+
+It does not look like the leading reco jets that failed matching with gen jets are the muons. The
+dR shows no values below 0.4 between them. There seems to be a peak at pi which is curious.
+
+Added in kinematic plots for the failed first jet cases.
+ - Need to remember to use the jets_20 vector not jets
+
+There may be an issue with using the jets_20 collection. The quality of the lower pt jets is not
+
+
+From the Pt of the failed jets it is clear that most of the contribution to the failed jets is from
+jets between 20-30GeV. I will take these out of the jet matching and work to switch to using the
+30GeV cut jets for all of the histograms.
+
+Its not quite clear if taking out the 20GeV jets will help since it will reduce the number of matches
+as well (not sure take away fails). For Now I will run with both over a large set and look at how the
+ratio change for the number of failed leading jets looks.
+
+Made an easy switch for the two so I can switch back easily if needed.
+30GeV Jets:
+ - HistoFiles_test1_09_26_2017 
+
+20GeV Jets:
+ - HistoFiles_test2_09_26_2017 
+
+One more thing to do is figure out why the unfolding does not get affected by the jet matching even though
+the response matrices change. One idea is the unfolding procedure is insensitive to randome noise uniformly
+spread over the response matrix. I will try to confirm this by first taking the different of the two response
+matrices to see if the noise is uniform. If it is, I will add random noise and try the unfolding to see any
+difference. The easiest one to try this on is the rapidity ditribution.
+
+First test directory with both response matrices (with/without matching):
+ - HistoFiles_test3_09_26_2017 
+ - Need to modify plotRespMatrix.cc to take the difference of the two histograms
+ - If the difference is a uniform addition this can be added into the unfolding code to see if the unfolded
+   distributions are changed by it
+
+
+_________________09_27_2017
+
+Running on 5M events to see the unfolding if a uniform distribution is added. This unfolding can be
+compared to HistoFiles_Match_1_09_20_2017 to see if there is a difference.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_09_27_2017 &
+
+_________________09_28_2017
+
+Looking at the match reponse matrix in HistoFiles_1_09_27_2017 things look like they are inverted. The non match on has less off diagonal entries.
+ - This was not correct, it was just how the histogram looked with tbrowser. Dont believe the dots...
+
+Taking a look at everything to make sure 
+
+_________________10_03_2017
+
+Taking a look at how the systematics are computed.
+ - Each of the systematics is done separately
+Systematic #  |  Systematic
+           1  |  Pile up
+           2  |  JES Uncertainty
+           3  |  xsec uncertainty for mc xsec values (This might need updating for 2016 - defined in fileNamesZJets.h)
+           4  |  Jet Energy Resolution (Smearing) uncertainty - This needs updating, values defined in function.cc::SmearJetPt
+                  - The cone size for the matching needs adjusting
+                  - A Pt matching should be added as well
+                  - All defined here: https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+                  - Also in that twiki: "when matching particle-level jet is found, the scaling method should be used; otherwise the stochastic smearing should be applied"
+           5  |  Lepton Scale uncertainty - Not sure where to find information on this for updating. It looks like just one number in ZJets_newformat (0.002)
+           6  |  Lepton Energy Resolution (Smearing) uncertainty - smearfactor = 0.006. This is identical to the jet smearing case but the central (direction=0) does not
+                 do any smearing. This value needs to also be checked for 2016
+
+
+The efficiency systematic is done with the lumi. In getFilesAndHistogramsZJets.cc copies of the central histogram (no variations) are made and then scaled by the lumi and efficiency
+uncertainties. This creates an extra 4 histograms in the collection. This can be done since the uncertainties are assumed to be global (need to see if this can be the case for 2016).
+
+
+_________________10_03_2017
+
+I am still not convinced about the way to add in the efficiency errors.
+
+Text files for the jet resolution and SF: (The main jet resolution page also has the SFs)
+https://github.com/cms-jet/JRDatabase/tree/master/textFiles/Spring16_25nsV10_MC
+
+_________________10_10_2017
+
+Plan of histograms to show for VJ meeting:
+ - Sample selection (qck background slide)
+ - Jet matching criteria/strategy - backup slide of dR
+ - Response matrix of one variable - could be difference of with and without matching
+ - Unfolded Jet Rapidity - with/without matching - could choose different one
+ - Unfolded Jet Pt - Same as above
+ - Conclusions about jet matching
+ - Back up slide about what to study next
+
+TO ADD for list of variables:
+ - SumZFirstJetRapidity
+ - JetsHT_Zinc1jet
+ - SumZJetRapidity
+ - Could go into the two jet and beyond case
+
+_________________10_11_2017
+
+Checking that the code is working properly, then running the full dataset.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_10_11_2017 &
+
+
+Done with the run. Cleaning up the getFileAndHistogramsZJets.cc file a bit so I can switch between match/no match unfolding easily. Also
+need to create a list of the variables I want to unfold to do it all at once.
+
+Variables:
+FirstJetPt_Zinc1jet
+FirstJetAbsRapidity_Zinc1jet
+SecondJetPt_Zinc2jet
+SecondJetAbsRapidity_Zinc2jet
+ThirdJetPt_Zinc3jet
+ThirdJetAbsRapidity_Zinc3jet
+FourthJetPt_Zinc4jet
+FourthJetAbsRapidity_Zinc4jet
+
+_________________10_17_2017
+
+Working on incorporating jet resolution:
+ - All files are now standalone and compile (JetResolution, JetResolutionObject, Utilities)
+ - The tables are now readable and described in the jet resolution twiki at the bottom
+ - The resolution table needs eta,rho and pt - eta,rho are bins and pt is a variable
+ - The scale factors can also be gotten this way and not from manually copying the values - they are binned in only eta
+ - To enter these values there is a class called JetParameters that has setvariable functions and the JetParameters object is then fed into getResolution (function of JetResolution class)
+ - The resolution is given as a percentage so they need to be multiplied by the Pt at that point to get the value
+
+_________________10_20_2017
+
+Running the full dataset with some of the jetresolution included.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_Smear_10_20_2017 &
+
+_________________10_23_2017
+
+Found an issue with the random number generator not generating random numbers... Fixing it and running
+the full set with and without smearing. I will also use these files for the vjets meeting on friday.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_Smear_10_23_2017 &
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_NoSmear_10_23_2017 &
+
+Running reco compare to get some plots for the meeting.
+
+$ runRecoComparison &> RecoCompare_1_10_23_2017.log
+
+_________________10_24_2017
+
+After fixing the lumi values stored in the histogram the mcYieldScale file got messed up. Testing now
+with a small dataset.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_Smear_10_24_2017 &
+ - Only 1M events
+$ runRecoComparison &> RecoCompare_1_10_24_2017.log
+
+Everything looks good now in terms of normalization. Running over the full set now.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_Smear_10_24_2017 &
+ - RecoComparison_1_Smear_10_24_2017 for the comparison
+
+_________________12_06_2017
+
+Setting up unfolding for the VJets meeting on 12_08_2017.
+
+I will use the 10_24_2017 histos:
+ - HistoFiles_1_Smear_10_24_2017
+$ runUnfoldingZJets &> Unfold_1_12_06_2017.log
+
+I only have the central values done so I cannot do the unfolding yet. I need to first produce the full systematic files.
+
+Full Systematics. Should take overnight:
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_12_06_2017 &
+ - Took 7 hours
+
+Running unfolding now.
+$ runUnfoldingZJets &> Unfold_1_12_07_2017.log
+ - Definitely has some issue
+
+Something went wrong with the data histograms. It looks like the mc did fine. Checking the logs.
+ - The catalog file for data was set for the test files...
+
+Running the data again:
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_12_07_2017 &> histo_production_12_07_2017.log
+ - All done and the counts look good. I will move these files into the HistoFiles_1_12_06_2017 directory just to keep everything in the same place. The logs will stay in
+   the origional folder.
+
+Going for a reco comparison before unfolding.
+ - Reco is good
+
+Unfolding:
+ - Still an issue.
+
+Finally think I found the issue. There is still a problem with filling the lumi histogram when using multiple jobs. It is just filling it with 35 for each one
+and coming out to 800 something. I put the value in by hand for now.
+
+The unfolded plots dont have many labels for the log axes. Looking into it now. Hopefully they are th1d and not graphs.
+
+Plotting response matrices:
+$ plotRespMatrix DMu HistoFiles_1_12_06_2017 ResponseMatrix_12_07_2017
+
+
+_________________12_13_2017
+
+Running up to reco plots to look at two regions:
+ - leading/subleading muon plots
+   - I will probably create multiple histograms for this and just do one big run
+ - Era BF/GH
+   - Here I will do two runs with changes to vjets
+
+Folders:
+histoDir = HistoFiles_Control_Muon_1_12_13_2017
+histoDir = HistoFiles_Control_EraBF_1_12_13_2017
+histoDir = HistoFiles_Control_EraGH_1_12_13_2017
+
+Going to just go to reco compare level so no systematic histograms (testrun = true)
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_Control_EraBF_1_12_13_2017 &> histo_production_1_12_13_2017.log &
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_Control_EraGH_2_12_13_2017 &> histo_production_2_12_13_2017.log &
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 3 -o HistoFiles_Control_Muon_3_12_13_2017 &> histo_production_3_12_13_2017.log &
+
+
+
+
+********Looking at the jet ID there seems to be an issue with the selection. In Tupel:
+if( abs(jet.eta())<2.4){
+      if(chf>0 &&    //Charged Hadron Fraction                                                                                                                                                               
+         nhf<0.99 &&  //Neutral Hadron Fraction                                                                                                                                                              
+         cmult>0.0 && //Charged Multiplicity                                                                                                                                                                 
+         cemf<0.99 && //Charged EM Fraction                                                                                                                                                                  
+         nemf<0.99 && //Neutral EM Fraction                                                                                                                                                                  
+         nconst>1) //Number of Constituents                                                                                                                                                                  
+        tempJetID=1;
+      if((chf>0)&&
+         (nhf<0.95)&&
+         (cmult>0.0)&&
+         (cemf<0.99)&&
+         (nemf<0.95)&&
+         (nconst>1))
+        tempJetID=2;
+      if((chf>0)&&
+         (nhf<0.9)&&
+         (cmult>0.0)&&
+         (cemf<0.99)&&
+         (nemf<0.9)&&
+         (nconst>1))
+        tempJetID=3;
+    }
+
+The JetID == 1 is the loose ID, ==2 is nothing, and ==3 is the tight. In the code I should only be selecting the loose id ones but right now I take anything greater than 0...
+ - bool jetPassesIdCut(JetAk04Id->at(i) > 0);
+
+_________________12_14_2017
+
+Trying a few other differences to see what happens to the lepton pt. I will also add in the exclusive plot for leading/subleading. Cutting the sample down to 10M to be a bit faster.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_Control_Roch_1_12_14_2017 &> histo_production_1_12_14_2017.log &
+Running the muon one again to get the leading and subleading Z exc.
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 2 -o HistoFiles_Control_Muon_2_12_13_2017 &> histo_production_2_12_14_2017.log &
+
+
+Does not seem to change with rochester. Also not seen in the 0 jet exclusive plot for subleading muons. Trying trigger scale factors.
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 3 -o HistoFiles_Control_Trig_3_12_14_2017 &> histo_production_3_12_14_2017.log &
+
+
+_________________12_18_2017
+
+Confusion with the jet id cleared up. Using loose id (1 or above is loose).
+To look up:
+ - (deltaR(jet.v, leptons[j].v) < 0.4)
+ - 
+
+_________________12_19_2017
+
+Looks like I just had the name wrong for the histlist option in vjets. It may actually work, but it
+caused an issue already where the histograms that I do not want to are null and a warning pops up.
+
+Histograms to add:
+ - ptBal_Zinc1jet +
+ - ptBal_Zinc3jet +
+ - MuPFIsoDBetaCorr (Make sure it fills) +
+ - ZNGoodJets_SameChargePair_Zinc
+ - Changed PU and NVtx names to NVtx_ZXXX#jet
+
+I will run the full set tonight with all the new histograms. I am also getting rid of the histlist
+since I dont want to go through and pick out all the histos + it still tries to fill them and does
+not save time.
+
+I still do not know if I fully understand the code, but it seems like the histList is really a
+variables list. It will then look through all possible names in the constructor for TH1D (newTH1D). 
+This will include gen and response names so those get made as well.
+
+The new same sign histograms are a little bit odd so far since they are filled with more events than
+I expected, but I will run with it now.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_12_20_2017 &> histo_production_1_12_20_2017.log &
+
+
+
+_________________12_21_2017
+
+The hadd command from the python helper needed fixing. I will do a test run first then run the full
+set again.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_test1_12_21_2017 &> histo_production_test1_12_21_2017.log &
+
+Everything seemed to work find in terms of code. Going to run a decent number of events to see if 
+normalization looks ok still.
+
+Need to add a few more histograms into the histList:
+ - Jet Pt, y 4,5,6 jets
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 2 -o HistoFiles_test2_12_21_2017 &> histo_production_test2_12_21_2017.log &
+
+Looks like everything is working and the normalization looks good. The same sign jet multiplicity 
+still looks a bit strange.
+
+Running the full production:
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_12_21_2017 &> histo_production_1_12_21_2017.log &
+
+_________________12_22_2017
+
+Produced some nice tables with runUnfolding (set the whichSyst to -1). The JES uncertainty in the 
+table is 0% so it is definitely not being calculated correctly. It looks like I have to do the same
+scheme as for resolution and make standalone code to parse the text file.
+
+Looking into:
+cmssw/CondFormats/JetMETObjects/src/
+ - JetCorrectionUncertainty.cc
+ - SimpleJetCorrectionUncertainty.cc
+
+I will folow the code blindly first. What I need in the analysis is:
+JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty("Jec11_V12_Uncertainty_AK5PF.txt")
+for (PFJetCollection::const_iterator jet = jets->begin(); jet != jets->end(); jet++)  {
+  ...............................
+  jecUnc->setJetEta(eta);
+  jecUnc->setJetPt(ptCor); // here you must use the CORRECTED jet pt
+  double unc = jecUnc->getUncertainty(true);
+  double ptCor_shifted = ptCor(1+shift*unc) ; // shift = +1(up), or -1(down)
+}
+
+Down the rabbit hole...
+
+JetCorrectionUncertainty.cc: +
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "Math/PtEtaPhiE4D.h"
+#include "Math/Vector3D.h"
+#include "Math/LorentzVector.h"
+#include <vector>
+#include <string>
+
+SimpleJetCorrectionUncertainty.cc +
+#include "CondFormats/JetMETObjects/interface/SimpleJetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include <vector>
+#include <string>
+
+JetCorrectionUncertainty.h +
+#include "CondFormats/Serialization/interface/Serializable.h"
+
+JetCorrectorParameters.h +
+#include "CondFormats/Serialization/interface/Serializable.h"
+
+SimpleJetCorrectionUncertainty.h +
+#include "CondFormats/Serialization/interface/Serializable.h"
+
+Serializable.h +
+#include <boost/serialization/access.hpp>
+
+#include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/bitset.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/unordered_map.hpp>
+
+Hopefully I have the boosts... but that is all I should need.
+
+Got it to make. Turns out I do not need to serializable like in the jet resolution case. Trying to 
+add it into the main code now.
+
+The Text files need to be updated to the charged hadron subtracted values:
+ - Spring16_23Sep2016BCDV2_DATA_Uncertainty_AK4PFchs.txt
+
+Added in the jes uncertainty. Made ZJets::Loop return an int so it can have proper exiting. The code is
+building fine so I will add in print statements to monitor the JES uncerstainty values.

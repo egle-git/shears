@@ -30,26 +30,37 @@ int main(int argc, char *argv[]){
   TGraphAsymmErrors * etaHisto = 0;
   TDirectory * histDir = 0;
   TH2D * ptetaHisto = 0;
+  bool SF = false;
   std::cout<<"Right before tracking\n";
-  if(inputString.find("Tracking")){
+  if(inputString.find("Tracking") != std::string::npos){
     std::cout<<"Tracking\n";
     etaHisto = (TGraphAsymmErrors*)rootFileInput->Get("ratio_eff_aeta_dr030e030_corr");
     std::cout<<etaHisto->GetName()<<std::endl;
   }else{
-    //TFile * rootFileInput = new TFile(file.c_str(), "read");
-    histDir = (TDirectory*)rootFileInput->Get(argv[2]);
-    std::cout<<histDir->GetName()<<std::endl;
-    ptetaHisto = (TH2D*)histDir->Get("abseta_pt_ratio");
-    std::cout<<ptetaHisto->GetName()<<std::endl;
+    if(SF){
+      printf("Getting the Scale Factors\n");
+      //TFile * rootFileInput = new TFile(file.c_str(), "read");
+      histDir = (TDirectory*)rootFileInput->Get(argv[2]);
+      std::cout<<histDir->GetName()<<std::endl;
+      ptetaHisto = (TH2D*)histDir->Get("abseta_pt_ratio");
+      std::cout<<ptetaHisto->GetName()<<std::endl;
+    }else{ //Get the efficiency
+      printf("Getting the Efficiencies\n");
+      histDir = (TDirectory*)rootFileInput->Get(argv[2]);
+      std::cout<<histDir->GetName()<<std::endl;
+      ptetaHisto = (TH2D*)histDir->Get("abseta_pt_MC");
+      std::cout<<ptetaHisto->GetName()<<std::endl;
+    }
   }
 
-  std::string outputFileName(argv[1]);
-  outputFileName = outputFileName.substr( outputFileName.find("Eff_SF"), 
-					  outputFileName.find(".root")-outputFileName.find("Eff_SF"));
-  outputFileName += date;
+  
+  std::string outputFileName(argv[3]);
+  //outputFileName = outputFileName.substr( outputFileName.find("Eff_SF"), 
+  //					  outputFileName.find(".root")-outputFileName.find("Eff_SF"));
+  //outputFileName += date;
   std::cout<<outputFileName<<std::endl;
   FILE * outputFile;
-  outputFile = fopen ( (outputFileName+".txt").c_str(),"w");
+  outputFile = fopen ( (outputFileName).c_str(),"w");
 
   //std::cout<<ptetaHisto->GetNbinsX()<<std::endl;
   //std::cout<<ptetaHisto->GetNbinsY()<<std::endl;
@@ -59,7 +70,7 @@ int main(int argc, char *argv[]){
   double y = 0;
   double yErrorHigh=0;
   double yErrorLow=0;  
-  if(inputString.find("Tracking")){
+  if(inputString.find("Tracking") != std::string::npos){
     //std::cout<<"etaHisto->GetN() = "<<etaHisto->GetN()<<std::endl;    
     for(int iEta = 0;iEta<etaHisto->GetN();iEta++){
       etaHisto->GetPoint(iEta,x,y);
@@ -74,7 +85,7 @@ int main(int argc, char *argv[]){
   }else{
     nBinsX = ptetaHisto->GetNbinsX();
     nBinsY = ptetaHisto->GetNbinsY();
-    //printf("%F",ptetaHisto->GetBinContent(2,2));
+    printf("%F",ptetaHisto->GetBinContent(2,2));
     
     for(int iBinX=1;iBinX<nBinsX+1;iBinX++){
       //printf("%f\n",xBinLowEdge[iBinX-1]);

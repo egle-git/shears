@@ -3,26 +3,33 @@
 #This script combines the histos from the multithreading job
 import os
 import subprocess
+import sys
 
 def CombineHistos(histoDir):
+    testMode = False #Set this and it will just print commands and not call them
 
-    HistoBase = ["DMu_13TeV_DYJets_UNFOLDING_TrigCorr_1_",
-                 "DMu_13TeV_Data_TrigCorr_1_",
-                 "DMu_13TeV_ST_sch_TrigCorr_1_",
-                 "DMu_13TeV_ST_tW_TrigCorr_1_",
-                 "DMu_13TeV_ST_tch_TrigCorr_1_",
-                 "DMu_13TeV_STbar_tW_TrigCorr_1_",
-                 "DMu_13TeV_TT_TrigCorr_1_",
-                 "DMu_13TeV_Top_TrigCorr_1_",
-                 "DMu_13TeV_VV_TrigCorr_1_",
-                 "DMu_13TeV_WToLNu_TrigCorr_1_",
-                 "DMu_13TeV_WWTo2L2Nu_TrigCorr_1_",
-                 "DMu_13TeV_WZ_TrigCorr_1_",
-                 "DMu_13TeV_ZZ_TrigCorr_1_"]
+    #Example of file name
+    #DMu_13TeV_DYJets_UNFOLDING_Syst_1_Down_1.root
+
+    HistoBasetest = ["DMu_13TeV_Data_"]
+
+    HistoBase = ["DMu_13TeV_DYJets_UNFOLDING_",
+                 "DMu_13TeV_Data_",
+                 "DMu_13TeV_ST_sch_",
+                 "DMu_13TeV_ST_tW_",
+                 "DMu_13TeV_ST_tch_",
+                 "DMu_13TeV_STbar_tW_",
+                 "DMu_13TeV_TT_",
+                 "DMu_13TeV_Top_",
+                 "DMu_13TeV_VV_",
+                 "DMu_13TeV_WToLNu_",
+                 "DMu_13TeV_WWTo2L2Nu_",
+                 "DMu_13TeV_WZ_",
+                 "DMu_13TeV_ZZ_"]
     HistoDirection = ["",
                       "Down_",
                       "Up_"]
-    HistoEnd = "JetPtMin_30_JetEtaMax_24"
+    #HistoEnd = "JetPtMin_30_JetEtaMax_24" //No longer needed after simplifying names 12_14_2017 DJALOG
     
     ls = subprocess.check_output(['ls',histoDir]).splitlines()
 
@@ -31,28 +38,39 @@ def CombineHistos(histoDir):
     tmpHisto2 = ""
     haddTarget = ""
     haddHistos = []
-    
+    #Example of file name
+    #DMu_13TeV_DYJets_UNFOLDING_Syst_1_Down_1.root
+    #for iHistoBase in HistoBasetest:
     for iHistoBase in HistoBase:
         HistoName = ""
         haddTarget = ""
         haddHistos = []
         HistoName += iHistoBase
+        print HistoName
         for iHistoSyst in range(0,10):
             if(iHistoSyst == 0):
                 tmpHisto1 = HistoName
             HistoName = tmpHisto1
+            print "\nHistoName = tmpHisto1: %s\n" % HistoName
             HistoName += "Syst_%d_" % iHistoSyst
+            print "HistoName += Syst_d_: %s\n" % HistoName
             for iHistoDirection in HistoDirection:
                 if(iHistoDirection == HistoDirection[0]):
                     tmpHisto2 = HistoName
                 HistoName = tmpHisto2
+
+                if(iHistoSyst != 0 and iHistoDirection == HistoDirection[0]):
+                    HistoName += "dummy"
+
                 HistoName += iHistoDirection
-                HistoName += HistoEnd
+                print "HistoName += iHistoDirection: %s\n" % HistoName
+                #HistoName += HistoEnd
                 haddHistos = []
-                haddTarget = histoDir+"/"+HistoName+".root"
-                
+                haddTarget = histoDir+"/"+HistoName[0:len(HistoName)-1]+".root"
+                print "haddTarget = %s" % haddTarget
+
                 for i in range(0,len(ls)):
-                    if (ls[i].find(HistoName) != -1) and (ls[i].find("24.root") == -1):
+                    if (ls[i].find(HistoName) != -1) and (ls[i].find("Max_24.root") == -1):
                         print "found: %s" % ls[i]
                         haddHistos.append(histoDir+"/"+ls[i])
 
@@ -60,9 +78,9 @@ def CombineHistos(histoDir):
                     haddCommand=["hadd","-f"]
                     haddCommand.append(haddTarget)
                     haddCommand += haddHistos
-                    subprocess.call(haddCommand);
+                    if(not testMode): subprocess.call(haddCommand);
                     removeCommand = ["rm"] + haddHistos
-                    subprocess.call(removeCommand)
+                    if(not testMode): subprocess.call(removeCommand)
                     #print "\n"
                     print haddCommand
                     #print removeCommand
@@ -112,3 +130,12 @@ def MoveLogs(logFileBase,histoDir):
             #print ls[i]
             subprocess.call(['mv',ls[i],logDir])
     
+
+#Place to test
+def main(arguments):
+    CombineHistos(arguments[0])
+
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

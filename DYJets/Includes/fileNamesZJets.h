@@ -22,7 +22,7 @@ struct processInfoStruct{
 //--- last element must point to the MC Signal(s)
 //8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
-    //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen
+    //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen
     /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data",       " Data"},
     /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.00,     kBlue,     kBlue,     " t#bar{t}",   " t#bar{t}"},  
     /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},

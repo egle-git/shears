@@ -23,6 +23,7 @@ def main(arguments):
     args = parser.parse_args(arguments)
 
     debug=False
+    testRun = False
     #SAMPLES = ["DATA"]
     SAMPLES = ["DATA","DYJETS","BACKGROUND"]
     NSYST = 0
@@ -38,7 +39,10 @@ def main(arguments):
             NSYST=9
         if(SAMPLES[iSample]=="BACKGROUND"):
             NSYST=7
-            
+        if(testRun):
+            NSYST=1
+        
+    
         for iSyst in range(0,NSYST):
 
             #Main loop for starting the processes for each job

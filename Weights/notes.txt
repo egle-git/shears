@@ -99,3 +99,17 @@ Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T_C.txt
 Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T_H.txt
 
 $ brilcalc lumi -b "STABLE BEAMS" --normtag=/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_DATACERT.json -i JSONFiles/Cert_271036-284044_13TeV_PromptReco_Collisions16_JSON_NoL1T_B.txt -u /fb &> IntLumi_RunB.txt &
+
+_________________12_06_2017
+
+Getting the efficiency values from central pog just to compare with mine
+$ ./GetSF /data/djarcaro/CMSSW_8_0_25/src/shears/DYJets/EfficiencyTables/EfficienciesAndSF_BCDEF.root MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/efficienciesMC EfficienciesAndSF_BCDEF_MC.txt
+$ ./GetSF /data/djarcaro/CMSSW_8_0_25/src/shears/DYJets/EfficiencyTables/EfficienciesAndSF_BCDEF.root MC_NUM_TightID_DEN_genTracks_PAR_pt_eta/efficienciesDATA EfficienciesAndSF_BCDEF_DATA.txt
+
+
+_________________12_19_2017
+
+Figured out how to get the up and down for the pile-up reweighting. Just vary the min bias cross section by 5%. I will calculate them now and check nastjas.
+Probably need to do this on lxplus.
+
+PU calculated on lxplus. All the histograms look good, I just need to get the values out of the rootfile and put them in the lumi.h file.

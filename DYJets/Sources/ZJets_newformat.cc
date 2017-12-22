@@ -23,16 +23,19 @@
 #include <regex.h>
 #include "ConfigVJets.h"
 #include "time.h"
+#include "JetResolution.h"
 //#include "RoccoR.h"
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
 using namespace std;
 
-void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
+int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		 TString pdfSet, int pdfMember, double muR, double muF, double yieldScale)
 {
    bool DJALOG = cfg.getB("DJALOG", false);
+   bool jetMatching =  cfg.getB("jetMatching", false);
+   bool smearJet =  cfg.getB("smearJet", true);
    if(DJALOG) printf("Starting ZJets::Loop\n");
 
    time_t timer;
@@ -48,21 +51,23 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //--------------------------------------------
    doRochester = cfg.getB("doRochester", true);
    rochCorr2016 = new RoccoR("EfficiencyTables/rcdata.2016.v3");
-   
+   m_JetResolution = new JME::JetResolution("EfficiencyTables/Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+   m_JetResolutionScaleFactor = new JME::JetResolutionScaleFactor("EfficiencyTables/Spring16_25nsV10_MC_SF_AK4PFchs.txt");
+   m_JetParameters = new JME::JetParameters();
    //--- Initialize PDF from LHAPDF if needed ---
    if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
    //--------------------------------------------
 
    //store job id
    //using unique name for jobinfo to prevent hadd to merge them
-   /*
+   
    if(DJALOG) printf("JobInfo->SetName\n");
    std::cout<<"Job info Name: "<<JobInfo->GetName()<<std::endl;
    if(jobNum > 0) JobInfo->SetName(TString::Format("%s_%d", JobInfo->GetName(), jobNum));
    if(DJALOG) printf("JobInfo->SetBinContent(kJobNum, jobNum);\n");
    JobInfo->SetBinContent(kJobNum, jobNum);
    JobInfo->SetBinContent(kNJobs, nJobs);    
-   */    
+       
 
    //--- Counters to check the yields ---
    Long64_t nEvents(0);
@@ -105,7 +110,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    bool TrackSFBool = cfg.getB("TrackSFBool", true);
    bool IdSFBool = cfg.getB("IdSFBool", true);
    bool IsoSFBool = cfg.getB("IsoSFBool", true);
-   bool TriggerSFBool = useTriggerCorrection;
+   bool TriggerSFBool = cfg.getB("TriggerSFBool", true);
    bool doPuReweight = cfg.getB("doPuReweight", true);
 
    //==========================================================================================================//
@@ -122,18 +127,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //       Load efficiency tables        //
    //====================================//
 
-   std::map<char,table> JESUnc;
-   table TableJESUncBD("EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt");
-   table TableJESUncEF("EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt");
-   table TableJESUncG("EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt");
-   table TableJESUncH("EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt");
-   JESUnc.insert( std::pair<char,table>('B',TableJESUncBD) );
-   JESUnc.insert( std::pair<char,table>('C',TableJESUncBD) );
-   JESUnc.insert( std::pair<char,table>('D',TableJESUncBD) );
-   JESUnc.insert( std::pair<char,table>('E',TableJESUncEF) );
-   JESUnc.insert( std::pair<char,table>('F',TableJESUncEF) );
-   JESUnc.insert( std::pair<char,table>('G',TableJESUncG) );
-   JESUnc.insert( std::pair<char,table>('H',TableJESUncH) );
+   std::map<char,std::string> JESUnc;
+   std::string JESUncBD = "EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt";
+   std::string JESUncEF = "EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt";
+   std::string JESUncG = "EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt";
+   std::string JESUncH = "EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt";
+   JESUnc.insert( std::pair<char,std::string>('B',JESUncBD) );
+   JESUnc.insert( std::pair<char,std::string>('C',JESUncBD) );
+   JESUnc.insert( std::pair<char,std::string>('D',JESUncBD) );
+   JESUnc.insert( std::pair<char,std::string>('E',JESUncEF) );
+   JESUnc.insert( std::pair<char,std::string>('F',JESUncEF) );
+   JESUnc.insert( std::pair<char,std::string>('G',JESUncG) );
+   JESUnc.insert( std::pair<char,std::string>('H',JESUncH) );
 
    std::map<char,table> TrackSF;
    table TableMuTrackBF("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
@@ -221,7 +226,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //====================================//
    cout << "Lepton Flavor: " << lepSel << "  systematics: " << systematics << "  direction: " << direction << endl;
 
-   int year = cfg.getI("LumiReweightYear", 2016);
+   //int year = cfg.getI("LumiReweightYear", 2016);
+   int year = 2016;
    int mode = (systematics == 1) ? direction : 0;
    int nBin = 75;
    standalone_LumiReWeighting puWeight(year, mode, nBin);
@@ -237,8 +243,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    xsecFactor_ = 1.;
    if (systematics == 3) xsecFactor_ = 1. + direction * xsecUnc;
 
-   int smearJet(0);
-   if (systematics == 4) smearJet = direction;
+   m_Variation = Variation::NOMINAL;
+   if (systematics == 4){
+      if(direction == 0)
+	 m_Variation = Variation::NOMINAL;
+      if(direction == 1)
+	 m_Variation = Variation::UP;
+      if(direction == -1)
+	 m_Variation = Variation::DOWN;
+   }
 
    int lepscale(0);
    if (systematics == 5) lepscale = direction;
@@ -403,7 +416,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
   
    //--- Initialize the tree branches ---
    Init(hasRecoInfo, hasGenInfo);
-   if (fChain == 0) return;
+   if (fChain == 0) return -1;
    Long64_t nEntries = fChain->GetEntries();  
    Long64_t nEventsToProcessTot = 0;
    Long64_t skipEvents = cfg.getL("skipEvents", 0); //eventStart+eventStop govern the full run independent of nJobs
@@ -569,11 +582,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //====================================//
       //        double weight = norm_;
       double weight = 1;
+      if(DJALOG) printf("Weight = %F\n",weight);
 
       if (hasRecoInfo && doPuReweight && !EvtIsRealData) {
 	 //std::cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
 	 weight *= puWeight.weight(EvtPuCntTruth);
       }
+
+      if(DJALOG) printf("Weight + PU = %F\n",weight);
 
       if(addPuWeights){
 	 double add_w_ = addPuWeights->GetBinContent(addPuWeights->GetXaxis()->FindBin(EvtVtxCnt));
@@ -601,6 +617,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    processedEventMcWeightSum_ += 1.;
 	 }
       }
+      if(DJALOG) printf("Weight + PU + EvtWeights = %F\n",weight);
 
       if(fileName.Index("MLM") >= 0 && EvtWeights->size() > 117){
 	 //MLM sample includes weights for several PDFs.
@@ -674,7 +691,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //=======================================================================================================//
       //         Retrieving leptons          //
       //====================================//
-      bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1);
+      bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1), passesSameSignLeptonCut;
       //bool passesLeptonMassCut(0);
       unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
       vector<leptonStruct> leptons;
@@ -721,6 +738,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    // --- lepton energy scale and resolution variation ---
 	    if(lepSel == "DMu"){
 	       // --- muon energy scale variation ---
+	       //lepscale is a systematic variation
 	       leptons[0].v.SetPtEtaPhiE(leptons[0].v.Pt() * (1 + lepscale*0.002), leptons[0].v.Eta(), leptons[0].v.Phi(), leptons[0].v.E() * (1 + lepscale*0.002));
 	       leptons[1].v.SetPtEtaPhiE(leptons[1].v.Pt() * (1 + lepscale*0.002), leptons[1].v.Eta(), leptons[1].v.Phi(), leptons[1].v.E() * (1 + lepscale*0.002));
 
@@ -783,12 +801,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		  effWeight *= ElReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
 		  effWeight *= ElId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
 		  effWeight *= ElId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta)); 
-		  if (useTriggerCorrection) effWeight *= ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), 
+		  if (TriggerSFBool) effWeight *= ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), 
 									      fabs(leptons[1].v.Eta()));
 	       }
 	       weight *= effWeight;
 	    }
-
+	    if(DJALOG) printf("Weight + PU + Evt + SF = %F\n",weight);
 	    weightSum += weight;
 
 	    EWKBoson = leptons[0].v + leptons[1].v;
@@ -806,6 +824,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		  passesLeptonCut = 1;
 		  //passesLeptonMassCut = 1;
 	       }
+	    }
+	    //Same sign lepton pairs
+	    if (passesTrigger && (leptons[0].charge * leptons[1].charge > 0)) {
+	        if (EWKBoson.M() > ZMCutLow  &&
+		   EWKBoson.M() < ZMCutHigh && 
+		   leptons[0].v.Pt() > lepPtCutMin 
+		   && leptons[1].v.Pt() > lepPtCutMin) {
+		   passesSameSignLeptonCut = 1;
+		}
 	    }
 	    if((leptons[0].charge * leptons[1].charge < 0)
 	       &&  EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh 
@@ -963,7 +990,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    
 	 //assert(genLeptons.size() < 2 || genLeptons[0].v.Pt() >= genLeptons[1].v.Pt());
 	 if(genLeptons.size() > 1 &&  genLeptons[0].v.Pt() < genLeptons[1].v.Pt()){
-	    std::cerr << "Problem in Gen jet ordering!\n";
+	    std::cerr << "Problem in Gen lep ordering!\n";
 	 }
 
 	 if (countTauS3 == 0 && fileName.Index("UNFOLDING") >= 0 && fileName.Index("Sherpa") < 0) {
@@ -1072,7 +1099,20 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		  }
 	       } // end if re-selection of leptons
 	    }
-	 } // end if DMu/DE channel
+	    //DJALOG
+	    //Looking to see how the matching is between the gen and reco level muons. Doing this in the same way as
+	    //the jets where a matrix is made with the element increased by 1 if they match.
+	    for (size_t i=0; i < leptons.size(); i++){
+	       double mindR(0.15);
+	       double dR(9999);
+	       for (size_t j=0; j < genLeptons.size(); j++){
+		  dR = deltaR(genLeptons[j].v, leptons[i].v);
+		  if (dR < mindR){
+		     fill(hhRecoGenLeptonMatching, i, j, 1.0);
+		  }
+	       }
+	    }
+ 	 } // end if DMu/DE channel
       } // end of hasRecoInfo and hasGenInfo
 
       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -1102,16 +1142,35 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			  JetAk04E->at(i), i, passesBJets);
 
 	    //-- apply jet energy scale uncertainty (need to change the scale when initiating the object)
-	    double jetEnergyCorr = 0.; 
 	    bool jetPassesPtCut(jet.v.Pt() >= 10); 
-	    
+	    JetCorrectionUncertainty * JESUncObject = 0;
 	    if(EvtIsRealData)
-	       jetEnergyCorr = JESUnc[GetRunData(EvtRunNum)].getEfficiency(jet.v.Pt(), jet.v.Eta());
+	       JESUncObject = new JetCorrectionUncertainty(JESUnc[GetRunData(EvtRunNum)]);
 	    else
-	       jetEnergyCorr = JESUnc[GetRunMC(mcEraBoundary,nEvents)].getEfficiency(jet.v.Pt(), jet.v.Eta());
+	       JESUncObject = new JetCorrectionUncertainty(JESUnc[GetRunMC(mcEraBoundary,nEvents)]);
+	    if(JESUncObject == 0){
+	       printf("Issue with the Jet Scale Uncertainty...Exiting.\n");
+	       return -1;
+	    }
+	    
+	    //Set up JESUncObject with jet parameters:
+	    JESUncObject->setJetEta(jet.v.Eta());
+	    JESUncObject->setJetPt(jet.v.Pt());
+	    double JESUncertainty = JESUncObject->getUncertainty(true);
+	    
+	    //Vary the jet pt for systematic study (this will not do anything for central value)
+	    jet.v.SetPtEtaPhiE(jet.v.Pt()*(1 + scale*JESUncertainty), jet.v.Eta(),
+			       jet.v.Phi(), jet.v.E()*(1 + scale*JESUncertainty));
+	    
+	    //DJALOG
+	    printf("jet.v.Eta() = %F\n",jet.v.Eta());
+	    printf("jet.v.Pt() = %F\n",jet.v.Pt());
+	    printf("JESUncertainty = %F\n",JESUncertainty);
+	    printf("New jet.v.Pt() scale=1 = %F\n",jet.v.Pt()*(1 + JESUncertainty));
+	    printf("New jet.v.Pt() scale=-1 = %F\n",jet.v.Pt()*(1 - JESUncertainty));
 
-	    jet.v.SetPtEtaPhiE(jet.v.Pt() * (1 + scale * jetEnergyCorr), jet.v.Eta(),
-			       jet.v.Phi(), jet.v.E() * (1 + scale * jetEnergyCorr));
+
+	    //DJALOG
 
 	    bool jetPassesEtaCut(fabs(jet.v.Rapidity()) <= 0.1*jetEtaCutMax); 
 	    bool jetPassesIdCut(JetAk04Id->at(i) > 0);
@@ -1187,40 +1246,91 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //=======================================================================================================//
       //     Matching gen and reco jets     //
       //====================================//
-      vector<int> genJetsIndex(nGoodGenJets, 0);
-      vector<vector<int> > matchingTable(nGoodJets, genJetsIndex);
+      if(smearJet){
+      if(DJALOG) printf("\n+++++++++++++++JET SMEARING++++++++++++++\n");
       if (hasRecoInfo && hasGenInfo){
+	 double mindR = 0.2;
+	 int index = -1;
+	 double dR = 100.0;
+	 double dPt = 0.0;
+	 double jetResolution = 0.0; 
+	 float jetSF = 0.0;
 	 for (unsigned short i(0); i < nGoodJets; i++){
-	    double mindR(0.15);
-	    int index(-1);
-	    double dR(9999);
+	    //Set up JetResolution object using pt, eta, rho - The resolution needs pt,eta,rho and the scale factor needs only eta. This is all
+	    //for the Reco jet.
+	    //printf("pt = %F\n",jets[i].v.Pt());
+	    //printf("eta = %F\n",jets[i].v.Eta());
+	    //printf("rho = %F\n",EvtFastJetRho);
+	    m_JetParameters->setJetPt(jets[i].v.Pt());
+	    m_JetParameters->setJetEta(jets[i].v.Eta());
+	    m_JetParameters->setRho(EvtFastJetRho);
+	    if(passesLeptonCut && jets[i].v.Pt() > 20.0){
+	       if(DJALOG) std::cout<<"rho = "<<EvtFastJetRho<<std::endl;
+	       //fill(hEvtFastJetRho,EvtFastJetRho,weight);
+	    }
+	    //Feed the parameters into the jetresolution class and get resolution. Later it will be used to get the scale factors as well.
+	    jetResolution = m_JetResolution->getResolution(*m_JetParameters);
+	    jetSF = m_JetResolutionScaleFactor->getScaleFactor(*m_JetParameters,m_Variation);
+	    if(passesLeptonCut && jets[i].v.Pt() > 20.0){
+	       if(DJALOG) printf("jetResolution = %F\n",jetResolution);
+	       if(DJALOG) printf("jetSF         = %F\n",jetSF);
+	       fill(hjetScaleFactor,jetSF,weight);
+	       fill(hjetResolution,jetResolution,weight);
+	       fill(hhjetResolutionPt,jets[i].v.Pt(),jetResolution,weight);
+	       fill(hhjetResolutionEta,jets[i].v.Eta(),jetResolution,weight);
+	    }
+
+	    //Loop over Gen Jets
 	    for (unsigned short j(0); j < nGoodGenJets; j++){
 	       dR = deltaR(genJets[j].v, jets[i].v);
-	       if (dR < mindR){
-		  mindR = dR;
-		  index = j;
+	       //Check first for a dR match with a gen jet
+	       if(dR < mindR){
+		  dPt = abs(jets[i].v.Pt() - genJets[j].v.Pt());
+		  //Check if the pt is within the jet resolution.
+		  if(dPt < (3*jets[i].v.Pt()*jetResolution) ){  
+		     index = j;
+		     //Take the first that matches. The number of two case matches is too small to consider.
+		     break;
+		  }
 	       }
 	    }
+	    //If there is a match do the smearing based on that gen jet
 	    if (index > -1 ){
-	       matchingTable[i][index] = 1; 
+	       jets[i].setSmearMatch(true);
 	       double oldJetPt = jets[i].v.Pt();
-	       double newJetPt = SmearJetPt(oldJetPt, genJets[index].v.Pt(), jets[i].v.Eta(), smearJet);
+	       double smearFactor = 1.0 + (jetSF - 1.0)*(jets[i].v.Pt() - genJets[index].v.Pt())/jets[i].v.Pt();
+	       double newJetPt = oldJetPt*smearFactor;
 	       jets[i].v.SetPtEtaPhiE(newJetPt, jets[i].v.Eta(), jets[i].v.Phi(), 
 				      jets[i].v.E() * newJetPt / oldJetPt);
+	       if(DJALOG)
+		  printf("Match OldJetPt=%F   |   NewJetPt=%F\n",oldJetPt,newJetPt);
+	    }else{
+	       jets[i].setSmearMatch(false);
+	       double oldJetPt = jets[i].v.Pt();
+	       TRandom3 * random = new TRandom3(0);
+	       double smearFactor = 1.0 + random->Gaus(0.0,jetResolution) * sqrt( std::max(pow(jetSF,2)-1.0, 0.0) );
+	       //printf("SmearFactor = %F\n",smearFactor);
+	       double newJetPt = oldJetPt*smearFactor;
+	       jets[i].v.SetPtEtaPhiE(newJetPt, jets[i].v.Eta(), jets[i].v.Phi(), 
+				      jets[i].v.E() * newJetPt / oldJetPt);	       
+	       if(DJALOG)
+		  printf("Gaus  OldJetPt=%F   |   NewJetPt=%F\n",oldJetPt,newJetPt);
 	    }
 	 }
-
-	 /*
-	 //-- print the mathcing table
-	 //cout << "\n mathcing Table: \n" << endl; 
-	 for (int i = 0; i < int(matchingTable.size()); i++){
-	 for (int j = 0; j < int(matchingTable[i].size()); j++){
-	 cout << matchingTable[i][j] << "  ";
-	 }
-	 cout << endl;
-	 }
-	 */
       }
+      if(DJALOG) printf("\n+++++++++++++END JET SMEARING++++++++++++\n");
+      }
+      //DJALOG
+      // The jet twiki recommendations:
+      // Smear the jet based on both a match in dR and Pt using the table of values given by jet group
+      // deltaR < Rcone/2 with Rcone = 0.4
+      // abs(reco pt - gen pt) < 3*reco pt*pt resolution
+
+      // smeared reco pt = gen pt + SF (reco pt - gen pt)
+      // If no match is found, use a stochastic smearing given by a gaussian
+      // 
+      // Values for both the resolution and SFs are here: https://github.com/cms-jet/JRDatabase/tree/master/textFiles/Spring16_25nsV10_MC
+      // There needs to be two methods made in function.cc: getJetSF and getJetResolution
 
       //=======================================================================================================//
       // Re-analyze the jets collections and cut on the Pt    //
@@ -1228,16 +1338,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       // the jet pt distribution for the MC                 //
       //===================================================//
 
-      if (hasRecoInfo){     
+      if (hasRecoInfo){
 	 // subsamble the prior jet collection by applying pt cut
 	 vector<jetStruct> tmpJets;
 	 for (unsigned short i(0); i < nGoodJets; i++){
 	    if (jets[i].v.Pt() >= jetPtCutMin) tmpJets.push_back(jets[i]);
 	    if (jets[i].v.Pt() >= 20) jets_20.push_back(jets[i]);
 	 }
-	 jets.clear(); 
-	 jets = tmpJets; 
+	 jets.clear();
+	 jets = tmpJets;
 	 nGoodJets = jets.size();
+	 //if(fileName.Index("TT") >= 0) cout << "TTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
 	 if(fileName.Index("TT") >= 0 && (systematics == 3)) {
 	    if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
 	    else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);
@@ -1252,23 +1363,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 }
 	 jetsHT = 0;
 	 for (unsigned short i(0); i < nGoodJets; i++){
-	    jetsHT += jets[i].v.Pt();  
-	    if(nGoodJets>=1) hadronicR += jets[i].v;  
+	    jetsHT += jets[i].v.Pt();
+	    if(nGoodJets>=1) hadronicR += jets[i].v;
 	 }
       }
-
+      
       if (hasGenInfo){
 	 vector<jetStruct> tmpGenJets;
 	 for (unsigned short i(0); i < nGoodGenJets; i++){
-	    if (genJets[i].v.Pt() >= jetPtCutMin && 
-		fabs(genJets[i].v.Rapidity()) <= 0.1*jetEtaCutMax) 
-	       tmpGenJets.push_back(genJets[i]);
-	    if (genJets[i].v.Pt() >= 20 && 
-		fabs(genJets[i].v.Rapidity()) <= 0.1*jetEtaCutMax) 
-	       genJets_20.push_back(genJets[i]);
+	    if (genJets[i].v.Pt() >= jetPtCutMin && fabs(genJets[i].v.Rapidity()) <= 0.1*jetEtaCutMax) tmpGenJets.push_back(genJets[i]);
+	    if (genJets[i].v.Pt() >= 20 && fabs(genJets[i].v.Rapidity()) <= 0.1*jetEtaCutMax) genJets_20.push_back(genJets[i]);
 	 }
 	 genJets.clear();
-	 genJets = tmpGenJets; 
+	 genJets = tmpGenJets;
 	 nGoodGenJets = genJets.size();
 	 nGoodGenJets_20 = genJets_20.size();
 	 sort(genJets.begin(), genJets.end(), JetDescendingOrder);
@@ -1278,12 +1385,412 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 }
 	 genJetsHT = 0.;
 	 for (unsigned short i(0); i < nGoodGenJets; i++){
-	    genJetsHT += genJets[i].v.Pt();  
-	    if(nGoodGenJets>=1) genHadronicR += genJets[i].v;  
+	    genJetsHT += genJets[i].v.Pt();
+	    if(nGoodGenJets>=1) genHadronicR += genJets[i].v;
 	 }
+
+
 	 sort(genJets_20.begin(), genJets_20.end(), JetDescendingOrder);
+
       }
+      
       //=======================================================================================================//
+
+
+      //DJALOG
+      //Testing the Matching matrix for gen and reco jets. If the two jets match in dR then it will fill the index
+      //of the two that matched (reco index, gen index).
+
+      vector<jetStruct> jets_Match = jets;
+      vector<jetStruct> genJets_Match = genJets;
+      size_t nGoodJets_Match = nGoodJets;
+      size_t nGoodGenJets_Match = nGoodGenJets;
+     
+      std::vector<std::pair<size_t,size_t> > jetMatches;
+      vector<size_t> failedRecoJetsdR;
+      vector<size_t> failedRecoJetsnGen;
+      std::vector<std::vector<std::pair<size_t,size_t> > > jetMatchingMatrix;
+      if(jetMatching){
+	 //if(nGoodJets_Match > 3){
+      if(DJALOG) printf("\n+++++++++++++++++++++++++++++\n");
+      if(DJALOG) printf(" nGoodJets_20=%ld      nGoodGenJets_20=%ld\n",nGoodJets_Match,nGoodGenJets_Match);
+      if(DJALOG) printf(" size() nGoodJets_20=%ld      nGoodGenJets_20=%ld\n",jets_Match.size(),genJets_Match.size());
+      if(DJALOG) printf(" Weight = %F\n",weight);
+
+      double matchWeight = weight;
+
+      if (hasRecoInfo && hasGenInfo){
+      
+	 //double dRMatch = 20.0;
+	 //double dRMatch = 0.38;
+	 double dRMatch = 0.20;
+	 double dR = 100.0;
+      
+	 std::vector<std::pair<size_t,double> > matchingElement;
+	 std::vector<std::pair<size_t,double> >::iterator iterMatchingElement;
+	 
+	 for(size_t iRecoJet=0;iRecoJet< nGoodJets_Match; iRecoJet++){
+	    if(DJALOG) printf("iRecoJet=%ld\n",iRecoJet);
+	    matchingElement.clear();
+	    for(size_t iGenJet=0;iGenJet < nGoodGenJets_Match; iGenJet++){
+	       if(DJALOG) printf("iGenJet=%ld\n",iGenJet);
+
+	       dR = deltaR(genJets_Match[iGenJet].v, jets_Match[iRecoJet].v);   
+	       if(iRecoJet==0)
+		  fill(hJetMatching_dRFirstJet, dR, matchWeight);
+	       if(dR < dRMatch){
+		  if(DJALOG) printf("dRMatch\n");
+		  //insert dR and index of GenJet in vector, ordered by lowest dR first
+		  iterMatchingElement = matchingElement.begin();
+		  if(matchingElement.size()==0){
+		     if(DJALOG) printf("matchingElement.size()==0\n");
+		     matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+		  }else if(matchingElement.size()==1){
+		     if(DJALOG) printf("matchingElement.size()==1\n");
+		     if(dR < matchingElement[0].second)
+			//matchingElement.insert(0,std::pair<size_t,double>(iGenJet,dR));
+			matchingElement.insert(iterMatchingElement,std::make_pair(iGenJet,dR));
+		     else
+			matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+		  }else{
+		     if(DJALOG) printf("matchingElement.size()=%ld\n",matchingElement.size());
+		     for(size_t i=0;i<matchingElement.size();i++){
+			if(DJALOG) printf("i=%ld\n",i);
+			iterMatchingElement = matchingElement.begin();
+			if(i+1 == matchingElement.size()){
+			   if(DJALOG) printf("i+1 == matchingElement.size()\n");
+			   matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+			   break;
+			}
+			if(i==0 && matchingElement[i].second > dR){
+			   matchingElement.insert(iterMatchingElement,
+						  std::pair<size_t,double>(iGenJet,dR));
+			   break;			
+			}
+			if(matchingElement[i].second < dR && dR < matchingElement[i+1].second){
+			   matchingElement.insert(iterMatchingElement+i+1,
+						  std::pair<size_t,double>(iGenJet,dR));
+			   break;
+			}
+		     }
+		  }
+	       }//dR if statment
+	    }//Loop over gen jets
+	    if(DJALOG) {printf("Done making vector of matches ");
+	       printf("   size(%ld)=%ld\n",iRecoJet,matchingElement.size());
+	       for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+		  printf("   %ld,%F",matchingElement[iMatchElement].first,
+			 matchingElement[iMatchElement].second);
+	       }
+	       printf("\n");
+	    }
+		  
+	    vector<std::pair<size_t,size_t> > tmpVector;
+	    for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+	       fill(hhRecoGenJetMatchingMatrix, iRecoJet, 
+	           matchingElement[iMatchElement].first, matchWeight);
+	       tmpVector.push_back(std::pair<size_t,size_t>(iRecoJet,matchingElement[iMatchElement].first));
+	    }
+	    jetMatchingMatrix.push_back(tmpVector);
+	    tmpVector.clear();
+	    if(DJALOG) printf("jetMatchingMatrix.size()=%ld\n",jetMatchingMatrix.size());
+	    
+	    //Make some graphs of just the first jet case
+	    if(iRecoJet==0){
+	       //No matches for first jet
+	       if(matchingElement.size() == 0){
+		  if(genJets_Match.size() > 0){
+		     if(DJALOG) printf("No matches for first jet\n");
+		     fill(hhJetMatching_FirstJetRap_NoMatch, abs(jets_Match[0].v.Eta()),
+			  abs(genJets_Match[0].v.Eta()), matchWeight);
+		     if(DJALOG) printf("Done Filling\n");
+		     
+		  }
+	       //First jet matches first reco jet
+	       }else{
+		  if(matchingElement[0].first == 0){
+		     fill(hhJetMatching_FirstJetRap_Match, abs(jets_Match[0].v.Eta()),
+			  abs(genJets_Match[0].v.Eta()), matchWeight);
+		  }else{
+		     fill(hhJetMatching_FirstJetRap_Match, abs(jets_Match[0].v.Eta()),
+			  abs(genJets_Match[matchingElement[0].first].v.Eta()), matchWeight);
+		     //Plot delta Pt between matches to see if the best eta match makes sense
+		  }	       
+		  fill(hJetMatching_FirstJetdPT_Match,
+		       jets_Match[0].v.Pt() - genJets_Match[matchingElement[0].first].v.Pt(), matchWeight);
+		  for(size_t i=0;i<nGoodGenJets_Match;i++){
+		     
+		     if(i==matchingElement[0].first)
+			continue;
+		     fill(hJetMatching_FirstJetdPT_Other,
+			  jets_Match[0].v.Pt() - genJets_Match[i].v.Pt(), matchWeight);			   
+		  }
+	       }
+	    }
+	 
+
+	    //If the matchingElement vector is empty there were no dR matches for iRecoJet
+	    fill(hhJetMatching_StatMatches, iRecoJet+1, matchingElement.size(), matchWeight);
+
+	    //Before going to the next reco jet the best match should be selected making sure it is
+	    //not a repeat from previous reco jets	    
+	    bool match = false;
+	    for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+	       match = false;
+	       for(size_t iMatchMatrix=0;iMatchMatrix<jetMatches.size();iMatchMatrix++){ 
+		  if(matchingElement[iMatchElement].first == jetMatches[iMatchMatrix].second){
+		     match=true;
+		     if(DJALOG) printf("Redundant Match\n");
+		     break;
+		  }
+	       }
+	       if(!match){
+		  jetMatches.push_back(std::pair<size_t,size_t>(iRecoJet, matchingElement[iMatchElement].first));
+		  break;
+	       }
+	    }
+
+	    //If matchingElement vector is not empty and match is true then there were redundant 
+	    //matches only
+	    if(matchingElement.size() != 0 && match){
+	       if(DJALOG) printf("Fill Redundant Match Stat\n");
+	       fill(hhJetMatching_StatFail, iRecoJet+1, 2, matchWeight);
+
+	    }
+	    if(matchingElement.size() == 0){
+	       if(iRecoJet+1 > nGoodGenJets_Match){  //If there arent enough gen jets fill 1
+		  if(DJALOG) printf("Failed because no Gen Jets to pick from\n");
+		  fill(hhJetMatching_StatFail, iRecoJet+1, 1, matchWeight);
+		  failedRecoJetsnGen.push_back(iRecoJet);
+	       }else{
+		  if(DJALOG) printf("Failed because no dR Match\n");
+		  fill(hhJetMatching_StatFail, iRecoJet+1, 0, matchWeight);
+		  //push_back jets that actually dont find a match here to be compared with the
+		  //muons in the event
+		  failedRecoJetsdR.push_back(iRecoJet);
+	       }
+	    }
+	    //Save the matchingElement for later use
+
+
+	 }//RecoJet Loop
+      }//if Reco+Gen Info
+      
+
+      if(DJALOG){ 
+      printf("\n\nReco   |   Gen |  dR        |  dEta      |  RecoPt    |  GenPt     |\n");
+      for(size_t i=0;i<jetMatches.size();i++){
+	 double dR = deltaR(genJets_Match[jetMatches[i].second].v, jets_Match[jetMatches[i].first].v);   
+	 printf("  %2ld   |   %2ld  |  %8F  |  %8F  |  %8F  |  %8F  |\n",
+		jetMatches[i].first,
+		jetMatches[i].second,
+		dR, 
+		abs(genJets_Match[jetMatches[i].second].v.Eta()-jets_Match[jetMatches[i].first].v.Eta()),
+		jets_Match[jetMatches[i].first].v.Pt(), 
+		genJets_Match[jetMatches[i].second].v.Pt());
+      }
+      }
+      if(DJALOG) printf("\n+++++++++++++++END++++++++++++++\n");
+      }//End Jet Matching
+
+
+
+      //vector<jetStruct> jets_Match = jets;
+      //vector<jetStruct> genJets_Match = genJets;
+      //size_t nGoodJets_Match = nGoodJets;
+      //size_t nGoodGenJets_Match = nGoodGenJets;
+      jets_Match = jets_20;
+      genJets_Match = genJets_20;
+      nGoodJets_Match = nGoodJets_20;
+      nGoodGenJets_Match = nGoodGenJets_20;
+     
+      std::vector<std::pair<size_t,size_t> > jetMatches_20;
+      vector<size_t> failedRecoJetsdR_20;
+      vector<size_t> failedRecoJetsnGen_20;
+      std::vector<std::vector<std::pair<size_t,size_t> > > jetMatchingMatrix_20;
+      if(jetMatching){
+	 //if(nGoodJets_Match > 3){
+      if(DJALOG) printf("\n+++++++++++++++++++++++++++++\n");
+      if(DJALOG) printf(" nGoodJets_20=%ld      nGoodGenJets_20=%ld\n",nGoodJets_Match,nGoodGenJets_Match);
+      if(DJALOG) printf(" size() nGoodJets_20=%ld      nGoodGenJets_20=%ld\n",jets_Match.size(),genJets_Match.size());
+      if(DJALOG) printf(" Weight = %F\n",weight);
+
+
+      if (hasRecoInfo && hasGenInfo){
+      
+	 //double dRMatch = 20.0;
+	 double dRMatch = 0.38;
+	 double dR = 100.0;
+      
+	 std::vector<std::pair<size_t,double> > matchingElement;
+	 std::vector<std::pair<size_t,double> >::iterator iterMatchingElement;
+	 
+	 for(size_t iRecoJet=0;iRecoJet< nGoodJets_Match; iRecoJet++){
+	    if(DJALOG) printf("iRecoJet=%ld\n",iRecoJet);
+	    matchingElement.clear();
+	    for(size_t iGenJet=0;iGenJet < nGoodGenJets_Match; iGenJet++){
+	       if(DJALOG) printf("iGenJet=%ld\n",iGenJet);
+
+	       dR = deltaR(genJets_Match[iGenJet].v, jets_Match[iRecoJet].v);   
+	       //if(iRecoJet==0)
+	       //	  fill(hJetMatching_dRFirstJet, dR, matchWeight);
+	       if(dR < dRMatch){
+		  if(DJALOG) printf("dRMatch\n");
+		  //insert dR and index of GenJet in vector, ordered by lowest dR first
+		  iterMatchingElement = matchingElement.begin();
+		  if(matchingElement.size()==0){
+		     if(DJALOG) printf("matchingElement.size()==0\n");
+		     matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+		  }else if(matchingElement.size()==1){
+		     if(DJALOG) printf("matchingElement.size()==1\n");
+		     if(dR < matchingElement[0].second)
+			//matchingElement.insert(0,std::pair<size_t,double>(iGenJet,dR));
+			matchingElement.insert(iterMatchingElement,std::make_pair(iGenJet,dR));
+		     else
+			matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+		  }else{
+		     if(DJALOG) printf("matchingElement.size()=%ld\n",matchingElement.size());
+		     for(size_t i=0;i<matchingElement.size();i++){
+			if(DJALOG) printf("i=%ld\n",i);
+			iterMatchingElement = matchingElement.begin();
+			if(i+1 == matchingElement.size()){
+			   if(DJALOG) printf("i+1 == matchingElement.size()\n");
+			   matchingElement.push_back(std::pair<size_t,double>(iGenJet,dR));
+			   break;
+			}
+			if(i==0 && matchingElement[i].second > dR){
+			   matchingElement.insert(iterMatchingElement,
+						  std::pair<size_t,double>(iGenJet,dR));
+			   break;			
+			}
+			if(matchingElement[i].second < dR && dR < matchingElement[i+1].second){
+			   matchingElement.insert(iterMatchingElement+i+1,
+						  std::pair<size_t,double>(iGenJet,dR));
+			   break;
+			}
+		     }
+		  }
+	       }//dR if statment
+	    }//Loop over gen jets
+	    if(DJALOG) {printf("Done making vector of matches ");
+	       printf("   size(%ld)=%ld\n",iRecoJet,matchingElement.size());
+	       for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+		  printf("   %ld,%F",matchingElement[iMatchElement].first,
+			 matchingElement[iMatchElement].second);
+	       }
+	       printf("\n");
+	    }
+		  
+	    vector<std::pair<size_t,size_t> > tmpVector;
+	    for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+	       //fill(hhRecoGenJetMatchingMatrix, iRecoJet, 
+	       //    matchingElement[iMatchElement].first, matchWeight);
+	       tmpVector.push_back(std::pair<size_t,size_t>(iRecoJet,matchingElement[iMatchElement].first));
+	    }
+	    jetMatchingMatrix_20.push_back(tmpVector);
+	    tmpVector.clear();
+	    if(DJALOG) printf("jetMatchingMatrix_20.size()=%ld\n",jetMatchingMatrix_20.size());
+	    
+	    //Make some graphs of just the first jet case
+	    if(iRecoJet==0){
+	       //No matches for first jet
+	       if(matchingElement.size() == 0){
+		  if(genJets_Match.size() > 0){
+		     if(DJALOG) printf("No matches for first jet\n");
+		     //fill(hhJetMatching_FirstJetRap_NoMatch, abs(jets_Match[0].v.Eta()),
+		     //		  abs(genJets_Match[0].v.Eta()), matchWeight);
+		     if(DJALOG) printf("Done Filling\n");
+		     
+		  }
+	       //First jet matches first reco jet
+	       }else{
+		  if(matchingElement[0].first == 0){
+		     //fill(hhJetMatching_FirstJetRap_Match, abs(jets_Match[0].v.Eta()),
+		     //		  abs(genJets_Match[0].v.Eta()), matchWeight);
+		  }else{
+		     //fill(hhJetMatching_FirstJetRap_Match, abs(jets_Match[0].v.Eta()),
+		     //		  abs(genJets_Match[matchingElement[0].first].v.Eta()), matchWeight);
+		     //Plot delta Pt between matches to see if the best eta match makes sense
+		  }	       
+		  //fill(hJetMatching_FirstJetdPT_Match,
+		  //    jets_Match[0].v.Pt() - genJets_Match[matchingElement[0].first].v.Pt(), matchWeight);
+		  for(size_t i=0;i<nGoodGenJets_Match;i++){
+		     
+		     if(i==matchingElement[0].first)
+			continue;
+		     // fill(hJetMatching_FirstJetdPT_Other,
+		     //	  jets_Match[0].v.Pt() - genJets_Match[i].v.Pt(), matchWeight);			   
+		  }
+	       }
+	    }
+	 
+
+	    //If the matchingElement vector is empty there were no dR matches for iRecoJet
+	    //fill(hhJetMatching_StatMatches, iRecoJet+1, matchingElement.size(), matchWeight);
+
+	    //Before going to the next reco jet the best match should be selected making sure it is
+	    //not a repeat from previous reco jets	    
+	    bool match = false;
+	    for(size_t iMatchElement=0;iMatchElement<matchingElement.size();iMatchElement++){ 
+	       match = false;
+	       for(size_t iMatchMatrix=0;iMatchMatrix<jetMatches_20.size();iMatchMatrix++){ 
+		  if(matchingElement[iMatchElement].first == jetMatches_20[iMatchMatrix].second){
+		     match=true;
+		     if(DJALOG) printf("Redundant Match\n");
+		     break;
+		  }
+	       }
+	       if(!match){
+		  jetMatches_20.push_back(std::pair<size_t,size_t>(iRecoJet, matchingElement[iMatchElement].first));
+		  break;
+	       }
+	    }
+
+	    //If matchingElement vector is not empty and match is true then there were redundant 
+	    //matches only
+	    if(matchingElement.size() != 0 && match){
+	       if(DJALOG) printf("Fill Redundant Match Stat\n");
+	       //fill(hhJetMatching_StatFail, iRecoJet+1, 2, matchWeight);
+
+	    }
+	    if(matchingElement.size() == 0){
+	       if(iRecoJet+1 > nGoodGenJets_Match){  //If there arent enough gen jets fill 1
+		  if(DJALOG) printf("Failed because no Gen Jets to pick from\n");
+		  //fill(hhJetMatching_StatFail, iRecoJet+1, 1, matchWeight);
+		  failedRecoJetsnGen_20.push_back(iRecoJet);
+	       }else{
+		  if(DJALOG) printf("Failed because no dR Match\n");
+		  //fill(hhJetMatching_StatFail, iRecoJet+1, 0, matchWeight);
+		  //push_back jets that actually dont find a match here to be compared with the
+		  //muons in the event
+		  failedRecoJetsdR_20.push_back(iRecoJet);
+	       }
+	    }
+	    //Save the matchingElement for later use
+
+
+	 }//RecoJet Loop
+      }//if Reco+Gen Info
+      
+
+      if(DJALOG){ 
+      printf("\n\nReco   |   Gen |  dR        |  dEta      |  RecoPt    |  GenPt     |\n");
+      for(size_t i=0;i<jetMatches_20.size();i++){
+	 double dR = deltaR(genJets_Match[jetMatches_20[i].second].v, jets_Match[jetMatches_20[i].first].v);   
+	 printf("  %2ld   |   %2ld  |  %8F  |  %8F  |  %8F  |  %8F  |\n",
+		jetMatches_20[i].first,
+		jetMatches_20[i].second,
+		dR, 
+		abs(genJets_Match[jetMatches_20[i].second].v.Eta()-jets_Match[jetMatches_20[i].first].v.Eta()),
+		jets_Match[jetMatches_20[i].first].v.Pt(), 
+		genJets_Match[jetMatches_20[i].second].v.Pt());
+      }
+      }
+      }//End Jet Matching
+
+
+
+
 
 
       if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -1960,6 +2467,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       double tau_cm_sum(0), tau_cm_max(0);
       double tau_c_cm_sum(0), tau_c_cm_max(0); 
 
+      //Filling Same Sign lepton plots
+      if (hasRecoInfo && passesSameSignLeptonCut && (!bTagJetFound || !rejectBTagEvents)) {
+	 if (nGoodJets >= 0){fill(ZNGoodJets_SameChargePair_Zinc, 0., weight);}
+	 if (nGoodJets >= 1){fill(ZNGoodJets_SameChargePair_Zinc, 1., weight);}
+	 if (nGoodJets >= 2){fill(ZNGoodJets_SameChargePair_Zinc, 2., weight);}
+	 if (nGoodJets >= 3){fill(ZNGoodJets_SameChargePair_Zinc, 3., weight);}
+	 if (nGoodJets >= 4){fill(ZNGoodJets_SameChargePair_Zinc, 4., weight);}
+	 if (nGoodJets >= 5){fill(ZNGoodJets_SameChargePair_Zinc, 5., weight);}
+	 if (nGoodJets >= 6){fill(ZNGoodJets_SameChargePair_Zinc, 6., weight);}
+	 if (nGoodJets >= 7){fill(ZNGoodJets_SameChargePair_Zinc, 7., weight);}
+	 if (nGoodJets >= 8){fill(ZNGoodJets_SameChargePair_Zinc, 8., weight);}
+      }
+
       if (hasRecoInfo && passesLeptonChargeCut && passesTauCut) {
 	 fill(ZMassFrom60_Zinc0jet, (leptons[0].v + leptons[1].v).M(), weight);
       }
@@ -1972,13 +2492,63 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 //      Start filling histograms      //
 	 //====================================//
 
-	 //cout << "Selected at reco level" << endl;
-	 fill(NVtx, EvtVtxCnt, weight);
 
+	 //DJALOG Jet Matching After Lepton Cut
+	 if(jetMatching){
+	    if(DJALOG) printf("Jet Matching after lepton selection.\n");
+	    for(size_t iRecoJet=0;iRecoJet<jetMatchingMatrix.size();iRecoJet++){
+	       if(DJALOG){
+		  for(size_t iGenJet=0;iGenJet<jetMatchingMatrix[iRecoJet].size();iGenJet++){
+		     printf("(%ld,%ld)\n",jetMatchingMatrix[iRecoJet][iGenJet].first,jetMatchingMatrix[iRecoJet][iGenJet].second);
+		  }
+		  printf("------------------\n");
+	       }
+	       fill(hhJetMatching_StatMatches_Lep, iRecoJet+1, 
+		    jetMatchingMatrix[iRecoJet].size(), weight);
+	       if(jetMatchingMatrix[iRecoJet].size() == 0){
+		  if(iRecoJet+1 > nGoodGenJets_Match){  //If there arent enough gen jets fill 1
+		     if(DJALOG) printf("Failed because no Gen Jets to pick from After Lep\n");
+		     fill(hhJetMatching_StatFail_Lep, iRecoJet+1, 1, weight);
+		  }else{
+		     if(DJALOG) printf("Failed because no dR match After Lep\n");
+		     fill(hhJetMatching_StatFail_Lep, iRecoJet+1, 0, weight);
+		  }
+		  if(iRecoJet==0){
+		     fill(hJetMatching_dRFailedFirstLeadLep, deltaR(leptons[0].v,jets_Match[0].v),weight);
+		     fill(hJetMatching_dRFailedFirstSubLep, deltaR(leptons[1].v,jets_Match[0].v),weight);
+		  }
+	       }
+	    }
+	    //Fille some kinematic plots of the jets that did not find a match. Keep the jets with different reasons for failed matches separate (dR and nGen)
+	    if(DJALOG) printf("failedRecoJetsdR.size()=%ld\n",failedRecoJetsdR.size());
+	    for(size_t iFailed=0;iFailed<failedRecoJetsdR.size();iFailed++){
+	       if(DJALOG) printf("iRecoJet=%ld\n",failedRecoJetsdR[iFailed]);
+	       fill(hJetMatching_FirstJetPt_FaileddR, jets_Match[failedRecoJetsdR[iFailed]].v.Pt(), weight);
+	       fill(hJetMatching_FirstJetAbsRapidity_FaileddR, abs(jets_Match[failedRecoJetsdR[iFailed]].v.Rapidity()), weight);
+	    }
+	    if(DJALOG) printf("failedRecoJetsnGen.size()=%ld\n",failedRecoJetsnGen.size());
+	    if(DJALOG) printf("jets.size()=%ld\n",jets_Match.size());
+	    
+	    for(size_t iFailed=0;iFailed<failedRecoJetsnGen.size();iFailed++){
+	       if(DJALOG) printf("iRecoJet=%ld\n",failedRecoJetsnGen[iFailed]);
+	       if(DJALOG) printf("jets[failedRecoJetsnGen[iFailed]].v.Pt()=%F\n",jets_Match[failedRecoJetsnGen[iFailed]].v.Pt());
+	       fill(hJetMatching_FirstJetPt_FailednGen, jets_Match[failedRecoJetsnGen[iFailed]].v.Pt(), weight);
+	       fill(hJetMatching_FirstJetAbsRapidity_FailednGen, abs(jets_Match[failedRecoJetsnGen[iFailed]].v.Rapidity()), weight);
+	    }  
+
+	 }
+	 //DJALOG END Jet Matching
+
+	 if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
+	 //cout << "Selected at reco level" << endl;
+	 fill(NVtx_Zinc0jet, EvtVtxCnt, weight);
+	 fill(hEvtFastJetRho,EvtFastJetRho,weight);
+
+	 
 	    
 	 double weightNoPUweight(weight);
 	 if (hasRecoInfo && !EvtIsRealData) weightNoPUweight /= puWeight.weight(int(EvtPuCntTruth));
-	 fill(NVtx_NoPUweight, EvtVtxCnt, weightNoPUweight);
+	 fill(NVtx_NoPUweight_Zinc0jet, EvtVtxCnt, weightNoPUweight);
 
 	 nEventsVInc0Jets++;
 	 nEffEventsVInc0Jets += weight;
@@ -2002,11 +2572,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 fill(ZEta_Zinc0jet, EWKBoson.Eta(), weight);
 	 fill(ZEtaUpTo5_Zinc0jet, EWKBoson.Eta(), weight);
 	 fill(lepPt_Zinc0jet, leptons[0].v.Pt(), weight);
+	 fill(lepLPt_Zinc0jet, leptons[0].v.Pt(), weight); //DJALOG
 	 fill(lepEta_Zinc0jet, leptons[0].v.Eta(), weight);
 	 fill(lepPhi_Zinc0jet, leptons[0].v.Phi(), weight);
 	 fill(lepPt_Zinc0jet, leptons[1].v.Pt(), weight);
+	 fill(lepSPt_Zinc0jet, leptons[1].v.Pt(), weight); //DJALOG
 	 fill(lepEta_Zinc0jet, leptons[1].v.Eta(), weight);
 	 fill(lepPhi_Zinc0jet, leptons[1].v.Phi(), weight);
+	 fill(MuPFIsoDBetaCorr, leptons[0].iso, weight);
+	 fill(MuPFIsoDBetaCorr, leptons[1].iso, weight);
+
+
 	 fill(dPhiLeptons_Zinc0jet, deltaPhi(leptons[0].v, leptons[1].v), weight);
 	 fill(dEtaLeptons_Zinc0jet, leptons[0].v.Eta() - leptons[1].v.Eta(), weight);
 	 fill(dRLeptons_Zinc0jet, deltaR(leptons[0].v, leptons[1].v), weight);
@@ -2019,14 +2595,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 if (nGoodJets == 0){
 	    //fill(TruePU_0, EvtPuCntTruth, weight);
 	    //fill(PU_0, EvtPuCnt, weight);
-	    fill(PU_0, EvtVtxCnt, weight);
+	    fill(NVtx_Zexc0jet, EvtVtxCnt, weight);
 	    fill(ZNGoodJets_Zexc_NoWeight, 0.);
 	    fill(ZPt_Zexc0jet, EWKBoson.Pt(), weight);
 	    fill(ZRapidity_Zexc0jet, EWKBoson.Rapidity(), weight);
 	    fill(ZEta_Zexc0jet, EWKBoson.Eta(), weight);
 	    fill(lepPt_Zexc0jet, leptons[0].v.Pt(), weight);
+	    fill(lepLPt_Zexc0jet, leptons[0].v.Pt(), weight);
 	    fill(lepEta_Zexc0jet, leptons[0].v.Eta(), weight);
 	    fill(lepPt_Zexc0jet, leptons[1].v.Pt(), weight);
+	    fill(lepSPt_Zexc0jet, leptons[1].v.Pt(), weight);
 	    fill(lepEta_Zexc0jet, leptons[1].v.Eta(), weight);
 	    fill(dPhiLeptons_Zexc0jet, deltaPhi(leptons[0].v, leptons[1].v), weight);
 	    fill(dEtaLeptons_Zexc0jet, leptons[0].v.Eta() - leptons[1].v.Eta(), weight);
@@ -2040,8 +2618,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       double binNumber = FirstJetPt_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jets_20[0].v.Pt());
 	       RatioValue =  FirstJetPt_2_Zinc1jetHratio_fit->GetBinContent(binNumber);
 	    }
-
 	    fill(FirstJetPt_Zinc1jet, jets_20[0].v.Pt(), weight*RatioValue);
+	    if(smearJet){
+	       if(jets_20[0].smearMatch)
+		  fill(FirstJetPt_SmearMatch_Zinc1jet, jets_20[0].v.Pt(), weight*RatioValue);
+	       else
+		  fill(FirstJetPt_SmearGauss_Zinc1jet, jets_20[0].v.Pt(), weight*RatioValue);
+	    }
+
 	    if(nEvents % 2) fill(FirstJetPt_Zinc1jet_Odd, jets_20[0].v.Pt(), weight*RatioValue);
 	    else fill(FirstJetPt_Zinc1jet_Even, jets_20[0].v.Pt(), weight*RatioValue);
 	    fill(FirstJetPt_2_Zinc1jet, jets_20[0].v.Pt(), weight);
@@ -2115,8 +2699,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(ZNGoodJets_Zinc_NoWeight, 1.);
 	    fill(ZPt_Zinc1jet, EWKBoson.Pt(), weight);
 	    fill(lepPt_Zinc1jet, leptons[0].v.Pt(), weight);
+	    fill(lepLPt_Zinc1jet, leptons[0].v.Pt(), weight); //DJALOG
 	    fill(lepEta_Zinc1jet, leptons[0].v.Eta(), weight);  
 	    fill(lepPt_Zinc1jet, leptons[1].v.Pt(), weight);
+	    fill(lepSPt_Zinc1jet, leptons[1].v.Pt(), weight); //DJALOG
 	    fill(lepEta_Zinc1jet, leptons[1].v.Eta(), weight);
 	    fill(dPhiLeptons_Zinc1jet, deltaPhi(leptons[0].v, leptons[1].v), weight);
 	    fill(dRLeptons_Zinc1jet, deltaPhi(leptons[0].v, leptons[1].v), weight);
@@ -2127,7 +2713,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(ZEta_Zinc1jet, EWKBoson.Eta(), weight);
 	    fill(ZEtaUpTo5_Zinc1jet, EWKBoson.Eta(), weight);
 	    fill(SpTLeptons_Zinc1jet, SpTsub(leptons[0].v, leptons[1].v), weight);
-
+	    TLorentzVector ptBal_Zinc1jet_Vector = jets[0].v + EWKBoson;
+	    fill(ptBal_Zinc1jet,ptBal_Zinc1jet_Vector.Pt(),weight);
 
 	    double RatioValue = 1.;
 	    double RatioValue1 = 1.;
@@ -2146,6 +2733,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(FirstJetEta_Zinc1jet, fabs(jets[0].v.Eta()), weight*RatioValue);
 	    fill(FirstJetEta_2_Zinc1jet, fabs(jets[0].v.Eta()), weight);
 	    fill(FirstJetAbsRapidity_Zinc1jet, fabs(jets[0].v.Rapidity()), weight*RatioValue);
+	    if(smearJet){
+	       if(jets_20[0].smearMatch)
+		  fill(FirstJetAbsRapidity_SmearMatch_Zinc1jet, fabs(jets[0].v.Rapidity()), weight*RatioValue);
+	       else
+		  fill(FirstJetAbsRapidity_SmearGauss_Zinc1jet, fabs(jets[0].v.Rapidity()), weight*RatioValue);
+	    }
+	    
+	    //DJALOG
+	    fill(FirstJetAbsYvsAbsEta_Zinc1jet,fabs(jets[0].v.Rapidity()),fabs(jets[0].v.Eta()), weight*RatioValue);
 	    fill(FirstJetAbsRapidity_2_Zinc1jet, fabs(jets[0].v.Rapidity()), weight*RatioValue);
 	    if(nEvents % 2) fill(FirstJetAbsRapidity_Zinc1jet_Odd, fabs(jets[0].v.Rapidity()), weight*RatioValue);
 	    else fill(FirstJetAbsRapidity_Zinc1jet_Even, fabs(jets[0].v.Rapidity()), weight*RatioValue);
@@ -2197,7 +2793,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 1){
 	       //fill(TruePU_1, EvtPuCntTruth, weight);
 	       //fill(PU_1, EvtPuCnt, weight);
-	       fill(PU_1, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc1jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 1.);
 	       fill(ZPt_Zexc1jet, EWKBoson.Pt(), weight);
 	       fill(ZRapidity_Zexc1jet, EWKBoson.Rapidity(), weight);
@@ -2492,7 +3088,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 	       //fill(TruePU_2, EvtPuCntTruth, weight);
 	       //fill(PU_2, EvtPuCnt, weight);              
-	       fill(PU_2, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc2jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 2.);
 	       fill(ZPt_Zexc2jet, EWKBoson.Pt(), weight);
 	       fill(ZRapidity_Zexc2jet, EWKBoson.Rapidity(), weight);
@@ -2647,6 +3243,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(DPhiFirstThirdJet_Zinc3jet, fabs(jets[0].v.DeltaPhi(jets[2].v)),weight);
 	    fill(DPhiSecondThirdJet_Zinc3jet, fabs(jets[1].v.DeltaPhi(jets[2].v)),weight);
 
+	    TLorentzVector ptBal_Zinc3jet_Vector = jets[0].v + jets[1].v + jets[2].v + EWKBoson;
+	    fill(ptBal_Zinc3jet,ptBal_Zinc3jet_Vector.Pt(),weight);
+
 	    if(EWKBoson.Pt()>150.)
 	       {
 		  fill(DPhiZFirstJet_ZPt150_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)),weight);
@@ -2678,7 +3277,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 3){
 	       //fill(TruePU_3, EvtPuCntTruth, weight);
 	       //fill(PU_3, EvtPuCnt, weight);
-	       fill(PU_3, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc3jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 3.);
 	    }
 	 }
@@ -2696,7 +3295,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 4){
 	       //fill(TruePU_4, EvtPuCntTruth, weight);
 	       //fill(PU_4, EvtPuCnt, weight);
-	       fill(PU_4, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc4jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 4.);
 	    }
 	 }    
@@ -2714,7 +3313,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 5){
 	       //fill(TruePU_5, EvtPuCntTruth, weight);
 	       //fill(PU_5, EvtPuCnt, weight);
-	       fill(PU_5, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc5jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 5.);
 	    }
 	 }    
@@ -2731,7 +3330,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 6){
 	       //fill(TruePU_6, EvtPuCntTruth, weight);
 	       //fill(PU_6, EvtPuCnt, weight);
-	       fill(PU_6, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc6jet, EvtVtxCnt, weight);
 	       fill(ZNGoodJets_Zexc_NoWeight, 6.);
 	    }
 	 }
@@ -2740,7 +3339,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    if (nGoodJets == 7 ){
 	       //fill(TruePU_7, EvtPuCntTruth, weight);
 	       //fill(PU_7, EvtPuCnt, weight);
-	       fill(PU_7, EvtVtxCnt, weight);
+	       fill(NVtx_Zexc7jet, EvtVtxCnt, weight);
 	    }
 	 }
 	 if (nGoodJets >= 8){
@@ -2838,10 +3437,39 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       else RatioValue2 = 1.;  
 	    }
 
-	    fill(hresponseFirstJetEta_Zinc1jet, fabs(jets[0].v.Eta()), fabs(genJets[0].v.Eta()), weight*RatioValue);        
-	    fill(hresponseFirstJetAbsRapidity_Zinc1jet, fabs(jets[0].v.Rapidity()), fabs(genJets[0].v.Rapidity()), weight*RatioValue);      
-	    fill(hresponseFirstJetEtaHigh_Zinc1jet, fabs(jets[0].v.Eta()), fabs(genJets[0].v.Eta()), weight);      
-	    fill(hresponseFirstJetRapidityHigh_Zinc1jet, fabs(jets[0].v.Rapidity()), fabs(genJets[0].v.Rapidity()), weight);      
+	    
+	    //fill(hresponseFirstJetPt_Zinc1jet, jets[0].v.Pt(), genJets[0].v.Pt(), weight*RatioValue);
+	    if(jetMatching){
+	       if(jetMatches.size() > 0){
+		  if(jetMatches[0].first == 0){
+		     fill(hresponseFirstJetEtaMatch_Zinc1jet, fabs(jets[jetMatches[0].first].v.Eta()), 
+			  fabs(genJets[jetMatches[0].second].v.Eta()), weight*RatioValue);        
+		     fill(hresponseFirstJetAbsRapidityMatch_Zinc1jet, 
+			  fabs(jets[jetMatches[0].first].v.Rapidity()), 
+			  fabs(genJets[jetMatches[0].second].v.Rapidity()), weight*RatioValue);
+		     fill(hresponseFirstJetEtaHighMatch_Zinc1jet, 
+			  fabs(jets[jetMatches[0].first].v.Eta()), 
+			  fabs(genJets[jetMatches[0].second].v.Eta()), weight);      
+		     fill(hresponseFirstJetRapidityHighMatch_Zinc1jet, 
+			  fabs(jets[jetMatches[0].first].v.Rapidity()), 
+			  fabs(genJets[jetMatches[0].second].v.Rapidity()), weight);      
+		  }
+	       }
+	    }
+	    fill(hresponseFirstJetEta_Zinc1jet, fabs(jets[0].v.Eta()), 
+		 fabs(genJets[0].v.Eta()), weight*RatioValue);        
+	    fill(hresponseFirstJetAbsRapidity_Zinc1jet, 
+		 fabs(jets[0].v.Rapidity()), 
+		 fabs(genJets[0].v.Rapidity()), weight*RatioValue);
+	    fill(hresponseFirstJetEtaHigh_Zinc1jet, 
+		 fabs(jets[0].v.Eta()), 
+		 fabs(genJets[0].v.Eta()), weight);      
+	    fill(hresponseFirstJetRapidityHigh_Zinc1jet, 
+		 fabs(jets[0].v.Rapidity()), 
+		 fabs(genJets[0].v.Rapidity()), weight);      
+	    
+
+
 	    fill(hresponseJetsHT_Zinc1jet, jetsHT, genJetsHT, weight*RatioValue1);
 	    fill(hresponseVisPt_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
 
@@ -2922,21 +3550,41 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       }
 	    }
 	 }
-
+	 
 	 if (nGoodGenJets_20 >= 1 && passesgenLeptonCut && nGoodJets_20 >= 1 && passesLeptonCut) {
-
+	    
 	    double RatioValue = 1.;
 	    if(UnfoldUnc){
 	       double binNumber = FirstJetPt_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jets_20[0].v.Pt());
 	       RatioValue =  FirstJetPt_2_Zinc1jetHratio_fit->GetBinContent(binNumber);               
 	    }
-
-	    fill(hresponseFirstJetPt_Zinc1jet, jets_20[0].v.Pt(), genJets_20[0].v.Pt(), weight*RatioValue);
+	    if(jetMatching){
+	       if(jetMatches_20.size() > 0){
+		  if(jetMatches_20[0].first == 0){
+		     fill(hresponseFirstJetPtMatch_Zinc1jet, jets_20[jetMatches_20[0].first].v.Pt(), 
+			  genJets_20[jetMatches_20[0].second].v.Pt(), weight*RatioValue);
+		     if(hresponseFirstJetPtMatch_Zinc1jet){
+			fill(hresponseFirstJetPtEta_Zinc1jet, 
+			     0.5 +FirstJetPtEta_Zinc1jet->FindBin(jets_20[jetMatches_20[0].first].v.Pt(), 
+								  fabs(jets_20[jetMatches_20[0].first].v.Eta())), 
+			     0.5 +FirstJetPtEta_Zinc1jet->FindBin(genJets_20[jetMatches_20[0].second].v.Pt(), 
+								  fabs(genJets_20[jetMatches_20[0].second].v.Eta())),
+			     weight);
+		     }
+		  }
+	       }	 
+	    }
+	    fill(hresponseFirstJetPt_Zinc1jet, jets_20[0].v.Pt(), 
+		 genJets_20[0].v.Pt(), weight*RatioValue);
 	    if(hresponseFirstJetPt_Zinc1jet){
-	       fill(hresponseFirstJetPtEta_Zinc1jet, 0.5 + FirstJetPtEta_Zinc1jet->FindBin(jets_20[0].v.Pt(), fabs(jets_20[0].v.Eta())), 
-		    0.5 + FirstJetPtEta_Zinc1jet->FindBin(genJets_20[0].v.Pt(), fabs(genJets_20[0].v.Eta())),
+	       fill(hresponseFirstJetPtEta_Zinc1jet, 
+		    0.5 +FirstJetPtEta_Zinc1jet->FindBin(jets_20[0].v.Pt(), 
+							 fabs(jets_20[0].v.Eta())), 
+		    0.5 +FirstJetPtEta_Zinc1jet->FindBin(genJets_20[0].v.Pt(), 
+							 fabs(genJets_20[0].v.Eta())),
 		    weight);
 	    }
+	    
 	 }
 
 	 //exclusive one jet case
@@ -2968,6 +3616,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 //-- Second Jet Pt inclusive 
 	 if (nGoodGenJets >= 2 && passesgenLeptonCut && nGoodJets >= 2 && passesLeptonCut) {
 	    ////////////////////////Special Branch//////////////////////
+
 	    fill(hresponseZPt_Zinc2jet, EWKBoson.Pt(),genEWKBoson.Pt(),weight);
 
 	    fill(hresponseAbsFirstJetRapidity_Zinc2jet, fabs(jets[0].v.Rapidity()),fabs(genJets[0].v.Rapidity()),weight);
@@ -3047,6 +3696,24 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
 	       else RatioValue2 = 1.;
 	    }
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for second jet with match\n");
+	       for(size_t iJet=0;iJet<jetMatches.size();iJet++){
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  //Look for if the second jet (i=1) has a match
+		  if(jetMatches[iJet].first == 1){
+		     if(DJALOG) printf("              Found it\n");
+		     fill(hresponseSecondJetEtaMatch_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight*RatioValue);      
+		     fill(hresponseSecondJetAbsRapidityMatch_Zinc2jet, fabs(jets[1].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight*RatioValue);      
+		     fill(hresponseSecondJetEtaHighMatch_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight);      
+		     fill(hresponseSecondJetRapidityHighMatch_Zinc2jet, fabs(jets[1].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight);      
+		     //fill(hresponseJetsHT_Zinc2jet, jetsHT, genJetsHT, weight*RatioValue1);
+		     //fill(hresponseVisPt_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
+		     break;
+	   
+		  }
+	       }
+	    }
 
 	    fill(hresponseSecondJetEta_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[1].v.Eta()), weight*RatioValue);      
 	    fill(hresponseSecondJetAbsRapidity_Zinc2jet, fabs(jets[1].v.Rapidity()), fabs(genJets[1].v.Rapidity()), weight*RatioValue);      
@@ -3088,7 +3755,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       double binNumber = SecondJetPt_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jets_20[1].v.Pt());
 	       RatioValue =  SecondJetPt_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
 	    }
-
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for second jet PT with match\n");
+	       for(size_t iJet=0;iJet<jetMatches_20.size();iJet++){
+		  //Look for if the second jet (i=1) has a match
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  if(jetMatches_20[iJet].first == 1){
+		     if(DJALOG) printf("               Found it\n");
+		     fill(hresponseSecondJetPtMatch_Zinc2jet, jets_20[1].v.Pt(), genJets_20[jetMatches_20[iJet].second].v.Pt(), weight*RatioValue);              
+		     break;
+	   
+		  }
+	       }
+	    }	    
 	    fill(hresponseSecondJetPt_Zinc2jet, jets_20[1].v.Pt(), genJets_20[1].v.Pt(), weight*RatioValue);              
 	 }
 
@@ -3155,6 +3834,26 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    fill(hresponseThirdJetAbsRapidity_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[2].v.Rapidity()), weight*RatioValue);      
 	    fill(hresponseThirdJetEtaHigh_Zinc3jet, fabs(jets[2].v.Eta()), fabs(genJets[2].v.Eta()), weight);      
 	    fill(hresponseThirdJetRapidityHigh_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[2].v.Rapidity()), weight);      
+
+	    //DJALOG
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for third jet with match\n");
+	       for(size_t iJet=0;iJet<jetMatches.size();iJet++){
+		  //Look for if the third jet (i=2) has a match
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  if(jetMatches[iJet].first == 2){
+		     if(DJALOG) printf("                Found it\n");	
+		     fill(hresponseThirdJetEtaMatch_Zinc3jet, fabs(jets[2].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight*RatioValue);         
+		     fill(hresponseThirdJetAbsRapidityMatch_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight*RatioValue);      
+		     fill(hresponseThirdJetEtaHighMatch_Zinc3jet, fabs(jets[2].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight);      
+		     fill(hresponseThirdJetRapidityHighMatch_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight);      
+		     break;
+	   
+		  }
+	       }
+	    }	    
+	    //DJALOG
+
 	    fill(hresponseJetsHT_Zinc3jet, jetsHT, genJetsHT, weight*RatioValue1);
 	    fill(hresponseVisPt_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
 
@@ -3203,6 +3902,20 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       double binNumber = ThirdJetPt_2_Zinc3jetHratio_fit->GetXaxis()->FindBin(jets_20[2].v.Pt());
 	       RatioValue = ThirdJetPt_2_Zinc3jetHratio_fit->GetBinContent(binNumber);
 	    }
+	    //DJALOG
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for third jet PT with match\n");
+	       for(size_t iJet=0;iJet<jetMatches_20.size();iJet++){
+		  //Look for if the third jet (i=2) has a match
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  if(jetMatches_20[iJet].first == 2){
+		     if(DJALOG) printf("                  Found it\n");	
+		     fill(hresponseThirdJetPtMatch_Zinc3jet, jets_20[2].v.Pt(), genJets_20[jetMatches_20[iJet].second].v.Pt(), weight*RatioValue); 
+		     break;
+		  }
+	       }
+	    }	    
+	    //DJALOG
 
 	    fill(hresponseThirdJetPt_Zinc3jet, jets_20[2].v.Pt(), genJets_20[2].v.Pt(), weight*RatioValue); 
         
@@ -3212,6 +3925,25 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 //-- Fourth Jet Pt  
 	 if (nGoodGenJets >= 4 && passesgenLeptonCut && nGoodJets >= 4 && passesLeptonCut){
 
+
+	    //DJALOG
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for fourth jet with match\n");
+	       for(size_t iJet=0;iJet<jetMatches.size();iJet++){
+		  //Look for if the third jet (i=3) has a match
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  if(jetMatches[iJet].first == 3){
+		     fill(hresponseFourthJetEtaMatch_Zinc4jet, fabs(jets[3].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight);      
+		     fill(hresponseFourthJetAbsRapidityMatch_Zinc4jet, fabs(jets[3].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight);      
+		     fill(hresponseFourthJetEtaHighMatch_Zinc4jet, fabs(jets[3].v.Eta()), fabs(genJets[jetMatches[iJet].second].v.Eta()), weight);      
+		     fill(hresponseFourthJetRapidityHighMatch_Zinc4jet, fabs(jets[3].v.Rapidity()), fabs(genJets[jetMatches[iJet].second].v.Rapidity()), weight);      
+		     break;
+		  }
+	       }
+	    }	    
+	    //DJALOG
+
+
 	    fill(hresponseFourthJetEta_Zinc4jet, fabs(jets[3].v.Eta()), fabs(genJets[3].v.Eta()), weight);      
 	    fill(hresponseFourthJetAbsRapidity_Zinc4jet, fabs(jets[3].v.Rapidity()), fabs(genJets[3].v.Rapidity()), weight);      
 	    fill(hresponseFourthJetEtaHigh_Zinc4jet, fabs(jets[3].v.Eta()), fabs(genJets[3].v.Eta()), weight);      
@@ -3220,6 +3952,20 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 }
 
 	 if (nGoodGenJets_20 >= 4 && passesgenLeptonCut && nGoodJets_20 >= 4 && passesLeptonCut){
+	    //DJALOG
+	    if(jetMatching){
+	       if(DJALOG) printf("Filling response matrix for fourth jet PT with match\n");
+	       for(size_t iJet=0;iJet<jetMatches_20.size();iJet++){
+		  //Look for if the third jet (i=3) has a match
+		  if(DJALOG) printf("        iJet = %ld\n",iJet);
+		  if(jetMatches_20[iJet].first == 3){
+		     fill(hresponseFourthJetPtMatch_Zinc4jet, jets_20[3].v.Pt(), genJets_20[jetMatches_20[iJet].second].v.Pt(), weight);      
+		     break;
+		  }
+	       }
+	    }	    
+	    //DJALOG
+
 	    fill(hresponseFourthJetPt_Zinc4jet, jets_20[3].v.Pt(), genJets_20[3].v.Pt(), weight);      
 	 }
 
@@ -3300,18 +4046,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << endl;
    //==========================================================================================================//
 
-   double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nEntries)): yieldScale;
-   /*
+   double data_frac = EvtIsRealData ? (nEventsToProcess / double(nEntries)): yieldScale;
+   
    JobInfo->SetBinContent(kNEvts, nEventsToProcess);
    JobInfo->SetBinContent(kNEvtsSample, nEntries);
    JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
-   
    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
-   //store integrated luminosity in Lumi histogram:
-   Lumi->SetBinContent(1., lumi_ *  data_frac);
    JobInfo->SetBinContent(kXsec, xsec_);
-   */
-    
+   
+
+   //store integrated luminosity in Lumi histogram:   
+   Lumi->SetBinContent(1., lumi_ *  data_frac);
+ 
    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
    //==========================================================================================================//
    //         Writing file              //
@@ -3387,15 +4133,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       norm_ = 1;
    }
 	
-   /*
+   
    if(!EvtIsRealData){
       JobInfo->SetBinContent(kXsec, xsec_ * xsecFactor_);
       double a = 1.;
       if(EvtWeightSums_.size()) a = EvtWeightSums_[0];
       JobInfo->SetBinContent(kJobWeight, processedEventMcWeightSum_ / a);
    }
-   */
-
+   
    for (unsigned short i(0); i < numbOfHistograms; i++){
       string hName = listOfHistograms[i]->GetName();
       if ((!hasGenInfo && hName.find("gen") != string::npos)
@@ -3407,6 +4152,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       
       listOfHistograms[i]->Write();        
    }
+
+
 
    //--- let's delete all histograms --- 
    for (unsigned short i(0); i < numbOfHistograms; i++){
@@ -3445,7 +4192,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 //std::ofstream f(outputDirectory + "/mcYieldScale.txt");
 	 //std::ofstream f("/mcYieldScale.txt");
 	 std::ofstream f("mcYieldScale.txt");
-	 f << data_frac << "\n";
+	 f << (nEventsToProcessTot / double(nEntries)) << "\n";
 	 f.close();
 	 //rename(outputDirectory + "/.mcYieldScale#", outputDirectory + "/.mcYieldScale");
 	 
@@ -3538,6 +4285,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    strftime(buffer, 26, "%Y-%m-%d %H:%M:%S", tm_info);
    std::cout<<buffer<<std::endl;
 
+   return 0;
 }
 
 void ZJets::initLHAPDF(TString pdfSet, int pdfMember)
@@ -4068,12 +4816,12 @@ string ZJets::CreateOutputFileName(const TString& pdfSet, int pdfMember, double 
    ostringstream result;
    //    result << outputDirectory << fileName;
    result << outputDirectory << lepSel << "_" << "13TeV" << "_" << sampleLabel_;
-   result << "_TrigCorr_" << useTriggerCorrection;
+   //result << "_TrigCorr_" << useTriggerCorrection;
    result << "_Syst_" << systematics;
    if (direction == 1) result << "_Up";
    else if (direction == -1) result << "_Down";
-   result << "_JetPtMin_" << jetPtCutMin;
-   result << "_JetEtaMax_" << jetEtaCutMax;
+   //result << "_JetPtMin_" << jetPtCutMin;
+   //result << "_JetEtaMax_" << jetEtaCutMax;
    if(iJob > 0) result << "_" << iJob;
 
    if (muR != 0 && muF != 0 && muR != 1 && muF != 1) result << "_muR_" << muR << "_muF_" << muF;
@@ -4187,6 +4935,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
    //    if (fileName.Index("Data") < 0) {
    fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
    fChain->SetBranchAddress("EvtPuCnt", &EvtPuCnt, &b_EvtPuCnt);
+   fChain->SetBranchAddress("EvtFastJetRho", &EvtFastJetRho, &b_EvtFastJetRho); 
    // }
    if (hasRecoInfo){
       fChain->SetBranchAddress("EvtVtxCnt", &EvtVtxCnt, &b_EvtVtxCnt);

@@ -288,7 +288,6 @@ int nZPt_Zinc0jet(22);
     //double jetPt_Zinc1jet[10] = {20, 30, 41, 59, 83, 118, 168, 220, 300, 400};
     double jetPt_Zinc1jet[11] = {20, 24, 30, 41, 59, 83, 118, 168, 220, 300, 400};
     int nJetPt_Zinc1jet(sizeof(jetPt_Zinc1jet) /sizeof(jetPt_Zinc1jet[0]) - 1);
-    
     vector<double> jetPt_2_Zinc1jet;
     jetPt_2_Zinc1jet = buildVecFineBin(nJetPt_Zinc1jet, jetPt_Zinc1jet, 5);
 
@@ -504,7 +503,12 @@ int nZPt_Zinc0jet(22);
     FifthJetEtaHigh_Zinc5jet            = newTH1D("FifthJetEtaHigh_Zinc5jet",            "5th jet |#eta| (N_{jets} #geq 5)",           "|#eta(j_{5})|",   6, 0., 4.7);  
     SixthJetEtaHigh_Zinc6jet            = newTH1D("SixthJetEtaHigh_Zinc6jet",            "6th jet |#eta| (N_{jets} #geq 6)",           "|#eta(j_{6})|",   6, 0., 4.7);  
 
+    //DJALOG
+    FirstJetAbsYvsAbsEta_Zinc1jet        = newTH2D("FirstJetAbsYvsAbsEta_Zinc1jet",  "FirstJetAbsYvsAbsEta_Zinc1jet",  12, 0, 2.4, 12, 0, 2.4);
+
     FirstJetAbsRapidity_Zinc1jet        = newTH1D("FirstJetAbsRapidity_Zinc1jet",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  12, 0, 2.4);
+    FirstJetAbsRapidity_SmearMatch_Zinc1jet        = newTH1D("FirstJetAbsRapidity_SmearMatch_Zinc1jet",        "1st jet |y| Smear Match (N_{jets} #geq 1)",            "|y(j_{1})|",  12, 0, 2.4); //DJALOG
+    FirstJetAbsRapidity_SmearGauss_Zinc1jet        = newTH1D("FirstJetAbsRapidity_SmearGauss_Zinc1jet",        "1st jet |y| Smear Gauss (N_{jets} #geq 1)",            "|y(j_{1})|",  12, 0, 2.4); //DJALOG
     FirstJetAbsRapidity_Zinc1jet_Odd    = newTH1D("FirstJetAbsRapidity_Zinc1jet_Odd",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  12, 0, 2.4);
     FirstJetAbsRapidity_Zinc1jet_Even   = newTH1D("FirstJetAbsRapidity_Zinc1jet_Even",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  12, 0, 2.4);
     FirstJetAbsRapidity_2_Zinc1jet        = newTH1D("FirstJetAbsRapidity_2_Zinc1jet",        "1st jet |y| (N_{jets} #geq 1)",              "|y(j_{1})|",  5*12, 0, 2.4);
@@ -582,10 +586,16 @@ int nZPt_Zinc0jet(22);
     SecondJetPhi_Zexc2jet               = newTH1D("SecondJetPhi_Zexc2jet",               "2nd jet #phi (N_{jets} = 2)",                "#phi(j_{2})",  30,-PI, PI );
 
     lepPt_Zinc0jet                      = newTH1D("lepPt_Zinc0jet",                      "1st & 2nd lep p_{T} (N_{jets} #geq 0)",       lpT,     40, 0, 200);
+    lepLPt_Zinc0jet                      = newTH1D("lepLPt_Zinc0jet",                      "1st lep p_{T} (N_{jets} #geq 0)",       lpT,     40, 0, 200);
+    lepSPt_Zinc0jet                      = newTH1D("lepSPt_Zinc0jet",                      "2nd lep p_{T} (N_{jets} #geq 0)",       lpT,     40, 0, 200);
     lepPt_Zinc1jet                      = newTH1D("lepPt_Zinc1jet",                      "1st & 2nd lep p_{T} (N_{jets} #geq 1)",       lpT,     40, 0, 200);
+    lepLPt_Zinc1jet                      = newTH1D("lepLPt_Zinc1jet",                      "1st lep p_{T} (N_{jets} #geq 1)",       lpT,     40, 0, 200);
+    lepSPt_Zinc1jet                      = newTH1D("lepSPt_Zinc1jet",                      "2nd lep p_{T} (N_{jets} #geq 1)",       lpT,     40, 0, 200);
     lepPtFrom15_Zinc0jet                = newTH1D("lepPtFrom15_Zinc0jet",                "1st & 2nd lep p_{T} (N_{jets} #geq 0)",       lpT,     100, 0, 200);
     genlepPt_Zinc0jet                   = newTH1D("genlepPt_Zinc0jet",                   "gen 1st & 2nd lep p_{T} (N_{jets} #geq 0)",   lpT,     40, 0, 200);
     lepPt_Zexc0jet                      = newTH1D("lepPt_Zexc0jet",                      "1st & 2nd lep p_{T} (N_{jets} = 0)",          lpT,     40, 0, 200);
+    lepLPt_Zexc0jet                      = newTH1D("lepLPt_Zexc0jet",                      "1st lep p_{T} (N_{jets} = 0)",          lpT,     40, 0, 200);
+    lepSPt_Zexc0jet                      = newTH1D("lepSPt_Zexc0jet",                      "2nd lep p_{T} (N_{jets} = 0)",          lpT,     40, 0, 200);
 
     dPhiLeptons_Zexc0jet                = newTH1D("dPhiLeptons_Zexc0jet",                "#Delta #phi btw lep (N_{jets} = 0)",          ldPhi,     50, 0, PI);
 
@@ -661,6 +671,8 @@ int nZPt_Zinc0jet(22);
 
 
     FirstJetPt_Zinc1jet               = newTH1D("FirstJetPt_Zinc1jet",                 "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet);
+    FirstJetPt_SmearMatch_Zinc1jet    = newTH1D("FirstJetPt_SmearMatch_Zinc1jet",       "1st jet p_{T} SmearMatch (N_{jets} #geq 1)",  "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); //DJALOG
+    FirstJetPt_SmearGauss_Zinc1jet    = newTH1D("FirstJetPt_SmearGauss_Zinc1jet",       "1st jet p_{T} SmearGauss (N_{jets} #geq 1)",  "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); //DJALOG
     FirstJetPt_Zinc1jet_Odd           = newTH1D("FirstJetPt_Zinc1jet_Odd",             "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet);
     FirstJetPt_Zinc1jet_Even          = newTH1D("FirstJetPt_Zinc1jet_Even",           "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); 
     //FirstJetPt_2_Zinc1jet               = newTH1D("FirstJetPt_2_Zinc1jet",                 "1st jet p_{T} (N_{jets} #geq 1)",             "p_{T}(j_{1}) [GeV]",     nJetPt_Zinc1jet, jetPt_Zinc1jet); 
@@ -740,6 +752,46 @@ int nZPt_Zinc0jet(22);
     genCentralJetEta_Zinc2jet = newTH1D("genCentralJetEta_Zinc2jet", "genCentral Jet Eta Zinc2jet", "Eta", 12, 0, 2.4); 
     genForwardJetEta_Zinc2jet = newTH1D("genForwardJetEta_Zinc2jet", "genForward Jet Eta Zinc2jet", "Eta", 12, 0, 2.4); 
 
+    //DJALOG
+    hjetResolution = newTH1D("JetResolution", "Jet Resolution", "Resolution", 100, 0.0, 1.0);
+    hEvtFastJetRho = newTH1D("hEvtFastJetRho", "hEvtFastJetRho", "Rho", 100, 0.0, 100.0);
+    hhjetResolutionPt = newTH2D("JetResolutionPt", "Jet Resolution vs Pt", 10, 0.0, 200.0, 30, 0.05, 0.35);
+    hhjetResolutionEta = newTH2D("JetResolutionEta", "Jet Resolution vs Eta", 12, 0.0, 2.4, 30, 0.05, 0.35);
+    hjetScaleFactor = newTH1D("JetScaleFactor", "Jet Scale Factor", "Scale Factor", 50, 1.0, 1.5);
+    hhJetMatching_StatMatches = newTH2D("hhJetMatching_StatMatches", 
+				       "Number of Matches", 7, 0.5, 7.5, 6, -0.5, 5.5);
+    hhJetMatching_StatFail = newTH2D("hhJetMatching_StatFail", 
+				       "Reason for No Match", 7, 0.5, 7.5, 3, -0.5, 2.5);
+    hhJetMatching_StatMatches_Lep = newTH2D("hhJetMatching_StatMatches_Lep", 
+				       "Number of Matches with Lepton", 7, 0.5, 7.5, 6, -0.5, 5.5);
+    hhJetMatching_StatFail_Lep = newTH2D("hhJetMatching_StatFail_Lep", 
+				       "Reason for No Match with Lepton", 7, 0.5, 7.5, 3, -0.5, 2.5);
+
+    hhRecoGenJetMatchingMatrix = newTH2D("hhRecoGenJetMatchingMatrix", 
+				       "Reco Gen Jet dR Matching Stat", 7, 0.5, 7.5, 7, 0.5, 7.5);
+    hhRecoGenJetMatchingMatrix_Lep = newTH2D("hhRecoGenJetMatchingMatrixLep", 
+				       "Reco Gen Jet dR Matching Stat with Lepton", 7, 0.5, 7.5, 7, 0.5, 7.5);
+
+
+    hhJetMatching_FirstJetRap_Match = newTH2D("hhJetMatching_FirstJetRap_Match", "Reco + Gen Jet Rapidity with match",           12, 0, 2.4, 12, 0, 2.4);
+    hhJetMatching_FirstJetRap_NoMatch = newTH2D("hhJetMatching_FirstJetRap_NoMatch", "Reco + Gen Jet Rapidity with no match",           12, 0, 2.4, 12, 0, 2.4);
+    hJetMatching_FirstJetdPT_Match = newTH1D("hJetMatching_dPT_FirstMatch", "dPT first reco jet and first match","GeV", 20, -200.0, 200.0);
+    hJetMatching_FirstJetdPT_Other = newTH1D("hJetMatching_dPT_FirstMatch", "dPT first reco jet and first match","GeV", 20, -200.0, 200.0);
+    hJetMatching_dPT_SecondMatch = newTH1D("hJetMatching_dPT_SecondMatch", "dPT first reco jet and second match","GeV",    20, -200.0, 200.0);
+    hJetMatching_dRFirstJet = newTH1D("hJetMatching_dRFirstJet", "hJetMatching_dRFirstJet","dR", 200, 0.0, 6.0);
+    hJetMathing_FailedRecoJet_AllEta = newTH1D("hJetMathing_FailedRecoJet_AllEta", "hJetMathing_FailedRecoJet_AllEta", "eta", 12, 0, 2.4);
+    hJetMathing_FailedRecoJet_FirstEta = newTH1D("hJetMathing_FailedRecoJet_FirstEta", "hJetMathing_FailedRecoJet_FirstEta", "eta", 12, 0, 2.4);
+    hJetMatching_dRFailedFirstLeadLep = newTH1D("hJetMatching_dRFailedFirstLeadLep", "hJetMatching_dRFailedFirstLeadLep", "dR", 200, 0, 6.0);
+    hJetMatching_dRFailedFirstSubLep = newTH1D("hJetMatching_dRFailedFirstSubLep", "hJetMatching_dRFailedFirstSubLep", "dR", 200, 0, 6.0);
+
+    hJetMatching_FirstJetPt_FaileddR = newTH1D("hJetMatching_FirstJetPt_FaileddR", "hJetMatching_FirstJetPt_FaileddR", "GeV", 28, 20.0, 300.0);
+    hJetMatching_FirstJetAbsRapidity_FaileddR = newTH1D("hJetMatching_FirstJetAbsRapidity_FaileddR", "hJetMatching_FirstJetAbsRapidity_FaileddR", "dR", 12, 0, 2.4);
+    hJetMatching_FirstJetPt_FailednGen = newTH1D("hJetMatching_FirstJetPt_FailednGen", "hJetMatching_FirstJetPt_FailednGen", "GeV", 28, 20.0, 300.0); 
+    hJetMatching_FirstJetAbsRapidity_FailednGen = newTH1D("hJetMatching_FirstJetAbsRapidity_FailednGen", "hJetMatching_FirstJetAbsRapidity_FailednGen", "dR", 12, 0, 2.4);
+
+    hhRecoGenLeptonMatching = newTH2D("hhRecoGenLeptonMatching", "Reco Gen Lepton Matching", 4, 0.0, 4.0, 4, 0.0, 4.0);
+
+
     hresponseZNGoodJets_Zexc = newTH2D("hresponseZNGoodJets_Zexc", "hresp ZNGoodJets_Zexc", 7, -0.5, 6.5, 7, -0.5, 6.5);
 
     hresponseZPt_Zinc1jet = newTH2D("hresponseZPt_Zinc1jet","hresponseZPt_Zinc1jet",nZPt_Zinc1jet, zPt_Zinc1jet, nZPt_Zinc1jet, zPt_Zinc1jet);
@@ -751,16 +803,18 @@ int nZPt_Zinc0jet(22);
     hresponseZAbsRapidity_Zinc1jet = newTH2D("hresponseZAbsRapidity_Zinc1jet", "hresp ZAbsRapidity_Zinc1jet", 12, 0., 2.4, 12, 0., 2.4); 
 
     hresponseFirstJetPt_Zinc1jet      = newTH2D("hresponseFirstJetPt_Zinc1jet", "hresp 1st jet pt", nJetPt_Zinc1jet, jetPt_Zinc1jet, nJetPt_Zinc1jet, jetPt_Zinc1jet);
+    hresponseFirstJetPtMatch_Zinc1jet      = newTH2D("hresponseFirstJetPtMatch_Zinc1jet", "hresp 1st jet pt match", nJetPt_Zinc1jet, jetPt_Zinc1jet, nJetPt_Zinc1jet, jetPt_Zinc1jet);
 
-
- 
     hresponseFirstJetPt_2_Zinc1jet    = newTH2D("hresponseFirstJetPt_2_Zinc1jet", "hresp 1st jet pt (2)", jetPt_2_Zinc1jet, jetPt_2_Zinc1jet);
     hresponseSecondJetPt_Zinc2jet     = newTH2D("hresponseSecondJetPt_Zinc2jet","hresp 2nd jet pt", nJetPt_Zinc2jet, jetPt_Zinc2jet, nJetPt_Zinc2jet, jetPt_Zinc2jet);
+    hresponseSecondJetPtMatch_Zinc2jet     = newTH2D("hresponseSecondJetPtMatch_Zinc2jet","hresp 2nd jet pt Match", nJetPt_Zinc2jet, jetPt_Zinc2jet, nJetPt_Zinc2jet, jetPt_Zinc2jet); //DJALOG
     hresponseSecondJetPt_2_Zinc2jet    = newTH2D("hresponseSecondJetPt_2_Zinc2jet","hresp 2nd jet pt (2)", jetPt_2_Zinc2jet, jetPt_2_Zinc2jet);
-    hresponseThirdJetPt_Zinc3jet      = newTH2D("hresponseThirdJetPt_Zinc3jet", "hresp 3rd jet pt", nJetPt_Zinc3jet, jetPt_Zinc3jet, nJetPt_Zinc3jet, jetPt_Zinc3jet);
+    hresponseThirdJetPt_Zinc3jet      = newTH2D("hresponseThirdJetPt_Zinc3jet", "hresp 3rd jet pt", nJetPt_Zinc3jet, jetPt_Zinc3jet, nJetPt_Zinc3jet, jetPt_Zinc3jet); 
+    hresponseThirdJetPtMatch_Zinc3jet      = newTH2D("hresponseThirdJetPtMatch_Zinc3jet", "hresp 3rd jet pt match", nJetPt_Zinc3jet, jetPt_Zinc3jet, nJetPt_Zinc3jet, jetPt_Zinc3jet);//DJALOG
     hresponseThirdJetPt_2_Zinc3jet     = newTH2D("hresponseThirdJetPt_2_Zinc3jet", "hresp 3rd jet pt (2)", jetPt_2_Zinc3jet, 
 jetPt_2_Zinc3jet);
     hresponseFourthJetPt_Zinc4jet     = newTH2D("hresponseFourthJetPt_Zinc4jet","hresp 4th jet pt", nJetPt_Zinc4jet, jetPt_Zinc4jet, nJetPt_Zinc4jet, jetPt_Zinc4jet);
+    hresponseFourthJetPtMatch_Zinc4jet     = newTH2D("hresponseFourthJetPtMatch_Zinc4jet","hresp 4th jet pt match", nJetPt_Zinc4jet, jetPt_Zinc4jet, nJetPt_Zinc4jet, jetPt_Zinc4jet);//DJALOG
     hresponseFifthJetPt_Zinc5jet      = newTH2D("hresponseFifthJetPt_Zinc5jet", "hresp 5th jet pt", nJetPt_Zinc5jet, jetPt_Zinc5jet, nJetPt_Zinc5jet, jetPt_Zinc5jet);
     hresponseJetsHT_Zinc1jet          = newTH2D("hresponseJetsHT_Zinc1jet", "hresp Scalar sum jets p_{T} (N_{jets} #geq 1)", nJetHT_Zinc1jet, jetHT_Zinc1jet, nJetHT_Zinc1jet, jetHT_Zinc1jet);  
     hresponseJetsHT_2_Zinc1jet         = newTH2D("hresponseJetsHT_2_Zinc1jet", "hresp Scalar sum jets p_{T} (N_{jets} #geq 1)2", jetHT_2_Zinc1jet, jetHT_2_Zinc1jet);  
@@ -781,27 +835,47 @@ jetPt_2_Zinc3jet);
 
     hresponseFirstJetEta_Zinc1jet     = newTH2D("hresponseFirstJetEta_Zinc1jet",  "hresp 1st jet #eta (N_{jets} #geq 1)", 32, 0, 2.4, 32, 0, 2.4);  
     hresponseFirstJetEta_2_Zinc1jet   = newTH2D("hresponseFirstJetEta_2_Zinc1jet",  "hresp 1st jet #eta (N_{jets} #geq 1)2", 160, 0, 2.4, 160, 0, 2.4); 
+    //DJALOG
+    hresponseFirstJetEtaMatch_Zinc1jet     = newTH2D("hresponseFirstJetEtaMatch_Zinc1jet",  "hresp 1st jet Match #eta (N_{jets} #geq 1)", 32, 0, 2.4, 32, 0, 2.4);  
     hresponseSecondJetEta_Zinc2jet    = newTH2D("hresponseSecondJetEta_Zinc2jet", "hresp 2nd jet #eta (N_{jets} #geq 2)", 24, 0, 2.4, 24, 0, 2.4);  
+    hresponseSecondJetEtaMatch_Zinc2jet    = newTH2D("hresponseSecondJetEtaMatch_Zinc2jet", "hresp 2nd jet match #eta (N_{jets} #geq 2)", 24, 0, 2.4, 24, 0, 2.4);  //DJALOG
     hresponseSecondJetEta_2_Zinc2jet  = newTH2D("hresponseSecondJetEta_2_Zinc2jet", "hresp 2nd jet #eta (N_{jets} #geq 2)2", 120, 0, 2.4, 120, 0, 2.4);  
     hresponseThirdJetEta_Zinc3jet     = newTH2D("hresponseThirdJetEta_Zinc3jet",  "hresp 3rd jet #eta (N_{jets} #geq 3)", 12, 0, 2.4, 12, 0, 2.4); 
+    hresponseThirdJetEtaMatch_Zinc3jet     = newTH2D("hresponseThirdJetEtaMatch_Zinc3jet",  "hresp 3rd jet match #eta (N_{jets} #geq 3)", 12, 0, 2.4, 12, 0, 2.4); //DJALOG
     hresponseThirdJetEta_2_Zinc3jet   = newTH2D("hresponseThirdJetEta_2_Zinc3jet",  "hresp 3rd jet #eta (N_{jets} #geq 3)2", 60, 0, 2.4, 60, 0, 2.4);  
     hresponseFourthJetEta_Zinc4jet    = newTH2D("hresponseFourthJetEta_Zinc4jet", "hresp 4th jet #eta (N_{jets} #geq 4)", 8, 0, 2.4, 8, 0, 2.4);  
+    hresponseFourthJetEtaMatch_Zinc4jet    = newTH2D("hresponseFourthJetEtaMatch_Zinc4jet", "hresp 4th jet match #eta (N_{jets} #geq 4)", 8, 0, 2.4, 8, 0, 2.4);  //DJALOG
     hresponseFifthJetEta_Zinc5jet     = newTH2D("hresponseFifthJetEta_Zinc5jet",  "hresp 5th jet #eta (N_{jets} #geq 5)",  6, 0, 2.4,  6, 0, 2.4);  
 
     hresponseFirstJetEtaHigh_Zinc1jet       = newTH2D("hresponseFirstJetEtaHigh_Zinc1jet",  "hresp 1st jet |#eta| (N_{jets} #geq 1)", 47, 0, 4.7, 47, 0, 4.7);  
+    hresponseFirstJetEtaHighMatch_Zinc1jet       = newTH2D("hresponseFirstJetEtaHighMatch_Zinc1jet",  "hresp 1st jet match |#eta| (N_{jets} #geq 1)", 47, 0, 4.7, 47, 0, 4.7);  //DJALOG
     hresponseSecondJetEtaHigh_Zinc2jet      = newTH2D("hresponseSecondJetEtaHigh_Zinc2jet", "hresp 2nd jet |#eta| (N_{jets} #geq 2)", 47, 0, 4.7, 47, 0, 4.7);  
+    hresponseSecondJetEtaHighMatch_Zinc2jet      = newTH2D("hresponseSecondJetEtaHighMatch_Zinc2jet", "hresp 2nd jet match |#eta| (N_{jets} #geq 2)", 47, 0, 4.7, 47, 0, 4.7);  //DJALOG
     hresponseThirdJetEtaHigh_Zinc3jet       = newTH2D("hresponseThirdJetEtaHigh_Zinc3jet",  "hresp 3rd jet |#eta| (N_{jets} #geq 3)", 24, 0, 4.7, 24, 0, 4.7);  
+    hresponseThirdJetEtaHighMatch_Zinc3jet       = newTH2D("hresponseThirdJetEtaHighMatch_Zinc3jet",  "hresp 3rd jet match |#eta| (N_{jets} #geq 3)", 24, 0, 4.7, 24, 0, 4.7);  //DJALOG
     hresponseFourthJetEtaHigh_Zinc4jet      = newTH2D("hresponseFourthJetEtaHigh_Zinc4jet", "hresp 4th jet |#eta| (N_{jets} #geq 4)", 12, 0, 4.7, 12, 0, 4.7);  
+    hresponseFourthJetEtaHighMatch_Zinc4jet      = newTH2D("hresponseFourthJetEtaHighMatch_Zinc4jet", "hresp 4th jet match |#eta| (N_{jets} #geq 4)", 12, 0, 4.7, 12, 0, 4.7);  //DJALOG
     hresponseFifthJetEtaHigh_Zinc5jet       = newTH2D("hresponseFifthJetEtaHigh_Zinc5jet",  "hresp 5th jet |#eta| (N_{jets} #geq 5)",  6, 0, 4.7,  6, 0, 4.7);  
 
     hresponseFirstJetAbsRapidity_Zinc1jet   = newTH2D("hresponseFirstJetAbsRapidity_Zinc1jet",   "hresp 1st jet |y| (N_{jets} #geq 1)", 12, 0, 2.4, 12, 0, 2.4);  
+    hresponseFirstJetAbsRapidityMatch_Zinc1jet   = newTH2D("hresponseFirstJetAbsRapidityMatch_Zinc1jet",   "hresp 1st jet match |y| (N_{jets} #geq 1)", 12, 0, 2.4, 12, 0, 2.4);  
+    //DJALOG
+    hresponseFirstJetAbsRapidityMatch_Zinc1jet   = newTH2D("hresponseFirstJetAbsRapidityMatch_Zinc1jet",   "hresp 1st jet |y| Match (N_{jets} #geq 1)", 12, 0, 2.4, 12, 0, 2.4);  
     hresponseFirstJetRapidityHigh_Zinc1jet  = newTH2D("hresponseFirstJetRapidityHigh_Zinc1jet",  "hresp 1st jet |y| (N_{jets} #geq 1)", 47, 0, 4.7, 47, 0, 4.7);  
+    hresponseFirstJetRapidityHighMatch_Zinc1jet  = newTH2D("hresponseFirstJetRapidityHighMatch_Zinc1jet",  "hresp 1st jet match |y| (N_{jets} #geq 1)", 47, 0, 4.7, 47, 0, 4.7);  //DJALOG
     hresponseSecondJetAbsRapidity_Zinc2jet  = newTH2D("hresponseSecondJetAbsRapidity_Zinc2jet",  "hresp 2nd jet |y| (N_{jets} #geq 2)", 12, 0, 2.4, 12, 0, 2.4);  
     hresponseSecondJetRapidityHigh_Zinc2jet = newTH2D("hresponseSecondJetRapidityHigh_Zinc2jet", "hresp 2nd jet |y| (N_{jets} #geq 2)", 47, 0, 4.7, 47, 0, 4.7);  
+    hresponseSecondJetAbsRapidityMatch_Zinc2jet  = newTH2D("hresponseSecondJetAbsRapidityMatch_Zinc2jet",  "hresp 2nd jet match |y| (N_{jets} #geq 2)", 12, 0, 2.4, 12, 0, 2.4);  //DJALOG
+    hresponseSecondJetRapidityHighMatch_Zinc2jet = newTH2D("hresponseSecondJetRapidityHighMatch_Zinc2jet", "hresp 2nd jet match |y| (N_{jets} #geq 2)", 47, 0, 4.7, 47, 0, 4.7);  //DJALOG
+
     hresponseThirdJetAbsRapidity_Zinc3jet   = newTH2D("hresponseThirdJetAbsRapidity_Zinc3jet",   "hresp 3rd jet |y| (N_{jets} #geq 3)", 8, 0, 2.4, 8, 0, 2.4);  
     hresponseThirdJetRapidityHigh_Zinc3jet  = newTH2D("hresponseThirdJetRapidityHigh_Zinc3jet",  "hresp 3rd jet |y| (N_{jets} #geq 3)", 24, 0, 4.7, 24, 0, 4.7);  
+    hresponseThirdJetAbsRapidityMatch_Zinc3jet   = newTH2D("hresponseThirdJetAbsRapidityMatch_Zinc3jet",   "hresp 3rd jet match |y| (N_{jets} #geq 3)", 8, 0, 2.4, 8, 0, 2.4);  //DJALOG
+    hresponseThirdJetRapidityHighMatch_Zinc3jet  = newTH2D("hresponseThirdJetRapidityHighMatch_Zinc3jet",  "hresp 3rd jet match |y| (N_{jets} #geq 3)", 24, 0, 4.7, 24, 0, 4.7);  //DJALOG
     hresponseFourthJetAbsRapidity_Zinc4jet  = newTH2D("hresponseFourthJetAbsRapidity_Zinc4jet",  "hresp 4th jet |y| (N_{jets} #geq 4)", 8, 0, 2.4, 8, 0, 2.4);  
     hresponseFourthJetRapidityHigh_Zinc4jet = newTH2D("hresponseFourthJetRapidityHigh_Zinc4jet", "hresp 4th jet |y| (N_{jets} #geq 4)", 12, 0, 4.7, 12, 0, 4.7);  
+    hresponseFourthJetAbsRapidityMatch_Zinc4jet  = newTH2D("hresponseFourthJetAbsRapidityMatch_Zinc4jet",  "hresp 4th jet match |y| (N_{jets} #geq 4)", 8, 0, 2.4, 8, 0, 2.4);  //DJALOG
+    hresponseFourthJetRapidityHighMatch_Zinc4jet = newTH2D("hresponseFourthJetRapidityHighMatch_Zinc4jet", "hresp 4th jet match |y| (N_{jets} #geq 4)", 12, 0, 4.7, 12, 0, 4.7);  //DJALOG
     hresponseFifthJetAbsRapidity_Zinc5jet   = newTH2D("hresponseFifthJetAbsRapidity_Zinc5jet",   "hresp 5th jet |y| (N_{jets} #geq 5)",  6, 0, 2.4,  6, 0, 2.4);  
     hresponseFifthJetRapidityHigh_Zinc5jet  = newTH2D("hresponseFifthJetRapidityHigh_Zinc5jet",  "hresp 5th jet |y| (N_{jets} #geq 5)",  6, 0, 4.7,  6, 0, 4.7);  
 
@@ -826,9 +900,11 @@ jetPt_2_Zinc3jet);
     }
 
     ZNGoodJets_Zinc = newTH1D("ZNGoodJets_Zinc","Jet Counter (incl.)", "N_{jets}", 7, -0.5, 6.5);
+    ZNGoodJets_SameChargePair_Zinc = newTH1D("ZNGoodJets_SameChargePair_Zinc","Jet Counter Same Sign Leptons(incl.)", "N_{jets}", 7, -0.5, 6.5);
     if(ZNGoodJets_Zinc){
 	for(int ibin = 1; ibin < ZNGoodJets_Zinc->GetNbinsX(); ++ibin){
 	    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(ibin, TString::Format("#geq %d", ibin));
+	    ZNGoodJets_SameChargePair_Zinc->GetXaxis()->SetBinLabel(ibin, TString::Format("#geq %d", ibin));
 	}
 //    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(1, "#geq 0");
 //    ZNGoodJets_Zinc->GetXaxis()->SetBinLabel(2, "#geq 1");
@@ -885,6 +961,7 @@ jetPt_2_Zinc3jet);
     JetsMass_Zexc2jet             = newTH1D("JetsMass_Zexc2jet",             "2Jets Invariant Mass (N_{jets} = 2)",                                          Mjj, 25, 0, 625);
     genJetsMass_Zexc2jet          = newTH1D("genJetsMass_Zexc2jet",          "gen 2Jets Invariant Mass (N_{jets} = 2)",                                      Mjj, 25, 0, 625);
     ptBal_Zexc2jet                = newTH1D("ptBal_Zexc2jet",                "Vectorial pT sum: Z_{pT} + DiJet_{pT} (N_{jets} = 2)",                          "#Sigma pT [GeV]",      50,  0, 100);
+
     genptBal_Zexc2jet             = newTH1D("genptBal_Zexc2jet",             "gen Vectorial pT sum: Z_{pT} + DiJet_{pT} (N_{jets} = 2)",                      "#Sigma pT [GeV]",      50,  0, 100);
     dPhiJets_Zexc2jet             = newTH1D("dPhiJets_Zexc2jet",             "#Delta#phi btwn jets (N_{jets} = 2)",                                          jdPhi,           20,  0, PI);
     gendPhiJets_Zexc2jet          = newTH1D("gendPhiJets_Zexc2jet",          "gen #Delta#phi btwn jets (N_{jets} = 2)",                                      jdPhi,           20,  0, PI);
@@ -933,7 +1010,9 @@ jetPt_2_Zinc3jet);
 
     BestJetsMass_Zinc2jet         = newTH1D("BestJetsMass_Zinc2jet",         "Best 2Jets Invariant Mass (N_{jets} #geq 2)",                                  Mjj, nJetsMass_Zinc2jet, jetsMass_Zinc2jet);
     genBestJetsMass_Zinc2jet      = newTH1D("genBestJetsMass_Zinc2jet",      "gen Best 2Jets Invariant Mass (N_{jets} #geq 2)",                              Mjj, nJetsMass_Zinc2jet, jetsMass_Zinc2jet);
-    ptBal_Zinc2jet                = newTH1D("ptBal_Zinc2jet",                "Vectorial pT sum: Z_{pT} + DiJet_{pT} (N_{jets} #geq 2)",                       "#Sigma pT [GeV]",      50,  0, 100);
+    ptBal_Zinc1jet                = newTH1D("ptBal_Zinc1jet",                "Vectorial pT sum: Z_{pT} + 1Jet_{pT} (N_{jets} #geq 1)",                       "#Sigma pT [GeV]",      50,  0, 100);
+    ptBal_Zinc2jet                = newTH1D("ptBal_Zinc2jet",                "Vectorial pT sum: Z_{pT} + 2Jet_{pT} (N_{jets} #geq 2)",                       "#Sigma pT [GeV]",      50,  0, 100);
+    ptBal_Zinc3jet                = newTH1D("ptBal_Zinc3jet",                "Vectorial pT sum: Z_{pT} + 3Jet_{pT} (N_{jets} #geq 3)",                       "#Sigma pT [GeV]",      50,  0, 100);
     genptBal_Zinc2jet             = newTH1D("genptBal_Zinc2jet",             "gen Vectorial pT sum: Z_{pT} + DiJet_{pT} (N_{jets} #geq 2)",                   "#Sigma pT [GeV]",      50,  0, 100);
     dPhiJets_Zinc2jet             = newTH1D("dPhiJets_Zinc2jet",             "#Delta#phi btwn jets (N_{jets} #geq 2)",                                       jdPhi,           20,  0, PI);
     gendPhiJets_Zinc2jet          = newTH1D("gendPhiJets_Zinc2jet",          "gen #Delta#phi btwn jets (N_{jets} #geq 2)",                                   jdPhi,           20,  0, PI);
@@ -1235,8 +1314,8 @@ jetPt_2_Zinc3jet);
     deltaPtjetMu                       = newTH1D("deltaPtjetMu", "delta Pt btwn jet and muon if dR<0.5", "#R", 150, -75., 75.);
 
     //TH2D* jecVspt=newTH1D("jecVspt","jec Vs pt","jec","pt",80,0.,400,100,0,0.5);
-    NVtx                          = newTH1D("NVtx","Number of vertices","#Vtx",45,0.5,45.5);
-    NVtx_NoPUweight               = newTH1D("NVtx_NoPUweight","Number of vertices","#Vtx",45,0.5,45.5);
+    NVtx_Zinc0jet                          = newTH1D("NVtx","Number of vertices","#Vtx",45,0.5,45.5);
+    NVtx_NoPUweight_Zinc0jet               = newTH1D("NVtx_NoPUweight","Number of vertices","#Vtx",45,0.5,45.5);
     TruePU_0                      = newTH1D("TruePU_0","True pile-up 0 jet","#pu",45,0.5,45.5);
     TruePU_1                      = newTH1D("TruePU_1","True pile-up 1 jet","#pu",45,0.5,45.5);
     TruePU_2                      = newTH1D("TruePU_2","True pile-up 2 jets","#pu",45,0.5,45.5);
@@ -1245,14 +1324,14 @@ jetPt_2_Zinc3jet);
     TruePU_5                      = newTH1D("TruePU_5","True pile-up 5 jets","#pu",45,0.5,45.5);
     TruePU_6                      = newTH1D("TruePU_6","True pile-up 6 jets","#pu",45,0.5,45.5);
     TruePU_7                      = newTH1D("TruePU_7","True pile-up 7 jets","#pu",45,0.5,45.5);
-    PU_0                      = newTH1D("PU_0","pile-up 0 jet","#pu",45,0.5,45.5);
-    PU_1                      = newTH1D("PU_1","pile-up 1 jet","#pu",45,0.5,45.5);
-    PU_2                      = newTH1D("PU_2","pile-up 2 jets","#pu",45,0.5,45.5);
-    PU_3                      = newTH1D("PU_3","pile-up 3 jets","#pu",45,0.5,45.5);
-    PU_4                      = newTH1D("PU_4","pile-up 4 jets","#pu",45,0.5,45.5);
-    PU_5                      = newTH1D("PU_5","pile-up 5 jets","#pu",45,0.5,45.5);
-    PU_6                      = newTH1D("PU_6","pile-up 6 jets","#pu",45,0.5,45.5);
-    PU_7                      = newTH1D("PU_7","pile-up 7 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc0jet                      = newTH1D("PU_0","pile-up 0 jet","#pu",45,0.5,45.5);
+    NVtx_Zexc1jet                      = newTH1D("PU_1","pile-up 1 jet","#pu",45,0.5,45.5);
+    NVtx_Zexc2jet                      = newTH1D("PU_2","pile-up 2 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc3jet                      = newTH1D("PU_3","pile-up 3 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc4jet                      = newTH1D("PU_4","pile-up 4 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc5jet                      = newTH1D("PU_5","pile-up 5 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc6jet                      = newTH1D("PU_6","pile-up 6 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc7jet                      = newTH1D("PU_7","pile-up 7 jets","#pu",45,0.5,45.5);
 
     ZNGoodJetsBeta_Zexc = newTH2D("ZNGoodJetsBeta_Zexc","Beta cut vs Jet Counter (excl.) ", 11, -0.5, 10.5, 10, -0.5, 9.5);
     if(ZNGoodJetsBeta_Zexc){

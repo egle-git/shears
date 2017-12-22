@@ -54,10 +54,16 @@ SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
 RecoComparison.cc PlotSettings.cc RoccoR.cc BLUEMeth.cc Combination.cc \
-printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc
+printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc \
+JetResolution.cc JetResolutionObject.cc \
+SimpleJetCorrectionUncertainty.cc \
+JetCorrectionUncertainty.cc \
+JetCorrectorParameters.cc
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o
 PLOTRESPMATRIX=Main/plotRespMatrix
+
+#$(info $$SOURCES is [${SOURCES}])
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
@@ -85,6 +91,8 @@ $(PLOTRESPMATRIX)
 # runZJets \
 # runMakeStatisticsTable \
 # dispatcher
+
+#$(info $$INCDIR is [${INCDIR}])
 
 # ===========================================================================
 %.o: %.cc

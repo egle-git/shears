@@ -26,7 +26,8 @@
 #include "getFilesAndHistogramsZJets.h"
 #include "HistoSetZJets.h"
 #include "RoccoR.h"
-
+#include "JetResolution.h"
+#include "JetCorrectionUncertainty.h"
 
 using namespace std;
 
@@ -35,6 +36,10 @@ class ZJets: public HistoSetZJets {
  public :
         bool doRochester;
         RoccoR * rochCorr2016;
+	JME::JetResolution * m_JetResolution;
+	JME::JetResolutionScaleFactor * m_JetResolutionScaleFactor;
+	JME::JetParameters * m_JetParameters;
+	Variation m_Variation;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 	TChain          fBonzaiHeaderChain;
@@ -464,7 +469,7 @@ class ZJets: public HistoSetZJets {
         void     Init(bool hasRecoInfo, bool hasGenInfo);
         void     initLHAPDF(TString pdfSet, int pdfMember);
         double   computePDFWeight();
-        void     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, int jobNum = 1, int nJobs = 1,
+        int     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, int jobNum = 1, int nJobs = 1,
 		      TString pdfSet = "", int pdfMember = -1, double muR = 0, double muF = 0,
 		      double yieldScale = 1.);
         void     getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons);
@@ -495,7 +500,7 @@ class ZJets: public HistoSetZJets {
 	
 	Int_t fill(TH1* h, Double_t x, Double_t w = 1.){
 	   if(!h){
-	      std::cout<<"Histograms pointer is 0\n";
+	      //std::cout<<"Histograms pointer is 0\n";
 	      return 0;
 	   }
 	   return h->Fill(x, w);

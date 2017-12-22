@@ -9,6 +9,7 @@
 
 //--- Load configuration ---
 ConfigVJets cfg;
+// const processInfoStruct Samples[] - defined in Includes/fileNameZJets.h 
 
 int main(int argc, char **argv)
 {
@@ -38,7 +39,7 @@ int main(int argc, char **argv)
     int jobNum         = cfg.getI("jobNum", 1);
     int nJobs          = cfg.getI("nJobs", 1);
     double mcYieldScale = cfg.getD("mcYieldScale", 1.);
-
+    bool trigCorr = 1; //Not currently used DJALOG
     
     //    TString dataSample        = cfg.getS("dataSample"       , "%s_Data_13TeV.txt");
     //    TString mcSample_ST_tW    = cfg.getS("mcSample_ST_tW"   , "%s_ST_tW_top_13TeV.txt");
@@ -189,7 +190,6 @@ int main(int argc, char **argv)
     
     if (!histoDir.EndsWith("/")) histoDir += "/";
 
-    std::cout<<"To Upper.\n";
     doWhat.ToUpper();
 
     //-----------------------------------------------------------------------------
@@ -238,7 +238,7 @@ int main(int argc, char **argv)
 	}
     }
     const int kNominal = 0;
-    int trigCorr = 1;
+
     bool hasRecoInfo = true;
     bool hasGenInfo  = true;
     short* syst   = 0;
@@ -363,8 +363,11 @@ int main(int argc, char **argv)
 		      lepPtMin, lepEtaMax, jetPtMin, jetEtaMax,
 		      maxEvents, histoDir, bonzaiDir, maxFiles);
 	    
-	    ana.Loop(hasRecoInfo, hasGenInfo, jobNum, nJobs, 
-		     pdfSet, pdfMember, muR, muF, yieldScale);
+	    if(ana.Loop(hasRecoInfo, hasGenInfo, jobNum, nJobs, 
+			pdfSet, pdfMember, muR, muF, yieldScale) < 0){
+		printf("Something went wrong in ZJets::Loop...Exiting runZJets_newformat\n");
+		return 0;
+	    }
 	    
 	    //if(i==1){
 	    if(Samples[iSample].merge == '+'){

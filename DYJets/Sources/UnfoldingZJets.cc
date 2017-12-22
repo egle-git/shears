@@ -51,7 +51,8 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
      gStyle->SetOptStat(0);
      //--- create output directory if does not exist ---
      system("mkdir -p " + unfoldDir);
-
+     
+     bool DJALOG = cfg.getB("DJALOG", false);
      int start = 0;
      int end = NVAROFINTERESTZJETS;
 
@@ -176,6 +177,10 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 getAllHistos(variable, hRecData, fData, 
 		      hRecDYJets, hGenDYJets, hResDYJets, fDYJets,
 		      hRecBg, hRecSumBg, fBg, NBGDYJETS, respDYJets, hFakDYJets, hPurity);
+	 
+	 printf("\n\n\n");
+	 hRecData[0]->Print();
+	 printf("\n\n\n");
 
 	 if(fAltUnf && withUnfUnc){
 	     //--- Get Sherpa Unfolding response ---	  
@@ -2084,6 +2089,7 @@ double pValueToNormChi2(double alpha, int n){
 TH1* unfold(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 	    const TH1* hRecDataMinusFakes, int niters, bool smoothPrior, std::vector<TH1*>* hUnfs,
 	    int uncMode){
+    //printf(" unfold() \n");
     std::unique_ptr<RooUnfold> rooUnfold(RooUnfold::New(algo, resp, hRecDataMinusFakes, niters));
     if(algo==RooUnfold::kBayes) ((RooUnfoldBayes*) rooUnfold.get())->SetSmoothing(smoothPrior);
     bool verbosity = cfg.getB("unfoldingVerbosity");
@@ -2099,6 +2105,7 @@ TH1* unfold(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 TH1* unfoldWithErr(RooUnfold::Algorithm algo, const RooUnfoldResponse* resp,
 		   const TH1* hRecDataMinusFakes, int niters, bool smoothPrior, std::vector<TH1*>* hUnfs,
 		   std::vector<TMatrixD>* cov, int uncMode){
+    printf(" unfoldWithErr() \n");
     bool verbosity = cfg.getB("unfoldingVerbosity");
     bool useFlatPrior = cfg.getB("useFlatPrior");
     if(hUnfs){

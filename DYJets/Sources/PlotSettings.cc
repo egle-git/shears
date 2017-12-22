@@ -343,7 +343,7 @@ TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString 
     TString histoDir = cfg.getS("histoDir");
     TFile *fDE;
     if (lepSel == "DE" || lepSel == "") {
-        fDE = new TFile(histoDir + "/DE_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDE = new TFile(histoDir + "/DE_13TeV_" + sample + "_Syst_0.root");
 	if(!fDE || fDE->IsZombie()){
 	    std::cerr << "Fatal error. Failed to open file  " << fDE->GetName()  << ".\n";
 	    abort();
@@ -352,7 +352,7 @@ TGraphAsymmErrors* createScaleSystGraph(TString sample, TString lepSel, TString 
 
     TFile *fDMu;
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu = new TFile(histoDir + "/DMu_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDMu = new TFile(histoDir + "/DMu_13TeV_" + sample + "_Syst_0.root");
 	if(!fDMu || fDMu->IsZombie()){
 	    std::cerr << "Fatal error. Failed to open file  " << fDMu->GetName()  << ".\n";
 	    abort();
@@ -510,12 +510,12 @@ TGraphAsymmErrors* createPDFSystGraph(TString sample, TString lepSel, TString va
     TString histoDir = cfg.getS("histoDir");
     TFile *fDE;
     if (lepSel == "DE" || lepSel == "") {
-        fDE = new TFile(histoDir + "/DE_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDE = new TFile(histoDir + "/DE_13TeV_" + sample + "_Syst_0.root");
     }
 
     TFile *fDMu;
     if (lepSel == "DMu" || lepSel == "") {
-        fDMu = new TFile(histoDir + "/DMu_13TeV_" + sample + "_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+        fDMu = new TFile(histoDir + "/DMu_13TeV_" + sample + "_Syst_0.root");
     }
 
     TGraphAsymmErrors *grDE, *grDMu;
@@ -901,6 +901,8 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
 	    grCentralSyst->GetXaxis()->SetLabelSize(0.18);
 	    grCentralSyst->GetXaxis()->SetLabelOffset(0.01);
 	}
+    }else{
+	grCentralSyst->GetXaxis()->SetLabelSize(0.09); //DJALOG
     }
     //grCentralSyst->GetXaxis()->SetRangeUser(minX, maxX);
     TString xtitle = gen1->GetXaxis()->GetTitle();
@@ -920,7 +922,7 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
    if (xtitle.Index("JZB") >= 0) xtitle = "JZB [GeV]";
 
     if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitle(xtitle);
-    if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitleSize(0.12);
+    if(grCentralSyst) grCentralSyst->GetXaxis()->SetTitleSize(0.10);
     //-----------------------------------------
 
 }
@@ -1750,6 +1752,9 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     plots->cd();
     TPad *plot1 = new TPad("plot1", "plot1", 0., 0., 0., 0.);
     setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator);
+    //DJALOG
+    //if(variable.Contains("ZPt_Zinc"))
+    //	plot1->SetLogx();
 
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
@@ -1767,6 +1772,8 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	hSyst->GetXaxis()->SetLabelSize(0);
 	hSyst->GetYaxis()->SetTitle("");
 	hSyst->GetYaxis()->SetLabelSize(0.055);
+	if(variable.Contains("AbsRapidity"))
+	    hSyst->GetYaxis()->SetMoreLogLabels();
     }
 
     if(hSyst){
@@ -1962,6 +1969,11 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	TPad *pad = new TPad(padName, padName, 0., 0., 0., 0.);
 	setAndDrawTPad(canvasName, pad, ipad, numbOfGenerator);
 
+	//DJALOG
+	//if(variable.Contains("ZPt_Zinc"))
+	//    pad->SetLogx();
+
+	
 	//--- TLegend ---
 	TLegend *legend = new TLegend(0.16, 0.05, 0.42, 0.20);
 	customizeLegend(canvasName,legend, 1 + igen, numbOfGenerator);

@@ -1006,11 +1006,11 @@ void Tupel::defineBitFields(){
   DEF_BIT2(ElId, 4, cutBasedElectronID-Summer16-80X-V1-veto);
 
 
-
+/* FIXME Photons for 2016
     DEF_BIT2(PhotId, 0, cutBasedPhotonID-Spring16-V2p2-loose);
     DEF_BIT2(PhotId, 1, cutBasedPhotonID-Spring16-V2p2-medium);
     DEF_BIT2(PhotId, 2, cutBasedPhotonID-Spring16-V2p2-tight);
-
+*/
 }
 
 void Tupel::readEvent(const edm::Event& iEvent){
@@ -1066,7 +1066,7 @@ void Tupel::readEvent(const edm::Event& iEvent){
     puJetIds_ = puJetIdHandle.failedToGet() ? 0 : &* puJetIdHandle;
     
     // get photon collection
-    if(photonMode_){
+    if(/* FIXME 2016 photons */ /* photonMode_ */ false){
       edm::Handle<std::vector<pat::Photon> > hPhotons;  
       iEvent.getByToken(photonToken_, hPhotons);
       photons = hPhotons.failedToGet () ? 0 :  &*hPhotons;

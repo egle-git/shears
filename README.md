@@ -95,7 +95,7 @@ Shears provides some scripts under the `shears/ntuple_production` directory. You
 
 ```
 cd shears
-PATH="$PATH:$(readlink -e ntuple_production)"
+export PATH="$PATH:$(readlink -e ntuple_production)"
 ```
 
 Compiling

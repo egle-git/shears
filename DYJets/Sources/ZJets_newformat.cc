@@ -127,18 +127,26 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //       Load efficiency tables        //
    //====================================//
 
+   table JESUncMC("EfficiencyTables/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt");
    std::map<char,std::string> JESUnc;
-   std::string JESUncBD = "EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt";
-   std::string JESUncEF = "EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt";
-   std::string JESUncG = "EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt";
-   std::string JESUncH = "EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt";
-   JESUnc.insert( std::pair<char,std::string>('B',JESUncBD) );
-   JESUnc.insert( std::pair<char,std::string>('C',JESUncBD) );
-   JESUnc.insert( std::pair<char,std::string>('D',JESUncBD) );
-   JESUnc.insert( std::pair<char,std::string>('E',JESUncEF) );
-   JESUnc.insert( std::pair<char,std::string>('F',JESUncEF) );
-   JESUnc.insert( std::pair<char,std::string>('G',JESUncG) );
-   JESUnc.insert( std::pair<char,std::string>('H',JESUncH) );
+   //V4 AK04
+   //std::string JESUncBD = "EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt";
+   //std::string JESUncEF = "EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt";
+   //std::string JESUncG = "EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt";
+   //std::string JESUncH = "EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt";
+   //V6 AK04chs
+   table JESUncBD("EfficiencyTables/Summer16_23Sep2016BCDV6_DATA_Uncertainty_AK4PFchs.txt");
+   table JESUncEF("EfficiencyTables/Summer16_23Sep2016EFV6_DATA_Uncertainty_AK4PFchs.txt");
+   table JESUncG("EfficiencyTables/Summer16_23Sep2016GV6_DATA_Uncertainty_AK4PFchs.txt");
+   table JESUncH("EfficiencyTables/Summer16_23Sep2016HV6_DATA_Uncertainty_AK4PFchs.txt");
+
+   JESUnc.insert( std::pair<char,table>('B',JESUncBD) );
+   JESUnc.insert( std::pair<char,table>('C',JESUncBD) );
+   JESUnc.insert( std::pair<char,table>('D',JESUncBD) );
+   JESUnc.insert( std::pair<char,table>('E',JESUncEF) );
+   JESUnc.insert( std::pair<char,table>('F',JESUncEF) );
+   JESUnc.insert( std::pair<char,table>('G',JESUncG) );
+   JESUnc.insert( std::pair<char,table>('H',JESUncH) );
 
    std::map<char,table> TrackSF;
    table TableMuTrackBF("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
@@ -487,15 +495,16 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       std::cout << "Letter file was not found\n";
    }
 
-
-   if(DJALOG)    printf("{DJA LOG}    nEventsToProcess = %lld\n",nEventsToProcess);
-   if(DJALOG)    printf("{DJA LOG}    nMaxEvents = %ld\n",nMaxEvents);
-   if(DJALOG)    printf("{DJA LOG}    entry_start = %lld\n",entry_start);
-   if(DJALOG)    printf("{DJA LOG}    entry_stop = %lld\n",entry_stop);
-   if(DJALOG)    printf("{DJA LOG}    nEntries = %lld\n",nEntries);
-   //======================================================================
-   // Event loop starts here
-   //======================================================================
+   //if(DJALOG){
+   printf("{DJA LOG}    nEventsToProcess = %lld\n",nEventsToProcess);
+   printf("{DJA LOG}    nMaxEvents = %ld\n",nMaxEvents);
+   printf("{DJA LOG}    entry_start = %lld\n",entry_start);
+   printf("{DJA LOG}    entry_stop = %lld\n",entry_stop);
+   printf("{DJA LOG}    nEntries = %lld\n",nEntries);
+   //}
+   printf("======================================================================\n");
+   printf("Event loop starts here\n");
+   printf("======================================================================\n");
    for (Long64_t jentry = entry_start; jentry <= entry_stop; jentry += 1) {
       if (0 <= nMaxEvents && nMaxEvents <= nEvents) break;
 	
@@ -1143,11 +1152,13 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
 	    //-- apply jet energy scale uncertainty (need to change the scale when initiating the object)
 	    bool jetPassesPtCut(jet.v.Pt() >= 10); 
-	    JetCorrectionUncertainty * JESUncObject = 0;
+	   
+	    /*
+	    //JetCorrectionUncertainty * JESUncObject = 0;
 	    if(EvtIsRealData)
 	       JESUncObject = new JetCorrectionUncertainty(JESUnc[GetRunData(EvtRunNum)]);
 	    else
-	       JESUncObject = new JetCorrectionUncertainty(JESUnc[GetRunMC(mcEraBoundary,nEvents)]);
+	       JESUncObject = new JetCorrectionUncertainty(JESUncMC);
 	    if(JESUncObject == 0){
 	       printf("Issue with the Jet Scale Uncertainty...Exiting.\n");
 	       return -1;
@@ -1157,17 +1168,24 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    JESUncObject->setJetEta(jet.v.Eta());
 	    JESUncObject->setJetPt(jet.v.Pt());
 	    double JESUncertainty = JESUncObject->getUncertainty(true);
+	    */
+	    double JESUncertainty = 0.0;
+
+	    //DJALOG
+	    //printf("_______________________________________________\n");
+	    //printf("GetRunData(EvtRunNum) = %c\n",GetRunData(EvtRunNum));
+	    //printf("%s\n",JESUnc[GetRunData(EvtRunNum)].c_str());
+	    //printf("jet.v.Eta() = %F\n",jet.v.Eta());
+	    //printf("jet.v.Pt() = %F\n",jet.v.Pt());
+	    //printf("JESUncertainty = %F\n",JESUncertainty);
+	    //printf("New jet.v.Pt() scale=1 = %F\n",jet.v.Pt()*(1 + JESUncertainty));
+	    //printf("New jet.v.Pt() scale=-1 = %F\n",jet.v.Pt()*(1 - JESUncertainty));
+	    //printf("Scale = %d\n",scale);
 	    
 	    //Vary the jet pt for systematic study (this will not do anything for central value)
 	    jet.v.SetPtEtaPhiE(jet.v.Pt()*(1 + scale*JESUncertainty), jet.v.Eta(),
 			       jet.v.Phi(), jet.v.E()*(1 + scale*JESUncertainty));
 	    
-	    //DJALOG
-	    printf("jet.v.Eta() = %F\n",jet.v.Eta());
-	    printf("jet.v.Pt() = %F\n",jet.v.Pt());
-	    printf("JESUncertainty = %F\n",JESUncertainty);
-	    printf("New jet.v.Pt() scale=1 = %F\n",jet.v.Pt()*(1 + JESUncertainty));
-	    printf("New jet.v.Pt() scale=-1 = %F\n",jet.v.Pt()*(1 - JESUncertainty));
 
 
 	    //DJALOG
@@ -1348,12 +1366,18 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 jets.clear();
 	 jets = tmpJets;
 	 nGoodJets = jets.size();
+
+	 //Here the TTbar sample is reweighted by the data/mc ratios from muon electron samples. This
+	 //has not been done for 2016 yet.
+	 /*
 	 //if(fileName.Index("TT") >= 0) cout << "TTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
 	 if(fileName.Index("TT") >= 0 && (systematics == 3)) {
 	    if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
 	    else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);
 	 }
 	 else if(fileName.Index("TT") >= 0) weight /= TTbarSF.getTTbarSF(nGoodJets);
+	 */
+
 	 nGoodJets_20 = jets_20.size();
 	 sort(jets.begin(), jets.end(), JetDescendingOrder);
 	 sort(jets_20.begin(), jets_20.end(), JetDescendingOrder);

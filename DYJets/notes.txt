@@ -1201,3 +1201,63 @@ The Text files need to be updated to the charged hadron subtracted values:
 
 Added in the jes uncertainty. Made ZJets::Loop return an int so it can have proper exiting. The code is
 building fine so I will add in print statements to monitor the JES uncerstainty values.
+
+Downloaded the chs v6 files. Adding them into the code now and checking the output by hand.
+
+I am still a little skeptical about the JES uncertainties since they do not quite match the table 
+values. They always seem to be around the right value but not exactly on (1.1% instead of 1.05%). I 
+will try a full production like it is now.
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_12_22_2017 &> histo_production_1_12_22_2017.log &
+
+_________________12_23_2017
+
+Looks like there were some issues with the cluster and the jobs crashed. Probably not able to access the cms stuff like I had seen before. Trying again:
+
+_________________01_03_2018
+
+In the 2015 analysis a muon electron sample was used to estimate the ttbar contribution. For 2016 this
+is not done and instead only a MC sample is used. For the 2015 MC the jet multiplicity was 
+re-weighted by the data/mc ratio. This procedure is a little confusing in the AN. Mainly this will not
+be done for now in 2016 so I need to make sure no SF is applied when dealing with the ttbar MC.
+
+Commented out the ttbar sample reweighting.
+
+Trying a full production:
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_01_03_2017 &> histo_production_1_01_03_2017.log &
+
+_________________01_04_2018
+
+Something seems to be broken with the production code. Trying with a small sample and debug.
+$ nohup python Tools/runZJets_newformat.py -t 25 -l 1 -o HistoFiles_1_01_04_2017 &> histo_production_1_01_04_2017.log &
+
+Everything seems to be going fine when doing small runs. 
+
+
+########################################
+Things to do:
+ - Finish same sign muon
+ - puMVA plot
+ - Unfolding uncertainty (ratio root files)
+ - Check if jets have separation to each other + check the 3rd (or more) leptons
+ - Make plot of number of muon cadidates
+   - For the two points above: The muons to add to the collection should be muons that pass all the 
+     selections except for pt, invariant mass, and charge.
+ - Check dxy requirement for muons (2mm for 2017)
+ - Make histograms of number of events after each cut state for each sample
+   - Stages: None, muon selection, Z candidate, invariant mass, jets
+########################################
+
+It seems like the code is just moving extremely slowly. I will do a few test withs the jet energy scale
+uncertainty first.
+
+Well it definitely seems to be the JES uncertainty... I have a feeling even making the member class
+will instead of calling the constructor every loop will not fix the problem. The original way of doing
+this was to have a table of the values. I may have to make my own table or write a parser for the 
+existing table.
+
+I converted the table into table that can be read by the shears software using a python script:
+ - EfficiencyTables/JECScaleConverter.py
+I just need to change the map in ZJets_newformat and I think the existing tools will be suffiecient.
+
+

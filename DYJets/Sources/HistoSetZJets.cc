@@ -19,10 +19,15 @@ HistoSetZJets::~HistoSetZJets()
 bool HistoSetZJets::filterHist(const char* name) const{
   if(varList.size() == 0) return true;
   std::string n(name);
+  //DJALOG
+  printf("HistoSetZJets::filterHist name=%s\n",name);
   for(std::set<std::string>::const_iterator it = varList.begin();
       it != varList.end();
       ++it){
-    if((*it) == n) return true;
+    if((*it) == n) {
+      printf("Got it\n");
+      return true;
+    }
     if((*it) + "_Odd" == n) return true;
     if((*it) + "_Even" == n) return true;
     if((*it) + "_2" == n) return true;

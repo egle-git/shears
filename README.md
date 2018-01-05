@@ -27,38 +27,81 @@ Repository organisation
 Installation recipe
 ------------------
 
-**a) install the additionnal packages**
+### If you don't want to produce baobabs
+
+First, download the code (change the URL if don't use the main shears):
 
 ```
-cmsrel CMSSW_8_0_26_patch1
-cd CMSSW_8_0_26_patch1/src
+git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
+```
+
+Once you have the code, you can checkout another branch as usual. For example, in order to run on 2017 data:
+
+```
+cd shears
+git checkout Run2017
+cd ..
+```
+
+You can then compile (see [below](#compiling)).
+
+### If you want to baobabs
+
+First, download the code (change the URL if don't use the main shears):
+
+```
+git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
+```
+
+Once you have the code, you can checkout another branch as usual. For example, in order to run on 2017 data:
+
+```
+cd shears
+git checkout Run2017
+cd ..
+```
+
+There is a script in the `shears/Baobabs` directory that takes care of installing the required CMSSW packages. Run it:
+
+```
+shears/Baobabs/install.sh
+```
+
+The script will:
+
+* Checkout the required CMSSW version in the current directory
+* Install all required modules
+* Move shears into the CMSSW tree (in `src/`) and replace it by a soft link
+* Compile everything
+
+If you don't need it, you can remove the soft link:
+
+```
+rm shears
+```
+
+Environment
+-----------
+
+Shears needs a working (and decently recent) CMSSW environment. Find a CMSSW installation and set up the environment using:
+
+```
+cd your_cmssw_directory
 cmsenv
-git cms-init #add the repository with the updated Egamma packages
-git cms-merge-topic HuguesBrun:METfiltersIn8027
-git cms-merge-topic ikrav:egm_id_80X_v3_photons
-git cms-merge-topic cms-egamma:EGM_gain_v1
-cd EgammaAnalysis/ElectronTools/data
-git clone https://github.com/ECALELFS/ScalesSmearings.git
-cd ScalesSmearings
-git checkout Moriond17_23Jan_v2
-cd $CMSSW_BASE/src
-scram b -j 8
+cd -
 ```
 
-**b) install and compile the Hzz code**
-```
-git clone ssh://git@gitlab.cern.ch:7999/HZZ-IIHE/shears.git
-scramv1 b -j 16
-```
+Shears provides some scripts under the `shears/ntuple_production` directory. You can add them to your `PATH` by using:
 
-**c) load the environement**
 ```
-cd shears/ntuple_production
-PATH=$PATH:`pwd`
+cd shears
+PATH="$PATH:$(readlink -e ntuple_production)"
 ```
 
 Compiling
 ---------
+
+[Setup the environment](#environment) and use `make` to compile the code.
 
 In addition to analysis' own `Makefile`s, the framework provides a `Makefile` at
 the root of the source tree. It supports the following targets:

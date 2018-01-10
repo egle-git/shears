@@ -120,6 +120,10 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
 	plot->SetLogx();
 	plot->SetLogy(0);
     }
+    if (canvasName.Index("Phistar") > 0){
+	plot->SetLogx();
+	plot->SetLogy(0);
+    }
     plot->SetLeftMargin(0.13);
     plot->SetRightMargin(0.07);
     plot->SetFillStyle(0);
@@ -915,62 +919,6 @@ void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen,
     }
 }
 
-
-//void customizeRatioGraph(TH1 *hAxis, TGraphAsymmErrors *gen, TGraphAsymmErrors *gPDF,
-//			 int genNum, TString yTitle, int numbOfGenerator, TLegend *legend)
-//{
-//    double minRatioY = cfg.getD("minRatioYUnf", 0.2);
-//    double maxRatioY = cfg.getD("maxRatioYUnf", 1.8);
-//
-//    if(hAxis){
-//	hAxis->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
-//	hAxis->GetYaxis()->SetNdivisions(507);
-//	hAxis->GetYaxis()->SetLabelFont(ts.defaultFont);
-//	hAxis->GetYaxis()->SetLabelSize(ts.yLabelSize);
-//	hAxis->GetYaxis()->SetTitle(yTitle);
-//	hAxis->GetYaxis()->SetTitleFont(ts.defaultFont);
-//	hAxis->GetYaxis()->SetTitleSize(ts.ratioYTitleSize);
-//	hAxis->GetYaxis()->SetTitleOffset(3.);
-//	hAxis->GetYaxis()->CenterTitle();
-//    }
-//
-//    if(gen){
-//	gen->SetFillColor(ZJetsFillColor[genNum-1]);
-//	gen->SetFillStyle(ZJetsFillStyle);
-//	gen->SetLineColor(ZJetsLineColor[genNum-1]);
-//	gen->SetLineWidth(2);
-//	gen->SetMarkerColor(ZJetsLineColor[genNum-1]);
-//	gen->SetMarkerStyle(ZJetsMarkerStyle[genNum-1]);
-//    }
-//
-//    if(gPDF){
-//	gPDF->SetFillStyle(0);
-//	gPDF->SetLineColor(ZJetsLineColor[genNum-1]);
-//	gPDF->SetLineWidth(2);
-//    }
-//    
-//    if (genNum == numbOfGenerator && hAxis) {
-//        hAxis->GetXaxis()->SetLabelFont(ts.defaultFont);
-//        hAxis->GetXaxis()->SetLabelSize(ts.xLabelSize);
-//        hAxis->GetXaxis()->SetTitleFont(ts.defaultFont);
-//        hAxis->GetXaxis()->SetTitleSize(ts.xTitleSize);
-//        hAxis->GetXaxis()->SetTitleOffset(3.0);
-//    }
-//    else if(hAxis){
-//        hAxis->GetXaxis()->SetTitle();
-//    }
-//
-//    if (legend) {
-//        TLegendEntry *leEntry;
-//        //leEntry = legend->AddEntry(gen, "Stat. unc.", "f");
-//        leEntry = legend->AddEntry((TObject*)0, "Stat. unc.", "f");
-//        leEntry->SetFillColor(ZJetsFillColor[genNum-1]);
-//        leEntry->SetFillStyle(ZJetsFillStyle);
-//        leEntry->SetLineColor(ZJetsFillColor[genNum-1]);
-//    }
-//}
-
-
 void customizeGenHist(TH1 *gen, int genNumb, TLegend *legend, TString legText)
 {
 
@@ -1082,10 +1030,10 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
     if (xtitle.Index("JZB") >= 0) xtitle = "JZB [GeV]";
     if (xtitle.Index("p_{T} balance [GeV]") >=0) xtitle = "p_{T}^{bal}";
    
-//   if(variable.Index("ZPt_") >= 0){
-//       TAxis* a = grCentralSyst->GetXaxis();
-//       a->SetRangeUser(10., a->GetBinUpEdge(a->GetNbins()));
-//   }
+   if(variable.Index("ZPt_") >= 0){
+      TAxis* a = grCentralSyst->GetXaxis();
+       a->SetRangeUser(1.25, a->GetBinUpEdge(a->GetNbins()));
+   }
 
    if(grCentralSyst){
        if(gen1) grCentralSyst->GetXaxis()->SetTitle(xtitle);
@@ -1756,10 +1704,10 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable,
 	//    dataRatioToCentral->GetXaxis()->SetRangeUser(30, x + ex);
 	//}
 
-	//	if(variable.Contains("ZPt_") && igen == 0){
-	//    draw_axis_labels(hcopy->GetXaxis());
-	//	    plots->Update();
-	//	} 
+		//if(variable.Contains("ZPt_") && igen == 0){
+	    //   draw_axis_labels(hcopy->GetXaxis());
+		//    plots->Update();
+		//} 
 	
 	    mainGen = false;
 	}//next gen of the ratio frame

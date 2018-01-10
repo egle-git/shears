@@ -3,14 +3,14 @@ config = Configuration()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'ZJetsAna'
+config.General.requestName = 'ZJetsAnaData'
 config.section_('JobType')
 config.JobType.outputFiles = [ 'HistoFiles.tgz' ]
 
 # Specify here the runZjets_newformat configuration file.
 # Note: the job (job_crab.sh) will substitute the string 'lepSel' 
 # DMu or DE
-config.JobType.scriptArgs = ['cfg=vjets_silver_lepSel_crab.cfg']
+config.JobType.scriptArgs = ['cfg=vjets.cfg']
 
 config.JobType.scriptExe = 'job_crab.sh'
 config.JobType.pluginName = 'PrivateMC'
@@ -22,18 +22,22 @@ config.JobType.inputFiles = [ '../runZJets_newformat', '../RooUnfold/libRooUnfol
 #Tarball with the efficiency tables. Can be created with the command tar -cxf EfficiencyTables.tgz EfficiencyTables to be run in DYJets direcrory
 config.JobType.inputFiles  += ['../EfficiencyTables.tgz' ]
 
+config.JobType.inputFiles  += ['../rcdata.2016.v3.tgz' ]
+
 #Specify here the ratio histograms to be used for unfolding uncertainties
-config.JobType.inputFiles += [ '../Ratios/ZNGoodJets_Zexc_ratio.root', '../Ratios/SecondJetEta_2_Zinc2jet_ratio.root', '../Ratios/FirstJetPt_2_Zinc1jet_ratio.root', '../Ratios/ThirdJetPt_2_Zinc3jet_ratio.root',  '../Ratios/JetsHT_2_Zinc3jet_ratio.root', '../Ratios/FirstJetEta_2_Zinc1jet_ratio.root', '../Ratios/ThirdJetEta_2_Zinc3jet_ratio.root', '../Ratios/JetsHT_2_Zinc2jet_ratio.root', '../Ratios/SecondJetPt_2_Zinc2jet_ratio.root', '../Ratios/JetsHT_2_Zinc1jet_ratio.root' ]
+config.JobType.inputFiles += ['../histList.txt' ] 
+
 
 #Specify here the configuration files
-config.JobType.inputFiles += ['vjets_silver_DMu_crab.cfg', 'vjets_silver_DE_crab.cfg']
+config.JobType.inputFiles += ['vjets.cfg']
+config.JobType.inputFiles += ['../unfolding.cfg']
 
 config.section_('Data')
 config.Data.unitsPerJob = 1
-config.Data.totalUnits = 20*2
+config.Data.totalUnits = 16
 config.Data.publication = False
 config.Data.splitting = 'EventBased'
-config.Data.outLFNDirBase = TO_BE_FILLED
+config.Data.outLFNDirBase = '/store/group/phys_muon/agrebeny/HistoFiles2016'
 config.section_('User')
 config.section_('Site')
 config.Site.whitelist = ['T2_CH_CERN']

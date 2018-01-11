@@ -25,7 +25,7 @@ static float minJetAk04Pt = 15;
 static float mll_low = 66;
 static float mll_high = 126;
 
-static const unsigned elIdMask = (1 <<10);
+static const unsigned elIdMask = 0b11111;
 
 //For data v11
 //static const unsigned elIdMask = (1 <<20);

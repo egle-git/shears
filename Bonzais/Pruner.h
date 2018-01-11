@@ -401,15 +401,14 @@ public:
    * @param subselection subselection name
    * @return true iff the subselection was found
    */
-  virtual bool setSubSelection(const char* subSelection){
-    size_t i = 0;
-    for(size_t i; i < subSelections_.size(); ++i){
-      if(subSelections_[i].tag == subSelection){
-	iSubSelection_ = i;
-	break;
+  virtual bool setSubSelection(const std::string &subSelection){
+    for(size_t i = 0; i < subSelections_.size(); ++i){
+      if(subSelection == subSelections_[i].tag){
+        iSubSelection_ = i;
+        return true;
       }
     }
-    return i  < subSelections_.size();
+    return false;
   }
 
   /** Sets message verbosity level

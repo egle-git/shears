@@ -10,17 +10,11 @@ else
     HOST = "iihe"
 endif
 
-# define LHAPDF library Path accroding to the host
-ifeq ($(HOST), "lxplus")
-  ifeq ($(LHAPDF_DATA_PATH),)
-    LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
-  else
-    LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
-  endif
+# define LHAPDF library path
+ifeq ($(LHAPDF_DATA_PATH),)
+  LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
 else
-  ifeq ($(HOST), "iihe")
-    LHAPDFPATH = /user/aleonard/LHAPDF/
-  endif
+  LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
 endif
 
 # get Root compiler flags

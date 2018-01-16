@@ -10,17 +10,11 @@ else
     HOST = "iihe"
 endif
 
-# define LHAPDF library Path accroding to the host
-ifeq ($(HOST), "lxplus")
-  ifeq ($(LHAPDF_DATA_PATH),)
-    LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
-  else
-    LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
-  endif
+# define LHAPDF library path
+ifeq ($(LHAPDF_DATA_PATH),)
+  LHAPDFPATH = /afs/cern.ch/cms/slc5_amd64_gcc434/external/lhapdf/5.8.5/
 else
-  ifeq ($(HOST), "iihe")
-    LHAPDFPATH = /user/aleonard/LHAPDF/
-  endif
+  LHAPDFPATH = $(LHAPDF_DATA_PATH)/../../
 endif
 
 # get Root compiler flags
@@ -50,8 +44,9 @@ CXXFLAGS      += -MD -Wall
 SOURCES = \
 ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogramsZJets.cc \
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
-RecoComparison.cc PlotSettings.cc muresolution_run2.cc rochcor2015.cc BLUEMeth.cc Combination.cc \
-printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc ResultTables.cc TextTools.cc Uncertainties.cc
+RecoComparison.cc PlotSettings.cc muresolution_run2.cc RoccoR.cc BLUEMeth.cc Combination.cc \
+printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc Uncertainties.cc \
+ResultTables.cc TextTools.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 EXELIST = \

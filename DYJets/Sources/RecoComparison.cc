@@ -239,6 +239,9 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         pad1->Draw();
         pad1->cd();
 
+        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 || vhNames[i].Index("ZPt_Zinc") >= 0 ) pad1->SetLogx();
+        if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) pad1->SetLogx(0);
+
         TH1D *hRatio = (TH1D*) hSumMC[i]->GetStack()->Last()->Clone();
         // Need to draw MC Stack first other wise
         // cannot access Xaxis !!!
@@ -368,6 +371,9 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         pad2->Draw();
         pad2->cd();
 
+        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 || vhNames[i].Index("ZPt_Zinc") >= 0 ) pad2->SetLogx();
+        if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) pad2->SetLogx(0);
+
         hRatio->SetStats(0);
         hRatio->SetTitle("");
 
@@ -380,6 +386,11 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         hRatio->GetXaxis()->SetTitleOffset(1.2);
         hRatio->GetXaxis()->SetLabelSize(0.12);
         hRatio->GetXaxis()->SetLabelOffset(0.017);
+
+        // to cut away firts bin which starts at 0 for logx()
+        if (vhNames[i].Index("Phistar") >= 0 ) hRatio->GetXaxis()->SetRangeUser(0.004,3.277);
+        if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
+        if (vhNames[i].Index("ZPt_Zinc1") >= 0 ) hRatio->GetXaxis()->SetRangeUser(2.5,1000.);
 
 	//        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);
 	hRatio->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);

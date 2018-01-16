@@ -4017,7 +4017,7 @@ void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, i
 		
 		    TString filePath = TString(line);
 
-		    if(filePath[0]!='/'){
+            if(filePath[0]!='/' && !filePath.BeginsWith("root:")) {
 			filePath.Insert(0, TString(bonzaiDir) + "/");
 		    }
 		    if(filePath.BeginsWith("/store/")){

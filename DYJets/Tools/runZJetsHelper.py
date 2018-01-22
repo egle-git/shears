@@ -46,14 +46,14 @@ def CombineHistos(histoDir):
         haddTarget = ""
         haddHistos = []
         HistoName += iHistoBase
-        print HistoName
+        #print HistoName
         for iHistoSyst in range(0,10):
             if(iHistoSyst == 0):
                 tmpHisto1 = HistoName
             HistoName = tmpHisto1
-            print "\nHistoName = tmpHisto1: %s\n" % HistoName
+            #print "\nHistoName = tmpHisto1: %s\n" % HistoName
             HistoName += "Syst_%d_" % iHistoSyst
-            print "HistoName += Syst_d_: %s\n" % HistoName
+            #print "HistoName += Syst_d_: %s\n" % HistoName
             for iHistoDirection in HistoDirection:
                 if(iHistoDirection == HistoDirection[0]):
                     tmpHisto2 = HistoName
@@ -63,11 +63,11 @@ def CombineHistos(histoDir):
                     HistoName += "dummy"
 
                 HistoName += iHistoDirection
-                print "HistoName += iHistoDirection: %s\n" % HistoName
+                #print "HistoName += iHistoDirection: %s\n" % HistoName
                 #HistoName += HistoEnd
                 haddHistos = []
                 haddTarget = histoDir+"/"+HistoName[0:len(HistoName)-1]+".root"
-                print "haddTarget = %s" % haddTarget
+                #print "haddTarget = %s" % haddTarget
 
                 for i in range(0,len(ls)):
                     if (ls[i].find(HistoName) != -1) and (ls[i].find("Max_24.root") == -1):

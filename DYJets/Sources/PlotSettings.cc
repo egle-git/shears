@@ -79,8 +79,8 @@ void setAndDrawTPad(TString canvasName, TPad *plot, int plotNumber, int numbOfGe
     }
 
 
-    if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0)) plot->SetLogy();
-    if (plotNumber == 1 && canvasName.Index("DPhiZFirstJet") > 0) plot->SetLogy();
+    if (plotNumber == 1 && (canvasName.Index("Eta") < 0 && canvasName.Index("AbsRapidity") < 0 && canvasName.Index("DPhi") < 0)) plot->SetLogy(0);
+    if (plotNumber == 1 && canvasName.Index("DPhiZFirstJet") > 0) plot->SetLogy(0);
     plot->SetLeftMargin(0.13);
     plot->SetRightMargin(0.07);
     plot->SetFillStyle(0);
@@ -133,9 +133,13 @@ void customizeLegend(TString canvasName, TLegend *legend, int genNumb, int numbO
 
     if (genNumb == numbOfGenerator) {
         if (numbOfGenerator == 1) {
-            legend->SetY1(0.35);
+	    //DJALOG Changed Y1
+	    legend->SetY1(0.90);
+            //legend->SetY1(0.35);
             legend->SetX2(0.43);
-            legend->SetY2(0.45);
+	    //DJALOG Changed Y2
+            legend->SetY2(1.0);
+            //legend->SetY2(0.45);
             //legend->SetTextSize(0.06);
             legend->SetTextSize(0.08);
         }
@@ -723,11 +727,13 @@ void customizeGenGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gS
         TLegendEntry *statEntry;
         TLegendEntry *pdfEntry;
 	//   if(/*genNum == 3 ||*/ genNum == 1) {
-	legend->SetTextSize(0.070);
-	legend->SetX2(0.64);
+	legend->SetTextSize(0.060); //Changed from 0.07
+	//DJALOG
+	legend->SetX2(0.68);
+	//legend->SetX2(0.64);
 	legend->SetNColumns(3);
 	//statEntry = legend->AddEntry(gen, "Stat", "f");
-	TString l = "Stat.";
+	TString l = "Stat.  #oplus";
 	if(!gScale && !gPDF) l += " unc.";
 	statEntry = legend->AddEntry((TObject*)0, l, "f");
 	statEntry->SetFillStyle(ZJetsFillStyle);
@@ -736,7 +742,7 @@ void customizeGenGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gS
 
 	if(gScale){
 	    //leEntry = legend->AddEntry(gScale, "#oplus Theory", "f");
-	    TString l = "#oplus theo.";
+	    TString l = "theo.  #oplus";
 	    if(!gPDF) l += " unc.";
 	    leEntry = legend->AddEntry((TObject*)0, l, "f");
 	    leEntry->SetFillColor(ZJetsScaleFillColor[genNum-1]);
@@ -745,7 +751,7 @@ void customizeGenGraph(TH1 *hSyst, TGraphAsymmErrors *gen, TGraphAsymmErrors *gS
 	}
 
 	if(gPDF){
-            pdfEntry = legend->AddEntry(gPDF, "#oplus PDF #oplus #alpha_{s} unc.", "f");
+            pdfEntry = legend->AddEntry(gPDF, "(PDF #oplus #alpha_{s} unc.)", "f");
             pdfEntry->SetFillStyle(0);
 	}
 	//        }
@@ -1752,9 +1758,6 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
     plots->cd();
     TPad *plot1 = new TPad("plot1", "plot1", 0., 0., 0., 0.);
     setAndDrawTPad(canvasName, plot1, 1, numbOfGenerator);
-    //DJALOG
-    //if(variable.Contains("ZPt_Zinc"))
-    //	plot1->SetLogx();
 
     //--- TLegend ---
     TLegend *legend = new TLegend(0.7, 0.74, 0.99, 0.98);
@@ -1780,10 +1783,16 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	if (canvasName.Contains("ZNGoodJets")) {
 	    hSyst->GetXaxis()->SetRangeUser(-0.5, hSyst->GetXaxis()->GetXmax());
 	}
-	//if (canvasName.Contains("JetPt_Zinc")) {
-	//hSyst->GetXaxis()->SetRangeUser(30, hSyst->GetXaxis()->GetXmax());
-	//}
 	hSyst->GetXaxis()->SetRange(nFirstBinsToSkip + 1, hSyst->GetNbinsX() - nLastBinsToSkip);
+	printf("\n_____________________________DJALOG_______________________\n");
+	printf("\n\n%s\n",canvasName.Data());
+	if(variable.Contains("ZPt_Zinc")){
+	    printf("JetPt_Zinc\n\n");
+	    hSyst->SetAxisRange(9.0, hSyst->GetXaxis()->GetXmax());
+	    //hSyst->GetXaxis()->SetRangeUser(1.0, hSyst->GetXaxis()->GetXmax());
+	    
+	}
+	printf("\n____________________________________________________\n");
 	if (canvasName.Contains("Eta") || canvasName.Contains("AbsRapidity")) {
 	    hSyst->GetYaxis()->SetRangeUser(0.001, 1.4*maximum);
 	}
@@ -1795,13 +1804,20 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	}
 	
 	hSyst->SetStats(0);
-		
+	//hSyst->GetXaxis()->SetRangeUser(10.0, hSyst->GetXaxis()->GetXmax());
+	//hSyst->SetAxisRange(10.0,1000.0);
+	//printf("%F - %F\n",hSyst->GetXaxis()->GetXmin(),hSyst->GetXaxis()->GetXmax());
 	hSyst->DrawCopy("e");
 	if(grCentralSyst){
 	    grCentralSyst->SetName("grCentralSyst");
 	    grCentralSyst->Draw("2");
 	}
     }
+
+    //DJALOG
+    if(variable.Contains("ZPt_Zinc"))
+     	plot1->SetLogx();
+
 
     igen = -1;
     for(auto hGen: hGens){
@@ -1970,12 +1986,14 @@ TCanvas* makeCrossSectionPlot(TString lepSel, double lumi, TString variable, boo
 	setAndDrawTPad(canvasName, pad, ipad, numbOfGenerator);
 
 	//DJALOG
-	//if(variable.Contains("ZPt_Zinc"))
-	//    pad->SetLogx();
+	if(variable.Contains("ZPt_Zinc"))
+	    pad->SetLogx();
 
 	
 	//--- TLegend ---
-	TLegend *legend = new TLegend(0.16, 0.05, 0.42, 0.20);
+	//DJALOG
+	TLegend *legend = new TLegend(0.14, 0.90, 0.52, 0.95);
+	//TLegend *legend = new TLegend(0.16, 0.05, 0.52, 0.20);
 	customizeLegend(canvasName,legend, 1 + igen, numbOfGenerator);
 	TString generator = hGen->GetZaxis()->GetTitle();
 	generator = generator(0, generator.Index(" "));

@@ -55,6 +55,7 @@ class HistoSetZJets {
 	TH1D* JobInfo;
 	TH1D *Lumi;
         TH1D *NumberPFcandidates;
+	TH1D *NumberOfEvents;
         TH1D *ZMass_lowDeltaR;
         TH1D *ZMass_Zinc0jet;
         TH1D *ZMass_Zinc1jet;

@@ -18,8 +18,10 @@ def main(arguments):
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-o', '--outputDir', help='Output directory for rootfiles', 
                         type=str, required=True)
+    parser.add_argument('-m', '--maxEvents', help='Number of Events to run over', type=int, required=True)
     parser.add_argument('-t','--threads', help='Number of threads', type=int, required=True)
     parser.add_argument('-l', '--log', help='Log file number', type=int, required=True)
+    
     args = parser.parse_args(arguments)
 
     debug=False
@@ -61,6 +63,7 @@ def main(arguments):
                 command.append("whichSyst=%d" % iSyst)
                 command.append("nJobs=%d" % args.threads)
                 command.append("jobNum=%d" % iJob)
+                command.append("maxEvents=%d" % args.maxEvents)
         
                 if debug: print command
                 processes.append(subprocess.Popen(command,stdout=outputFile,stderr=outputFile))

@@ -1260,4 +1260,119 @@ I converted the table into table that can be read by the shears software using a
  - EfficiencyTables/JECScaleConverter.py
 I just need to change the map in ZJets_newformat and I think the existing tools will be suffiecient.
 
+Looks like everything went well and the transition is done. I will check the speed again. Added some
+more print statements to see why other places are slow.
 
+Back to normal speed and the JEC scale uncertainty is working. I will start the production again.
+$ nohup python Tools/runZJets_newformat.py -t 25 -m 100 -l 1 -o HistoFiles_test4_01_04_2017 &> histo_production_1_01_04_2017.log &
+
+$ nohup python Tools/runZJets_newformat.py -t 25 -m -1 -l 1 -o HistoFiles_1_01_04_2017 &> histo_production_1_01_04_2017.log &
+
+Running the unfolding and generating the tables
+
+_________________01_08_2018
+
+Changing the Efficiency uncertainty in the config file works fine since the value is only used in the unfolding step. New 
+unfolded tables are in:
+ - UnfoldedFiles_1_01_08_2018.
+
+
+Cross Section Uncertainty used for the MC samples
+    //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen                                                         
+    /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data",       " Data"},
+    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.00,     kBlue,     kBlue,     " t#bar{t}",   " t#bar{t}"},
+    /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},
+    /* 3*/{"ST_tch",    '+',     1.,       1.,      1,  0.06,     kBlue+4,   kBlue+4,   " Single Top t-ch", " Single Top t-ch"},
+    /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W",   " #bar{t}W"},
+    /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW",         " tW"},
+    /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single top", "Single top"},
+    /* 7*/{"WToLNu",    ' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " WJets",          " W"},
+//    /* 7*/{"TauTau",  ' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},                                         
+    /* 8*/{"ZZ",        '+',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ",         " ZZ"},
+    /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW",         " WW"},
+    /*10*/{"WZ",        '+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ",         " WZ"},
+    /*11*/{"VV",        '=',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " VV",         "VV"},
+    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS)"},
+    /*13*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10, " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 4j LO + PS)"},
+    /*14*/{"DYJets_GE", ' ',     1.,       1.,      1,  0.00,     kBlue-5,   kBlue-5,  " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
+    /*15*/{"DYJets_GEas1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
+    /*16*/{"DYJets_ZjNNLO", ' ',1.,       1.,       1,  0.00,     kOrange,   kOrange, " Z/#gamma^{*} #rightarrow ll", "N_{jetti} NNLO (1j NNLO)"},
+    };
+
+
+_________________01_09_2018
+
+Find out where the Eff values get added in to get the final cross section values and the systematic
+on the efficiency.
+
+Find out where the theo blue band is coming from the unfolded distributions. It should be in the event
+weights like for the PDF and alpha s:
+
+0-99 adjust pdf parameters
+100-101 alpha s
+102-107 theoretical. renormalization, factorization
+
+########################################
+Things to do:
+ - Finish same sign muon
+ - puMVA plot
+ - Unfolding uncertainty (ratio root files)
+ - Check if jets have separation to each other + check the 3rd (or more) leptons
+ - Make plot of number of muon cadidates 
+   - For the two points above: The muons to add to the collection should be muons that pass all the 
+     selections except for pt, invariant mass, and charge.
+ - Check dxy requirement for muons (2mm for 2017)
+ - Make histograms of number of events after each cut state for each sample
+   - Stages: None, muon selection, Z candidate, invariant mass, jets
+ + Efficiencies applied to unfolded results?
+From Philippe:
+there is no such table. We provide to the unfolding code a 1-D generator histogram which contains also the events which are not reconstructed. The unfolding algorithm gets the efficiency for each gen bin from the ratio of number of events in the 2D histograms (summed over the reco bins) and the bin content of the 1D gen histo.
+
+ + Why is TTbar xsec uncertainty 0?
+It is not, it is 10% 
+ - Check uncertainty on single top and diboson. Single top = 15%, biboson = 10% but which channel?
+   All the same?
+ - Vertex histograms with central and +- uncertainties.
+########################################
+
+_________________01_10_2018
+
+vertices histograms are in the histList but not being made in the reco plots. I changed the names of
+the histograms since this might be how it checks the matching. Make sure that all histo names are
+identical to their name in histList.
+
+Need to make sure the MuPFIsoDBetaCorr histogram is filled by muon before the cut. Changed it to
+fill in getMuons.
+
+Testing if the nvtx histograms are being filled. See it in the found histograms so it looks good.
+
+The same sign lepton issue could have been in the initialization value. Makings sure it starts off
+as false. 
+ - Fixed!
+
+Trying a test run to see what reco level plots might be missing.
+$ nohup python Tools/runZJets_newformat.py -t 25 -m 1000000 -l 1 -o HistoFiles_test1_01_10_2018 &> histo_production_1_01_10_2018.log &
+
+Looks like all the lepton and nvtx graphs are there. I can run the full set without the systemtics again. 
+
+Test mode true
+$ nohup python Tools/runZJets_newformat.py -t 25 -m -1 -l 1 -o HistoFiles_1_01_10_2018 &> histo_production_1_01_10_2018.log &
+
+Started to full production that should have all the lepton plots and nvtx. Doing some renaming of the
+nvtx histograms should be pretty easy to get the pileup up/down plots. 
+
+_________________01_11_2018
+
+Production 1_01_10_2018 looks good. Running compare and unfolding.
+
+_________________01_16_2018
+
+maybe look at rho variable.
+
+same sign sample is it really qcd? charge mis-id is very low for muons. ttbar contribution?
+ - look at same sign leptons in ttbar mc. 
+
+ttbar reweighting 
+
+Order the recocomparison mc samples in terms on events. I will put the smallest on the bottom.
+ - Wow it actually worked. Seems like the edits to Includes/fileNamesZJets.h could definitely break other things so keep an eye on it.

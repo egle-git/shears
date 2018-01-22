@@ -529,7 +529,7 @@ void createInclusivePlots(bool doNormalized, TString outputFileName, TString lep
 	 hCent->SetMarkerColor(kBlack);
 	 hCent->SetMarkerStyle(20);
 	 if (variable == "ZNGoodJets_Zexc") hCent->GetXaxis()->SetRangeUser(1, 8);
-	 if (variable.Index("JetPt_Zinc") >= 0) hCent->GetXaxis()->SetRangeUser(30, hCent->GetXaxis()->GetXmax());
+	 //DJALOGif (variable.Index("JetPt_Zinc") >= 0) hCent->GetXaxis()->SetRangeUser(30, hCent->GetXaxis()->GetXmax());
 	 hCent->GetXaxis()->SetLabelSize(0);
 	 hCent->GetYaxis()->SetTitle("d#sigma");
 	 hCent->GetYaxis()->SetTitleSize(0.05);
@@ -763,8 +763,8 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
      table += var + " & " + dSigma + " & \\tiny{Tot. Unc [\\%]} & ";
  
      table += "\\tiny{stat [\\%]} & \\tiny{JES [\\%]} & \\tiny{JER [\\%]} & \\tiny{Eff [\\%]} & ";
-     table += "\\tiny{Lumi [\\%]}  & \\tiny{Bkg [\\%]} & \\tiny{PU [\\%]} & ";
-     //    table += "\\tiny{LES [\\%]} & \\tiny{LER [\\%]} & ";
+     table += "\\tiny{Lumi [\\%]}  & \\tiny{XSec [\\%]} & \\tiny{PU [\\%]} & ";
+     //table += "\\tiny{LES [\\%]} & \\tiny{LER [\\%]} & ";
      table += "\\tiny{Unf sys [\\%]} & \\tiny{Unf stat [\\%]} \\\\\\hline\n";
 
 
@@ -822,14 +822,14 @@ void createTable(TString outputFileName, TString lepSel, TString variable, bool 
 	 if(hCov[3]) numbers.Form("%#.2g", sqrt(hCov[3]->GetBinContent(i,i))*100./xs);
 	 else numbers="-";
 	 table += numbers + " & ";
-	 //	// LES uncertainty
-	 //	if(hCov[6]) numbers.Form("%#.2g", sqrt(hCov[6]->GetBinContent(i,i))*100./xs);
-	 //	else numbers="-";
-	 //	table += numbers + " & ";
-	 //	// LER uncertainty
-	 //	if(hCov[7]) numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
-	 //	else numbers="-";
-	 //	table += numbers + " & ";
+	 // LES uncertainty
+	 //if(hCov[6]) numbers.Form("%#.2g", sqrt(hCov[6]->GetBinContent(i,i))*100./xs);
+	 //else numbers="-";
+	 //table += numbers + " & ";
+	 // LER uncertainty
+	 //if(hCov[7]) numbers.Form("%#.2g", sqrt(hCov[7]->GetBinContent(i,i))*100./xs);
+	 //else numbers="-";
+	 //table += numbers + " & ";
 	 if (hCov[10]){
 	     // Unf uncertainty
 	     numbers.Form("%#.2g", sqrt(hCov[10]->GetBinContent(i,i))*100./xs);

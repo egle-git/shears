@@ -977,7 +977,6 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	    continue;
 	  }
 
-	  printf("\n\n\n\n HEEEELLLO\n\n\n"); //DJALOG
 	  if(xsec  && s != "DYJets_ZjNNLO"){
 	    TH1* hLumi = (TH1*) f->Get("Lumi");
 	    if(!hLumi && verbose){
@@ -987,7 +986,7 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	    }
 	    double lumi = hLumi->GetBinContent(1);
 	    //DJALOG Temporary fix for the lumi bin getting filled too much (lumi x # of jobs...)
-	    lumi = 35290.0;
+	    //lumi = 35290.0;
 	    //DJALOG
 	    if(lumi <= 0.0){
 	      lumi = 35290.0;
@@ -995,7 +994,14 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 			<< ". Integrated luminosity forced to " << lumi << " pb-1"
 			<< "\n";
 	    }
-	    printf("Lumi = %F\n",lumi);
+	    //DJALOG The problem will be fixed in the next production for lumi in MC so this should
+	    //be removed before production starts.
+	    if(lumi > 100000.0){
+	      printf("Problem with the MC lumi: %F\n   Setting it to 35290.0",lumi);
+	      lumi = 35290.0;
+	    }
+	    //DJALOG
+	    printf("getFilesAndHistograms::getGenHistos Lumi = %F\n",lumi);
 	    h_->Scale(1./lumi);
 	  }
 	  

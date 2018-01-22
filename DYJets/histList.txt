@@ -2,7 +2,7 @@ JobInfo
 Lumi
 JobInfo;
 Input
-
+NumberOfEvents
 
 AbsFirstJetRapidity_Zinc1jet
 AbsSecondJetRapidity_Zinc2jet
@@ -52,6 +52,7 @@ JZB
 JZB_ptLow
 JZB_ptHigh
 
+puMVA
 
 NVtx_Zinc0jet
 NVtx_NoPUweight_Zinc0jet

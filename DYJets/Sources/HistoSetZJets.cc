@@ -20,12 +20,12 @@ bool HistoSetZJets::filterHist(const char* name) const{
   if(varList.size() == 0) return true;
   std::string n(name);
   //DJALOG
-  printf("HistoSetZJets::filterHist name=%s\n",name);
+  //printf("HistoSetZJets::filterHist name=%s\n",name);
   for(std::set<std::string>::const_iterator it = varList.begin();
       it != varList.end();
       ++it){
     if((*it) == n) {
-      printf("Got it\n");
+      //printf("Got it\n");
       return true;
     }
     if((*it) + "_Odd" == n) return true;
@@ -316,11 +316,20 @@ int nZPt_Zinc0jet(22);
     vector<double> jetPt_2_Zinc3jet;
     jetPt_2_Zinc3jet = buildVecFineBin(nJetPt_Zinc3jet, jetPt_Zinc3jet, 5);
 
-    int nJetPt_Zinc4jet(8);
-    double jetPt_Zinc4jet[9]  = {20, 24, 30, 39, 49, 62, 78, 96, 150};
+    //DJALOG Making 4 and 5 jet histogram binning the same as 3 jet
+    double jetPt_Zinc4jet[9]  = {20, 24, 30, 41, 59, 83, 118, 168, 250};
+    int nJetPt_Zinc4jet(sizeof(jetPt_Zinc4jet) /sizeof(jetPt_Zinc4jet[0]) - 1);
+    double jetPt_Zinc5jet[9]  = {20, 24, 30, 41, 59, 83, 118, 168, 250};
+    int nJetPt_Zinc5jet(sizeof(jetPt_Zinc5jet) /sizeof(jetPt_Zinc5jet[0]) - 1);
 
-    int nJetPt_Zinc5jet(6);
-    double jetPt_Zinc5jet[7]  =  {20, 24, 30, 39, 49, 62, 100};
+    //double jetPt_Zinc4jet[9]  = {20, 24, 30, 39, 49, 62, 78, 96, 150};
+    //int nJetPt_Zinc4jet(8);
+    //int nJetPt_Zinc5jet(6);
+    //double jetPt_Zinc5jet[7]  =  {20, 24, 30, 39, 49, 62, 100};
+
+
+
+
 
    // double jetPt_Zinc1jet[23] = {39, 49, 60, 72, 85, 100, 117, 136, 157, 187, 220, 258, 300, 350, 400, 450, 500, 590, 700, 1000};
     //double jetPt_Zinc1jet[9] = {20, 29, 41, 59, 83, 118, 168, 250, 350};
@@ -376,6 +385,9 @@ int nZPt_Zinc0jet(22);
     Lumi->SetBit(TH1::kIsAverage);
     
     NumberPFcandidates                  = newTH1D("NumberPFcandidates",                  "NumberPFcandidates",           "Number of lepton PF candidates",    20, -0.5, 19.5);
+
+    NumberOfEvents                  = newTH1D("NumberOfEvents",                  "NumberOfEvents",           "Number of events after various selection",    10, -0.5, 9.5);
+
 
     ZMass_lowDeltaR                     = newTH1D("ZMass_lowDeltaR",                     "ZMass_lowDeltaR",                             Mll,    120, 50, 169);
     ZMass_Zinc0jet                      = newTH1D("ZMass_Zinc0jet",                      "Z Invariant Mass (N_{jets} #geq 0)",          Mll,    210, 50, 260 );
@@ -497,9 +509,9 @@ int nZPt_Zinc0jet(22);
     SecondJetEta_2_Zinc2jet             = newTH1D("SecondJetEta_2_Zinc2jet",             "2nd jet |#eta| (N_{jets} #geq 2)2",           "|#eta(j_{2})|",  120, 0., 2.4);  
     ThirdJetEta_Zinc3jet                = newTH1D("ThirdJetEta_Zinc3jet",                "3rd jet |#eta| (N_{jets} #geq 3)",           "|#eta(j_{3})|",  12, 0., 2.4); 
     ThirdJetEta_2_Zinc3jet               = newTH1D("ThirdJetEta_2_Zinc3jet",             "3rd jet |#eta| (N_{jets} #geq 3)2",           "|#eta(j_{3})|",  60, 0., 2.4);  
-    FourthJetEta_Zinc4jet               = newTH1D("FourthJetEta_Zinc4jet",               "4th jet |#eta| (N_{jets} #geq 4)",           "|#eta(j_{4})|",  8, 0., 2.4);  
-    FifthJetEta_Zinc5jet                = newTH1D("FifthJetEta_Zinc5jet",                "5th jet |#eta| (N_{jets} #geq 5)",           "|#eta(j_{5})|",   6, 0., 2.4);  
-    SixthJetEta_Zinc6jet                = newTH1D("SixthJetEta_Zinc6jet",                "6th jet |#eta| (N_{jets} #geq 6)",           "|#eta(j_{6})|",   6, 0., 2.4);  
+    FourthJetEta_Zinc4jet               = newTH1D("FourthJetEta_Zinc4jet",               "4th jet |#eta| (N_{jets} #geq 4)",           "|#eta(j_{4})|",  12, 0., 2.4);  
+    FifthJetEta_Zinc5jet                = newTH1D("FifthJetEta_Zinc5jet",                "5th jet |#eta| (N_{jets} #geq 5)",           "|#eta(j_{5})|",  12, 0., 2.4);  
+    SixthJetEta_Zinc6jet                = newTH1D("SixthJetEta_Zinc6jet",                "6th jet |#eta| (N_{jets} #geq 6)",           "|#eta(j_{6})|",  12, 0., 2.4);  
 
     FirstJetEtaHigh_Zinc1jet            = newTH1D("FirstJetEtaHigh_Zinc1jet",            "1st jet |#eta| (N_{jets} #geq 1)",           "|#eta(j_{1})|",  47, 0, 4.7);  
     SecondJetEtaHigh_Zinc2jet           = newTH1D("SecondJetEtaHigh_Zinc2jet",           "2nd jet |#eta| (N_{jets} #geq 2)",           "|#eta(j_{2})|",  47, 0, 4.7);  
@@ -1319,8 +1331,8 @@ jetPt_2_Zinc3jet);
     deltaPtjetMu                       = newTH1D("deltaPtjetMu", "delta Pt btwn jet and muon if dR<0.5", "#R", 150, -75., 75.);
 
     //TH2D* jecVspt=newTH1D("jecVspt","jec Vs pt","jec","pt",80,0.,400,100,0,0.5);
-    NVtx_Zinc0jet                          = newTH1D("NVtx","Number of vertices","#Vtx",45,0.5,45.5);
-    NVtx_NoPUweight_Zinc0jet               = newTH1D("NVtx_NoPUweight","Number of vertices","#Vtx",45,0.5,45.5);
+    NVtx_Zinc0jet                          = newTH1D("NVtx_Zinc0jet","Number of vertices 0 jet inc","#Vtx",45,0.5,45.5);
+    NVtx_NoPUweight_Zinc0jet               = newTH1D("NVtx_NoPUweight_Zinc0jet","Number of vertices","#Vtx",45,0.5,45.5);
     TruePU_0                      = newTH1D("TruePU_0","True pile-up 0 jet","#pu",45,0.5,45.5);
     TruePU_1                      = newTH1D("TruePU_1","True pile-up 1 jet","#pu",45,0.5,45.5);
     TruePU_2                      = newTH1D("TruePU_2","True pile-up 2 jets","#pu",45,0.5,45.5);
@@ -1329,14 +1341,14 @@ jetPt_2_Zinc3jet);
     TruePU_5                      = newTH1D("TruePU_5","True pile-up 5 jets","#pu",45,0.5,45.5);
     TruePU_6                      = newTH1D("TruePU_6","True pile-up 6 jets","#pu",45,0.5,45.5);
     TruePU_7                      = newTH1D("TruePU_7","True pile-up 7 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc0jet                      = newTH1D("PU_0","pile-up 0 jet","#pu",45,0.5,45.5);
-    NVtx_Zexc1jet                      = newTH1D("PU_1","pile-up 1 jet","#pu",45,0.5,45.5);
-    NVtx_Zexc2jet                      = newTH1D("PU_2","pile-up 2 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc3jet                      = newTH1D("PU_3","pile-up 3 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc4jet                      = newTH1D("PU_4","pile-up 4 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc5jet                      = newTH1D("PU_5","pile-up 5 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc6jet                      = newTH1D("PU_6","pile-up 6 jets","#pu",45,0.5,45.5);
-    NVtx_Zexc7jet                      = newTH1D("PU_7","pile-up 7 jets","#pu",45,0.5,45.5);
+    NVtx_Zexc0jet                      = newTH1D("NVtx_Zexc0jet","Number of vertices 0 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc1jet                      = newTH1D("NVtx_Zexc1jet","Number of vertices 1 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc2jet                      = newTH1D("NVtx_Zexc2jet","Number of vertices 2 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc3jet                      = newTH1D("NVtx_Zexc3jet","Number of vertices 3 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc4jet                      = newTH1D("NVtx_Zexc4jet","Number of vertices 4 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc5jet                      = newTH1D("NVtx_Zexc5jet","Number of vertices 5 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc6jet                      = newTH1D("NVtx_Zexc6jet","Number of vertices 6 jet exc","#NVtx",45,0.5,45.5);
+    NVtx_Zexc7jet                      = newTH1D("NVtx_Zexc7jet","Number of vertices 7 jet exc","#NVtx",45,0.5,45.5);
 
     ZNGoodJetsBeta_Zexc = newTH2D("ZNGoodJetsBeta_Zexc","Beta cut vs Jet Counter (excl.) ", 11, -0.5, 10.5, 10, -0.5, 9.5);
     if(ZNGoodJetsBeta_Zexc){

@@ -24,19 +24,19 @@ struct processInfoStruct{
 const processInfoStruct Samples[] = {
     //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen
     /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data",       " Data"},
-    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.00,     kBlue,     kBlue,     " t#bar{t}",   " t#bar{t}"},  
+    /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.04,     kOrange,   kOrange,   " WJets",          " W"},
     /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},
     /* 3*/{"ST_tch",    '+',     1.,       1.,      1,  0.06,     kBlue+4,   kBlue+4,   " Single Top t-ch", " Single Top t-ch"},
     /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W",   " #bar{t}W"},
     /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW",         " tW"},  
     /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single top", "Single top"},
-    /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " WJets",          " W"},
-//    /* 7*/{"TauTau", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},
     /* 8*/{"ZZ",        '+',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ",         " ZZ"},
     /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW",         " WW"},
     /*10*/{"WZ",    	'+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ",         " WZ"},
     /*11*/{"VV",    	'=',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " VV",         "VV"},
-    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS)"},
+    /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.10,     kBlue,     kBlue,     " t#bar{t}",   " t#bar{t}"},  
+//    /* 7*/{"TauTau", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},
+    /*12*/{"DYJets_UNFOLDING", ' ', 1.,    1.,      1,  0.10,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS)"},
     /*13*/{"DYJets_MLM",' ',     1.,       1.,      1,  0.06,     kBlue-10,  kBlue-10, " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 4j LO + PS)"},
     /*14*/{"DYJets_GE", ' ',     1.,       1.,      1,  0.00,     kBlue-5,   kBlue-5,  " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
     /*15*/{"DYJets_GEas1135", ' ',1.,       1.,     1,  0.00,     kBlue-2,   kBlue-2, " Z/#gamma^{*} #rightarrow ll", "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
@@ -62,7 +62,8 @@ const unsigned int NBGDYJETS = NFILESDYJETS - 2;
  * to top in the order they appear in this list
  */
 //
-const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
+const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 10, 11, 12}; //Test one
+//const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12}; //Last one used DJALOG
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 12};
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 7, 6, 11, 1, 12};
 //const unsigned int FilesDYJets[NFILESDYJETS] = {0, 1, 6, 7, 11, 14};

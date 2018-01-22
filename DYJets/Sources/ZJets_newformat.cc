@@ -127,18 +127,18 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //       Load efficiency tables        //
    //====================================//
 
-   table JESUncMC("EfficiencyTables/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs.txt");
-   std::map<char,std::string> JESUnc;
+   table JESUncMC("EfficiencyTables/Summer16_23Sep2016V6_MC_Uncertainty_AK4PFchs_ShearsTable.txt");
+   std::map<char,table> JESUnc;
    //V4 AK04
    //std::string JESUncBD = "EfficiencyTables/Summer16_23Sep2016BCDV4_DATA_Uncertainty_AK4PF.txt";
    //std::string JESUncEF = "EfficiencyTables/Summer16_23Sep2016EFV4_DATA_Uncertainty_AK4PF.txt";
    //std::string JESUncG = "EfficiencyTables/Summer16_23Sep2016GV4_DATA_Uncertainty_AK4PF.txt";
    //std::string JESUncH = "EfficiencyTables/Summer16_23Sep2016HV4_DATA_Uncertainty_AK4PF.txt";
    //V6 AK04chs
-   table JESUncBD("EfficiencyTables/Summer16_23Sep2016BCDV6_DATA_Uncertainty_AK4PFchs.txt");
-   table JESUncEF("EfficiencyTables/Summer16_23Sep2016EFV6_DATA_Uncertainty_AK4PFchs.txt");
-   table JESUncG("EfficiencyTables/Summer16_23Sep2016GV6_DATA_Uncertainty_AK4PFchs.txt");
-   table JESUncH("EfficiencyTables/Summer16_23Sep2016HV6_DATA_Uncertainty_AK4PFchs.txt");
+   table JESUncBD("EfficiencyTables/Summer16_23Sep2016BCDV6_DATA_Uncertainty_AK4PFchs_ShearsTable.txt");
+   table JESUncEF("EfficiencyTables/Summer16_23Sep2016EFV6_DATA_Uncertainty_AK4PFchs_ShearsTable.txt");
+   table JESUncG("EfficiencyTables/Summer16_23Sep2016GV6_DATA_Uncertainty_AK4PFchs_ShearsTable.txt");
+   table JESUncH("EfficiencyTables/Summer16_23Sep2016HV6_DATA_Uncertainty_AK4PFchs_ShearsTable.txt");
 
    JESUnc.insert( std::pair<char,table>('B',JESUncBD) );
    JESUnc.insert( std::pair<char,table>('C',JESUncBD) );
@@ -245,12 +245,15 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //   printf("%F\n",puWeight.weight(iBin));
    //}
 
+   // JEC Scale Systematic
    int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
    if (systematics == 2) scale =  direction;
 
+   // MC Cross Section value systematic
    xsecFactor_ = 1.;
    if (systematics == 3) xsecFactor_ = 1. + direction * xsecUnc;
 
+   // JEC Resolution Systematic
    m_Variation = Variation::NOMINAL;
    if (systematics == 4){
       if(direction == 0)
@@ -261,9 +264,11 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 m_Variation = Variation::DOWN;
    }
 
+   // Lepton Scale Systematic
    int lepscale(0);
    if (systematics == 5) lepscale = direction;
 
+   // Lepton Resolution Systematic
    int smearlepton(0);
    if (systematics == 6) smearlepton = direction;
    //==========================================================================================================//
@@ -700,7 +705,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //=======================================================================================================//
       //         Retrieving leptons          //
       //====================================//
-      bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1), passesSameSignLeptonCut;
+      bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1), passesSameSignLeptonCut(0);
       //bool passesLeptonMassCut(0);
       unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
       vector<leptonStruct> leptons;
@@ -713,7 +718,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       if (hasRecoInfo) {
 	 //--- get Muons ---
 	 if (lepSel == "DMu" || lepSel == "SMu") {
-	    getMuons(leptons, vetoMuons);
+	    getMuons(leptons, vetoMuons,weight);
 
 	 }
 
@@ -1029,7 +1034,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	       ++nGenEventsWithTwoGoodLeptonsWithOppCharge;
 	       nEffGenEventsWithTwoGoodLeptonsWithOppCharge += genWeight;
 	    }
-		 
+	    
 	    // apply charge, mass and eta cut
 	    if (genLeptons[0].charge * genLeptons[1].charge < 0 && 
 		genEWKBoson.M() > ZMCutLow && 
@@ -1153,28 +1158,15 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    //-- apply jet energy scale uncertainty (need to change the scale when initiating the object)
 	    bool jetPassesPtCut(jet.v.Pt() >= 10); 
 	   
-	    /*
-	    //JetCorrectionUncertainty * JESUncObject = 0;
-	    if(EvtIsRealData)
-	       JESUncObject = new JetCorrectionUncertainty(JESUnc[GetRunData(EvtRunNum)]);
-	    else
-	       JESUncObject = new JetCorrectionUncertainty(JESUncMC);
-	    if(JESUncObject == 0){
-	       printf("Issue with the Jet Scale Uncertainty...Exiting.\n");
-	       return -1;
-	    }
-	    
-	    //Set up JESUncObject with jet parameters:
-	    JESUncObject->setJetEta(jet.v.Eta());
-	    JESUncObject->setJetPt(jet.v.Pt());
-	    double JESUncertainty = JESUncObject->getUncertainty(true);
-	    */
 	    double JESUncertainty = 0.0;
-
+	    if(!EvtIsRealData)
+	       JESUncertainty = JESUncMC.getEfficiency(jet.v.Pt(), jet.v.Eta());
+	    else
+	       JESUncertainty = JESUnc[GetRunData(EvtRunNum)].getEfficiency(jet.v.Pt(), jet.v.Eta());
+	    
 	    //DJALOG
 	    //printf("_______________________________________________\n");
 	    //printf("GetRunData(EvtRunNum) = %c\n",GetRunData(EvtRunNum));
-	    //printf("%s\n",JESUnc[GetRunData(EvtRunNum)].c_str());
 	    //printf("jet.v.Eta() = %F\n",jet.v.Eta());
 	    //printf("jet.v.Pt() = %F\n",jet.v.Pt());
 	    //printf("JESUncertainty = %F\n",JESUncertainty);
@@ -2603,8 +2595,6 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 fill(lepSPt_Zinc0jet, leptons[1].v.Pt(), weight); //DJALOG
 	 fill(lepEta_Zinc0jet, leptons[1].v.Eta(), weight);
 	 fill(lepPhi_Zinc0jet, leptons[1].v.Phi(), weight);
-	 fill(MuPFIsoDBetaCorr, leptons[0].iso, weight);
-	 fill(MuPFIsoDBetaCorr, leptons[1].iso, weight);
 
 
 	 fill(dPhiLeptons_Zinc0jet, deltaPhi(leptons[0].v, leptons[1].v), weight);
@@ -4070,7 +4060,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << endl;
    //==========================================================================================================//
 
-   double data_frac = EvtIsRealData ? (nEventsToProcess / double(nEntries)): yieldScale;
+   double data_frac = EvtIsRealData ? (nEventsToProcess / double(nEntries)): (yieldScale/nJobs);
    
    JobInfo->SetBinContent(kNEvts, nEventsToProcess);
    JobInfo->SetBinContent(kNEvtsSample, nEntries);
@@ -4082,6 +4072,40 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    //store integrated luminosity in Lumi histogram:   
    Lumi->SetBinContent(1., lumi_ *  data_frac);
  
+   nEffEventsPassingTrigger *= nEvents / genWeightSum;
+   nEffEventsVInc0JetsNoTrig *= nEvents / genWeightSum;
+   nEffEventsVInc0Jets *= nEvents / genWeightSum;
+   nEffEventsVInc1Jets *= nEvents / genWeightSum;
+   nEffEventsVInc2Jets *= nEvents / genWeightSum;
+   nEffEventsVInc3Jets *= nEvents / genWeightSum;
+   nEffEventsWithTwoGoodLeptons *= nEvents / genWeightSum;
+   nEffEventsWithTwoGoodLeptonsWithOppCharge *= nEvents / genWeightSum;
+   nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass  *= nEvents / genWeightSum;
+
+   nEffGenEventsVInc0Jets *= nEvents / genWeightSum;
+   nEffGenEventsVInc1Jets *= nEvents / genWeightSum;
+   nEffGenEventsVInc2Jets *= nEvents / genWeightSum;
+   nEffGenEventsVInc3Jets *= nEvents / genWeightSum;    
+   nEffGenEventsWithTwoGoodLeptons  *= nEvents / genWeightSum;
+   nEffGenEventsWithTwoGoodLeptonsWithOppCharge  *= nEvents / genWeightSum;
+   nEffGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass *= nEvents / genWeightSum;
+
+   //DJALOG
+   //Filling some histograms to keep track of these numbers.
+   NumberOfEvents->SetBinContent(1,nEvents);
+   NumberOfEvents->SetBinContent(2,nEffEventsPassingTrigger);
+   NumberOfEvents->SetBinContent(3,nEffEventsWithTwoGoodLeptons);
+   NumberOfEvents->SetBinContent(4,nEffEventsWithTwoGoodLeptonsWithOppCharge);
+   NumberOfEvents->SetBinContent(5,nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass);
+   NumberOfEvents->SetBinContent(6,nEffEventsVInc0Jets);
+   NumberOfEvents->SetBinContent(7,nEffEventsVInc1Jets);
+   NumberOfEvents->SetBinContent(8,nEffEventsVInc2Jets);
+   NumberOfEvents->SetBinContent(9,nEffEventsVInc3Jets);
+
+
+
+
+
    if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
    //==========================================================================================================//
    //         Writing file              //
@@ -4177,8 +4201,6 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       listOfHistograms[i]->Write();        
    }
 
-
-
    //--- let's delete all histograms --- 
    for (unsigned short i(0); i < numbOfHistograms; i++){
       delete listOfHistograms[i];
@@ -4189,23 +4211,6 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
    //==========================================================================================================//
 
-   nEffEventsPassingTrigger *= nEvents / genWeightSum;
-   nEffEventsVInc0JetsNoTrig *= nEvents / genWeightSum;
-   nEffEventsVInc0Jets *= nEvents / genWeightSum;
-   nEffEventsVInc1Jets *= nEvents / genWeightSum;
-   nEffEventsVInc2Jets *= nEvents / genWeightSum;
-   nEffEventsVInc3Jets *= nEvents / genWeightSum;
-   nEffEventsWithTwoGoodLeptons *= nEvents / genWeightSum;
-   nEffEventsWithTwoGoodLeptonsWithOppCharge *= nEvents / genWeightSum;
-   nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass  *= nEvents / genWeightSum;
-
-   nEffGenEventsVInc0Jets *= nEvents / genWeightSum;
-   nEffGenEventsVInc1Jets *= nEvents / genWeightSum;
-   nEffGenEventsVInc2Jets *= nEvents / genWeightSum;
-   nEffGenEventsVInc3Jets *= nEvents / genWeightSum;    
-   nEffGenEventsWithTwoGoodLeptons  *= nEvents / genWeightSum;
-   nEffGenEventsWithTwoGoodLeptonsWithOppCharge  *= nEvents / genWeightSum;
-   nEffGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass *= nEvents / genWeightSum;
 	    
    cout << "Number of processed events                                : " << nEvents << endl;
    if(maxFiles_ < 0){
@@ -4273,7 +4278,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << "Number GEN Inclusif V + 1 jets                            : " << nGenEventsVInc1Jets << endl;
    cout << "Number GEN Inclusif V + 2 jets                            : " << nGenEventsVInc2Jets << endl;
    cout << "Number GEN Inclusif V + 3 jets                            : " << nGenEventsVInc3Jets << endl;
-
+   cout << "Eff. number of events passing the trigger                      : " << nEffEventsPassingTrigger << "\n";
    cout << "Eff. number with two good leptons (gen)                        : " << nEffEventsWithTwoGoodLeptons 
 	<< " (" << nEffGenEventsWithTwoGoodLeptons << ")" << endl;
    cout << "Eff. number with two good leptons of opp. charge (gem)         : " << nEffEventsWithTwoGoodLeptonsWithOppCharge 
@@ -4290,6 +4295,9 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    cout << "Eff. number GEN Inclusif V + 2 jets                            : " << nEffGenEventsVInc2Jets << endl;
    cout << "Eff. number GEN Inclusif V + 3 jets                            : " << nEffGenEventsVInc3Jets << endl;
    cout << "Sum of MC event weights                                        : " << processedEventMcWeightSum_ << endl;
+   
+
+
    if(!EvtIsRealData){
       if(xsec_ > 0){
 	 cout << "MC norm., yield_scale*lumi*xsec*skim_accep/sum_weights*unc_var. : " 
@@ -4356,7 +4364,7 @@ double ZJets::computePDFWeight()
 
 }
 
-void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons)
+void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons, double weight)
 {
 
    //--- get the number of Muon candidates from the vector size ---
@@ -4442,6 +4450,9 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
         
       // if (muPassesPtCut && muPassesEtaCut && muPassesIdCut && muPassesIsoCut && (!useTriggerCorrection || muPassesTrig || eventTrigger)) {   // CommentAG: this is original line which is replaced by:
 
+      if (muPassesPtCut && muPassesEtaCut && muPassesIdCut) {
+	 fill(MuPFIsoDBetaCorr, mu.iso, weight);
+      }
 
       if (muPassesPtCut && muPassesEtaCut && muPassesIdCut && muPassesIsoCut && muPassesTrig) {
 	 leptons.push_back(mu); 
@@ -4545,8 +4556,10 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
    readCatalog(fullFileName, bonzaiDir, maxFiles, &lumi_, &xsec_,
 	       fChain, &fBonzaiHeaderChain, &fBitFieldsChain);
 
+   printf("getMcNorm();\n");
    getMcNorm();
 
+   printf("setTriggerMask();\n");
    setTriggerMask();
    /*
    if(!setTriggerMask()){
@@ -4733,6 +4746,7 @@ void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, i
 	 closeFunc(f);
       } //file opening succeeded
    }//is root file
+   printf("regfree(&xsecLine);\n");
    regfree(&xsecLine);
    regfree(&lumiLine);
 }
@@ -5112,14 +5126,18 @@ bool ZJets::setTriggerMask(){
     
    TString branchName;
    std::vector<std::string>* TrigHlt = 0;
-
-   if(lepSel == "DMu") { branchName = "TrigHltDiMu"; ourTrig_ = &TrigHltDiMu;  }
-   else if(lepSel == "DE"){ branchName = "TrigHltDiEl"; ourTrig_ = &TrigHltDiEl; }
-   else if(lepSel == "SMu"){ branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu; }
-   else if(lepSel == "SE"){ branchName = "TrigHltEl"; ourTrig_ = &TrigHltEl; }
+   //DJALOG
+   //Overriding the lepSel so that SMu is picked
+   TString tmplepSel = lepSel;
+   tmplepSel = "SMu";
+   //DJALOG
+   if(tmplepSel == "DMu") { branchName = "TrigHltDiMu"; ourTrig_ = &TrigHltDiMu;  }
+   else if(tmplepSel == "DE"){ branchName = "TrigHltDiEl"; ourTrig_ = &TrigHltDiEl; }
+   else if(tmplepSel == "SMu"){ branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu; }
+   else if(tmplepSel == "SE"){ branchName = "TrigHltEl"; ourTrig_ = &TrigHltEl; }
    else{
       std::cerr << __FILE__ << ":" << __LINE__ << ". "
-		<< "lepSel value, '" << lepSel
+		<< "lepSel value, '" << tmplepSel
 		<< "', was  not recognzed. We cannot set the trigger bits.\n\n";
       return false;
    }

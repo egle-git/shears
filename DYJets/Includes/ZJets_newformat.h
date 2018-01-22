@@ -472,7 +472,7 @@ class ZJets: public HistoSetZJets {
         int     Loop(bool hasRecoInfo = 1, bool hasGenInfo = 0, int jobNum = 1, int nJobs = 1,
 		      TString pdfSet = "", int pdfMember = -1, double muR = 0, double muF = 0,
 		      double yieldScale = 1.);
-        void     getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons);
+        void     getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoMuons, double weight);
         void     getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoElectrons);
         Bool_t   Notify();
         void     Show(Long64_t entry = -1);

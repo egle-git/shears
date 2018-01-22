@@ -245,45 +245,91 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         // cannot access Xaxis !!!
 
 
+	
+	if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
+	  std::cout << __FILE__ << ":" << __LINE__ 
+		    << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	  //hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+	  //	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+	  hRatio->GetXaxis()->SetBinLabel(1, "= 0");
+	  hRatio->GetXaxis()->SetBinLabel(2, "= 1");
+	  hRatio->GetXaxis()->SetBinLabel(3, "= 2");
+	  hRatio->GetXaxis()->SetBinLabel(4, "= 3");
+	  hRatio->GetXaxis()->SetBinLabel(5, "= 4");
+	  hRatio->GetXaxis()->SetBinLabel(6, "= 5");
+	  hRatio->GetXaxis()->SetBinLabel(7, "= 6");
+	  //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+	  //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+	  //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+	  //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
+	}
+	
+	if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
+	  std::cout << __FILE__ << ":" << __LINE__ 
+		    << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+	  //hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+	  //	  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
+	  //hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+	  hRatio->GetXaxis()->SetBinLabel(1, "#geq 0");
+	  hRatio->GetXaxis()->SetBinLabel(2, "#geq 1");
+	  hRatio->GetXaxis()->SetBinLabel(3, "#geq 2");
+	  hRatio->GetXaxis()->SetBinLabel(4, "#geq 3");
+	  hRatio->GetXaxis()->SetBinLabel(5, "#geq 4");
+	  hRatio->GetXaxis()->SetBinLabel(6, "#geq 5");
+	  hRatio->GetXaxis()->SetBinLabel(7, "#geq 6");
+	  //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+	  //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+	  //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+	  //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
+	  
+	  
+	  //DJALOG
+	  printf("Printing ZNGoodJets_Zinc bin values and signal to background ratios...\n");
+	  printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
+	  
+	  printf("         Bin|     Signal| Background|      Ratio\n");       
+	  for(int iBin=1;iBin<8;iBin++){
+	    double signal = ((TH1D*)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
+	    double background = ((TH1D*)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
+	    signal = signal - background;
+	    printf("%12d|%11.2F|%11.2F|%11.2F\n", iBin, signal, background, signal/background);
+	  }
+	  printf("\n");
+	  
+	  for(int iBin=0;iBin<8;iBin++){
+	    for(int iHisto=1;iHisto<6;iHisto++){
+	      if(iBin==0){
+		printf("%30s|",legendNames[iHisto].Data());
+	      }else{
+		printf("%30F|",hist[iHisto][i]->GetBinContent(iBin));
+	      }
+	    }
+	    printf("\n");
+	  }
+	  
+	  
+	  
+	  printf("\n");
+	  printf("WJets Integral = %F",hist[3][i]->Integral());
+	  
+	  printf("\n");
+	}
+  if (vhNames[i].Index("ZNGoodJets_SameChargePair_Zinc") >= 0) {
+	//DJALOG
+	printf("Printing ZNGoodJets_SameSignCharge_Zinc bin values and signal to background ratios...\n");
+	printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
 
-  if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
-	std::cout << __FILE__ << ":" << __LINE__ 
-		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	//hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
-	//	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        hRatio->GetXaxis()->SetBinLabel(1, "= 0");
-        hRatio->GetXaxis()->SetBinLabel(2, "= 1");
-        hRatio->GetXaxis()->SetBinLabel(3, "= 2");
-        hRatio->GetXaxis()->SetBinLabel(4, "= 3");
-        hRatio->GetXaxis()->SetBinLabel(5, "= 4");
-        hRatio->GetXaxis()->SetBinLabel(6, "= 5");
-      	hRatio->GetXaxis()->SetBinLabel(7, "= 6");
-        //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
-	//     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
-      //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
-      //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
-    }
+	printf("         Bin|       Data|     Signal| Background|      Ratio|        QCD\n");       
+	for(int iBin=1;iBin<8;iBin++){
+	    double signal = ((TH1D*)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
+	    double background = ((TH1D*)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
+	    signal = signal - background;
+	    printf("%12d|%11.2F|%11.2F|%11.2F|%11.2F|%11.2F\n", iBin, hist[0][i]->GetBinContent(iBin), 
+		   signal, background, signal/background, 
+		   hist[0][i]->GetBinContent(iBin)-signal-background);
+	}	
 
-  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
-	std::cout << __FILE__ << ":" << __LINE__ 
-		  << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	//hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
-	//	  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
-	//hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
-        hRatio->GetXaxis()->SetBinLabel(1, "#geq 0");
-        hRatio->GetXaxis()->SetBinLabel(2, "#geq 1");
-        hRatio->GetXaxis()->SetBinLabel(3, "#geq 2");
-        hRatio->GetXaxis()->SetBinLabel(4, "#geq 3");
-        hRatio->GetXaxis()->SetBinLabel(5, "#geq 4");
-        hRatio->GetXaxis()->SetBinLabel(6, "#geq 5");
-      	hRatio->GetXaxis()->SetBinLabel(7, "#geq 6");
-        //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
-	//     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
-      //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
-      //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
-    }
-
-
+  }
 
 
 

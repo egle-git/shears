@@ -30,6 +30,25 @@
 
 using namespace std;
 
+enum triggers
+{
+  TrigHltPhot,
+  TrigHltMu,
+  TrigHltDiMu,
+  TrigHltEl,
+  TrigHltDiEl,
+  triggerCount, // Keep this last
+};
+
+// Keep entries in this list in the same order as in the above enum
+constexpr const std::array<const char * const, triggerCount> triggerBranchNames
+{
+  "TrigHltPhot",
+  "TrigHltMu",
+  "TrigHltDiMu",
+  "TrigHltEl",
+  "TrigHltDiEl",
+};
 
 class ZJets: public HistoSetZJets {
     public :
@@ -55,12 +74,7 @@ class ZJets: public HistoSetZJets {
    vector<double>  *EvtWeights;
    Float_t         EvtFastJetRho;
 	//   UInt_t          TrigHlt;
-   ULong64_t       TrigHltPhot;
-   ULong64_t       TrigHltMu;
-   ULong64_t       TrigHltDiMu;
-   ULong64_t       TrigHltEl;
-   ULong64_t       TrigHltDiEl;
-   ULong64_t*      ourTrig_;
+   std::array<ULong64_t, triggerCount> Triggers;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -493,6 +507,10 @@ class ZJets: public HistoSetZJets {
 	 * @return true if succesful false otherwise
 	 */
 	bool setTriggerMask();
+
+        /** Returns @c true if the current event passes the trigger
+         */
+        bool passesTrigger() const;
 	
 	Int_t fill(TH1* h, Double_t x, Double_t w = 1.){
 		if(!h) return 0;
@@ -546,8 +564,8 @@ class ZJets: public HistoSetZJets {
 	
 	double processedEventMcWeightSum_;
 	//ULong64_t triggerMask_;
-	ULong64_t triggerMask_EraBG;
-	ULong64_t triggerMask_EraH;
+	std::array<ULong64_t, triggerCount> triggerMask_EraBG;
+	std::array<ULong64_t, triggerCount> triggerMask_EraH;
 	bool triggerMaskSet_;
 	double muIso_;
 	double eIso_;

@@ -490,8 +490,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
         // if(EvtIsRealData && (EvtRunNum < 282037 || EvtRunNum > 283469))
         // continue;
-	const UInt_t runThreshold = 278820;  // start of Run G
-	//const UInt_t runThreshold = 276811;  //This is the end of Run D
 	
 /*
 	if( EvtIsRealData ){
@@ -600,21 +598,8 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
-	//Trigger // NEW DA
-	//bool passesTrigger = ((*ourTrig_) & triggerMask_);
-	bool passesTrigger = false;
-	if( EvtIsRealData ){	
-	    if( EvtRunNum < runThreshold ){
-		//printf("{DJA LOG}        This is from Runs B-F\n");
-		passesTrigger = ((*ourTrig_) & triggerMask_EraBG);
-	    }
-	    if( EvtRunNum >= runThreshold ){
-		//printf("{DJA LOG}        This is from Run GH\n");
-		passesTrigger = ((*ourTrig_) & triggerMask_EraH);
-	    }
-	}else{
-	    passesTrigger = ((*ourTrig_) & triggerMask_EraH);
-	}
+        // Trigger
+	bool passesTrigger = this->passesTrigger();
 
 	if(passesTrigger){
 	    nEventsPassingTrigger++;
@@ -3848,7 +3833,7 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     systematics(systematics_), direction(direction_), xsecUnc(xsecUnc_), 
     lepPtCutMin(lepPtCutMin_), lepEtaCutMax(lepEtaCutMax_), jetPtCutMin(jetPtCutMin_), jetEtaCutMax(jetEtaCutMax_),
     nMaxEvents(maxEvents_), lepSel(lepSel_), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles),
-    triggerMask_EraBG(0), triggerMask_EraH(0), triggerMaskSet_(false), muIso_(0), eIso_(0)
+    triggerMaskSet_(false), muIso_(0), eIso_(0)
 {
     //--- Create output directory if necessary ---
     TString command = "mkdir -p " + outputDirectory;
@@ -3880,10 +3865,19 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
 		  << __LINE__ << "." << std::endl;
 	abort();
     }
-    // NEW DA
-    // std::cout << "Trigger mask: " << std::hex << "0x" << triggerMask_ << std::dec << "\n";
-    std::cout << "Trigger mask EraBF: " << std::hex << "0x" << triggerMask_EraBG << std::dec << "\n";
-    std::cout << "Trigger mask EraGH: " << std::hex << "0x" << triggerMask_EraH << std::dec << "\n";
+
+    std::cout << "Trigger masks EraBG:" << std::endl;
+    std::cout << std::hex; // Print masks in hex
+    for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+        std::cout << "\t" << triggerBranchNames[i] << ": "
+                  << "\t0x" << triggerMask_EraBG[i] << "\n";
+    }
+    std::cout << "Trigger masks EraH:" << std::endl;
+    for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+        std::cout << "\t" << triggerBranchNames[i] << ": "
+                  << "\t0x" << triggerMask_EraH[i] << "\n";
+    }
+    std::cout << std::dec; // Revert to decimal
 }
 
 void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
@@ -4268,12 +4262,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
     //weight_amcNLO_sum_ = 0; 
     EvtWeights = 0;
     
-    //    TrigHlt = 0;
-    TrigHltPhot = 0;
-    TrigHltMu = 0;
-    TrigHltDiMu = 0;
-    TrigHltEl = 0;
-    TrigHltDiEl = 0;
+    Triggers.fill(0LL);
 
     // Set branch addresses and branch pointers
     fCurrent = -1;
@@ -4301,10 +4290,10 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
 	fChain->SetBranchAddress("METPy", &METPy, &b_METPy);
         //fChain->SetBranchAddress("METsig", &METsig, &b_METsig); // not used
 	//        fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
-        fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
-        fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
-        fChain->SetBranchAddress("TrigHltEl",   &TrigHltEl,   &b_TrigHltEl);
-        fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
+        fChain->SetBranchAddress("TrigHltMu", &Triggers[TrigHltDiMu], &b_TrigHltMu);
+        fChain->SetBranchAddress("TrigHltDiMu", &Triggers[TrigHltDiMu], &b_TrigHltDiMu);
+        fChain->SetBranchAddress("TrigHltEl",   &Triggers[TrigHltEl],   &b_TrigHltEl);
+        fChain->SetBranchAddress("TrigHltDiEl", &Triggers[TrigHltDiEl], &b_TrigHltDiEl);
 
         if (lepSel == "DE" || lepSel == "SE"){
             fChain->SetBranchAddress("ElPt", &ElPt, &b_ElPt);
@@ -4404,11 +4393,9 @@ Int_t ZJets::Cut(Long64_t entry){
     return 1;
 }
 
-bool ZJets::setTriggerMask(){
-    //if (triggerMaskSet_) return triggerMask_;
+bool ZJets::setTriggerMask() {
     if (triggerMaskSet_) return true;
-    // NEW DA
-    //std::vector<std::string> triggers = cfg.getVS("triggers");
+
     std::vector<std::string> triggers_EraBF = cfg.getVS("triggers_EraBF");
     std::vector<std::string> triggers_EraGH = cfg.getVS("triggers_EraGH");
 
@@ -4433,94 +4420,133 @@ bool ZJets::setTriggerMask(){
     }
 
     TString branchName;
-    std::vector<std::string>* TrigHlt = 0;
+    std::vector<std::vector<std::string>> triggerNames;
 
-    if(lepSel == "DMu") { branchName = "TrigHltDiMu"; ourTrig_ = &TrigHltDiMu;  }
-   // if(lepSel == "DMu") { branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu;  }
-    else if(lepSel == "DE"){ branchName = "TrigHltDiEl"; ourTrig_ = &TrigHltDiEl; }
-    else if(lepSel == "SMu"){ branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu; }
-    else if(lepSel == "SE"){ branchName = "TrigHltEl"; ourTrig_ = &TrigHltEl; }
-    else{
-	std::cerr << __FILE__ << ":" << __LINE__ << ". "
-		  << "lepSel value, '" << lepSel
-		  << "', was  not recognzed. We cannot set the trigger bits.\n\n";
-	return false;
+    if (triggers_EraBF.empty()) {
+        triggerMask_EraBG.fill(-1LL); // all bits set.
     }
-
-   // NEW DA
-    if(triggers_EraBF.size()==0){
-	triggerMask_EraBG = (ULong64_t) -1; //all bits set.
-	return true;
+    if (triggers_EraGH.empty()) {
+        triggerMask_EraH.fill(-1LL); // all bits set.
     }
-    if(triggers_EraGH.size()==0){
-        triggerMask_EraH = (ULong64_t) -1; //all bits set.
+    if (triggers_EraBF.empty() && triggers_EraGH.empty()) {
         return true;
     }
 
-    
-    if(fBitFieldsChain.GetBranch(branchName)){
-	fBitFieldsChain.SetBranchAddress(branchName, &TrigHlt);
-    } else{
-	std::cerr << "Cannot set the trigger bits, because the Branch "
-		  << branchName << " was not found in the tree BitFields.\n\n";
-	return false;
+    // Loop on all trigger types (DiMu, DiEl, ...)
+    for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+        const char * const branchName = triggerBranchNames[i];
+
+        std::vector<std::string> *trigHlt = nullptr;
+
+        // Fetch the mapping between position in bitfield and trigger name
+        if (fBitFieldsChain.GetBranch(branchName)) {
+            fBitFieldsChain.SetBranchAddress(branchName, &trigHlt);
+        } else {
+            std::cerr << "Cannot set the trigger bits, because the Branch "
+                      << branchName << " was not found in the tree BitFields.\n\n";
+            return false;
+        }
+
+        //FIXME: check all files?
+        if (fBitFieldsChain.GetEntry(0) <= 0) {
+            std::cerr << "Failed to read BitFields tree. Is the tree empty? "
+                      << "Cannot set the trigger bits.\n\n";
+            return false;
+        }
+
+        std::cout << "Available triggers for " << branchName << ":";
+        for (const std::string &triggerName : *trigHlt) {
+            if (!triggerName.empty()) std::cout << " " << triggerName;
+        }
+        std::cout << "\n";
+
+        triggerNames.push_back(*trigHlt);
+
+        // The line below is needed to prevent ROOT from holding a dangling
+        // pointer (which leads to memory corruption).
+        fBitFieldsChain.SetBranchAddress(branchName, nullptr);
     }
 
-    //FIXME: check all files?
-    if(fBitFieldsChain.GetEntry(0)<=0){
-	std::cerr << "Failed to read BitFields tree. Is the tree empty? "
-		  << "Cannot set the trigger bits.\n\n";
-	return false;	
-    }
+    bool success = true;
 
-    std::cout << "Available triggers for " << branchName << ":";
-    for(unsigned i = 0; i < TrigHlt->size(); ++i){
-	if((*TrigHlt)[i].size()) std::cout << " " << (*TrigHlt)[i];
-    }
-    std::cout << "\n";
-    
-    // NEW DA
-    bool rc = true;
-    triggerMask_EraBG = 0;
-    triggerMask_EraH = 0;
-    for(unsigned i = 0; i < triggers_EraBF.size(); ++i){
-	int found = 0;
-	for(unsigned bit = 0; bit < TrigHlt->size(); ++bit){
-	    if(triggers_EraBF[i] == (*TrigHlt)[bit]){
-		triggerMask_EraBG |= (1 <<bit);
-		++found;
-	    }
-	}
-	if(found==0){
-	    std::cerr << "Trigger " << triggers_EraBF[i] << " was not found in the input sample!\n\n";
-	    rc = rc && false;
-	}
-	if(found > 1){
-	    std::cerr << "Trigger " << triggers_EraBF[i] << " is assigned to several bits!\n\n";
-	    rc = rc && true;
-	}
-    }
+    // Fill trigger mask
 
-    for(unsigned i = 0; i < triggers_EraGH.size(); ++i){
+    // Start with zeroes
+    triggerMask_EraBG.fill(0LL);
+
+    // Loop on triggers from the cfg file
+    for (const std::string &name : triggers_EraBF) {
         int found = 0;
-        for(unsigned bit = 0; bit < TrigHlt->size(); ++bit){
-            if(triggers_EraGH[i] == (*TrigHlt)[bit]){
-                triggerMask_EraH |= (1 <<bit);
-                ++found;
+        // Loop on trigger types
+        for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+            // Loop on bits
+            for (unsigned bit = 0; bit < triggerNames[i].size(); ++bit){
+                if (name == triggerNames[i][bit]){
+                    triggerMask_EraBG[i] |= (1 << bit);
+                    ++found;
+                }
             }
         }
-        if(found==0){
-	    std::cerr << "Trigger " << triggers_EraGH[i] << " was not found in the input sample!\n\n";
-            rc = rc && false;
+        if (found == 0) { // Error if using undefined trigger
+            std::cerr << "Trigger " << name << " was not found in the input sample!\n\n";
+            success = false;
         }
-        if(found > 1){
-	    std::cerr << "Trigger " << triggers_EraGH[i] << " is assigned to several bits!\n\n";
-            rc = rc && true;
+        if (found > 1) {
+            std::cerr << "Trigger " << name << " is assigned to several bits!\n\n";
         }
     }
 
+    // Start with zeroes
+    triggerMask_EraH.fill(0LL);
 
-    return rc;
+    for (const std::string &name : triggers_EraGH) {
+        int found = 0;
+        // Loop on trigger types
+        for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+            // Loop on bits
+            for (unsigned bit = 0; bit < triggerNames[i].size(); ++bit){
+                if (name == triggerNames[i][bit]){
+                    triggerMask_EraH[i] |= (1 << bit);
+                    ++found;
+                }
+            }
+        }
+        if (found == 0) { // Error if using undefined trigger
+            std::cerr << "Trigger " << name << " was not found in the input sample!\n\n";
+            success = false;
+        }
+        if (found > 1) {
+            std::cerr << "Trigger " << name << " is assigned to several bits!\n\n";
+        }
+    }
+
+    triggerMaskSet_ = success;
+    return success;
+}
+
+bool ZJets::passesTrigger() const
+{
+    const UInt_t runThreshold = 278820;  // start of Run G
+    //const UInt_t runThreshold = 276811;  //This is the end of Run D
+
+    if (EvtIsRealData && EvtRunNum < runThreshold) {
+        // Runs B-F
+        //printf("{DJA LOG}        This is from Runs B-F\n");
+        for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+            if (Triggers[i] & triggerMask_EraBG[i]) {
+                return true;
+            }
+        }
+    } else {
+        // MC or runs G-H
+        //printf("{DJA LOG}        This is from Run GH\n");
+        for (std::size_t i = 0; i < triggerBranchNames.size(); ++i) {
+            if (Triggers[i] & triggerMask_EraH[i]) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //bool ZJets::compTrigger(const char* a, const char* bv) const{

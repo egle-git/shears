@@ -4290,7 +4290,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
 	fChain->SetBranchAddress("METPy", &METPy, &b_METPy);
         //fChain->SetBranchAddress("METsig", &METsig, &b_METsig); // not used
 	//        fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
-        fChain->SetBranchAddress("TrigHltMu", &Triggers[TrigHltDiMu], &b_TrigHltMu);
+        fChain->SetBranchAddress("TrigHltMu",   &Triggers[TrigHltMu],   &b_TrigHltMu);
         fChain->SetBranchAddress("TrigHltDiMu", &Triggers[TrigHltDiMu], &b_TrigHltDiMu);
         fChain->SetBranchAddress("TrigHltEl",   &Triggers[TrigHltEl],   &b_TrigHltEl);
         fChain->SetBranchAddress("TrigHltDiEl", &Triggers[TrigHltDiEl], &b_TrigHltDiEl);

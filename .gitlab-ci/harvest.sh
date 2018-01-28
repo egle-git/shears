@@ -12,4 +12,4 @@ cd HZZ2l2nu
 nbOfDiff=`ls result_* | grep png | wc -l`
 wget "https://slack.com/api/chat.postMessage?token=$1&channel=slackci&text=nb%20of%20differences%20found=$nbOfDiff&pretty=1&username=shearsDocker"
 
-tar cfvz allComparisons.tar.gz result_*
+tar cfvz allComparisons.tar.gz result_* *Histos.root

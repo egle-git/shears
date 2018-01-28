@@ -84,7 +84,10 @@ void makeTheComparison(TString name, TString saveDirectory){
   ratio->GetXaxis()->SetLabelOffset(0.02);
   ratio->Draw("E1");
 
-  if (kolmo<1) c0->Print(saveDirectory+"/"+name+".png");
+  if (kolmo<1) {
+        cout << "found differences in plot " << name << endl;
+	c0->Print(saveDirectory+"/"+name+".png");
+  } 
 }
 
 void compareHistos(TString ref, TString test, TString output){

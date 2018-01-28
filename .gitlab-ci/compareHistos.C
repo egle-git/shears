@@ -63,7 +63,7 @@ void makeTheComparison(TString name, TString saveDirectory){
   stTest->SetY2NDC(0.8);
   stTest->SetFillColor(kBlue-9);
   stTest->Draw();
-
+  c0->cd(1)->SetLogy();
 
   c0->cd(2);
 

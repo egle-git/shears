@@ -15,6 +15,6 @@ cd HZZ2l2nu
 wget http://mon.iihe.ac.be/~hbrun/filesForTests/${1}_Ref.root 
 mkdir result_${1}
 
-root -b -q -l 'compareHistos.C("'${1}'.root", "'${1}'_Ref.root", "result_'${1}'")'
+root -b -q -l 'compareHistos.C("'${1}'_Ref.root", "'${1}'.root", "result_'${1}'")'
 
 

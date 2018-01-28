@@ -11,8 +11,8 @@ baobabs:
   stage: buildCMSSW
   tags: [ cvmfs ]
   script:
-  - wget "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=Hello%20here%20the%20shears%20CI&pretty=1&username=shearsDocker" 
-  - wget "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=testing%20branch%20$CI_COMMIT_REF_NAME%20for%20$GITLAB_USER_NAME&pretty=1&username=shearsDocker" 
+  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=Hello%20here%20the%20shears%20CI&pretty=1&username=shearsDocker" >&  scrunch
+  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=testing%20branch%20$CI_COMMIT_REF_NAME%20for%20$GITLAB_USER_NAME&pretty=1&username=shearsDocker" >& scranch 
   - .gitlab-ci/compile-scram.sh Baobabs
   artifacts:
     paths:
@@ -106,7 +106,7 @@ getCompResults:
   stage: harvesting
   tags: [ cvmfs ]
   script:
-  - wget "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=tests%20results%20for%20$CI_COMMIT_REF_NAME&pretty=1&username=shearsDocker" 
+  - wget -nv  "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=tests%20results%20for%20$CI_COMMIT_REF_NAME&pretty=1&username=shearsDocker" >&  scrantch
   - .gitlab-ci/harvest.sh $SLACKTOKEN
   artifacts:
     paths:

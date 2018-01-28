@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-ls
 shopt -s expand_aliases
 
 . /cvmfs/cms.cern.ch/cmsset_default.sh

@@ -106,6 +106,7 @@ getCompResults:
   stage: harvesting
   tags: [ cvmfs ]
   script:
+  - wget "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=tests%20results%20for%20$CI_COMMIT_REF_NAME&pretty=1&username=shearsDocker" 
   - .gitlab-ci/harvest.sh $SLACKTOKEN
   artifacts:
     paths:

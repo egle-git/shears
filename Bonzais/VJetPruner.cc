@@ -52,13 +52,13 @@ protected:
   double mll(std::vector<float>* lepColPt, std::vector<float>* lepColEta,
 	     std::vector<float>* lepColPhi, std::vector<float>* lepColE,
 	     std::vector<int>* lepColId = 0, int pid = 0);
-  enum { DMu, DMuUnf, DMuMass, DE, DEUnf, DEMass, EMu, SE, SEUnf, SMu, SMuUnf, NSubSels};
+  enum { DMu, DMuUnf, DMuMass, DE, DEUnf, DEMass, EMu, SE, SEUnf, SMu, SMuUnf, FourLep, FourLepUnf, NSubSels};
 
   static const int kEl = 11;
   static const int kMu = 13;
 };
 
-DECLARE_PRUNER(VJetPruner, "Pruner of W/Z + jet analyses")
+DECLARE_PRUNER(VJetPruner, "Pruner of W/Z/H + jet analyses")
 
 void VJetPruner::declareSubSelections(){
   subSelections_.resize(NSubSels);
@@ -73,6 +73,8 @@ void VJetPruner::declareSubSelections(){
   subSelections_[SEUnf]  = SubSelection("SEUnf", "Single electron selection for W+jet analysis with MC selection suitable to fill the detector response matrices for the unfolding.");
   subSelections_[SMu]    = SubSelection("SMu", "Single muon selection for W+jet analysis");
   subSelections_[SMuUnf] = SubSelection("SMuUnf", "Single muon selection for W+jet analysis with MC selection suitable to fill the detector response matrices for the unfolding.");
+  subSelections_[FourLep]    = SubSelection("FourLep", "Four-lepton selection for H+jet analysis");
+  subSelections_[FourLepUnf] = SubSelection("FourLepUnf", "Four-lepton selection for H+jet analysis with MC selection suitable to fill the detector response matrices for the unfolding.");
 }
 
 bool VJetPruner::init(TChain* tree){
@@ -220,6 +222,10 @@ bool VJetPruner::eventSelection(){
     return MuPt->size() > 0;
   case SMuUnf:
     return MuPt->size() > 0 || GMuCnt > 0;
+  case FourLep:
+    return MuPt->size() + ElPt->size() >= 4;
+  case FourLepUnf:
+    return MuPt->size() + ElPt->size() >= 4 || GMuCnt + GElCnt >= 4;
   case NSubSels:
   default:
     return false;

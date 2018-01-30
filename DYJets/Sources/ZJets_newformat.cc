@@ -25,6 +25,7 @@
 //#include "rochcor2015.h"
 #include "TSystem.h"
 
+#include "timer.h"
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
@@ -368,10 +369,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     //------------------------------------
 
-    struct timeval t0;
-    int mess_every_n =  std::min(1000LL, nentries/10);
-    if(mess_every_n < 1) mess_every_n = 1;
-
     // ------ Random number for lepton energy resolution smearing -----
     //TRandom* RamMu = new TRandom(10);
     //TRandom* RamEle = new TRandom(20);
@@ -379,8 +376,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     //event yield normalisation for MC
     //norm_ = yieldScale;
-
-    double prev_rate = 0;
 
     //cout << "!!!!!!!! nentries =" << nentries << "\n";
     Long64_t nEventsToProcessTot = nentries;
@@ -418,6 +413,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     if(DJALOG)    printf("{DJA LOG}    entry_stop = %lld\n",entry_stop);
     if(DJALOG)    printf("{DJA LOG}    nentries = %lld\n",nentries);
 
+    timer time(entry_stop, entry_start);
+    time.start();
+
     //======================================================================
     // Event loop starts here
     //======================================================================
@@ -430,31 +428,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
         //cout << "---------------------------------------------------------------------" << endl;
-	
-	if(nEvents == mess_every_n) gettimeofday(&t0, 0);
-        if (nEvents % mess_every_n == 0 && nEvents > mess_every_n){
-            timeval t1;
-            gettimeofday(&t1, 0);
-            double rate = ((t1.tv_sec - t0.tv_sec) + 1.e-6*(t1.tv_usec - t0.tv_usec)) 
-		/ (nEvents - mess_every_n);
-	    if(fabs(rate / prev_rate - 1.) > 0.1){
-		prev_rate = 0.5*(prev_rate + rate);
-	    }
-            double rem = prev_rate * (nEventsToProcess - nEvents);
-            int rem_s = int(rem + 0.5);
-            int rem_h = int(rem_s) / 3600; 
-            rem_s -= rem_h * 3600;
-            int rem_m = rem_s / 60;
-            rem_s -= rem_m *60;
-            cout << "\r" << TString::Format("%4.1f%%", (100. * nEvents) / nEventsToProcess)
-		 << " " << std::setw(11) << nEvents << " / " << nEventsToProcess
-		 << " " << std::setw(7) << int(prev_rate * 1.e6 + 0.5) << " us/event"
-		 << " Remaining time for this dataset: " 
-		 << std::setw(2) << rem_h << " h "
-		 << std::setw(2) << rem_m << " min "
-		 << std::setw(2) << rem_s << " s"
-		 << std::flush;
-        }
 
         if(fChain->GetEntry(jentry) == 0){
 	    std::cerr << "Failed to read Tree entry " << jentry << "!\n";
@@ -3403,7 +3376,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 //			  << (genLeptons[1].charge ? '+' : '-');
 //	    }
 //	}
+
+        time.update(jentry + 1);
     } //End of loop over all the events
+
+    time.stop();
     cout << endl;
     //==========================================================================================================//
 

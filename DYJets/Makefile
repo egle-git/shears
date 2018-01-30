@@ -46,7 +46,7 @@ ZJets_newformat.cc ArgParser.cc variablesOfInterestZJets.cc getFilesAndHistogram
 ConfigVJets.cc HistoSetZJets.cc functions.cc UnfoldingZJets.cc \
 RecoComparison.cc PlotSettings.cc muresolution_run2.cc RoccoR.cc BLUEMeth.cc Combination.cc \
 printTable.cc rootFunctions.cc fixYscale.cc SectionedConfig.cc Config.cc Uncertainties.cc \
-ResultTables.cc TextTools.cc
+ResultTables.cc TextTools.cc timer.cc
 
 SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 EXELIST = \

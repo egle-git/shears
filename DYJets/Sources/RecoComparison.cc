@@ -14,6 +14,7 @@
 #include "getFilesAndHistogramsZJets.h"
 #include "ConfigVJets.h"
 #include "functions.h"
+#include "timer.h"
 
 //--  Setting global variables --------------------------------------------------------------
 #include "fileNamesZJets.h"
@@ -224,6 +225,9 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     cout << "Now creating the pdf files ..." << endl;
     double minRatioY = cfg.getD("minRatioYReco", 0.51);;
     double maxRatioY = cfg.getD("maxRatioYReco", 1.49);
+
+    timer time(nHist);
+    time.start();
 
     for (unsigned short i = 0; i < nHist; ++i) {
 
@@ -439,7 +443,10 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 	//tmpCanvas->SaveAs(outputFileLinBase + ".C");
 	saveCanvas(tmpCanvas, outputFileName, vhNames[i]);
 
+        time.update(i + 1);
     }
+
+    time.stop();
 
     outputFile->cd();
     outputFile->Close();

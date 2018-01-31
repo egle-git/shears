@@ -52,14 +52,15 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
 
     // Percentage
     std::cout << std::fixed << std::setprecision(0) << std::setw(3)
-              << 100. * _done / _steps << "%\t";
+              << 100. * (_done - _from) / (_steps - _from) << "%\t";
 
     // done/total
     std::cout << " "
               << std::setw(std::ceil(std::log10(steps())))
               << _done << "/" << _steps << "\t";
 
-    if (_done > 10 || now - _start > std::chrono::seconds(2)) {
+    if (_done - _from > (steps() - _from) / 10 ||
+          now - _start > std::chrono::seconds(2)) {
         // Time computations (in microseconds)
         us::rep totalduration = duration_cast<us>(now - _start).count();
         us::rep stepduration  = duration_cast<us>(now - _last).count();

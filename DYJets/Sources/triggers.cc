@@ -69,7 +69,7 @@ void print_available_triggers(TTree &bitFieldsChain)
 trigger::~trigger()
 {}
 
-trigger::trigger(std::vector<std::string> names) :
+trigger::trigger(const std::vector<std::string> &names) :
     _mask(0LL),
     _names(names)
 {}

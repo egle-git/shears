@@ -30,7 +30,7 @@ private:
 
 public:
     /// \brief Constructor.
-    explicit trigger(std::vector<std::string> names);
+    explicit trigger(const std::vector<std::string> &names);
 
     /// \brief Destructor.
     virtual ~trigger();

@@ -80,7 +80,7 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
         // ETA
         if (!at_end) {
             std::cout << " Time left: ";
-            print_time(totalduration * ((double) steps() / _done - 1));
+            print_time(1e6 * (steps() - _from) / avgspeed - totalduration);
         } else {
             std::cout << " Duration: ";
             print_time(totalduration);

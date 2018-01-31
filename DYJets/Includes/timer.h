@@ -29,11 +29,11 @@ public:
 private:
     // In both threads
     const counter _steps, _from;
-    std::atomic<unsigned long> _done;
+    std::atomic<counter> _done;
+    std::atomic<bool> _stop;
 
     // In control thread
     bool _running = false;
-    std::atomic<bool> _stop;
     std::thread _thread;
 
     // In timer thread

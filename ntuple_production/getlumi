@@ -16,15 +16,16 @@ export PATH="$BRILCAL_INSTALL_DIR"/bin:/afs/cern.ch/cms/lumi/brilconda-1.1.7/bin
 
 if [ "$1" = --install ]; then
     if [ -e "$BRILCAL_INSTALL_DIR" ]; then
-	echo "Delete directory $BRILCAL_INSTALL_DIR (y/n) ?" 1>&2
-	read n
-	if [ $n = "y" -o $n = "Y" ]; then
-	    rm -r "$BRILCAL_INSTALL_DIR"
-	else
-	    echo "Aborting installation." 1>&2
-	fi
+    	echo "Delete directory $BRILCAL_INSTALL_DIR (y/n) ?" 1>&2
+    	read n
+    	if [ $n = "y" -o $n = "Y" ]; then
+	   rm -r "$BRILCAL_INSTALL_DIR"
+    	else
+    	    echo "Aborting installation." 1>&2
+    	fi
+    
+        pip install --install-option="--prefix=$BRILCAL_INSTALL_DIR" brilws
     fi
-    pip install --install-option="--prefix=$BRILCAL_INSTALL_DIR" brilws
     exit $?
 fi
 
@@ -78,7 +79,10 @@ if [ "$dataset" = 2015 ]; then
 #Update on Apr. 11, 2016. See https://hypernews.cern.ch/HyperNews/CMS/get/physics-announcements/4482.html
     normtag=/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json
 elif [ "$dataset" = 2016 ]; then
-    normtag=/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_DATACERT.json
+    normtag=/afs/cern.ch/user/l/lumipro/public/Normtags/normtag_PHYSICS.json
+elif [ "$dataset" = 2017 ]; then
+    #normtag=/afs/cern.ch/user/l/lumipro/public/normtag_file/normtag_BRIL.json
+    normtag=/cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_BRIL.json
 else
     echo "Failed to determine data period and normtag file." 1>&2
     exit 1
@@ -98,8 +102,8 @@ fi
 #brilcalc lumi --normtag /afs/cern.ch/user/c/cmsbril/public/normtag_json/OfflineNormtagV1.json -i "$json"  | filter
 #Updated on Dec. 6, 15 to normtag announced in https://hypernews.cern.ch/HyperNews/CMS/get/luminosity/544.html
 #brilcalc lumi --normtag /afs/cern.ch/user/l/lumipro/public/normtag_file/OfflineNormtagV2.json -i "$json"  | filter
-echo "Using normtag $normtag." 1>&2
-$BRILCAL_INSTALL_DIR/bin/brilcalc lumi --normtag  "$normtag" -i "$1"  --without-checkjson | filter
-
+echo "Using normtag $normtag" 1>&2
+#$BRILCAL_INSTALL_DIR/bin/brilcalc lumi --normtag  "$normtag" -i "$1"
+$BRILCAL_INSTALL_DIR/bin/brilcalc lumi -b "STABLE BEAMS" -i $1 --normtag "$normtag"| filter 
 
 #pip uninstall brilws

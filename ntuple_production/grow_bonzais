@@ -65,7 +65,7 @@ def time2str(t):
     return time.strftime("%Y-%m-%d-%T-%Z", time.localtime(t))
 
 def check_environment():
-    for f in [ "job_bonzai_prod_bbilin.sh", "donothing_cfg.py" ]:
+    for f in [ "job_bonzai_prod.sh", "donothing_cfg.py" ]:
         if not os.path.isfile(f):
             print "File %s was not found. Copying file from %s." % (f, mydir)
             try:
@@ -272,7 +272,7 @@ def crab_get_config(catalog, selection, subselection, input_file, filesPerJob, o
 # The user must ensure that a properly named framework job report file will be written; 
 # this can be done e.g. by calling cmsRun within the script as 
 # cmsRun -j FrameworkJobReport.xml -p PSet.py. 
-    config.JobType.scriptExe = 'job_bonzai_prod_bbilin.sh'
+    config.JobType.scriptExe = 'job_bonzai_prod.sh'
     config.JobType.scriptArgs = ['sel=%s' % selection, 'subsel=%s' % subselection, 'output_file=%s' % output_file, 'input_catalog=%s' % input_file, 'files_per_job=%d' % filesPerJob ]
 
 # Allows use of non-production CMSSW version

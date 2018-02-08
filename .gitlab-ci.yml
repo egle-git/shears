@@ -17,7 +17,7 @@ baobabs:
   artifacts:
     paths:
     - shearsCompilated.tar.gz
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 pruner:
   stage: build
@@ -26,7 +26,7 @@ pruner:
   artifacts:
     paths:
     - Bonzais/pruner
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 hzz2l2nu:
   stage: build
@@ -37,7 +37,7 @@ hzz2l2nu:
   artifacts:
     paths:
     - HZZ2l2nu/runHZZanalysis 
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 runHzzDiMuData:
   stage: runHzz
@@ -47,7 +47,7 @@ runHzzDiMuData:
   artifacts:
     paths:
     - HZZ2l2nu/doubleMuHistos.root
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 runHzzDiElData:
   stage: runHzz
@@ -57,7 +57,7 @@ runHzzDiElData:
   artifacts:
     paths:
     - HZZ2l2nu/doubleElHistos.root
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 runHzzDYMC:
   stage: runHzz
@@ -67,7 +67,7 @@ runHzzDYMC:
   artifacts:
     paths:
     - HZZ2l2nu/DYHistos.root
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 compDiMu:
   stage: comparisons
@@ -78,7 +78,7 @@ compDiMu:
   artifacts:
     paths:
     - HZZ2l2nu/result_doubleMuHistos
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 compDiEle:
   stage: comparisons
@@ -89,7 +89,7 @@ compDiEle:
   artifacts:
     paths:
     - HZZ2l2nu/result_doubleElHistos
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 compDYMC:
   stage: comparisons
@@ -100,7 +100,7 @@ compDYMC:
   artifacts:
     paths:
     - HZZ2l2nu/result_DYHistos
-    expire_in: 20 minutes
+    expire_in: 60 minutes
 
 getCompResults:
   stage: harvesting

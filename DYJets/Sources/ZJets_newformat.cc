@@ -4485,7 +4485,6 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
     EvtWeights = 0;
     
     Triggers.fill(0LL);
-    TrigHltEl = 0;
 
     // Set branch addresses and branch pointers
     fCurrent = -1;

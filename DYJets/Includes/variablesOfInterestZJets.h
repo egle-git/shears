@@ -45,11 +45,19 @@ const variableStruct VAROFINTERESTZJETS[] = {
   //{"JetsMass_Zinc2jet",            0, 0,      1,           9,              5,            13,           11 ,               5    }, // 16
   {"Phistar_Zinc0jet",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
 {"Phistar_Zinc0jetM111_130",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
-{"Phistar_Zinc0jetM130_3",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
-  {"ZPt_Zinc0jet",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
-  {"ZPt_Zinc0jetM115_135",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+{"Phistar_Zinc0jetM130_170",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+{"Phistar_Zinc0jetM170_250",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+{"Phistar_Zinc0jetM250_3",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+{"ZPt_Zinc0jetM15_50",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17 
+{"ZPt_Zinc0jetM50_71",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17 
+ {"ZPt_Zinc0jet",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+//  {"ZPt_Zinc0jetM115_135",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
   {"ZPt_Zinc0jetM111_130",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
-  {"ZPt_Zinc0jetM130_3",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM130_170",                   1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM170_250",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+  {"ZPt_Zinc0jetM250_3",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+//  {"ZPt_Zinc0jetM135_170",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
+//  {"ZPt_Zinc0jetM170_3",                   1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
   //{"ZAbsRapidity_Zinc1jet",        0, 0,      1,           9,              5,            13,           11 ,               5    }, // 18
   //    {"SumZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,           11 ,               5    }, // 19
   //    {"DifZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,           11 ,               5    }, // 20
@@ -124,12 +132,12 @@ const variableStruct VAROFINTERESTZJETS[] = {
   //    {"AbsFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"SumZFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"DifZFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"Phistar_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"Phistar_Zinc1jetM111_130",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"Phistar_Zinc1jetM130_3",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"ZPt_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"ZPt_Zinc1jetM111_130",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-  {"ZPt_Zinc1jetM130_3",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+//  {"Phistar_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+//  {"Phistar_Zinc1jetM111_130",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+//  {"Phistar_Zinc1jetM130_3",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+//  {"ZPt_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+//  {"ZPt_Zinc1jetM111_130",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+ // {"ZPt_Zinc1jetM130_3",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"ZPt_Zinc2jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"VisPt_Zinc0jetQun",     0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"VisPt_Zinc1jetQun",     0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1

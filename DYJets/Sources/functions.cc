@@ -79,6 +79,11 @@ double phi0to2pi(double phi){
     return phi;
 }
 
+double  ZPtviaPhistar(double phistar){
+   return log(-3.36739e+00 / (-5.14753e-01 - phistar) - 1.)*(-6.48782e+01) + 1.11148e+02;    // from fit "[0] - [1]/(1+exp((x-[2])/[3]))"
+}
+
+
 double deltaPhi(TLorentzVector v1, TLorentzVector v2){
     // build the delta Phi angle between the two vectors
     double pi = 3.141592653589793238;
@@ -259,29 +264,6 @@ double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFact
     }
 
     return smearedPt;
-}
-
-double MuTracking(double eta){
-    double SF(1.00);
-    //if (fabs(eta) < 2.5) SF = 1.095;
-    if (eta > -2.4 && eta < -2.1) SF = 0.991237; 
-    if (eta > -2.1 && eta < -1.6 ) SF = 0.994853;
-    if (eta > -1.6 && eta < -1.2 ) SF = 0.996413;
-    if (eta > -1.2 && eta < -0.9 ) SF = 0.997157;
-    if (eta > -0.9 && eta < -0.6 ) SF = 0.997512;
-    if (eta > -0.6 && eta < -0.3 ) SF = 0.997560;
-    if (eta > -0.3 && eta < -0.2 ) SF = 0.996745;
-    if (eta > -0.2 && eta <  0.2) SF = 0.996996;
-    if (eta > 0.2 && eta < 0.3) SF = 0.997720;
-    if (eta > 0.3 && eta < 0.6 ) SF = 0.998604;
-    if (eta > 0.6 && eta < 0.9 ) SF = 0.998321;
-    if (eta > 0.9 && eta < 1.2 ) SF = 0.997682;
-    if (eta > 1.2 && eta < 1.6 ) SF = 0.995252;
-    if (eta > 1.6 && eta < 2.1 ) SF = 0.994919;
-    if (eta > 2.1 && eta < 2.4 ) SF = 0.987334;
-
-    return SF;
- 
 }
 
 double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){

@@ -389,7 +389,7 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 
         // to cut away firts bin which starts at 0 for logx()
         if (vhNames[i].Index("Phistar") >= 0 ) hRatio->GetXaxis()->SetRangeUser(0.004,3.277);
-        if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
+       // if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
         if (vhNames[i].Index("ZPt_Zinc1") >= 0 ) hRatio->GetXaxis()->SetRangeUser(2.5,1000.);
 
 	//        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);

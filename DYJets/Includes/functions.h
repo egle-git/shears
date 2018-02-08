@@ -54,6 +54,7 @@ vector<double> makeVector(int num, ...);
 void insertVector(vector<double>& veca, int num, ...);
 
 double phi0to2pi(double);
+double ZPtviaPhistar(double);
 
 double deltaPhi(TLorentzVector, TLorentzVector);
 
@@ -153,5 +154,4 @@ void pground(double val, const std::vector<double>& unc, std::string& sVal,
 void pground(double val, double unc, std::string& sVal, std::string& sUnc);
 
 ///@}
-
 #endif

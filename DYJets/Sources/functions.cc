@@ -77,6 +77,11 @@ double phi0to2pi(double phi){
     return phi;
 }
 
+double  ZPtviaPhistar(double phistar){
+   return log(-3.36739e+00 / (-5.14753e-01 - phistar) - 1.)*(-6.48782e+01) + 1.11148e+02;    // from fit "[0] - [1]/(1+exp((x-[2])/[3]))"
+}
+
+
 double deltaPhi(TLorentzVector v1, TLorentzVector v2){
     // build the delta Phi angle between the two vectors
     double pi = 3.141592653589793238;
@@ -259,91 +264,83 @@ double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFact
     return smearedPt;
 }
 
+//double MuTracking(double eta){
+//    double SF(1.00);
+//    //if (fabs(eta) < 2.5) SF = 1.095;
+//    if (eta > -2.4 && eta < -2.1) SF = 0.991237; 
+//    if (eta > -2.1 && eta < -1.6 ) SF = 0.994853;
+//    if (eta > -1.6 && eta < -1.2 ) SF = 0.996413;
+//    if (eta > -1.2 && eta < -0.9 ) SF = 0.997157;
+//    if (eta > -0.9 && eta < -0.6 ) SF = 0.997512;
+//    if (eta > -0.6 && eta < -0.3 ) SF = 0.997560;
+//    if (eta > -0.3 && eta < -0.2 ) SF = 0.996745;
+//    if (eta > -0.2 && eta <  0.2) SF = 0.996996;
+//    if (eta > 0.2 && eta < 0.3) SF = 0.997720;
+//    if (eta > 0.3 && eta < 0.6 ) SF = 0.998604;
+//    if (eta > 0.6 && eta < 0.9 ) SF = 0.998321;
+//    if (eta > 0.9 && eta < 1.2 ) SF = 0.997682;
+//    if (eta > 1.2 && eta < 1.6 ) SF = 0.995252;
+//    if (eta > 1.6 && eta < 2.1 ) SF = 0.994919;
+//   if (eta > 2.1 && eta < 2.4 ) SF = 0.987334;
+
+//    return SF;
+ 
+//}
+
 double SmearJetPt(double recoPt, double genPt, double eta, int smearJet){
-    // Fall 2015 resolution scale factor
+    // Fall 2016 resolution scale factor
     // twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+    // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
     double centralSF(1.00);
-    if      (fabs(eta) < 0.5) centralSF = 1.095;
-    else if (fabs(eta) < 0.8) centralSF = 1.120;
-    else if (fabs(eta) < 1.1) centralSF = 1.097;
-    else if (fabs(eta) < 1.3) centralSF = 1.103;
-    else if (fabs(eta) < 1.7) centralSF = 1.118;
-    else if (fabs(eta) < 1.9) centralSF = 1.100;
-    else if (fabs(eta) < 2.1) centralSF = 1.162;
-    else if (fabs(eta) < 2.3) centralSF = 1.160;
-    else if (fabs(eta) < 2.5) centralSF = 1.161;
-    else if (fabs(eta) < 2.8) centralSF = 1.209;
-    else if (fabs(eta) < 3.0) centralSF = 1.564;
-    else if (fabs(eta) < 3.2) centralSF = 1.384;
-    else if (fabs(eta) < 5.0) centralSF = 1.216;
-    else centralSF = 1.320;
+    if      (fabs(eta) < 0.5) centralSF = 1.109;
+    else if (fabs(eta) < 0.8) centralSF = 1.138;
+    else if (fabs(eta) < 1.1) centralSF = 1.114;
+    else if (fabs(eta) < 1.3) centralSF = 1.123;
+    else if (fabs(eta) < 1.7) centralSF = 1.084;
+    else if (fabs(eta) < 1.9) centralSF = 1.082;
+    else if (fabs(eta) < 2.1) centralSF = 1.140;
+    else if (fabs(eta) < 2.3) centralSF = 1.067;
+    else if (fabs(eta) < 2.5) centralSF = 1.177;
+    else if (fabs(eta) < 2.8) centralSF = 1.364;
+    else if (fabs(eta) < 3.0) centralSF = 1.857;
+    else if (fabs(eta) < 3.2) centralSF = 1.328;
+    else if (fabs(eta) < 5.0) centralSF = 1.16;
+    else centralSF = 1.320; // from 2015
 
     double upSF(1.00);
-    if      (fabs(eta) < 0.5) upSF = 1.095+0.018;
-    else if (fabs(eta) < 0.8) upSF = 1.120+0.028;
-    else if (fabs(eta) < 1.1) upSF = 1.097+0.017;
-    else if (fabs(eta) < 1.3) upSF = 1.103+0.033;
-    else if (fabs(eta) < 1.7) upSF = 1.118+0.014;
-    else if (fabs(eta) < 1.9) upSF = 1.100+0.033;
-    else if (fabs(eta) < 2.1) upSF = 1.162+0.044;
-    else if (fabs(eta) < 2.3) upSF = 1.160+0.048;
-    else if (fabs(eta) < 2.5) upSF = 1.161+0.060;
-    else if (fabs(eta) < 2.8) upSF = 1.209+0.059;
-    else if (fabs(eta) < 3.0) upSF = 1.564+0.321;
-    else if (fabs(eta) < 3.2) upSF = 1.384+0.033;
-    else if (fabs(eta) < 5.0) upSF = 1.216+0.050;
-    else upSF = 1.606;
+    if      (fabs(eta) < 0.5) upSF = 1.109+0.008;
+    else if (fabs(eta) < 0.8) upSF = 1.138+0.013;
+    else if (fabs(eta) < 1.1) upSF = 1.114+0.013;
+    else if (fabs(eta) < 1.3) upSF = 1.123+0.024;
+    else if (fabs(eta) < 1.7) upSF = 1.084+0.011;
+    else if (fabs(eta) < 1.9) upSF = 1.082+0.035;
+    else if (fabs(eta) < 2.1) upSF = 1.140+0.047;
+    else if (fabs(eta) < 2.3) upSF = 1.067+0.053;
+    else if (fabs(eta) < 2.5) upSF = 1.177+0.041;
+    else if (fabs(eta) < 2.8) upSF = 1.364+0.039;
+    else if (fabs(eta) < 3.0) upSF = 1.857+0.071;
+    else if (fabs(eta) < 3.2) upSF = 1.328+0.022;
+    else if (fabs(eta) < 5.0) upSF = 1.16+0.029;
+    else upSF = 1.606; // from 2015
 
     double downSF(1.00);
-    if      (fabs(eta) < 0.5) downSF = 1.095-0.018;
-    else if (fabs(eta) < 0.8) downSF = 1.120-0.028;
-    else if (fabs(eta) < 1.1) downSF = 1.097-0.017;
-    else if (fabs(eta) < 1.3) downSF = 1.103-0.033;
-    else if (fabs(eta) < 1.7) downSF = 1.118-0.014;
-    else if (fabs(eta) < 1.9) downSF = 1.100-0.033;
-    else if (fabs(eta) < 2.1) downSF = 1.162-0.044;
-    else if (fabs(eta) < 2.3) downSF = 1.160-0.048;
-    else if (fabs(eta) < 2.5) downSF = 1.161-0.060;
-    else if (fabs(eta) < 2.8) downSF = 1.209-0.059;
-    else if (fabs(eta) < 3.0) downSF = 1.564-0.321;
-    else if (fabs(eta) < 3.2) downSF = 1.384-0.033;
-    else if (fabs(eta) < 5.0) downSF = 1.216-0.050;
-    else downSF = 1.034;
+    if      (fabs(eta) < 0.5) downSF = 1.109-0.008;
+    else if (fabs(eta) < 0.8) downSF = 1.138-0.013;
+    else if (fabs(eta) < 1.1) downSF = 1.114-0.013;
+    else if (fabs(eta) < 1.3) downSF = 1.123-0.024;
+    else if (fabs(eta) < 1.7) downSF = 1.084-0.011;
+    else if (fabs(eta) < 1.9) downSF = 1.082-0.035;
+    else if (fabs(eta) < 2.1) downSF = 1.140-0.047;
+    else if (fabs(eta) < 2.3) downSF = 1.067-0.053;
+    else if (fabs(eta) < 2.5) downSF = 1.177-0.041;
+    else if (fabs(eta) < 2.8) downSF = 1.364-0.039;
+    else if (fabs(eta) < 3.0) downSF = 1.857-0.071;
+    else if (fabs(eta) < 3.2) downSF = 1.328-0.022;
+    else if (fabs(eta) < 5.0) downSF = 1.16-0.029;
+    else downSF = 1.034; // from 2015
 
     double smearedPt(0);
 
-/*    double centralSF(1.00);
-    if      (fabs(eta) < 0.8) centralSF = 1.061;
-    else if (fabs(eta) < 1.3) centralSF = 1.088;
-    else if (fabs(eta) < 1.9) centralSF = 1.106;
-    else if (fabs(eta) < 2.5) centralSF = 1.126;
-    else if (fabs(eta) < 3.0) centralSF = 1.343;
-    else if (fabs(eta) < 3.2) centralSF = 1.303;
-    else if (fabs(eta) < 5.0) centralSF = 1.320;
-    else centralSF = 1.320;
-
-    double upSF(1.00);
-    if      (fabs(eta) < 0.8) upSF = 1.084;
-    else if (fabs(eta) < 1.3) upSF = 1.117;
-    else if (fabs(eta) < 1.9) upSF = 1.136;
-    else if (fabs(eta) < 2.5) upSF = 1.220;
-    else if (fabs(eta) < 3.0) upSF = 1.466;
-    else if (fabs(eta) < 3.2) upSF = 1.414;
-    else if (fabs(eta) < 5.0) upSF = 1.606;
-    else upSF = 1.606;
-
-    double downSF(1.00);
-    if      (fabs(eta) < 0.8) downSF = 1.038;
-    else if (fabs(eta) < 1.3) downSF = 1.059;
-    else if (fabs(eta) < 1.9) downSF = 1.076;
-    else if (fabs(eta) < 2.5) downSF = 1.032;
-    else if (fabs(eta) < 3.0) downSF = 1.220;
-    else if (fabs(eta) < 3.2) downSF = 1.192;
-    else if (fabs(eta) < 5.0) downSF = 1.034;
-    else downSF = 1.034;
-
-    double smearedPt(0);
-*/
     if (smearJet == 0) {
         smearedPt = std::max(0., genPt + centralSF*(recoPt - genPt));
     }

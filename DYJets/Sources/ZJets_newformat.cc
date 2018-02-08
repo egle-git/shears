@@ -22,7 +22,9 @@
 #include <sys/types.h>
 #include <regex.h>
 #include "ConfigVJets.h"
-#include "rochcor2015.h"
+//#include "rochcor2015.h"
+#include "TSystem.h"
+
 
 extern ConfigVJets cfg;//defined in runZJets_newformat.cc
 
@@ -31,12 +33,14 @@ using namespace std;
 void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		 TString pdfSet, int pdfMember, double muR, double muF, double yieldScale)
 {
+
     
     //--- Random generator necessary for BTagging ---
     TRandom3* RandGen = new TRandom3();
     //--------------------------------------------
     doRochester = true;
-    rmcor = new rochcor2015();
+    //   doRochester = false;
+    //rmcor = new rochcor2015();
 
     //--- Initialize PDF from LHAPDF if needed ---
     if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
@@ -86,6 +90,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     bool pogSF = cfg.getB("pogSF", true);
 
     bool doPuReweight = cfg.getB("doPuReweight", true);
+    
 
     //==========================================================================================================//
     //         Output file name           //
@@ -104,8 +109,6 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV5_Data_AK4PF.txt");
     //table TableJESunc("EfficiencyTables/JECUncertainty_Summer15_25nsV6_AK4PF.txt");
 
-    // muon SF
-    table TrigMu17Mu8SF("EfficiencyTables/Efficiency_SF_Mu17Mu8.txt");
 
     ////////////////////////////////////////////////////////////////////////
     //8TeV
@@ -122,7 +125,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     ////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////////////
-    // 13TeV 2015 data
+    // 13TeV 2016 data
     //
     // new for 13 TeV SF for Id+Iso
     table TrigIsoMu24SF("EfficiencyTables/Efficiency_SF_IsoMu24_eta2p1.txt");
@@ -131,11 +134,36 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     table Iso_TightID13TeV("EfficiencyTables/ratios.txt"); 
     table MuIdIso = Iso_TightID13TeV;
 
-    //Muon POG numbers
-    table MuIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_RunD_2015_Eta_Pt.txt");
-    table MuId("EfficiencyTables/Muon_IDTight_Efficiencies_RunD_2015_Eta_Pt.txt");
+    // trigger
+    table TrigMu17Mu8SF("EfficiencyTables/EfficienciesAndSF_ALL_Mu17Mu8OR.txt");
     table MuTrig = TrigMu17Mu8SF;
-    
+
+    //Muon POG numbers
+    //table MuIso("EfficiencyTables/Muon_ISOLoose_forTight_Efficiencies_RunD_2015_Eta_Pt.txt");
+    //table MuId("EfficiencyTables/Muon_IDTight_Efficiencies_RunD_2015_Eta_Pt.txt");
+
+     string RunPeriod = cfg.getS("RunPeriod");
+     cout << RunPeriod << "\n";
+
+     table MuIso("EfficiencyTables/EfficienciesAndSF_ISO_2016.txt");  // tight ISO 
+     table MuId("EfficiencyTables/EfficienciesAndSF_ID_2016.txt");
+     // table MuTracking("EfficiencyTables/EfficienciesAndSF_All_Mutracking.txt"); // from Qun
+     table MuTracking("EfficiencyTables/Eff_SF_Tracking_Full_08_07_2017.txt"); // from Dan
+
+    if(RunPeriod == "RunBCDEF"){
+       // cout << "baba"<< "\n";
+        table MuIso("EfficiencyTables/Eff_SF_ISO_BF_6_16_2017.txt");   // loose ISO
+        table MuId("EfficiencyTables/EfficienciesAndSF_BCDEF_ID.txt");
+        table MuTracking("EfficiencyTables/Eff_SF_Tracking_BF_08_07_2017.txt");
+    }
+    else if(RunPeriod == "RunGH"){
+        table MuIso("EfficiencyTables/Eff_SF_ISO_GH_6_16_2017.txt");
+        table MuId("EfficiencyTables/EfficienciesAndSF_GH_ID.txt");
+        table MuTracking("EfficiencyTables/Eff_SF_Tracking_GH_08_07_2017.txt");
+    }
+
+
+
     //table for electron SF
     table ElId("EfficiencyTables/Electron_Id_2015D_SF.txt");
     table ElReco("EfficiencyTables/Electron_Reco_2015D_SF.txt");
@@ -146,6 +174,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     //Ele_Rec = Ele_Rec_8TeV;
     //if (lepSel == "DE" || lepSel == "SE") LeptID = SC_Ele_2012EA;
     // else if (lepSel == "SMu") LeptTrig = TrigIsoMu24SF;
+
+    // Load Rochester corrections
+    rc = new RoccoR("rcdata.2016.v3");
     //==========================================================================================================//
     ////////////////////////////////////////////////////////////////////////
 
@@ -156,7 +187,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     cout << "Lepton Flavor: " << lepSel << "  systematics: " << systematics << "  direction: " << direction << endl;
 
     int mode = (systematics == 1) ? direction : 0;
-    standalone_LumiReWeighting puWeight(2015250, mode);
+    // standalone_LumiReWeighting puWeight(2015250, mode);
+     int year = cfg.getI("puReweightYear", 2016);
+     standalone_LumiReWeighting puWeight(year, mode);
 
     int scale(0); //0,+1,-1; (keep 0 for noJEC shift study)
     if (systematics == 2) scale =  direction;
@@ -221,119 +254,126 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     TH1D *ZNGoodJets_ZexcHratio_fit = 0;
 
+    TH1D* MuonResolutionCorr = 0;
+   
+    TFile *fratioResol = new TFile("Resolution.root");
+    MuonResolutionCorr =  (TH1D*) fratioResol->Get("hresol");   
+
+
     if(UnfoldUnc){
-	
+
  if (lepSel == "DMu"){
+
         // jet pt
-	TFile *fratio1jpt = new TFile("FirstJetPt_2_Zinc1jetHratio_fit.root");
+	TFile *fratio1jpt = new TFile("RootRatios/FirstJetPt_2_Zinc1jetHratio_fit.root");
 	FirstJetPt_2_Zinc1jetHratio_fit =  (TH1D*) fratio1jpt->Get("Hratio");
 	
-	TFile *fratio2jpt = new TFile("SecondJetPt_2_Zinc2jetHratio_fit.root");
+	TFile *fratio2jpt = new TFile("RootRatios/SecondJetPt_2_Zinc2jetHratio_fit.root");
 	SecondJetPt_2_Zinc2jetHratio_fit =  (TH1D*) fratio2jpt->Get("Hratio");
 	
-	TFile *fratio3jpt = new TFile("ThirdJetPt_2_Zinc3jetHratio_fit.root");
+	TFile *fratio3jpt = new TFile("RootRatios/ThirdJetPt_2_Zinc3jetHratio_fit.root");
 	ThirdJetPt_2_Zinc3jetHratio_fit =  (TH1D*) fratio3jpt->Get("Hratio");
 	
 	// jet Ht
-	TFile *fratioht = new TFile("JetsHT_2_Zinc1jetHratio_fit.root");
+	TFile *fratioht = new TFile("RootRatios/JetsHT_2_Zinc1jetHratio_fit.root");
 	JetsHT_2_Zinc1jetHratio_fit =  (TH1D*) fratioht->Get("Hratio");
 	
-	TFile *fratioht2 = new TFile("JetsHT_2_Zinc2jetHratio_fit.root");
+	TFile *fratioht2 = new TFile("RootRatios/JetsHT_2_Zinc2jetHratio_fit.root");
 	JetsHT_2_Zinc2jetHratio_fit =  (TH1D*) fratioht2->Get("Hratio");
 	
-	TFile *fratioht3 = new TFile("JetsHT_2_Zinc3jetHratio_fit.root");
+	TFile *fratioht3 = new TFile("RootRatios/JetsHT_2_Zinc3jetHratio_fit.root");
 	JetsHT_2_Zinc3jetHratio_fit =  (TH1D*) fratioht3->Get("Hratio");
 	
 	// jet rapidity
-	TFile *fratio1jrapidity = new TFile("FirstJetAbsRapidity_2_Zinc1jetHratio_fit.root");
+	TFile *fratio1jrapidity = new TFile("RootRatios/FirstJetAbsRapidity_2_Zinc1jetHratio_fit.root");
 	FirstJetAbsRapidity_2_Zinc1jetHratio_fit =  (TH1D*) fratio1jrapidity->Get("Hratio");
 	
-	TFile *fratio2jrapidity = new TFile("SecondJetAbsRapidity_2_Zinc2jetHratio_fit.root");
+	TFile *fratio2jrapidity = new TFile("RootRatios/SecondJetAbsRapidity_2_Zinc2jetHratio_fit.root");
 	SecondJetAbsRapidity_2_Zinc2jetHratio_fit =  (TH1D*) fratio2jrapidity->Get("Hratio");
 	
-	TFile *fratio3jrapidity = new TFile("ThirdJetAbsRapidity_2_Zinc3jetHratio_fit.root");
+	TFile *fratio3jrapidity = new TFile("RootRatios/ThirdJetAbsRapidity_2_Zinc3jetHratio_fit.root");
 	ThirdJetAbsRapidity_2_Zinc3jetHratio_fit =  (TH1D*) fratio3jrapidity->Get("Hratio");
 	
         // pt-balance
-	TFile *fratio1jptbal = new TFile("VisPt_2_Zinc1jetQunHratio_fit.root");
+	TFile *fratio1jptbal = new TFile("RootRatios/VisPt_2_Zinc1jetQunHratio_fit.root");
 	VisPt_2_Zinc1jetQunHratio_fit =  (TH1D*) fratio1jptbal->Get("Hratio");
 	
-	TFile *fratio2jptbal = new TFile("VisPt_2_Zinc2jetQunHratio_fit.root");
+	TFile *fratio2jptbal = new TFile("RootRatios/VisPt_2_Zinc2jetQunHratio_fit.root");
 	VisPt_2_Zinc2jetQunHratio_fit =  (TH1D*) fratio2jptbal->Get("Hratio");
 	
-	TFile *fratio3jptbal = new TFile("VisPt_2_Zinc3jetQunHratio_fit.root");
+	TFile *fratio3jptbal = new TFile("RootRatios/VisPt_2_Zinc3jetQunHratio_fit.root");
 	VisPt_2_Zinc3jetQunHratio_fit =  (TH1D*) fratio3jptbal->Get("Hratio");
 
         // JZB
-	TFile *fratioJZB = new TFile("JZB_2Hratio_fit.root");
+	TFile *fratioJZB = new TFile("RootRatios/JZB_2Hratio_fit.root");
 	JZB_2Hratio_fit =  (TH1D*) fratioJZB->Get("Hratio");
 	
-	TFile *fratioJZBlow = new TFile("JZB_ptLow_2Hratio_fit.root");
+	TFile *fratioJZBlow = new TFile("RootRatios/JZB_ptLow_2Hratio_fit.root");
 	JZB_ptLow_2Hratio_fit =  (TH1D*) fratioJZBlow->Get("Hratio");
 	
-	TFile *fratioJZBhigh = new TFile("JZB_ptHigh_2Hratio_fit.root");
+	TFile *fratioJZBhigh = new TFile("RootRatios/JZB_ptHigh_2Hratio_fit.root");
 	JZB_ptHigh_2Hratio_fit =  (TH1D*) fratioJZBhigh->Get("Hratio");
-	
-	
+
+
 	//  multiplicity
-	TFile *fratioNJexc = new TFile("ZNGoodJets_ZexcHratio_fit.root");
+	TFile *fratioNJexc = new TFile("RootRatios/ZNGoodJets_ZexcHratio_fit.root");
 	ZNGoodJets_ZexcHratio_fit =  (TH1D*) fratioNJexc->Get("Hratio");
-    }
+      }
 
  if (lepSel == "DE"){
         // jet pt
-	TFile *fratio1jpt = new TFile("FirstJetPt_2_Zinc1jetHratio_ee_fit.root");
+	TFile *fratio1jpt = new TFile("RootRatios/FirstJetPt_2_Zinc1jetHratio_ee_fit.root");
 	FirstJetPt_2_Zinc1jetHratio_fit =  (TH1D*) fratio1jpt->Get("Hratio");
 	
-	TFile *fratio2jpt = new TFile("SecondJetPt_2_Zinc2jetHratio_ee_fit.root");
+	TFile *fratio2jpt = new TFile("RootRatios/SecondJetPt_2_Zinc2jetHratio_ee_fit.root");
 	SecondJetPt_2_Zinc2jetHratio_fit =  (TH1D*) fratio2jpt->Get("Hratio");
 	
-	TFile *fratio3jpt = new TFile("ThirdJetPt_2_Zinc3jetHratio_ee_fit.root");
+	TFile *fratio3jpt = new TFile("RootRatios/ThirdJetPt_2_Zinc3jetHratio_ee_fit.root");
 	ThirdJetPt_2_Zinc3jetHratio_fit =  (TH1D*) fratio3jpt->Get("Hratio");
 	
 	// jet Ht
-	TFile *fratioht = new TFile("JetsHT_2_Zinc1jetHratio_ee_fit.root");
+	TFile *fratioht = new TFile("RootRatios/JetsHT_2_Zinc1jetHratio_ee_fit.root");
 	JetsHT_2_Zinc1jetHratio_fit =  (TH1D*) fratioht->Get("Hratio");
 	
-	TFile *fratioht2 = new TFile("JetsHT_2_Zinc2jetHratio_ee_fit.root");
+	TFile *fratioht2 = new TFile("RootRatios/JetsHT_2_Zinc2jetHratio_ee_fit.root");
 	JetsHT_2_Zinc2jetHratio_fit =  (TH1D*) fratioht2->Get("Hratio");
 	
-	TFile *fratioht3 = new TFile("JetsHT_2_Zinc3jetHratio_ee_fit.root");
+	TFile *fratioht3 = new TFile("RootRatios/JetsHT_2_Zinc3jetHratio_ee_fit.root");
 	JetsHT_2_Zinc3jetHratio_fit =  (TH1D*) fratioht3->Get("Hratio");
 	
 	// jet rapidity
-	TFile *fratio1jrapidity = new TFile("FirstJetAbsRapidity_2_Zinc1jetHratio_ee_fit.root");
+	TFile *fratio1jrapidity = new TFile("RootRatios/FirstJetAbsRapidity_2_Zinc1jetHratio_ee_fit.root");
 	FirstJetAbsRapidity_2_Zinc1jetHratio_fit =  (TH1D*) fratio1jrapidity->Get("Hratio");
 	
-	TFile *fratio2jrapidity = new TFile("SecondJetAbsRapidity_2_Zinc2jetHratio_ee_fit.root");
+	TFile *fratio2jrapidity = new TFile("RootRatios/SecondJetAbsRapidity_2_Zinc2jetHratio_ee_fit.root");
 	SecondJetAbsRapidity_2_Zinc2jetHratio_fit =  (TH1D*) fratio2jrapidity->Get("Hratio");
 	
-	TFile *fratio3jrapidity = new TFile("ThirdJetAbsRapidity_2_Zinc3jetHratio_ee_fit.root");
+	TFile *fratio3jrapidity = new TFile("RootRatios/ThirdJetAbsRapidity_2_Zinc3jetHratio_ee_fit.root");
 	ThirdJetAbsRapidity_2_Zinc3jetHratio_fit =  (TH1D*) fratio3jrapidity->Get("Hratio");
 	
         // pt-balance
-	TFile *fratio1jptbal = new TFile("VisPt_2_Zinc1jetQunHratio_ee_fit.root");
+	TFile *fratio1jptbal = new TFile("RootRatios/VisPt_2_Zinc1jetQunHratio_ee_fit.root");
 	VisPt_2_Zinc1jetQunHratio_fit =  (TH1D*) fratio1jptbal->Get("Hratio");
 	
-	TFile *fratio2jptbal = new TFile("VisPt_2_Zinc2jetQunHratio_ee_fit.root");
+	TFile *fratio2jptbal = new TFile("RootRatios/VisPt_2_Zinc2jetQunHratio_ee_fit.root");
 	VisPt_2_Zinc2jetQunHratio_fit =  (TH1D*) fratio2jptbal->Get("Hratio");
 	
-	TFile *fratio3jptbal = new TFile("VisPt_2_Zinc3jetQunHratio_ee_fit.root");
+	TFile *fratio3jptbal = new TFile("RootRatios/VisPt_2_Zinc3jetQunHratio_ee_fit.root");
 	VisPt_2_Zinc3jetQunHratio_fit =  (TH1D*) fratio3jptbal->Get("Hratio");
 
         // JZB
-	TFile *fratioJZB = new TFile("JZB_2Hratio_ee_fit.root");
+	TFile *fratioJZB = new TFile("RootRatios/JZB_2Hratio_ee_fit.root");
 	JZB_2Hratio_fit =  (TH1D*) fratioJZB->Get("Hratio");
 	
-	TFile *fratioJZBlow = new TFile("JZB_ptLow_2Hratio_ee_fit.root");
+	TFile *fratioJZBlow = new TFile("RootRatios/JZB_ptLow_2Hratio_ee_fit.root");
 	JZB_ptLow_2Hratio_fit =  (TH1D*) fratioJZBlow->Get("Hratio");
 	
-	TFile *fratioJZBhigh = new TFile("JZB_ptHigh_2Hratio_ee_fit.root");
+	TFile *fratioJZBhigh = new TFile("RootRatios/JZB_ptHigh_2Hratio_ee_fit.root");
 	JZB_ptHigh_2Hratio_fit =  (TH1D*) fratioJZBhigh->Get("Hratio");
 
 
 	//  multiplicity
-	TFile *fratioNJexc = new TFile("ZNGoodJets_ZexcHratio_ee_fit.root");
+	TFile *fratioNJexc = new TFile("RootRatios/ZNGoodJets_ZexcHratio_ee_fit.root");
 	ZNGoodJets_ZexcHratio_fit =  (TH1D*) fratioNJexc->Get("Hratio");
       }
 
@@ -369,6 +409,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
     double prev_rate = 0;
 
+    //cout << "!!!!!!!! nentries =" << nentries << "\n";
     Long64_t nEventsToProcessTot = nentries;
     if(nMaxEvents >= 0 && nEventsToProcessTot > nMaxEvents) nEventsToProcessTot = nMaxEvents;    
 
@@ -394,12 +435,25 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	std::cout << "Warning: tau gen veto was not found in the ntuple. It is fine if the samples is not DY or if it does not contains Z->\\tau\\tau.\n" ;
     }
     
+    bool DJALOG = false;
+    //entry_start = 19000000;
+   // entry_stop = nentries;
+
+    if(DJALOG)    printf("{DJA LOG}    nEventsToProcess = %d\n",nEventsToProcess);
+    if(DJALOG)    printf("{DJA LOG}    nMaxEvents = %ld\n",nMaxEvents);
+    if(DJALOG)    printf("{DJA LOG}    entry_start = %lld\n",entry_start);
+    if(DJALOG)    printf("{DJA LOG}    entry_stop = %lld\n",entry_stop);
+    if(DJALOG)    printf("{DJA LOG}    nentries = %lld\n",nentries);
+
     //======================================================================
     // Event loop starts here
     //======================================================================
     for (Long64_t jentry = entry_start; jentry < entry_stop; jentry += 1) {
 	if (0 <= nMaxEvents && nMaxEvents  <= nEvents) break;
 	
+	if( (jentry % 1000000) == 0 )
+	    if(DJALOG)    printf("{DJA LOG}    Trying Entry = %lld\n",jentry);
+
 	Long64_t ientry = LoadTree(jentry);
         if (ientry < 0) break;
         //cout << "---------------------------------------------------------------------" << endl;
@@ -459,8 +513,37 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         //if (EvtVtxCnt <= 14) continue;
 
         //=======================================================================================================//
+         // if (EvtIsRealData && EvtRunNum >= 282037 && EvtRunNum <=283469){
 
-	nEvents++;
+        // if(EvtIsRealData && (EvtRunNum < 282037 || EvtRunNum > 283469))
+        // continue;
+        // https://twiki.cern.ch/twiki/bin/viewauth/CMS/MuonTagAndProbeTreesRun2#Latest_version
+	const UInt_t runThreshold = 278820;  // start of Run G
+        
+	//const UInt_t runThreshold = 276811;  //This is the end of Run D
+
+
+       // if(EvtIsRealData && ( EvtRunNum > 275376 || EvtRunNum < 273150 ))  continue;  //  run B only
+
+        if(RunPeriod == "RunBCDEF" && EvtIsRealData && EvtRunNum >= runThreshold)  continue;  // we run only on B-F
+        if(RunPeriod == "RunGH" && EvtIsRealData && EvtRunNum < runThreshold)  continue;  // we run only on GH
+
+/*
+	if( EvtIsRealData ){
+	    if( EvtRunNum > runThreshold ){
+		if( (jentry % 1000000) == 0 )
+		    if(DJALOG)    printf("{DJA LOG}    Run = %d\n",EvtRunNum);
+		     printf("{DJA LOG} This is from Run GH (run = %d) we also want this\n", EvtRunNum);
+		//continue;
+	    }else{
+		if(DJALOG)    printf("{DJA LOG} This is from Run B-F (run = %d) we want this\n", EvtRunNum);
+	    }
+	}
+*/
+        //=======================================================================================================//
+
+
+	 nEvents++;
 
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
@@ -472,7 +555,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	double weight = 1;
 
 	if (hasRecoInfo && doPuReweight && !EvtIsRealData) {
-	    //std::cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
+	   // std::cout << "PU weight: " << EvtPuCntTruth << " , " << puWeight.weight(EvtPuCntTruth) << "\n";
 	    weight *= puWeight.weight(EvtPuCntTruth);
 	}
 
@@ -552,18 +635,33 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
 
-	//Trigger
-	bool passesTrigger = ((*ourTrig_) & triggerMask_);
+	//Trigger // NEW DA
+	//bool passesTrigger = ((*ourTrig_) & triggerMask_);
+	bool passesTrigger = false;
+	if( EvtIsRealData ){	
+	    if( EvtRunNum < runThreshold ){
+		//printf("{DJA LOG}        This is from Runs B-F\n");
+		passesTrigger = ((*ourTrig_) & triggerMask_EraBG);
+	    }
+	    if( EvtRunNum >= runThreshold ){
+		//printf("{DJA LOG}        This is from Run GH\n");
+		passesTrigger = ((*ourTrig_) & triggerMask_EraH);
+	    }
+	}else{
+	    passesTrigger = ((*ourTrig_) & triggerMask_EraH);
+	}
 
 	if(passesTrigger){
 	    nEventsPassingTrigger++;
 	    nEffEventsPassingTrigger += weight;
 	}
 	
+        // passesTrigger = true;  // remove it!!!!!!!!!!!1
+
         //=======================================================================================================//
         //         Retrieving leptons          //
         //====================================//
-        bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1);
+        bool passesLeptonCut(0), passesLeptonCutNoMass(0), passesLeptonChargeCut(0), passesTauCut(1);
 	//bool passesLeptonMassCut(0);
         unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
         vector<leptonStruct> leptons;
@@ -571,6 +669,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         vector<leptonStruct> vetoElectrons;
         TLorentzVector MET;
         double MT = -99;
+        double phi_acop= -99; 
+        double sinthetastar= -99, costhetastar=-99;
+        double phistar= -99;
         TLorentzVector EWKBoson;
 
         if (hasRecoInfo) {
@@ -647,12 +748,20 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			    effWeight *= MuId.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
 			    effWeight *= MuIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 			    effWeight *= MuIso.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+
+			    effWeight *= MuTracking.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
+			    effWeight *= MuTracking.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].v.Eta()));
+
+                          //  effWeight *= MuTracking(leptons[0].v.Eta());  // coded in function.cc
+                          //  effWeight *= MuTracking(leptons[1].v.Eta());
+
 			} else{
 			    effWeight *= MuIdIso.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].v.Eta()));
 			}
                         if (useTriggerCorrection) effWeight *= MuTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     }
                     if (lepSel == "DE") {
+/*
                         effWeight *= ElReco.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
                         effWeight *= ElReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta));
                         effWeight *= ElId.getEfficiency(leptons[0].v.Pt(), fabs(leptons[0].scEta));
@@ -660,6 +769,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     //cout<< "Reco" <<ElReco.getEfficiency(leptons[1].v.Pt(), fabs(leptons[1].scEta))<<endl;
  if (useTriggerCorrection) effWeight *= ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()));
                     //cout<< "Trig "<<ElTrig.getEfficiency(fabs(leptons[0].v.Eta()), fabs(leptons[1].v.Eta()))<<endl;
+*/
 }
                                         weight *= effWeight;
                 }
@@ -672,12 +782,29 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		    nEventsWithTwoGoodLeptonsWithOppCharge++;
 		    nEffEventsWithTwoGoodLeptonsWithOppCharge += weight;
 		    passesLeptonChargeCut = 1;
-		    if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh 
-			&& leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
-			nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
-			nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass += weight;
-			passesLeptonCut = 1;
-			//passesLeptonMassCut = 1;
+
+                    if(leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin){ 
+                        passesLeptonCutNoMass = 1;
+		        if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh) {
+
+                           
+
+
+		    	   nEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass++;
+			   nEffEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass += weight;
+			   passesLeptonCut = 1;
+/*			   //passesLeptonMassCut = 1;
+
+                            //  ----  code Phi* AG
+                            phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
+                            if(leptons[0].charge < 0) costhetastar = tanh( (leptons[0].v.Eta() - leptons[1].v.Eta())/2. );
+                            else costhetastar = tanh( (leptons[1].v.Eta() - leptons[0].v.Eta())/2. );
+                            sinthetastar = sqrt(1. - costhetastar*costhetastar);
+                            //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+                            phistar = tan(phi_acop/2.) * sinthetastar;
+                           //  cout << "phistar = " << phistar << "\n";
+*/
+                        }
 		    }
 		}
 		if((leptons[0].charge * leptons[1].charge < 0)
@@ -732,11 +859,15 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         //       Retrieving gen leptons        //
         //====================================//
         bool passesgenLeptonCut(0);
+        bool passesgenLeptonCutNoMass(0);
         unsigned short nTotgenLeptons(0), ngenLeptons(0), nTotGenPhotons(0);
         vector<leptonStruct> genLeptons;
         vector<int> usedGenPho;
         TLorentzVector genMET;
         double genMT = -99;
+        double genPhi_acop= -99; 
+        double genSinthetastar= -99, genCosthetastar=-99;
+        double genPhistar= -99;
         TLorentzVector genEWKBoson;
         int countTauS3 = 0;
 	
@@ -779,7 +910,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                         for (unsigned short k(0); k < usedGenPho.size(); k++){
                             if (j == usedGenPho[k]) used = 1;
                         }
-                        if (deltaR(tmpGenPho.Phi(), tmpGenPho.Eta(), genLepNoFSR.v.Phi(), genLepNoFSR.v.Eta()) < 0.1 && !used){
+                        if (deltaR(tmpGenPho.Phi(), tmpGenPho.Eta(), genLepNoFSR.v.Phi(), genLepNoFSR.v.Eta()) < 0.1 && !used){   // change back to 0.1
                             genLep.v += tmpGenPho;
                             usedGenPho.push_back(j);
                         }
@@ -830,13 +961,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		 }
 		 
 		 // apply charge, mass and eta cut
-		 if (genLeptons[0].charge * genLeptons[1].charge < 0 && genEWKBoson.M() > ZMCutLow && genEWKBoson.M() < ZMCutHigh) {
-		     ++nGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass;
-		     nEffGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass += genWeight;
-		     passesgenLeptonCut = 1;
+		 if (genLeptons[0].charge * genLeptons[1].charge < 0){
+                     passesgenLeptonCutNoMass = 1;
+                     if(genEWKBoson.M() > ZMCutLow && genEWKBoson.M() < ZMCutHigh) {
+		        ++nGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass;
+		        nEffGenEventsWithTwoGoodLeptonsWithOppChargeAndGoodMass += genWeight;
+		        passesgenLeptonCut = 1;
+                     }
 		 }
-                //--- if there are taus we don't want the gen level
-		 if (countTauS3 > 0 && fileName.Index("Bugra") < 0 && fileName.Index("MG5") < 0) passesgenLeptonCut = 0;
+                //--- if there are taus we don't want the gen level (think about NoMass flag here!!!)
+		// if (countTauS3 > 0 && fileName.Index("Bugra") < 0 && fileName.Index("MG5") < 0) passesgenLeptonCut = 0;
 	     }
 	     else if ((lepSel == "SMu" || lepSel == "SE") && (ngenLeptons >= 2)) {
 
@@ -863,6 +997,91 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
         } // end of hasGenInfo
 
+       //=========== Rochester ==========
+          //  cout << "---------" << "\n";
+       if (doRochester && hasRecoInfo){
+          if((lepSel == "DMu") && nLeptons >= 2){ 
+              //for each data muon in the loop, use this function to get a scale factor for its momentum:
+              if (EvtIsRealData) {
+                    double dataSF_lead=1.; double dataSF_sublead=1.;
+                    dataSF_lead = rc->kScaleDT(leptons[0].charge, leptons[0].v.Pt(), leptons[0].v.Eta(), leptons[0].v.Phi(), 0,0);
+                    dataSF_sublead = rc->kScaleDT(leptons[1].charge, leptons[1].v.Pt(), leptons[1].v.Eta(), leptons[1].v.Phi(), 0,0);
+                    //cout << "ptold " <<  leptons[0].v.Pt() << " , "  <<  leptons[1].v.Pt() << "\n";
+                    // double ptold0 = leptons[0].v.Pt();
+                    // double ptold1 = leptons[1].v.Pt();
+                    //cout <<  dataSF_lead << " , " << dataSF_sublead << "\n";
+                    //cout << "pz old " << leptons[0].v.Pz() << "\n";
+
+                    leptons[0].v.SetPtEtaPhiM(leptons[0].v.Pt()*dataSF_lead, leptons[0].v.Eta(), leptons[0].v.Phi(),.10565);
+                    leptons[1].v.SetPtEtaPhiM(leptons[1].v.Pt()*dataSF_sublead, leptons[1].v.Eta(), leptons[1].v.Phi(),.10565);
+
+                     //cout << "dataSF_lead " << dataSF_lead << " dataSF_sublead " << dataSF_sublead << "\n";
+                    // cout << "pz new " << leptons[0].v.Pz() << "\n";
+                    // cout << "ptnew " <<  leptons[0].v.Pt() << " , "  <<  leptons[1].v.Pt() << "\n";
+                    // cout << "M: " << leptons[0].v.E()*leptons[0].v.E() -(leptons[0].v.Px()*leptons[0].v.Px() + leptons[0].v.Py()*leptons[0].v.Py() + leptons[0].v.Pz()*leptons[0].v.Pz() ) << "\n";
+              
+     
+              }
+
+              if(!EvtIsRealData && hasGenInfo && ngenLeptons >= 2){ 
+      
+                   //for MC, if matched gen-level muon (genPt) is available, use this function  
+                   // double u1= gRandom->Rndm();
+                   // double u2= gRandom->Rndm();
+                    double mcSF_lead=1.; double mcSF_sublead =1.;
+                
+                   if(deltaR(genLeptons[0].v, leptons[0].v) <0.1)  
+                       mcSF_lead = rc->kScaleFromGenMC(leptons[0].charge, leptons[0].v.Pt(), leptons[0].v.Eta(), leptons[0].v.Phi(), leptons[0].MuTkLayer, genLeptons[0].v.Pt(), gRandom->Rndm(),0,0);
+                   else  mcSF_lead = rc->kScaleAndSmearMC(leptons[0].charge, leptons[0].v.Pt(), leptons[0].v.Eta(), leptons[0].v.Phi(), leptons[0].MuTkLayer, gRandom->Rndm(), gRandom->Rndm(), 0, 0);
+
+
+                   if(deltaR(genLeptons[1].v, leptons[1].v) <0.1) 
+                       mcSF_sublead = rc->kScaleFromGenMC(leptons[1].charge, leptons[1].v.Pt(), leptons[1].v.Eta(), leptons[1].v.Phi(), leptons[1].MuTkLayer, genLeptons[1].v.Pt(), gRandom->Rndm(), 0, 0);
+                   else  mcSF_sublead = rc->kScaleAndSmearMC(leptons[1].charge, leptons[1].v.Pt(), leptons[1].v.Eta(), leptons[1].v.Phi(), leptons[1].MuTkLayer, gRandom->Rndm(), 0, 0);
+
+                   // cout << u1 << " , " << u2 << "\n";
+                   // cout << "sf; "<< mcSF_lead << " , " << mcSF_sublead << "\n";
+                   leptons[0].v.SetPtEtaPhiM(leptons[0].v.Pt()*mcSF_lead, leptons[0].v.Eta(), leptons[0].v.Phi(),.10565);
+                   leptons[1].v.SetPtEtaPhiM(leptons[1].v.Pt()*mcSF_sublead, leptons[1].v.Eta(), leptons[1].v.Phi(),.10565);
+
+             } // if(!EvtIsRealData
+
+		    
+             // build Electroweak boson candidate: here it is expected to be a Z
+                EWKBoson = leptons[0].v + leptons[1].v;
+
+               //  if(ngenLeptons >= 2)  EWKBoson = leptons[0].v + genLeptons[1].v;
+             //cout << EWKBoson.E()  << " , " << EWKBoson.Pt() << " , " << EWKBoson.Pz() << "\n";
+            // cout << "M_new  "  << sqrt(EWKBoson.E()*EWKBoson.E() - (EWKBoson.Pt()*EWKBoson.Pt()+ EWKBoson.Pz()*EWKBoson.Pz() )) << "\n";
+            // cout << "M_new1  "  << sqrt(EWKBoson.E()*EWKBoson.E() - ( (leptons[0].v.Pt() + leptons[1].v.Pt())* (leptons[0].v.Pt() + leptons[1].v.Pt()) + EWKBoson.Pz()*EWKBoson.Pz() )) << "\n";
+
+             // apply charge, mass cut
+	     if (passesTrigger && leptons[0].charge * leptons[1].charge < 0) {
+		  passesLeptonChargeCut = 1;
+
+                  if (leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) passesLeptonCutNoMass = 1;
+                  else passesLeptonCutNoMass = 0;
+
+
+                  if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh && leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
+		  // cout <<  "AndGoodMass" << "\n";
+		  passesLeptonCut = 1;
+		  //passesLeptonMassCut = 1;
+		  } else{
+			  passesLeptonCut = 0;
+			}
+		   } // end if re-selection of leptons
+                   
+                   // boosted Z
+                 //  if(abs(leptons[1].v.Eta())<0.9 && abs(leptons[0].v.Eta())< 0.9 && deltaPhi(leptons[0].v,leptons[1].v) < 1.22){
+                 //      passesLeptonCut = 0; 
+                 //      passesLeptonCutNoMass = 0;
+                 //  }
+
+          }  // if((lepSel == "DMu"  
+       } // if (hasRecoInfo && doRochester)
+       //============ end of Rochester ======================
+        //cout << EWKBoson.M() << "\n";
 
 	//=======================================================================================================//
         //   ------- lepton energy smearing ------
@@ -888,11 +1107,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		    leptons[1].v.SetPtEtaPhiE(newLeptonPt, leptons[1].v.Eta(), leptons[1].v.Phi(), leptons[1].v.E()*newLeptonPt/oldLeptonPt);
 		    
 		    // build Electroweak boson candidate: here it is expected to be a Z
-		    EWKBoson = leptons[0].v + leptons[1].v;
+		        EWKBoson = leptons[0].v + leptons[1].v;
+                    //   EWKBoson = leptons[0].v + genLeptons[1].v; //!!!!!!!!! change back
 
 		    // apply charge, mass cut
 		    if (passesTrigger && leptons[0].charge * leptons[1].charge < 0) {
 			passesLeptonChargeCut = 1;
+
+                        if (leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) passesLeptonCutNoMass = 1;
+                        else passesLeptonCutNoMass = 0;
+
 			if (EWKBoson.M() > ZMCutLow && EWKBoson.M() < ZMCutHigh && leptons[0].v.Pt() > lepPtCutMin && leptons[1].v.Pt() > lepPtCutMin) {
 			    // cout <<  "AndGoodMass" << "\n";
 			    passesLeptonCut = 1;
@@ -901,10 +1125,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			    passesLeptonCut = 0;
 			}
 		    } // end if re-selection of leptons
+                     // boosted Z
+                   // if(abs(leptons[1].v.Eta())<0.9 && abs(leptons[0].v.Eta())< 0.9 && deltaPhi(leptons[0].v,leptons[1].v) < 1.22){
+                   //    passesLeptonCut = 0;
+                   //    passesLeptonCutNoMass = 0;
+                   // }
 		}
             } // end if DMu/DE channel
 
         } // end of hasRecoInfo and hasGenInfo
+
+        // cout << MuTkLayerCnt->at(0) << "\n";
 
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //=======================================================================================================//
@@ -939,7 +1170,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                 bool jetPassesEtaCut(fabs(jet.v.Rapidity()) <= 0.1*jetEtaCutMax); 
                 bool jetPassesIdCut(JetAk04Id->at(i) > 0);
-                bool jetPassesMVACut(JetAk04PuMva->at(i) > -0.2);
+                bool jetPassesMVACut(JetAk04PuMva->at(i) > -0.2); ///// check it!!!!!!
 
                 bool jetPassesdRCut(1);
                 unsigned short nRemovedLep = min(int(nLeptons), 2);
@@ -953,7 +1184,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 if (passesLeptonCut && jet.v.Pt() >= 30 && jetPassesEtaCut && jetPassesIdCut && jetPassesdRCut)  // no MVA cut
                 fill(puMVA, JetAk04PuMva->at(i), weight);
 
-                if (jetPassesPtCut && jetPassesEtaCut && jetPassesIdCut && jetPassesMVACut && jetPassesdRCut) {
+                if (jetPassesPtCut && jetPassesEtaCut && jetPassesMVACut && jetPassesIdCut  && jetPassesdRCut) {  // jetPassesMVACut 
                     jets.push_back(jet);
                     // as soon as one selected jet is a b-jet, turn bTagJetFound to true
                     bTagJetFound = (bTagJetFound || passesBJets); 
@@ -971,7 +1202,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         }  // END IF HAS RECO
         //=======================================================================================================//
 
-	//cout << "passesLeptonCut 2 : " << passesLeptonCut << "\n";
+//cout << "passesLeptonCut 2 : " << passesLeptonCut << "\n";
         if (DEBUG) cout << "Stop after line " << __LINE__ << endl;
         //=======================================================================================================//
         //        Retrieving gen jets          //
@@ -1059,11 +1290,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             jets = tmpJets; 
             nGoodJets = jets.size();
 	    //if(fileName.Index("TT") >= 0) cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQTTbar"<< nGoodJets << " SF: "<<TTbarSF.getTTbarSF(nGoodJets) << "weight" << weight << endl;
-	    if(fileName.Index("TT") >= 0 && (systematics == 3)) {
-		if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
-		else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);
-	    }
-	    else if(fileName.Index("TT") >= 0) weight /= TTbarSF.getTTbarSF(nGoodJets);
+	   // if(fileName.Index("TT") >= 0 && (systematics == 3)) {
+	   //	if(direction > 0 ) weight /= TTbarSF.getTTbarSFHigh(nGoodJets);
+	   //	else if(direction < 0 ) weight /= TTbarSF.getTTbarSFLow(nGoodJets);
+	   // }
+	   // else if(fileName.Index("TT") >= 0) weight /= TTbarSF.getTTbarSF(nGoodJets);
             nGoodJets_20 = jets_20.size();
             sort(jets.begin(), jets.end(), JetDescendingOrder);
             sort(jets_20.begin(), jets_20.end(), JetDescendingOrder);
@@ -1096,8 +1327,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             genJetsHT = 0.;
             for (unsigned short i(0); i < nGoodGenJets; i++){
                 genJetsHT += genJets[i].v.Pt();  
-                if(nGoodGenJets>=1) genHadronicR += genJets[i].v;  
+                if(nGoodGenJets>=1){ genHadronicR += genJets[i].v;  
+             //   if(genEWKBoson.Pt()>0. && genEWKBoson.Pt()> 50. ) cout << "px = " << genJets[i].v.Px() << " , py = " <<  genJets[i].v.Py() << " , pt = " <<  genJets[i].v.Pt() << " , eta = " <<  genJets[i].v.Rapidity() << "\n";
+                }
             }
+
+           // if(nGoodGenJets>=1 && genEWKBoson.Pt()>0. && genEWKBoson.Pt()> 50. ){ 
+           //    cout << "Zpx = " << genEWKBoson.Px()  <<  " , Zpy = " << genEWKBoson.Py() <<  " , Zpt = " << genEWKBoson.Pt() << "\n";
+           //    cout << "hadronicR.Pt = " << genHadronicR.Pt()  << ", JZB = " << genHadronicR.Pt()-genEWKBoson.Pt() << "\n";
+           // }
+           // cout << "------------------------" << "\n";
+ 
             sort(genJets_20.begin(), genJets_20.end(), JetDescendingOrder);
 
         }
@@ -1146,6 +1386,70 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         // cout << "passesgenLeptonCut : " << passesgenLeptonCut << endl;
      
         if (hasGenInfo){
+
+            // 2016 
+            if(ngenLeptons >= 2){
+                 genPhi_acop = PI - deltaPhi(genLeptons[0].v, genLeptons[1].v);
+                 if(genLeptons[0].charge < 0) genCosthetastar = tanh( (genLeptons[0].v.Eta() - genLeptons[1].v.Eta())/2. );
+                 else genCosthetastar = tanh( (genLeptons[1].v.Eta() - genLeptons[0].v.Eta())/2. );
+                 genSinthetastar = sqrt(1. - genCosthetastar*genCosthetastar);
+                 //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+                 genPhistar = tan(genPhi_acop/2.) * genSinthetastar;
+                 // cout << genPhistar << "\n";
+            }
+
+            if(passesgenLeptonCutNoMass){
+
+               if(genEWKBoson.M() >= 15. && genEWKBoson.M() < 50.) { 
+                    fill(genZPt_Zinc0jetM15_50, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    //fill(genPhistar_Zinc0jetM15_50, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 50. && genEWKBoson.M() < 71.) { 
+                    fill(genZPt_Zinc0jetM50_71, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    //fill(genPhistar_Zinc0jetM50_71, genPhistar, commonGenWeight, EvtWeights);
+                }
+               // for Higgs comparison
+               if(genEWKBoson.M() > 115. && genEWKBoson.M() < 135.) fill(genZPt_Zinc0jetM115_135, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+               if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130.) { 
+                    fill(genZPt_Zinc0jetM111_130, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc0jetM111_130, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 130. && genEWKBoson.M() < 170.) { 
+                    fill(genZPt_Zinc0jetM130_170, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                     fill(genPhistar_Zinc0jetM130_170, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 170. && genEWKBoson.M() < 250.) {
+                    fill(genZPt_Zinc0jetM170_250, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc0jetM170_250, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 250. && genEWKBoson.M() < 320.) { 
+                    fill(genZPt_Zinc0jetM250_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc0jetM250_3, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if(genEWKBoson.M() >= 320. && genEWKBoson.M() < 3000.) { 
+                    fill(genZPt_Zinc0jetM320_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                   // fill(genPhistar_Zinc0jetM320_3, genPhistar, commonGenWeight, EvtWeights);
+                }
+               if (nGoodGenJets >= 1){
+                     if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130.) { 
+                        fill(genZPt_Zinc1jetM111_130, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM111_130, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                     if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 170.) {
+                        fill(genZPt_Zinc1jetM130_170, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM130_170, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                    if(genEWKBoson.M() >= 170. && genEWKBoson.M() < 250.) { 
+                        fill(genZPt_Zinc1jetM170_250, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM170_250, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                     if(genEWKBoson.M() >= 250. && genEWKBoson.M() < 3000.) {
+                        fill(genZPt_Zinc1jetM250_3, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                        fill(genPhistar_Zinc1jetM250_3, genPhistar, commonGenWeight, EvtWeights);
+                      }
+                }
+            } // no mass cut
+
             if (passesgenLeptonCut){
                 //cout << "Selected at gen level" << endl;
                 nGenEventsVInc0Jets++;
@@ -1160,7 +1464,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(genZNGoodJets_Zexc, nGoodGenJets, commonGenWeight*RatioValue, EvtWeights);
                 fill(genZNGoodJets_Zinc, 0., commonGenWeight, EvtWeights);
                 fill(genZMass_Zinc0jet, genEWKBoson.M(), commonGenWeight, EvtWeights);
+                fill(genPhistar_Zinc0jet, genPhistar, commonGenWeight, EvtWeights);
                 fill(genZPt_Zinc0jet, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
+                fill(genZPt_Zinc0jet_new, genEWKBoson.Pt(), commonGenWeight, EvtWeights);  // keep gen original
                 fill(genZRapidity_Zinc0jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
                 fill(genZEta_Zinc0jet, genEWKBoson.Eta(), commonGenWeight, EvtWeights);
                 fill(genlepPt_Zinc0jet, genLeptons[0].v.Pt(), commonGenWeight, EvtWeights);
@@ -1275,6 +1581,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     }
 
                     fill(genZNGoodJets_Zinc, 1., commonGenWeight, EvtWeights);
+                    fill(genPhistar_Zinc1jet, genPhistar, commonGenWeight, EvtWeights);
                     fill(genZPt_Zinc1jet, genEWKBoson.Pt(), commonGenWeight, EvtWeights);
                     fill(genZRapidity_Zinc1jet, genEWKBoson.Rapidity(), commonGenWeight, EvtWeights);
                     fill(genZAbsRapidity_Zinc1jet, fabs(genEWKBoson.Rapidity()), commonGenWeight, EvtWeights);
@@ -1287,11 +1594,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
                         RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetBinContent(binNumber);
                         double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-                        if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
-                        else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR +EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
-                        else RatioValue2 = 1.;     
+                        RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1);    
+                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
+                        RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);      
                     }
                     // cout << RatioValue1 << " , " << RatioValue1 << "\n";
 
@@ -1302,7 +1607,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genFirstJetRapidityHigh_Zinc1jet, fabs(genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc1jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
                     //fill(genJetsHT_2_Zinc1jet, genJetsHT, commonGenWeight, EvtWeights);
-		    fill(genVisPt_Zinc1jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc1jetQun, fabs((genJets[0].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
                     fill(genSumZJetRapidity_Zinc1jet, 0.5*fabs(genEWKBoson.Rapidity()+genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genDifZJetRapidity_Zinc1jet, 0.5*fabs(genEWKBoson.Rapidity()-genJets[0].v.Rapidity()), commonGenWeight, EvtWeights);
                     if (nGoodGenJets == 1){
@@ -1446,20 +1751,18 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 			double binNumber = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(fabs(jets[1].v.Eta()));
 			RatioValue =  SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
 			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
-                        else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
-                        else RatioValue2 = 1.;             
+			RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
+                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
+                        RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
+             
                     }
-                    
- 
+
                     fill(genSecondJetEta_Zinc2jet, fabs(genJets[1].v.Eta()), commonGenWeight*RatioValue, EvtWeights);
                     fill(genSecondJetAbsRapidity_Zinc2jet, fabs(genJets[1].v.Rapidity()), commonGenWeight*RatioValue, EvtWeights);
                     fill(genSecondJetEtaHigh_Zinc2jet, fabs(genJets[1].v.Eta()), commonGenWeight, EvtWeights);
                     fill(genSecondJetRapidityHigh_Zinc2jet, fabs(genJets[1].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc2jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
-		    fill(genVisPt_Zinc2jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc2jetQun, fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
                     fill(genptBal_Zinc2jet, genJet1Plus2PlusZ.Pt(), commonGenWeight, EvtWeights);
                     fill(gendPhiJets_Zinc2jet, deltaPhi(genJets[0].v, genJets[1].v), commonGenWeight, EvtWeights);
                     fill(genBestdPhiJets_Zinc2jet, deltaPhi(genBestTwoJets.first, genBestTwoJets.second), commonGenWeight, EvtWeights);
@@ -1625,9 +1928,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                       else RatioValue1 = 1.;
                       if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;  
 
-                       double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+genEWKBoson).Pt()));
+                       double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()));
                        //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
-                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
                     }
@@ -1638,7 +1941,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     fill(genThirdJetEtaHigh_Zinc3jet, fabs(genJets[2].v.Eta()), commonGenWeight, EvtWeights);
                     fill(genThirdJetRapidityHigh_Zinc3jet, fabs(genJets[2].v.Rapidity()), commonGenWeight, EvtWeights);
                     fill(genJetsHT_Zinc3jet, genJetsHT, commonGenWeight*RatioValue1, EvtWeights);
-		    fill(genVisPt_Zinc3jetQun, fabs((genHadronicR+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
+		    fill(genVisPt_Zinc3jetQun, fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), commonGenWeight*RatioValue2, EvtWeights);
  
                     /////Azimuth cross check//////////////////////////////////
                     fill(genDPhiZFirstJet_Zinc3jet, fabs(genEWKBoson.DeltaPhi(genJets[0].v)),commonGenWeight, EvtWeights);
@@ -1719,7 +2022,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                       
                        //if(EWKBoson.Pt()<= 50){   //check if gen or reco!!!!
                           double binNumber1 = JZB_ptLow_2Hratio_fit->GetXaxis()->FindBin(hadronicR.Pt()-EWKBoson.Pt());
-		          if((hadronicR.Pt()-EWKBoson.Pt()) > -50 && (hadronicR.Pt()-EWKBoson.Pt()) < 200. && EWKBoson.Pt()<= 50. ) RatioValue1 =  JZB_ptLow_2Hratio_fit->GetBinContent(binNumber1);
+		          if((hadronicR.Pt()-EWKBoson.Pt()) > -50 && (hadronicR.Pt()-EWKBoson.Pt()) < 200.) RatioValue1 =  JZB_ptLow_2Hratio_fit->GetBinContent(binNumber1);
                           else RatioValue1 = 1.;
                           if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;
                           //cout << RatioValue1 << "\n";
@@ -1727,8 +2030,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                       // }
                        //if(EWKBoson.Pt()> 50){ 
                           double binNumber2 = JZB_ptHigh_2Hratio_fit->GetXaxis()->FindBin(hadronicR.Pt()-EWKBoson.Pt());
-		         if(EWKBoson.Pt() > 50.) RatioValue2 =  JZB_ptHigh_2Hratio_fit->GetBinContent(binNumber2);
-                         else RatioValue2 = 1.;
+		          RatioValue2 =  JZB_ptHigh_2Hratio_fit->GetBinContent(binNumber2);
                        //}
 		     }
                     // cout << hadronicR.Pt()-EWKBoson.Pt() << " , " << RatioValue << " , " << RatioValue1 << " , " << RatioValue2 << "\n";
@@ -1757,7 +2059,72 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
         if (hasRecoInfo && passesLeptonChargeCut && passesTauCut) {
             fill(ZMassFrom60_Zinc0jet, (leptons[0].v + leptons[1].v).M(), weight);
         }
-       //  cout << passesLeptonCut << " , " << (!bTagJetFound || !rejectBTagEvents)  << "\n";
+
+        // 2016 
+        if(nLeptons >= 2){
+            phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
+            if(leptons[0].charge < 0) costhetastar = tanh( (leptons[0].v.Eta() - leptons[1].v.Eta())/2. );
+            else costhetastar = tanh( (leptons[1].v.Eta() - leptons[0].v.Eta())/2. );
+            sinthetastar = sqrt(1. - costhetastar*costhetastar);
+            //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+            phistar = tan(phi_acop/2.) * sinthetastar;
+        }
+        //  cout << passesLeptonCut << " , " << (!bTagJetFound || !rejectBTagEvents)  << "\n";
+        if (hasRecoInfo && passesLeptonCutNoMass && (!bTagJetFound || !rejectBTagEvents)) {   // no Mass cut, fill the whole range
+           fill(Mass_Zinc0jet, EWKBoson.M(), weight);  
+
+            if(EWKBoson.M() >= 15. && EWKBoson.M() < 50.) { 
+                 fill(ZPt_Zinc0jetM15_50, EWKBoson.Pt(), weight);
+                 // fill(Phistar_Zinc0jetM15_50, phistar, weight);
+             }
+            if(EWKBoson.M() >= 50. && EWKBoson.M() < 71.) { 
+                 fill(ZPt_Zinc0jetM50_71, EWKBoson.Pt(), weight);
+                 // fill(Phistar_Zinc0jetM15_50, phistar, weight);
+             }
+            // for Higggs comparison
+            if(EWKBoson.M() > 115. && EWKBoson.M() < 135.) fill(ZPt_Zinc0jetM115_135, EWKBoson.Pt(), weight);
+            if(EWKBoson.M() >= 111. && EWKBoson.M() < 130.) { 
+                 fill(ZPt_Zinc0jetM111_130, EWKBoson.Pt(), weight);
+                 fill(Phistar_Zinc0jetM111_130, phistar, weight);
+             }
+            if(EWKBoson.M() >= 130. && EWKBoson.M() < 170.) { 
+                 fill(ZPt_Zinc0jetM130_170, EWKBoson.Pt(), weight);
+                 fill(Phistar_Zinc0jetM130_170, phistar, weight);
+             }  
+            if(EWKBoson.M() >= 170. && EWKBoson.M() < 250.) {
+                  fill(ZPt_Zinc0jetM170_250, EWKBoson.Pt(), weight);
+                  fill(ZPt_Zinc0jetM170_250_new, ZPtviaPhistar(phistar), weight); // modify via ptstar
+                  fill(Phistar_Zinc0jetM170_250, phistar, weight);
+             }
+            if(EWKBoson.M() >= 250. && EWKBoson.M() < 320.) { 
+                 fill(ZPt_Zinc0jetM250_3, EWKBoson.Pt(), weight);
+                 fill(Phistar_Zinc0jetM250_3, phistar, weight);
+             }
+            if(EWKBoson.M() >= 320. && EWKBoson.M() < 3000.) { 
+                 fill(ZPt_Zinc0jetM320_3, EWKBoson.Pt(), weight);
+               //  fill(Phistar_Zinc0jetM320_3, phistar, weight);
+             }
+            if (nGoodJets >= 1){ 
+                  if(EWKBoson.M() >= 111. && EWKBoson.M() < 130.) { 
+                      fill(ZPt_Zinc1jetM111_130, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM111_130, phistar, weight);
+                  }
+                  if(EWKBoson.M() >= 130. && EWKBoson.M() <= 170.) {
+                      fill(ZPt_Zinc1jetM130_170, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM130_170, phistar, weight);
+                  }  
+                  if(EWKBoson.M() >= 170. && EWKBoson.M() < 250.) {
+                      fill(ZPt_Zinc1jetM170_250, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM170_250, phistar, weight);
+                  }
+                 if(EWKBoson.M() >= 250. && EWKBoson.M() < 3000.) { 
+                      fill(ZPt_Zinc1jetM250_3, EWKBoson.Pt(), weight);
+                      fill(Phistar_Zinc1jetM250_3, phistar, weight);
+                  }  
+
+            } //if (nGoodJets >= 1)
+        }
+
         if (hasRecoInfo && passesLeptonCut && (!bTagJetFound || !rejectBTagEvents)) { 
             //=======================================================================================================//
 
@@ -1777,7 +2144,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             nEventsVInc0Jets++;
             nEffEventsVInc0Jets += weight;
             fill(ZNGoodJetsNVtx_Zexc, nGoodJets, EvtVtxCnt  , weight);
+            fill(ZNGoodJets20NVtx_Zexc, nGoodJets_20, EvtVtxCnt, weight);
             fill(ZNGoodJets_Zinc, 0., weight);
+            if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 0., weight);
+            if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 0., weight);
+            if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 0., weight);
+            if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 0., weight);
 
 	    double RatioValue = 1;
 	    if(UnfoldUnc){
@@ -1786,12 +2158,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	    }
 
             fill(ZNGoodJets_Zexc, nGoodJets, weight*RatioValue);
-	    if(nEvents % 2) fill(ZNGoodJets_Zexc_Odd, nGoodJets, weight);
-	    else fill(ZNGoodJets_Zexc_Even, nGoodJets, weight);
-
             fill(ZNGoodJets_Zinc_NoWeight, 0.);
             fill(ZMass_Zinc0jet, EWKBoson.M(), weight);
             fill(ZPt_Zinc0jet, EWKBoson.Pt(), weight);
+            fill(ZPt_Zinc0jet_new, ZPtviaPhistar(phistar), weight); // modify rec via phistar
+            
+            //cout << ZPtviaPhistar(phistar) << " , " << phistar << "\n";
+
+
             fill(ZRapidity_Zinc0jet, EWKBoson.Rapidity(), weight);
             fill(ZEta_Zinc0jet, EWKBoson.Eta(), weight);
             fill(ZEtaUpTo5_Zinc0jet, EWKBoson.Eta(), weight);
@@ -1809,6 +2183,16 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             fill(VisPt_2_Zinc0jetQun, EWKBoson.Pt(), weight);
 	    if(nEvents % 2) fill(VisPt_Zinc0jetQun_Odd, EWKBoson.Pt(), weight);
 	    else fill(VisPt_Zinc0jetQun_Even, EWKBoson.Pt(), weight);
+/*
+            // 2016 
+            phi_acop = PI - deltaPhi(leptons[0].v, leptons[1].v);
+            if(leptons[0].charge < 0) costhetastar = tanh( (leptons[0].v.Eta() - leptons[1].v.Eta())/2. );
+            else costhetastar = tanh( (leptons[1].v.Eta() - leptons[0].v.Eta())/2. );
+            sinthetastar = sqrt(1. - costhetastar*costhetastar);
+            //  cout << "phi_acop = " << phi_acop << " , sinthetastar = " << sinthetastar << "\n";
+            phistar = tan(phi_acop/2.) * sinthetastar;
+*/             
+            fill(Phistar_Zinc0jet, phistar, weight);
 
             if (nGoodJets == 0){
                 //fill(TruePU_0, EvtPuCntTruth, weight);
@@ -1906,6 +2290,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 }
 
                 fill(ZNGoodJets_Zinc, 1., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 1., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 1., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 1., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 1., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 1.);
                 fill(ZPt_Zinc1jet, EWKBoson.Pt(), weight);
                 fill(lepPt_Zinc1jet, leptons[0].v.Pt(), weight);
@@ -1921,20 +2310,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(ZEta_Zinc1jet, EWKBoson.Eta(), weight);
                 fill(ZEtaUpTo5_Zinc1jet, EWKBoson.Eta(), weight);
                 fill(SpTLeptons_Zinc1jet, SpTsub(leptons[0].v, leptons[1].v), weight);
+                fill(Phistar_Zinc1jet, phistar, weight);
 
 
 		double RatioValue = 1.;
 		double RatioValue1 = 1.;
 		double RatioValue2 = 1.;		
 		if(UnfoldUnc){
-		        double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
-                        RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetBinContent(binNumber);
-                        double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-                        if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
-                        else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
-                        else RatioValue2 = 1.;  
+		    double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
+		    RatioValue = FirstJetAbsRapidity_2_Zinc1jetHratio_fit->GetBinContent(binNumber);
+		    double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
+		    RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1);
+                    double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
+                    RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
 		}
 
                 fill(FirstJetEta_Zinc1jet, fabs(jets[0].v.Eta()), weight*RatioValue);
@@ -1948,16 +2336,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(FirstJetEtaFull_Zinc1jet, jets[0].v.Eta(), weight);
                 fill(FirstJetPhi_Zinc1jet, jets[0].v.Phi(), weight);
                 fill(JetsHT_Zinc1jet, jetsHT, weight*RatioValue1);
-                if(nEvents % 2) fill(JetsHT_Zinc1jet_Odd, jetsHT, weight*RatioValue1);
-		else fill(JetsHT_Zinc1jet_Even, jetsHT, weight*RatioValue1);
                 fill(JetsHT_2_Zinc1jet, jetsHT, weight);
                 fill(dEtaBosonJet_Zinc1jet, fabs(jets[0].v.Eta() - EWKBoson.Eta()), weight);
                 fill(SumZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()+jets[0].v.Rapidity()), weight);
                 fill(DifZJetRapidity_Zinc1jet, 0.5*fabs(EWKBoson.Rapidity()-jets[0].v.Rapidity()), weight);
-		fill(VisPt_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc1jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc1jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc1jetQun_Odd, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc1jetQun_Even, fabs((jets[0].v+EWKBoson).Pt()), weight*RatioValue2);
 
                 for (unsigned short i(0); i < nGoodJets; i++) {
                     double trans_mass = jets[i].v.Mt();
@@ -2109,6 +2495,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                 TLorentzVector jet1Plus2PlusZ = jet1Plus2 + EWKBoson;
                 fill(ZNGoodJets_Zinc, 2., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 2., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 2., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 2., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 2., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 2.);
                 fill(TwoJetsPtDiff_Zinc2jet, jet1Minus2.Pt(), weight);
                 fill(BestTwoJetsPtDiff_Zinc2jet, bestJet1Minus2.Pt(), weight);
@@ -2134,26 +2525,22 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		double RatioValue1 = 1.;
                 double RatioValue2 = 1.;
 		if(UnfoldUnc){
-		        double binNumber = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(fabs(jets[1].v.Eta()));
-			RatioValue =  SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
-			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
-                        else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
-                        else RatioValue2 = 1.;
+		    double binNumber = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(fabs(jets[1].v.Eta()));
+		    RatioValue = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
+		    double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
+		    RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
+                    double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
+                    RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2);
 		}
-                //cout << 
-                //if (jetsHT<61.) cout << jetsHT  << " , "<< RatioValue1 << "\n";
 
                 if (EvtVtxCnt < 14) fill(JetsMassLowPU_Zinc2jet, jet1Plus2.M(), weight);
                 else if (EvtVtxCnt < 18) fill(JetsMassMidPU_Zinc2jet, jet1Plus2.M(), weight);
                 else fill(JetsMassHigPU_Zinc2jet, jet1Plus2.M(), weight);
                 fill(ZPt_Zinc2jet, EWKBoson.Pt(), weight);
-		fill(VisPt_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc2jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc2jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc2jetQun_Odd, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc2jetQun_Even, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()), weight*RatioValue2);
                 fill(ZRapidity_Zinc2jet, EWKBoson.Rapidity(), weight);
                 fill(ZEta_Zinc2jet, EWKBoson.Eta(), weight);
                 fill(SpTLeptons_Zinc2jet, SpTsub(leptons[0].v, leptons[1].v), weight);
@@ -2390,6 +2777,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 nEventsVInc3Jets++;
                 nEffEventsVInc3Jets += weight;
                 fill(ZNGoodJets_Zinc, 3., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 3., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 3., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 3., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 3., weight);
                 fill(ZNGoodJets_Zinc_NoWeight, 3.);
 
 		double RatioValue = 1.;
@@ -2404,13 +2795,13 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     else RatioValue1 = 1.;
                     if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;                    
  
-                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()));
                     //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2);
-                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
 		}
-
+                
                 //cout << RatioValue1 << "\n";
 
                 fill(ThirdJetEta_Zinc3jet, fabs(jets[2].v.Eta()), weight*RatioValue);
@@ -2427,11 +2818,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(JetsHT_Zinc3jet, jetsHT, weight*RatioValue1);
                 if(nEvents % 2) fill(JetsHT_Zinc3jet_Odd, jetsHT, weight*RatioValue1);
                 else fill(JetsHT_Zinc3jet_Even, jetsHT, weight*RatioValue1);
-                fill(JetsHT_2_Zinc3jet, jetsHT, weight*RatioValue1);
-		fill(VisPt_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		fill(VisPt_2_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		if(nEvents % 2) fill(VisPt_Zinc3jetQun_Odd, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
-		else fill(VisPt_Zinc3jetQun_Even, fabs((hadronicR+EWKBoson).Pt()), weight*RatioValue2);
+                fill(JetsHT_2_Zinc3jet, jetsHT, weight);
+		fill(VisPt_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
+		fill(VisPt_2_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
+		if(nEvents % 2) fill(VisPt_Zinc3jetQun_Odd, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
+		else fill(VisPt_Zinc3jetQun_Even, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()), weight*RatioValue2);
+
 
                 ///Azimuth cross check
                 fill(DPhiZFirstJet_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)),weight);
@@ -2479,6 +2871,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 4) fill(FourthJetPt_Zinc4jet, jets_20[3].v.Pt(), weight);
             if (nGoodJets >= 4){
                 fill(ZNGoodJets_Zinc, 4., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 4., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 4., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 4., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 4., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 4.);
                 fill(FourthJetEta_Zinc4jet, fabs(jets[3].v.Eta()), weight);
                 fill(FourthJetAbsRapidity_Zinc4jet, fabs(jets[3].v.Rapidity()), weight);
@@ -2497,6 +2894,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 5) fill(FifthJetPt_Zinc5jet, jets_20[4].v.Pt(), weight);
             if (nGoodJets >= 5){
                 fill(ZNGoodJets_Zinc, 5., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 5., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 5., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 5., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 5., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 5.);
                 fill(FifthJetEta_Zinc5jet, fabs(jets[4].v.Eta()), weight);
                 fill(FifthJetAbsRapidity_Zinc5jet, fabs(jets[4].v.Rapidity()), weight);
@@ -2515,6 +2917,11 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodJets_20 >= 6) fill(SixthJetPt_Zinc6jet, jets_20[5].v.Pt(), weight);
             if (nGoodJets >= 6){
                 fill(ZNGoodJets_Zinc, 6., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 6., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 6., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 6., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 6., weight);
+
                 fill(ZNGoodJets_Zinc_NoWeight, 6.);
                 fill(SixthJetEta_Zinc6jet, fabs(jets[5].v.Eta()), weight);
                 fill(SixthJetEtaHigh_Zinc6jet, fabs(jets[5].v.Eta()), weight);
@@ -2531,6 +2938,10 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
             if (nGoodJets >= 7){
                 fill(ZNGoodJets_Zinc, 7., weight);
+                if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 7., weight);
+                if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 7., weight);
+                if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 7., weight);
+                if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 7., weight);
                 if (nGoodJets == 7 ){
                     //fill(TruePU_7, EvtPuCntTruth, weight);
                     //fill(PU_7, EvtPuCnt, weight);
@@ -2539,12 +2950,17 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
             if (nGoodJets >= 8){
                 fill(ZNGoodJets_Zinc, 8., weight);
+               if(EvtVtxCnt< 10) fill(ZNGoodJets_Zinc_nvtx10, 8., weight);
+               if(EvtVtxCnt>= 10 && EvtVtxCnt < 20) fill(ZNGoodJets_Zinc_nvtx20, 8., weight);
+               if(EvtVtxCnt>= 20 && EvtVtxCnt < 30) fill(ZNGoodJets_Zinc_nvtx30, 8., weight);
+               if(EvtVtxCnt>= 30) fill(ZNGoodJets_Zinc_nvtx45, 8., weight);
             }
 	    
 	    if (nGoodJets >= 1){
+
 		    double RatioValue = 1.;
                     double RatioValue1 = 1.;
-		    double RatioValue2 = 1.;
+                    double RatioValue2 = 1.;
 		    if(UnfoldUnc){
 		       double binNumber = JZB_2Hratio_fit->GetXaxis()->FindBin(hadronicR.Pt()-EWKBoson.Pt());
 		       RatioValue =  JZB_2Hratio_fit->GetBinContent(binNumber);
@@ -2556,7 +2972,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 
                        double binNumber2 = JZB_ptHigh_2Hratio_fit->GetXaxis()->FindBin(hadronicR.Pt()-EWKBoson.Pt());
 		       RatioValue2 =  JZB_ptHigh_2Hratio_fit->GetBinContent(binNumber2);
+                     
 		    }
+
 
 	        fill(HadRecoil, hadronicR.Pt(),weight);
 		fill(JZB, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue);
@@ -2573,9 +2991,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		}
 		else{
 		    fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
-		    fill(JZB_ptHigh_2, hadronicR.Pt()-EWKBoson.Pt(), weight);
+		    fill(JZB_ptHigh_2, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
 		    if(nEvents % 2) fill(JZB_ptHigh_Odd, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
-		    else fill(JZB_ptHigh_Even, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2); //was filling JZB_ptHigh before Jan 19!
+		    else fill(JZB_ptHigh, hadronicR.Pt()-EWKBoson.Pt(), weight*RatioValue2);
 		}
 	    }
             //=======================================================================================================//
@@ -2599,7 +3017,151 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             }
 
             //-- EWKBoson Mass and jet multiplicity
+
+            if (passesgenLeptonCutNoMass && passesLeptonCutNoMass) {
+ 
+               
+		double RatioValue = 1.;
+
+	            double binNumber = MuonResolutionCorr->GetXaxis()->FindBin(leptons[0].v.Pt());
+		    RatioValue =  MuonResolutionCorr->GetBinContent(binNumber);
+                 // cout << RatioValue << "\n";
+ 	        if(leptons[0].v.Pt()>20. && leptons[0].v.Pt()<50.)  RatioValue = 1. - (RatioValue - 0.015); // reducing by 
+                //leptons[0].v.Pt() == (leptons[0].v.Pt())*RatioValue;
+
+                  
+                  if(leptons[0].v.Pt() >= 50.) RatioValue = (1.-0.003); //RatioValue =(1. - 0.02) ;
+
+                 // cout << RatioValue << "\n";
+
+
+                 fill(lepResolution_pt, leptons[0].v.Pt(), fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt())/genLeptons[0].v.Pt(), weight );
+
+                 fill(lepResolution_nvtx, EvtVtxCnt, fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt())/genLeptons[0].v.Pt(), weight );
+
+                 fill(lepResolution_pt_rel, leptons[0].v.Pt(), (genLeptons[0].v.Pt() - leptons[0].v.Pt()*(1.-0.003))/genLeptons[0].v.Pt()*(1.-0.003), weight );
+
+
+                 if(genEWKBoson.M() >= 15. && genEWKBoson.M() < 50. && EWKBoson.M() >= 15. && EWKBoson.M() < 50.){
+ 
+                    fill(hresponseZPt_Zinc0jetM15_50, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    // fill(hresponsePhistar_Zinc0jetM15_50, phistar, genPhistar, weight);
+                 }
+                 if(genEWKBoson.M() >= 50. && genEWKBoson.M() < 71. && EWKBoson.M() >= 50. && EWKBoson.M() < 71.){
+ 
+                    fill(hresponseZPt_Zinc0jetM50_71, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    // fill(hresponsePhistar_Zinc0jetM50_71, phistar, genPhistar, weight);
+                 }
+
+                 // for Higgs comparison
+                 if(genEWKBoson.M() > 115. && genEWKBoson.M() < 135. && EWKBoson.M() > 115. && EWKBoson.M() < 135.)
+                 fill(hresponseZPt_Zinc0jetM115_135, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+
+                 if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130. && EWKBoson.M() >= 111. && EWKBoson.M() < 130.){
+ 
+                    fill(hresponseZPt_Zinc0jetM111_130, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    fill(hresponsePhistar_Zinc0jetM111_130, phistar, genPhistar, weight);
+
+                    fill(deltaRMuRecGen_lead_lowM, deltaR(genLeptons[0].v, leptons[0].v), weight);
+                    fill(deltaRMuRecGen_sublead_lowM, deltaR(genLeptons[1].v, leptons[1].v), weight);
+                    // fill(deltaPtMuRecGen_lead_lowM, fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt()), weight);
+                    //fill(deltaPtMuRecGen_sublead_lowM, fabs(genLeptons[1].v.Pt() - leptons[1].v.Pt()), weight);
+                    fill(deltaPtMuRecGen_lead_lowM, (genLeptons[0].v.Pt() - leptons[0].v.Pt())/genLeptons[0].v.Pt(), weight);
+                    fill(deltaPtMuRecGen_sublead_lowM, (genLeptons[1].v.Pt() - leptons[1].v.Pt())/genLeptons[1].v.Pt(), weight);
+
+                 }
+
+  
+                 if(genEWKBoson.M() >= 130. && genEWKBoson.M() < 170. && EWKBoson.M() >= 130. && EWKBoson.M() < 170.){
+ 
+                    fill(hresponseZPt_Zinc0jetM130_170, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    fill(hresponsePhistar_Zinc0jetM130_170, phistar, genPhistar, weight);
+
+
+                 }
+
+                 if(genEWKBoson.M() >= 170. && genEWKBoson.M()  < 250. && EWKBoson.M() >= 170. && EWKBoson.M() < 250.){
+                 //   if(genEWKBoson.M() >= 170. && genEWKBoson.M()  < 250. && EWKBoson.M() >= 170. && EWKBoson.M() < 250.){
+ 
+                    fill(hresponseZPt_Zinc0jetM170_250, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                    fill(hresponsePhistar_Zinc0jetM170_250, phistar, genPhistar, weight);
+                   // fill(hresponseZPt_Zinc0jetM170_250_new, ZPtviaPhistar(phistar), genEWKBoson.Pt(), weight); //
+                    fill(hresponseZPt_Zinc0jetM170_250_new, phistar, genEWKBoson.Pt(), weight); //
+
+                 }
+
+
+                 if(genEWKBoson.M() >= 250. && genEWKBoson.M() < 320. && EWKBoson.M() >= 250. && EWKBoson.M() < 320.){
+ 
+                    fill(hresponseZPt_Zinc0jetM250_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);                   
+                    fill(hresponsePhistar_Zinc0jetM250_3, phistar, genPhistar, weight);
+                
+                    fill(deltaPtMuRecGen_lead_highM, (genLeptons[0].v.Pt() - leptons[0].v.Pt())/genLeptons[0].v.Pt(), weight);
+                    fill(deltaPtMuRecGen_sublead_highM, (genLeptons[1].v.Pt() - leptons[1].v.Pt())/genLeptons[1].v.Pt(), weight);
+ 
+                    fill(deltaRMuRecGen_lead_highM, deltaR(genLeptons[0].v, leptons[0].v), weight);
+                    fill(deltaRMuRecGen_sublead_highM, deltaR(genLeptons[1].v, leptons[1].v), weight);
+                    if(deltaR(genLeptons[0].v, leptons[0].v) <0.05 && deltaR(genLeptons[1].v, leptons[1].v) <0.05) fill(hresponseZPt_Zinc0jetM250_3_dR, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                   // if(fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt()) <4. && fabs(genLeptons[1].v.Pt() - leptons[1].v.Pt()) <4.) fill(hresponseZPt_Zinc0jetM170_250_dPt, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+
+                    if(leptons[0].v.Pt()<200. && leptons[1].v.Pt()<200.) fill(hresponseZPt_Zinc0jetM250_3_dPt, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+
+/*
+
+                  if ( fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt()) >4. && genEWKBoson.Pt() > 0.1 && genEWKBoson.Pt() < 2. ) {
+                  cout << "abs Diff= " << fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt()) << " , eta0(rec) = " <<  leptons[0].v.Eta() << " , eta1(rec) = " <<  leptons[1].v.Eta() <<
+ " , phi0(rec) = " <<  leptons[0].v.Phi() << " , phi1(rec) = " <<  leptons[1].v.Phi() << " , pt0(rec) = " <<  leptons[0].v.Pt() << " , pt1(rec) = " <<  leptons[1].v.Pt() << "\n";
+ 
+ 
+                  cout << "abs Diff= " << fabs(genLeptons[0].v.Pt() - leptons[0].v.Pt()) << " , eta0(gec) = " <<  genLeptons[0].v.Eta() << " , eta1(gen) = " <<  genLeptons[1].v.Eta() <<
+ " , phi0(gen) = " <<  genLeptons[0].v.Phi() << " , phi1(gen) = " <<  genLeptons[1].v.Phi() << " , pt0(gen) = " <<  genLeptons[0].v.Pt() << " , pt1(gen) = " <<  genLeptons[1].v.Pt() << "\n";
+ 
+                  cout << "Mass(rec)= " << EWKBoson.M() << " , Mass(gen)= " << genEWKBoson.M() << "\n";
+ 
+                  cout << "------------------ small ptz gen" << "\n";
+      }
+
+*/
+
+                 }
+
+
+                 if(genEWKBoson.M() >= 320. && genEWKBoson.M() < 3000. && EWKBoson.M() >= 320. && EWKBoson.M() < 3000.){
+ 
+                    fill(hresponseZPt_Zinc0jetM320_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);                   
+                   // fill(hresponsePhistar_Zinc0jetM320_3, phistar, genPhistar, weight);
+                 }
+
+                 if (nGoodGenJets >= 1 && nGoodJets >= 1){ // inclusive one jet
+                       if(genEWKBoson.M() >= 111. && genEWKBoson.M() < 130. && EWKBoson.M() >= 111. && EWKBoson.M() < 130.){ 
+                          fill(hresponseZPt_Zinc1jetM111_130, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM111_130, phistar, genPhistar, weight);
+                       }
+                       if(genEWKBoson.M() >= 130. && genEWKBoson.M() <= 170. && EWKBoson.M() >= 130. && EWKBoson.M() <= 170.){
+                          fill(hresponseZPt_Zinc1jetM130_170, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM130_170, phistar, genPhistar, weight);
+                       }
+                       if(genEWKBoson.M() >= 170. && genEWKBoson.M() < 250. && EWKBoson.M() >= 170. && EWKBoson.M() < 250.){
+                          fill(hresponseZPt_Zinc1jetM170_250, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM170_250, phistar, genPhistar, weight);
+                       }
+                       if(genEWKBoson.M() >= 250. && genEWKBoson.M() < 3000. && EWKBoson.M() >= 250. && EWKBoson.M() < 3000.){
+                          fill(hresponseZPt_Zinc1jetM250_3, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                          fill(hresponsePhistar_Zinc1jetM250_3, phistar, genPhistar, weight);
+                       }
+  
+                 }
+            } // pass gen and reco lep cuts
+
+
             if (passesgenLeptonCut && passesLeptonCut) {
+
+                fill(hresponselep0Pt_Zinc0jet, leptons[0].v.Pt(), genLeptons[0].v.Pt(), weight);
+                fill(hresponselep1Pt_Zinc0jet, leptons[1].v.Pt(), genLeptons[1].v.Pt(), weight);
+
+                fill(Phistar_Zpt, genEWKBoson.Pt(), phistar, weight);
+                fill(Phistar_Zpt_test, ZPtviaPhistar(phistar), phistar, weight);
+
 
 		double RatioValue = 1.;
 		if(UnfoldUnc){
@@ -2608,7 +3170,14 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		}
 
                 fill(hresponseZNGoodJets_Zexc, nGoodJets, nGoodGenJets, weight*RatioValue);
+                fill(hresponsePhistar_Zinc0jet, phistar, genPhistar, weight);
                 fill(hresponseZPt_Zinc0jet, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+
+                if(EvtVtxCnt< 20) fill(hresponseZPt_Zinc0jet_lowNVtx, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+                if(EvtVtxCnt>= 20) fill(hresponseZPt_Zinc0jet_highNVtx, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
+
+                //fill(hresponseZPt_Zinc0jet_new, ZPtviaPhistar(phistar), genEWKBoson.Pt(), weight);  // rec is modified and gen is original
+                fill(hresponseZPt_Zinc0jet_new, phistar, genEWKBoson.Pt(), weight); 
 		fill(hresponseVisPt_Zinc0jetQun, EWKBoson.Pt(), genEWKBoson.Pt(), weight);
             }
 
@@ -2616,20 +3185,19 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
             if (nGoodGenJets >= 1 && passesgenLeptonCut && nGoodJets >= 1 && passesLeptonCut) {
 
                 fill(hresponseZPt_Zinc1jet, EWKBoson.Pt(),genEWKBoson.Pt(),weight);
+                fill(hresponsePhistar_Zinc1jet, phistar, genPhistar, weight);
                 fill(hresponseZAbsRapidity_Zinc1jet, fabs(EWKBoson.Rapidity()), fabs(genEWKBoson.Rapidity()), weight);      
 
 		double RatioValue = 1.;
 		double RatioValue1 = 1.;
 		double RatioValue2 = 1.;
 		if(UnfoldUnc){
-     		        double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
-                        RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetBinContent(binNumber);
-                        double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-                        if(jetsHT >=30. && jetsHT >=1100. )  RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1); 
-                        else RatioValue1 = 1.;   
-                        double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <= 200.) RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
-                        else RatioValue2 = 1.;  
+		    double binNumber = FirstJetAbsRapidity_2_Zinc1jetHratio_fit ->GetXaxis()->FindBin(fabs(jets[0].v.Eta()));
+		    RatioValue =  FirstJetAbsRapidity_2_Zinc1jetHratio_fit->GetBinContent(binNumber);
+		    double binNumber1 = JetsHT_2_Zinc1jetHratio_fit->GetXaxis()->FindBin(jetsHT);
+		    RatioValue1 = JetsHT_2_Zinc1jetHratio_fit->GetBinContent(binNumber1);
+                    double binNumber2 = VisPt_2_Zinc1jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+EWKBoson).Pt()));
+                    RatioValue2 = VisPt_2_Zinc1jetQunHratio_fit->GetBinContent(binNumber2);
 		}
 
                 fill(hresponseFirstJetEta_Zinc1jet, fabs(jets[0].v.Eta()), fabs(genJets[0].v.Eta()), weight*RatioValue);        
@@ -2637,7 +3205,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseFirstJetEtaHigh_Zinc1jet, fabs(jets[0].v.Eta()), fabs(genJets[0].v.Eta()), weight);      
                 fill(hresponseFirstJetRapidityHigh_Zinc1jet, fabs(jets[0].v.Rapidity()), fabs(genJets[0].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc1jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc1jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc1jetQun, fabs((jets[0].v+EWKBoson).Pt()),fabs((genJets[0].v+genEWKBoson).Pt()), weight*RatioValue2);
 
                 // Additional Abs responses of variables
                 fill(hresponseAbsZRapidity_Zinc1jet, fabs(EWKBoson.Rapidity()),fabs(genEWKBoson.Rapidity()),weight);
@@ -2832,14 +3400,12 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		double RatioValue1 = 1.;
                 double RatioValue2 = 1.;
 		if(UnfoldUnc){
-		        double binNumber = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(fabs(jets[1].v.Eta()));
-			RatioValue =  SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
-			double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
-			if(jetsHT >=60. && jetsHT >=1100. ) RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
-                        else RatioValue1 = 1.;
-                        double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
-                        if(fabs((hadronicR+EWKBoson).Pt()) >=0. && fabs((hadronicR+EWKBoson).Pt()) <=200.) RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
-                        else RatioValue2 = 1.;
+		    double binNumber = SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(fabs(jets[1].v.Eta()));
+		    RatioValue =  SecondJetAbsRapidity_2_Zinc2jetHratio_fit->GetBinContent(binNumber);
+		    double binNumber1 = JetsHT_2_Zinc2jetHratio_fit->GetXaxis()->FindBin(jetsHT);
+		    RatioValue1 = JetsHT_2_Zinc2jetHratio_fit->GetBinContent(binNumber1);
+                    double binNumber2 = VisPt_2_Zinc2jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+EWKBoson).Pt()));
+                    RatioValue2 = VisPt_2_Zinc2jetQunHratio_fit->GetBinContent(binNumber2); 
 		}
 
                 fill(hresponseSecondJetEta_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[1].v.Eta()), weight*RatioValue);      
@@ -2847,7 +3413,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseSecondJetEtaHigh_Zinc2jet, fabs(jets[1].v.Eta()), fabs(genJets[1].v.Eta()), weight);      
                 fill(hresponseSecondJetRapidityHigh_Zinc2jet, fabs(jets[1].v.Rapidity()), fabs(genJets[1].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc2jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc2jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc2jetQun, fabs((jets[0].v+jets[1].v+EWKBoson).Pt()),fabs((genJets[0].v+genJets[1].v+genEWKBoson).Pt()), weight*RatioValue2);
                 // fill(hresponseJetsHT_2_Zinc2jet, jetsHT, genJetsHT, weight);
                 //fill(responseTwoJetsPtDiffInc, jet1Minus2.Pt(), genJet1Minus2.Pt(), weight);
                 //fill(responseBestTwoJetsPtDiffInc, bestJet1Minus2.Pt(), genBestJet1Minus2.Pt(), weight);
@@ -2938,9 +3504,9 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                     else RatioValue1 = 1.;
                     if(RatioValue1 > 2. || RatioValue1 < 0.5) RatioValue1 = 1.;  
 
-                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((hadronicR+EWKBoson).Pt()));
+                    double binNumber2 = VisPt_2_Zinc3jetQunHratio_fit->GetXaxis()->FindBin(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()));
                     //RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2);
-                      if(fabs((hadronicR+EWKBoson).Pt()) >= 0. && fabs((hadronicR+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
+                      if(fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) >= 0. && fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()) <= 200. ) RatioValue2 = VisPt_2_Zinc3jetQunHratio_fit->GetBinContent(binNumber2); 
                       else RatioValue2 = 1.;
                       if(RatioValue2 > 2. || RatioValue2 < 0.5) RatioValue2 = 1.; 
 		}
@@ -2950,7 +3516,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
                 fill(hresponseThirdJetEtaHigh_Zinc3jet, fabs(jets[2].v.Eta()), fabs(genJets[2].v.Eta()), weight);      
                 fill(hresponseThirdJetRapidityHigh_Zinc3jet, fabs(jets[2].v.Rapidity()), fabs(genJets[2].v.Rapidity()), weight);      
                 fill(hresponseJetsHT_Zinc3jet, jetsHT, genJetsHT, weight*RatioValue1);
-		fill(hresponseVisPt_Zinc3jetQun, fabs((hadronicR+EWKBoson).Pt()),fabs((genHadronicR+genEWKBoson).Pt()), weight*RatioValue2);
+		fill(hresponseVisPt_Zinc3jetQun, fabs((jets[0].v+jets[1].v+jets[2].v+EWKBoson).Pt()),fabs((genJets[0].v+genJets[1].v+genJets[2].v+genEWKBoson).Pt()), weight*RatioValue2);
 
                 /////Azimuthal cross check//////////////////////////////
                 fill(hresponseDPhiZFirstJet_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)),fabs(genEWKBoson.DeltaPhi(genJets[0].v)),weight);
@@ -3098,10 +3664,27 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     JobInfo->SetBinContent(kNEvts, nEventsToProcess);
     JobInfo->SetBinContent(kNEvtsSample, nentries);
     JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
+
+    cout << "nEventsToProcessTot = " << nEventsToProcessTot << " , nEventsToProcess = " << nEventsToProcess << " , double(nentries) = " << double(nentries) << "\n" << " , yieldScale = " << yieldScale << " , nJobs = " << nJobs <<   "\n";
+
+    // nEventsToProcessTot is defined by maxevt in the cfg file. If one indicated maxevt then nEventsToProcessTot=nEventsToProcess, if not and split the full sample by Njobs
+    // then nEventsToProcessTot = netries and nEventsToProcess corresponds to jobNum statistics (yieldScale is calulated using this fraction of full stat)
     double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nentries)): yieldScale;
-    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
+
+    if(nJobs > 1){  // AG: in one run on full stat with division nJobs then yieldScale =1
+        //  1./nJobs = nEventsToProcess / double(nentries)
+        double  data_frac_njob = EvtIsRealData ? (nEventsToProcess / double(nentries)): yieldScale*1./nJobs;
+        Lumi->SetBinContent(1., lumi_ *  data_frac_njob);
+    }
+    else Lumi->SetBinContent(1., lumi_ *  data_frac);
+ 
     //store integrated luminosity in Lumi histogram:
-    Lumi->SetBinContent(1., lumi_ *  data_frac);
+    //cout << "!!!! data_frac = " << data_frac << " , " << nEventsToProcess << " , " << double(nentries) << "\n";
+    //cout << " !!!!!!!! lumi = " << lumi_ << " , " << lumi_ *  data_frac << "\n";
+    
+ 
+    //else Lumi->SetBinContent(1., lumi_ *  data_frac*);
+    JobInfo->SetBinContent(kLumi, lumi_ * data_frac);
     JobInfo->SetBinContent(kXsec, xsec_);
 
     
@@ -3179,7 +3762,7 @@ void ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
     } else{
 	norm_ = 1;
     }
-	
+		
 
     if(!EvtIsRealData){
 	JobInfo->SetBinContent(kXsec, xsec_ * xsecFactor_);
@@ -3367,19 +3950,33 @@ void ZJets::getMuons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoM
                 MuIdTight->at(i),    //  CommentAG: muonId; Tight muons are selected in Bonzai
                 MuPfIso->at(i), 
                 MuEta->at(i),
-                0);  // CommentAG
+                MuTkLayerCnt->at(i));  // CommentAG
 
+        //  cout << mu.MuTkLayer << "\n";
 
-	float qter = 1.0;
+	//float qter = 1.0;
+/*
 	if (doRochester) {
 	    if (!EvtIsRealData) {
-		rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
+		 //rmcor->momcor_mc(mu.v, (float)mu.charge, 0, qter);
+                 //cout << MuTkLayerCnt->at(i) << "\n";
+                 //TRandom *rochester;
+                 //float aRand = rochester->Uniform(1.0);
+                 //float aRand2 = rochester->Uniform(1.0);
+                  double mcSF = rc->kScaleAndSmearMC((float)mu.charge, mu.v.Pt(), mu.v.Eta(), mu.v.Phi(), 6, gRandom->Rndm(), gRandom->Rndm());
+                 // cout << mu.v.Pt() << " , " << mu.v.Eta() << " , " <<  mu.v.Phi() << " , " << mu.v.E() << "\n"; 
+                  mu.v.SetPtEtaPhiE(mu.v.Pt()*mcSF, mu.v.Eta(), mu.v.Phi(), mu.v.E());  
+
+                 // cout << mcSF << "\n";
 	    }
 	    else {
-		rmcor->momcor_data(mu.v, (float)mu.charge, 0, qter);
+		 //rmcor->momcor_data(mu.v, (float)mu.charge, 0, qter);
+                  double dataSF = rc->kScaleDT((float)mu.charge, mu.v.Pt(), mu.v.Eta(), mu.v.Phi());
+                  mu.v.SetPtEtaPhiE(mu.v.Pt()*dataSF, mu.v.Eta(), mu.v.Phi(),mu.v.E()); 
+                  //cout << dataSF << "\n";
 	    }
 	}
-
+*/
         bool muPassesPtCut(mu.v.Pt() >= (lepPtCutMin*0.8));
         bool muPassesEtaCut(fabs(mu.v.Eta()) <= 0.1*lepEtaCutMax);
        // bool muPassesIdCut(mu.id & 0x1);  //CommentAG: Tight muons Id are selected in the Bonzai Maker
@@ -3453,7 +4050,9 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
         //--- good electrons ---
         bool elePassesPtCut(ele.v.Pt() >= (lepPtCutMin*0.8));
         bool elePassesEtaCut(fabs(ele.scEta) <= min(1.4442, 0.1*lepEtaCutMax) || (fabs(ele.scEta) >= 1.566 && fabs(ele.scEta) <= 0.1*lepEtaCutMax));
-        bool elePassesIdCut(ele.id >= 4); /// 4 is medium ID, 2 is Loose ID
+        // bool elePassesIdCut(ele.id >= 4); /// 4 is medium ID, 2 is Loose ID
+        bool elePassesIdCut = ele.id & (1<<3);  // tight El ID
+        bool elePassesLooseIdCut = ele.id & (1<<1); // loose El ID  
         bool elePassesIsoCut(ele.iso < eIso_);
         //bool elePassesAnyTrig(ele.trigger & 0x2);
 	bool elePassesAnyTrig(true); //no matching with lepton from trigger.
@@ -3467,7 +4066,8 @@ void ZJets::getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& v
 
         // select the good electrons only
         //if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && (!useTriggerCorrection || elePassesAnyTrig || eventTrigger))
-        if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && elePassesAnyTrig){
+        //if (elePassesPtCut && elePassesEtaCut &&  elePassesAnyTrig){
+          if (elePassesPtCut && elePassesEtaCut && elePassesIdCut && elePassesIsoCut && elePassesAnyTrig){   
             leptons.push_back(ele);
         }
         // select the veto electrons
@@ -3488,8 +4088,8 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     fileName(fileName_), lumi_(lumi), useTriggerCorrection(useTriggerCorrection_), 
     systematics(systematics_), direction(direction_), xsecUnc(xsecUnc_), 
     lepPtCutMin(lepPtCutMin_), lepEtaCutMax(lepEtaCutMax_), jetPtCutMin(jetPtCutMin_), jetEtaCutMax(jetEtaCutMax_),
-    nMaxEvents(maxEvents_), lepSel(lepSel_), InEvtCount_(0), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles),
-    triggerMask_(0), triggerMaskSet_(false), muIso_(0), eIso_(0)
+    nMaxEvents(maxEvents_), lepSel(lepSel_), xsec_(0.), sampleLabel_(sampleLabel), maxFiles_(maxFiles),
+    triggerMask_EraBG(0), triggerMask_EraH(0), triggerMaskSet_(false), muIso_(0), eIso_(0)
 {
     //--- Create output directory if necessary ---
     TString command = "mkdir -p " + outputDirectory;
@@ -3521,8 +4121,10 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
 		  << __LINE__ << "." << std::endl;
 	abort();
     }
-
-    std::cout << "Trigger mask: " << std::hex << "0x" << triggerMask_ << std::dec << "\n";
+    // NEW DA
+    // std::cout << "Trigger mask: " << std::hex << "0x" << triggerMask_ << std::dec << "\n";
+    std::cout << "Trigger mask EraBF: " << std::hex << "0x" << triggerMask_EraBG << std::dec << "\n";
+    std::cout << "Trigger mask EraGH: " << std::hex << "0x" << triggerMask_EraH << std::dec << "\n";
 }
 
 void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
@@ -3656,7 +4258,7 @@ void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, i
 		
 		    TString filePath = TString(line);
 
-		    if(filePath[0]!='/'){
+		    if(filePath[0]!='/' && !filePath.BeginsWith("root:") ){
 			filePath.Insert(0, TString(bonzaiDir) + "/");
 		    }
 		    if(filePath.BeginsWith("/store/")){
@@ -3718,10 +4320,8 @@ void ZJets::getMcNorm(){
     if(fBonzaiHeaderChain.GetListOfFiles()->IsEmpty()){
 	std::cerr << "Running on a boabab file, skim acceptance = 1\n";
 	skimAccep_ = std::vector<double>(1,1.);	
-	//InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
-	//EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0)
-	InEvtWeightSums_ = std::vector<Double_t>(0);
-	EvtWeightSums_ = std::vector<Double_t>(0);
+	InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
+	EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
     } else{
 	fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
 	fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
@@ -3781,6 +4381,7 @@ void ZJets::getMcNorm(){
 	}
 
     }
+    // cout << "we are here" << "\n";
     //    delete InEvtWeightSums;
     //    delete EvtWeightSums;
 } 
@@ -3888,6 +4489,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
    // patMuonCombId_Double = 0;
    // patMuonTrig_ = 0;
     MuPfIso = 0;
+    MuTkLayerCnt = 0;
 
     JetAk04E = 0;
     JetAk04Pt = 0;
@@ -3911,8 +4513,8 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
     TrigHltPhot = 0;
     TrigHltMu = 0;
     TrigHltDiMu = 0;
-    TrigHltEl = 0;
     TrigHltDiEl = 0;
+    TrigHltEl = 0;
 
     // Set branch addresses and branch pointers
     fCurrent = -1;
@@ -3972,6 +4574,7 @@ void ZJets::Init(bool hasRecoInfo, bool hasGenInfo){
           //  }
          //   fChain->SetBranchAddress("patMuonTrig_", &patMuonTrig_, &b_patMuonTrig_);
             fChain->SetBranchAddress("MuPfIso", &MuPfIso, &b_MuPfIso);
+            fChain->SetBranchAddress("MuTkLayerCnt", &MuTkLayerCnt, &b_MuTkLayerCnt);
         }
     }
     if (hasGenInfo){
@@ -4043,23 +4646,38 @@ Int_t ZJets::Cut(Long64_t entry){
 }
 
 bool ZJets::setTriggerMask(){
-    if (triggerMaskSet_) return triggerMask_;
-    std::vector<std::string> triggers = cfg.getVS("triggers");
+    //if (triggerMaskSet_) return triggerMask_;
+    if (triggerMaskSet_) return true;
+    // NEW DA
+    //std::vector<std::string> triggers = cfg.getVS("triggers");
+    std::vector<std::string> triggers_EraBF = cfg.getVS("triggers_EraBF");
+    std::vector<std::string> triggers_EraGH = cfg.getVS("triggers_EraGH");
 
-    if(triggers.size()){
+    if(triggers_EraBF.size()){
 	std::cout << "An or of the following trigger paths will be used:";
-	for(unsigned i = 0; i < triggers.size(); ++i){
-	std::cout << " " << triggers[i];
+	for(unsigned i = 0; i < triggers_EraBF.size(); ++i){
+	std::cout << " " << triggers_EraBF[i];
 	}
 	std::cout << "\n";
     } else{
 	std::cout << "No trigger requirement will be applied.\n\n";
     }
-    
+
+    if(triggers_EraGH.size()){
+	std::cout << "An or of the following trigger paths will be used:";
+        for(unsigned i = 0; i < triggers_EraGH.size(); ++i){
+	    std::cout << " " << triggers_EraGH[i];
+        }
+	std::cout << "\n";
+    } else{
+	std::cout << "No trigger requirement will be applied.\n\n";
+    }
+
     TString branchName;
     std::vector<std::string>* TrigHlt = 0;
 
     if(lepSel == "DMu") { branchName = "TrigHltDiMu"; ourTrig_ = &TrigHltDiMu;  }
+   // if(lepSel == "DMu") { branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu;  }
     else if(lepSel == "DE"){ branchName = "TrigHltDiEl"; ourTrig_ = &TrigHltDiEl; }
     else if(lepSel == "SMu"){ branchName = "TrigHltMu"; ourTrig_ = &TrigHltMu; }
     else if(lepSel == "SE"){ branchName = "TrigHltEl"; ourTrig_ = &TrigHltEl; }
@@ -4070,10 +4688,16 @@ bool ZJets::setTriggerMask(){
 	return false;
     }
 
-    if(triggers.size()==0){
-	triggerMask_ = (ULong64_t) -1; //all bits set.
+   // NEW DA
+    if(triggers_EraBF.size()==0){
+	triggerMask_EraBG = (ULong64_t) -1; //all bits set.
 	return true;
     }
+    if(triggers_EraGH.size()==0){
+        triggerMask_EraH = (ULong64_t) -1; //all bits set.
+        return true;
+    }
+
     
     if(fBitFieldsChain.GetBranch(branchName)){
 	fBitFieldsChain.SetBranchAddress(branchName, &TrigHlt);
@@ -4096,25 +4720,47 @@ bool ZJets::setTriggerMask(){
     }
     std::cout << "\n";
     
+    // NEW DA
     bool rc = true;
-    triggerMask_ = 0;
-    for(unsigned i = 0; i < triggers.size(); ++i){
+    triggerMask_EraBG = 0;
+    triggerMask_EraH = 0;
+    for(unsigned i = 0; i < triggers_EraBF.size(); ++i){
 	int found = 0;
 	for(unsigned bit = 0; bit < TrigHlt->size(); ++bit){
-	    if(triggers[i] == (*TrigHlt)[bit]){
-		triggerMask_ |= (1 <<bit);
+	    if(triggers_EraBF[i] == (*TrigHlt)[bit]){
+		triggerMask_EraBG |= (1 <<bit);
 		++found;
 	    }
 	}
 	if(found==0){
-	    std::cerr << "Trigger " << triggers[i] << " was not found in the input sample!\n\n";
-	    rc =false;
+	    std::cerr << "Trigger " << triggers_EraBF[i] << " was not found in the input sample!\n\n";
+	    rc = rc && false;
 	}
 	if(found > 1){
-	    std::cerr << "Trigger " << triggers[i] << " is assigned to several bits!\n\n";
-	    rc =true;
+	    std::cerr << "Trigger " << triggers_EraBF[i] << " is assigned to several bits!\n\n";
+	    rc = rc && true;
 	}
     }
+
+    for(unsigned i = 0; i < triggers_EraGH.size(); ++i){
+        int found = 0;
+        for(unsigned bit = 0; bit < TrigHlt->size(); ++bit){
+            if(triggers_EraGH[i] == (*TrigHlt)[bit]){
+                triggerMask_EraH |= (1 <<bit);
+                ++found;
+            }
+        }
+        if(found==0){
+	    std::cerr << "Trigger " << triggers_EraGH[i] << " was not found in the input sample!\n\n";
+            rc = rc && false;
+        }
+        if(found > 1){
+	    std::cerr << "Trigger " << triggers_EraGH[i] << " is assigned to several bits!\n\n";
+            rc = rc && true;
+        }
+    }
+
+
     return rc;
 }
 

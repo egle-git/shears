@@ -24,7 +24,8 @@
 #include "functions.h"
 #include "getFilesAndHistogramsZJets.h"
 #include "HistoSetZJets.h"
-#include "rochcor2015.h"
+//#include "rochcor2015.h"
+#include "RoccoR.h"
 
 
 using namespace std;
@@ -33,7 +34,8 @@ using namespace std;
 class ZJets: public HistoSetZJets {
     public :
         bool doRochester;
-        rochcor2015 *rmcor;
+        //rochcor2015 *rmcor;
+        RoccoR  *rc;
         //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
         TChain          *fChain;   //!pointer to the analyzed TTree or TChain
 	TChain          fBonzaiHeaderChain;
@@ -59,6 +61,7 @@ class ZJets: public HistoSetZJets {
    ULong64_t       TrigHltEl;
    ULong64_t       TrigHltDiEl;
    ULong64_t*      ourTrig_;
+   ULong64_t*      ourTrig1_;
    vector<float>   *METPt;
    vector<float>   *METPx;
    vector<float>   *METPy;
@@ -138,7 +141,7 @@ class ZJets: public HistoSetZJets {
    vector<float>   *MuMatchedStationCnt;
    vector<float>   *MuDz;
    vector<float>   *MuPixelHitCnt;
-   vector<float>   *MuTkLayerCnt;
+   vector<int>   *MuTkLayerCnt;
    vector<float>   *MuPfIsoChHad;
    vector<float>   *MuPfIsoNeutralHad;
    vector<float>   *MuPfIsoRawRel;
@@ -543,7 +546,9 @@ class ZJets: public HistoSetZJets {
 	int maxFiles_;
 	
 	double processedEventMcWeightSum_;
-	ULong64_t triggerMask_;
+	//ULong64_t triggerMask_;
+	ULong64_t triggerMask_EraBG;
+	ULong64_t triggerMask_EraH;
 	bool triggerMaskSet_;
 	double muIso_;
 	double eIso_;

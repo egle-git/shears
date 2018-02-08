@@ -15,6 +15,7 @@
 #include <fstream>
 #include <sstream>
 #include "LHAPDF/LHAPDF.h"
+#include "catalog.h"
 #include "functions.h"
 #include "standalone_LumiReWeighting.h"
 #include "ZJets_newformat.h"
@@ -3842,8 +3843,6 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     //--------------------------------------------
 
     rejectBTagEvents = lepSel.BeginsWith("S"); 
-    
-    fChain = new TChain("", "");
 
     TString fullFileName;
     TString baseName;
@@ -3855,8 +3854,7 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
     
     Input->SetTitle(fullFileName);
 
-    readCatalog(fullFileName, bonzaiDir, maxFiles, &lumi_, &xsec_,
-		fChain, &fBonzaiHeaderChain, &fBitFieldsChain);
+    readCatalog(fullFileName, bonzaiDir, maxFiles);
 
     getMcNorm();
 
@@ -3909,152 +3907,16 @@ void ZJets::canonizeInputFilePath(const TString& bonzaiDir, const TString& fileN
     }
 }
 
-void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir, int maxFiles,
-			double* pLumi, double* pXsec, TChain* pEventTreeChain,
-			TChain* pBonzaiHeaderChain, TChain* pBitFieldsChain){
-    regex_t xsecLine;
-    int rc =  regcomp(&xsecLine,"[#*][[:space:]]*sample xsec[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
-    if(rc){
-	char buffer[256];
-	regerror(rc, &xsecLine, buffer, sizeof(buffer));
-	buffer[sizeof(buffer)-1] = 0;
-	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
-    }
-    
-    regex_t lumiLine;
-    rc =  regcomp(&lumiLine,"[#*][[:space:]]*lumi[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
-    if(rc){
-    	char buffer[256];
-    	regerror(rc, &lumiLine, buffer, sizeof(buffer));
-    	buffer[sizeof(buffer)-1] = 0;
-    	std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
-    }
-    
-    if (isRootFile(fullFileName)){
-        TString treePath = fullFileName + "/tupel/EventTree";
-	TString bonzaiHeaderPath = fullFileName + "/tupel/BonzaiHeader";
-	TString bonzaiBitFieldsPath = fullFileName + "/tupel/BitFields";
-        cout << "Loading file: " << fullFileName << endl;
-        if(pEventTreeChain) pEventTreeChain->Add(treePath);
-	if(pBonzaiHeaderChain){
-	    //check presence of the BonzaiHeader tree:
-	    TFile* f = TFile::Open(fullFileName);
-	    if(f && !f->IsZombie()){
-		if(f->GetDirectory("tupel")->FindKey("BonzaiHeader")){
-		    pBonzaiHeaderChain->Add(bonzaiHeaderPath);
-		} else{
-		    std::cerr << "Warning: the tree BonzaiHeader was not found in file "
-			      << fullFileName
-			      << ". We will assume we run on a boabab file and not Baobab->Bonzai "
-			      << "acceptance correction will be considered. This message can be ignored "
-			      << "if for this sample Boabab ntuples are usd as input.\n";
-		}
-	    }
-	}
-	if(pBitFieldsChain) pBitFieldsChain->Add(bonzaiBitFieldsPath);
-    } else {
-	    int (*closeFunc)(FILE*);
-	    FILE* f = eosOpen(fullFileName, &closeFunc);
-	    if(!f){
-		std::cerr << "Failed to  open file " << fullFileName << ".\n";
-	    } else{
-		std::cout << "Reading input files from catalog file " << fullFileName << "\n";
-		string line; 
-		char* buffer = 0;
-		size_t buffer_size = 0;
-		int ifile = 0;
-		//if maxFiles = 0 only catalog header is read.
-		enum {False = 0, True, Unknown } isBonzai = Unknown;
-		while (!feof(f)){
-		    ssize_t len = getline(&buffer, &buffer_size, f);
-		    if(len  < 0) break;
-		    char* line = buffer;
-		    size_t n = len - 1;
-		    //trim white spaces:
-		    while(line[0] == ' ' || line[0] == '\t') {++line; --n;}
-		    while(n >=0 && (line[n] == ' ' || line[n] == '\t' || line[n] == '\r' || line[n] == '\n' )){
-			line[n] = 0; --n;
-		    }
-
-		    regmatch_t pmatch[2];
-		    if(pXsec && !regexec(&xsecLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
-			line[pmatch[1].rm_eo] = 0;
-			*pXsec = strtod(line + pmatch[1].rm_so, 0);
-			if(*pXsec == 0){
-			    std::cerr << "Value of parameter 'sample xsec', " << line + pmatch[1].rm_so
-				      << " found in file " << fullFileName << " is not valid.\n";
-			}
-		    }
-		    else if(pLumi && !regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
-			line[pmatch[1].rm_eo] = 0;
-			*pLumi = strtod(line + pmatch[1].rm_so, 0);
-			if(*pLumi == 0){
-			    std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
-				      << " found in file " << fullFileName << " is not valid.\n";
-			}
-		    }
-		
-		    //skip empty lines,  comment lines and metadata lines:
-		    if (line[0] == 0 || line[0] == '#' || line[0] == '*') continue;
-		
-		    if(maxFiles == 0 || (pEventTreeChain == 0 && pEventTreeChain ==0)) break;
-		
-		    //keep content of first column only:
-		    char* p = line;
-		    while(*p != 0 && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') ++p;
-		    *p = 0;
-
-		    //following check is done having read the header
-		    //such that maxFiles = 0 can be used to read only
-		    //the header.
-		    if(maxFiles >= 0 && ifile >= maxFiles) break;
-		
-		    TString filePath = TString(line);
-
-            if(filePath[0]!='/' && !filePath.BeginsWith("root:")) {
-			filePath.Insert(0, TString(bonzaiDir) + "/");
-		    }
-		    if(filePath.BeginsWith("/store/")){
-			filePath.Insert(0, "root://eoscms.cern.ch//eos/cms");
-		    }
-
-		    TString treePath = filePath + "/tupel";
-		    TString bonzaiHeaderPath = treePath + "/BonzaiHeader";
-		    TString bonzaiBitFieldsPath = treePath + "/BitFields";
-		    treePath += "/EventTree";
-		    //std::cout << "Adding path " << treePath << " to the tree chain.\n";
-		    if(pEventTreeChain) pEventTreeChain->Add(treePath);
-		    
-		    if(pBonzaiHeaderChain && (isBonzai == Unknown)){
-			//check presence of the BonzaiHeader tree. It is checked
-			//only on the first file which can be succesfully opened
-			//assuming that all files of the catalog are the same.
-			TFile* f = TFile::Open(filePath);
-			if(f && !f->IsZombie()){
-			    if(f->GetDirectory("tupel")->FindKey("BonzaiHeader")){
-				isBonzai = True;
-			    } else{
-				isBonzai = False;
-				std::cerr << "Warning: the tree BonzaiHeader was not found in file "
-					  << fullFileName
-					  << ". We will assume we run on a boabab file and not Baobab->Bonzai "
-					  << "acceptance correction will be considered. This message can be ignored "
-					  << "if for this sample Boabab ntuples are usd as input.\n";
-			    }
-			}
-		    }
-		    if(isBonzai) pBonzaiHeaderChain->Add(bonzaiHeaderPath);
-		    if(pBitFieldsChain) pBitFieldsChain->Add(bonzaiBitFieldsPath);
-		    ++ifile;
-		}//next line
-		std::cout << "Closing catalog file " << fullFileName << "\n";
-		if(buffer) free(buffer);
-		closeFunc(f);
-	    } //file opening succeeded
-	}//is root file
-	regfree(&xsecLine);
-	regfree(&lumiLine);
-    }
+void ZJets::readCatalog(const TString& fullFileName, const TString& bonzaiDir,
+                        int maxFiles)
+{
+    catalog c(fullFileName.Data(), bonzaiDir.Data(), maxFiles);
+    lumi_ = c.lumi();
+    xsec_ = c.xsec();
+    fChain = c.event_chain();
+    fBonzaiHeaderChain = c.bonzai_header_chain();
+    fBitFieldsChain = c.bit_fields_chain();
+}
 
 //#define weight_bug //to read bonzai version 2.
 
@@ -4063,26 +3925,26 @@ void ZJets::getMcNorm(){
 //#ifdef weight_bug
 //    std::vector<Double_t> InEvtWeightSums(1,0);
 //    std::vector<Double_t> EvtWeightSums(1,0);
-//    fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums[0]);
-//    fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums[0]);
+//    fBonzaiHeaderChain->SetBranchAddress("InEvtWeightSums", &InEvtWeightSums[0]);
+//    fBonzaiHeaderChain->SetBranchAddress("EvtWeightSums", &EvtWeightSums[0]);
 //#else
     std::vector<Double_t>* InEvtWeightSums  = 0;
     std::vector<Double_t>* EvtWeightSums = 0;
     EvtCount_ = fChain->GetEntries();
 
-    if(fBonzaiHeaderChain.GetListOfFiles()->IsEmpty()){
+    if(fBonzaiHeaderChain->GetListOfFiles()->IsEmpty()){
 	std::cerr << "Running on a boabab file, skim acceptance = 1\n";
 	skimAccep_ = std::vector<double>(1,1.);	
 	InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
 	EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
     } else{
-	fBonzaiHeaderChain.SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
-	fBonzaiHeaderChain.SetBranchAddress("EvtWeightSums", &EvtWeightSums);
+	fBonzaiHeaderChain->SetBranchAddress("InEvtWeightSums", &InEvtWeightSums);
+	fBonzaiHeaderChain->SetBranchAddress("EvtWeightSums", &EvtWeightSums);
 	//#endif
 	//for(Long64_t i = 0; i < nfiles; ++ i){
-	int nheaders = fBonzaiHeaderChain.GetEntries(); //can be several in case files were merged with haddd
+	int nheaders = fBonzaiHeaderChain->GetEntries(); //can be several in case files were merged with haddd
 	for(int ientry = 0; ientry < nheaders; ++ientry){
-	    fBonzaiHeaderChain.GetEntry(ientry);
+	    fBonzaiHeaderChain->GetEntry(ientry);
 	    if(ientry == 0){
 		InEvtWeightSums_ = std::vector<Double_t>(InEvtWeightSums->size(), 0);
 		EvtWeightSums_ = std::vector<Double_t>(EvtWeightSums->size(), 0);
@@ -4439,8 +4301,8 @@ bool ZJets::setTriggerMask() {
         std::vector<std::string> *trigHlt = nullptr;
 
         // Fetch the mapping between position in bitfield and trigger name
-        if (fBitFieldsChain.GetBranch(branchName)) {
-            fBitFieldsChain.SetBranchAddress(branchName, &trigHlt);
+        if (fBitFieldsChain->GetBranch(branchName)) {
+            fBitFieldsChain->SetBranchAddress(branchName, &trigHlt);
         } else {
             std::cerr << "Cannot set the trigger bits, because the Branch "
                       << branchName << " was not found in the tree BitFields.\n\n";
@@ -4448,7 +4310,7 @@ bool ZJets::setTriggerMask() {
         }
 
         //FIXME: check all files?
-        if (fBitFieldsChain.GetEntry(0) <= 0) {
+        if (fBitFieldsChain->GetEntry(0) <= 0) {
             std::cerr << "Failed to read BitFields tree. Is the tree empty? "
                       << "Cannot set the trigger bits.\n\n";
             return false;
@@ -4464,7 +4326,7 @@ bool ZJets::setTriggerMask() {
 
         // The line below is needed to prevent ROOT from holding a dangling
         // pointer (which leads to memory corruption).
-        fBitFieldsChain.SetBranchAddress(branchName, nullptr);
+        fBitFieldsChain->SetBranchAddress(branchName, nullptr);
     }
 
     bool success = true;

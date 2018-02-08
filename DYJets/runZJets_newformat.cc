@@ -3,6 +3,7 @@
 #include <thread>
 #include <TString.h>
 #include "ArgParser.h"
+#include "catalog.h"
 #include "ConfigVJets.h"
 #include "ZJets_newformat.h"
 
@@ -209,10 +210,10 @@ int main(int argc, char **argv)
 	    lumi = 1.;
 	} else{
 	    TString fullPath;
-	    lumi = 0;
 	    ZJets::canonizeInputFilePath(dataBonzaiDir, TString::Format(input, lepSel.Data()),
 					 &fullPath);
-	    ZJets::readCatalog(fullPath, dataBonzaiDir, 0, &lumi);
+            catalog c(fullPath.Data(), dataBonzaiDir.Data(), 0);
+            lumi = c.lumi();
 	    if(lumi > 0){
 		std::cout << "Lumi read from catalog: " << lumi << std::endl;
 	    } else{

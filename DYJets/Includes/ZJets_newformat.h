@@ -55,10 +55,9 @@ class ZJets: public HistoSetZJets {
         bool doRochester;
         //rochcor2015 *rmcor;
         RoccoR  *rc;
-        //TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-        TChain          *fChain;   //!pointer to the analyzed TTree or TChain
-	TChain          fBonzaiHeaderChain;
-	TChain          fBitFieldsChain;
+        std::shared_ptr<TChain> fChain;   //!pointer to the analyzed TTree or TChain
+        std::shared_ptr<TChain> fBonzaiHeaderChain;
+        std::shared_ptr<TChain> fBitFieldsChain;
         //TTree          *tree;
         Int_t           fCurrent; //!current Tree number in a TChain
 
@@ -486,9 +485,9 @@ class ZJets: public HistoSetZJets {
         void     getElectrons(vector<leptonStruct>& leptons,  vector<leptonStruct>& vetoElectrons);
         Bool_t   Notify();
         void     Show(Long64_t entry = -1);
-	static void readCatalog(const TString& fileName, const TString& bonzaiDir, int maxFiles = -1,
-				double* pLumi = 0, double* pXsec = 0, TChain* pChain = 0,
-				TChain* pBonzaiHeaderChain = 0, TChain* pBitFieldsChain = 0);
+        void readCatalog(const TString& fileName, const TString& bonzaiDir,
+                         int maxFiles = -1);
+
 	static void canonizeInputFilePath(const TString& bonzaiDir, const TString& fileName,
 					  TString* fullFileName, TString* baseName = 0,
 					  TString* ext = 0);

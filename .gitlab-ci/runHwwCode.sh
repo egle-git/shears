@@ -14,4 +14,4 @@ cd CMSSW_8_0_26_patch1/src && cmsenv && cd ../..
 cd HZZ2l2nu
 wget http://mon.iihe.ac.be/~hbrun/filesForTests/$1
 echo `pwd`"/$1" > localCata.txt
-./runHZZanalysis catalogInputFile=localCata.txt histosOutputFile=$2 skip-files=0 max-files=25 isMC=$3 maxEvents=-1 doInstrMETAnalysis=0 doTnPTree=0
+./runHZZanalysis catalogInputFile=localCata.txt histosOutputFile=$2 skip-files=0 max-files=25 isMC=$3 maxEvents=-1 doInstrMETAnalysis=$4 doTnPTree=0

@@ -12,7 +12,7 @@ baobabs:
   tags: [ cvmfs ]
   script:
   - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=Hello%20here%20the%20shears%20CI&pretty=1&username=shearsDocker" >&  scrunch
-  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=testing%20branch%20$CI_COMMIT_REF_NAME%20for%20$GITLAB_USER_NAME&pretty=1&username=shearsDocker" >& scranch 
+  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=testing%20branch%20$CI_COMMIT_REF_NAME%20for%20$GITLAB_USER_NAME&pretty=1&username=shearsDocker" >& scranch
   - .gitlab-ci/compile-scram.sh Baobabs
   artifacts:
     paths:
@@ -36,14 +36,14 @@ hzz2l2nu:
     - .gitlab-ci/compile.sh HZZ2l2nu
   artifacts:
     paths:
-    - HZZ2l2nu/runHZZanalysis 
+    - HZZ2l2nu/runHZZanalysis
     expire_in: 60 minutes
 
 runHzzDiMuData:
   stage: runHzz
   tags: [ cvmfs ]
   script:
-    - .gitlab-ci/runHwwCode.sh doubleMuData.root doubleMuHistos.root 0
+    - .gitlab-ci/runHwwCode.sh doubleMuData.root doubleMuHistos.root 0 0
   artifacts:
     paths:
     - HZZ2l2nu/doubleMuHistos.root
@@ -53,7 +53,7 @@ runHzzDiElData:
   stage: runHzz
   tags: [ cvmfs ]
   script:
-    - .gitlab-ci/runHwwCode.sh doubleEGData.root doubleElHistos.root 0
+    - .gitlab-ci/runHwwCode.sh doubleEGData.root doubleElHistos.root 0 0
   artifacts:
     paths:
     - HZZ2l2nu/doubleElHistos.root
@@ -63,10 +63,30 @@ runHzzDYMC:
   stage: runHzz
   tags: [ cvmfs ]
   script:
-    - .gitlab-ci/runHwwCode.sh Bonzai-DYJetsToLL.root DYHistos.root 1
+    - .gitlab-ci/runHwwCode.sh Bonzai-DYJetsToLL.root DYHistos.root 1 0
   artifacts:
     paths:
     - HZZ2l2nu/DYHistos.root
+    expire_in: 60 minutes
+
+runHzzPhotonData:
+  stage: runHzz
+  tags: [ cvmfs ]
+  script:
+    - .gitlab-ci/runHwwCode.sh SinglePhotonDataGH.root SinglePhotonsHistos.root 0 1
+  artifacts:
+    paths:
+    - HZZ2l2nu/SinglePhotonsHistos.root
+    expire_in: 60 minutes
+
+runHzzGammaJetMC:
+  stage: runHzz
+  tags: [ cvmfs ]
+  script:
+    - .gitlab-ci/runHwwCode.sh Bonzai-GJets_HT-200To400.root gammaJetHisto.root 1 1
+  artifacts:
+    paths:
+    - HZZ2l2nu/gammaJetHisto.root
     expire_in: 60 minutes
 
 compDiMu:
@@ -85,7 +105,7 @@ compDiEle:
   tags: [ cvmfs ]
   script:
     - yum -q -y install glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel boost-devel
-    - .gitlab-ci/runComparisons.sh doubleElHistos 
+    - .gitlab-ci/runComparisons.sh doubleElHistos
   artifacts:
     paths:
     - HZZ2l2nu/result_doubleElHistos
@@ -102,6 +122,28 @@ compDYMC:
     - HZZ2l2nu/result_DYHistos
     expire_in: 60 minutes
 
+compSinglePhoton:
+  stage: comparisons
+  tags: [ cvmfs ]
+  script:
+    - yum -q -y install glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel boost-devel
+    - .gitlab-ci/runComparisons.sh SinglePhotonsHistos
+  artifacts:
+    paths:
+    - HZZ2l2nu/result_SinglePhotonsHistos
+    expire_in: 60 minutes
+
+compGammaJetMC:
+  stage: comparisons
+  tags: [ cvmfs ]
+  script:
+    - yum -q -y install glibc-headers glibc-devel git gsl-devel freetype-devel libSM libX11-devel libXext-devel make gcc-c++ gcc binutils libXpm-devel libXft-devel boost-devel
+    - .gitlab-ci/runComparisons.sh gammaJetHisto
+  artifacts:
+    paths:
+    - HZZ2l2nu/result_gammaJetHisto
+    expire_in: 60 minutes
+
 getCompResults:
   stage: harvesting
   tags: [ cvmfs ]
@@ -110,4 +152,4 @@ getCompResults:
   - .gitlab-ci/harvest.sh $SLACKTOKEN
   artifacts:
     paths:
-    - HZZ2l2nu/allComparisons.tar.gz 
+    - HZZ2l2nu/allComparisons.tar.gz

@@ -3,8 +3,6 @@
 #include "ConfigVJets.h"
 #include "Combination.h"
 
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     

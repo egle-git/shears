@@ -4,8 +4,6 @@
 #include "ConfigVJets.h"
 #include "UnfoldingZJets.h"
 
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     //--- Loads configuration -----------------------------------------------------

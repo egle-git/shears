@@ -12,8 +12,6 @@
 #include "SectionedConfig.h"
 #include "TextTools.h"
 
-ConfigVJets cfg;
-
 /** Computes the integral of the different measured differental cross sections
  * for cross check. A latex table with the result is produced.
  * The list of considered differential cross sections is taken from the file

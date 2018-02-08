@@ -40,6 +40,8 @@ private:
   
 };
 
+extern ConfigVJets cfg;
+
 template<typename T>
 bool ConfigVJets::getUnf1(const char* lepSel, const char* variable, const char* param, T& val) const{
   return unfCfg.get1<T>(getUnfSec(lepSel, variable).Data(), param, val);

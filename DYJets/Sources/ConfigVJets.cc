@@ -11,6 +11,8 @@
 #include <sstream>
 #include "ConfigVJets.h"
 
+ConfigVJets cfg = ConfigVJets();
+
 bool ConfigVJets::read(const char* filename){
   bool rc = Config::read(filename);
   TString unfCfgFile = getS("unfConf");

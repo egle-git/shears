@@ -2,9 +2,6 @@
 #include "ConfigVJets.h"
 #include "ArgParser.h"
 
-ConfigVJets cfg;
-
-
 int main(int argc, char **argv){
   TString variable("");
   TString lepSel;  

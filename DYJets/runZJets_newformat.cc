@@ -6,9 +6,6 @@
 #include "ConfigVJets.h"
 #include "ZJets_newformat.h"
 
-//--- Load configuration ---
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     //-----------------------------------------------------------------------

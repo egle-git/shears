@@ -7,8 +7,6 @@
 #include "RecoComparison.h"
 //#include "variablesOfInterest.h"
 
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     gROOT->SetBatch();

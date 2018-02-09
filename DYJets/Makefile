@@ -21,7 +21,7 @@ endif
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags)
 
-LIB = LHAPDF
+LIB = TreePlayer LHAPDF
 LIBLIST = $(addprefix -l, $(LIB))
 
 LIBDIR = RooUnfold $(LHAPDFPATH)lib
@@ -56,7 +56,8 @@ EXELIST = \
   runCombination \
   testDecompVar \
   runIntegralCheck \
-  plotCrossSections
+  plotCrossSections \
+  runHiggs
 
 OBJLIST = $(SRCLIST:.cc=.o)
 DEPS    = $(SRCLIST:.cc=.d)
@@ -83,6 +84,9 @@ all: $(EXELIST)
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runZJets_newformat: runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+runHiggs: runHiggs.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 runRecoComparison: runRecoComparison.o $(OBJLIST) RooUnfold/libRooUnfold.so

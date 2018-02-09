@@ -1,5 +1,3 @@
-#include "catalog.h"
-
 #include <algorithm>
 #include <iostream>
 
@@ -8,6 +6,7 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "catalog.h"
 #include "timer.h"
 #include "ZJets_newformat.h"
 

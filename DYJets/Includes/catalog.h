@@ -6,6 +6,9 @@
 
 class TChain;
 
+/**
+ * \brief Represents the contents of a catalog.
+ */
 class catalog
 {
     std::shared_ptr<TChain> _event_chain;
@@ -15,16 +18,37 @@ class catalog
     double _lumi, _xsec;
 
 public:
+    /**
+     * \brief Constructor.
+     *
+     * The constructor reads the catalog.
+     *
+     * \param filename The location of the catalog.
+     * \param bonzaiDir The `bonzaiDir` parameter from the config file, used
+     *                  when paths in the catalog aren't absolute (Run I catalog
+     *                  support).
+     * \param maxFiles The maximum number of files to be used (-1 for no limit).
+     */
     explicit catalog(const std::string &filename,
                      const std::string &bonzaiDir,
                      int maxFiles = -1);
+
+    /// \brief Destructor
     virtual ~catalog();
 
+    /// \brief Returns a \c TChain pointing to event data.
     std::shared_ptr<TChain> event_chain() { return _event_chain; }
+
+    /// \brief Returns a \c TChain pointing to bonzai header data.
     std::shared_ptr<TChain> bonzai_header_chain() { return _bonzai_header_chain; }
+
+    /// \brief Returns a \c TChain pointing to bit fields header data.
     std::shared_ptr<TChain> bit_fields_chain() { return _bit_fields_chain; }
 
+    /// \brief Returns the integrated luminosity read from the catalog.
     double lumi() const { return _lumi; }
+
+    /// \brief Returns the integrated cross section read from the catalog.
     double xsec() const { return _xsec; }
 };
 

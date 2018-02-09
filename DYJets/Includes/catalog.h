@@ -21,7 +21,9 @@ public:
     /**
      * \brief Constructor.
      *
-     * The constructor reads the catalog.
+     * The constructor reads the catalog. If `filename` is relative, it is
+     * interpreted as being relative to `bonzaiDir`. Paths beginning with
+     * "/store/" are interpreted as pointing to an `eos`-based directory.
      *
      * \param filename The location of the catalog.
      * \param bonzaiDir The `bonzaiDir` parameter from the config file, used

@@ -3,6 +3,8 @@
 #include <regex.h>
 #include <iostream>
 
+#include <boost/algorithm/string.hpp>
+
 #include <TChain.h>
 #include <TFile.h>
 
@@ -17,6 +19,17 @@ catalog::catalog(const std::string &filename,
     _lumi(0),
     _xsec(0)
 {
+    std::string fullpath = filename;
+    if (filename[0] == '/') { // Absolute path
+        fullpath = filename;
+    } else {
+        fullpath = bonzaiDir + "/" + filename;
+    }
+
+    if (boost::starts_with(fullpath, "/store/")) {
+        fullpath.insert(0, "root://eoscms.cern.ch//eos/cms");
+    }
+
     regex_t xsecLine;
     int rc =  regcomp(&xsecLine,"[#*][[:space:]]*sample xsec[[:space:]:=]\\+\\([[:digit:].eE+-]\\+\\)", 0);
     if(rc){
@@ -35,21 +48,21 @@ catalog::catalog(const std::string &filename,
         std::cerr << "Bug found in " << __FILE__  << ":" << __LINE__ << ": " << buffer << "\n";
     }
 
-    if (isRootFile(filename.c_str())){
-        TString treePath = filename + "/tupel/EventTree";
-        TString bonzaiHeaderPath = filename + "/tupel/BonzaiHeader";
-        TString bonzaiBitFieldsPath = filename + "/tupel/BitFields";
-        cout << "Loading file: " << filename << endl;
+    if (isRootFile(fullpath.c_str())){
+        TString treePath = fullpath + "/tupel/EventTree";
+        TString bonzaiHeaderPath = fullpath + "/tupel/BonzaiHeader";
+        TString bonzaiBitFieldsPath = fullpath + "/tupel/BitFields";
+        cout << "Loading file: " << fullpath << endl;
         if(_event_chain) _event_chain->Add(treePath);
         if(_bonzai_header_chain){
             //check presence of the BonzaiHeader tree:
-            TFile* f = TFile::Open(filename.c_str());
+            TFile* f = TFile::Open(fullpath.c_str());
             if(f && !f->IsZombie()){
                 if(f->GetDirectory("tupel")->FindKey("BonzaiHeader")){
                     _bonzai_header_chain->Add(bonzaiHeaderPath);
                 } else{
                     std::cerr << "Warning: the tree BonzaiHeader was not found in file "
-                        << filename
+                        << fullpath
                         << ". We will assume we run on a boabab file and not Baobab->Bonzai "
                         << "acceptance correction will be considered. This message can be ignored "
                         << "if for this sample Boabab ntuples are usd as input.\n";
@@ -59,11 +72,11 @@ catalog::catalog(const std::string &filename,
         if(_bit_fields_chain) _bit_fields_chain->Add(bonzaiBitFieldsPath);
     } else {
         int (*closeFunc)(FILE*);
-        FILE* f = eosOpen(filename.c_str(), &closeFunc);
+        FILE* f = eosOpen(fullpath.c_str(), &closeFunc);
         if(!f){
-            std::cerr << "Failed to  open file " << filename << ".\n";
+            std::cerr << "Failed to  open file " << fullpath << ".\n";
         } else{
-            std::cout << "Reading input files from catalog file " << filename << "\n";
+            std::cout << "Reading input files from catalog file " << fullpath << "\n";
             string line;
             char* buffer = 0;
             size_t buffer_size = 0;
@@ -87,7 +100,7 @@ catalog::catalog(const std::string &filename,
                     _xsec = strtod(line + pmatch[1].rm_so, 0);
                     if(_xsec == 0){
                         std::cerr << "Value of parameter 'sample xsec', " << line + pmatch[1].rm_so
-                            << " found in file " << filename << " is not valid.\n";
+                            << " found in file " << fullpath << " is not valid.\n";
                     }
                 }
                 else if(!regexec(&lumiLine, line, sizeof(pmatch)/sizeof(pmatch[0]), pmatch, 0)){
@@ -95,7 +108,7 @@ catalog::catalog(const std::string &filename,
                     _lumi = strtod(line + pmatch[1].rm_so, 0);
                     if(_lumi == 0){
                         std::cerr << "Integrated luminosity parameter value, " << line + pmatch[1].rm_so
-                            << " found in file " << filename << " is not valid.\n";
+                            << " found in file " << fullpath << " is not valid.\n";
                     }
                 }
 
@@ -141,7 +154,7 @@ catalog::catalog(const std::string &filename,
                         } else{
                             isBonzai = False;
                             std::cerr << "Warning: the tree BonzaiHeader was not found in file "
-                                << filename
+                                << fullpath
                                 << ". We will assume we run on a boabab file and not Baobab->Bonzai "
                                 << "acceptance correction will be considered. This message can be ignored "
                                 << "if for this sample Boabab ntuples are usd as input.\n";
@@ -152,7 +165,7 @@ catalog::catalog(const std::string &filename,
                 if(_bit_fields_chain) _bit_fields_chain->Add(bonzaiBitFieldsPath);
                 ++ifile;
             }//next line
-            std::cout << "Closing catalog file " << filename << "\n";
+            std::cout << "Closing catalog file " << fullpath << "\n";
             if(buffer) free(buffer);
             closeFunc(f);
         } //file opening succeeded

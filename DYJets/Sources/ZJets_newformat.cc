@@ -3844,17 +3844,17 @@ ZJets::ZJets(const TString& lepSel_, TString sampleLabel, TString fileName_,
 
     rejectBTagEvents = lepSel.BeginsWith("S"); 
 
+    readCatalog(fileName, bonzaiDir, maxFiles);
+
     TString fullFileName;
     TString baseName;
 
     canonizeInputFilePath(bonzaiDir, fileName,
 			  &fullFileName, &baseName);
-
     fileName = baseName;
-    
+
     Input->SetTitle(fullFileName);
 
-    readCatalog(fileName, bonzaiDir, maxFiles);
 
     getMcNorm();
 

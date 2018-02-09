@@ -22,12 +22,8 @@ int main(int argc, char **argv)
     TString bonzaiDir("/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/");
 
     TString fullFileName;
-    TString baseName;
 
-    ZJets::canonizeInputFilePath(bonzaiDir, fileName,
-                                 &fullFileName, &baseName);
-
-    fileName = baseName;
+    ZJets::canonizeInputFilePath(bonzaiDir, fileName, &fullFileName, nullptr);
 
     catalog c(fullFileName.Data(), bonzaiDir.Data(), -1);
 

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#Author: Dylan Rankin
+#Description: Script to check (using brilcalc) whether triggers were prescaled after the first good lumisection of each run in a json file.
+
+#Example: ./checkPrescales.sh 'HLT_Mu45_eta2p1_v* HLT_Mu50_v*' Cert_271036-276811_13TeV_PromptReco_Collisions16_JSON_NoL1T.txt
+
+
+if [ `echo ${PATH} | grep -c "bril"` -eq 0 ]; then
+  echo "You need to first setup brilcalc"
+  exit 1
+fi
+
+for run in $( sed 's/\([0-9]\+\)":/\n\1/g' $2 | sed 's/\(^[0-9]\+\).*$/\1/g' | sed '/^[0-9]/! d' ); do
+  UNPRE=0
+  START=`eval "sed 's/.*${run}\": \[\[\([0-9]\+\),/@\1@/g' $2 | sed '/^@/! d' | cut -d'@' -f2"`
+  for trig in $( echo $1 ); do
+    eval brilcalc trg --prescale --hltpath ${trig} -r ${run} -o test.csv
+    grep "^.*,.*,.*,0" test.csv | while read -r line ; do
+      if [ `echo $line | cut -d',' -f2` -gt ${START} ]; then
+        echo "${trig} is prescaled in run ${run}!"
+        grep -B1 -A1 "^.*,.*,.*,0" test.csv
+        UNPRE=1
+        break
+      fi
+    done
+    if [ $UNPRE -eq 0 ]; then
+      echo "${trig} is unprescaled in ${run}."
+    fi
+  done
+done
+
+rm test.csv

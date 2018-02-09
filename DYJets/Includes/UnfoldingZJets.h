@@ -11,14 +11,18 @@
 #include "TGraphAsymmErrors.h"
 #include <vector>
 
+#define NCYCLES 1
+
 //void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable = "", bool noramlized = false);
 void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,
 		    TString histoDir, TString unfoldDir, int jetPtMin, int jetEtaMax, 
 		    TString variable = "", bool noramlized = false, int whichSyst = -1);
 
-int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, RooUnfoldResponse *resp,
+int UnfoldData(const SectionedConfig& unfCfg, const TString lepSel, const char* variable, 
+	       RooUnfoldResponse *resp,
 	       TH1D *hRecData, TH1D* &hUnfData, TH2D* &hUnfDataStatCov, TH2D* &hUnfMCStatCov,
-	       TString name, double integratedLumi, const TString& unfoldDir,
+	       std::vector<TH1D> & hUnfDataBBB, TString name, double integratedLumi, 
+	       const TString& unfoldDir,
 	       TH1* hRecDYJets, TH1* hGenDYJets, bool logy = false,
 	       TH1D *hRecDataMinusFakesOdd = 0, TH1D *hRecDataMinusFakesEven = 0, int fixNIterTo = -1,
 	       const char* outputFileName = 0);

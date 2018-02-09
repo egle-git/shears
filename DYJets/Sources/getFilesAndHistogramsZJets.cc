@@ -2,6 +2,8 @@
 #include <sstream>
 #include <RooUnfoldResponse.h>
 #include <TFile.h>
+#include <TCanvas.h>
+#include <TPad.h>
 #include <TString.h>
 #include <TSystem.h>
 #include <algorithm>
@@ -9,6 +11,7 @@
 #include <cassert>
 #include "getFilesAndHistogramsZJets.h"
 #include "ConfigVJets.h"
+#include "TRandom3.h"
 using namespace std;
 
 extern ConfigVJets cfg;
@@ -49,15 +52,15 @@ TFile* getFile(TString histoDir, TString lepSel, TString energy, TString Name,
     //-------------------------------------------------
 
     //--- update fileName with trigger correction ----------
-    fileName += "_TrigCorr_" + trigCorr;
+    //fileName += "_TrigCorr_" + trigCorr; //DJALOG
     //------------------------------------------------------
 
     //--- update fileName for a bunch of other things ---
     fileName += "_Syst_" + syst;
-    fileName += "_JetPtMin_";
-    fileName += jetPtMin;
-    fileName += "_JetEtaMax_";
-    fileName += jetEtaMax; 
+    //fileName += "_JetPtMin_"; //DJALOG
+    //fileName += jetPtMin;     //DJALOG
+    //fileName += "_JetEtaMax_";//DJALOG
+    //fileName += jetEtaMax;    //DJALOG
     if (closureTest != "") fileName += closureTest;
     //---------------------------------------------------
 
@@ -156,8 +159,19 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3],
     //--- get gen DYJets histograms ---
     getHistos(hGenDYJets, fDYJets, "gen" + variable);
 
+    //DJALOG
+    //TH2D *hResDYJetsTmp[13] = {NULL};
     //--- get res DYJets histograms ---
-    getHistos(hResDYJets, fDYJets, "hresponse" + variable);
+    
+    //DJALOG
+    //Switch for using the Match response matrix
+    bool match = false;
+    TString tmpVariable = variable;
+    if(match)
+      tmpVariable.Insert(variable.Index("_Z"),"Match");
+
+    std::cout<<std::endl<<tmpVariable<<std::endl;
+    getHistos(hResDYJets, fDYJets, "hresponse" + tmpVariable);
 
     for (unsigned short iSyst = 0; iSyst < 11; ++iSyst) {
       hRecSumBg[iSyst] = 0;
@@ -191,6 +205,58 @@ void getAllHistos(TString variable, TH1D *hRecData[3], TFile *fData[3],
       }
     }
     
+    
+    //DJALOG
+    //TCanvas * canvas = new TCanvas("Test","test",1000,800);
+    //canvas->SetRightMargin(0.15);
+    //hResDYJets[0]->Draw("colz TEXT");
+    //canvas->Print("hresponseFirstJetAbsRapidity_NoMatch.pdf","pdf");
+    //canvas->Clear();
+    //hRecDYJets[0]->Draw("colz TEXT");
+    //canvas->Print("FirstJetAbsRapidity_Reco_NoMatch.pdf","pdf");
+    //canvas->Clear();
+    //hResDYJetsTmp[0]->Add(hResDYJets[0],hResDYJetsTmp[0],1.0,-1.0);
+    //hGenDYJets[0]->Draw("colz TEXT");
+    //canvas->Print("FirstJetAbsRapidity_Gen_NoMatch.pdf","pdf");
+
+
+    /*
+    printf("Resp Bin (%ld,%ld) = %F\n",1,1,hResDYJets[0]->GetBinContent(1,1));
+    printf("Resp Bin (%ld,%ld) = %F\n",3,3,hResDYJets[0]->GetBinContent(3,3));
+    printf("Resp Bin (%ld,%ld) = %F\n",2,7,hResDYJets[0]->GetBinContent(2,7));
+
+
+
+    size_t nFill = 300000;
+    for(size_t iFill=0;iFill<nFill;iFill++){
+      TRandom3 randomRec(iFill);
+      TRandom3 randomGen(iFill + nFill + 100);
+      double rapRec = randomRec.Rndm()*2.4;
+      double rapGen = randomGen.Rndm()*2.4;
+      double weightRec=hRecDYJets[0]->GetBinContent(hRecDYJets[0]->FindBin(rapRec))/hRecDYJets[0]->GetEntries();
+      double weightGen=hGenDYJets[0]->GetBinContent(hGenDYJets[0]->FindBin(rapGen))/hGenDYJets[0]->GetEntries();
+      weightRec *= 5.0;
+      weightGen *= 5.0;
+      
+
+      
+      std::cout<<"Rap Rec "<<rapRec<<std::endl;
+      std::cout<<"Rap Gen "<<rapGen<<std::endl;
+      std::cout<<"Bin Rec "<<hRecData[0]->FindBin(rapRec)<<std::endl;
+      std::cout<<"Bin Gen "<<hRecData[0]->FindBin(rapGen)<<std::endl;
+      std::cout<<"Weight Rec "<<weightRec<<std::endl;
+      std::cout<<"Weight Gen "<<weightGen<<std::endl;
+      printf("\n");
+      
+      hRecDYJets[0]->Fill(rapRec,weightRec);
+      hGenDYJets[0]->Fill(rapGen,weightGen);
+      hResDYJets[0]->Fill(rapRec,rapGen,weightRec*weightGen);
+      
+    }
+    */
+
+    //DJALOG
+
     //--- get response DYJets objects ---
     getResps(respDYJets, hRecDYJets, hGenDYJets, hResDYJets);
 
@@ -377,6 +443,8 @@ void getHistos(TH1D *histograms[], TFile *Files[], TString variable)
 
 void getHistos(TH2D *histograms[], TFile *Files[], TString variable)
 {
+
+
     TString fileName = gSystem->BaseName(Files[0]->GetName());
     bool isData = (fileName.Index("Data") >= 0 || fileName.Index("data") >= 0 || fileName.Index("DATA") >= 0);
     bool isSignal = (fileName.Index("DYJets") >= 0 && fileName.Index("UNFOLDING") >=0 && fileName.Index("Tau") < 0);
@@ -886,10 +954,10 @@ TFile* getHistoFile(const char* sample, const char* lepSel, int sys, bool verbos
   std::string jetPtMin = cfg.getS("jetPtMin");
   std::string jetEtaMax = cfg.getS("jetEtaMax");
   
-  TString fname = histoDir + "/" + lepSel + "_13TeV_" + sample + TString::Format("_TrigCorr_1_Syst_%d_JetPtMin_", sys);
-  fname += jetPtMin;
-  fname += "_JetEtaMax_";
-  fname += jetEtaMax;
+  TString fname = histoDir + "/" + lepSel + "_13TeV_" + sample + TString::Format("_Syst_%d", sys);
+  //fname += jetPtMin;
+  //fname += "_JetEtaMax_";
+  //fname += jetEtaMax;
   fname += ".root";
   TFile* f = new TFile(fname);
   if(f && f->IsZombie()){
@@ -930,6 +998,21 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	      continue;
 	    }
 	    double lumi = hLumi->GetBinContent(1);
+	    //DJALOG
+	    if(lumi <= 0.0){
+	      lumi = 35290.0;
+	      std::cerr << "Warning. Problem with lumi value stored in " << f->GetName()
+			<< ". Integrated luminosity forced to " << lumi << " pb-1"
+			<< "\n";
+	    }
+	    //DJALOG The problem will be fixed in the next production for lumi in MC so this should
+	    //be removed before production starts.
+	    if(lumi > 100000.0){
+	      printf("Problem with the MC lumi: %F\n   Setting it to 35290.0",lumi);
+	      lumi = 35290.0;
+	    }
+	    //DJALOG
+	    printf("getFilesAndHistograms::getGenHistos Lumi = %F\n",lumi);
 	    h_->Scale(1./lumi);
 	  }
 	  
@@ -939,7 +1022,6 @@ std::vector<TH1*> getGenHistos(const std::vector<std::string> samples, const cha
 	  delete f;
 	}
       }
-
       if(h[i] && xsec && s != "DYJets_ZjNNLO"){ //DYJets_ZjNNLO histos are already divided by the bin widths
 	//normalize to one-channel decay for cross-section histograms in case two channels were sumed up
 	h[i]->Scale(1./ich);

@@ -123,13 +123,23 @@ void VJetPruner::skimCollections(){
 
   //Reco muon collections:
   mask.resize(MuPt->size());
+  //printf("makeFilterMask(&VJetPruner::filterMu, mask);\n");
   makeFilterMask(&VJetPruner::filterMu, mask);
   filter(MuPt, mask);
   filter(MuEta, mask);
   filter(MuPhi, mask);
   filter(MuE, mask);
+  for(size_t i=0;i<MuId->size();i++){
+    //    printf("MuId(%ld)=%d\n",i,MuId->at(i));
+    printf("MuId(%ld)=0x%x\n",i,MuId->at(i));
+  }
   filter(MuId, mask);
   filter(MuIdTight, mask);
+  for(size_t i=0;i<MuIdTight->size();i++){
+    //    printf("MuId(%ld)=%d\n",i,MuId->at(i));
+    printf("MuIdTight(%ld)=0x%x\n",i,MuIdTight->at(i));
+  }
+
   filter(MuCh, mask);
   filter(MuVtxZ, mask);
   filter(MuDxy, mask);

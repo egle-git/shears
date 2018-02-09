@@ -1,0 +1,16 @@
+GETPILEUP_O=GetPileup.o 
+GETPILEUP=GetPileup
+
+CXXFLAGS += -I./ -fno-strict-aliasing -g
+LDFLAGS += -g
+
+CXXFLAGS += $(shell root-config --cflags)
+LDFLAGS += $(shell root-config --libs)
+
+all: $(GETPILEUP)
+
+clean:
+	@rm -f *~ \#* *.o $(GETPILEUP) > /dev/null
+
+$(GETPILEUP):	$(GETPILEUP_O)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $@

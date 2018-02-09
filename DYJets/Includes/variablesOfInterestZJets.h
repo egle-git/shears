@@ -18,15 +18,19 @@ struct variableStruct{
 const variableStruct VAROFINTERESTZJETS[] = {
   //--  Name  ------------------ log x - log y - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD kterm - E Bayes kterm  - E Bayes kterm COMBINE
   //-- jet Pt distribution
-//  {"FirstJetPt_Zinc1jet",          1, 1,      1,          11,              5,             9,            9 ,               6    }, // 1
-//  {"SecondJetPt_Zinc2jet",         1, 1,      1,          14,              8,            11,            7 ,               7    }, // 2
-//  {"ThirdJetPt_Zinc3jet",          1, 1,      1,           6,              9,             8,            7 ,               7    }, // 3
-  //{"FourthJetPt_Zinc4jet",         1, 1,      1,           4,              4,             6,            5 ,               4    }, // 4
-  //{"FifthJetPt_Zinc5jet",          1, 1,      1,           3,              2,             4,            3 ,               2    }, // 5 
+  //PAPER//{"FirstJetPt_Zinc1jet",          1, 1,      1,          11,              5,             9,            9 ,               6    }, // 1
+  //{"FirstJetPtMatch_Zinc1jet",          1, 1,      1,          11,              5,             9,            9 ,               6    }, // 1
+  //PAPER//{"SecondJetPt_Zinc2jet",         1, 1,      1,          14,              8,            11,            7 ,               7    }, // 2
+  //{"SecondJetPtMatch_Zinc2jet",         1, 1,      1,          14,              8,            11,            7 ,               7    }, // 2
+  //PAPER//{"ThirdJetPt_Zinc3jet",          1, 1,      1,           6,              9,             8,            7 ,               7    }, // 3
+  //{"ThirdJetPtMatch_Zinc3jet",          1, 1,      1,           6,              9,             8,            7 ,               7    }, // 3
+  //PAPER//{"FourthJetPt_Zinc4jet",         1, 1,      1,           4,              4,             6,            5 ,               4    }, // 4
+  //{"FourthJetPtMatch_Zinc4jet",         1, 1,      1,           4,              4,             6,            5 ,               4    }, // 4
+  //PAPER//{"FifthJetPt_Zinc5jet",          1, 1,      1,           3,              2,             4,            3 ,               2    }, // 5 
   //-- jets HT distribution
-//  {"JetsHT_Zinc1jet",              1, 1,      1,           9,              4,             7,            3 ,               3    }, // 6
- // {"JetsHT_Zinc2jet",              1, 1,      1,           5,              3,             9,            4 ,               2    }, // 7
-//  {"JetsHT_Zinc3jet",              1, 1,      1,           6,              3,             6,            6 ,               3    }, // 8
+  //PAPER//{"JetsHT_Zinc1jet",              1, 1,      1,           9,              4,             7,            3 ,               3    }, // 6
+  //PAPER//{"JetsHT_Zinc2jet",              1, 1,      1,           5,              3,             9,            4 ,               2    }, // 7
+  //PAPER//{"JetsHT_Zinc3jet",              1, 1,      1,           6,              3,             6,            6 ,               3    }, // 8
   //    {"JetsHT_Zinc4jet",              1, 1,      1,           5,              5,             4,            4 ,               3    }, // 9
   //    {"JetsHT_Zinc5jet",              1, 1,      1,           3,              2,             4,            3 ,               1    }, // 10       
   //-- jet Eta distribution
@@ -36,11 +40,15 @@ const variableStruct VAROFINTERESTZJETS[] = {
   //    {"FourthJetEta_Zinc4jet",        0, 0,      1,           4,              4,             4,            5 ,               4    }, // 14
   //    {"FifthJetEta_Zinc5jet",         0, 0,      1,           3,              2,             2,            2 ,               1    }, // 15    
   //-- jet Rapidity distribution
-//  {"FirstJetAbsRapidity_Zinc1jet",         0, 0,      1,          10,              4,            18,            4 ,               5    }, // 11
-//  {"SecondJetAbsRapidity_Zinc2jet",        0, 0,      1,           6,              5,            16,            5 ,               5    }, // 12
-//  {"ThirdJetAbsRapidity_Zinc3jet",         0, 0,      1,           4,              4,             8,            4 ,               5    }, // 13
-  //    {"FourthJetAbsRapidity_Zinc4jet",        0, 0,      1,           4,              4,             4,            5 ,               4    }, // 14
-  //    {"FifthJetAbsRapidity_Zinc5jet",         0, 0,      1,           3,              2,             2,            2 ,               1    }, // 15    
+  //PAPER//{"FirstJetAbsRapidity_Zinc1jet",         0, 0,      1,          10,              4,            18,            4 ,               5    }, // 11
+  //{"FirstJetAbsRapidityMatch_Zinc1jet",         0, 0,      1,          10,              4,            18,            4 ,               5    }, // 11
+  //PAPER//{"SecondJetAbsRapidity_Zinc2jet",        0, 0,      1,           6,              5,            16,            5 ,               5    }, // 12
+  //{"SecondJetAbsRapidityMatch_Zinc2jet",        0, 0,      1,           6,              5,            16,            5 ,               5    }, // 12
+  //PAPER//{"ThirdJetAbsRapidity_Zinc3jet",         0, 0,      1,           4,              4,             8,            4 ,               5    }, // 13
+  //{"ThirdJetAbsRapidityMatch_Zinc3jet",         0, 0,      1,           4,              4,             8,            4 ,               5    }, // 13
+  //PAPER//{"FourthJetAbsRapidity_Zinc4jet",        0, 0,      1,           4,              4,             4,            5 ,               4    }, // 14
+  //{"FourthJetAbsRapidityMatch_Zinc4jet",        0, 0,      1,           4,              4,             4,            5 ,               4    }, // 14
+  //PAPER//{"FifthJetAbsRapidity_Zinc5jet",         0, 0,      1,           3,              2,             2,            2 ,               1    }, // 15    
   //-- Jets Mass distribution
   //{"JetsMass_Zinc2jet",            0, 0,      1,           9,              5,            13,           11 ,               5    }, // 16
   {"Phistar_Zinc0jet",                 1, 0,      1,           9,              5,            13,           11 ,               5    }, // 17
@@ -132,6 +140,7 @@ const variableStruct VAROFINTERESTZJETS[] = {
   //    {"AbsFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"SumZFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"DifZFirstJetRapidity_ZPt300_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
+  {"ZPt_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"Phistar_Zinc1jet",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"Phistar_Zinc1jetM111_130",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"Phistar_Zinc1jetM130_3",          1, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
@@ -144,9 +153,9 @@ const variableStruct VAROFINTERESTZJETS[] = {
 //  {"VisPt_Zinc2jetQun",     0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
 //  {"VisPt_Zinc3jetQun",     0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"HadRecoil",             0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
-//  {"JZB",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
-//  {"JZB_ptHigh",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
-//  {"JZB_ptLow",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
+  //PAPER//{"JZB",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
+  //PAPER//{"JZB_ptHigh",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
+  //PAPER//{"JZB_ptLow",                   0, 0,      1,           3,              3,             3,            3 ,               3    }, // 1
   //different JetPt cuts////////
   //    {"AbsZRapidity_FirstJetPt50_Zinc1jet",         0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1
   //    {"AbsFirstJetRapidity_FirstJetPt50_Zinc1jet",          0, 1,      1,           3,              3,             3,            3 ,               3    }, // 1

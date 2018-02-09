@@ -1,0 +1,1092 @@
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273158 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273158 | 17    | 6        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273158 | 32    | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273158,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 17
+preScale = 1
+line with lumi cut= 273158,17,6,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 32
+preScale = 1
+line with lumi cut= 273158,32,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273158: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273158 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273158 | 17    | 6        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273158 | 32    | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273158,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 17
+preScale = 1
+line with lumi cut= 273158,17,6,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 32
+preScale = 1
+line with lumi cut= 273158,32,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273158: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273291 | 1     | 6        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273291,1,6,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273291: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273291 | 1     | 6        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273291,1,6,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273291: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273299 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273299,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273299: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273299 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273299,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273299: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273301 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273301,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273301: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273301 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273301,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273301: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| 273402 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 273402 | 10    | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 46    | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 59    | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 79    | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273402 | 190   | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 255   | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 10
+preScale = 1
+lumiSection = 46
+preScale = 1
+lumiSection = 59
+preScale = 1
+lumiSection = 79
+preScale = 1
+lumiSection = 190
+preScale = 1
+line with lumi cut= 273402,190,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 255
+preScale = 1
+line with lumi cut= 273402,255,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 273402: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| 273402 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 273402 | 10    | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 46    | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 59    | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 79    | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273402 | 190   | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 273402 | 255   | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 10
+preScale = 1
+lumiSection = 46
+preScale = 1
+lumiSection = 59
+preScale = 1
+lumiSection = 79
+preScale = 1
+lumiSection = 190
+preScale = 1
+line with lumi cut= 273402,190,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 255
+preScale = 1
+line with lumi cut= 273402,255,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 273402: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273403 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273403,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273403: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273403 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273403,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273403: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273728 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273728,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273728: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273728 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273728,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273728: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 273730 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 287   | 6        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 295   | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 1491  | 6        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273730,1,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 287
+preScale = 1
+line with lumi cut= 273730,287,6,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 295
+preScale = 1
+line with lumi cut= 273730,295,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 1491
+preScale = 1
+line with lumi cut= 273730,1491,6,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273730: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 273730 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 287   | 6        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 295   | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 273730 | 1491  | 6        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 273730,1,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 287
+preScale = 1
+line with lumi cut= 273730,287,6,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 295
+preScale = 1
+line with lumi cut= 273730,295,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+lumiSection = 1491
+preScale = 1
+line with lumi cut= 273730,1491,6,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 273730: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274094 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274094: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274094 | 1     | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274094: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| 274146 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274146 | 4     | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274146,1,0,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 4
+preScale = 1
+line with lumi cut= 274146,4,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274146: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| 274146 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274146 | 4     | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274146,1,0,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 4
+preScale = 1
+line with lumi cut= 274146,4,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274146: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274159 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274159,1,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274159: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274159 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274159,1,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274159: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274160 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274160,1,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274160: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274160 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274160,1,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274160: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274161 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274161,1,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274161: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274161 | 1     | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274161,1,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274161: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| 274172 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274172 | 7     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274172 | 55    | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 7
+preScale = 1
+lumiSection = 55
+preScale = 1
+line with lumi cut= 274172,55,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274172: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| 274172 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274172 | 7     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274172 | 55    | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 7
+preScale = 1
+lumiSection = 55
+preScale = 1
+line with lumi cut= 274172,55,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274172: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274198 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274198 | 115   | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+lumiSection = 115
+preScale = 1
+line with lumi cut= 274198,115,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274198: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274198 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274198 | 115   | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+lumiSection = 115
+preScale = 1
+line with lumi cut= 274198,115,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274198: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274199 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274199 | 14    | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274199,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 14
+preScale = 1
+line with lumi cut= 274199,14,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274199: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274199 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274199 | 14    | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274199,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 14
+preScale = 1
+line with lumi cut= 274199,14,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274199: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| 274200 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274200 | 5     | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274200 | 74    | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274200,1,0,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 5
+preScale = 1
+line with lumi cut= 274200,5,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 74
+preScale = 1
+line with lumi cut= 274200,74,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274200: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| 274200 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274200 | 5     | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274200 | 74    | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274200,1,0,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 5
+preScale = 1
+line with lumi cut= 274200,5,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 74
+preScale = 1
+line with lumi cut= 274200,74,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274200: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274240 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274240,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274240: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274240 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274240,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274240: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274241 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274241 | 442   | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274241 | 853   | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274241,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 442
+preScale = 1
+line with lumi cut= 274241,442,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 853
+preScale = 1
+line with lumi cut= 274241,853,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274241: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274241 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274241 | 442   | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274241 | 853   | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274241,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 442
+preScale = 1
+line with lumi cut= 274241,442,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 853
+preScale = 1
+line with lumi cut= 274241,853,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274241: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+| 274244 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274244 | 15    | 4        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274244 | 152   | 5        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274244,1,0,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 15
+preScale = 1
+line with lumi cut= 274244,15,4,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 152
+preScale = 1
+line with lumi cut= 274244,152,5,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 274244: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+| 274244 | 1     | 0        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50 | OR    | L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0 |
+| 274244 | 15    | 4        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274244 | 152   | 5        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1  | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 274244,1,0,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/50,OR,L1_DoubleMu_12_5/0 L1_DoubleMu_11_4/0
+lumiSection = 15
+preScale = 1
+line with lumi cut= 274244,15,4,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 152
+preScale = 1
+line with lumi cut= 274244,152,5,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+UNPRESCALED Run 274244: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274250 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274250,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274250: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274250 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274250,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274250: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274251 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274251 | 273   | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274251,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 273
+preScale = 1
+line with lumi cut= 274251,273,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274251: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274251 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 274251 | 273   | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274251,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+lumiSection = 273
+preScale = 1
+line with lumi cut= 274251,273,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274251: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274283 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274283: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274283 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274283: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274284 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274284,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274284: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274284 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274284,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274284: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274286 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274286,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274286: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274286 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274286,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274286: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274314 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274314: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274314 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+UNPRESCALED Run 274314: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274315 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274315,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274315: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274315 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274315,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274315: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 274316 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274316,1,2,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274316: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 274316 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 274316,1,2,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v2/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 274316: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 275292 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 275292,1,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275292: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 275292 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 275292,1,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275292: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 275293 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 275293,1,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275293: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 275293 | 1     | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+line with lumi cut= 275293,1,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275293: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                      | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+| 275309 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 275309 | 380   | 3        | 1           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+---------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+lumiSection = 380
+preScale = 1
+line with lumi cut= 275309,380,3,1,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275309: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                        | logic | l1bit/prescval                        |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+| 275309 | 1     | 2        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 275309 | 380   | 3        | 1           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+-----------------------------------------+-------+---------------------------------------+
+lumiSection = 1
+preScale = 1
+lumiSection = 380
+preScale = 1
+line with lumi cut= 275309,380,3,1,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v3/1,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 275309: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 283946 | 1     | 1        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/42 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/0 |
+| 283946 | 133   | 2        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 283946 | 263   | 3        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 283946 | 425   | 4        | 34          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/34 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 283946 | 583   | 5        | 30          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
+| 283946 | 826   | 6        | 26          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 283946 | 1012  | 7        | 21          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 283946 | 1225  | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 133
+preScale = 0
+line with lumi cut= 283946,133,2,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 263
+preScale = 0
+line with lumi cut= 283946,263,3,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+lumiSection = 425
+preScale = 34
+line with lumi cut= 283946,425,4,34,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/34,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 283946: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 283946 | 1     | 1        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/42 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/0 |
+| 283946 | 133   | 2        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 283946 | 263   | 3        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 283946 | 425   | 4        | 34          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/34 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 283946 | 583   | 5        | 30          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
+| 283946 | 826   | 6        | 26          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 283946 | 1012  | 7        | 21          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 283946 | 1225  | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 133
+preScale = 0
+line with lumi cut= 283946,133,2,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 263
+preScale = 0
+line with lumi cut= 283946,263,3,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+lumiSection = 425
+preScale = 34
+line with lumi cut= 283946,425,4,34,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/34,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 283946: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 283964 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 283964 | 3     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 283964,1,2,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 3
+preScale = 18
+line with lumi cut= 283964,3,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 283964: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 283964 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 283964 | 3     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 283964,1,2,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 3
+preScale = 18
+line with lumi cut= 283964,3,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 283964: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284006 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 284006 | 105   | 7        | 21          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 284006 | 162   | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
+| 284006 | 190   | 7        | 21          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 105
+preScale = 21
+line with lumi cut= 284006,105,7,21,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+PRESCALED   Run 284006: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284006 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 284006 | 105   | 7        | 21          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 284006 | 162   | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
+| 284006 | 190   | 7        | 21          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 105
+preScale = 21
+line with lumi cut= 284006,105,7,21,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+PRESCALED   Run 284006: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284014 | 1     | 7        | 21          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 21
+line with lumi cut= 284014,1,7,21,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+PRESCALED   Run 284014: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284014 | 1     | 7        | 21          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 21
+line with lumi cut= 284014,1,7,21,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1
+PRESCALED   Run 284014: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284025 | 1     | 1        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/42 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/0 |
+| 284025 | 155   | 2        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 155
+preScale = 0
+line with lumi cut= 284025,155,2,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 284025: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284025 | 1     | 1        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/42 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/0 |
+| 284025 | 155   | 2        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+lumiSection = 155
+preScale = 0
+line with lumi cut= 284025,155,2,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+UNPRESCALED Run 284025: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284029 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 284029 | 39    | 3        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 284029,1,2,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 39
+preScale = 0
+line with lumi cut= 284029,39,3,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+UNPRESCALED Run 284029: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284029 | 1     | 2        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 |
+| 284029 | 39    | 3        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 284029,1,2,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1
+lumiSection = 39
+preScale = 0
+line with lumi cut= 284029,39,3,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+UNPRESCALED Run 284029: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284035 | 1     | 3        | 0           | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 284035 | 74    | 4        | 34          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/34 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 284035 | 278   | 5        | 30          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 284035,1,3,0,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+lumiSection = 74
+preScale = 34
+line with lumi cut= 284035,74,4,34,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/34,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 284035: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284035 | 1     | 3        | 0           | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38 | OR    | L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 284035 | 74    | 4        | 34          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/34 | OR    | L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 |
+| 284035 | 278   | 5        | 30          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 0
+line with lumi cut= 284035,1,3,0,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/38,OR,L1_DoubleMu_11_4/0 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+lumiSection = 74
+preScale = 34
+line with lumi cut= 284035,74,4,34,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/34,OR,L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 284035: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284036 | 1     | 5        | 30          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
+| 284036 | 140   | 6        | 26          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 30
+line with lumi cut= 284036,1,5,30,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/30,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 284036: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284036 | 1     | 5        | 30          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/30 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1 |
+| 284036 | 140   | 6        | 26          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 30
+line with lumi cut= 284036,1,5,30,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/30,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 L1_DoubleMu_13_6/1
+PRESCALED   Run 284036: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284037 | 1     | 6        | 26          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 284037 | 7     | 7        | 21          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 284037 | 258   | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 26
+line with lumi cut= 284037,1,6,26,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/26,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284037: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284037 | 1     | 6        | 26          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/26 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1 |
+| 284037 | 7     | 7        | 21          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/21 | OR    | L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 L1_DoubleMu_12_5/1 |
+| 284037 | 258   | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 26
+line with lumi cut= 284037,1,6,26,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/26,OR,L1_DoubleMu_13_6/1 L1_DoubleMu_12_5/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284037: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284038 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284038,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284038: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284038 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284038,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284038: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284039 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284039,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284039: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284039 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284039,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284039: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284040 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284040,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284040: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284040 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284040,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284040: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284041 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284041,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284041: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284041 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284041,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284041: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284042 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284042,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284042: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284042 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284042,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284042: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284043 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284043,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284043: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284043 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284043,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284043: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                       | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+| 284044 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+----------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284044,1,8,18,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v6/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284044: HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| run    | cmsls | prescidx | totprescval | hltpath/prescval                         | logic | l1bit/prescval                                           |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+| 284044 | 1     | 8        | 18          | HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18 | OR    | L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1 |
++--------+-------+----------+-------------+------------------------------------------+-------+----------------------------------------------------------+
+lumiSection = 1
+preScale = 18
+line with lumi cut= 284044,1,8,18,HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v5/18,OR,L1_DoubleMu_12_5/1 L1_DoubleMu_13_6/1 L1_DoubleMu_11_4/1
+PRESCALED   Run 284044: HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*

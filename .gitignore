@@ -11,6 +11,9 @@ runMakeStatisticsTable
 DYJets/Sources/plotRespMatrix
 DYJets/runDMu.sh
 DYJets/runDE.sh
+plotCrossSections
+plotRespMatrix
+runIntegralCheck
 
 # git will not consider the following files:
 *.root
@@ -31,6 +34,10 @@ tmp*.cc
 *.swp
 *.DS_Store
 copyToPNFS.sh
+*~
+*.pyc
+*.pdf
+#*#
 
 # git will ignore the nohup output files
 .nfs*
@@ -38,6 +45,11 @@ copyToPNFS.sh
 *.cfg
 
 # git will not consider the following directory:
+DYJets/Recos/
+DYJets/Unfolds/
+DYJets/logs/
+
+
 
 # ignores input data files
 Data_Z_5311

@@ -22,7 +22,7 @@ struct processInfoStruct{
 //--- last element must point to the MC Signal(s)
 //8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
-    //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen
+    //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen - legendReco - legendGen
     /* 0*/{"Data",      ' ',     1.,       1.,      1,  1,        kBlack,    kBlack,    " Data",       " Data"},
     /* 1*/{"TT",        ' ',     1.,       1.,      1,  0.00,     kBlue,     kBlue,     " t#bar{t}",   " t#bar{t}"},  
     /* 2*/{"ST_sch",    '+',     1.,       1.,      1,  0.06,     kBlue+2,   kBlue+2,   " Single Top s-ch", " Single Top s-ch"},
@@ -30,8 +30,8 @@ const processInfoStruct Samples[] = {
     /* 4*/{"STbar_tW",  '+',     1.,       1.,      1,  0.06,     kBlue+6,   kBlue+6,   " #bar{t}W",   " #bar{t}W"},
     /* 5*/{"ST_tW",     '+',     1.,       1.,      1,  0.06,     kBlue+8,   kBlue+8,   " tW",         " tW"},  
     /* 6*/{"Top",       '=',     1.,       1.,      1,  0.06,     kMagenta,  kMagenta,  " Single top", "Single top"},
-    /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " W",          " W"},
-//    /* 7*/{"TauTau", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},
+//  /* 7*/{"WToLNu", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " W",          " W"},
+    /* 7*/{"TauTau", 	' ',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " Z/#gamma^{*} #rightarrow #tau#tau", "Z/#gamma^{*} #rightarrow  #tau#tau"},
     /* 8*/{"ZZ",        '+',     1.,       1.,      1,  0.06,     kOrange,   kOrange,   " ZZ",         " ZZ"},
     /* 9*/{"WWTo2L2Nu", '+',     1.,       1.,      1,  0.06,     kViolet+5, kViolet+5, " WW",         " WW"},
     /*10*/{"WZ",    	'+',     1.,       1.,      1,  0.06,     kRed+1,    kRed+1,    " WZ",         " WZ"},

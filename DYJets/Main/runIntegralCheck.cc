@@ -1,6 +1,7 @@
 #include "IntegralCheck.h"
 
-int main(){
-  IntegralCheck a;
-  a.run();
+int main()
+{
+    IntegralCheck a;
+    a.run();
 }

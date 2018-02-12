@@ -1,13 +1,13 @@
 #ifndef _functions_h_
 #define _functions_h_
 
-#include <iostream>
-#include <cstdarg>
-#include <vector>
-#include <TLorentzVector.h>
 #include <RooUnfoldResponse.h>
+#include <TLorentzVector.h>
+#include <cstdarg>
+#include <iostream>
+#include <vector>
 
-//Beginning of run for 2016
+// Beginning of run for 2016
 #define RUNB_2016 273150
 #define RUNC_2016 275656
 #define RUND_2016 276315
@@ -16,7 +16,7 @@
 #define RUNG_2016 278820
 #define RUNH_2016 281613
 
-//Integrated Lumi for each run 2016
+// Integrated Lumi for each run 2016
 #define LUMI_RUNB_2016 5.748
 #define LUMI_RUNC_2016 2.573
 #define LUMI_RUND_2016 4.248
@@ -25,17 +25,26 @@
 #define LUMI_RUNG_2016 7.540
 #define LUMI_RUNH_2016 8.606
 
-
 class TCanvas;
 
 using namespace std;
 
 void barre_de_progression(int);
 
-struct leptonStruct{
+struct leptonStruct
+{
 
     leptonStruct();
-    leptonStruct(double pt_, double eta_, double phi_, double en_, double charge_, double id_, double iso_, double scEta_, int trigger_) {
+    leptonStruct(double pt_,
+                 double eta_,
+                 double phi_,
+                 double en_,
+                 double charge_,
+                 double id_,
+                 double iso_,
+                 double scEta_,
+                 int trigger_)
+    {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
         id = id_;
@@ -49,26 +58,24 @@ struct leptonStruct{
     int id, trigger;
 };
 
-struct jetStruct{
+struct jetStruct
+{
     jetStruct();
-    jetStruct(double pt_, double eta_, double phi_, double en_, int patIndex_, bool isBJet_) {
+    jetStruct(double pt_, double eta_, double phi_, double en_, int patIndex_, bool isBJet_)
+    {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         patIndex = patIndex_;
         isBJet = isBJet_;
     }
 
-  void setSmearMatch(bool match){
-    smearMatch = match;
-  }
-  void setGenMatchIndex(size_t match){
-    genMatchIndex = match;
-  }
+    void setSmearMatch(bool match) { smearMatch = match; }
+    void setGenMatchIndex(size_t match) { genMatchIndex = match; }
 
     TLorentzVector v;
     int patIndex;
     bool isBJet;
-  bool smearMatch; //True implies a gen match was found for smearing, vs false is guassian smear.
-  size_t genMatchIndex;
+    bool smearMatch; // True implies a gen match was found for smearing, vs false is guassian smear.
+    size_t genMatchIndex;
 };
 
 bool LepDescendingOrder(leptonStruct, leptonStruct);
@@ -79,7 +86,7 @@ double deltaRYPhi(TLorentzVector, TLorentzVector);
 //-----------------
 
 vector<double> makeVector(int num, ...);
-void insertVector(vector<double>& veca, int num, ...);
+void insertVector(vector<double> &veca, int num, ...);
 
 double phi0to2pi(double);
 double ZPtviaPhistar(double);
@@ -95,41 +102,43 @@ double SpTsub(TLorentzVector, TLorentzVector);
 double SpT(TLorentzVector, TLorentzVector, TLorentzVector, TLorentzVector);
 double SPhi(TLorentzVector, TLorentzVector, TLorentzVector, TLorentzVector);
 
-class record{
-    public:
-        double ptLow, ptHi, etaLow, etaHi, effi, effiErrorLow, effiErrorHigh;
-        record();
-        record(double, double, double, double, double, double, double);
-        bool belongToEta(double);
-        bool belongTo(double, double);
-	bool equalTo(int num);
+class record
+{
+  public:
+    double ptLow, ptHi, etaLow, etaHi, effi, effiErrorLow, effiErrorHigh;
+    record();
+    record(double, double, double, double, double, double, double);
+    bool belongToEta(double);
+    bool belongTo(double, double);
+    bool equalTo(int num);
 };
 
-class table{
-    public:
-        table();
-        table(string);
-//        double getEfficiencyEta(double);  
-        double getEfficiency(double, double);  
-        double getEfficiencyLow(double, double);  
-        double getEfficiencyHigh(double, double);  
-        double getTTbarSF(int);  
-        double getTTbarSFLow(int);  
-        double getTTbarSFHigh(int);  
+class table
+{
+  public:
+    table();
+    table(string);
+    //        double getEfficiencyEta(double);
+    double getEfficiency(double, double);
+    double getEfficiencyLow(double, double);
+    double getEfficiencyHigh(double, double);
+    double getTTbarSF(int);
+    double getTTbarSFLow(int);
+    double getTTbarSFHigh(int);
 
-    private:
-        vector<record> recd;
+  private:
+    vector<record> recd;
 };
 
 char GetRunData(int runNumber);
-char GetRunMC(Long64_t * mcEraBoundary, Long64_t eventNumber);
+char GetRunMC(Long64_t *mcEraBoundary, Long64_t eventNumber);
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
-double GetJetSF(double,int);
+double GetJetSF(double, int);
 double GetJetResolution();
 double SmearJetPt(double, double, double, int);
 double SmearJetPt(double, double, int);
-void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
-void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector>&);
+void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
+void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
 
 /** Open in read mode a file on eos or a local file. For EOS file,
@@ -141,15 +150,15 @@ void BTagModification(double randNumber, double pt, double eta, int jetFlavour, 
  * the file instead of fclose.
  * @return pointer to the file stream.
  */
-FILE* eosOpen(const char* path, int (**closeFunc)(FILE*));
+FILE *eosOpen(const char *path, int (**closeFunc)(FILE *));
 
-/** Test if a file is a root file. The test is based on the "magic number" 
+/** Test if a file is a root file. The test is based on the "magic number"
  * contained in the file which identifies its type. A ROOT file starts with
  * the sequence r,o,o,t,\0
  * @param path path of the file to test.
  * @return true iff the file is a ROOT file.
  */
-bool isRootFile(const char* path);
+bool isRootFile(const char *path);
 
 /** Adds histograms and RooUnfoldResponse objects  with same name
  * and definition read from different files and writes the result
@@ -158,7 +167,7 @@ bool isRootFile(const char* path);
  * @param dest output files
  * @return true on success, false on failure
  */
-bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest);
+bool mergeHistFiles(const std::vector<std::string> &src, const std::string &dest);
 
 /** Check that two Root TAxis have indentical boudaries and binning:
  * @param ax1 first axis to compare
@@ -166,24 +175,28 @@ bool mergeHistFiles(const std::vector<std::string>& src, const std::string& dest
  * @return true iff the test succeeds
  */
 
-bool isSameBinning(const TAxis& ax1, const TAxis& ax2);
+bool isSameBinning(const TAxis &ax1, const TAxis &ax2);
 
-//void saveCanvas(const char* fileBaseName, const TCanvas* c = 0);
+// void saveCanvas(const char* fileBaseName, const TCanvas* c = 0);
 
 /** Save a root canvas in the file formats defined in the configuration
  * parameters mainFormat and extraFormats
  */
-void saveCanvas(TCanvas* c, const char* outputDir, const char* baseName);
+void saveCanvas(TCanvas *c, const char *outputDir, const char *baseName);
 
 ///@{
 /** Rounds figures of a measurement according to CMS convention
  * https://twiki.cern.ch/twiki/bin/viewauth/CMS/Internal/PubGuidelines#Significant_figures_for_measurem
- * rev. 188 and matching the precision of the central value to the precision of the largest uncertainty.
+ * rev. 188 and matching the precision of the central value to the precision of the largest
+ * uncertainty.
  */
-void pground(double val, const std::vector<double>& unc, std::string& sVal, 
-	     std::vector<std::string>& sUnc, bool matchUncPrecOnCentralValue);
+void pground(double val,
+             const std::vector<double> &unc,
+             std::string &sVal,
+             std::vector<std::string> &sUnc,
+             bool matchUncPrecOnCentralValue);
 
-void pground(double val, double unc, std::string& sVal, std::string& sUnc);
+void pground(double val, double unc, std::string &sVal, std::string &sUnc);
 
 ///@}
 #endif

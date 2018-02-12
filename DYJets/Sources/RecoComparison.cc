@@ -1,19 +1,19 @@
+#include "ConfigVJets.h"
+#include "functions.h"
+#include "getFilesAndHistogramsZJets.h"
+#include <TCanvas.h>
+#include <TFile.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <THStack.h>
+#include <TLatex.h>
+#include <TLegend.h>
+#include <TPad.h>
+#include <TPaveStats.h>
+#include <TStyle.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <TFile.h>
-#include <TStyle.h>
-#include <TH1.h> 
-#include <TH2.h>
-#include <THStack.h>
-#include <TCanvas.h>
-#include <TPad.h>
-#include <TPaveStats.h>
-#include <TLatex.h>   
-#include <TLegend.h>
-#include "getFilesAndHistogramsZJets.h"
-#include "ConfigVJets.h"
-#include "functions.h"
 
 //--  Setting global variables --------------------------------------------------------------
 #include "fileNamesZJets.h"
@@ -31,7 +31,8 @@ using namespace std;
  * @param jetPtMin lower bound for jet pt histograms
  * @param jetEtaMax upper bound in jet |eta| for jet eta histograms
  */
-void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int jetPtMin, int jetEtaMax)
+void RecoComparison(
+    TString lepSel, TString histoDir, TString recoCompDir, int jetPtMin, int jetEtaMax)
 {
     TH1::SetDefaultSumw2();
     gStyle->SetOptStat(0);
@@ -44,33 +45,41 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
 
     int Colors[NFILESDYJETS];
     TString legendNames[NFILESDYJETS];
-    
-    //-- get the files, legend names and colors -----------------------------------------------------------
+
+    //-- get the files, legend names and colors
+    //-----------------------------------------------------------
     TFile *fSamples[NFILESDYJETS];
-    for (unsigned short i = 0; i < NFILESDYJETS; ++i){
+    for (unsigned short i = 0; i < NFILESDYJETS; ++i) {
 
-	int iSample = FilesDYJets[i];
+        int iSample = FilesDYJets[i];
 
-	if(iSample < 0) continue;
-	
+        if (iSample < 0) continue;
+
         //--- get the file ---
         TString syst = "0";
         if (iSample != 0) syst = "0";
-        fSamples[i] = getFile(histoDir, lepSel, energy, Samples[iSample].name, jetPtMin, jetEtaMax, "", syst);
+        fSamples[i] =
+            getFile(histoDir, lepSel, energy, Samples[iSample].name, jetPtMin, jetEtaMax, "", syst);
         if (!fSamples[i]) return;
 
         //-- set the legend name for the current file ---
         if (iSample == 0) {
-            if (lepSel == "DMu")      legendNames[i] = " #mu#mu Data";
-            else if (lepSel == "DE")  legendNames[i] = " ee Data";
-            else if (lepSel == "SMu") legendNames[i] = " #mu Data";
-            else if (lepSel == "SE")  legendNames[i] = " e Data";
-            else                      legendNames[i] = " Data";
+            if (lepSel == "DMu")
+                legendNames[i] = " #mu#mu Data";
+            else if (lepSel == "DE")
+                legendNames[i] = " ee Data";
+            else if (lepSel == "SMu")
+                legendNames[i] = " #mu Data";
+            else if (lepSel == "SE")
+                legendNames[i] = " e Data";
+            else
+                legendNames[i] = " Data";
         }
-	//        else if (i == NFILESDYJETS-1) 
-        //    legendNames[i] = (lepSel == "DMu") ? " Z/#gamma^{*} #rightarrow #mu#mu" : "Z/#gamma^{*} #rightarrow ee"; 
-        else 
-	  legendNames[i] = Samples[iSample].legendReco;
+        //        else if (i == NFILESDYJETS-1)
+        //    legendNames[i] = (lepSel == "DMu") ? " Z/#gamma^{*} #rightarrow #mu#mu" :
+        //    "Z/#gamma^{*} #rightarrow ee";
+        else
+            legendNames[i] = Samples[iSample].legendReco;
         //--- set the legend color for the current file ---
         Colors[i] = Samples[iSample].colorReco;
     }
@@ -79,10 +88,10 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     TString outputFileName = recoCompDir;
     system("mkdir -p " + recoCompDir);
     outputFileName += "Comparison_" + lepSel + "_" + energy + "_Data_All_MC";
-    //outputFileName += "_JetPtMin_";
-    //outputFileName += jetPtMin;
-    //outputFileName += "_JetEtaMax_";
-    //outputFileName += jetEtaMax;
+    // outputFileName += "_JetPtMin_";
+    // outputFileName += jetPtMin;
+    // outputFileName += "_JetEtaMax_";
+    // outputFileName += jetEtaMax;
     //--- create the directory if it doesn't exist ---
     system("mkdir -p " + outputFileName);
     TString outputFileRoot = outputFileName + ".root";
@@ -96,26 +105,26 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     vector<TString> vhTitles;
     //---------------------------------------------------------------------
 
-    //--- total number of histograms inside the data file 
+    //--- total number of histograms inside the data file
     //    (included gen and TH2 that we dont want for comparison) ---
     unsigned short nTotHist = fSamples[0]->GetListOfKeys()->GetEntries();
     for (unsigned short i = 0; i < nTotHist; ++i) {
         TString hName = fSamples[0]->GetListOfKeys()->At(i)->GetName();
-        TH1D *hTemp = (TH1D*) fSamples[0]->Get(hName);
+        TH1D *hTemp = (TH1D *)fSamples[0]->Get(hName);
         TString hTitle = hTemp->GetName();
         //--- skip histogram if it is gen or has no entry or is not a TH1 ---
-        if (hName.Index("gen") >= 0 || hTemp->GetEntries() < 1 || !hTemp->InheritsFrom(TH1D::Class())) continue;
+        if (hName.Index("gen") >= 0 || hTemp->GetEntries() < 1 ||
+            !hTemp->InheritsFrom(TH1D::Class()))
+            continue;
 
         //--- store the histograme name  and title ---
         vhNames.push_back(hName);
         vhTitles.push_back(hTitle);
-    } 
-
+    }
 
     //--- vhNames size gives us the number of reco histograms
     //    interesting for comparison at reco level
     int nHist = vhNames.size();
-
 
     TH1D *hist[NFILESDYJETS][nHist];
     THStack *hSumMC[nHist];
@@ -128,7 +137,6 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     cmsColl->SetTextColor(kBlack);
     cmsColl->SetNDC();
     cmsColl->SetTextAlign(11);
-
 
     TLatex *cmsPrel = new TLatex();
     cmsPrel->SetTextSize(0.04);
@@ -157,26 +165,27 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     TLatex *intLumi = new TLatex();
     intLumi->SetTextSize(0.03);
     intLumi->SetTextFont(42);
-    intLumi->SetLineWidth(2);  
+    intLumi->SetLineWidth(2);
     intLumi->SetTextColor(kBlack);
     intLumi->SetNDC();
     intLumi->SetTextAlign(31);
 
     for (unsigned int i = 0; i < NFILESDYJETS; ++i) {
-      double scale =  cfg.getD(TString("scale_") + Samples[FilesDYJets[i]].name, 1.);
-      if(scale!=1.){
-	std::cout << "Info. Scale factor " << scale << " will be applied on the event yield of sample "
-		  << Samples[FilesDYJets[i]].name << "\n";
-      }
-      
+        double scale = cfg.getD(TString("scale_") + Samples[FilesDYJets[i]].name, 1.);
+        if (scale != 1.) {
+            std::cout << "Info. Scale factor " << scale
+                      << " will be applied on the event yield of sample "
+                      << Samples[FilesDYJets[i]].name << "\n";
+        }
+
         for (int j = 0; j < nHist; ++j) {
             hist[i][j] = getHisto(fSamples[i], vhNames[j]);
-	    if(!hist[i][j]) {
-	      std::cerr << "Histogram " << vhNames[j] 
-			<< " was not found for sample " << Samples[FilesDYJets[i]].name << "\n";
-	      continue;
-	    }
-	    hist[i][j]->Scale(scale);
+            if (!hist[i][j]) {
+                std::cerr << "Histogram " << vhNames[j] << " was not found for sample "
+                          << Samples[FilesDYJets[i]].name << "\n";
+                continue;
+            }
+            hist[i][j]->Scale(scale);
             hist[i][j]->SetTitle(vhTitles[j]);
             if (i == 0) {
                 hist[0][j]->SetMarkerStyle(20);
@@ -184,45 +193,49 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
                 hist[0][j]->SetLineColor(Colors[0]);
                 hSumMC[j] = new THStack(vhNames[j], vhTitles[j]);
 
-                //if (!doPASPlots) { 
-		//legend[j] = new TLegend(0.72, 0.5, 0.76, 0.86);
-		//legend[j]->SetTextSize(0.032);
-		//}
-		//else {
-		legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
-		legend[j]->SetTextSize(0.042);
-		//}
-		legend[j]->SetFillStyle(0);
-		legend[j]->SetBorderSize(0);
-		legend[j]->SetTextFont(42);
-            }
-            else {
-	        hist[i][j]->SetFillStyle(1001);
-	        hist[i][j]->SetFillColor(Colors[i]);
+                // if (!doPASPlots) {
+                // legend[j] = new TLegend(0.72, 0.5, 0.76, 0.86);
+                // legend[j]->SetTextSize(0.032);
+                //}
+                // else {
+                legend[j] = new TLegend(0.63, 0.60, 0.81, 0.87);
+                legend[j]->SetTextSize(0.042);
+                //}
+                legend[j]->SetFillStyle(0);
+                legend[j]->SetBorderSize(0);
+                legend[j]->SetTextFont(42);
+            } else {
+                hist[i][j]->SetFillStyle(1001);
+                hist[i][j]->SetFillColor(Colors[i]);
                 hist[i][j]->SetLineColor(Colors[i]);
                 hSumMC[j]->Add(hist[i][j]);
-                //if (!doPASPlots || i == 1 || i == 3 || i == 5 || i == 11) legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
+                // if (!doPASPlots || i == 1 || i == 3 || i == 5 || i == 11)
+                // legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
             }
-        } //next histo j
-    } //next file i
+        } // next histo j
+    }     // next file i
 
-    //Fill the legend in reverse order of drawing in order
-    //that the legend lines order matches with stacked histogram one.
+    // Fill the legend in reverse order of drawing in order
+    // that the legend lines order matches with stacked histogram one.
     for (int j = 0; j < nHist; ++j) {
-      if(NFILESDYJETS > 0) legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
-      for (int i = NFILESDYJETS - 1; i > 0; --i) {
-	legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
-      }
+        if (NFILESDYJETS > 0) legend[j]->AddEntry(hist[0][j], legendNames[0], "ep");
+        for (int i = NFILESDYJETS - 1; i > 0; --i) {
+            legend[j]->AddEntry(hist[i][j], legendNames[i], "f");
+        }
     }
-    //reads integrated luminosity
+    // reads integrated luminosity
     double lumi = -1;
-    TH1* Lumi;
+    TH1 *Lumi;
     fSamples[0]->GetObject("Lumi", Lumi);
-    if(Lumi) lumi = Lumi->GetBinContent(1);
-    else cerr << "Warning: Lumi histogram was not found. The integrated luminosity indicaion will be missing from the plots.\n";
+    if (Lumi)
+        lumi = Lumi->GetBinContent(1);
+    else
+        cerr << "Warning: Lumi histogram was not found. The integrated luminosity indicaion will "
+                "be missing from the plots.\n";
 
     cout << "Now creating the pdf files ..." << endl;
-    double minRatioY = cfg.getD("minRatioYReco", 0.51);;
+    double minRatioY = cfg.getD("minRatioYReco", 0.51);
+    ;
     double maxRatioY = cfg.getD("maxRatioYReco", 1.49);
 
     for (unsigned short i = 0; i < nHist; ++i) {
@@ -236,185 +249,201 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         pad1->SetRightMargin(0.03);
         pad1->SetTicks();
         pad1->SetLogy();
-	//pad1->SetLogx(); //DJALOG
+        // pad1->SetLogx(); //DJALOG
         pad1->Draw();
         pad1->cd();
 
-        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 || vhNames[i].Index("ZPt_Zinc") >= 0 ) pad1->SetLogx();
+        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 ||
+            vhNames[i].Index("ZPt_Zinc") >= 0)
+            pad1->SetLogx();
         if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) pad1->SetLogx(0);
 
-        TH1D *hRatio = (TH1D*) hSumMC[i]->GetStack()->Last()->Clone();
+        TH1D *hRatio = (TH1D *)hSumMC[i]->GetStack()->Last()->Clone();
         // Need to draw MC Stack first other wise
         // cannot access Xaxis !!!
 
-
-	
-	if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
-	  std::cout << __FILE__ << ":" << __LINE__ 
-		    << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	  //hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
-	  //	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
-	  hRatio->GetXaxis()->SetBinLabel(1, "= 0");
-	  hRatio->GetXaxis()->SetBinLabel(2, "= 1");
-	  hRatio->GetXaxis()->SetBinLabel(3, "= 2");
-	  hRatio->GetXaxis()->SetBinLabel(4, "= 3");
-	  hRatio->GetXaxis()->SetBinLabel(5, "= 4");
-	  hRatio->GetXaxis()->SetBinLabel(6, "= 5");
-	  hRatio->GetXaxis()->SetBinLabel(7, "= 6");
-	  //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
-	  //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
-	  //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
-	  //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
-	}
-	
-	if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
-	  std::cout << __FILE__ << ":" << __LINE__ 
-		    << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
-	  //hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
-	  //	  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
-	  //hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
-	  hRatio->GetXaxis()->SetBinLabel(1, "#geq 0");
-	  hRatio->GetXaxis()->SetBinLabel(2, "#geq 1");
-	  hRatio->GetXaxis()->SetBinLabel(3, "#geq 2");
-	  hRatio->GetXaxis()->SetBinLabel(4, "#geq 3");
-	  hRatio->GetXaxis()->SetBinLabel(5, "#geq 4");
-	  hRatio->GetXaxis()->SetBinLabel(6, "#geq 5");
-	  hRatio->GetXaxis()->SetBinLabel(7, "#geq 6");
-	  //hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
-	  //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
-	  //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
-	  //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
-	  
-	  
-	  //DJALOG
-	  printf("Printing ZNGoodJets_Zinc bin values and signal to background ratios...\n");
-	  printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
-	  
-	  printf("         Bin|     Signal| Background|      Ratio\n");       
-	  for(int iBin=1;iBin<8;iBin++){
-	    double signal = ((TH1D*)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
-	    double background = ((TH1D*)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
-	    signal = signal - background;
-	    printf("%12d|%11.2F|%11.2F|%11.2F\n", iBin, signal, background, signal/background);
-	  }
-	  printf("\n");
-	  
-	  for(int iBin=0;iBin<8;iBin++){
-	    for(int iHisto=1;iHisto<6;iHisto++){
-	      if(iBin==0){
-		printf("%30s|",legendNames[iHisto].Data());
-	      }else{
-		printf("%30F|",hist[iHisto][i]->GetBinContent(iBin));
-	      }
-	    }
-	    printf("\n");
-	  }
-	  
-	  
-	  
-	  printf("\n");
-	  printf("WJets Integral = %F",hist[3][i]->Integral());
-	  
-	  printf("\n");
-	}
-  if (vhNames[i].Index("ZNGoodJets_SameChargePair_Zinc") >= 0) {
-	//DJALOG
-	printf("Printing ZNGoodJets_SameSignCharge_Zinc bin values and signal to background ratios...\n");
-	printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
-
-	printf("         Bin|       Data|     Signal| Background|      Ratio|        QCD\n");       
-	for(int iBin=1;iBin<8;iBin++){
-	    double signal = ((TH1D*)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
-	    double background = ((TH1D*)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
-	    signal = signal - background;
-	    printf("%12d|%11.2F|%11.2F|%11.2F|%11.2F|%11.2F\n", iBin, hist[0][i]->GetBinContent(iBin), 
-		   signal, background, signal/background, 
-		   hist[0][i]->GetBinContent(iBin)-signal-background);
-	}	
-
-  }
-
-
-
-        hSumMC[i]->Draw("HIST"); 
-        if (vhNames[i].Index("ZMass_Z") >= 0){
-            hist[0][i]->GetXaxis()->SetRangeUser(71,110.9);
-            hSumMC[i]->GetXaxis()->SetRangeUser(71,110.9);
-            hRatio->GetXaxis()->SetRangeUser(71,110.9);
+        if (vhNames[i].Index("ZNGoodJets_Zexc") >= 0) {
+            std::cout << __FILE__ << ":" << __LINE__
+                      << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+            // hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+            //	hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+            hRatio->GetXaxis()->SetBinLabel(1, "= 0");
+            hRatio->GetXaxis()->SetBinLabel(2, "= 1");
+            hRatio->GetXaxis()->SetBinLabel(3, "= 2");
+            hRatio->GetXaxis()->SetBinLabel(4, "= 3");
+            hRatio->GetXaxis()->SetBinLabel(5, "= 4");
+            hRatio->GetXaxis()->SetBinLabel(6, "= 5");
+            hRatio->GetXaxis()->SetBinLabel(7, "= 6");
+            // hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+            //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+            //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+            //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
         }
-        //if (vhNames[i].Index("JetEta") >= 0){
+
+        if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
+            std::cout << __FILE__ << ":" << __LINE__
+                      << ". Range of ZNGoodJets_Zexc x-axis is being modified.!\n";
+            // hSumMC[i]->GetXaxis()->Set(maxX-minX, minX, maxX);
+            //	  if (vhNames[i].Index("ZNGoodJets_Zinc") >= 0) {
+            // hSumMC[i]->GetXaxis()->SetRangeUser(-0.5, 4.5);
+            hRatio->GetXaxis()->SetBinLabel(1, "#geq 0");
+            hRatio->GetXaxis()->SetBinLabel(2, "#geq 1");
+            hRatio->GetXaxis()->SetBinLabel(3, "#geq 2");
+            hRatio->GetXaxis()->SetBinLabel(4, "#geq 3");
+            hRatio->GetXaxis()->SetBinLabel(5, "#geq 4");
+            hRatio->GetXaxis()->SetBinLabel(6, "#geq 5");
+            hRatio->GetXaxis()->SetBinLabel(7, "#geq 6");
+            // hSumMC[i]->GetXaxis()->SetBinLabel(8, "= 7");
+            //     hSumMC[i]->GetXaxis()->SetBinLabel(9, "= 8");
+            //  hSumMC[i]->GetXaxis()->SetLabelSize(0.18);
+            //  hSumMC[i]->GetXaxis()->SetLabelOffset(0.01);
+
+            // DJALOG
+            printf("Printing ZNGoodJets_Zinc bin values and signal to background ratios...\n");
+            printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
+
+            printf("         Bin|     Signal| Background|      Ratio\n");
+            for (int iBin = 1; iBin < 8; iBin++) {
+                double signal = ((TH1D *)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
+                double background = ((TH1D *)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
+                signal = signal - background;
+                printf(
+                    "%12d|%11.2F|%11.2F|%11.2F\n", iBin, signal, background, signal / background);
+            }
+            printf("\n");
+
+            for (int iBin = 0; iBin < 8; iBin++) {
+                for (int iHisto = 1; iHisto < 6; iHisto++) {
+                    if (iBin == 0) {
+                        printf("%30s|", legendNames[iHisto].Data());
+                    } else {
+                        printf("%30F|", hist[iHisto][i]->GetBinContent(iBin));
+                    }
+                }
+                printf("\n");
+            }
+
+            printf("\n");
+            printf("WJets Integral = %F", hist[3][i]->Integral());
+
+            printf("\n");
+        }
+        if (vhNames[i].Index("ZNGoodJets_SameChargePair_Zinc") >= 0) {
+            // DJALOG
+            printf("Printing ZNGoodJets_SameSignCharge_Zinc bin values and signal to background "
+                   "ratios...\n");
+            printf("Entries in stack=%d\n", hSumMC[i]->GetStack()->GetEntries());
+
+            printf("         Bin|       Data|     Signal| Background|      Ratio|        QCD\n");
+            for (int iBin = 1; iBin < 8; iBin++) {
+                double signal = ((TH1D *)hSumMC[i]->GetStack()->At(4))->GetBinContent(iBin);
+                double background = ((TH1D *)hSumMC[i]->GetStack()->At(3))->GetBinContent(iBin);
+                signal = signal - background;
+                printf("%12d|%11.2F|%11.2F|%11.2F|%11.2F|%11.2F\n",
+                       iBin,
+                       hist[0][i]->GetBinContent(iBin),
+                       signal,
+                       background,
+                       signal / background,
+                       hist[0][i]->GetBinContent(iBin) - signal - background);
+            }
+        }
+
+        hSumMC[i]->Draw("HIST");
+        if (vhNames[i].Index("ZMass_Z") >= 0) {
+            hist[0][i]->GetXaxis()->SetRangeUser(71, 110.9);
+            hSumMC[i]->GetXaxis()->SetRangeUser(71, 110.9);
+            hRatio->GetXaxis()->SetRangeUser(71, 110.9);
+        }
+        // if (vhNames[i].Index("JetEta") >= 0){
         //    hist[0][i]->GetXaxis()->SetRangeUser(-2.4,2.4);
         //    hSumMC[i]->GetXaxis()->SetRangeUser(-2.4,2.4);
         //    hRatio->GetXaxis()->SetRangeUser(-2.4,2.4);
 
         //}
 
-
-        hSumMC[i]->SetTitle(""); 
-        hSumMC[i]->GetYaxis()->SetLabelSize(0.04); 
-        hSumMC[i]->GetYaxis()->SetLabelOffset(0.002); 
-        hSumMC[i]->GetYaxis()->SetTitle("# Events"); 
-        hSumMC[i]->GetYaxis()->SetTitleSize(0.04); 
-        hSumMC[i]->GetYaxis()->SetTitleOffset(1.32); 
+        hSumMC[i]->SetTitle("");
+        hSumMC[i]->GetYaxis()->SetLabelSize(0.04);
+        hSumMC[i]->GetYaxis()->SetLabelOffset(0.002);
+        hSumMC[i]->GetYaxis()->SetTitle("# Events");
+        hSumMC[i]->GetYaxis()->SetTitleSize(0.04);
+        hSumMC[i]->GetYaxis()->SetTitleOffset(1.32);
         hSumMC[i]->SetMinimum(8);
-        hSumMC[i]->SetMaximum(100*hSumMC[i]->GetMaximum()); 
+        hSumMC[i]->SetMaximum(100 * hSumMC[i]->GetMaximum());
 
-	//DJALOG
-	//Change the axes of the jet pt to be the cut value.
-	if (vhNames[i].Index("JetPt") >= 0) {
-	  printf("Pt Histo\n");
-	  hSumMC[i]->GetXaxis()->SetRangeUser(jetPtMin, hSumMC[i]->GetXaxis()->GetBinUpEdge(hSumMC[i]->GetXaxis()->GetLast()));
-
-	}
-
+        // DJALOG
+        // Change the axes of the jet pt to be the cut value.
+        if (vhNames[i].Index("JetPt") >= 0) {
+            printf("Pt Histo\n");
+            hSumMC[i]->GetXaxis()->SetRangeUser(
+                jetPtMin, hSumMC[i]->GetXaxis()->GetBinUpEdge(hSumMC[i]->GetXaxis()->GetLast()));
+        }
 
         // first pad plots
         hist[0][i]->DrawCopy("e same");
         legend[i]->Draw();
 
-        cmsColl->DrawLatex(0.17,0.83, isPrel ? "CMS Preliminary" : "CMS");
-        //if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s} = 13 TeV");
-	if (energy == "13TeV"){
-	  if(lumi>0) intLumi->DrawLatex(0.5,0.77, TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", lumi/1000.));
-	  else intLumi->DrawLatex(0.5,0.77, "#sqrt{s} = 13 TeV");
-	}
+        cmsColl->DrawLatex(0.17, 0.83, isPrel ? "CMS Preliminary" : "CMS");
+        // if (energy == "13TeV") intLumi->DrawLatex(0.5,0.77, "#int L dt = 2.25 fb^{-1},  #sqrt{s}
+        // = 13 TeV");
+        if (energy == "13TeV") {
+            if (lumi > 0)
+                intLumi->DrawLatex(
+                    0.5,
+                    0.77,
+                    TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", lumi / 1000.));
+            else
+                intLumi->DrawLatex(0.5, 0.77, "#sqrt{s} = 13 TeV");
+        }
 
-
-        if (vhNames[i].Index("inc0") < 0){
+        if (vhNames[i].Index("inc0") < 0) {
             ostringstream ptLegend;
 
+            if (vhNames[i].Index("ZB") > 0)
+                ptLegend << "p_{T}^{jet} > " << jetPtMin
+                         << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
+            else if (vhNames[i].Index("inc1") > 0)
+                ptLegend << "p_{T}^{jet} > " << jetPtMin
+                         << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
+            else if (vhNames[i].Index("inc2") > 0)
+                ptLegend << "p_{T}^{jet} > " << jetPtMin
+                         << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 2";
+            else if (vhNames[i].Index("inc3") > 0)
+                ptLegend << "p_{T}^{jet} > " << jetPtMin
+                         << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 3";
+            else
+                ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
 
-            if(vhNames[i].Index("ZB") > 0 ) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
-            else if (vhNames[i].Index("inc1") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 1";
-            else if (vhNames[i].Index("inc2") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 2";
-            else if (vhNames[i].Index("inc3") > 0) ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4, N_{jets} #geq 3";
-            else ptLegend << "p_{T}^{jet} > " << jetPtMin << " GeV,  |y^{jet}| < 2.4";
-     
-            jetCuts->DrawLatex(0.17,0.66, ptLegend.str().c_str());
-            jetAlgo->DrawLatex(0.17,0.715, "anti-k_{t} jets,  R = 0.4");
-            if (vhNames[i].Index("ptLow") > 0 ) jetCuts->DrawLatex(0.17,0.61, " p_{T}(Z) #leq 50 GeV");
-            if (vhNames[i].Index("ptHigh") > 0 ) jetCuts->DrawLatex(0.17,0.61, " p_{T}(Z) > 50 GeV");
+            jetCuts->DrawLatex(0.17, 0.66, ptLegend.str().c_str());
+            jetAlgo->DrawLatex(0.17, 0.715, "anti-k_{t} jets,  R = 0.4");
+            if (vhNames[i].Index("ptLow") > 0)
+                jetCuts->DrawLatex(0.17, 0.61, " p_{T}(Z) #leq 50 GeV");
+            if (vhNames[i].Index("ptHigh") > 0)
+                jetCuts->DrawLatex(0.17, 0.61, " p_{T}(Z) > 50 GeV");
 
             pad1->Draw();
         }
         //-------------------------
-        //cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
-	//        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
-	//        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
-	//        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
-	//if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi, energy.Data()));
-        if (vhNames[i].Index("inc0") < 0){
-//            if (!doPASPlots) {
-//                ostringstream ptLegend;
-//                if (vhNames[i].Index("JetPt_Zinc") > 0) {
-//                    ptLegend << "p_{T}^{jet} > 20 GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
-//                }
-//                else {
-//                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |y^{jet}| < " << (0.1*jetEtaMax);
-//                }
-//                jetAlgo->DrawLatex(0.13,0.68, "anti-k_{t} jets,  R = 0.4");
-//                jetCuts->DrawLatex(0.13,0.63, ptLegend.str().c_str());
-//            }
+        // cmsColl->DrawLatex(0.13,0.82, "CMS Preliminary");
+        //        cmsPrel->DrawLatex(0.13,0.78, "Preliminary");
+        //        if (energy == "7TeV")      intLumi->DrawLatex(0.97,0.9, "5.05 fb^{-1} (7 TeV)");
+        //        else if (energy == "8TeV") intLumi->DrawLatex(0.97,0.9, "19.6 fb^{-1} (8 TeV)");
+        // if(lumi >= 0) intLumi->DrawLatex(0.97, 0.9, TString::Format("%.3g fb^{-1} (%s)", lumi,
+        // energy.Data()));
+        if (vhNames[i].Index("inc0") < 0) {
+            //            if (!doPASPlots) {
+            //                ostringstream ptLegend;
+            //                if (vhNames[i].Index("JetPt_Zinc") > 0) {
+            //                    ptLegend << "p_{T}^{jet} > 20 GeV,  |y^{jet}| < " <<
+            //                    (0.1*jetEtaMax);
+            //                }
+            //                else {
+            //                    ptLegend << "p_{T}^{jet} > " << jetPtMin << "GeV,  |y^{jet}| < "
+            //                    << (0.1*jetEtaMax);
+            //                }
+            //                jetAlgo->DrawLatex(0.13,0.68, "anti-k_{t} jets,  R = 0.4");
+            //                jetCuts->DrawLatex(0.13,0.63, ptLegend.str().c_str());
+            //            }
             pad1->Draw();
         }
         canvas->cd();
@@ -423,12 +452,14 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         pad2->SetBottomMargin(0.3);
         pad2->SetRightMargin(0.03);
         pad2->SetGridy();
-	//pad2->SetLogx(); //DJALOG
+        // pad2->SetLogx(); //DJALOG
         pad2->SetTicks();
         pad2->Draw();
         pad2->cd();
 
-        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 || vhNames[i].Index("ZPt_Zinc") >= 0 ) pad2->SetLogx();
+        if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 ||
+            vhNames[i].Index("ZPt_Zinc") >= 0)
+            pad2->SetLogx();
         if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) pad2->SetLogx(0);
 
         hRatio->SetStats(0);
@@ -445,22 +476,21 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         hRatio->GetXaxis()->SetLabelOffset(0.017);
 
         // to cut away firts bin which starts at 0 for logx()
-        if (vhNames[i].Index("Phistar") >= 0 ) hRatio->GetXaxis()->SetRangeUser(0.004,3.277);
-       // if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
-        if (vhNames[i].Index("ZPt_Zinc1") >= 0 ) hRatio->GetXaxis()->SetRangeUser(2.5,1000.);
-	//DJALOG
-	//Change the axes of the jet pt to be the cut value.
-	if (vhNames[i].Index("JetPt") >= 0) {
-	  printf("Pt Histo\n");
-	  hRatio->GetXaxis()->SetRangeUser(jetPtMin, hRatio->GetXaxis()->GetBinUpEdge(hRatio->GetXaxis()->GetLast()));
+        if (vhNames[i].Index("Phistar") >= 0) hRatio->GetXaxis()->SetRangeUser(0.004, 3.277);
+        // if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
+        if (vhNames[i].Index("ZPt_Zinc1") >= 0) hRatio->GetXaxis()->SetRangeUser(2.5, 1000.);
+        // DJALOG
+        // Change the axes of the jet pt to be the cut value.
+        if (vhNames[i].Index("JetPt") >= 0) {
+            printf("Pt Histo\n");
+            hRatio->GetXaxis()->SetRangeUser(
+                jetPtMin, hRatio->GetXaxis()->GetBinUpEdge(hRatio->GetXaxis()->GetLast()));
+        }
 
-	}
+        //        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);
+        hRatio->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
 
-
-	//        hRatio->GetYaxis()->SetRangeUser(0.51,1.49);
-	hRatio->GetYaxis()->SetRangeUser(minRatioY, maxRatioY);
-
-        hRatio->GetYaxis()->SetNdivisions(5,5,0);
+        hRatio->GetYaxis()->SetNdivisions(5, 5, 0);
         hRatio->GetYaxis()->SetTitle("Simulation/Data");
         hRatio->GetYaxis()->SetTitleSize(0.1);
         hRatio->GetYaxis()->SetTitleOffset(0.5);
@@ -473,37 +503,36 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
         canvas->cd();
         canvas->Update();
 
-        //TString outputFilePDF = outputFileName + "/" + vhNames[i] + ".pdf";
-        //canvas->Print(outputFilePDF);
-        //outputFile->cd();
-        //canvas->Write();
-	
-        //TString outputFileBase = outputFileName + "/" + vhNames[i];
-	//canvas->SaveAs(outputFileBase + ".root");
-	//canvas->SaveAs(outputFileBase + ".C");
-	//canvas->SaveAs(outputFileBase + ".png");
-	saveCanvas(canvas, outputFileName, vhNames[i]);
+        // TString outputFilePDF = outputFileName + "/" + vhNames[i] + ".pdf";
+        // canvas->Print(outputFilePDF);
+        // outputFile->cd();
+        // canvas->Write();
 
-        hSumMC[i]->SetMaximum(1.5*hSumMC[i]->GetMaximum());
-        TCanvas *tmpCanvas = (TCanvas*) canvas->Clone();
+        // TString outputFileBase = outputFileName + "/" + vhNames[i];
+        // canvas->SaveAs(outputFileBase + ".root");
+        // canvas->SaveAs(outputFileBase + ".C");
+        // canvas->SaveAs(outputFileBase + ".png");
+        saveCanvas(canvas, outputFileName, vhNames[i]);
+
+        hSumMC[i]->SetMaximum(1.5 * hSumMC[i]->GetMaximum());
+        TCanvas *tmpCanvas = (TCanvas *)canvas->Clone();
         tmpCanvas->cd();
         tmpCanvas->Draw();
-        TPad *tmpPad = (TPad*) tmpCanvas->GetPrimitive("pad1");
+        TPad *tmpPad = (TPad *)tmpCanvas->GetPrimitive("pad1");
         tmpPad->SetLogy(0);
         vhNames[i] += "_Lin";
         tmpCanvas->SetTitle(vhNames[i]);
         tmpCanvas->SetName(vhNames[i]);
         tmpCanvas->Update();
-        //TString outputFileLinPDF = outputFileName + "/" + vhNames[i] + ".pdf";
-        //tmpCanvas->Print(outputFileLinPDF);
-        //outputFile->cd();
-        //tmpCanvas->Write();
+        // TString outputFileLinPDF = outputFileName + "/" + vhNames[i] + ".pdf";
+        // tmpCanvas->Print(outputFileLinPDF);
+        // outputFile->cd();
+        // tmpCanvas->Write();
 
-	//TString outputFileLinBase = outputFileName + "/" + vhNames[i];
-	//tmpCanvas->SaveAs(outputFileLinBase + ".root");
-	//tmpCanvas->SaveAs(outputFileLinBase + ".C");
-	saveCanvas(tmpCanvas, outputFileName, vhNames[i]);
-
+        // TString outputFileLinBase = outputFileName + "/" + vhNames[i];
+        // tmpCanvas->SaveAs(outputFileLinBase + ".root");
+        // tmpCanvas->SaveAs(outputFileLinBase + ".C");
+        saveCanvas(tmpCanvas, outputFileName, vhNames[i]);
     }
 
     outputFile->cd();
@@ -512,5 +541,4 @@ void RecoComparison(TString lepSel, TString histoDir, TString recoCompDir, int j
     //-- Close all the files ------------------------------
     for (unsigned short i(0); i < NFILESDYJETS; ++i) closeFile(fSamples[i]);
     //-----------------------------------------------------
-
 }

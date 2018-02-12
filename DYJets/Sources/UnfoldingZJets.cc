@@ -182,7 +182,7 @@ void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,
 
 	 if(fAltUnf && withUnfUnc){
 	     //--- Get Sherpa Unfolding response ---	  
-	     respDYJets[17] = getResp(fAltUnf, variable);
+	     respDYJets[17] = getResp(fAltUnf.get(), variable);
 	     if(respDYJets[17] == 0){
 		 std::cerr << "Response matrix was not found in the file " << fAltUnf->GetName() << ". Aborts.\n";
 		 abort();
@@ -455,10 +455,14 @@ void UnfoldingZJets(const SectionedConfig& unfCfg, TString lepSel, TString algo,
 	     }
 	 }
 
+	int upperBin = hUnfData[0]->GetXaxis()->GetNbins() -  nLastBinsToSkip;
+	int lowerBin = 1 + nFirstBinsToSkip;
+
+	hUnfData[0]->GetXaxis()->SetRange(lowerBin, upperBin);
+
 	 TCanvas *crossSectionPlot = makeCrossSectionPlot(lepSel, integratedLumi, variable, 
 							  doNormalized, hUnfData[0], hCov[11],
-							  predictions, nFirstBinsToSkip, 
-							  nLastBinsToSkip);
+							  predictions);
 
 	 crossSectionPlot->Draw();
 	 //crossSectionPlot->SaveAs(outputFileName + ".png");

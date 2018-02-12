@@ -35,7 +35,7 @@ void barre_de_progression(int);
 struct leptonStruct{
 
     leptonStruct();
-    leptonStruct(double pt_, double eta_, double phi_, double en_, double charge_, double id_, double iso_, double scEta_, int MuTkLayer_) {
+    leptonStruct(double pt_, double eta_, double phi_, double en_, double charge_, double id_, double iso_, double scEta_, int trigger_) {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
         id = id_;

@@ -734,7 +734,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
       //=======================================================================================================//
       //         Retrieving leptons          //
       //====================================//
-      bool passesLeptonCut(0), passesLeptonChargeCut(0), passesTauCut(1), passesSameSignLeptonCut(0);
+      bool passesLeptonCut(0), passesLeptonCutNoMass(0), passesLeptonChargeCut(0), passesTauCut(1), passesSameSignLeptonCut(0);
       //bool passesLeptonMassCut(0);
       unsigned short nLeptons(0), nVetoMuons(0), nVetoElectrons(0);
       vector<leptonStruct> leptons;
@@ -1171,7 +1171,6 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 		     //passesLeptonMassCut = 1;
 		  } else{
 		     passesLeptonCut = 0;
-		  }
 	       } // end if re-selection of leptons
                      // boosted Z
                     //if(abs(leptons[1].v.Eta())<0.9 && abs(leptons[0].v.Eta())< 0.9 && deltaPhi(leptons[0].v,leptons[1].v) < 1.22) passesLeptonCut = 0;
@@ -1468,7 +1467,6 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
 	 for (unsigned short i(0); i < nGoodGenJets; i++){
 	    genJetsHT += genJets[i].v.Pt();
 	    if(nGoodGenJets>=1) genHadronicR += genJets[i].v;
-                }
             }
 
            // if(nGoodGenJets>=1 && genEWKBoson.Pt()>0. && genEWKBoson.Pt()> 50. ){ 
@@ -4466,7 +4464,7 @@ int ZJets::Loop(bool hasRecoInfo, bool hasGenInfo, int jobNum, int nJobs,
    JobInfo->SetBinContent(kNEvtsSample, nEntries);
    JobInfo->SetBinContent(kNEvtsAllJobs, nEventsToProcessTot);
 
-    cout << "nEventsToProcessTot = " << nEventsToProcessTot << " , nEventsToProcess = " << nEventsToProcess << " , double(nentries) = " << double(nentries) << "\n" << " , yieldScale = " << yieldScale << " , nJobs = " << nJobs <<   "\n";
+    cout << "nEventsToProcessTot = " << nEventsToProcessTot << " , nEventsToProcess = " << nEventsToProcess << " , double(nentries) = " << double(nEntries) << "\n" << " , yieldScale = " << yieldScale << " , nJobs = " << nJobs <<   "\n";
 
     // nEventsToProcessTot is defined by maxevt in the cfg file. If one indicated maxevt then nEventsToProcessTot=nEventsToProcess, if not and split the full sample by Njobs
     // then nEventsToProcessTot = netries and nEventsToProcess corresponds to jobNum statistics (yieldScale is calulated using this fraction of full stat)

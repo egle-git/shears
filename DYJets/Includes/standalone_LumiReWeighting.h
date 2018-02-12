@@ -78,7 +78,6 @@ standalone_LumiReWeighting::standalone_LumiReWeighting(int year,int mode,int nBi
   Lumi_distr.clear();
 
   printf("standalone_LumiReWeighting Mode = %d\n",mode);
-  if(year==2016) NBins = 75;
 
   char tmpName[50];
   char tmpNameMC[50];

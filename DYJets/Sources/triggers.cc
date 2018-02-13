@@ -113,7 +113,8 @@ trigger_values::trigger_values(TTree &event_tree)
 
 /******************************************************************************/
 
-trigger_mask::trigger_mask(TTree &bitFieldsChain)
+trigger_mask::trigger_mask(TTree &bitFieldsChain) :
+    _accepts_any_trigger(false)
 {
     for (unsigned trig = 0; trig < trigger::count; ++trig) {
         auto trigger_names = available_triggers(bitFieldsChain, trig);
@@ -164,7 +165,7 @@ bool trigger_mask::veto(const std::vector<std::string> &names)
 
 bool trigger_mask::passes(const trigger_values &values) const
 {
-    bool pass = false;
+    bool pass = _accepts_any_trigger;
     for (unsigned i = 0; i < trigger::count; ++i) {
         if (_triggers[i]->is_veto(values[i])) {
             return false;

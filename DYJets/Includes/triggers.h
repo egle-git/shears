@@ -102,6 +102,7 @@ public:
  */
 class trigger_mask
 {
+    bool _accepts_any_trigger;
     std::array<std::shared_ptr<trigger>, trigger::count> _triggers;
 
 public:
@@ -127,6 +128,12 @@ public:
      */
     bool accept(const std::vector<std::string> &name);
 
+    /// \brief Sets whether all triggers should be accepted.
+    void set_accepts_any_trigger(bool enable) { _accepts_any_trigger = enable; }
+
+    /// \brief Returns whether all triggers are accepted.
+    bool accepts_any_trigger() { return _accepts_any_trigger; }
+
     /**
      * \brief Sets the given trigger path to cause \ref passes to return \c false.
      * \returns \c true if the path was found.
@@ -143,7 +150,13 @@ public:
      */
     bool veto(const std::vector<std::string> &name);
 
-    /// \brief Checks whether the given \c values contain an accepted trigger.
+    /**
+     * \brief Checks whether the event coorsponding to the given \c values passes the trigger
+     *        requirements.
+     *
+     * An event passes the trigger requirement if no veto'ed trigger fired, and at least one
+     * accepted trigger fired (or \c accepts_any_trigger was set).
+     */
     bool passes(const trigger_values &values) const;
 };
 

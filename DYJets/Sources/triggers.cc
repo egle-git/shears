@@ -85,11 +85,6 @@ bool trigger::accept(const std::string &name)
     return false;
 }
 
-double trigger::scale_factor(unsigned long long) const
-{
-    return 0;
-}
-
 /******************************************************************************/
 
 trigger_values::trigger_values(TTree &event_tree)
@@ -144,15 +139,4 @@ bool trigger_mask::passes(const trigger_values &values) const
         }
     }
     return false;
-}
-
-double trigger_mask::scale_factor(const trigger_values &values) const
-{
-    double max = 0;
-    for (unsigned i = 0; i < trigger::count; ++i) {
-        if (_triggers[i]->passes(values[i])) {
-            max = std::max(max, _triggers[i]->scale_factor(values[i]));
-        }
-    }
-    return max;
 }

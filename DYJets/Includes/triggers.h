@@ -15,8 +15,7 @@ void print_available_triggers(TTree &bitFieldsChain);
 /**
  * \brief Represents a category of related triggers.
  *
- * This class is used internally by \ref trigger_mask. It can be subclassed to
- * provide scale factors.
+ * This class is used internally by \ref trigger_mask.
  */
 class trigger
 {
@@ -44,14 +43,6 @@ public:
     /// \brief Returns \c true if the given \c trigger is accepted.
     bool passes(unsigned long long trigger) const
     { return (_mask & trigger) != 0; }
-
-    /**
-     * \brief Computes the scale factor for the given trigger.
-     * \param trigger The set of triggers that the event passed.
-     * \note  The result of this function is undefined when `passes(trigger)` is
-     *        \c false.
-     */
-    virtual double scale_factor(unsigned long long trigger) const;
 };
 
 /**
@@ -128,14 +119,6 @@ public:
 
     /// \brief Checks whether the given \c values contain an accepted trigger.
     bool passes(const trigger_values &values) const;
-
-    /**
-     * \brief Retrieves the scale factor for the given trigger values.
-     *
-     * When an event passes several triggers, the highest scale factor is
-     * returned.
-     */
-    double scale_factor(const trigger_values &values) const;
 };
 
 #endif // TRIGGERS_H

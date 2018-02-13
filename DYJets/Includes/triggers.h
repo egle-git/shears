@@ -34,10 +34,10 @@ public:
     /// \brief Destructor.
     virtual ~trigger();
 
-    /// \brief Sets the given trigger path to be passes by the system.
+    /// \brief Sets the given trigger path to be accepted.
     bool accept(const std::string &name);
 
-    /// \brief Sets the given trigger path to be passes by the system.
+    /// \brief Sets the given trigger path to be used as a veto.
     bool veto(const std::string &name);
 
     /// \brief Retrieves the mask of accepted triggers paths.

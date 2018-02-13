@@ -24,7 +24,7 @@ public:
     static const unsigned count = 5;
 
 private:
-    unsigned long long _mask;
+    unsigned long long _mask, _veto;
     std::vector<std::string> _names;
 
 public:
@@ -37,12 +37,22 @@ public:
     /// \brief Sets the given trigger path to be passes by the system.
     bool accept(const std::string &name);
 
-    /// \brief Retrieves the mask of passes triggers paths.
+    /// \brief Sets the given trigger path to be passes by the system.
+    bool veto(const std::string &name);
+
+    /// \brief Retrieves the mask of accepted triggers paths.
     unsigned long long mask() const { return _mask; }
 
+    /// \brief Retrieves the mask of vetoed triggers paths.
+    unsigned long long veto_mask() const { return _veto; }
+
     /// \brief Returns \c true if the given \c trigger is accepted.
-    bool passes(unsigned long long trigger) const
+    bool accepted(unsigned long long trigger) const
     { return (_mask & trigger) != 0; }
+
+    /// \brief Returns \c true if the given \c trigger triggers a veto.
+    bool is_veto(unsigned long long trigger) const
+    { return (_veto & trigger) != 0; }
 };
 
 /**
@@ -116,6 +126,22 @@ public:
      * \returns \c true if all paths were found.
      */
     bool accept(const std::vector<std::string> &name);
+
+    /**
+     * \brief Sets the given trigger path to cause \ref passes to return \c false.
+     * \returns \c true if the path was found.
+     */
+    bool veto(const std::string &name);
+
+    /**
+     * \brief Sets all of the given trigger paths cause \ref passes to return \c false.
+     *
+     * If some paths aren't found, this function will set all others to be
+     * vetoed and return \c false.
+     *
+     * \returns \c true if all paths were found.
+     */
+    bool veto(const std::vector<std::string> &name);
 
     /// \brief Checks whether the given \c values contain an accepted trigger.
     bool passes(const trigger_values &values) const;

@@ -71,6 +71,7 @@ trigger::~trigger()
 
 trigger::trigger(const std::vector<std::string> &names) :
     _mask(0LL),
+    _veto(0LL),
     _names(names)
 {}
 
@@ -79,6 +80,17 @@ bool trigger::accept(const std::string &name)
     for (std::size_t i = 0; i < _names.size(); ++i) {
         if (_names[i] == name) {
             _mask |= (1LL << i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool trigger::veto(const std::string &name)
+{
+    for (std::size_t i = 0; i < _names.size(); ++i) {
+        if (_names[i] == name) {
+            _veto |= (1LL << i);
             return true;
         }
     }
@@ -131,12 +143,33 @@ bool trigger_mask::accept(const std::vector<std::string> &names)
     return ok;
 }
 
-bool trigger_mask::passes(const trigger_values &values) const
+bool trigger_mask::veto(const std::string &name)
 {
-    for (unsigned i = 0; i < trigger::count; ++i) {
-        if (_triggers[i]->passes(values[i])) {
+    for (auto &trig : _triggers) {
+        if (trig->veto(name)) {
             return true;
         }
     }
     return false;
+}
+
+bool trigger_mask::veto(const std::vector<std::string> &names)
+{
+    bool ok = true;
+    for (auto &name : names) {
+        ok &= veto(name);
+    }
+    return ok;
+}
+
+bool trigger_mask::passes(const trigger_values &values) const
+{
+    bool pass = false;
+    for (unsigned i = 0; i < trigger::count; ++i) {
+        if (_triggers[i]->is_veto(values[i])) {
+            return false;
+        }
+        pass |= _triggers[i]->accepted(values[i]);
+    }
+    return pass;
 }

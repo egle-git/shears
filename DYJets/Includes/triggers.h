@@ -113,6 +113,26 @@ public:
     explicit trigger_mask(TTree &bitFieldsChain);
 
     /**
+     * \brief Constructs a trigger mask from user input.
+     *
+     * The definition provided must be a comma- or space-separated list of (possibly quoted)
+     * trigger names. A trigger can be specified as a veto by putting a \c ^ before its name.
+     *
+     * For sample, the definition `HLT_IsoMu24, HLT_IsoTkMu24, ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL`
+     * will produce a mask accepting events passing either of the `HLT_IsoMu24` and `HLT_IsoTkMu24`
+     * triggers, and rejecting events passing the `HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL`.
+     *
+     * If the definition doesn't have any accepted trigger, anything will be accepted (as per
+     * \ref set_accepts_any_trigger).
+     *
+     * If \c verbose is enabled, the constructor will log some information to \c cout.
+     *
+     * \throws std::invalid_argument if \c bitFieldsChain is empty, or a trigger is not found.
+     */
+    explicit trigger_mask(TTree &bitFieldsChain, const std::string &definition,
+                          bool verbose = false);
+
+    /**
      * \brief Sets the given trigger path to be accepted by \ref passes.
      * \returns \c true if the path was found.
      */

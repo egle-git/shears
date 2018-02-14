@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <boost/tokenizer.hpp>
+
 #include <TTree.h>
 
 static const char * const branch_names[trigger::count] = {
@@ -122,6 +124,47 @@ trigger_mask::trigger_mask(TTree &bitFieldsChain) :
         default:
             _triggers[trig] = std::make_shared<trigger>(trigger_names);
         }
+    }
+}
+
+trigger_mask::trigger_mask(TTree &bitFieldsChain, const std::string &definition, bool verbose) :
+    trigger_mask(bitFieldsChain)
+{
+    using boost::escaped_list_separator;
+    using boost::tokenizer;
+
+    int accepted_count = 0;
+
+    // Retrieve tokens
+    escaped_list_separator<char> sep("\\", "\t ,", "\"\'");
+    tokenizer<escaped_list_separator<char>> tok(definition, sep);
+    for (auto it = tok.begin(); it != tok.end(); ++it) {
+        const std::string &token = *it;
+
+        if (token.empty()) {
+            continue;
+        }
+
+        if (token[0] == '^') { // Trigger is a veto
+            if (!veto(token.substr(1))) {
+                std::string msg = "Could not find trigger ";
+                msg += token.substr(1);
+                throw std::invalid_argument(msg);
+            }
+            if (verbose) std::cout << "\tVETO\t" << token.substr(1) << std::endl;
+        } else { // Regular trigger
+            accepted_count++;
+            if (!accept(token)) {
+                std::string msg = "Could not find trigger ";
+                msg += token.substr(1);
+                throw std::invalid_argument(msg);
+            }
+            if (verbose) std::cout << "\tACCEPT\t" << token << std::endl;
+        }
+    }
+    if (accepted_count == 0) {
+        set_accepts_any_trigger(true);
+        if (verbose) std::cout << "\tACCEPT ANY TRIGGER" << std::endl;
     }
 }
 

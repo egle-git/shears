@@ -80,7 +80,7 @@ while [ $# -gt 0 ]; do
     [ $? = 0 ] && eval "$1"
     shift
 done
-cfg=vjets_DMu_crab.cfg
+cfg=vjets.cfg
 echo "cfg=$cfg" >> analysis.log
 echo "maxEvents=$maxEvents" >> analysis.log
 [ -n "$cfg" ] || die "Parameter cfg was not found!"
@@ -105,7 +105,7 @@ echo "Doing the tar now" >> analysis.log
 tar -xzf EfficiencyTables.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
-echo "$cfg" | grep -q lepSel  && lepSels="DMu DE" || lepSels="dummy"
+echo "$cfg" | grep -q lepSel  && lepSels="DMu" || lepSels="dummy"
 
 #echo "nRuns=$nRuns before">> analysis.log
 iRun=$NJob

@@ -96,6 +96,11 @@ bool VJetPruner::filterEvent(){
   
 void VJetPruner::skimCollections(){
   std::vector<bool> mask;
+
+  if (iSubSelection_ == FourLep || iSubSelection_ == FourLepUnf) {
+    // No skimming for 4-lepton selections
+    return;
+  }
   
   //Gen lepton collections:
   mask.resize(GLepDr01Pt->size());

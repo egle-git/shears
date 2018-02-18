@@ -9,6 +9,8 @@ void makeTheComparison(TString name, TString saveDirectory){
     return;
   }
 
+  if (ref->Integral()==0) return;
+
   TCanvas *c0 = new TCanvas("c0","coucou",600,800);
   TPad *pad =new TPad("haut","haut",0,0.25,1,1);
   pad->SetNumber(1);

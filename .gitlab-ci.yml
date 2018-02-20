@@ -1,6 +1,7 @@
 stages:
   - buildCMSSW
   - build
+  - lint
   - runHzz
   - comparisons
   - harvesting
@@ -38,6 +39,17 @@ hzz2l2nu:
     paths:
     - HZZ2l2nu/runHZZanalysis
     expire_in: 60 minutes
+
+DYJets doxygen:
+  stage: lint
+  tags: [ cvmfs ]
+  allow_failure: true
+  script:
+    - cd DYJets
+    - doxygen
+    - rm doc/html/installdox # Prohibited by server
+    - tar -czf doc.tar.gz doc
+    - ../.gitlab-ci/upload-tarball.sh doc doc.tar.gz
 
 runHzz DiMuData:
   stage: runHzz

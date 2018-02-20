@@ -39,7 +39,7 @@ hzz2l2nu:
     - HZZ2l2nu/runHZZanalysis
     expire_in: 60 minutes
 
-runHzzDiMuData:
+runHzz DiMuData:
   stage: runHzz
   tags: [ cvmfs ]
   script:
@@ -49,7 +49,7 @@ runHzzDiMuData:
     - HZZ2l2nu/doubleMuHistos.root
     expire_in: 60 minutes
 
-runHzzDiElData:
+runHzz DiElData:
   stage: runHzz
   tags: [ cvmfs ]
   script:
@@ -59,7 +59,7 @@ runHzzDiElData:
     - HZZ2l2nu/doubleElHistos.root
     expire_in: 60 minutes
 
-runHzzDYMC:
+runHzz DYMC:
   stage: runHzz
   tags: [ cvmfs ]
   script:
@@ -69,7 +69,7 @@ runHzzDYMC:
     - HZZ2l2nu/DYHistos.root
     expire_in: 60 minutes
 
-runHzzPhotonData:
+runHzz PhotonData:
   stage: runHzz
   tags: [ cvmfs ]
   script:
@@ -79,7 +79,7 @@ runHzzPhotonData:
     - HZZ2l2nu/SinglePhotonsHistos.root
     expire_in: 60 minutes
 
-runHzzGammaJetMC:
+runHzz GammaJetMC:
   stage: runHzz
   tags: [ cvmfs ]
   script:
@@ -89,7 +89,7 @@ runHzzGammaJetMC:
     - HZZ2l2nu/gammaJetHisto.root
     expire_in: 60 minutes
 
-compDiMu:
+compHzz DiMu:
   stage: comparisons
   tags: [ cvmfs ]
   script:
@@ -100,7 +100,7 @@ compDiMu:
     - HZZ2l2nu/result_doubleMuHistos
     expire_in: 60 minutes
 
-compDiEle:
+compHzz DiEle:
   stage: comparisons
   tags: [ cvmfs ]
   script:
@@ -111,7 +111,7 @@ compDiEle:
     - HZZ2l2nu/result_doubleElHistos
     expire_in: 60 minutes
 
-compDYMC:
+compHzz DYMC:
   stage: comparisons
   tags: [ cvmfs ]
   script:
@@ -122,7 +122,7 @@ compDYMC:
     - HZZ2l2nu/result_DYHistos
     expire_in: 60 minutes
 
-compSinglePhoton:
+compHzz SinglePhoton:
   stage: comparisons
   tags: [ cvmfs ]
   script:
@@ -133,7 +133,7 @@ compSinglePhoton:
     - HZZ2l2nu/result_SinglePhotonsHistos
     expire_in: 60 minutes
 
-compGammaJetMC:
+compHzz GammaJetMC:
   stage: comparisons
   tags: [ cvmfs ]
   script:

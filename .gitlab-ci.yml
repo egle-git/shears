@@ -52,6 +52,7 @@ DYJets doxygen:
   tags: [ cvmfs ]
   allow_failure: true
   script:
+    - . .gitlab-ci/setup_cmssw.sh
     - cd DYJets
     - doxygen
     - rm doc/html/installdox # Prohibited by server

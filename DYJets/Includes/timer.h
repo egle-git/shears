@@ -19,14 +19,14 @@
  */
 class timer
 {
-    using clock      = std::chrono::steady_clock;
+    using clock = std::chrono::steady_clock;
     using time_point = clock::time_point;
-    using duration   = clock::duration;
+    using duration = clock::duration;
 
-public:
+  public:
     using counter = unsigned long;
 
-private:
+  private:
     // In both threads
     const counter _steps, _from;
     std::atomic<counter> _done;
@@ -40,7 +40,7 @@ private:
     time_point _start, _last;
     counter _lastcounter = 0;
 
-public:
+  public:
     /**
      * \brief Creates a new timer that will count up to the given \c last step,
      *        starting from \c begin.
@@ -84,7 +84,7 @@ public:
      */
     bool isrunning() const;
 
-private:
+  private:
     void displayprogress(const time_point &now, bool at_end = false) const;
 };
 

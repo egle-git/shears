@@ -17,7 +17,7 @@ class catalog
 
     double _lumi, _xsec;
 
-public:
+  public:
     /**
      * \brief Constructor.
      *
@@ -31,9 +31,7 @@ public:
      *                  support).
      * \param maxFiles The maximum number of files to be used (-1 for no limit).
      */
-    explicit catalog(const std::string &filename,
-                     const std::string &bonzaiDir,
-                     int maxFiles = -1);
+    explicit catalog(const std::string &filename, const std::string &bonzaiDir, int maxFiles = -1);
 
     /// \brief Destructor
     virtual ~catalog();

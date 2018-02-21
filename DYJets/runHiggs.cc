@@ -5,19 +5,17 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "ZJets_newformat.h"
 #include "catalog.h"
 #include "timer.h"
-#include "ZJets_newformat.h"
 
-bool isZ(int charge, double mass)
-{
-    return charge == 0 && mass > 60 && mass < 110;
-}
+bool isZ(int charge, double mass) { return charge == 0 && mass > 60 && mass < 110; }
 
 int main(int argc, char **argv)
 {
     std::string fileName("Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt");
-    std::string bonzaiDir("/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/");
+    std::string bonzaiDir(
+        "/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/");
 
     catalog c(fileName, bonzaiDir, -1);
 
@@ -54,8 +52,7 @@ int main(int argc, char **argv)
                 for (; MuPfIso->at(j) <= 0.25 && !(MuIdTight->at(i) & 1); ++j) {
                     // Do nothing
                 }
-                p[i].SetPtEtaPhiE(MuPt->at(j), MuEta->at(j),
-                                  MuPhi->at(j), MuE->at(j));
+                p[i].SetPtEtaPhiE(MuPt->at(j), MuEta->at(j), MuPhi->at(j), MuE->at(j));
                 charge[i] = MuCh->at(j);
             }
             if (std::accumulate(charge, charge + 4, 0) != 0) {

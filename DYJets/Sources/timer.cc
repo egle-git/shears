@@ -4,12 +4,10 @@
 #include <iomanip>
 #include <iostream>
 
-timer::timer(timer::counter last, timer::counter begin) :
-    _steps(last),
-    _from(begin),
-    _done(begin),
-    _stop(false)
-{}
+timer::timer(timer::counter last, timer::counter begin)
+    : _steps(last), _from(begin), _done(begin), _stop(false)
+{
+}
 
 timer::~timer()
 {
@@ -55,15 +53,12 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
               << 100. * (_done - _from) / (_steps - _from) << "%\t";
 
     // done/total
-    std::cout << " "
-              << std::setw(std::ceil(std::log10(steps())))
-              << _done << "/" << _steps << "\t";
+    std::cout << " " << std::setw(std::ceil(std::log10(steps()))) << _done << "/" << _steps << "\t";
 
-    if (_done - _from > (steps() - _from) / 10 ||
-          now - _start > std::chrono::seconds(2)) {
+    if (_done - _from > (steps() - _from) / 10 || now - _start > std::chrono::seconds(2)) {
         // Time computations (in microseconds)
         us::rep totalduration = duration_cast<us>(now - _start).count();
-        us::rep stepduration  = duration_cast<us>(now - _last).count();
+        us::rep stepduration = duration_cast<us>(now - _last).count();
 
         // Speeds (s^-1)
         double instspeed = 1e6 * (_done - _lastcounter) / stepduration;
@@ -99,7 +94,7 @@ void timer::start()
     _thread = std::thread([&]() {
         // Main work function, will be invoked in a separate thread
         _start = clock::now();
-        _last  = _start;
+        _last = _start;
 
         displayprogress(_start);
 

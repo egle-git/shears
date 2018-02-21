@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <dlfcn.h> // dlopen
 
+#if __GNUC__ < 5
+  #error "You're using an old compiler version. Run cmsenv."
+#endif
+
 using std::cout;
 using std::cerr;
 using std::endl;

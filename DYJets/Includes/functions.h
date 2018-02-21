@@ -7,6 +7,24 @@
 #include <iostream>
 #include <vector>
 
+// Beginning of run for 2016
+#define RUNB_2016 273150
+#define RUNC_2016 275656
+#define RUND_2016 276315
+#define RUNE_2016 276831
+#define RUNF_2016 277932
+#define RUNG_2016 278820
+#define RUNH_2016 281613
+
+// Integrated Lumi for each run 2016
+#define LUMI_RUNB_2016 5.748
+#define LUMI_RUNC_2016 2.573
+#define LUMI_RUND_2016 4.248
+#define LUMI_RUNE_2016 4.009
+#define LUMI_RUNF_2016 3.102
+#define LUMI_RUNG_2016 7.540
+#define LUMI_RUNH_2016 8.606
+
 class TCanvas;
 
 using namespace std;
@@ -25,19 +43,19 @@ struct leptonStruct
                  double id_,
                  double iso_,
                  double scEta_,
-                 int MuTkLayer_)
+                 int trigger_)
     {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
         id = id_;
         iso = iso_;
         scEta = scEta_;
-        MuTkLayer = MuTkLayer_;
+        trigger = trigger_;
     }
 
     TLorentzVector v;
     double charge, iso, scEta;
-    int id, trigger, MuTkLayer;
+    int id, trigger;
 };
 
 struct jetStruct
@@ -50,9 +68,14 @@ struct jetStruct
         isBJet = isBJet_;
     }
 
+    void setSmearMatch(bool match) { smearMatch = match; }
+    void setGenMatchIndex(size_t match) { genMatchIndex = match; }
+
     TLorentzVector v;
     int patIndex;
     bool isBJet;
+    bool smearMatch; // True implies a gen match was found for smearing, vs false is guassian smear.
+    size_t genMatchIndex;
 };
 
 bool LepDescendingOrder(leptonStruct, leptonStruct);
@@ -66,6 +89,7 @@ vector<double> makeVector(int num, ...);
 void insertVector(vector<double> &veca, int num, ...);
 
 double phi0to2pi(double);
+double ZPtviaPhistar(double);
 
 double deltaPhi(TLorentzVector, TLorentzVector);
 
@@ -106,9 +130,13 @@ class table
     vector<record> recd;
 };
 
+char GetRunData(int runNumber);
+char GetRunMC(Long64_t *mcEraBoundary, Long64_t eventNumber);
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor);
+double GetJetSF(double, int);
+double GetJetResolution();
 double SmearJetPt(double, double, double, int);
-double MuTracking(double);
+double SmearJetPt(double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
@@ -171,5 +199,4 @@ void pground(double val,
 void pground(double val, double unc, std::string &sVal, std::string &sUnc);
 
 ///@}
-
 #endif

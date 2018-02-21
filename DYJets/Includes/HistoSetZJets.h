@@ -13,6 +13,8 @@
 #include <iostream>
 #include <set>
 #include <vector>
+#define JETPT_ZINC1_BINS 9
+#define JETPT_20_ZINC1_BINS 11
 
 using namespace std;
 
@@ -51,6 +53,7 @@ class HistoSetZJets
     TH1D *JobInfo;
     TH1D *Lumi;
     TH1D *NumberPFcandidates;
+    TH1D *NumberOfEvents;
     TH1D *ZMass_lowDeltaR;
     TH1D *ZMass_Zinc0jet;
     TH1D *ZMass_Zinc1jet;
@@ -59,32 +62,82 @@ class HistoSetZJets
     TH1D *Mass_Zinc0jet;
     TH1D *Phistar_Zinc0jet;
     TH1D *Phistar_Zinc0jetM111_130;
-    TH1D *Phistar_Zinc0jetM130_3;
+    TH1D *Phistar_Zinc0jetM130_170;
+    TH1D *Phistar_Zinc0jetM170_250;
+    TH1D *Phistar_Zinc0jetM250_3;
     GenH1D *genPhistar_Zinc0jet;
     GenH1D *genPhistar_Zinc0jetM111_130;
-    GenH1D *genPhistar_Zinc0jetM130_3;
+    GenH1D *genPhistar_Zinc0jetM130_170;
+    GenH1D *genPhistar_Zinc0jetM170_250;
+    GenH1D *genPhistar_Zinc0jetM250_3;
     TH2D *hresponsePhistar_Zinc0jet;
     TH2D *hresponsePhistar_Zinc0jetM111_130;
-    TH2D *hresponsePhistar_Zinc0jetM130_3;
+    TH2D *hresponsePhistar_Zinc0jetM130_170;
+    TH2D *hresponsePhistar_Zinc0jetM170_250;
+    TH2D *hresponsePhistar_Zinc0jetM250_3;
     TH1D *Phistar_Zinc1jet;
     TH1D *Phistar_Zinc1jetM111_130;
-    TH1D *Phistar_Zinc1jetM130_3;
+    TH1D *Phistar_Zinc1jetM130_170;
+    TH1D *Phistar_Zinc1jetM170_250;
+    TH1D *Phistar_Zinc1jetM250_3;
     GenH1D *genPhistar_Zinc1jet;
     GenH1D *genPhistar_Zinc1jetM111_130;
-    GenH1D *genPhistar_Zinc1jetM130_3;
+    GenH1D *genPhistar_Zinc1jetM130_170;
+    GenH1D *genPhistar_Zinc1jetM170_250;
+    GenH1D *genPhistar_Zinc1jetM250_3;
+
+    GenH1D *genZPt_Zinc0jetM15_50;
+    GenH1D *genZPt_Zinc0jetM50_71;
+    GenH1D *genZPt_Zinc0jetM111_130;
+    GenH1D *genZPt_Zinc0jetM130_170;
+    GenH1D *genZPt_Zinc0jetM250_3;
+    GenH1D *genZPt_Zinc0jetM320_3;
+    GenH1D *genZPt_Zinc0jetM170_250;
+    GenH1D *genZPt_Zinc0jetM170_250_new;
+
     TH2D *hresponsePhistar_Zinc1jet;
     TH2D *hresponsePhistar_Zinc1jetM111_130;
-    TH2D *hresponsePhistar_Zinc1jetM130_3;
+    TH2D *hresponsePhistar_Zinc1jetM130_170;
+    TH2D *hresponsePhistar_Zinc1jetM170_250;
+    TH2D *hresponsePhistar_Zinc1jetM250_3;
+
+    TH2D *hresponseZPt_Zinc0jetM15_50;
+    TH2D *hresponseZPt_Zinc0jetM50_71;
+    TH2D *hresponseZPt_Zinc0jetM111_130;
+    TH2D *hresponseZPt_Zinc0jetM130_170;
+    TH2D *hresponseZPt_Zinc0jetM250_3;
+    TH2D *hresponseZPt_Zinc0jetM320_3;
+    TH2D *hresponseZPt_Zinc0jetM170_250;
+    TH2D *hresponseZPt_Zinc0jetM170_250_new;
+    TH2D *hresponseZPt_Zinc0jetM250_3_dR;
+    TH2D *hresponseZPt_Zinc0jetM250_3_dPt;
+
+    TH2D *hresponselep0Pt_Zinc0jet;
+    TH2D *hresponselep1Pt_Zinc0jet;
+
     TH1D *ZPt_Zinc0jet;
+    TH1D *ZPt_Zinc0jet_new;
     TH1D *ZPt_Zinc0jetM115_135;
-    TH1D *ZPt_Zinc0jetM111_130;
     TH1D *ZPt_Zinc0jetM130_3;
+
+    TH1D *ZPt_Zinc0jetM15_50;
+    TH1D *ZPt_Zinc0jetM50_71;
+    TH1D *ZPt_Zinc0jetM111_130;
+    TH1D *ZPt_Zinc0jetM130_170;
+    TH1D *ZPt_Zinc0jetM250_3;
+    TH1D *ZPt_Zinc0jetM320_3;
+    TH1D *ZPt_Zinc0jetM170_250;
+    TH1D *ZPt_Zinc0jetM170_250_new;
+
     TH1D *ZPt_Zinc0jet_Odd;
     ;
     TH1D *ZPt_Zinc0jet_Even;
     TH1D *ZPt_Zinc1jet;
     TH1D *ZPt_Zinc1jetM111_130;
-    TH1D *ZPt_Zinc1jetM130_3;
+    TH1D *ZPt_Zinc1jetM130_170;
+    TH1D *ZPt_Zinc1jetM170_250;
+    TH1D *ZPt_Zinc1jetM250_3;
+
     TH1D *ZPt_Zinc1jet_Odd;
     ;
     TH1D *ZPt_Zinc1jet_Even;
@@ -130,19 +183,25 @@ class HistoSetZJets
     TH1D *VisPt_2_Zinc3jetQun;
     GenH1D *genVisPt_Zinc3jetQun;
     GenH1D *genZPt_Zinc0jet;
+    GenH1D *genZPt_Zinc0jet_new;
     GenH1D *genZPt_Zinc0jetM115_135;
-    GenH1D *genZPt_Zinc0jetM111_130;
     GenH1D *genZPt_Zinc0jetM130_3;
     TH2D *hresponseZPt_Zinc0jet;
+    TH2D *hresponseZPt_Zinc0jet_new;
+    TH2D *hresponseZPt_Zinc0jet_lowNVtx;
+    TH2D *hresponseZPt_Zinc0jet_highNVtx;
     TH2D *hresponseZPt_Zinc0jetM115_135;
-    TH2D *hresponseZPt_Zinc0jetM111_130;
     TH2D *hresponseZPt_Zinc0jetM130_3;
     GenH1D *genZPt_Zinc1jet;
     GenH1D *genZPt_Zinc1jetM111_130;
-    GenH1D *genZPt_Zinc1jetM130_3;
+    GenH1D *genZPt_Zinc1jetM130_170;
+    GenH1D *genZPt_Zinc1jetM170_250;
+    GenH1D *genZPt_Zinc1jetM250_3;
     TH2D *hresponseZPt_Zinc1jet;
     TH2D *hresponseZPt_Zinc1jetM111_130;
-    TH2D *hresponseZPt_Zinc1jetM130_3;
+    TH2D *hresponseZPt_Zinc1jetM130_170;
+    TH2D *hresponseZPt_Zinc1jetM170_250;
+    TH2D *hresponseZPt_Zinc1jetM250_3;
     GenH1D *genHadRecoil;
     GenH1D *genJZB;
     GenH1D *genJZB_ptLow;
@@ -209,7 +268,11 @@ class HistoSetZJets
     TH1D *FifthJetEtaHigh_Zinc5jet;
     TH1D *SixthJetEtaHigh_Zinc6jet;
 
+    TH2D *FirstJetAbsYvsAbsEta_Zinc1jet;
+
     TH1D *FirstJetAbsRapidity_Zinc1jet;
+    TH1D *FirstJetAbsRapidity_SmearMatch_Zinc1jet; // DJALOG
+    TH1D *FirstJetAbsRapidity_SmearGauss_Zinc1jet; // DJALOG
     TH1D *FirstJetAbsRapidity_Zinc1jet_Odd;
     TH1D *FirstJetAbsRapidity_Zinc1jet_Even;
     TH1D *FirstJetAbsRapidity_2_Zinc1jet;
@@ -277,6 +340,11 @@ class HistoSetZJets
     TH1D *FirstJetPhi_Zinc1jet;
     TH2D *FirstJetPt_Zinc1jet_NVtx;
     TH2D *FirstJetPtRecoOvGen_Zinc1jet_NVtx;
+    TH2D *lepResolution_pt;
+    TH2D *lepResolution_nvtx;
+    TH2D *lepResolution_pt_rel;
+    TH2D *Phistar_Zpt;
+    TH2D *Phistar_Zpt_test;
 
     TH1D *SecondJetPhi_Zinc2jet;
     TH1D *ThirdJetPhi_Zinc3jet;
@@ -286,10 +354,16 @@ class HistoSetZJets
     TH1D *FirstJetPhi_Zexc1jet;
     TH1D *SecondJetPhi_Zexc2jet;
     TH1D *lepPt_Zinc0jet;
+    TH1D *lepLPt_Zinc0jet;
+    TH1D *lepSPt_Zinc0jet;
     TH1D *lepPt_Zinc1jet;
+    TH1D *lepLPt_Zinc1jet;
+    TH1D *lepSPt_Zinc1jet;
     TH1D *lepPtFrom15_Zinc0jet;
     GenH1D *genlepPt_Zinc0jet;
     TH1D *lepPt_Zexc0jet;
+    TH1D *lepLPt_Zexc0jet;
+    TH1D *lepSPt_Zexc0jet;
     TH1D *dPhiLeptons_Zexc0jet;
     TH1D *dPhiLeptons_Zinc0jet;
     TH1D *dPhiLeptons_Zinc1jet;
@@ -334,6 +408,8 @@ class HistoSetZJets
     GenH1D *genJetsHT_Zinc6jet;
 
     TH1D *FirstJetPt_Zinc1jet;
+    TH1D *FirstJetPt_SmearMatch_Zinc1jet; // DJALOG
+    TH1D *FirstJetPt_SmearGauss_Zinc1jet; // DJALOG
     TH1D *FirstJetPt_Zinc1jet_Odd;
     TH1D *FirstJetPt_Zinc1jet_Even;
     TH1D *FirstJetPt_2_Zinc1jet;
@@ -365,6 +441,7 @@ class HistoSetZJets
     TH1D *SecondJetPt_Zexc2jet;
     GenH1D *genFirstJetPt_Zexc1jet;
     GenH1D *genSecondJetPt_Zexc2jet;
+
     TH1D *ZNGoodJets_Zexc;
     TH1D *ZNGoodJets_Zexc_Odd;
     TH1D *ZNGoodJets_Zexc_Even;
@@ -375,16 +452,17 @@ class HistoSetZJets
     TH1D *ZNGoodJets_Zinc_nvtx20;
     TH1D *ZNGoodJets_Zinc_nvtx30;
     TH1D *ZNGoodJets_Zinc_nvtx45;
-    // TH1D *ZNGoodJets_test;
     TH1D *ZNGoodJets_Zinc_5;
     TH1D *ZNGoodJets_Zinc_10;
     TH1D *ZNGoodJets_Zinc_15;
     TH1D *ZNGoodJets_Zinc_20;
     TH1D *ZNGoodJets_Zinc_25;
-
     TH1D *ZNGoodJets_Zexc_NoWeight;
     TH1D *ZNGoodJets_Zinc_NoWeight;
+    TH1D *ZNGoodJets_SameChargePair_Zinc;
 
+    TH1D *ptBal_Zinc1jet;
+    TH1D *ptBal_Zinc3jet;
     TH1D *TwoJetsPtDiff_Zexc2jet;
     GenH1D *genTwoJetsPtDiff_Zexc2jet;
     TH1D *JetsMass_Zexc2jet;
@@ -687,10 +765,17 @@ class HistoSetZJets
     TH1D *MuPFIsoDBetaCorrj2;
     TH1D *MuPFIsoDBetaCorrj3;
 
+    TH1D *deltaRMuRecGen_lead_lowM;
+    TH1D *deltaRMuRecGen_sublead_lowM;
+    TH1D *deltaRMuRecGen_lead_highM;
+    TH1D *deltaRMuRecGen_sublead_highM;
+    TH1D *deltaPtMuRecGen_lead_highM;
+    TH1D *deltaPtMuRecGen_sublead_highM;
+    TH1D *deltaPtMuRecGen_lead_lowM;
+    TH1D *deltaPtMuRecGen_sublead_lowM;
+
     TH1D *deltaRjetMu;
     TH1D *deltaPtjetMu;
-    TH1D *NVtx;
-    TH1D *NVtx_NoPUweight;
     TH1D *TruePU_0;
     TH1D *TruePU_1;
     TH1D *TruePU_2;
@@ -700,14 +785,16 @@ class HistoSetZJets
     TH1D *TruePU_6;
     TH1D *TruePU_7;
 
-    TH1D *PU_0;
-    TH1D *PU_1;
-    TH1D *PU_2;
-    TH1D *PU_3;
-    TH1D *PU_4;
-    TH1D *PU_5;
-    TH1D *PU_6;
-    TH1D *PU_7;
+    TH1D *NVtx_Zinc0jet;
+    TH1D *NVtx_NoPUweight_Zinc0jet;
+    TH1D *NVtx_Zexc0jet;
+    TH1D *NVtx_Zexc1jet;
+    TH1D *NVtx_Zexc2jet;
+    TH1D *NVtx_Zexc3jet;
+    TH1D *NVtx_Zexc4jet;
+    TH1D *NVtx_Zexc5jet;
+    TH1D *NVtx_Zexc6jet;
+    TH1D *NVtx_Zexc7jet;
 
     TH1D *Beta;
     TH1D *BetaStar;
@@ -1021,6 +1108,35 @@ class HistoSetZJets
     GenH1D *genCentralJetEta_Zinc2jet;
     GenH1D *genForwardJetEta_Zinc2jet;
 
+    // DJALOG TH2D
+    TH1D *hjetResolution;
+    TH1D *hEvtFastJetRho;
+    TH2D *hhjetResolutionPt;
+    TH2D *hhjetResolutionEta;
+    TH1D *hjetScaleFactor;
+    TH2D *hhJetMatching_StatMatches;
+    TH2D *hhJetMatching_StatFail;
+    TH2D *hhJetMatching_StatMatches_Lep;
+    TH2D *hhJetMatching_StatFail_Lep;
+    TH2D *hhRecoGenJetMatchingMatrix;
+    TH2D *hhRecoGenJetMatchingMatrix_Lep;
+    TH2D *hhJetMatching_FirstJetRap_Match;
+    TH2D *hhJetMatching_FirstJetRap_NoMatch;
+    TH2D *hhJetMatching_FirstJetNoMatch_Matrix;
+    TH1D *hJetMatching_FirstJetdPT_Match;
+    TH1D *hJetMatching_FirstJetdPT_Other;
+    TH1D *hJetMatching_dPT_SecondMatch;
+    TH2D *hhRecoGenLeptonMatching;
+    TH1D *hJetMatching_dRFirstJet;
+    TH1D *hJetMathing_FailedRecoJet_AllEta;
+    TH1D *hJetMathing_FailedRecoJet_FirstEta;
+    TH1D *hJetMatching_dRFailedFirstLeadLep;
+    TH1D *hJetMatching_dRFailedFirstSubLep;
+    TH1D *hJetMatching_FirstJetPt_FaileddR;
+    TH1D *hJetMatching_FirstJetAbsRapidity_FaileddR;
+    TH1D *hJetMatching_FirstJetPt_FailednGen;
+    TH1D *hJetMatching_FirstJetAbsRapidity_FailednGen;
+
     // TH2D for reponse objects
 
     TH2D *hresponsetau_sum_Zinc1jet[5];
@@ -1048,12 +1164,16 @@ class HistoSetZJets
     TH2D *hresponseDifZJetRapidity_Zinc1jet;
 
     TH2D *hresponseFirstJetPt_Zinc1jet;
+    TH2D *hresponseFirstJetPtMatch_Zinc1jet;
     TH2D *hresponseFirstJetPt_2_Zinc1jet;
     TH2D *hresponseSecondJetPt_Zinc2jet;
+    TH2D *hresponseSecondJetPtMatch_Zinc2jet; // DJALOG
     TH2D *hresponseSecondJetPt_2_Zinc2jet;
     TH2D *hresponseThirdJetPt_Zinc3jet;
+    TH2D *hresponseThirdJetPtMatch_Zinc3jet; // DJALOG
     TH2D *hresponseThirdJetPt_2_Zinc3jet;
     TH2D *hresponseFourthJetPt_Zinc4jet;
+    TH2D *hresponseFourthJetPtMatch_Zinc4jet; // DJALOG
     TH2D *hresponseFifthJetPt_Zinc5jet;
 
     TH2D *hresponseJetsHT_Zinc1jet;
@@ -1066,28 +1186,45 @@ class HistoSetZJets
     TH2D *hresponseJetsHT_Zinc5jet;
 
     TH2D *hresponseFirstJetEta_Zinc1jet;
+    TH2D *hresponseFirstJetEtaMatch_Zinc1jet; // DJALOG
     TH2D *hresponseFirstJetEta_2_Zinc1jet;
+
     TH2D *hresponseSecondJetEta_Zinc2jet;
+    TH2D *hresponseSecondJetEtaMatch_Zinc2jet; // DJALOG
     TH2D *hresponseSecondJetEta_2_Zinc2jet;
     TH2D *hresponseThirdJetEta_Zinc3jet;
+    TH2D *hresponseThirdJetEtaMatch_Zinc3jet; // DJALOG
     TH2D *hresponseThirdJetEta_2_Zinc3jet;
     TH2D *hresponseFourthJetEta_Zinc4jet;
+    TH2D *hresponseFourthJetEtaMatch_Zinc4jet; // DJALOG
     TH2D *hresponseFifthJetEta_Zinc5jet;
 
     TH2D *hresponseFirstJetEtaHigh_Zinc1jet;
+    TH2D *hresponseFirstJetEtaHighMatch_Zinc1jet; // DJALOG
     TH2D *hresponseSecondJetEtaHigh_Zinc2jet;
+    TH2D *hresponseSecondJetEtaHighMatch_Zinc2jet; // DJALOG
     TH2D *hresponseThirdJetEtaHigh_Zinc3jet;
+    TH2D *hresponseThirdJetEtaHighMatch_Zinc3jet; // DJALOG
     TH2D *hresponseFourthJetEtaHigh_Zinc4jet;
+    TH2D *hresponseFourthJetEtaHighMatch_Zinc4jet; // DJALOG
     TH2D *hresponseFifthJetEtaHigh_Zinc5jet;
 
     TH2D *hresponseFirstJetRapidityHigh_Zinc1jet;
+    TH2D *hresponseFirstJetRapidityHighMatch_Zinc1jet; // DJALOG
     TH2D *hresponseFirstJetAbsRapidity_Zinc1jet;
+    TH2D *hresponseFirstJetAbsRapidityMatch_Zinc1jet; // DJALOG
     TH2D *hresponseSecondJetRapidityHigh_Zinc2jet;
     TH2D *hresponseSecondJetAbsRapidity_Zinc2jet;
+    TH2D *hresponseSecondJetRapidityHighMatch_Zinc2jet; // DJALOG
+    TH2D *hresponseSecondJetAbsRapidityMatch_Zinc2jet;  // DJALOG
     TH2D *hresponseThirdJetRapidityHigh_Zinc3jet;
     TH2D *hresponseThirdJetAbsRapidity_Zinc3jet;
+    TH2D *hresponseThirdJetRapidityHighMatch_Zinc3jet; // DJALOG
+    TH2D *hresponseThirdJetAbsRapidityMatch_Zinc3jet;  // DJALOG
     TH2D *hresponseFourthJetRapidityHigh_Zinc4jet;
     TH2D *hresponseFourthJetAbsRapidity_Zinc4jet;
+    TH2D *hresponseFourthJetRapidityHighMatch_Zinc4jet; // DJALOG
+    TH2D *hresponseFourthJetAbsRapidityMatch_Zinc4jet;  // DJALOG
     TH2D *hresponseFifthJetRapidityHigh_Zinc5jet;
     TH2D *hresponseFifthJetAbsRapidity_Zinc5jet;
 
@@ -1097,6 +1234,7 @@ class HistoSetZJets
     TH2D *hresponseJetsMassHigPU_Zinc2jet;
 
     TH2D *hresponseFirstJetPtEta_Zinc1jet;
+    TH2D *hresponseFirstJetPtEtaMatch_Zinc1jet; // DJALOG
     TH2D *FirstJetPtEta_Zinc1jet;
     TH2D *genFirstJetPtEta_Zinc1jet;
 

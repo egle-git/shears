@@ -24,7 +24,7 @@ struct processInfoStruct
 //--- last element must point to the MC Signal(s)
 // 8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
-    //--  Name  --- merge - #events -- xsec - BR - xsec rel. unc. - colorReco - colorGen -
+    //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen -
     //legendReco - legendGen
     /* 0*/ {"Data", ' ', 1., 1., 1, 1, kBlack, kBlack, " Data", " Data"},
     /* 1*/ {"TT", ' ', 1., 1., 1, 0.00, kBlue, kBlue, " t#bar{t}", " t#bar{t}"},
@@ -87,7 +87,7 @@ const processInfoStruct Samples[] = {
             kBlue - 5,
             kBlue - 5,
             " Z/#gamma^{*} #rightarrow ll",
-            "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
+            "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.118"},
     /*15*/ {"DYJets_GEas1135",
             ' ',
             1.,
@@ -97,7 +97,7 @@ const processInfoStruct Samples[] = {
             kBlue - 2,
             kBlue - 2,
             " Z/#gamma^{*} #rightarrow ll",
-            "GE 0.3 + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
+            "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
     /*16*/ {"DYJets_ZjNNLO",
             ' ',
             1.,

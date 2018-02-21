@@ -1,4 +1,4 @@
-//-*- c-basic-offset: 8; -*-
+//-*- c-basic-offset: 3; -*-
 #ifndef ZJets_h
 #define ZJets_h
 
@@ -14,6 +14,7 @@
 #include <TROOT.h>
 #include <TRandom3.h>
 #include <TStyle.h>
+#include <TSystem.h>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -22,11 +23,11 @@
 
 // Header file for the classes stored in the TTree if any.
 #include "HistoSetZJets.h"
+#include "JetCorrectionUncertainty.h"
+#include "JetResolution.h"
+#include "RoccoR.h"
 #include "functions.h"
 #include "getFilesAndHistogramsZJets.h"
-//#include "rochcor2015.h"
-#include "RoccoR.h"
-
 using namespace std;
 
 enum triggers {
@@ -47,8 +48,11 @@ class ZJets : public HistoSetZJets
 {
   public:
     bool doRochester;
-    // rochcor2015 *rmcor;
-    RoccoR *rc;
+    RoccoR *rochCorr2016;
+    JME::JetResolution *m_JetResolution;
+    JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;
+    JME::JetParameters *m_JetParameters;
+    Variation m_Variation;
     std::shared_ptr<TChain> fChain; //! pointer to the analyzed TTree or TChain
     std::shared_ptr<TChain> fBonzaiHeaderChain;
     std::shared_ptr<TChain> fBitFieldsChain;
@@ -247,17 +251,17 @@ class ZJets : public HistoSetZJets
     // Double_t mcEveWeight_;
 
     // List of branches
-    TBranch *b_EvtIsRealData;                //!
-    TBranch *b_EvtNum;                       //!
-    TBranch *b_EvtRunNum;                    //!
-    TBranch *b_EvtLumiNum;                   //!
-    TBranch *b_EvtBxNum;                     //!
-    TBranch *b_EvtVtxCnt;                    //!
-    TBranch *b_EvtPuCnt;                     //!
-    TBranch *b_EvtPuCntTruth;                //!
-    TBranch *b_EvtWeights;                   //!
-    TBranch *b_EvtFastJetRho;                //!
-                                             //   TBranch        *b_TrigHlt;   //!
+    TBranch *b_EvtIsRealData; //!
+    TBranch *b_EvtNum;        //!
+    TBranch *b_EvtRunNum;     //!
+    TBranch *b_EvtLumiNum;    //!
+    TBranch *b_EvtBxNum;      //!
+    TBranch *b_EvtVtxCnt;     //!
+    TBranch *b_EvtPuCnt;      //!
+    TBranch *b_EvtPuCntTruth; //!
+    TBranch *b_EvtWeights;    //!
+    TBranch *b_EvtFastJetRho; //!
+    //   TBranch        *b_TrigHlt;   //!
     TBranch *b_TrigHltPhot;                  //!
     TBranch *b_TrigHltMu;                    //!
     TBranch *b_TrigHltDiMu;                  //!
@@ -489,16 +493,16 @@ class ZJets : public HistoSetZJets
     void Init(bool hasRecoInfo, bool hasGenInfo);
     void initLHAPDF(TString pdfSet, int pdfMember);
     double computePDFWeight();
-    void Loop(bool hasRecoInfo = 1,
-              bool hasGenInfo = 0,
-              int jobNum = 1,
-              int nJobs = 1,
-              TString pdfSet = "",
-              int pdfMember = -1,
-              double muR = 0,
-              double muF = 0,
-              double yieldScale = 1.);
-    void getMuons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoMuons);
+    int Loop(bool hasRecoInfo = 1,
+             bool hasGenInfo = 0,
+             int jobNum = 1,
+             int nJobs = 1,
+             TString pdfSet = "",
+             int pdfMember = -1,
+             double muR = 0,
+             double muF = 0,
+             double yieldScale = 1.);
+    void getMuons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoMuons, double weight);
     void getElectrons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoElectrons);
     Bool_t Notify();
     void Show(Long64_t entry = -1);
@@ -509,7 +513,6 @@ class ZJets : public HistoSetZJets
                                       TString *fullFileName,
                                       TString *baseName = 0,
                                       TString *ext = 0);
-
     /** Gets integrated luminosity read from lumi parameter of catalog file.
      */
     double getLumi() { return lumi_; }
@@ -528,7 +531,10 @@ class ZJets : public HistoSetZJets
 
     Int_t fill(TH1 *h, Double_t x, Double_t w = 1.)
     {
-        if (!h) return 0;
+        if (!h) {
+            // std::cout<<"Histograms pointer is 0\n";
+            return 0;
+        }
         return h->Fill(x, w);
     }
 
@@ -566,6 +572,9 @@ class ZJets : public HistoSetZJets
     Long_t nMaxEvents;
     TString lepSel;
     bool rejectBTagEvents;
+
+    uint64_t triggerMaskRunB, triggerMaskRunC, triggerMaskRunD, triggerMaskRunE, triggerMaskRunF,
+        triggerMaskRunG, triggerMaskRunH, triggerMaskMCA, triggerMaskMCB;
 
     std::vector<Double_t> InEvtWeightSums_;
     std::vector<Double_t> EvtWeightSums_;

@@ -11,6 +11,8 @@
 #include "TString.h"
 #include <vector>
 
+#define NCYCLES 1
+
 // void UnfoldingZJets(TString lepSel, TString algo, TString histoDir, TString unfoldDir, int
 // jetPtMin, int jetEtaMax, TString gen1, TString gen2, TString variable = "", bool noramlized =
 // false);
@@ -33,6 +35,7 @@ int UnfoldData(const SectionedConfig &unfCfg,
                TH1D *&hUnfData,
                TH2D *&hUnfDataStatCov,
                TH2D *&hUnfMCStatCov,
+               std::vector<TH1D> &hUnfDataBBB,
                TString name,
                double integratedLumi,
                const TString &unfoldDir,

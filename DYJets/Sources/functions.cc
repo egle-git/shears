@@ -9,6 +9,7 @@
 #include "TLorentzVector.h"
 #include "TROOT.h"
 #include "TRandom.h"
+#include "TRandom3.h"
 #include "TString.h"
 #include "TSystem.h"
 #include <algorithm>
@@ -76,6 +77,12 @@ double phi0to2pi(double phi)
     while (phi >= 2. * pi) phi -= 2. * pi;
     while (phi < 0.) phi += 2. * pi;
     return phi;
+}
+
+double ZPtviaPhistar(double phistar)
+{
+    return log(-3.36739e+00 / (-5.14753e-01 - phistar) - 1.) * (-6.48782e+01) +
+           1.11148e+02; // from fit "[0] - [1]/(1+exp((x-[2])/[3]))"
 }
 
 double deltaPhi(TLorentzVector v1, TLorentzVector v2)
@@ -261,6 +268,42 @@ double table::getTTbarSFHigh(int NJets)
     return 1;
 }
 
+char GetRunData(int runNumber)
+{
+    if ((RUNB_2016 <= runNumber) && (runNumber < RUNC_2016)) {
+        return 'B';
+    }
+    if ((RUNC_2016 <= runNumber) && (runNumber < RUND_2016)) {
+        return 'C';
+    }
+    if ((RUND_2016 <= runNumber) && (runNumber < RUNE_2016)) {
+        return 'D';
+    }
+    if ((RUNE_2016 <= runNumber) && (runNumber < RUNF_2016)) {
+        return 'E';
+    }
+    if ((RUNF_2016 <= runNumber) && (runNumber < RUNG_2016)) {
+        return 'F';
+    }
+    if ((RUNG_2016 <= runNumber) && (runNumber < RUNH_2016)) {
+        return 'G';
+    }
+    if (RUNH_2016 <= runNumber) {
+        return 'H';
+    }
+    return 'Z';
+}
+
+char GetRunMC(Long64_t *mcEraBoundary, Long64_t eventNumber)
+{
+    const size_t _nLetters = 7;
+    const std::string _runLettersAll = "BCDEFGH";
+    for (size_t iLetter = 0; iLetter < _nLetters; iLetter++) {
+        if (eventNumber <= mcEraBoundary[iLetter]) return _runLettersAll[iLetter];
+    }
+    return 'Z';
+}
+
 double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFactor)
 {
 
@@ -281,134 +324,225 @@ double SmearLepPt(double recoPt, double genPt, int smearlepton, double smearFact
     return smearedPt;
 }
 
-double MuTracking(double eta)
+// Helper function for SmearsJetPt
+double GetJetSF(double eta, int direction)
 {
-    double SF(1.00);
-    // if (fabs(eta) < 2.5) SF = 1.095;
-    if (eta > -2.4 && eta < -2.1) SF = 0.991237;
-    if (eta > -2.1 && eta < -1.6) SF = 0.994853;
-    if (eta > -1.6 && eta < -1.2) SF = 0.996413;
-    if (eta > -1.2 && eta < -0.9) SF = 0.997157;
-    if (eta > -0.9 && eta < -0.6) SF = 0.997512;
-    if (eta > -0.6 && eta < -0.3) SF = 0.997560;
-    if (eta > -0.3 && eta < -0.2) SF = 0.996745;
-    if (eta > -0.2 && eta < 0.2) SF = 0.996996;
-    if (eta > 0.2 && eta < 0.3) SF = 0.997720;
-    if (eta > 0.3 && eta < 0.6) SF = 0.998604;
-    if (eta > 0.6 && eta < 0.9) SF = 0.998321;
-    if (eta > 0.9 && eta < 1.2) SF = 0.997682;
-    if (eta > 1.2 && eta < 1.6) SF = 0.995252;
-    if (eta > 1.6 && eta < 2.1) SF = 0.994919;
-    if (eta > 2.1 && eta < 2.4) SF = 0.987334;
-
-    return SF;
-}
-
-double SmearJetPt(double recoPt, double genPt, double eta, int smearJet)
-{
-    // Fall 2016 resolution scale factor
+    // Fall 2015 resolution scale factor
     // twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-    // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
+    size_t year = 2016;
     double centralSF(1.00);
-    if (fabs(eta) < 0.5)
-        centralSF = 1.109;
-    else if (fabs(eta) < 0.8)
-        centralSF = 1.138;
-    else if (fabs(eta) < 1.1)
-        centralSF = 1.114;
-    else if (fabs(eta) < 1.3)
-        centralSF = 1.123;
-    else if (fabs(eta) < 1.7)
-        centralSF = 1.084;
-    else if (fabs(eta) < 1.9)
-        centralSF = 1.082;
-    else if (fabs(eta) < 2.1)
-        centralSF = 1.140;
-    else if (fabs(eta) < 2.3)
-        centralSF = 1.067;
-    else if (fabs(eta) < 2.5)
-        centralSF = 1.177;
-    else if (fabs(eta) < 2.8)
-        centralSF = 1.364;
-    else if (fabs(eta) < 3.0)
-        centralSF = 1.857;
-    else if (fabs(eta) < 3.2)
-        centralSF = 1.328;
-    else if (fabs(eta) < 5.0)
-        centralSF = 1.16;
-    else
-        centralSF = 1.320; // from 2015
-
     double upSF(1.00);
-    if (fabs(eta) < 0.5)
-        upSF = 1.109 + 0.008;
-    else if (fabs(eta) < 0.8)
-        upSF = 1.138 + 0.013;
-    else if (fabs(eta) < 1.1)
-        upSF = 1.114 + 0.013;
-    else if (fabs(eta) < 1.3)
-        upSF = 1.123 + 0.024;
-    else if (fabs(eta) < 1.7)
-        upSF = 1.084 + 0.011;
-    else if (fabs(eta) < 1.9)
-        upSF = 1.082 + 0.035;
-    else if (fabs(eta) < 2.1)
-        upSF = 1.140 + 0.047;
-    else if (fabs(eta) < 2.3)
-        upSF = 1.067 + 0.053;
-    else if (fabs(eta) < 2.5)
-        upSF = 1.177 + 0.041;
-    else if (fabs(eta) < 2.8)
-        upSF = 1.364 + 0.039;
-    else if (fabs(eta) < 3.0)
-        upSF = 1.857 + 0.071;
-    else if (fabs(eta) < 3.2)
-        upSF = 1.328 + 0.022;
-    else if (fabs(eta) < 5.0)
-        upSF = 1.16 + 0.029;
-    else
-        upSF = 1.606; // from 2015
-
     double downSF(1.00);
-    if (fabs(eta) < 0.5)
-        downSF = 1.109 - 0.008;
-    else if (fabs(eta) < 0.8)
-        downSF = 1.138 - 0.013;
-    else if (fabs(eta) < 1.1)
-        downSF = 1.114 - 0.013;
-    else if (fabs(eta) < 1.3)
-        downSF = 1.123 - 0.024;
-    else if (fabs(eta) < 1.7)
-        downSF = 1.084 - 0.011;
-    else if (fabs(eta) < 1.9)
-        downSF = 1.082 - 0.035;
-    else if (fabs(eta) < 2.1)
-        downSF = 1.140 - 0.047;
-    else if (fabs(eta) < 2.3)
-        downSF = 1.067 - 0.053;
-    else if (fabs(eta) < 2.5)
-        downSF = 1.177 - 0.041;
-    else if (fabs(eta) < 2.8)
-        downSF = 1.364 - 0.039;
-    else if (fabs(eta) < 3.0)
-        downSF = 1.857 - 0.071;
-    else if (fabs(eta) < 3.2)
-        downSF = 1.328 - 0.022;
-    else if (fabs(eta) < 5.0)
-        downSF = 1.16 - 0.029;
-    else
-        downSF = 1.034; // from 2015
+    if (year == 2015) {
+        if (fabs(eta) < 0.5)
+            centralSF = 1.095;
+        else if (fabs(eta) < 0.8)
+            centralSF = 1.120;
+        else if (fabs(eta) < 1.1)
+            centralSF = 1.097;
+        else if (fabs(eta) < 1.3)
+            centralSF = 1.103;
+        else if (fabs(eta) < 1.7)
+            centralSF = 1.118;
+        else if (fabs(eta) < 1.9)
+            centralSF = 1.100;
+        else if (fabs(eta) < 2.1)
+            centralSF = 1.162;
+        else if (fabs(eta) < 2.3)
+            centralSF = 1.160;
+        else if (fabs(eta) < 2.5)
+            centralSF = 1.161;
+        else if (fabs(eta) < 2.8)
+            centralSF = 1.209;
+        else if (fabs(eta) < 3.0)
+            centralSF = 1.564;
+        else if (fabs(eta) < 3.2)
+            centralSF = 1.384;
+        else if (fabs(eta) < 5.0)
+            centralSF = 1.216;
+        else
+            centralSF = 1.320;
 
-    double smearedPt(0);
+        if (fabs(eta) < 0.5)
+            upSF = 1.095 + 0.018;
+        else if (fabs(eta) < 0.8)
+            upSF = 1.120 + 0.028;
+        else if (fabs(eta) < 1.1)
+            upSF = 1.097 + 0.017;
+        else if (fabs(eta) < 1.3)
+            upSF = 1.103 + 0.033;
+        else if (fabs(eta) < 1.7)
+            upSF = 1.118 + 0.014;
+        else if (fabs(eta) < 1.9)
+            upSF = 1.100 + 0.033;
+        else if (fabs(eta) < 2.1)
+            upSF = 1.162 + 0.044;
+        else if (fabs(eta) < 2.3)
+            upSF = 1.160 + 0.048;
+        else if (fabs(eta) < 2.5)
+            upSF = 1.161 + 0.060;
+        else if (fabs(eta) < 2.8)
+            upSF = 1.209 + 0.059;
+        else if (fabs(eta) < 3.0)
+            upSF = 1.564 + 0.321;
+        else if (fabs(eta) < 3.2)
+            upSF = 1.384 + 0.033;
+        else if (fabs(eta) < 5.0)
+            upSF = 1.216 + 0.050;
+        else
+            upSF = 1.606;
 
-    if (smearJet == 0) {
-        smearedPt = std::max(0., genPt + centralSF * (recoPt - genPt));
-    } else if (smearJet == 1) {
-        smearedPt = std::max(0., genPt + upSF * (recoPt - genPt));
-    } else if (smearJet == -1) {
-        smearedPt = std::max(0., genPt + downSF * (recoPt - genPt));
+        if (fabs(eta) < 0.5)
+            downSF = 1.095 - 0.018;
+        else if (fabs(eta) < 0.8)
+            downSF = 1.120 - 0.028;
+        else if (fabs(eta) < 1.1)
+            downSF = 1.097 - 0.017;
+        else if (fabs(eta) < 1.3)
+            downSF = 1.103 - 0.033;
+        else if (fabs(eta) < 1.7)
+            downSF = 1.118 - 0.014;
+        else if (fabs(eta) < 1.9)
+            downSF = 1.100 - 0.033;
+        else if (fabs(eta) < 2.1)
+            downSF = 1.162 - 0.044;
+        else if (fabs(eta) < 2.3)
+            downSF = 1.160 - 0.048;
+        else if (fabs(eta) < 2.5)
+            downSF = 1.161 - 0.060;
+        else if (fabs(eta) < 2.8)
+            downSF = 1.209 - 0.059;
+        else if (fabs(eta) < 3.0)
+            downSF = 1.564 - 0.321;
+        else if (fabs(eta) < 3.2)
+            downSF = 1.384 - 0.033;
+        else if (fabs(eta) < 5.0)
+            downSF = 1.216 - 0.050;
+        else
+            downSF = 1.034;
+    }
+    if (year == 2016) {
+        if (fabs(eta) < 0.5)
+            centralSF = 1.109;
+        else if (fabs(eta) < 0.8)
+            centralSF = 1.138;
+        else if (fabs(eta) < 1.1)
+            centralSF = 1.114;
+        else if (fabs(eta) < 1.3)
+            centralSF = 1.123;
+        else if (fabs(eta) < 1.7)
+            centralSF = 1.084;
+        else if (fabs(eta) < 1.9)
+            centralSF = 1.082;
+        else if (fabs(eta) < 2.1)
+            centralSF = 1.140;
+        else if (fabs(eta) < 2.3)
+            centralSF = 1.067;
+        else if (fabs(eta) < 2.5)
+            centralSF = 1.177;
+        else if (fabs(eta) < 2.8)
+            centralSF = 1.364;
+        else if (fabs(eta) < 3.0)
+            centralSF = 1.857;
+        else if (fabs(eta) < 3.2)
+            centralSF = 1.328;
+        else if (fabs(eta) < 5.0)
+            centralSF = 1.160;
+        else
+            centralSF = 1.320;
+
+        if (fabs(eta) < 0.5)
+            centralSF = 1.109 + 0.008;
+        else if (fabs(eta) < 0.8)
+            centralSF = 1.138 + 0.013;
+        else if (fabs(eta) < 1.1)
+            centralSF = 1.114 + 0.013;
+        else if (fabs(eta) < 1.3)
+            centralSF = 1.123 + 0.024;
+        else if (fabs(eta) < 1.7)
+            centralSF = 1.084 + 0.011;
+        else if (fabs(eta) < 1.9)
+            centralSF = 1.082 + 0.035;
+        else if (fabs(eta) < 2.1)
+            centralSF = 1.140 + 0.047;
+        else if (fabs(eta) < 2.3)
+            centralSF = 1.067 + 0.053;
+        else if (fabs(eta) < 2.5)
+            centralSF = 1.177 + 0.041;
+        else if (fabs(eta) < 2.8)
+            centralSF = 1.364 + 0.039;
+        else if (fabs(eta) < 3.0)
+            centralSF = 1.857 + 0.071;
+        else if (fabs(eta) < 3.2)
+            centralSF = 1.328 + 0.022;
+        else if (fabs(eta) < 5.0)
+            centralSF = 1.160 + 0.029;
+        else
+            upSF = 1.606;
+
+        if (fabs(eta) < 0.5)
+            centralSF = 1.109 - 0.008;
+        else if (fabs(eta) < 0.8)
+            centralSF = 1.138 - 0.013;
+        else if (fabs(eta) < 1.1)
+            centralSF = 1.114 - 0.013;
+        else if (fabs(eta) < 1.3)
+            centralSF = 1.123 - 0.024;
+        else if (fabs(eta) < 1.7)
+            centralSF = 1.084 - 0.011;
+        else if (fabs(eta) < 1.9)
+            centralSF = 1.082 - 0.035;
+        else if (fabs(eta) < 2.1)
+            centralSF = 1.140 - 0.047;
+        else if (fabs(eta) < 2.3)
+            centralSF = 1.067 - 0.053;
+        else if (fabs(eta) < 2.5)
+            centralSF = 1.177 - 0.041;
+        else if (fabs(eta) < 2.8)
+            centralSF = 1.364 - 0.039;
+        else if (fabs(eta) < 3.0)
+            centralSF = 1.857 - 0.071;
+        else if (fabs(eta) < 3.2)
+            centralSF = 1.328 - 0.022;
+        else if (fabs(eta) < 5.0)
+            centralSF = 1.160 - 0.029;
+        else
+            downSF = 1.034;
     }
 
+    if (direction == 0)
+        return centralSF;
+    else if (direction == 1)
+        return upSF;
+    else if (direction == -1)
+        return downSF;
+    else {
+        std::cerr
+            << "function.cc::GetJetSF: Something went wrong getting the SF for jet smearing\n";
+        abort();
+    }
+}
+
+// Helper function for SmearsJetPt
+double GetJetResolution() { return 0.10; }
+
+// Smearing when a gen jet match is found:
+double SmearJetPt(double recoPt, double genPt, double recoJetEta, int direction)
+{
+    double smearedPt = recoPt;
+    smearedPt = std::max(0.0, genPt + GetJetSF(recoJetEta, direction) * (recoPt - genPt));
+    return smearedPt;
+}
+// Smearing with stochastic method (no match found)
+double SmearJetPt(double recoPt, double recoJetEta, int direction)
+{
+    TRandom3 *random = new TRandom3();
+    double smearedPt = recoPt;
+    double smearFactor = 1 +
+                         random->Gaus(0, GetJetResolution()) *
+                             sqrt(std::max(pow(GetJetSF(recoJetEta, direction), 2) - 1.0, 0.0));
+    smearedPt = smearedPt * smearFactor;
+    // printf("SmearFactor = %F\n",smearFactor);
     return smearedPt;
 }
 
@@ -778,7 +912,7 @@ bool mergeHistFiles(const std::vector<std::string> &src, const std::string &dest
 // Check that two Root TAxis have indentical boudaries and binning:
 bool isSameBinning(const TAxis &ax1, const TAxis &ax2)
 {
-    const static bool verbose = false;
+    const static bool verbose = true;
     // check number of bins
     if (ax1.GetNbins() != ax2.GetNbins()) return false;
 

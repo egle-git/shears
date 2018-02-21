@@ -54,10 +54,11 @@ public:
 
   void SetNtoysSVD (Int_t ntoyssvd);  // no longer used
   Int_t GetNtoysSVD() const;          // no longer used
+  virtual void Unfold();
 
 protected:
   void Assign (const RooUnfoldSvd& rhs); // implementation of assignment operator
-  virtual void Unfold();
+
   virtual void GetCov();
   virtual void GetWgt();
   virtual void GetSettings();

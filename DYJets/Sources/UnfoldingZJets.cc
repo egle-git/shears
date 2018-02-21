@@ -68,6 +68,7 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
     //--- create output directory if does not exist ---
     system("mkdir -p " + unfoldDir);
 
+    bool DJALOG = cfg.getB("DJALOG", false);
     int start = 0;
     int end = NVAROFINTERESTZJETS;
 
@@ -108,6 +109,7 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
 
     //--- Now run on the different variables ---
     for (int i = start; i < end; ++i) {
+        printf("run over variable\n");
         timeval t0, t1;
         gettimeofday(&t0, 0);
 
@@ -201,6 +203,10 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
                      hFakDYJets,
                      hPurity);
 
+        printf("\n\n\n");
+        hRecData[0]->Print();
+        printf("\n\n\n");
+
         if (fAltUnf && withUnfUnc) {
             //--- Get Sherpa Unfolding response ---
             respDYJets[17] = getResp(fAltUnf.get(), variable);
@@ -257,6 +263,7 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
         TH1D *hUnfData[18] = {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         };
+        std::vector<TH1D> hUnfDataBBB;
         TH2D *hUnfDataStatCov[18] = {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         };
@@ -289,10 +296,6 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
 
             if (iSyst != 0 && whichSyst >= 0 && iSyst != whichSyst) continue;
 
-            std::cout << "\n----------------------------------------------------------------------"
-                         "\nProcessing uncertainty variation number "
-                      << iSyst << "(0: central)...\n\n";
-
             //--- only JES up and down (iSyst = 1 and 2) is applied on data ---
             unsigned short iData = (iSyst == 1 || iSyst == 2) ? iSyst : 0;
             unsigned short iBg = 0;
@@ -314,20 +317,19 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
             //		    <<  " " << hRecDataMinusFakes->GetBinError(1)
             //	    / sqrt(hRecDataMinusFakes->GetBinContent(1)) << "\n";
             //	}
-            //	std::cerr << "DEBUG: hRecData[" << iData << "]->GetEntries() = "
-            //		  << hRecDataMinusFakes->GetEntries()
-            //		  << ", nbins: " << hRecDataMinusFakes->GetNbinsX()
-            //		  <<"\n"
-            //		  << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = "
-            //		  << hRecSumBg[iData]->GetEntries()
-            //		  << ", nbins: " << hRecSumBg[iData]->GetNbinsX()
-            //		  <<"\n"
-            //		  << "DEBUG: hPurity[" << iData << "]->GetEntries() = "
-            //		  << hPurity[iData]->GetEntries()
-            //		  << ", nbins: " << hPurity[iData]->GetNbinsX()
-            //		  <<"\n"
-            //		  << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX()
-            //		  << std::endl;
+            // std::cout << "DEBUG: hRecData[" << iData << "]->GetEntries() = ";
+            // std::cout	       << hRecDataMinusFakes->GetEntries();
+            // std::cout      << ", nbins: " << hRecDataMinusFakes->GetNbinsX();
+            // std::cout     <<"\n";
+            // std::cout     << "DEBUG: hRecSumBg[" << iData << "]->GetEntries() = ";
+            // std::cout   << hRecSumBg[iData]->GetEntries();
+            // std::cout     << ", nbins: " << hRecSumBg[iData]->GetNbinsX();
+            // std::cout		       <<"\n";
+            //	     std::cout	       << "DEBUG: hPurity[" << iData << "]->GetEntries() = ";
+            // std::cout      << hPurity[iData]->GetEntries();
+            // std::cout     << ", nbins: " << hPurity[iData]->GetNbinsX();
+            // std::cout  <<"\n";
+            // std::cout    << "hRecDYJets[iData]->GetNbins() = " << hRecDYJets[iData]->GetNbinsX();
 
             hRecDataMinusFakes->Add(hRecSumBg[iBg], -1);
             //	if(hRecDataMinusFakes->GetBinContent(1) > 0){
@@ -396,6 +398,7 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
                                       hUnfData[iSyst],
                                       hUnfDataStatCov[iSyst],
                                       hUnfMCStatCov[iSyst],
+                                      hUnfDataBBB,
                                       name[iSyst],
                                       integratedLumi,
                                       unfoldDir,
@@ -406,6 +409,7 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
                                       hRecDataMinusFakesEven,
                                       fixNIterTo,
                                       outputFileName + "_niters.txt");
+
             // The number of unfolding iterations is fixed to the value used for the central value.
 
             if (iSyst == 0) {
@@ -540,16 +544,19 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
 
         int upperBin = hUnfData[0]->GetXaxis()->GetNbins() - nLastBinsToSkip;
         int lowerBin = 1 + nFirstBinsToSkip;
+
         hUnfData[0]->GetXaxis()->SetRange(lowerBin, upperBin);
+
         TCanvas *crossSectionPlot = makeCrossSectionPlot(
             lepSel, integratedLumi, variable, doNormalized, hUnfData[0], hCov[11], predictions);
+
         crossSectionPlot->Draw();
-        crossSectionPlot->SaveAs(outputFileName + ".png");
+        // crossSectionPlot->SaveAs(outputFileName + ".png");
         crossSectionPlot->SaveAs(outputFileName + ".pdf");
-        crossSectionPlot->SaveAs(outputFileName + ".eps");
-        crossSectionPlot->SaveAs(outputFileName + ".ps");
-        crossSectionPlot->SaveAs(outputFileName + ".C");
-        crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+        // crossSectionPlot->SaveAs(outputFileName + ".eps");
+        // crossSectionPlot->SaveAs(outputFileName + ".ps");
+        // crossSectionPlot->SaveAs(outputFileName + ".C");
+        // crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
 
         if (whichSyst < 0) {
             createSystPlots(outputFileName, sysPlotDir, variable, lepSel, hUnfData, logy);
@@ -612,7 +619,11 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
         TParameter<int> pNIter("nIter", nIter[0]);
         pNIter.Write();
         std::cout << "number of iterations: " << nIter[0] << "\n";
+        printf("Cross Section Plot name = %s\n", crossSectionPlot->GetName());
         crossSectionPlot->Write();
+        // for(size_t i=0;i<hUnfDataBBB.size();i+=2){
+        //    crossSectionPlotBBB[i]->Write();
+        //}
         //-----------------------------------------------------------------------------------------
 
         outputRootFile->Close();
@@ -663,8 +674,8 @@ void createSystPlots(TString outputFileName,
         hCent->SetMarkerColor(kBlack);
         hCent->SetMarkerStyle(20);
         if (variable == "ZNGoodJets_Zexc") hCent->GetXaxis()->SetRangeUser(1, 8);
-        if (variable.Index("JetPt_Zinc") >= 0)
-            hCent->GetXaxis()->SetRangeUser(30, hCent->GetXaxis()->GetXmax());
+        // DJALOGif (variable.Index("JetPt_Zinc") >= 0) hCent->GetXaxis()->SetRangeUser(30,
+        // hCent->GetXaxis()->GetXmax());
         hCent->GetXaxis()->SetLabelSize(0);
         hCent->GetYaxis()->SetTitle("d#sigma");
         hCent->GetYaxis()->SetTitleSize(0.05);
@@ -751,12 +762,12 @@ void createSystPlots(TString outputFileName,
         TString systStr = syst[i / 2];
         if (systStr == "S.F.") systStr = "SF";
         system("mkdir " + sysPlotDir);
-        c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".png");
-        c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".ps");
-        c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
+        // c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".png");
+        // c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".ps");
+        // c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".eps");
         c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".pdf");
-        c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
-        c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");
+        // c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".C");
+        // c->SaveAs(sysPlotDir + "/" + lepSel + "_" + variable + "_" + systStr + ".root");
     }
 }
 
@@ -854,12 +865,12 @@ void createInclusivePlots(bool doNormalized,
                                                      predictions);
     outputFileName.ReplaceAll("ZNGoodJets_Zexc", "ZNGoodJets_Zinc");
     crossSectionPlot->Draw();
-    crossSectionPlot->SaveAs(outputFileName + ".png");
+    // crossSectionPlot->SaveAs(outputFileName + ".png");
     crossSectionPlot->SaveAs(outputFileName + ".pdf");
-    crossSectionPlot->SaveAs(outputFileName + ".eps");
-    crossSectionPlot->SaveAs(outputFileName + ".ps");
-    crossSectionPlot->SaveAs(outputFileName + ".C");
-    crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
+    // crossSectionPlot->SaveAs(outputFileName + ".eps");
+    // crossSectionPlot->SaveAs(outputFileName + ".ps");
+    // crossSectionPlot->SaveAs(outputFileName + ".C");
+    // crossSectionPlot->SaveAs(outputFileName + "_canvas.root");
     createTable(outputFileName + "_withLERS",
                 lepSel,
                 TString("ZNGoodJets_Zinc"),
@@ -879,6 +890,7 @@ int UnfoldData(const SectionedConfig &unfCfg,
                TH1D *&hUnfData,
                TH2D *&hUnfDataStatCov,
                TH2D *&hUnfMCStatCov,
+               std::vector<TH1D> &hUnfDataBBB,
                TString name,
                double integratedLumi,
                const TString &unfoldDir,
@@ -940,7 +952,7 @@ int UnfoldData(const SectionedConfig &unfCfg,
         (TH2D *)resp->Hresponse()->Clone(TString::Format("hResp%s%s", variable, name.Data()));
     hresp->Write();
     //    std::cout << "Response matrix dimensions: " << resp->Mresponse().GetNrows()
-    //	      << "x" << resp->Mresponse().GetNcols() << "\n";
+    //		  << "x" << resp->Mresponse().GetNcols() << "\n";
     TDecompSVD svd(resp->Mresponse());
     svd.Decompose();
     double matrixCond = svd.Condition();
@@ -1131,6 +1143,11 @@ int UnfoldData(const SectionedConfig &unfCfg,
         // unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior,
         // hUnfs.get());
 
+        unfoldWithErr(
+            alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior, hUnfs.get(), &covs, 2);
+        // unfoldWithErr(alg, respBis, hRecDataMinusFakesBis, nTestIterMax, smoothPrior,
+        // hUnfs.get());
+
         TH1 *hResMax = new TH1D(
             "hResMax",
             TString::Format("Reco Max(#chi^{2}_{ibin}) for %s;Iter;max(#chi^{2}_{ibin})", variable),
@@ -1243,7 +1260,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
             if (nIterResMax < 0 && maxRes < resMaxThr) nIterResMax = i;
         }
         hResMax->Write();
-
         TH1D *hgen = (TH1D *)respBis->Htruth();
         TString tmpName = "mcGen" + name;
         hgen->SetName(tmpName);
@@ -1266,7 +1282,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
         hRecDataMinusFakes->Write("hBkgSubData");
 
         if (hRecDataMinusFakesOdd && hRecDataMinusFakesEven) {
-
             // hchi2Xval = (TH1D*) hchi2->Clone("hchi2Xval");
             // hchi2Xval->Reset();
 
@@ -1277,8 +1292,8 @@ int UnfoldData(const SectionedConfig &unfCfg,
             std::auto_ptr<std::vector<TH1 *>> hUnfs2(new std::vector<TH1 *>);
 
             // Unfolds the data:
-            //	    unfoldWithErr(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax,
-            //smoothPrior, hUnfs2.get(), &covs, 2);
+            //    unfoldWithErr(alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax, smoothPrior,
+            //    hUnfs2.get(), &covs, 2);
             unfoldWithErr(
                 alg, respBis2, hRecDataMinusFakesBisOdd, nTestIterMax, smoothPrior, hUnfs2.get());
 
@@ -1333,7 +1348,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
                     nIterXvalMin = i;
                     chi2XvalMin = mychi2;
                 }
-
                 double maxRes = -1.;
                 for (int j = nFirstBinsToSkip; j < nRes - nLastBinsToSkip; ++j) {
                     double x = pow(resXval[j], 2);
@@ -1377,7 +1391,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
         std::vector<double> rmsII(nTestIterMax + 1, 0);
         std::vector<TH1 *> hChi2IIs(nTestIterMax + 1);
         std::vector<double> chi2ToyII(nTestIterMax + 1, 0);
-
         for (int i = 0; i < nTestIterMax + 1; ++i) {
             hChi2s[i] = new TH1D(TString::Format("hChi2_%d", i),
                                  TString::Format("#chi2/ndf distribution for %d iteration", i),
@@ -1398,7 +1411,7 @@ int UnfoldData(const SectionedConfig &unfCfg,
                     hRecDataMinusFakes->GetXaxis()->GetBinLowEdge(1),
                     hRecDataMinusFakes->GetXaxis()->GetBinUpEdge(hRecDataMinusFakes->GetNbinsX()));
             }
-            //	    hResToysII[i] = (TProfile*) hResToys[i]->Clone(n+"II");
+            //    hResToysII[i] = (TProfile*) hResToys[i]->Clone(n+"II");
             n += "II";
             if (bins) {
                 hResToysII[i] =
@@ -1471,7 +1484,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
                 nIterResMaxToyCmp = iter;
             }
         }
-
         for (int iter = 1; iter <= nTestIterMax; ++iter) {
             double bias = 0;
             double ebias = 0;
@@ -1560,7 +1572,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
                          "iterations.\n";
             nIterToy = nIterToyMin;
         }
-
         if (nIterToyII < 0) {
             std::cout << "Chi2/ndf of Toy II is always larger than 1. Using minimum as number of "
                          "iterations\n";
@@ -1643,7 +1654,6 @@ int UnfoldData(const SectionedConfig &unfCfg,
                    << nIterResMax << "\t" << nIterResMaxXval << "\t" << nIterResMaxToy << "\t"
                    << nIterResMaxToyCmp << "\t" << nIterResMaxToyII << "\t" << chosenIter << "\n";
         }
-
         int chi2Ylog = cfg.getUnf(lepSel, variable, "unfChi2LogScale", 0);
 
         makeChi2Plot(hchi2,
@@ -1855,19 +1865,62 @@ int UnfoldData(const SectionedConfig &unfCfg,
     } // end of test of number of iterations
 
     if (binByBin_unfold) {
-        std::unique_ptr<RooUnfold> RObjectForDataBinByBin(
-            RooUnfold::New(RooUnfold::kBinByBin, resp, hRecDataMinusFakes));
-        RObjectForDataBinByBin->SetVerbose(verbosity);
-        TH1D *hUnfDataBinByBin = (TH1D *)RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+        TH1D *hUnfDataBinByBin = 0;
+        RooUnfoldBinByBin *RObjectForDataBinByBin = 0;
+        RObjectForDataBinByBin = new RooUnfoldBinByBin(resp, hRecDataMinusFakes);
+        RObjectForDataBinByBin->RooUnfoldBinByBin::Unfold();
+        hUnfDataBinByBin = (TH1D *)RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+        // std::unique_ptr<RooUnfold> RObjectForDataBinByBin(RooUnfold::New(RooUnfold::kBinByBin,
+        //								 resp, hRecDataMinusFakes));
+        // RObjectForDataBinByBin->SetVerbose(verbosity);
+        // TH1D *hUnfDataBinByBin = (TH1D*) RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
         hUnfDataBinByBin->SetName("UnfDataBinByBin" + name);
         hUnfDataBinByBin->Write();
+
+        /*
+        TH1D *hFoldedDataBinByBin = 0;
+        RooUnfoldBinByBin* RObjectForDataBinByBin = 0;
+        TH1D * tmpHisto = 0;
+        printf("Starting Bin by Bin, creating roounfold object\n");
+        for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
+        //for(int iCycle = 0;iCycle<NCYCLES;iCycle++){
+            printf("Cycle = %d\n",iCycle);
+            if(iCycle == 0)
+                RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hRecDataMinusFakes);
+            else
+                RObjectForDataBinByBin = new RooUnfoldBinByBin(resp,hFoldedDataBinByBin);
+            //RObjectForDataBinByBin->SetVerbose(verbosity);
+            RObjectForDataBinByBin->RooUnfoldBinByBin::Unfold();
+            tmpHisto = (TH1D*)RObjectForDataBinByBin->Hreco(RooUnfold::kCovariance);
+            hUnfDataBBB.push_back(*(TH1D*)tmpHisto->Clone());
+            hFoldedDataBinByBin = foldUnfData(&hUnfDataBBB[iCycle],0,resp);
+
+            char cycleChar[10];
+            sprintf(cycleChar, "%d",iCycle);
+            TString cycleString = string(cycleChar);
+            hUnfDataBBB[iCycle].SetName("UnfDataBinByBin_Cycle_"+cycleString+"_"+ name);
+            hUnfDataBBB[iCycle].SetTitle("Data Truth Bin By Bin Cycle "+cycleString);
+            hUnfDataBBB[iCycle].Scale(1./integratedLumi);
+
+            int nBins = hUnfDataBBB[iCycle].GetNbinsX();
+            for (int i = 1; i <= nBins; ++i) {
+                double binWidth = hUnfDataBBB[iCycle].GetBinWidth(i);
+                hUnfDataBBB[iCycle].SetBinContent(i,hUnfDataBBB[iCycle].GetBinContent(i)*1./binWidth);
+                hUnfDataBBB[iCycle].SetBinError(i,hUnfDataBBB[iCycle].GetBinError(i)*1./binWidth);
+            }
+            if((iCycle%2)==0){
+                hUnfDataBBB[iCycle].Write();
+            }
+        }
+        */
     }
 
     if (svd_unfold) {
+        printf("Running SVD Unfold\n");
         for (int iter(1); iter <= nTestIterMax; iter++) {
-            std::unique_ptr<RooUnfold> RObjectForDataSVD(
-                RooUnfold::New(RooUnfold::kSVD, resp, hRecDataMinusFakes, iter));
+            RooUnfoldSvd *RObjectForDataSVD = new RooUnfoldSvd(resp, hRecDataMinusFakes, iter);
             RObjectForDataSVD->SetVerbose(verbosity);
+            RObjectForDataSVD->RooUnfoldSvd::Unfold();
             TH1D *hUnfDataSVD = (TH1D *)RObjectForDataSVD->Hreco(RooUnfold::kCovariance);
             hUnfDataSVD->SetName("UnfDataSVD_" + TString::Format("%d", iter) + "_" + name);
             hUnfDataSVD->Write();
@@ -2321,6 +2374,7 @@ TH1 *unfold(RooUnfold::Algorithm algo,
             std::vector<TH1 *> *hUnfs,
             int uncMode)
 {
+    // printf(" unfold() \n");
     std::unique_ptr<RooUnfold> rooUnfold(RooUnfold::New(algo, resp, hRecDataMinusFakes, niters));
     if (algo == RooUnfold::kBayes) ((RooUnfoldBayes *)rooUnfold.get())->SetSmoothing(smoothPrior);
     bool verbosity = cfg.getB("unfoldingVerbosity");
@@ -2343,6 +2397,7 @@ TH1 *unfoldWithErr(RooUnfold::Algorithm algo,
                    std::vector<TMatrixD> *cov,
                    int uncMode)
 {
+    printf(" unfoldWithErr() \n");
     bool verbosity = cfg.getB("unfoldingVerbosity");
     bool useFlatPrior = cfg.getB("useFlatPrior");
     if (hUnfs) {

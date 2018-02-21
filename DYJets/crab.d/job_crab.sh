@@ -37,7 +37,6 @@ die(){
     exit 1
 }
 
-
 date;
 t1=`date +%s`
 
@@ -81,9 +80,9 @@ while [ $# -gt 0 ]; do
     [ $? = 0 ] && eval "$1"
     shift
 done
-
-echo "cfg=$cfg"
-echo "maxEvents=$maxEvents"
+cfg=vjets.cfg
+echo "cfg=$cfg" >> analysis.log
+echo "maxEvents=$maxEvents" >> analysis.log
 [ -n "$cfg" ] || die "Parameter cfg was not found!"
 
 unset maxEventsOpt
@@ -91,7 +90,7 @@ unset maxEventsOpt
 
 [ -n "$NJob" ] || die "Missing job ID"
 
-echo "Job id: $NJob"
+echo "Job id: $NJob" >> analysis.log
 
 #note: when using --dryrun option of crab submit, the job is run twice in the same directory, we therefore
 #need to look for libRooUnfold.so both in local directory and RooUnfold one, where it is moved to by this
@@ -102,23 +101,21 @@ mkdir RooUnfold
 mv libRooUnfold.so RooUnfold/
 mv RooUnfoldDict_rdict.pcm RooUnfold/
 
-tar xzf EfficiencyTables.tgz
-tar xzf rcdata.2016.v3.tgz
+echo "Doing the tar now" >> analysis.log
+tar -xzf EfficiencyTables.tgz
 
 #%lep% keyword in the is used to provide to configurations, on for DMu and one for DE
 echo "$cfg" | grep -q lepSel  && lepSels="DMu" || lepSels="dummy"
 
-nRuns=20
-#if [ $NJob -gt $nRuns ]; then
-#    iRun=$((NJob-nRuns))
-#    lepSel=DE
-#else
+#echo "nRuns=$nRuns before">> analysis.log
 iRun=$NJob
 lepSel=DMu
 #fi
 
 export VJETS_CONFIG="`echo "$cfg" | sed "s/lepSel/${lepSel}/"`"
-echo "Running with configuraion file $VJETS_CONFIG..."
+echo "Running with configuraion file $VJETS_CONFIG..." >> analysis.log
+
+echo "iRun = $iRun" >> analysis.log
     
 case "$iRun" in
     1)  ./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 nJobs=15 jobNum=1 ;;
@@ -148,12 +145,16 @@ case "$iRun" in
 #     17) ./runZJets_newformat $maxEventsOpt doWhat=MG_MLM whichSyst=0;;
 esac
 
+#./runZJets_newformat $maxEventsOpt doWhat=DATA whichSyst=0 &>> analysis.log
+#./runZJets_newformat $maxEventsOpt doWhat=DYJETS whichSyst=0 &>> analysis.log
+#./runZJets_newformat $maxEventsOpt doWhat=BACKGROUND whichSyst=0 &>> analysis.log
+
 tar czf HistoFiles.tgz HistoFiles*
 
-echo "List of files:"
-ls
+echo "List of files:" >> analysis.log
+ls -la >> analysis.log
 
 date 
 t2=`date +%s`
-echo "Duration:  $(((t2*10-t1*10+300)/600)) mn"
+echo "Duration:  $(((t2*10-t1*10+300)/600)) mn" >> analysis.log
 

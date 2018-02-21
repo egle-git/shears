@@ -6,6 +6,8 @@ runRecoComparison
 runFinalUnfold
 runUnfoldingZJets
 runCombination
+runHiggs
+testDecompVar
 dispatcher
 runMakeStatisticsTable
 DYJets/Sources/plotRespMatrix

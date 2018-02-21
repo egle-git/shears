@@ -4,8 +4,6 @@
 #include <TString.h>
 #include <iostream>
 
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     //--- Loads configuration -----------------------------------------------------

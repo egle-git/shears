@@ -2,8 +2,6 @@
 #include "ConfigVJets.h"
 #include "PlotSettings.h"
 
-ConfigVJets cfg;
-
 int main(int argc, char **argv)
 {
     TString variable("");

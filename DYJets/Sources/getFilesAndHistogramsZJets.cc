@@ -14,8 +14,6 @@
 #include <sstream>
 using namespace std;
 
-extern ConfigVJets cfg;
-
 //------------------------------------------------------------
 // getEnergy() returns a TString, either "7TeV" or "8TeV"
 // according to the name of the directory from which the

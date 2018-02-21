@@ -1,11 +1,12 @@
 #include <algorithm>
 #include <iostream>
 
+#include <TChain.h>
+#include <TH1D.h>
 #include <TLorentzVector.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
-#include "ZJets_newformat.h"
 #include "catalog.h"
 #include "timer.h"
 

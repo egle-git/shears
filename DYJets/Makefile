@@ -78,7 +78,8 @@ SRCLIST = $(addprefix $(SRCDIR), $(SOURCES))
 OBJLIST = $(SRCLIST:.cc=.o)
 MAINLIST = runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d \
 	Sources/testDecompVar.d Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d \
-	testSectionConfig.d
+	testSectionConfig.d \
+	runHiggs.d
 MAINDEPS = $(addprefix $(MAINDIR), $(MAINLIST))
 DEPS    = $(SRCLIST:.cc=.d)
 DEPS    += $(MAINDEPS)
@@ -155,7 +156,7 @@ clean:
 	$(MAKE) -C RooUnfold clean
 
 clean-dep:
-	rm -f *.d Sources/*.d
+	rm -f *.d Sources/*.d Main/*.d
 	$(MAKE) -C RooUnfold clean
 
 echo_%:

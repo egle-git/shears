@@ -8,8 +8,6 @@
 #include <iostream>
 #include <thread>
 
-//--- Load configuration ---
-ConfigVJets cfg;
 // const processInfoStruct Samples[] - defined in Includes/fileNameZJets.h
 
 int main(int argc, char **argv)

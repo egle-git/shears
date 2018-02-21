@@ -4896,10 +4896,6 @@ int ZJets::Loop(bool hasRecoInfo,
                     fill(VisPt_Zinc3jetQun_Even,
                          fabs((hadronicR + EWKBoson).Pt()),
                          weight * RatioValue2);
-                else
-                    fill(VisPt_Zinc3jetQun_Even,
-                         fabs((jets[0].v + jets[1].v + jets[2].v + EWKBoson).Pt()),
-                         weight * RatioValue2);
 
                 /// Azimuth cross check
                 fill(DPhiZFirstJet_Zinc3jet, fabs(EWKBoson.DeltaPhi(jets[0].v)), weight);

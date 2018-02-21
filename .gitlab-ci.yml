@@ -5,8 +5,6 @@ stages:
   - runHzz
   - comparisons
   - harvesting
-#before_script:
-#  - .gitlab-ci/setup_cmssw.sh
 
 baobabs:
   stage: buildCMSSW
@@ -52,10 +50,9 @@ DYJets doxygen:
   tags: [ cvmfs ]
   allow_failure: true
   script:
-    - . .gitlab-ci/setup_cmssw.sh
+    - eval $(.gitlab-ci/cmsenv.sh)
     - cd DYJets
     - doxygen
-    - rm doc/html/installdox # Prohibited by server
     - tar -czf doc.tar.gz doc
     - ../.gitlab-ci/upload-tarball.sh doc doc.tar.gz
 

@@ -40,6 +40,13 @@ hzz2l2nu:
     - HZZ2l2nu/runHZZanalysis
     expire_in: 60 minutes
 
+DYJets:
+  stage: build
+  tags: [ cvmfs ]
+  script:
+    - yum -q -y install boost-devel
+    - .gitlab-ci/compile.sh DYJets
+
 DYJets doxygen:
   stage: lint
   tags: [ cvmfs ]

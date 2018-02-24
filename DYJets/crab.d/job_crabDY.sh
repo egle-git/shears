@@ -1,5 +1,6 @@
 #!/bin/bash
-#set -x
+set -x
+set -e
 
 mybasename="`basename "$0"`"
 myfullpath="`readlink -f "$0"`"

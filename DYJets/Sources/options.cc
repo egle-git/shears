@@ -104,12 +104,11 @@ void options::process_easter_egg()
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
             if (fraction_remaining < 1e-3 && messages_shown == 0) {
-                logging::warn << "Oxygen level dropping dangerously." << ansi::clear_line()
-                              << std::endl;
+                logging::warn << "Oxygen level dropping dangerously." << std::endl;
                 messages_shown++;
             } else if (fraction_remaining < 1e-6 && messages_shown == 1) {
                 logging::warn << "Fatal oxygen level reached. Hope your mask is working."
-                              << ansi::clear_line() << std::endl;
+                              << std::endl;
                 messages_shown++;
             }
         }

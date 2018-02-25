@@ -131,15 +131,13 @@ template <class Analyzer, class... Args> void job::run(Args... args)
                     ana();
                 } catch (std::logic_error e) {
                     had_exception = true;
-                    error << "Caught exception while processing events: " << e.what()
-                          << ansi::clear_line() << std::endl;
+                    error << "Caught exception while processing events: " << e.what() << std::endl;
                     if (_fatal_exceptions) {
                         throw;
                     }
                 } catch (std::runtime_error e) {
                     had_exception = true;
-                    error << "Caught exception while processing events: " << e.what()
-                          << ansi::clear_line() << std::endl;
+                    error << "Caught exception while processing events: " << e.what() << std::endl;
                     if (_fatal_exceptions) {
                         throw;
                     }

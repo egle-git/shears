@@ -24,12 +24,14 @@
 namespace logging
 {
 
+/// \cond
 // Set streams to non-null sinks in case the user doesn't call init()
 stream debug(boost::ref(std::cerr));
 stream info(boost::ref(std::cerr));
 stream warn(boost::ref(std::cerr));
 stream error(boost::ref(std::cerr));
 stream fatal(boost::ref(std::cerr));
+/// \endcond
 
 namespace /* anonymous */
 {

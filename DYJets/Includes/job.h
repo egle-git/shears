@@ -129,13 +129,7 @@ template <class Analyzer, class... Args> void job::run(Args... args)
                 time.next();
                 try {
                     ana();
-                } catch (std::logic_error e) {
-                    had_exception = true;
-                    error << "Caught exception while processing events: " << e.what() << std::endl;
-                    if (_fatal_exceptions) {
-                        throw;
-                    }
-                } catch (std::runtime_error e) {
+                } catch (std::exception &e) {
                     had_exception = true;
                     error << "Caught exception while processing events: " << e.what() << std::endl;
                     if (_fatal_exceptions) {

@@ -81,7 +81,6 @@ settings &settings::operator<<(const YAML::Node &node)
         try {
             override_root_handler = node["override root handler"].as<bool>();
         } catch (...) {
-
             error << "Invalid bool: " << node["override root handler"].as<std::string>()
                   << std::endl;
             std::exit(EXIT_FAILURE);

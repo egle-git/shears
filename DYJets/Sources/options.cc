@@ -138,3 +138,25 @@ void options::default_init(int argc,
     setup_logging();
     process_easter_egg();
 }
+
+namespace util
+{
+
+template <> std::string name_for<po::variables_map>(const std::string &name)
+{
+    std::string res = name;
+    boost::replace_all(res, " ", "-");
+    return res;
+}
+
+template <> bool is_present<YAML::Node>(const std::string &name, const YAML::Node &node)
+{
+    return node[name];
+}
+
+template <>
+bool is_present<po::variables_map>(const std::string &name, const po::variables_map &varmap)
+{
+    return varmap.count(name) > 0;
+}
+}

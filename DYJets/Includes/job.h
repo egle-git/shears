@@ -15,6 +15,7 @@
 #include "catalog.h"
 #include "chains.h"
 #include "logging.h"
+#include "options.h"
 #include "timer.h"
 
 namespace po = boost::program_options;
@@ -33,21 +34,6 @@ namespace po = boost::program_options;
  */
 class job
 {
-  public:
-    struct settings
-    {
-        settings &operator<<(const YAML::Node &node);
-        settings &operator<<(const po::variables_map &varmap);
-
-        int job_id = 0;
-        int job_count = 1;
-        int max_files = std::numeric_limits<int>::max();
-        long long max_events = std::numeric_limits<long long>::max();
-
-      private:
-        template <class Container> void set_common_options(const Container &);
-    };
-
   private:
     int _job_id = 0;
     int _job_count = 1;
@@ -60,7 +46,7 @@ class job
 
   public:
     /// \brief Constructs a job to run on files from the given catalog.
-    explicit job(const catalog &input, const settings &s);
+    explicit job(const catalog &input);
 
     /// \brief Retrieves the list of files that will be processed.
     std::vector<std::string> files() const { return _files; }
@@ -90,7 +76,14 @@ class job
      */
     template <class Analyzer, class... Args> inline void run(Args... args);
 
+    void configure(const options &opt);
+
     static po::options_description options();
+
+  private:
+    void configure(const YAML::Node &node);
+    void configure(const po::variables_map &varmap);
+    template <class Container> void configure_common(const Container &);
 };
 
 template <class Analyzer, class... Args> void job::run(Args... args)

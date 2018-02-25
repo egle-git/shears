@@ -240,30 +240,69 @@ stream_settings error_settings(error, level::error);
 stream_settings fatal_settings(fatal, level::fatal);
 }
 
+void set_use_color(bool color)
+{
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->color = color;
+        s->update();
+    }
+}
+
+void override_root_handler() {
+    SetErrorHandler(root_error_handler);
+}
+
+void set_primary_stream(std::ostream &stream)
+{
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->primary_ostream = &stream;
+        s->update();
+    }
+}
+
+void set_primary_level(level l)
+{
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->primary_level = l;
+        s->update();
+    }
+}
+
+void set_secondary_stream(std::ostream &stream)
+{
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->secondary_ostream = &stream;
+        s->update();
+    }
+}
+
+void set_secondary_level(level l)
+{
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->secondary_level = l;
+        s->update();
+    }
+}
+
 void init(const struct settings &settings)
 {
     bool color = (settings.color == color_mode::enabled);
     if (settings.color == color_mode::autodetect) {
         color = isatty(fileno(stderr));
     }
+    set_use_color(color);
+
+    if (settings.override_root_handler) {
+        override_root_handler();
+    }
+
+    set_primary_level(settings.screen_level);
+    set_secondary_level(settings.log_file_level);
 
     // Create file output streams
     if (!settings.log_file.empty()) {
         fileout = new std::ofstream(settings.log_file);
-    }
-
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
-        s->color = color;
-        s->primary_ostream = &std::cerr;
-        s->primary_level = settings.screen_level;
-        s->secondary_level = settings.log_file_level;
-        s->secondary_ostream = fileout;
-        s->update();
-    }
-
-    // Override ROOT error settings
-    if (settings.override_root_handler) {
-        SetErrorHandler(root_error_handler);
+        set_secondary_stream(*fileout);
     }
 }
 

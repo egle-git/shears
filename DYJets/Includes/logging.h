@@ -1,6 +1,8 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
+#include <iostream>
+
 #include <boost/iostreams/filtering_stream.hpp>
 
 /// \cond
@@ -38,6 +40,15 @@ struct settings
 
     level screen_level = level::info;
 };
+
+void set_use_color(bool color);
+void override_root_handler();
+
+void set_primary_stream(std::ostream &stream = std::cerr);
+void set_primary_level(level l);
+
+void set_secondary_stream(std::ostream &stream = std::cerr);
+void set_secondary_level(level l);
 
 void init(const struct settings &settings);
 }

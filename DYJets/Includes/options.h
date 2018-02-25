@@ -14,35 +14,79 @@
 
 namespace po = boost::program_options;
 
+/**
+ * \brief Class to handle program options and startup.
+ *
+ * Starting up a program is as simple as:
+ *
+ * ~~~{.cc}
+ * try {
+ *     options opt;
+ *     opt.default_init(argc, argv, "config.yml", {});
+ * } catch (std::exception &e) {
+ *     logging::fatal << e.what() << std::endl;
+ *     return EXIT_FAILURE;
+ * }
+ * ~~~
+ *
+ * The lines above will parse the command line and the config file, handling common options such as
+ * \c --help. Most errors are reported as exceptions.
+ */
 class options
 {
     std::string _prog_name;
     po::options_description _all;
-
-  public:
-    YAML::Node config;
     std::string _config_file;
 
+  public:
+    /// \brief The parsed contents of the configuration file.
+    YAML::Node config;
+
+    /// \brief The parsed contents of the command line.
     po::variables_map map;
 
+    /// \brief Destructor.
     virtual ~options() = default;
 
+    /**
+     * \brief Add default options \c --help, \c --verbose. and \c --config to the list of command
+     *        line options.
+     */
     void add_defaults(const std::string &default_config_file);
 
+    /// \brief Prints usage information.
     void print_usage();
+
+    /// \brief Parses the command line.
     void parse_command_line(int argc, char **argv);
 
+    /// \brief Processes the \c --help options.
     void process_help();
+
+    /// \brief Processes the \c --config options.
     void process_config();
 
+    /// \brief Sets up the \ref logging module according to the config file and \c --verbose.
     void setup_logging();
 
+    /**
+     * \brief Default init sequence.
+     *
+     * \param argc The number of arguments from the command line.
+     * \param argv The arguments from the command line.
+     * \param default_config_file The name of the default config file.
+     * \param groups Additionnal command line option groups.
+     */
     void default_init(int argc,
                       char **argv,
                       const std::string &default_config_file,
                       const std::initializer_list<po::options_description> &groups);
 
+    /// \brief Retrieves the name of the config file that was used.
+    std::string config_file() const { return _config_file; }
+
   private:
+    /// \brief \c --make-paper
     void process_easter_egg();
 };
 

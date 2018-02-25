@@ -27,7 +27,10 @@ namespace po = boost::program_options;
 namespace /* anonymous */
 {
 
-template <class Container> std::string name_for(const std::string &name) { return name; }
+template <class Container> std::string name_for(const std::string &name)
+{
+    return name;
+}
 
 template <> std::string name_for<po::variables_map>(const std::string &name)
 {
@@ -40,7 +43,7 @@ template <class Container> bool is_present(const std::string &name, const Contai
 
 template <> bool is_present<YAML::Node>(const std::string &name, const YAML::Node &node)
 {
-    return node[name].IsScalar();
+    return node[name];
 }
 
 template <>
@@ -96,7 +99,8 @@ job::settings &job::settings::operator<<(const po::variables_map &varmap)
     return *this;
 }
 
-template <class Container> void job::settings::set_common_options(const Container &container)
+template<class Container>
+void job::settings::set_common_options(const Container &container)
 {
     set_value_safe("max files", container, max_files, "maximum number of files");
     if (max_files < 0) {

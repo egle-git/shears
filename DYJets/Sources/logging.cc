@@ -54,7 +54,7 @@ level str_to_level(const std::string &str)
 
 settings &settings::operator<<(const YAML::Node &node)
 {
-    if (node["color"].IsScalar()) {
+    if (node["color"]) {
         try {
             bool enabled = node["color"].as<bool>();
             color = enabled ? color_mode::enabled : color_mode::disabled;
@@ -68,16 +68,16 @@ settings &settings::operator<<(const YAML::Node &node)
             }
         }
     }
-    if (node["log level"].IsScalar()) {
+    if (node["log level"]) {
         screen_level = str_to_level(node["log level"].as<std::string>());
     }
-    if (node["log file"].IsScalar()) {
+    if (node["log file"]) {
         log_file = node["log file level"].as<std::string>();
     }
-    if (node["log file level"].IsScalar()) {
+    if (node["log file level"]) {
         log_file_level = str_to_level(node["log file level"].as<std::string>());
     }
-    if (node["override root handler"].IsScalar()) {
+    if (node["override root handler"]) {
         try {
             override_root_handler = node["override root handler"].as<bool>();
         } catch (...) {

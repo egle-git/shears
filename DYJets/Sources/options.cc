@@ -63,7 +63,7 @@ void options::setup_logging()
         logging::debug << "Debug messages are enabled." << std::endl;
     }
     if (map.count("verbose") > 0) {
-        logging::debug << "Using configuration file: " << config_file << std::endl;
+        logging::debug << "Using configuration file: " << _config_file << std::endl;
     }
 }
 
@@ -159,4 +159,5 @@ bool is_present<po::variables_map>(const std::string &name, const po::variables_
 {
     return varmap.count(name) > 0;
 }
+
 }

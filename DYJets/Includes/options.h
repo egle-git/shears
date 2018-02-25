@@ -21,7 +21,7 @@ class options
 
   public:
     YAML::Node config;
-    std::string config_file;
+    std::string _config_file;
 
     po::variables_map map;
 

@@ -4,10 +4,7 @@
 #include <string>
 #include <vector>
 
-job::job(const catalog &input) :
-    _interactive(isatty(fileno(stdin)) || isatty(fileno(stdout)) || isatty(fileno(stderr)))
-{
-}
+job::job(const catalog &input) : _files(input.files()) {}
 
 std::vector<std::string> job::files() const
 {

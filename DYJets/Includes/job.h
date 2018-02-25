@@ -40,7 +40,6 @@ class job
     int _max_files = std::numeric_limits<int>::max();
     long long _max_events = std::numeric_limits<long long>::max();
     bool _fatal_exceptions = false;
-    bool _interactive = false;
 
     std::vector<std::string> _files;
 

@@ -7,6 +7,9 @@
 
 class TChain;
 
+namespace util
+{
+
 class chains
 {
     std::shared_ptr<TChain> _events;
@@ -32,5 +35,6 @@ class chains
     /// \brief Returns true if the bonzai header was found.
     bool isbonzai() const { return _bonzai_header != nullptr; }
 };
+} // namespace util
 
 #endif // CHAINS_H

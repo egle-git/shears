@@ -9,6 +9,9 @@
 #include "logging.h"
 #include "timer.h"
 
+namespace util
+{
+
 void options::add_defaults(const std::string &default_config_file)
 {
     po::options_description general = po::options_description("General options");
@@ -139,9 +142,6 @@ void options::default_init(int argc,
     process_easter_egg();
 }
 
-namespace util
-{
-
 template <> std::string name_for<po::variables_map>(const std::string &name)
 {
     std::string res = name;
@@ -160,4 +160,4 @@ bool is_present<po::variables_map>(const std::string &name, const po::variables_
     return varmap.count(name) > 0;
 }
 
-}
+} // namespace util

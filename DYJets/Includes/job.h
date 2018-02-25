@@ -20,6 +20,9 @@
 
 namespace po = boost::program_options;
 
+namespace util
+{
+
 /**
  * \brief The core class to run analysis codes.
  *
@@ -149,5 +152,6 @@ template <class Analyzer, class... Args> void job::run(Args... args)
         ana.write();
     }
 }
+} // namespace util
 
 #endif // JOB_H

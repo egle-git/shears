@@ -15,6 +15,14 @@
 namespace po = boost::program_options;
 
 /**
+ * \brief Generally useful classes and functions.
+ *
+ * This namespace is meant to group utilities that have little physics interest.
+ */
+namespace util
+{
+
+/**
  * \brief Class to handle program options and startup.
  *
  * Starting up a program is as simple as:
@@ -91,14 +99,6 @@ class options
 };
 
 /**
- * \brief Generally useful classes and functions.
- *
- * This namespace is meant to group utilities that have little physics interest.
- */
-namespace util
-{
-
-/**
  * \brief Transforms the name to match the convention for the given container.
  *
  * The default implementation returns its argument unchanged.
@@ -169,6 +169,6 @@ void set_value_safe(const Container &container,
 {
     set_value_safe(container, target, name, descr, [](Type) { return true; });
 }
-}
+} // namespace util
 
 #endif // OPTIONS_H

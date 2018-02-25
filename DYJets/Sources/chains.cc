@@ -7,6 +7,9 @@
 
 #include "logging.h"
 
+namespace util
+{
+
 chains::chains(const std::vector<std::string> &files)
     : _events(std::make_shared<TChain>()), _bit_fields(std::make_shared<TChain>())
 {
@@ -43,3 +46,4 @@ chains::chains(const std::vector<std::string> &files)
         _bit_fields->Add(bonzaiBitFieldsPath.c_str());
     }
 }
+} // namespace util

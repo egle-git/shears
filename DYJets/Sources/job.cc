@@ -4,7 +4,11 @@
 #include <string>
 #include <vector>
 
-job::job(const catalog &input) : _files(input.files()) {}
+namespace util
+{
+
+job::job(const catalog &input) : _files(input.files())
+{}
 
 std::vector<std::string> job::files() const
 {
@@ -62,3 +66,4 @@ po::options_description job::options()
         "job-count", po::value<int>()->default_value(1), "Number of jobs (useful when running on batch)");
     return options;
 }
+} // namespace util

@@ -263,8 +263,18 @@ void init(const struct settings &settings)
 
 void close()
 {
+    debug.reset();
+    debug.push(boost::ref(std::cerr));
+    info.reset();
+    info.push(boost::ref(std::cerr));
+    warn.reset();
+    warn.push(boost::ref(std::cerr));
+    error.reset();
+    error.push(boost::ref(std::cerr));
+    fatal.reset();
+    fatal.push(boost::ref(std::cerr));
     if (fileout != nullptr) {
-        fileout->close();
+        delete fileout;
         fileout = nullptr;
     }
 }

@@ -132,11 +132,8 @@ std::string level_string(level l)
     return "";
 }
 
-void push_chain(stream &log_stream,
-                level stream_level,
-                level min_level,
-                bool color,
-                std::ostream &out)
+void push_chain(
+    stream &log_stream, level stream_level, level min_level, bool color, std::ostream &out)
 {
     if (stream_level >= min_level) {
         log_stream.push(logging_filter(level_string(stream_level), color));
@@ -227,19 +224,19 @@ stream_settings fatal_settings(fatal, level::fatal);
 
 void set_use_color(bool color)
 {
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->color = color;
         s->update();
     }
 }
 
-void override_root_handler() {
-    SetErrorHandler(root_error_handler);
-}
+void override_root_handler() { SetErrorHandler(root_error_handler); }
 
 void set_primary_stream(std::ostream &stream)
 {
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->primary_ostream = &stream;
         s->update();
     }
@@ -247,7 +244,8 @@ void set_primary_stream(std::ostream &stream)
 
 void set_primary_level(level l)
 {
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->primary_level = l;
         s->update();
     }
@@ -255,7 +253,8 @@ void set_primary_level(level l)
 
 void set_secondary_stream(std::ostream &stream)
 {
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->secondary_ostream = &stream;
         s->update();
     }
@@ -263,7 +262,8 @@ void set_secondary_stream(std::ostream &stream)
 
 void set_secondary_level(level l)
 {
-    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->secondary_level = l;
         s->update();
     }

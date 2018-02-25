@@ -11,6 +11,8 @@
 #include "functions.h"
 #include "logging.h"
 
+namespace logging = util::logging;
+
 catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std::size_t maxFiles)
     : _event_chain(std::make_shared<TChain>()),
       _bonzai_header_chain(std::make_shared<TChain>()),

@@ -118,7 +118,7 @@ void set_primary_level(level l);
  *
  * \see \ref set_secondary_level
  */
-void set_secondary_stream(std::ostream &stream = std::cerr);
+void set_secondary_stream(std::ostream &stream);
 
 /**
  * \brief Changes the log level of the *secondary* stream.

@@ -98,8 +98,7 @@ template <class Analyzer, class... Args> void job::run(Args... args)
     using namespace logging;
 
     if (files().empty()) {
-        fatal << "No file set for input." << std::endl;
-        std::exit(EXIT_FAILURE);
+        throw std::runtime_error("No file set for input.");
     } else {
         logging::info << "Initializing reader (this can take a while)..." << std::endl;
 
@@ -110,8 +109,7 @@ template <class Analyzer, class... Args> void job::run(Args... args)
 
         long long count = reader.GetEntries(true);
         if (count == 0) {
-            fatal << "Input files don't appear to contain data. Is your proxy valid?" << std::endl;
-            std::exit(EXIT_FAILURE);
+            throw std::runtime_error("Input files don't appear to contain data. Is your proxy valid?");
         }
         count = std::min(_max_events, count);
 

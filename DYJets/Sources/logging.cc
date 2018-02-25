@@ -46,8 +46,7 @@ level str_to_level(const std::string &str)
     } else if (str == "fatal") {
         return level::fatal;
     } else {
-        error << "Invalid log level: " << str << std::endl;
-        std::exit(EXIT_FAILURE);
+        throw std::runtime_error("Invalid log level: " + str);
     }
 }
 } // namespace anonymous
@@ -63,8 +62,7 @@ settings &settings::operator<<(const YAML::Node &node)
             if (strval == "auto") {
                 color = color_mode::autodetect;
             } else {
-                error << "Invalid color mode: " << strval << std::endl;
-                std::exit(EXIT_FAILURE);
+                throw std::runtime_error("Invalid color mode: " + strval);
             }
         }
     }
@@ -78,13 +76,7 @@ settings &settings::operator<<(const YAML::Node &node)
         log_file_level = str_to_level(node["log file level"].as<std::string>());
     }
     if (node["override root handler"]) {
-        try {
-            override_root_handler = node["override root handler"].as<bool>();
-        } catch (...) {
-            error << "Invalid bool: " << node["override root handler"].as<std::string>()
-                  << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+        override_root_handler = node["override root handler"].as<bool>();
     }
     return *this;
 }

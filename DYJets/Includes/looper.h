@@ -66,8 +66,7 @@ void set_value_safe(const std::string &name,
             logging::debug << "Setting " << descr << " to " << config_value << std::endl;
             target = config_value;
         } else {
-            logging::error << "Invalid " << descr << ": " << config_value << std::endl;
-            std::exit(EXIT_FAILURE);
+            throw std::runtime_error("Invalid " + descr + ": " + std::to_string(config_value));
         }
     }
 }

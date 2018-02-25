@@ -76,13 +76,23 @@ class job
      */
     template <class Analyzer, class... Args> inline void run(Args... args);
 
+    /// \brief Configures the job from user input.
     void configure(const options &opt);
 
+    /// \brief Retrieves the list of command-line options supported by this class.
     static po::options_description options();
 
   private:
+    /// \brief Configures the job from a configuration file.
     void configure(const YAML::Node &node);
+
+    /// \brief Configures the job from command-line options.
     void configure(const po::variables_map &varmap);
+
+    /**
+     * \brief Handles the subset of options available on the command line and in the configuration
+     *        file.
+     */
     template <class Container> void configure_common(const Container &);
 };
 

@@ -152,12 +152,6 @@ void push_chain(stream &log_stream,
 
 std::ofstream *fileout = nullptr;
 
-stream *debug_fs = nullptr;
-stream *info_fs = nullptr;
-stream *warn_fs = nullptr;
-stream *error_fs = nullptr;
-stream *fatal_fs = nullptr;
-
 void root_error_handler(int level, bool abort, const char *location, const char *msg)
 {
     if (level < kInfo) {
@@ -175,11 +169,6 @@ void root_error_handler(int level, bool abort, const char *location, const char 
         std::terminate();
     }
 }
-
-} // namespace anonymous
-
-namespace /* anonymous */
-{
 
 class stream_settings
 {

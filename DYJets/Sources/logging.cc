@@ -139,14 +139,11 @@ std::string level_string(level l)
 void push_chain(stream &log_stream,
                 level stream_level,
                 level min_level,
-                bool label,
                 bool color,
                 std::ostream &out)
 {
-    if (label) {
-        log_stream.push(logging_filter(level_string(stream_level), color));
-    }
     if (stream_level >= min_level) {
+        log_stream.push(logging_filter(level_string(stream_level), color));
         log_stream.push(boost::ref(out));
     } else {
         log_stream.push(boost::iostreams::null_sink());
@@ -192,7 +189,6 @@ class stream_settings
 
   public:
     bool color = false;
-    bool prepend_label = true;
     level primary_level = level::info;
     level secondary_level = level::debug;
     std::ostream *primary_ostream = &std::cerr; // Not owned
@@ -218,13 +214,12 @@ class stream_settings
             push_chain(*secondary_stream,
                        secondary_level,
                        stream_level,
-                       prepend_label,
                        false, // no color
                        *secondary_ostream);
             stream.push(tee(boost::ref(*secondary_stream)));
         }
         // Setup primary stream
-        push_chain(stream, stream_level, primary_level, prepend_label, color, *primary_ostream);
+        push_chain(stream, stream_level, primary_level, color, *primary_ostream);
     }
 
     ~stream_settings()
@@ -259,7 +254,6 @@ void init(const struct settings &settings)
 
     for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->color = color;
-        s->prepend_label = settings.prepend_label;
         s->primary_ostream = &std::cerr;
         s->primary_level = settings.screen_level;
         s->secondary_level = settings.log_file_level;

@@ -31,7 +31,6 @@ struct settings
 
     color_mode color = color_mode::autodetect;
 
-    bool prepend_label = true;
     bool override_root_handler = true;
 
     level log_file_level = level::debug;

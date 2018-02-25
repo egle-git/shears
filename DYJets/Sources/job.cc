@@ -7,19 +7,24 @@
 job::job(const catalog &input) :
     _interactive(isatty(fileno(stdin)) || isatty(fileno(stdout)) || isatty(fileno(stderr)))
 {
-    std::vector<std::string> files = input.files();
-    std::size_t total = files.size();
+}
+
+std::vector<std::string> job::files() const
+{
+    std::size_t total = _files.size();
     std::size_t begin = total * _job_id / _job_count;
     std::size_t end = std::min(begin + _max_files, total * (_job_id + 1) / _job_count);
 
-    assert(end <= files.size());
+    assert(end <= _files.size());
 
-    std::copy(files.begin() + begin, files.begin() + end, std::back_inserter(_files));
+    std::vector<std::string> files;
+    std::copy(_files.begin() + begin, _files.begin() + end, std::back_inserter(files));
+    return files;
 }
 
 void job::configure(const class options &opt)
 {
-    configure(opt.config);
+    configure(opt.config["job"]);
     configure(opt.map);
 }
 

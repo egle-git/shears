@@ -49,7 +49,7 @@ class job
     explicit job(const catalog &input);
 
     /// \brief Retrieves the list of files that will be processed.
-    std::vector<std::string> files() const { return _files; }
+    std::vector<std::string> files() const;
 
     /**
      * \brief Loops on data.

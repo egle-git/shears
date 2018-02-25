@@ -20,7 +20,7 @@ int main(int argc, char **argv)
         j.run<higgs_analyzer>();
 
     } catch (std::exception &e) {
-        logging::fatal << e.what() << std::endl;
+        util::logging::fatal << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

@@ -21,6 +21,9 @@
 
 #include "ansi_seq.h"
 
+namespace util
+{
+
 namespace logging
 {
 
@@ -287,5 +290,5 @@ void init(const struct settings &settings)
         set_secondary_stream(*fileout);
     }
 }
-
 } // namespace logging
+} // namespace ansi

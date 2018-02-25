@@ -10,6 +10,9 @@ class TChain;
 namespace util
 {
 
+/**
+ * \brief Utilitiy class to get \c TChain from Tupel-generated ROOT trees.
+ */
 class chains
 {
     std::shared_ptr<TChain> _events;

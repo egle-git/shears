@@ -12,6 +12,9 @@ class Node;
 }
 /// \endcond
 
+namespace util
+{
+
 /**
  * \brief Module providing support for some advanced logging features.
  *
@@ -123,6 +126,7 @@ void set_secondary_stream(std::ostream &stream = std::cerr);
  */
 
 void init(const struct settings &settings);
-}
+} // namespace logging
+} // namespace util
 
 #endif // LOGGING_H

@@ -181,15 +181,72 @@ void root_error_handler(int level, bool abort, const char *location, const char 
 
 } // namespace anonymous
 
+namespace /* anonymous */
+{
+
+class stream_settings
+{
+    logging::stream &stream;
+    logging::stream *secondary_stream;
+    level stream_level;
+
+  public:
+    bool color = false;
+    bool prepend_label = true;
+    level primary_level = level::info;
+    level secondary_level = level::debug;
+    std::ostream *primary_ostream = &std::cerr; // Not owned
+    std::ostream *secondary_ostream = nullptr;  // Not owned
+
+    explicit stream_settings(logging::stream &stream, logging::level level)
+        : stream(stream), stream_level(level)
+    {
+        update();
+    }
+
+    void update()
+    {
+        stream.reset();
+        if (secondary_stream != nullptr) {
+            secondary_stream->reset();
+            delete secondary_stream;
+        }
+
+        if (secondary_ostream != nullptr) {
+            // Setup secondary stream
+            secondary_stream = new logging::stream;
+            push_chain(*secondary_stream,
+                       secondary_level,
+                       stream_level,
+                       prepend_label,
+                       false, // no color
+                       *secondary_ostream);
+            stream.push(tee(boost::ref(*secondary_stream)));
+        }
+        // Setup primary stream
+        push_chain(stream, stream_level, primary_level, prepend_label, color, *primary_ostream);
+    }
+
+    ~stream_settings()
+    {
+        stream.reset();
+        stream.push(boost::ref(std::cout));
+        if (secondary_stream != nullptr) {
+            secondary_stream->reset();
+            delete secondary_stream;
+        }
+    }
+};
+
+stream_settings debug_settings(debug, level::debug);
+stream_settings info_settings(info, level::info);
+stream_settings warn_settings(warn, level::warn);
+stream_settings error_settings(error, level::error);
+stream_settings fatal_settings(fatal, level::fatal);
+}
+
 void init(const struct settings &settings)
 {
-    // Reset chains
-    debug.reset();
-    info.reset();
-    warn.reset();
-    error.reset();
-    fatal.reset();
-
     bool color = (settings.color == color_mode::enabled);
     if (settings.color == color_mode::autodetect) {
         color = isatty(fileno(stderr));
@@ -198,84 +255,21 @@ void init(const struct settings &settings)
     // Create file output streams
     if (!settings.log_file.empty()) {
         fileout = new std::ofstream(settings.log_file);
-
-        debug_fs = new stream;
-        push_chain(*debug_fs,
-                   level::debug,
-                   settings.log_file_level,
-                   settings.prepend_label,
-                   false,
-                   *fileout);
-        debug.push(tee(boost::ref(*debug_fs)));
-
-        info_fs = new stream;
-        push_chain(*info_fs,
-                   level::info,
-                   settings.log_file_level,
-                   settings.prepend_label,
-                   false,
-                   *fileout);
-        info.push(tee(boost::ref(*info_fs)));
-
-        warn_fs = new stream;
-        push_chain(*warn_fs,
-                   level::warn,
-                   settings.log_file_level,
-                   settings.prepend_label,
-                   false,
-                   *fileout);
-        warn.push(tee(boost::ref(*warn_fs)));
-
-        error_fs = new stream;
-        push_chain(*error_fs,
-                   level::error,
-                   settings.log_file_level,
-                   settings.prepend_label,
-                   false,
-                   *fileout);
-        error.push(tee(boost::ref(*error_fs)));
-
-        fatal_fs = new stream;
-        push_chain(*fatal_fs,
-                   level::fatal,
-                   settings.log_file_level,
-                   settings.prepend_label,
-                   false,
-                   *fileout);
-        fatal.push(tee(boost::ref(*fatal_fs)));
     }
 
-    // Create cerr output streams
-    push_chain(
-        debug, level::debug, settings.screen_level, settings.prepend_label, color, std::cerr);
-    push_chain(info, level::info, settings.screen_level, settings.prepend_label, color, std::cerr);
-    push_chain(warn, level::warn, settings.screen_level, settings.prepend_label, color, std::cerr);
-    push_chain(
-        error, level::error, settings.screen_level, settings.prepend_label, color, std::cerr);
-    push_chain(
-        fatal, level::fatal, settings.screen_level, settings.prepend_label, color, std::cerr);
+    for (auto s : {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->color = color;
+        s->prepend_label = settings.prepend_label;
+        s->primary_ostream = &std::cerr;
+        s->primary_level = settings.screen_level;
+        s->secondary_level = settings.log_file_level;
+        s->secondary_ostream = fileout;
+        s->update();
+    }
 
     // Override ROOT error settings
     if (settings.override_root_handler) {
         SetErrorHandler(root_error_handler);
-    }
-}
-
-void close()
-{
-    debug.reset();
-    debug.push(boost::ref(std::cerr));
-    info.reset();
-    info.push(boost::ref(std::cerr));
-    warn.reset();
-    warn.push(boost::ref(std::cerr));
-    error.reset();
-    error.push(boost::ref(std::cerr));
-    fatal.reset();
-    fatal.push(boost::ref(std::cerr));
-    if (fileout != nullptr) {
-        delete fileout;
-        fileout = nullptr;
     }
 }
 

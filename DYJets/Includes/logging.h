@@ -3,10 +3,12 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 
+/// \cond
 namespace YAML
 {
 class Node;
 }
+/// \endcond
 
 namespace logging
 {
@@ -39,7 +41,6 @@ struct settings
 };
 
 void init(const struct settings &settings);
-void close();
 }
 
 #endif // LOGGING_H

@@ -18,12 +18,13 @@ struct options
     po::options_description _all;
 
   public:
+
     YAML::Node config;
     std::string config_file;
 
     po::variables_map map;
 
-    virtual ~options();
+    virtual ~options() = default;
 
     void add_defaults(const std::string &default_config_file);
 
@@ -43,5 +44,6 @@ struct options
   private:
     void process_easter_egg();
 };
+
 
 #endif // OPTIONS_H

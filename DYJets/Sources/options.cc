@@ -9,8 +9,6 @@
 #include "logging.h"
 #include "timer.h"
 
-options::~options() { logging::close(); }
-
 void options::add_defaults(const std::string &default_config_file)
 {
     po::options_description general = po::options_description("General options");

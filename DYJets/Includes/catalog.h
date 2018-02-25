@@ -1,8 +1,10 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
+#include <limits>
 #include <memory>
 #include <string>
+#include <vector>
 
 class TChain;
 
@@ -14,7 +16,9 @@ class catalog
     std::shared_ptr<TChain> _event_chain;
     std::shared_ptr<TChain> _bonzai_header_chain;
     std::shared_ptr<TChain> _bit_fields_chain;
+    bool _chains_initialized;
 
+    std::vector<std::string> _files;
     double _lumi, _xsec;
 
   public:
@@ -31,25 +35,51 @@ class catalog
      *                  support).
      * \param maxFiles The maximum number of files to be used (-1 for no limit).
      */
-    explicit catalog(const std::string &filename, const std::string &bonzaiDir, int maxFiles = -1);
+    explicit catalog(const std::string &filename,
+                     const std::string &bonzaiDir,
+                     std::size_t maxFiles = std::numeric_limits<int>::max());
 
     /// \brief Destructor
     virtual ~catalog();
 
     /// \brief Returns a \c TChain pointing to event data.
-    std::shared_ptr<TChain> event_chain() { return _event_chain; }
+    [[deprecated]] std::shared_ptr<TChain> event_chain()
+    {
+        if (!_chains_initialized) {
+            initialize_chains();
+        }
+        return _event_chain;
+    }
 
     /// \brief Returns a \c TChain pointing to bonzai header data.
-    std::shared_ptr<TChain> bonzai_header_chain() { return _bonzai_header_chain; }
+    [[deprecated]] std::shared_ptr<TChain> bonzai_header_chain()
+    {
+        if (!_chains_initialized) {
+            initialize_chains();
+        }
+        return _bonzai_header_chain;
+    }
 
     /// \brief Returns a \c TChain pointing to bit fields header data.
-    std::shared_ptr<TChain> bit_fields_chain() { return _bit_fields_chain; }
+    [[deprecated]] std::shared_ptr<TChain> bit_fields_chain()
+    {
+        if (!_chains_initialized) {
+            initialize_chains();
+        }
+        return _bit_fields_chain;
+    }
+
+    /// \brief Returns the list of files read from the catalog.
+    std::vector<std::string> files() const { return _files; }
 
     /// \brief Returns the integrated luminosity read from the catalog.
     double lumi() const { return _lumi; }
 
     /// \brief Returns the integrated cross section read from the catalog.
     double xsec() const { return _xsec; }
+
+  private:
+    void initialize_chains();
 };
 
 #endif // CATALOG_H

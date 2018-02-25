@@ -29,23 +29,26 @@ else
   endif
 endif
 
+# define yaml-cpp library path
+YAMLCPPPATH = /cvmfs/cms.cern.ch/slc6_amd64_gcc600/external/yaml-cpp/0.5.1-cms3/
+
 # $(info $$LHAPDFPATH is [${LHAPDFPATH}])
 
 # get Root compiler flags
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags)
 
-LIB = TreePlayer LHAPDF
+LIB = TreePlayer LHAPDF yaml-cpp boost_program_options
 LIBLIST = $(addprefix -l, $(LIB))
 
-LIBDIR = RooUnfold $(LHAPDFPATH)lib
+LIBDIR = RooUnfold $(LHAPDFPATH)lib $(YAMLCPPPATH)/lib
 LIBDIRLIST = $(addprefix -L, $(LIBDIR))
 
 RTL = -Wl,-rpath,
 LIBDIRLISTRTL = $(addprefix $(RTL), $(LIBDIR))
 
 SRCDIR = Sources/
-INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include
+INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include -I$(YAMLCPPPATH)/include
 MAINDIR = Main/
 
 CXX           ?= c++
@@ -64,6 +67,10 @@ SimpleJetCorrectionUncertainty.cc \
 JetCorrectionUncertainty.cc \
 JetCorrectorParameters.cc \
 catalog.cc \
+chains.cc \
+job.cc \
+logging.cc \
+options.cc \
 timer.cc
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <string>
 
@@ -92,46 +93,45 @@ settings &settings::operator<<(const YAML::Node &node)
 namespace /* anonymous */
 {
 
-class label_filter : public boost::iostreams::line_filter
+class logging_filter : public boost::iostreams::line_filter
 {
     std::string _prefix;
+    bool _color;
 
   public:
-    explicit label_filter(const std::string &prefix) : _prefix(prefix) {}
+    explicit logging_filter(const std::string &prefix, bool color) : _prefix(prefix), _color(color)
+    {
+    }
+
   private:
-    std::string do_filter(const std::string &line) { return "[" + _prefix + "] " + line; }
+    std::string do_filter(const std::string &line)
+    {
+        std::string composed_line = "[" + _prefix + "] " + line + ansi::clear_line();
+        if (_color) {
+            return composed_line;
+        } else {
+            // Erase any ANSI sequence
+            const static std::regex ansi_seq("\x1B\\[[0-?]*[ -/]*[@-~]");
+            return std::regex_replace(composed_line, ansi_seq, "");
+        }
+    }
 };
 
-std::string level_string(level l, color_mode color = color_mode::autodetect)
+std::string level_string(level l)
 {
-    if (color == color_mode::enabled) {
-        using namespace ansi;
+    using namespace ansi;
 
-        switch (l) {
-        case level::debug:
-            return "DEBUG";
-        case level::info:
-            return setcolor(cyan) + "INFO " + reset();
-        case level::warn:
-            return setcolor(bright_magenta) + "WARN " + reset();
-        case level::error:
-            return setcolor(bright_red) + "ERROR" + reset();
-        case level::fatal:
-            return setcolor(bright_yellow) + setcolor(red, background) + "FATAL" + reset();
-        }
-    } else {
-        switch (l) {
-        case level::debug:
-            return "DEBUG";
-        case level::info:
-            return "INFO ";
-        case level::warn:
-            return "WARN ";
-        case level::error:
-            return "ERROR";
-        case level::fatal:
-            return "FATAL";
-        }
+    switch (l) {
+    case level::debug:
+        return "DEBUG";
+    case level::info:
+        return setcolor(cyan) + "INFO " + reset();
+    case level::warn:
+        return setcolor(bright_magenta) + "WARN " + reset();
+    case level::error:
+        return setcolor(bright_red) + "ERROR" + reset();
+    case level::fatal:
+        return setcolor(bright_yellow) + setcolor(red, background) + "FATAL" + reset();
     }
     return "";
 }
@@ -140,11 +140,11 @@ void push_chain(stream &log_stream,
                 level stream_level,
                 level min_level,
                 bool label,
-                color_mode color,
+                bool color,
                 std::ostream &out)
 {
     if (label) {
-        log_stream.push(label_filter(level_string(stream_level, color)));
+        log_stream.push(logging_filter(level_string(stream_level), color));
     }
     if (stream_level >= min_level) {
         log_stream.push(boost::ref(out));
@@ -190,9 +190,9 @@ void init(const struct settings &settings)
     error.reset();
     fatal.reset();
 
-    color_mode color = settings.color;
-    if (color == color_mode::autodetect) {
-        color = isatty(fileno(stderr)) ? color_mode::enabled : color_mode::disabled;
+    bool color = (settings.color == color_mode::enabled);
+    if (settings.color == color_mode::autodetect) {
+        color = isatty(fileno(stderr));
     }
 
     // Create file output streams
@@ -204,7 +204,7 @@ void init(const struct settings &settings)
                    level::debug,
                    settings.log_file_level,
                    settings.prepend_label,
-                   color_mode::disabled,
+                   false,
                    *fileout);
         debug.push(tee(boost::ref(*debug_fs)));
 
@@ -213,7 +213,7 @@ void init(const struct settings &settings)
                    level::info,
                    settings.log_file_level,
                    settings.prepend_label,
-                   color_mode::disabled,
+                   false,
                    *fileout);
         info.push(tee(boost::ref(*info_fs)));
 
@@ -222,7 +222,7 @@ void init(const struct settings &settings)
                    level::warn,
                    settings.log_file_level,
                    settings.prepend_label,
-                   color_mode::disabled,
+                   false,
                    *fileout);
         warn.push(tee(boost::ref(*warn_fs)));
 
@@ -231,7 +231,7 @@ void init(const struct settings &settings)
                    level::error,
                    settings.log_file_level,
                    settings.prepend_label,
-                   color_mode::disabled,
+                   false,
                    *fileout);
         error.push(tee(boost::ref(*error_fs)));
 
@@ -240,7 +240,7 @@ void init(const struct settings &settings)
                    level::fatal,
                    settings.log_file_level,
                    settings.prepend_label,
-                   color_mode::disabled,
+                   false,
                    *fileout);
         fatal.push(tee(boost::ref(*fatal_fs)));
     }

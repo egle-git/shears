@@ -192,6 +192,7 @@ void options::default_init(int argc,
     process_easter_egg();
 }
 
+/// \cond
 template <> std::string name_for<po::variables_map>(const std::string &name)
 {
     std::string res = name;
@@ -209,5 +210,6 @@ bool is_present<po::variables_map>(const std::string &name, const po::variables_
 {
     return varmap.count(name) > 0;
 }
+/// \endcond
 
 } // namespace util

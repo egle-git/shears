@@ -37,6 +37,10 @@ YAMLCPPPATH = /cvmfs/cms.cern.ch/slc6_amd64_gcc600/external/yaml-cpp/0.5.1-cms3/
 # get Root compiler flags
 ROOTGLIBS     = $(shell $(ROOTSYS)/bin/root-config --glibs)
 ROOTCFLAGS    = $(shell $(ROOTSYS)/bin/root-config --cflags)
+# ROOT uses -I where it should use -isystem instead
+ROOTCFLAGS   := $(subst -I/,-isystem/,$(ROOTCFLAGS))
+# ROOT includes -W flags and shouldn't
+ROOTCFLAGS   := $(filter-out -W%,$(ROOTCFLAGS))
 
 LIB = TreePlayer LHAPDF yaml-cpp boost_program_options
 LIBLIST = $(addprefix -l, $(LIB))
@@ -47,8 +51,11 @@ LIBDIRLIST = $(addprefix -L, $(LIBDIR))
 RTL = -Wl,-rpath,
 LIBDIRLISTRTL = $(addprefix $(RTL), $(LIBDIR))
 
-SRCDIR = Sources/
-INCDIR = -IIncludes/ -IRooUnfold/src -I$(LHAPDFPATH)include -I$(YAMLCPPPATH)/include
+SRCDIR  = Sources/
+INCDIR  = -IIncludes/
+INCDIR += -IRooUnfold/src
+INCDIR += -isystem$(LHAPDFPATH)/include
+INCDIR += -isystem$(YAMLCPPPATH)/include
 MAINDIR = Main/
 
 CXX           ?= c++

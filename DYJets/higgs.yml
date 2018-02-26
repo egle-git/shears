@@ -1,30 +1,29 @@
-#Sets the maximum number of input files to use.The default is to run on all files.
-#max files : 5
+# Sets the maximum number of input files to use.The default is to run on all files.
+#max files: 5
 
-#Sets the maximum number of events to use.The default is to run on all events.
-#max events : 1000
+# Sets the maximum number of events to use.The default is to run on all events.
+#max events: 1000
 
-#Options related to output and logs
-log :
-    #Whether to use colors in the terminal.
-    #Possible values : yes | no | auto(default auto)
-    color : auto
+# Options related to output and logs
+log:
+    # Whether to use colors in the terminal.
+    #Possible values: yes|no|auto (default: auto)
+    color: auto
 
-    #Controls what's printed to the screen.
-    #Possible values : debug | info | warn | error | fatal(default : info)
-    log level : debug
+    # Controls what's printed to the screen.
+    # Possible values: debug|info|warn|error|fatal (default: info)
+    log level: info
 
-    #Pipe logs to the given log file, empty for no log.
-    #Default value : empty
-    log file : log.txt
+    # Pipe logs to the given log file, comment out for no log.
+    log file: log.txt
 
-    #Controls what's written in the log file.
-    #Possible values : debug | info | warn | error | fatal(default : debug)
+    # Controls what's written in the log file.
+    # Possible values: debug|info|warn|error|fatal (default: debug)
     log file level: debug
 
-    #Whether to override ROOT's default log handler.
-    #Default value : yes
-    override root handler: yes
+    # Whether to override ROOT's default log handler.
+    # Default value: yes
+    #override root handler: yes
 
 bonzai dir: /afs/cern.ch/user/l/lmoureau/shearsop/bonzai-prod/13TeV_2016/Data/v6.2/catalogs/
 catalog: Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt

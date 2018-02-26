@@ -4,6 +4,9 @@
 #include <atomic>
 #include <thread>
 
+namespace util
+{
+
 /**
  * \brief Displays progress in the terminal.
  *
@@ -87,5 +90,6 @@ class timer
   private:
     void displayprogress(const time_point &now, bool at_end = false) const;
 };
+} // namespace util
 
 #endif // TIMER_H

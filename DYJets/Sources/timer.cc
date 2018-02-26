@@ -4,6 +4,9 @@
 #include <iomanip>
 #include <iostream>
 
+namespace util
+{
+
 timer::timer(timer::counter last, timer::counter begin)
     : _steps(last), _from(begin), _done(begin), _stop(false)
 {
@@ -121,3 +124,4 @@ void timer::stop()
     _thread.join();
     _running = false;
 }
+} // namespace util

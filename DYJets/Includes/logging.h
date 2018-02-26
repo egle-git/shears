@@ -74,22 +74,6 @@ enum class level {
     fatal  ///< \brief Display fatal errors only.
 };
 
-enum class color_mode { enabled, disabled, autodetect };
-
-struct settings
-{
-    settings &operator<<(const YAML::Node &node);
-
-    color_mode color = color_mode::autodetect;
-
-    bool override_root_handler = true;
-
-    level log_file_level = level::debug;
-    std::string log_file = "";
-
-    level screen_level = level::info;
-};
-
 /// \brief Sets whether the primary stream should have colors.
 void set_use_color(bool color);
 
@@ -121,11 +105,17 @@ void set_primary_level(level l);
 void set_secondary_stream(std::ostream &stream);
 
 /**
+ * \brief Removes any secondary stream
+ *
+ * It is safe to call this function when no secondary stream is set.
+ */
+void unset_secondary_stream();
+
+/**
  * \brief Changes the log level of the *secondary* stream.
  * \see \ref set_secondary_stream
  */
-
-void init(const struct settings &settings);
+void set_secondary_level(level l);
 } // namespace logging
 } // namespace util
 

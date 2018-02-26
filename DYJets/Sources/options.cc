@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <fstream>
 #include <thread>
 
 #include "ansi_seq.h"
@@ -11,6 +12,11 @@
 
 namespace util
 {
+
+options::~options()
+{
+    logging::unset_secondary_stream();
+}
 
 void options::add_defaults(const std::string &default_config_file)
 {
@@ -54,15 +60,59 @@ void options::process_help()
 
 void options::process_config() { config = YAML::LoadFile(map["config"].as<std::string>()); }
 
+namespace /* anonymous */
+{
+logging::level str_to_level(const std::string &str)
+{
+    if (str == "debug") {
+        return logging::level::debug;
+    } else if (str == "info") {
+        return logging::level::info;
+    } else if (str == "warn") {
+        return logging::level::warn;
+    } else if (str == "error") {
+        return logging::level::error;
+    } else if (str == "fatal") {
+        return logging::level::fatal;
+    } else {
+        throw std::runtime_error("Invalid log level: " + str);
+    }
+}
+} // namespace anonymous
+
 void options::setup_logging()
 {
-    logging::settings log_settings;
-    log_settings << config["log"];
-    log_settings.screen_level =
-        map.count("verbose") > 0 ? logging::level::debug : logging::level::info;
-    logging::init(log_settings);
+    // Configuration file
+    YAML::Node node = config["log"];
+    if (node["color"]) {
+        try {
+            logging::set_use_color(node["color"].as<bool>());
+        } catch (...) {
+            std::string strval = node["color"].as<std::string>();
+            if (strval == "auto") {
+                logging::set_use_color(isatty(fileno(stderr)));
+            } else {
+                throw std::runtime_error("Invalid color mode: " + strval);
+            }
+        }
+    }
+    if (node["log level"]) {
+        logging::set_primary_level(str_to_level(node["log level"].as<std::string>()));
+    }
+    if (node["log file"]) {
+        _logfile_out = std::make_shared<std::ofstream>(node["log file"].as<std::string>());
+        logging::set_secondary_stream(*_logfile_out);
+    }
+    if (node["log file level"]) {
+        logging::set_secondary_level(str_to_level(node["log file level"].as<std::string>()));
+    }
+    if ((!node["override root handler"]) || node["override root handler"].as<bool>()) {
+        logging::override_root_handler();
+    }
 
+    // Command line
     if (map.count("verbose") > 0) {
+        logging::set_primary_level(logging::level::debug);
         logging::debug << "Debug messages are enabled." << std::endl;
     }
     if (map.count("verbose") > 0) {

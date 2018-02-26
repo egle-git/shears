@@ -2,6 +2,7 @@
 #define OPTIONS_H
 
 #include <iostream>
+#include <memory>
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/program_options/errors.hpp>
@@ -45,6 +46,7 @@ class options
     std::string _prog_name;
     po::options_description _all;
     std::string _config_file;
+    std::shared_ptr<std::ostream> _logfile_out;
 
   public:
     /// \brief The parsed contents of the configuration file.
@@ -54,7 +56,7 @@ class options
     po::variables_map map;
 
     /// \brief Destructor.
-    virtual ~options() = default;
+    virtual ~options();
 
     /**
      * \brief Add default options \c --help, \c --verbose. and \c --config to the list of command

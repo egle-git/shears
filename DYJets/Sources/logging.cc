@@ -38,56 +38,6 @@ stream fatal(boost::ref(std::cerr));
 
 namespace /* anonymous */
 {
-level str_to_level(const std::string &str)
-{
-    if (str == "debug") {
-        return level::debug;
-    } else if (str == "info") {
-        return level::info;
-    } else if (str == "warn") {
-        return level::warn;
-    } else if (str == "error") {
-        return level::error;
-    } else if (str == "fatal") {
-        return level::fatal;
-    } else {
-        throw std::runtime_error("Invalid log level: " + str);
-    }
-}
-} // namespace anonymous
-
-settings &settings::operator<<(const YAML::Node &node)
-{
-    if (node["color"]) {
-        try {
-            bool enabled = node["color"].as<bool>();
-            color = enabled ? color_mode::enabled : color_mode::disabled;
-        } catch (...) {
-            std::string strval = node["color"].as<std::string>();
-            if (strval == "auto") {
-                color = color_mode::autodetect;
-            } else {
-                throw std::runtime_error("Invalid color mode: " + strval);
-            }
-        }
-    }
-    if (node["log level"]) {
-        screen_level = str_to_level(node["log level"].as<std::string>());
-    }
-    if (node["log file"]) {
-        log_file = node["log file level"].as<std::string>();
-    }
-    if (node["log file level"]) {
-        log_file_level = str_to_level(node["log file level"].as<std::string>());
-    }
-    if (node["override root handler"]) {
-        override_root_handler = node["override root handler"].as<bool>();
-    }
-    return *this;
-}
-
-namespace /* anonymous */
-{
 
 class logging_filter : public boost::iostreams::line_filter
 {
@@ -143,8 +93,6 @@ void push_chain(
     }
 }
 
-std::ofstream *fileout = nullptr;
-
 void root_error_handler(int level, bool abort, const char *location, const char *msg)
 {
     if (level < kInfo) {
@@ -188,6 +136,7 @@ class stream_settings
         if (secondary_stream != nullptr) {
             secondary_stream->reset();
             delete secondary_stream;
+            secondary_stream = nullptr;
         }
 
         if (secondary_ostream != nullptr) {
@@ -211,6 +160,7 @@ class stream_settings
         if (secondary_stream != nullptr) {
             secondary_stream->reset();
             delete secondary_stream;
+            secondary_stream = nullptr;
         }
     }
 };
@@ -260,34 +210,21 @@ void set_secondary_stream(std::ostream &stream)
     }
 }
 
+void unset_secondary_stream()
+{
+    for (auto s :
+         {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
+        s->secondary_ostream = nullptr;
+        s->update();
+    }
+}
+
 void set_secondary_level(level l)
 {
     for (auto s :
          {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->secondary_level = l;
         s->update();
-    }
-}
-
-void init(const struct settings &settings)
-{
-    bool color = (settings.color == color_mode::enabled);
-    if (settings.color == color_mode::autodetect) {
-        color = isatty(fileno(stderr));
-    }
-    set_use_color(color);
-
-    if (settings.override_root_handler) {
-        override_root_handler();
-    }
-
-    set_primary_level(settings.screen_level);
-    set_secondary_level(settings.log_file_level);
-
-    // Create file output streams
-    if (!settings.log_file.empty()) {
-        fileout = new std::ofstream(settings.log_file);
-        set_secondary_stream(*fileout);
     }
 }
 } // namespace logging

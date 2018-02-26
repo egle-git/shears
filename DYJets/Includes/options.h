@@ -104,6 +104,8 @@ class options
  * \brief Transforms the name to match the convention for the given container.
  *
  * The default implementation returns its argument unchanged.
+ *
+ * \relates options
  */
 template <class Container> std::string name_for(const std::string &name) { return name; }
 
@@ -111,6 +113,8 @@ template <class Container> std::string name_for(const std::string &name) { retur
  * \brief Transforms the name to match the convention for the command line.
  *
  * This specialization turns whitespaces into dashes.
+ *
+ * \relates options
  */
 template <> std::string name_for<po::variables_map>(const std::string &name);
 
@@ -118,6 +122,8 @@ template <> std::string name_for<po::variables_map>(const std::string &name);
  * \brief Checks whether a value with `name` is present in the given `Container`.
  *
  * This function has specialization for \c YAML::Node and \c po::variables_map.
+ *
+ * \relates options
  */
 template <class Container> bool is_present(const std::string &name, const Container &);
 
@@ -133,6 +139,8 @@ template <class Container> bool is_present(const std::string &name, const Contai
  * \param name      The name of the variable. It will be translated using \ref name_for.
  * \param descr     A user-readable string describing the variable. Used for output.
  * \param check     A function that takes a value and returns \c true if it is valid.
+ *
+ * \relates options
  */
 template <class Type, class Container, class Checker>
 void set_value_safe(const Container &container,
@@ -162,6 +170,8 @@ void set_value_safe(const Container &container,
  * \param target    The variable to store the value into.
  * \param name      The name of the variable. It will be translated using \ref name_for.
  * \param descr     A user-readable string describing the variable. Used for output.
+ *
+ * \relates options
  */
 template <class Type, class Container>
 void set_value_safe(const Container &container,

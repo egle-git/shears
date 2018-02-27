@@ -20,6 +20,7 @@ options::~options()
 
 void options::add_defaults(const std::string &default_config_file)
 {
+    _config_file = default_config_file;
     po::options_description general = po::options_description("General options");
     general.add_options()("config,c",
                           po::value<std::string>()->default_value(default_config_file),

@@ -19,6 +19,9 @@ timer::~timer()
     }
 }
 
+namespace /* anonymous */
+{
+
 static void print_time(timer::counter us)
 {
     using namespace std;
@@ -42,6 +45,7 @@ static void print_time(timer::counter us)
         std::cout << std::setw(2) << std::ceil(milliseconds / 1000.) << "s";
     }
 }
+} // namespace anonymous
 
 void timer::displayprogress(const timer::time_point &now, bool at_end) const
 {

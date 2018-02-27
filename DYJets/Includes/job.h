@@ -114,7 +114,8 @@ template <class Analyzer, class... Args> void job::run(Args... args)
 
         long long count = reader.GetEntries(true);
         if (count == 0) {
-            throw std::runtime_error("Input files don't appear to contain data. Is your proxy valid?");
+            throw std::runtime_error(
+                "Input files don't appear to contain data. Is your proxy valid?");
         }
         count = std::min(_max_events, count);
 
@@ -128,8 +129,17 @@ template <class Analyzer, class... Args> void job::run(Args... args)
 
             timer time(count);
             time.start();
-            while (reader.Next()) {
-                time.next();
+            for (long long entry = 0; entry < count; ++entry) {
+                TTreeReader::EEntryStatus status = reader.SetEntry(entry);
+                if (status != TTreeReader::kEntryValid) {
+                    error << "Reader status code not valid: " << status << std::endl;
+                    if (_fatal_exceptions) {
+                        throw std::runtime_error("Reader status code not valid: " +
+                                                 std::to_string(status));
+                    }
+                    continue;
+                }
+
                 try {
                     ana();
                 } catch (std::exception &e) {
@@ -139,8 +149,8 @@ template <class Analyzer, class... Args> void job::run(Args... args)
                         throw;
                     }
                 }
+                time.next();
             }
-            time.next(); // Reach 100%
             time.stop();
 
             if (had_exception) {

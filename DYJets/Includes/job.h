@@ -34,6 +34,7 @@ namespace util
  *   * Division of files in a number of jobs (file-based)
  *   * Progress display (through \ref timer)
  *   * Graceful handling of exceptions thrown by the analysis code
+ *   * Graceful handling of SIGINT
  */
 class job
 {
@@ -43,6 +44,8 @@ class job
     int _max_files = std::numeric_limits<int>::max();
     long long _max_events = std::numeric_limits<long long>::max();
     bool _fatal_exceptions = false;
+    bool _graceful_sigint;
+    std::atomic<bool> _sigint_caught;
 
     std::vector<std::string> _files;
 
@@ -78,6 +81,16 @@ class job
      */
     template <class Analyzer, class... Args> inline void run(Args... args);
 
+    /**
+     * \brief Sets whether the even loop should exit gracefully on \c SIGINT (ie \c Ctrl+C).
+     *
+     * This setting defaults to \c true if \c stdin, \c stdout or \c stderr is a terminal, and to
+     * \c false otherwise.
+     *
+     * \note This function must be called before \ref run.
+     */
+    void set_graceful_sigint(bool enable) { _graceful_sigint = enable; }
+
     /// \brief Configures the job from user input.
     void configure(const options &opt);
 
@@ -96,6 +109,12 @@ class job
      *        file.
      */
     template <class Container> void configure_common(const Container &);
+
+    /// \brief Sets up the \c SIGINT handler.
+    static void setup_sigint_handler(class job *job);
+
+    /// \brief \c SIGINT handler.
+    static void sigint_handler(int);
 };
 
 template <class Analyzer, class... Args> void job::run(Args... args)
@@ -123,7 +142,10 @@ template <class Analyzer, class... Args> void job::run(Args... args)
             warn << "Running on zero event. Skipping event loop." << std::endl;
         } else {
             info << "We will run on " << count << " events." << std::endl;
-            reader.SetEntriesRange(0, count);
+
+            if (_graceful_sigint) {
+                setup_sigint_handler(this);
+            }
 
             bool had_exception = false;
 
@@ -150,8 +172,17 @@ template <class Analyzer, class... Args> void job::run(Args... args)
                     }
                 }
                 time.next();
+
+                if (_sigint_caught) {
+                    warn << "Caught SIGINT, exiting..." << std::endl;
+                    break;
+                }
             }
             time.stop();
+
+            if (_graceful_sigint) {
+                setup_sigint_handler(nullptr);
+            }
 
             if (had_exception) {
                 warn << "Caught exceptions while processing events. Output may not be complete."

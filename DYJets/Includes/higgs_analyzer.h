@@ -13,7 +13,7 @@
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
-class higgs_analyzer : private util::histo_set, private physics::muons_analyzer
+class higgs_analyzer : private virtual util::histo_set, private virtual physics::muons_analyzer
 {
   public:
     /**

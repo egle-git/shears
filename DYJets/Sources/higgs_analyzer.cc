@@ -29,6 +29,7 @@ void higgs_analyzer::operator()()
                                }),
                 muons.end());
 
+
     if (muons.size() >= 2) {
         TLorentzVector pZ = muons[0].v + muons[1].v;
         float charge_check = muons[0].charge * muons[1].charge;
@@ -36,6 +37,7 @@ void higgs_analyzer::operator()()
         if (charge_check >= 0) {
             return;
         }
+        fill_muons(muons, "Zinc0jet");
         fill("mass", "Zinc0jet", pZ.M());
     }
 }

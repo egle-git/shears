@@ -1,10 +1,14 @@
 #include "higgs_analyzer.h"
 
+#include <algorithm>
+
 #include <TFile.h>
 #include <TH1D.h>
 #include <TLorentzVector.h>
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
+
+#include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(TTreeReader &reader)
     : MuPt(reader, "MuPt"),
@@ -20,36 +24,30 @@ higgs_analyzer::higgs_analyzer(TTreeReader &reader)
 
 void higgs_analyzer::operator()()
 {
-    std::vector<bool> good(MuPt->size());
+    using namespace physics;
 
-    int nGoodLep = 0;
+    std::vector<lepton> muons;
     for (unsigned i = 0; i < MuPt->size(); ++i) {
-        float pt = MuPt->at(i);
-        float eta = MuEta->at(i);
-        float iso = MuPfIso->at(i);
-        int id = MuIdTight->at(i);
-        if (pt > 7 && iso < 0.25 && (id & 1) && std::abs(eta) <= 2.4) {
-            good[i] = true;
-            nGoodLep++;
-        } else {
-            good[i] = false;
-        }
+        lepton l;
+        l.v.SetPtEtaPhiE(MuPt->at(i), MuEta->at(i), MuPhi->at(i), MuE->at(i));
+        l.charge = MuCh->at(i);
+        l.iso = MuPfIso->at(i);
+        l.id = MuIdTight->at(i);
+        muons.push_back(l);
     }
 
-    if (nGoodLep >= 2) {
-        TLorentzVector pZ;
-        float charge_check = 1;
+    muons.erase(std::remove_if(muons.begin(),
+                               muons.end(),
+                               [](const lepton &mu) {
+                                   return mu.v.Pt() < 7 || mu.iso >= 0.25 ||
+                                          std::abs(mu.v.Eta()) > 2.4;
+                               }),
+                muons.end());
 
-        unsigned numLep = 0;
-        for (unsigned i = 0; numLep < 2 && i < MuPt->size(); ++i) {
-            if (good[i]) {
-                numLep++;
-                TLorentzVector p;
-                p.SetPtEtaPhiE(MuPt->at(i), MuEta->at(i), MuPhi->at(i), MuE->at(i));
-                pZ += p;
-                charge_check *= MuCh->at(i);
-            }
-        }
+    if (muons.size() >= 2) {
+        TLorentzVector pZ = muons[0].v + muons[1].v;
+        float charge_check = muons[0].charge * muons[1].charge;
+
         if (charge_check >= 0) {
             return;
         }

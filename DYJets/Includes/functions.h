@@ -7,6 +7,8 @@
 #include <iostream>
 #include <vector>
 
+#include "lepton.h"
+
 // Beginning of run for 2016
 #define RUNB_2016 273150
 #define RUNC_2016 275656
@@ -31,7 +33,7 @@ using namespace std;
 
 void barre_de_progression(int);
 
-struct leptonStruct
+struct leptonStruct : public physics::lepton
 {
 
     leptonStruct();
@@ -53,9 +55,8 @@ struct leptonStruct
         trigger = trigger_;
     }
 
-    TLorentzVector v;
-    double charge, iso, scEta;
-    int id, trigger;
+    double scEta;
+    int trigger;
 };
 
 struct jetStruct

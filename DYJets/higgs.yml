@@ -27,3 +27,17 @@ log:
 
 bonzai dir: /afs/cern.ch/user/l/lmoureau/shearsop/bonzai-prod/13TeV_2016/Data/v6.2/catalogs/
 catalog: Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt
+
+# Options related to the selection of muons
+muons:
+    # Pt cut [GeV]
+    # Default value: 20
+    pt: 20
+
+    # Eta cut
+    # Default value: 2.4
+    eta: 2.4
+
+    # Relative isolation cut
+    # Default value: 0.25
+    isolation: 0.25

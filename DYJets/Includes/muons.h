@@ -7,6 +7,7 @@
 
 #include "histo_set.h"
 #include "lepton.h"
+#include "options.h"
 
 namespace physics
 {
@@ -22,11 +23,22 @@ class muons_analyzer : private virtual util::histo_set
     TTreeReaderArray<float> MuPfIso;
     TTreeReaderArray<unsigned> MuIdTight;
 
+    double _pt_cut = 20;
+    double _eta_cut = 2.4;
+    double _iso_cut = 0.25;
+
   public:
     /// \brief Constructor.
-    explicit muons_analyzer(TTreeReader &reader);
+    explicit muons_analyzer(TTreeReader &reader, const util::options &opt);
 
-    /// \brief Retrieves a list of all muons in the current event.
+    /// \brief Configures the analyzer from user input.
+    void configure(const util::options &opt);
+
+    /**
+     * \brief Retrieves a list of all muons in the current event.
+     *
+     * The list is already filtered according to config file options.
+     */
     std::vector<lepton> get_muons();
 
     /**

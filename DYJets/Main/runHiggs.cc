@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 
         util::job j(c);
         j.configure(opt);
-        j.run<higgs_analyzer>();
+        j.run<higgs_analyzer>(opt);
 
     } catch (std::exception &e) {
         util::logging::fatal << e.what() << std::endl;

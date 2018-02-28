@@ -10,7 +10,8 @@
 
 #include "lepton.h"
 
-higgs_analyzer::higgs_analyzer(TTreeReader &reader) : muons_analyzer(reader)
+higgs_analyzer::higgs_analyzer(TTreeReader &reader, const util::options &opt)
+    : muons_analyzer(reader, opt)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -20,15 +21,6 @@ void higgs_analyzer::operator()()
     using namespace physics;
 
     std::vector<lepton> muons = get_muons();
-
-    muons.erase(std::remove_if(muons.begin(),
-                               muons.end(),
-                               [](const lepton &mu) {
-                                   return mu.v.Pt() < 7 || mu.iso >= 0.25 ||
-                                          std::abs(mu.v.Eta()) > 2.4;
-                               }),
-                muons.end());
-
 
     if (muons.size() >= 2) {
         TLorentzVector pZ = muons[0].v + muons[1].v;

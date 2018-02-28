@@ -20,7 +20,7 @@ class higgs_analyzer : private virtual util::histo_set, private virtual physics:
      * \brief Constructor.
      * \param reader A \c TTreeReader that will iterate over all events.
      */
-    explicit higgs_analyzer(TTreeReader &reader);
+    explicit higgs_analyzer(TTreeReader &reader, const util::options &opt);
 
     /// \brief Function called for every event.
     void operator()();

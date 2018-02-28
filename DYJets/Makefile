@@ -76,6 +76,7 @@ JetCorrectorParameters.cc \
 catalog.cc \
 chains.cc \
 higgs_analyzer.cc \
+histo_set.cc \
 job.cc \
 logging.cc \
 options.cc \

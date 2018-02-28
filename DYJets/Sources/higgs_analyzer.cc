@@ -15,6 +15,7 @@ higgs_analyzer::higgs_analyzer(TTreeReader &reader)
       MuPfIso(reader, "MuPfIso"),
       MuIdTight(reader, "MuIdTight")
 {
+    declare("mass", "Dilepton mass", 100, 0, 200);
 }
 
 void higgs_analyzer::operator()()
@@ -52,16 +53,14 @@ void higgs_analyzer::operator()()
         if (charge_check >= 0) {
             return;
         }
-        histogram.Fill(pZ.M());
+        fill("mass", "Zinc0jet", pZ.M());
     }
 }
 
 void higgs_analyzer::write()
 {
     TFile output("higgs_output.root", "RECREATE");
-
-    histogram.Write();
-
+    histo_set::write();
     output.Close();
 }
 

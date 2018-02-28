@@ -7,13 +7,13 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "histo_set.h"
+
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
-class higgs_analyzer
+class higgs_analyzer : private util::histo_set
 {
-    TH1D histogram = TH1D("Mass", "Mass", 100, 0, 200);
-
     TTreeReaderValue<std::vector<float>> MuPt;
     TTreeReaderValue<std::vector<float>> MuEta;
     TTreeReaderValue<std::vector<float>> MuPhi;

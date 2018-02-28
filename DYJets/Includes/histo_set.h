@@ -11,6 +11,18 @@
 namespace util
 {
 
+/**
+ * \brief Manages a collection of histograms.
+ *
+ * This class can be used to manage histograms, simplifying the declare-fill-write paradigm. It is used as follows:
+ *
+ * 1. \ref declare "Declare" your histograms as if you were creating them
+ * 1. \ref fill "Fill" them as usual
+ * 1. \ref write "Write" them all at once
+ *
+ * This class also features *tags* that allow one to use the same declaration for similar
+ * histograms (ie when the selection is different).
+ */
 class histo_set
 {
   public:

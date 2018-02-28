@@ -10,14 +10,7 @@
 
 #include "lepton.h"
 
-higgs_analyzer::higgs_analyzer(TTreeReader &reader)
-    : MuPt(reader, "MuPt"),
-      MuEta(reader, "MuEta"),
-      MuPhi(reader, "MuPhi"),
-      MuE(reader, "MuE"),
-      MuCh(reader, "MuCh"),
-      MuPfIso(reader, "MuPfIso"),
-      MuIdTight(reader, "MuIdTight")
+higgs_analyzer::higgs_analyzer(TTreeReader &reader) : muons_analyzer(reader)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -26,15 +19,7 @@ void higgs_analyzer::operator()()
 {
     using namespace physics;
 
-    std::vector<lepton> muons;
-    for (unsigned i = 0; i < MuPt->size(); ++i) {
-        lepton l;
-        l.v.SetPtEtaPhiE(MuPt->at(i), MuEta->at(i), MuPhi->at(i), MuE->at(i));
-        l.charge = MuCh->at(i);
-        l.iso = MuPfIso->at(i);
-        l.id = MuIdTight->at(i);
-        muons.push_back(l);
-    }
+    std::vector<lepton> muons = get_muons();
 
     muons.erase(std::remove_if(muons.begin(),
                                muons.end(),

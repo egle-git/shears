@@ -8,20 +8,13 @@
 #include <TTreeReaderValue.h>
 
 #include "histo_set.h"
+#include "muons.h"
 
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
-class higgs_analyzer : private util::histo_set
+class higgs_analyzer : private util::histo_set, private physics::muons_analyzer
 {
-    TTreeReaderValue<std::vector<float>> MuPt;
-    TTreeReaderValue<std::vector<float>> MuEta;
-    TTreeReaderValue<std::vector<float>> MuPhi;
-    TTreeReaderValue<std::vector<float>> MuE;
-    TTreeReaderValue<std::vector<float>> MuCh;
-    TTreeReaderValue<std::vector<float>> MuPfIso;
-    TTreeReaderValue<std::vector<unsigned>> MuIdTight;
-
   public:
     /**
      * \brief Constructor.

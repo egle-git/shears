@@ -79,6 +79,7 @@ higgs_analyzer.cc \
 histo_set.cc \
 job.cc \
 logging.cc \
+muons.cc \
 options.cc \
 timer.cc
 

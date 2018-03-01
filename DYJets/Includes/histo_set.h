@@ -77,13 +77,17 @@ class histo_set
     void write();
 
     /**
-     * \brief Retrives a string that combines the given name and tag.
+     * \brief Retrieves a string that combines the given name and tag.
      * \returns \c name if \c tag is empty, \c name_tag otherwise.
      */
     static std::string combined_name(const std::string &name, const std::string &tag);
 
-  private:
-    histogram_type &get(const std::string &name, const std::string &tag);
+    /**
+     * \brief Retrieves the histogram with the given \c name and \c tag.
+     *
+     * The histogram is created if it doesn't exist.
+     */
+    histogram_type &get(const std::string &name, const std::string &tag = "");
 };
 } // namespace util
 

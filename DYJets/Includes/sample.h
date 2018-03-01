@@ -18,7 +18,7 @@ class sample
 {
   public:
     /// \brief Identifies data, MC and background samples
-    enum class type {
+    enum type {
         data,      ///< \brief Data sample
         mc,        ///< \brief MC sample
         background ///< \brief Background sample

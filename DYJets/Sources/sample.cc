@@ -41,11 +41,11 @@ template <> struct convert<data::sample>
         }
         std::string type = node["type"].as<std::string>();
         if (type == "data") {
-            sample._type = data::sample::type::data;
+            sample._type = data::sample::data;
         } else if (type == "MC") {
-            sample._type = data::sample::type::mc;
+            sample._type = data::sample::mc;
         } else if (type == "background") {
-            sample._type = data::sample::type::background;
+            sample._type = data::sample::background;
         } else {
             throw std::runtime_error("Sample type is not \"data\" or \"MC\" for " + sample._name);
         }

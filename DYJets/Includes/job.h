@@ -88,7 +88,7 @@ class job
      * \tparam Analyzer An analyzer class.
      * \param args Arguments to pass to the analyzer constructor.
      */
-    template <class Analyzer, class... Args> inline void run(Args... args);
+    template <class Analyzer, class... Args> inline void run(Args &... args);
 
     /**
      * \brief Sets whether the even loop should exit gracefully on \c SIGINT (ie \c Ctrl+C).
@@ -126,7 +126,7 @@ class job
     static void sigint_handler(int);
 };
 
-template <class Analyzer, class... Args> void job::run(Args... args)
+template <class Analyzer, class... Args> void job::run(Args &... args)
 {
     using namespace logging;
 

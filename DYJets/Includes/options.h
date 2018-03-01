@@ -55,8 +55,17 @@ class options
     /// \brief The parsed contents of the command line.
     po::variables_map map;
 
+    /// \brief Constructor.
+    explicit options() = default;
+
+    /// \brief Deleted copy constructor.
+    explicit options(const options &other) = delete;
+
     /// \brief Destructor.
     virtual ~options();
+
+    /// \brief Deleted \c operator=.
+    options &operator= (const options &other) = delete;
 
     /**
      * \brief Add default options \c --help, \c --verbose. and \c --config to the list of command

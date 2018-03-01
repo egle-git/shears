@@ -143,8 +143,8 @@ class stream_settings
             // Setup secondary stream
             secondary_stream = new logging::stream;
             push_chain(*secondary_stream,
-                       secondary_level,
                        stream_level,
+                       secondary_level,
                        false, // no color
                        *secondary_ostream);
             stream.push(tee(boost::ref(*secondary_stream)));
@@ -212,6 +212,7 @@ void set_secondary_stream(std::ostream &stream)
 
 void unset_secondary_stream()
 {
+    debug << "Unsetting secondary stream" << std::endl;
     for (auto s :
          {&debug_settings, &info_settings, &warn_settings, &error_settings, &fatal_settings}) {
         s->secondary_ostream = nullptr;

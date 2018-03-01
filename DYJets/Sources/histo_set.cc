@@ -25,7 +25,7 @@ histo_set::histogram_type &histo_set::get(const std::string &name, const std::st
 
 void histo_set::write()
 {
-    logging::info << "Writing histograms..." << std::endl;
+    logging::debug << "Writing histograms..." << std::endl;
     for (auto &pair : _histograms) {
         pair.second.Write(combined_name(pair.first.first, pair.first.second).c_str());
     }

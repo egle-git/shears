@@ -93,7 +93,7 @@ OBJLIST = $(SRCLIST:.cc=.o)
 MAINLIST = runCombination.d  runRecoComparison.d  runUnfoldingZJets.d  runZJets_newformat.d \
 	Sources/testDecompVar.d Sources/testPrintTable.d runIntegralCheck.d plotCrossSections.d \
 	testSectionConfig.d \
-	runHiggs.d
+	higgs-loop.d
 MAINDEPS = $(addprefix $(MAINDIR), $(MAINLIST))
 DEPS    = $(SRCLIST:.cc=.d)
 DEPS    += $(MAINDEPS)
@@ -107,7 +107,7 @@ Main/runCombination \
 Main/testDecompVar \
 Main/runIntegralCheck \
 Main/plotCrossSections \
-Main/runHiggs \
+Main/higgs-loop \
 $(PLOTRESPMATRIX)
 
 #in untested branch:
@@ -127,7 +127,7 @@ $(PLOTRESPMATRIX)
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
-Main/runHiggs: Main/runHiggs.o $(OBJLIST) RooUnfold/libRooUnfold.so
+Main/higgs-loop: Main/higgs-loop.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/runZJets_newformat: Main/runZJets_newformat.o $(OBJLIST) RooUnfold/libRooUnfold.so

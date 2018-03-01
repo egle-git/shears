@@ -10,8 +10,8 @@
 
 #include "lepton.h"
 
-higgs_analyzer::higgs_analyzer(TTreeReader &reader, const util::options &opt)
-    : muons_analyzer(reader, opt)
+higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
+    : muons_analyzer(info.reader, opt)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }

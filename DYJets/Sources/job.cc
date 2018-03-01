@@ -8,6 +8,13 @@
 namespace util
 {
 
+job::info::info(const data::catalog &catalog, const util::chains &chains)
+    : catalog(catalog),
+      chains(chains),
+      reader(this->chains.events().get())
+{
+}
+
 job::job(const std::string &analyzer_name)
     : _graceful_sigint(isatty(fileno(stdin)) || isatty(fileno(stdout)) || isatty(fileno(stderr))),
       _sigint_caught(false),
@@ -15,10 +22,9 @@ job::job(const std::string &analyzer_name)
 {
 }
 
-std::vector<std::string> job::files() const
+std::vector<std::string> job::files(const data::catalog &catalog) const
 {
-    data::catalog cat = sample().catalog();
-    std::vector<std::string> files = cat.files();
+    std::vector<std::string> files = catalog.files();
 
     std::size_t total = files.size();
     std::size_t begin = total * _job_id / _job_count;

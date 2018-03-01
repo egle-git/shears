@@ -7,6 +7,7 @@
 #include <boost/program_options/errors.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/ref.hpp>
 
 #include <TChain.h>
 #include <TFile.h>
@@ -40,6 +41,16 @@ namespace util
  */
 class job
 {
+  public:
+    struct info
+    {
+        explicit info(const data::catalog &catalog, const util::chains &chains);
+
+        data::catalog catalog;
+        util::chains chains;
+        TTreeReader reader;
+    };
+
   private:
     int _job_id = 0;
     int _job_count = 1;
@@ -55,9 +66,6 @@ class job
   public:
     /// \brief Constructor.
     explicit job(const std::string &analyzer_name);
-
-    /// \brief Retrieves the list of files that will be processed.
-    std::vector<std::string> files() const;
 
     /// \brief Retrieves the sample that will be processed.
     data::sample sample() const;
@@ -107,6 +115,9 @@ class job
     static po::options_description options();
 
   private:
+    /// \brief Retrieves the list of files that will be processed.
+    std::vector<std::string> files(const data::catalog &catalog) const;
+
     /// \brief Configures the job from a configuration file.
     void configure(const YAML::Node &node);
 
@@ -130,18 +141,20 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
 {
     using namespace logging;
 
-    std::vector<std::string> files = job::files();
+    data::catalog catalog = sample().catalog();
+
+    std::vector<std::string> files = job::files(catalog);
     if (files.empty()) {
         throw std::runtime_error("No file set for input.");
     } else {
         logging::info << "Initializing reader (this can take a while)..." << std::endl;
 
-        chains ch(files);
-        TTreeReader reader(ch.events().get());
+        util::chains chains(files);
+        struct info info(catalog, chains);
 
-        Analyzer ana(reader, args...);
+        Analyzer ana(info, args...);
 
-        long long count = reader.GetEntries(true);
+        long long count = info.reader.GetEntries(true);
         if (count == 0) {
             throw std::runtime_error(
                 "Input files don't appear to contain data. Is your proxy valid?");
@@ -151,7 +164,7 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
         if (count <= 0) {
             warn << "Running on zero event. Skipping event loop." << std::endl;
         } else {
-            info << "We will run on " << count << " events." << std::endl;
+            logging::info << "We will run on " << count << " events." << std::endl;
 
             if (_graceful_sigint) {
                 setup_sigint_handler(this);
@@ -162,7 +175,7 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
             timer time(count);
             time.start();
             for (long long entry = 0; entry < count; ++entry) {
-                TTreeReader::EEntryStatus status = reader.SetEntry(entry);
+                TTreeReader::EEntryStatus status = info.reader.SetEntry(entry);
                 if (status != TTreeReader::kEntryValid) {
                     error << "Reader status code not valid: " << status << std::endl;
                     if (_fatal_exceptions) {
@@ -200,11 +213,11 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
             }
         }
 
-        info << "Writing output to: " << output_filename() << std::endl;
+        logging::info << "Writing output to: " << output_filename() << std::endl;
         TFile out(output_filename().c_str(), "RECREATE");
         ana.write();
         out.Close();
-        info << "Done writing output." << std::endl;
+        logging::info << "Done writing output." << std::endl;
     }
 }
 } // namespace util

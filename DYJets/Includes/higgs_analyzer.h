@@ -8,6 +8,7 @@
 #include <TTreeReaderValue.h>
 
 #include "histo_set.h"
+#include "job.h"
 #include "muons.h"
 
 namespace po = boost::program_options;
@@ -16,11 +17,8 @@ namespace po = boost::program_options;
 class higgs_analyzer : private virtual util::histo_set, private virtual physics::muons_analyzer
 {
   public:
-    /**
-     * \brief Constructor.
-     * \param reader A \c TTreeReader that will iterate over all events.
-     */
-    explicit higgs_analyzer(TTreeReader &reader, const util::options &opt);
+    /// \brief Constructor.
+    explicit higgs_analyzer(util::job::info &info, const util::options &opt);
 
     /// \brief Function called for every event.
     void operator()();

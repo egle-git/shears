@@ -25,9 +25,6 @@ log:
     # Default value: yes
     #override root handler: yes
 
-bonzai dir: /afs/cern.ch/user/l/lmoureau/shearsop/bonzai-prod/13TeV_2016/Data/v6.2/catalogs/
-catalog: Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt
-
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]
@@ -41,3 +38,72 @@ muons:
     # Relative isolation cut
     # Default value: 0.25
     isolation: 0.25
+
+# List of available data/MC samples
+samples:
+    - name: data
+      type: data
+      bonzai dir: /afs/cern.ch/user/l/lmoureau/shearsop/bonzai-prod/13TeV_2016/Data/v6.2/catalogs/
+      catalog: Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt
+    - name: DYJets
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: ST-s-channel
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-all-VJetPruner-DMu.txt
+    - name: ST-t-channel
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin-all-VJetPruner-DMu.txt
+    - name: STbar-tW
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
+    - name: ST-tW
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
+    - name: ST-tW
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
+    - name: WToLNu
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-all-VJetPruner-DMu.txt
+    - name: WWTo2L2Nu
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-WWTo2L2Nu_13TeV-powheg-all-VJetPruner-DMu.txt
+    - name: WZ
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-WZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
+    - name: ZZ
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-ZZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
+    - name: TT
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
+      catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMu.txt
+
+# How to group MC samples when drawing Data/MC comparisons
+MC grouping:
+    - legend: "Z/#gamma^{*} #rightarrow ll"
+      samples: [ DYJets ]
+      color: 608 # kGreen - 8
+    - legend: "t#bar{t}"
+      samples: [ TT ]
+      color: 600 # kBlue
+    - legend: VV
+      samples: [ ZZ, WWTo2L2Nu, WZ ]
+      color: 633 # kRed + 1
+    - legend: Single top
+      samples: [ ST-s-channel, ST-t-channel, STbar-tW, ST-tW ]
+      color: 616 # kMagenta
+    - legend: W
+      samples: [ WToLNu ]
+      color: 800 # kOrange

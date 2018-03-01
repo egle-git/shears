@@ -8,28 +8,42 @@
 namespace util
 {
 
-job::job(const data::catalog &input)
+job::job()
     : _graceful_sigint(isatty(fileno(stdin)) || isatty(fileno(stdout)) || isatty(fileno(stderr))),
-      _sigint_caught(false),
-      _files(input.files())
+      _sigint_caught(false)
 {
 }
 
 std::vector<std::string> job::files() const
 {
-    std::size_t total = _files.size();
+    data::catalog cat = sample().catalog();
+    std::vector<std::string> files = cat.files();
+
+    std::size_t total = files.size();
     std::size_t begin = total * _job_id / _job_count;
     std::size_t end = std::min(begin + _max_files, total * (_job_id + 1) / _job_count);
 
-    assert(end <= _files.size());
+    assert(end <= files.size());
 
-    std::vector<std::string> files;
-    std::copy(_files.begin() + begin, _files.begin() + end, std::back_inserter(files));
-    return files;
+    return std::vector<std::string>(files.begin() + begin, files.begin() + end);
+}
+
+data::sample job::sample() const
+{
+    auto it = std::find_if(_samples.begin(), _samples.end(), [this](const data::sample &s) {
+        return s.name() == _sample_name;
+    });
+    if (it == _samples.end()) {
+        throw std::runtime_error("Sample \"" + _sample_name + "\" not found");
+    } else {
+        return *it;
+    }
 }
 
 void job::configure(const class options &opt)
 {
+    _samples = data::sample::load(opt);
+
     configure(opt.config["job"]);
     configure(opt.map);
 }
@@ -44,6 +58,7 @@ void job::configure(const po::variables_map &varmap)
     util::set_value_safe(varmap, _job_id, "job-id", "job id", [&](int val) -> bool {
         return val >= 0 && val < _job_count;
     });
+    _sample_name = varmap["sample"].as<std::string>();
 }
 
 template <class Container> void job::configure_common(const Container &container)
@@ -62,14 +77,18 @@ po::options_description job::options()
 {
     po::options_description options("Job control options");
     options.add_options()(
-        "max-events", po::value<long long>(), "Maximum number of events to read (-1 for no limit)")(
-        "max-files",
-        po::value<int>()->default_value(-1),
-        "Maximum number of files to read (-1 for no limit)")(
-        "job-id", po::value<int>()->default_value(0), "Job id (useful when running on batch)")(
-        "job-count",
-        po::value<int>()->default_value(1),
-        "Number of jobs (useful when running on batch)");
+        "sample,s", po::value<std::string>()->default_value("data"), "Name of the sample to use");
+    options.add_options()("max-events",
+                          po::value<long long>()->default_value(-1),
+                          "Maximum number of events to read (-1 for no limit)");
+    options.add_options()("max-files",
+                          po::value<int>()->default_value(-1),
+                          "Maximum number of files to read (-1 for no limit)");
+    options.add_options()(
+        "job-id", po::value<int>()->default_value(0), "Job id (useful when running on batch)");
+    options.add_options()("job-count",
+                          po::value<int>()->default_value(1),
+                          "Number of jobs (useful when running on batch)");
     return options;
 }
 

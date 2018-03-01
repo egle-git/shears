@@ -81,6 +81,7 @@ job.cc \
 logging.cc \
 muons.cc \
 options.cc \
+sample.cc \
 timer.cc
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o

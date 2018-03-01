@@ -16,6 +16,7 @@
 #include "chains.h"
 #include "logging.h"
 #include "options.h"
+#include "sample.h"
 #include "timer.h"
 
 namespace po = boost::program_options;
@@ -46,15 +47,18 @@ class job
     bool _fatal_exceptions = false;
     bool _graceful_sigint;
     std::atomic<bool> _sigint_caught;
-
-    std::vector<std::string> _files;
+    std::vector<data::sample> _samples;
+    std::string _sample_name;
 
   public:
-    /// \brief Constructs a job to run on files from the given catalog.
-    explicit job(const data::catalog &input);
+    /// \brief Constructor.
+    explicit job();
 
     /// \brief Retrieves the list of files that will be processed.
     std::vector<std::string> files() const;
+
+    /// \brief Retrieves the sample that will be processed.
+    data::sample sample() const;
 
     /**
      * \brief Loops on data.

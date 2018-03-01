@@ -3,6 +3,7 @@
 #include "job.h"
 #include "logging.h"
 #include "options.h"
+#include "sample.h"
 #include "timer.h"
 
 int main(int argc, char **argv)
@@ -11,11 +12,7 @@ int main(int argc, char **argv)
         util::options opt;
         opt.default_init(argc, argv, "higgs.yml", {higgs_analyzer::options(), util::job::options()});
 
-        std::string fileName(opt.config["catalog"].as<std::string>());
-        std::string bonzaiDir(opt.config["bonzai dir"].as<std::string>());
-        data::catalog c(fileName, bonzaiDir);
-
-        util::job j(c);
+        util::job j;
         j.configure(opt);
         j.run<higgs_analyzer>(opt);
 

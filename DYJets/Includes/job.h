@@ -9,6 +9,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #include <TChain.h>
+#include <TFile.h>
 #include <TTreeReader.h>
 
 #include "ansi_seq.h"
@@ -49,16 +50,20 @@ class job
     std::atomic<bool> _sigint_caught;
     std::vector<data::sample> _samples;
     std::string _sample_name;
+    std::string _analyzer_name;
 
   public:
     /// \brief Constructor.
-    explicit job();
+    explicit job(const std::string &analyzer_name);
 
     /// \brief Retrieves the list of files that will be processed.
     std::vector<std::string> files() const;
 
     /// \brief Retrieves the sample that will be processed.
     data::sample sample() const;
+
+    /// \brief Retrieves the name of the output file.
+    std::string output_filename() const;
 
     /**
      * \brief Loops on data.
@@ -194,7 +199,11 @@ template <class Analyzer, class... Args> void job::run(Args... args)
             }
         }
 
+        info << "Writing output to: " << output_filename() << std::endl;
+        TFile out(output_filename().c_str(), "RECREATE");
         ana.write();
+        out.Close();
+        info << "Done writing output." << std::endl;
     }
 }
 } // namespace util

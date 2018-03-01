@@ -12,7 +12,7 @@ int main(int argc, char **argv)
         util::options opt;
         opt.default_init(argc, argv, "higgs.yml", {higgs_analyzer::options(), util::job::options()});
 
-        util::job j;
+        util::job j("higgs");
         j.configure(opt);
         j.run<higgs_analyzer>(opt);
 

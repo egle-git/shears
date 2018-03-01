@@ -36,9 +36,7 @@ void higgs_analyzer::operator()()
 
 void higgs_analyzer::write()
 {
-    TFile output("higgs_output.root", "RECREATE");
     histo_set::write();
-    output.Close();
 }
 
 po::options_description higgs_analyzer::options()

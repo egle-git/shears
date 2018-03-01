@@ -56,6 +56,17 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
                        << std::endl;
     }
 
+    regex_t primEvtLine;
+    rc = regcomp(
+        &primEvtLine, "[#*][[:space:]]*primary events[[:space:]:=]\\+\\([[:digit:]]\\+\\)", 0);
+    if (rc) {
+        char buffer[256];
+        regerror(rc, &primEvtLine, buffer, sizeof(buffer));
+        buffer[sizeof(buffer) - 1] = 0;
+        logging::fatal << "Bug found in " << __FILE__ << ":" << __LINE__ << ": " << buffer
+                       << std::endl;
+    }
+
     if (isRootFile(fullpath.c_str())) {
         logging::info << "Loading file: " << fullpath << endl;
         _files.push_back(fullpath);
@@ -101,6 +112,15 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
                     _lumi = strtod(line + pmatch[1].rm_so, 0);
                     if (_lumi == 0) {
                         logging::error << "Integrated luminosity parameter value, "
+                                       << line + pmatch[1].rm_so << " found in file " << fullpath
+                                       << " is not valid." << std::endl;
+                    }
+                } else if (!regexec(
+                               &primEvtLine, line, sizeof(pmatch) / sizeof(pmatch[0]), pmatch, 0)) {
+                    line[pmatch[1].rm_eo] = 0;
+                    _primary_events = strtoll(line + pmatch[1].rm_so, 0, 10);
+                    if (_primary_events == 0) {
+                        logging::error << "Primary events parameter value, "
                                        << line + pmatch[1].rm_so << " found in file " << fullpath
                                        << " is not valid." << std::endl;
                     }

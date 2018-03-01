@@ -8,6 +8,10 @@
 
 class TChain;
 
+/// \brief Classes describing data and datasets
+namespace data
+{
+
 /**
  * \brief Represents the contents of a catalog.
  */
@@ -81,5 +85,6 @@ class catalog
   private:
     void initialize_chains();
 };
+} // namespace data
 
 #endif // CATALOG_H

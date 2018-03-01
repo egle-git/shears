@@ -51,7 +51,7 @@ class job
 
   public:
     /// \brief Constructs a job to run on files from the given catalog.
-    explicit job(const catalog &input);
+    explicit job(const data::catalog &input);
 
     /// \brief Retrieves the list of files that will be processed.
     std::vector<std::string> files() const;

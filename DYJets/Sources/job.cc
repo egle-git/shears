@@ -8,7 +8,7 @@
 namespace util
 {
 
-job::job(const catalog &input)
+job::job(const data::catalog &input)
     : _graceful_sigint(isatty(fileno(stdin)) || isatty(fileno(stdout)) || isatty(fileno(stderr))),
       _sigint_caught(false),
       _files(input.files())

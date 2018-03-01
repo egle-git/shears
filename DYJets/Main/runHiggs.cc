@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 
         std::string fileName(opt.config["catalog"].as<std::string>());
         std::string bonzaiDir(opt.config["bonzai dir"].as<std::string>());
-        catalog c(fileName, bonzaiDir);
+        data::catalog c(fileName, bonzaiDir);
 
         util::job j(c);
         j.configure(opt);

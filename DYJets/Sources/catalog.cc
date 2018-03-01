@@ -13,6 +13,9 @@
 
 namespace logging = util::logging;
 
+namespace data
+{
+
 catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std::size_t maxFiles)
     : _event_chain(std::make_shared<TChain>()),
       _bonzai_header_chain(std::make_shared<TChain>()),
@@ -176,3 +179,4 @@ void catalog::initialize_chains()
     _chains_initialized = true;
     logging::info << "Chains initialized." << std::endl;
 }
+} // namespace data

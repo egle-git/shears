@@ -214,7 +214,7 @@ int main(int argc, char **argv)
             TString fullPath;
             ZJets::canonizeInputFilePath(
                 dataBonzaiDir, TString::Format(input, lepSel.Data()), &fullPath);
-            catalog c(fullPath.Data(), dataBonzaiDir.Data());
+            data::catalog c(fullPath.Data(), dataBonzaiDir.Data());
             lumi = c.lumi();
             if (lumi > 0) {
                 std::cout << "Lumi read from catalog: " << lumi << std::endl;

@@ -130,12 +130,13 @@ template <class Analyzer, class... Args> void job::run(Args... args)
 {
     using namespace logging;
 
-    if (files().empty()) {
+    std::vector<std::string> files = job::files();
+    if (files.empty()) {
         throw std::runtime_error("No file set for input.");
     } else {
         logging::info << "Initializing reader (this can take a while)..." << std::endl;
 
-        chains ch(files());
+        chains ch(files);
         TTreeReader reader(ch.events().get());
 
         Analyzer ana(reader, args...);

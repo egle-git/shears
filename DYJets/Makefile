@@ -43,6 +43,7 @@ ROOTCFLAGS   := $(subst -I/,-isystem/,$(ROOTCFLAGS))
 ROOTCFLAGS   := $(filter-out -W%,$(ROOTCFLAGS))
 
 LIB = \
+    Table \
     TreePlayer \
     LHAPDF \
     yaml-cpp \
@@ -86,6 +87,7 @@ higgs_analyzer.cc \
 histo_set.cc \
 job.cc \
 logging.cc \
+mc_group.cc \
 muons.cc \
 options.cc \
 sample.cc \

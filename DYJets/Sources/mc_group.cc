@@ -1,0 +1,137 @@
+#include "mc_group.h"
+
+#include <stdexcept>
+
+#include <TFileIter.h>
+#include <TH1.h>
+
+#include "logging.h"
+
+namespace data
+{
+
+void mc_group::add_histograms(std::set<std::string> &histos)
+{
+    for (std::shared_ptr<TFile> &file : _files) {
+        if (file == nullptr) {
+            continue;
+        }
+
+        // Iterate on keys
+        for (TFileIter it(file.get()); it < it.TotalKeys(); ++it) {
+            histos.insert(it.GetKeyName());
+        }
+    }
+}
+
+TH1 *mc_group::get(const std::string &name)
+{
+    TH1 *res = nullptr;
+    for (std::shared_ptr<TFile> &file : _files) {
+        if (file == nullptr) {
+            continue;
+        }
+
+        TH1 *histo = nullptr;
+        file->GetObject(name.c_str(), histo);
+        if (histo == nullptr) {
+            util::logging::warn << "Histogram " << name << " not found in file "
+                                << file->GetName() << std::endl;
+            continue;
+        }
+
+        if (res == nullptr) {
+            res = histo;
+        } else {
+            res->Add(histo);
+        }
+    }
+    if (res != nullptr) {
+        res->SetStats(0);
+        res->SetFillStyle(1001);
+        res->SetFillColor(_color);
+        res->SetLineColor(_color);
+    }
+    return res;
+}
+
+void mc_group::init(const std::vector<sample> &all_samples)
+{
+    bool all_found = true;
+    for (const std::string &name : _sample_names) {
+        // Find sample
+        bool found = false;
+        for (const sample &sample : all_samples) {
+            if (name == sample.name()) {
+                _samples.push_back(sample);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw std::runtime_error(
+                "Sample " + name + " (required by MC group " + _legend + ") doesn't exist.");
+        }
+
+        // Open file
+        // FIXME Hardcoding
+        std::shared_ptr<TFile> file =
+            _samples.back().histogram_file("higgs", "higgs-histograms-max-files-1");
+        _files.push_back(file);
+        if (file == nullptr) {
+            util::logging::warn << "File not found for sample " << name << std::endl;
+            all_found = false;
+        }
+    }
+    if (!all_found) {
+        if (_required) {
+            throw std::runtime_error("Missing files for group " + _legend);
+        } else {
+            util::logging::warn << "Sample " << _legend << " is not complete" << std::endl;
+        }
+    }
+}
+
+std::vector<mc_group> mc_group::load(const util::options &opt,
+                                     const std::vector<sample> &all_samples)
+{
+    std::vector<mc_group> groups = opt.config["MC grouping"].as<std::vector<mc_group>>();
+    for (mc_group &g : groups) {
+        g.init(all_samples);
+    }
+    return groups;
+}
+} // namespace data
+
+/// \cond
+namespace YAML
+{
+
+template <> struct convert<data::mc_group>
+{
+    static bool decode(const Node &node, data::mc_group &group)
+    {
+        if (!node["legend"]) {
+            throw std::runtime_error("MC group legend is not set");
+        }
+        group._legend = node["legend"].as<std::string>();
+
+        if (!node["color"]) {
+            throw std::runtime_error("MC group color is not set for " + group._legend);
+        }
+        group._color = node["color"].as<int>();
+
+        if (node["required"]) {
+            group._required = node["required"].as<bool>();
+        }
+
+        if (!node["samples"]) {
+            throw std::runtime_error("MC group list of samples is not set for " + group._legend);
+        }
+        group._sample_names = node["samples"].as<std::vector<std::string>>();
+
+        return true;
+    }
+};
+} // namespace YAML
+/// \endcond

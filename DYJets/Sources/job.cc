@@ -49,6 +49,10 @@ data::sample job::sample() const
 
 std::string job::output_dirname() const
 {
+    if (!_output_dir.empty()) {
+        return _output_dir;
+    }
+
     std::string name = _analyzer_name + "-histograms";
     if (_max_files < std::numeric_limits<int>::max()) {
         name += "-max-files-" + std::to_string(_max_files);
@@ -78,6 +82,9 @@ void job::configure(const po::variables_map &varmap)
         return val >= 0 && val < _job_count;
     });
     _sample_name = varmap["sample"].as<std::string>();
+    if (varmap.count("output-dir") > 0) {
+        _output_dir = varmap["output-dir"].as<std::string>();
+    }
 }
 
 template <class Container> void job::configure_common(const Container &container)
@@ -97,6 +104,7 @@ po::options_description job::options()
     po::options_description options("Job control options");
     options.add_options()(
         "sample,s", po::value<std::string>()->default_value("data"), "Name of the sample to use");
+    options.add_options()("output-dir,o", po::value<std::string>(), "Output directory");
     options.add_options()("max-events",
                           po::value<long long>()->default_value(-1),
                           "Maximum number of events to read (-1 for no limit)");

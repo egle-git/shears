@@ -62,6 +62,7 @@ class job
     std::vector<data::sample> _samples;
     std::string _sample_name;
     std::string _analyzer_name;
+    std::string _output_dir;
 
   public:
     /// \brief Constructor.
@@ -215,7 +216,7 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
 
         logging::info << "Writing output into: " << output_dirname() << std::endl;
         std::shared_ptr<TFile> out = sample().histogram_file(
-            _analyzer_name, output_dirname(), "RECREATE", _job_count > 0 ? _job_id : -1);
+            _analyzer_name, output_dirname(), "RECREATE", _job_count > 1 ? _job_id : -1);
         out->cd();
         ana.write();
         out->Close();

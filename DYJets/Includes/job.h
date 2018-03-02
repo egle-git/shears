@@ -76,18 +76,18 @@ class job
     /**
      * \brief Loops on data.
      *
-     * This function creates an instance of the \c Analyzer class, passing a \c TTreeReader as the
+     * This function creates an instance of the \c Analyzer class, passing a \ref job_info as the
      * first argument, followed by any arguments passed to this function:
      *
      * ~~~
-     * new Analyser(<TTreeReader>, <args...>);
+     * new Analyzer(<job_info>, <args...>);
      * ~~~
      *
      * The \c Analyzer class should have the following methods:
      *
      * ~~~{.cpp}
-     * <return value ignored> operator()();
-     * <return value ignored> write(int);
+     * void operator()();
+     * void write();
      * ~~~
      *
      * The `operator()` method will be called for every event. `write()` will be called once at

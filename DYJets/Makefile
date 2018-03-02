@@ -82,7 +82,8 @@ logging.cc \
 muons.cc \
 options.cc \
 sample.cc \
-timer.cc
+timer.cc \
+weights.cc
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o
 PLOTRESPMATRIX=Main/plotRespMatrix

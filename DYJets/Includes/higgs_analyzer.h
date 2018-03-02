@@ -10,11 +10,14 @@
 #include "histo_set.h"
 #include "job.h"
 #include "muons.h"
+#include "weights.h"
 
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
-class higgs_analyzer : private virtual util::histo_set, private virtual physics::muons_analyzer
+class higgs_analyzer : private virtual util::histo_set,
+                       private virtual physics::muons_analyzer,
+                       private virtual physics::weights_analyzer
 {
   public:
     /// \brief Constructor.

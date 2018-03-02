@@ -11,7 +11,8 @@
 #include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
-    : muons_analyzer(info.reader, opt)
+    : muons_analyzer(info.reader, opt),
+      weights_analyzer(info)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -19,6 +20,8 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
 void higgs_analyzer::operator()()
 {
     using namespace physics;
+
+    weights_analyzer::operator()();
 
     std::vector<lepton> muons = get_muons();
 
@@ -36,6 +39,7 @@ void higgs_analyzer::operator()()
 
 void higgs_analyzer::write()
 {
+    weights_analyzer::write();
     histo_set::write();
 }
 

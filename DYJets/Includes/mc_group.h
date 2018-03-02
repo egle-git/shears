@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 
+#include "logging.h"
 #include "sample.h"
 
 class TFile;
@@ -19,16 +20,23 @@ class mc_group
   private:
     friend struct YAML::convert<data::mc_group>;
 
-    // Always available
+    struct sample_data
+    {
+        double scale = 1;
+        data::sample sample;
+        std::shared_ptr<TFile> file = nullptr;
+    };
+
     bool _required = false;
     double _scale_factor = 1;
     int _color;
     std::string _legend;
+    std::vector<sample_data> _sample_data;
     std::vector<std::string> _sample_names;
-    std::vector<sample> _samples;
-    std::vector<std::shared_ptr<TFile>> _files;
 
   public:
+    virtual ~mc_group() = default;
+
     /// \brief Returns whether the group is required.
     bool required() const { return _required; }
 

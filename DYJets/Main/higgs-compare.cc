@@ -47,6 +47,7 @@ int main(int argc, char **argv)
             upper.Draw();
             upper.cd();
             */
+            canvas.SetLogy();
 
             THStack stack("stack", "");
             for (auto it = groups.rbegin(); it != groups.rend(); ++it) {
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
             stack.GetYaxis()->SetTitleSize(0.04);
             stack.GetYaxis()->SetTitleOffset(1.32);
             stack.SetMinimum(8);
-//             stack.SetMaximum(100 * stack.GetMaximum());
+//            stack.SetMaximum(100 * stack.GetMaximum());
 
             /*
             // Get back to the canvas

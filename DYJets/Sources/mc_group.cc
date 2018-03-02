@@ -12,13 +12,13 @@ namespace data
 
 void mc_group::add_histograms(std::set<std::string> &histos)
 {
-    for (std::shared_ptr<TFile> &file : _files) {
-        if (file == nullptr) {
+    for (sample_data &sd : _sample_data) {
+        if (sd.file == nullptr) {
             continue;
         }
 
         // Iterate on keys
-        for (TFileIter it(file.get()); it < it.TotalKeys(); ++it) {
+        for (TFileIter it(sd.file.get()); it < it.TotalKeys(); ++it) {
             histos.insert(it.GetKeyName());
         }
     }
@@ -27,18 +27,20 @@ void mc_group::add_histograms(std::set<std::string> &histos)
 TH1 *mc_group::get(const std::string &name)
 {
     TH1 *res = nullptr;
-    for (std::shared_ptr<TFile> &file : _files) {
-        if (file == nullptr) {
+    for (sample_data &sd : _sample_data) {
+        if (sd.file == nullptr) {
             continue;
         }
 
         TH1 *histo = nullptr;
-        file->GetObject(name.c_str(), histo);
+        sd.file->GetObject(name.c_str(), histo);
         if (histo == nullptr) {
             util::logging::warn << "Histogram " << name << " not found in file "
-                                << file->GetName() << std::endl;
+                                << sd.file->GetName() << std::endl;
             continue;
         }
+
+        histo->Scale(sd.scale);
 
         if (res == nullptr) {
             res = histo;
@@ -60,29 +62,45 @@ void mc_group::init(const std::vector<sample> &all_samples)
 {
     bool all_found = true;
     for (const std::string &name : _sample_names) {
+        sample_data sd;
+
         // Find sample
         bool found = false;
         for (const sample &sample : all_samples) {
             if (name == sample.name()) {
-                _samples.push_back(sample);
+                sd.sample = sample;
                 found = true;
                 break;
             }
         }
         if (!found) {
-            throw std::runtime_error(
-                "Sample " + name + " (required by MC group " + _legend + ") doesn't exist.");
+            throw std::runtime_error("Sample " + name + " (required by MC group " + _legend +
+                                     ") doesn't exist.");
         }
 
         // Open file
         // FIXME Hardcoding
-        std::shared_ptr<TFile> file =
-            _samples.back().histogram_file("higgs", "higgs-histograms-max-files-1");
-        _files.push_back(file);
-        if (file == nullptr) {
+        sd.file = sd.sample.histogram_file("higgs", "higgs-histograms-max-files-1");
+
+        if (sd.file == nullptr) {
             util::logging::warn << "File not found for sample " << name << std::endl;
             all_found = false;
+        } else {
+            // Read job info histogram
+            TH1 *job_info = nullptr;
+            sd.file->GetObject("_job_info", job_info);
+            if (job_info == nullptr) {
+                throw std::runtime_error("File " + std::string(sd.file->GetName()) +
+                                         "doesn't have the _job_info histogram.");
+            }
+
+            double xsec = job_info->GetBinContent(3);
+            double wsum = job_info->GetBinContent(4);
+
+            sd.scale *= xsec / wsum;
         }
+
+        _sample_data.push_back(sd);
     }
     if (!all_found) {
         if (_required) {

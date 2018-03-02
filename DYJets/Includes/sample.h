@@ -1,10 +1,13 @@
 #ifndef SAMPLE_H
 #define SAMPLE_H
 
+#include <memory>
 #include <string>
 
 #include "catalog.h"
 #include "options.h"
+
+class TFile;
 
 namespace data
 {
@@ -35,6 +38,23 @@ class sample
   public:
     /// \brief Retrives the catalog for this sample.
     data::catalog catalog() const;
+
+    /**
+     * \brief Finds and opens the file containing histograms for this sample.
+     *
+     * If \c directory doesn't exist, it is created first (except when \c mode is \c "READ").
+     *
+     * If the file couldn't be opened, returns a null pointer.
+     *
+     * \param analyzer_name A unique prefix for the analyzer
+     * \param directory     The directory in which files are stored
+     * \param mode          Passed to \c TFile::Open.
+     * \param job_id        The job id If the sample is divided in jobs, else \c -1.
+     */
+    std::shared_ptr<TFile> histogram_file(const std::string &analyzer_name,
+                                          const std::string &directory,
+                                          const std::string &mode = "READ",
+                                          int job_id = -1) const;
 
     /// \brief Retrives the name of the sample.
     std::string name() const { return _name; }

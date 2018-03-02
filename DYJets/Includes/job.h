@@ -71,7 +71,7 @@ class job
     data::sample sample() const;
 
     /// \brief Retrieves the name of the output file.
-    std::string output_filename() const;
+    std::string output_dirname() const;
 
     /**
      * \brief Loops on data.
@@ -213,10 +213,12 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
             }
         }
 
-        logging::info << "Writing output to: " << output_filename() << std::endl;
-        TFile out(output_filename().c_str(), "RECREATE");
+        logging::info << "Writing output into: " << output_dirname() << std::endl;
+        std::shared_ptr<TFile> out = sample().histogram_file(
+            _analyzer_name, output_dirname(), "RECREATE", _job_count > 0 ? _job_id : -1);
+        out->cd();
         ana.write();
-        out.Close();
+        out->Close();
         logging::info << "Done writing output." << std::endl;
     }
 }

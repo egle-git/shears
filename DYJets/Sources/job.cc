@@ -47,19 +47,15 @@ data::sample job::sample() const
     }
 }
 
-std::string job::output_filename() const
+std::string job::output_dirname() const
 {
-    std::string name = _analyzer_name + "-" + sample().name();
+    std::string name = _analyzer_name + "-histograms";
     if (_max_files < std::numeric_limits<int>::max()) {
         name += "-max-files-" + std::to_string(_max_files);
     }
     if (_max_events < std::numeric_limits<long long>::max()) {
         name += "-max-events-" + std::to_string(_max_events);
     }
-    if (_job_count > 1) {
-        name += "-job-" + std::to_string(_job_id);
-    }
-    name += ".root";
     return name;
 }
 

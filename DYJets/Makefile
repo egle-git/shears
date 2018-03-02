@@ -42,7 +42,14 @@ ROOTCFLAGS   := $(subst -I/,-isystem/,$(ROOTCFLAGS))
 # ROOT includes -W flags and shouldn't
 ROOTCFLAGS   := $(filter-out -W%,$(ROOTCFLAGS))
 
-LIB = TreePlayer LHAPDF yaml-cpp boost_program_options
+LIB = \
+    TreePlayer \
+    LHAPDF \
+    yaml-cpp \
+    boost_filesystem \
+    boost_program_options \
+    boost_system \
+
 LIBLIST = $(addprefix -l, $(LIB))
 
 LIBDIR = RooUnfold $(LHAPDFPATH)lib $(YAMLCPPPATH)/lib

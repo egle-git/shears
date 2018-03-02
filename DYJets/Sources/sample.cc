@@ -2,10 +2,45 @@
 
 #include <stdexcept>
 
+#include <boost/filesystem.hpp>
+
+#include <TFile.h>
+
 namespace data
 {
 
 catalog sample::catalog() const { return data::catalog(_catalog, _bonzai_dir); }
+
+std::shared_ptr<TFile> sample::histogram_file(const std::string &analyzer_name,
+                                              const std::string &directory,
+                                              const std::string &mode,
+                                              int job_id) const
+{
+    using namespace boost::filesystem;
+
+    // Create output directory if needed and it doesn't exist
+    if (mode != "READ" && !is_directory(directory)) {
+        if (exists(directory)) {
+            // "directory" exists and is not a directory...
+            throw std::runtime_error("Path " + directory + " exists and is not a directory");
+        } else {
+            util::logging::info << "Creating directory " << directory << std::endl;
+            create_directories(directory);
+        }
+    }
+
+    // Construct the filename
+    std::string filename = directory + "/" + analyzer_name + "-" + name();
+    if (job_id >= 0) {
+        filename += "-" + std::to_string(job_id);
+    }
+    filename += ".root";
+
+    util::logging::debug << "Histogram file for sample " << name() << ": " << filename << std::endl;
+
+    // Open the file
+    return std::shared_ptr<TFile>(TFile::Open(filename.c_str(), mode.c_str()));
+}
 
 std::vector<sample> sample::load(const util::options &opt)
 {

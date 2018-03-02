@@ -39,7 +39,11 @@ std::shared_ptr<TFile> sample::histogram_file(const std::string &analyzer_name,
     util::logging::debug << "Histogram file for sample " << name() << ": " << filename << std::endl;
 
     // Open the file
-    return std::shared_ptr<TFile>(TFile::Open(filename.c_str(), mode.c_str()));
+    if (mode != "READ" || exists(filename)) {
+        return std::shared_ptr<TFile>(TFile::Open(filename.c_str(), mode.c_str()));
+    } else {
+        return nullptr;
+    }
 }
 
 std::vector<sample> sample::load(const util::options &opt)

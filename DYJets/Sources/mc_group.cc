@@ -51,6 +51,7 @@ TH1 *mc_group::get(const std::string &name)
         res->SetFillStyle(1001);
         res->SetFillColor(_color);
         res->SetLineColor(_color);
+        res->Scale(_scale_factor);
     }
     return res;
 }
@@ -123,6 +124,10 @@ template <> struct convert<data::mc_group>
 
         if (node["required"]) {
             group._required = node["required"].as<bool>();
+        }
+
+        if (node["scale factor"]) {
+            group._scale_factor = node["scale factor"].as<double>();
         }
 
         if (!node["samples"]) {

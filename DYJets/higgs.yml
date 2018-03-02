@@ -93,8 +93,10 @@ samples:
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
     - legend: "Z/#gamma^{*} #rightarrow ll"
+      required: yes
       samples: [ DYJets ]
-      color: 608 # kGreen - 8
+      color: 408 # kGreen - 8
+      #scale factor: 1
     - legend: "t#bar{t}"
       samples: [ TT ]
       color: 600 # kBlue

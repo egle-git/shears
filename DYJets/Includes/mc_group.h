@@ -21,6 +21,7 @@ class mc_group
 
     // Always available
     bool _required = false;
+    double _scale_factor = 1;
     int _color;
     std::string _legend;
     std::vector<std::string> _sample_names;

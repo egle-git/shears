@@ -24,7 +24,7 @@ class catalog
 
     std::vector<std::string> _files;
     double _lumi, _xsec;
-    long long _primary_events;
+    long long _primary_events = -1;
 
   public:
     /**

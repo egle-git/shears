@@ -23,9 +23,9 @@ weights_analyzer::weights_analyzer(util::job::info &info)
     TTreeReaderValue<int> InEvtCount(reader, "InEvtCount");
 
     while (reader.Next()) {
-        if (InEvtWeightSums.GetSize() > 0) {
-            _weights_sum += EvtWeightSums[0];
-            _weights_sum_in_chain += InEvtWeightSums[0];
+        if (EvtWeightSums.GetSize() > 0) {
+            _weights_sum_in_chain += EvtWeightSums[0];
+            _weights_sum += InEvtWeightSums[0];
         }
         _primary_events_in_chain += *InEvtCount;
     }
@@ -73,6 +73,6 @@ void weights_analyzer::write()
     job_info_average.GetXaxis()->SetBinLabel(2, "xsec"); // For MC
     job_info_average.SetBinContent(2, _xsec);
 
-    info << "Processed fraction of sample: " << fraction_processed << std::endl;
+    util::logging::info << "Processed fraction of sample: " << fraction_processed << std::endl;
 }
 } // namespace physics

@@ -67,7 +67,7 @@ int main(int argc, char **argv)
             stack.GetYaxis()->SetTitle("# Events");
             stack.GetYaxis()->SetTitleSize(0.04);
             stack.GetYaxis()->SetTitleOffset(1.32);
-            stack.SetMinimum(8);
+//             stack.SetMinimum(8);
 //            stack.SetMaximum(100 * stack.GetMaximum());
 
             /*

@@ -6,14 +6,16 @@
 #include <TTreeReaderArray.h>
 
 #include "histo_set.h"
+#include "job.h"
 #include "lepton.h"
 #include "options.h"
+#include "weights.h"
 
 namespace physics
 {
 
 /// \brief A muon-only analysis.
-class muons_analyzer : private virtual util::histo_set
+class muons_analyzer : private virtual util::histo_set, private virtual weights_analyzer
 {
     TTreeReaderArray<float> MuPt;
     TTreeReaderArray<float> MuEta;
@@ -29,7 +31,7 @@ class muons_analyzer : private virtual util::histo_set
 
   public:
     /// \brief Constructor.
-    explicit muons_analyzer(TTreeReader &reader, const util::options &opt);
+    explicit muons_analyzer(util::job::info &info, const util::options &opt);
 
     /// \brief Configures the analyzer from user input.
     void configure(const util::options &opt);

@@ -11,8 +11,8 @@
 #include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
-    : muons_analyzer(info.reader, opt),
-      weights_analyzer(info)
+    : weights_analyzer(info),
+      muons_analyzer(info, opt)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -33,7 +33,7 @@ void higgs_analyzer::operator()()
             return;
         }
         fill_muons(muons, "Zinc0jet");
-        fill("mass", "Zinc0jet", pZ.M());
+        fill("mass", "Zinc0jet", pZ.M(), global_weight());
     }
 }
 

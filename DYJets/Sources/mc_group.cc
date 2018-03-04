@@ -35,8 +35,8 @@ TH1 *mc_group::get(const std::string &name)
         TH1 *histo = nullptr;
         sd.file->GetObject(name.c_str(), histo);
         if (histo == nullptr) {
-            util::logging::warn << "Histogram " << name << " not found in file "
-                                << sd.file->GetName() << std::endl;
+            util::logging::warn << "Histogram " << name << " not found in file " << sd.file->GetName()
+                                << std::endl;
             continue;
         }
 
@@ -86,7 +86,7 @@ void mc_group::init(const std::vector<sample> &all_samples)
             util::logging::warn << "File not found for sample " << name << std::endl;
             all_found = false;
         } else {
-            // Read job info histogram
+            // Read job info histograms
             TH1 *job_info = nullptr;
             sd.file->GetObject("_job_info", job_info);
             if (job_info == nullptr) {
@@ -94,8 +94,15 @@ void mc_group::init(const std::vector<sample> &all_samples)
                                          "doesn't have the _job_info histogram.");
             }
 
-            double xsec = job_info->GetBinContent(3);
-            double wsum = job_info->GetBinContent(4);
+            TH1 *job_info_average = nullptr;
+            sd.file->GetObject("_job_info_average", job_info_average);
+            if (job_info == nullptr) {
+                throw std::runtime_error("File " + std::string(sd.file->GetName()) +
+                                         "doesn't have the _job_info_average histogram.");
+            }
+
+            double wsum = job_info->GetBinContent(2);
+            double xsec = job_info_average->GetBinContent(2);
 
             sd.scale *= xsec / wsum;
         }

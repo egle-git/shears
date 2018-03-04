@@ -21,6 +21,8 @@ class weights_analyzer : private virtual util::histo_set
 {
     TTreeReaderArray<double> EvtWeights;
 
+    bool _ismc;
+
     long long _primary_events_in_chain = 0;
     long long _primary_events_total = 0;
 
@@ -28,10 +30,13 @@ class weights_analyzer : private virtual util::histo_set
     long long _events_in_chain = 0;
 
     double _processed_weights_sum = 0;
+    double _weights_sum = 0;
     double _weights_sum_in_chain = 0;
 
     double _xsec;
     double _lumi;
+
+    double _global_weight;
 
   public:
     /// \brief Constructor.
@@ -44,13 +49,22 @@ class weights_analyzer : private virtual util::histo_set
     void write();
 
     /// \brief Returns the size of the current weight vector.
-    std::size_t size() { return EvtWeights.GetSize(); }
+    std::size_t weights_count() { return EvtWeights.GetSize(); }
 
     /// \brief Returns the contents of the current weight vector at index \c i (checked).
-    double at(std::size_t i) { return EvtWeights.At(i); }
+    double weight_at(std::size_t i) { return EvtWeights.At(i); }
 
-    /// \brief Returns the contents of the current weight vector at index \c i (unchecked).
-    double &operator[](std::size_t i) { return EvtWeights[i]; }
+    /// \brief Returns the global weight of the event.
+    double global_weight() const { return _global_weight; }
+
+    /// \brief Edits the global weight of the event.
+    void use_weight(double weight) { _global_weight *= weight; }
+
+    /// \brief Checks whether the current event is from MC.
+    bool ismc() const { return _ismc; }
+
+    /// \brief Checks whether the current event is real data.
+    bool isdata() const { return !_ismc; }
 };
 }
 

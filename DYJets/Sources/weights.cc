@@ -1,10 +1,13 @@
 #include "weights.h"
 
+#include <iostream>
+
 namespace physics
 {
 
 weights_analyzer::weights_analyzer(util::job::info &info)
     : EvtWeights(info.reader, "EvtWeights"),
+      _ismc(info.catalog.primary_events() <= 0), // FIXME Improve ?
       _primary_events_total(info.catalog.primary_events()),
       _events_in_chain(info.reader.GetEntries(true)),
       _xsec(info.catalog.xsec()),
@@ -16,11 +19,13 @@ weights_analyzer::weights_analyzer(util::job::info &info)
 
     TTreeReader reader(info.chains.bonzai_header().get());
     TTreeReaderArray<double> EvtWeightSums(reader, "EvtWeightSums");
+    TTreeReaderArray<double> InEvtWeightSums(reader, "InEvtWeightSums");
     TTreeReaderValue<int> InEvtCount(reader, "InEvtCount");
 
     while (reader.Next()) {
-        if (EvtWeightSums.GetSize() > 0) {
-            _weights_sum_in_chain += EvtWeightSums[0];
+        if (InEvtWeightSums.GetSize() > 0) {
+            _weights_sum += EvtWeightSums[0];
+            _weights_sum_in_chain += InEvtWeightSums[0];
         }
         _primary_events_in_chain += *InEvtCount;
     }
@@ -28,54 +33,46 @@ weights_analyzer::weights_analyzer(util::job::info &info)
 
 void weights_analyzer::operator()()
 {
-    if (size() > 0) {
-        _processed_weights_sum += at(0);
+    _global_weight = weight_at(0);
+    if (weights_count() > 0) {
+        _processed_weights_sum += weight_at(0);
     }
     _processed_events++;
 }
 
 void weights_analyzer::write()
 {
-    // Fraction of events that was available in the chain
-    double fraction_in_chain = double(_primary_events_in_chain) / _primary_events_total;
-
-    // Fraction of events from the chain that was processed
-    double fraction_of_chain;
-    if (_weights_sum_in_chain != 0) {
-        fraction_of_chain = _processed_weights_sum / _weights_sum_in_chain;
+    double fraction_processed = 1;
+    if (ismc()) {
+        fraction_processed *= _processed_weights_sum / _weights_sum_in_chain;
     } else {
-        fraction_of_chain = double(_processed_events) / _events_in_chain;
+        // Fraction of all events that was present in chain
+        fraction_processed *= double(_primary_events_in_chain) / _primary_events_total;
+        // Fraction of events in the chain that was processed
+        fraction_processed *= double(_processed_events) / _events_in_chain;
     }
 
-    // Fraction of events that was processed
-    double fraction_processed = fraction_in_chain * fraction_of_chain;
-
-    // Declare and fill info histogram
+    // Declare and fill summed info histogram
     declare("_job_info", "Job information", 4, 0, 4);
     histogram_type &job_info = get("_job_info");
-    int bin = 1;
 
-    job_info.GetXaxis()->SetBinLabel(bin, "fraction_processed");
-    job_info.SetBinContent(bin, fraction_processed);
+    job_info.GetXaxis()->SetBinLabel(1, "fraction_processed"); // For data
+    job_info.SetBinContent(1, fraction_processed);
 
-    bin++;
+    job_info.GetXaxis()->SetBinLabel(2, "weights_sum"); // For MC
+    job_info.SetBinContent(2, _weights_sum);
 
-    job_info.GetXaxis()->SetBinLabel(bin, "lumi_processed");
-    job_info.SetBinContent(bin, _lumi * fraction_processed);
+    // Declare and fill info histogram
+    declare("_job_info_average", "Job information", 4, 0, 4);
+    histogram_type &job_info_average = get("_job_info_average");
+    job_info_average.SetBit(TH1::kIsAverage);
 
-    bin++;
+    job_info_average.GetXaxis()->SetBinLabel(1, "lumi"); // For data
+    job_info_average.SetBinContent(1, _lumi);
 
-    job_info.GetXaxis()->SetBinLabel(bin, "xsec_processed");
-    job_info.SetBinContent(bin, _xsec * fraction_processed);
+    job_info_average.GetXaxis()->SetBinLabel(2, "xsec"); // For MC
+    job_info_average.SetBinContent(2, _xsec);
 
-    bin++;
-
-    job_info.GetXaxis()->SetBinLabel(bin, "weights_sum");
-    job_info.SetBinContent(bin, _processed_weights_sum);
-
-    using util::logging::info;
-    info << "Available fraction of sample: " << fraction_in_chain << std::endl;
-    info << "        ...of which was used: " << fraction_of_chain << std::endl;
     info << "Processed fraction of sample: " << fraction_processed << std::endl;
 }
 } // namespace physics

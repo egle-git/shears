@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+#include <TTreeReaderValue.h>
+
+#include "options.h"
+#include "job.h"
+
 class TTree;
 
 namespace physics
@@ -64,34 +69,28 @@ class trigger
 class trigger_values
 {
   private:
-    std::array<unsigned long long, trigger::count> _data;
+    mutable std::array<TTreeReaderValue<unsigned long long>, trigger::count> _values;
 
   public:
     /**
      * \brief Constructor.
-     * \param event_tree The event tree from a bonzai or baobab.
      * \note  Don't try to read trigger branches by yourself or you'll break
      *        this class.
-     * \throws std::invalid_argument if the event tree doesn't contain all
-     *         trigger branches.
      */
-    explicit trigger_values(TTree &event_tree);
-
-    /// \brief Cannot be copied.
-    trigger_values(const trigger_values &) = delete;
+    explicit trigger_values(util::job::info &info);
 
     /**
      * \brief Retrieves the value of the `i`th trigger branch without bound
      *        checking.
      */
-    unsigned long long operator[](std::size_t i) const { return _data[i]; }
+    unsigned long long operator[](std::size_t i) const { return *_values[i]; }
 
     /**
      * \brief Retrieves the value of the `i`th trigger branch with bound
      *        checking.
      * \throws std::out_of_range if \c i is out of bounds.
      */
-    unsigned long long at(std::size_t i) const { return _data.at(i); }
+    unsigned long long at(std::size_t i) const { return *_values.at(i); }
 };
 
 /**

@@ -97,15 +97,10 @@ bool trigger::veto(const std::string &name)
 
 /******************************************************************************/
 
-trigger_values::trigger_values(TTree &event_tree)
+trigger_values::trigger_values(util::job::info &info)
 {
     for (unsigned i = 0; i < trigger::count; ++i) {
-        if (event_tree.SetBranchAddress(branch_names[i], &_data[i]) < 0) {
-            std::string msg = "The event tree doesn't contain branch ";
-            msg += branch_names[i];
-            msg += ", needed for triggers";
-            throw std::invalid_argument(msg);
-        }
+        _values[i] = TTreeReaderValue<unsigned long long>(info.reader, branch_names[i]);
     }
 }
 

@@ -91,14 +91,14 @@ void mc_group::init(const std::vector<sample> &all_samples)
             sd.file->GetObject("_job_info", job_info);
             if (job_info == nullptr) {
                 throw std::runtime_error("File " + std::string(sd.file->GetName()) +
-                                         "doesn't have the _job_info histogram.");
+                                         " doesn't have the _job_info histogram.");
             }
 
             TH1 *job_info_average = nullptr;
             sd.file->GetObject("_job_info_average", job_info_average);
-            if (job_info == nullptr) {
+            if (job_info_average == nullptr) {
                 throw std::runtime_error("File " + std::string(sd.file->GetName()) +
-                                         "doesn't have the _job_info_average histogram.");
+                                         " doesn't have the _job_info_average histogram.");
             }
 
             double wsum = job_info->GetBinContent(2);

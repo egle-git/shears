@@ -87,6 +87,8 @@ class data_comparison_entry : public comparison_entry
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
+    double lumi() const;
+
   private:
     void create_histo(const std::string &name);
 };

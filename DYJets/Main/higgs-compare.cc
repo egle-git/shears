@@ -17,10 +17,8 @@ int main(int argc, char **argv)
         opt.default_init(argc, argv, "higgs.yml", {});
 
         std::string input_dir = "higgs-histograms-max-files-1";
-        double lumi = 1;
 
         data::mc_comparison_entry mc_entry(opt, input_dir);
-
 
         data::sample data;
         std::vector<data::sample> samples = data::sample::load(opt);
@@ -30,6 +28,8 @@ int main(int argc, char **argv)
             }
         }
         data::data_comparison_entry data_entry(data, input_dir);
+
+        double lumi = data_entry.lumi();
 
         // Initialize list of histograms
         std::set<std::string> histogram_names;
@@ -55,8 +55,8 @@ int main(int argc, char **argv)
             */
             canvas.SetLogy();
 
-            data_entry.draw(name, lumi);
-            mc_entry.draw(name, lumi, true);
+            mc_entry.draw(name, lumi);
+            data_entry.draw(name, lumi, true);
 
             /*
             // Get back to the canvas

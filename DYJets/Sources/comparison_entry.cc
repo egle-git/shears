@@ -71,9 +71,10 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-data_comparison_entry::data_comparison_entry(const sample &sample, const std::string &input_dir)
-    // FIXME Hardcoding
-    : _file(sample.histogram_file("higgs", input_dir)),
+data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
+                                             const sample &sample,
+                                             const std::string &input_dir)
+    : _file(sample.histogram_file(analyzer_name, input_dir)),
       _histo(nullptr)
 {
 }

@@ -27,7 +27,7 @@ int main(int argc, char **argv)
                 data = s;
             }
         }
-        data::data_comparison_entry data_entry(data, input_dir);
+        data::data_comparison_entry data_entry("higgs", data, input_dir);
 
         double lumi = data_entry.lumi();
 
@@ -80,7 +80,7 @@ int main(int argc, char **argv)
             ratio->GetXaxis()->SetLabelSize(0.10);
             ratio->GetXaxis()->SetLabelOffset(0.017);
 
-            ratio->GetYaxis()->SetRangeUser(0, 5);
+            ratio->GetYaxis()->SetRangeUser(0.801, 1.199);
             ratio->GetYaxis()->SetNdivisions(5, 5, 0);
             ratio->GetYaxis()->SetTitle("Simulation/Data");
             ratio->GetYaxis()->SetTitleSize(0.1);

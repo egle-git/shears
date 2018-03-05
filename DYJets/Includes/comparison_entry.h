@@ -71,7 +71,7 @@ class mc_comparison_entry : public comparison_entry
 class data_comparison_entry : public comparison_entry
 {
     std::shared_ptr<TFile> _file;
-    TH1 *_histo;
+    std::shared_ptr<TH1> _histo;
 
     double _frac, _wsum, _lumi, _xsec;
 
@@ -97,7 +97,7 @@ class data_comparison_entry : public comparison_entry
     double lumi() const { return _lumi * _frac; }
 
   private:
-    void create_histo(const std::string &name);
+    void create_histo(const std::string &name, double lumi);
 };
 } // namespace data
 

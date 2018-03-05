@@ -117,7 +117,7 @@ void data_comparison_entry::add_histograms(std::set<std::string> &histos)
 void data_comparison_entry::draw(const std::string &name, double lumi, bool same)
 {
     if (_histo == nullptr) {
-        create_histo(name);
+        create_histo(name, lumi);
         if (_histo == nullptr) {
             return;
         }
@@ -131,7 +131,7 @@ void data_comparison_entry::draw(const std::string &name, double lumi, bool same
 std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double lumi)
 {
     if (_histo == nullptr) {
-        create_histo(name);
+        create_histo(name, lumi);
         if (_histo == nullptr) {
             return nullptr;
         }
@@ -142,20 +142,26 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
 
 void data_comparison_entry::reset_drawing_state()
 {
-    _histo = nullptr; // Will be deleted by TFile
+    _histo = nullptr;
 }
 
-void data_comparison_entry::create_histo(const std::string &name)
+void data_comparison_entry::create_histo(const std::string &name, double lumi)
 {
     if (_file != nullptr) {
-        _histo = nullptr;
-        _file->GetObject(name.c_str(), _histo);
-        if (_histo == nullptr) {
+        TH1 *histo = nullptr;
+        _file->GetObject(name.c_str(), histo);
+        if (histo == nullptr) {
             util::logging::warn << "Histogram " << name << " not found in file " << _file->GetName()
                                 << std::endl;
             return;
+        } else {
+            _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
+            if (_lumi != 0) { // Data
+                _histo->Scale(lumi / _lumi);
+            } else { // MC
+                _histo->Scale(lumi  * _xsec / _wsum);
+            }
         }
-
     }
 }
 } // namespace data

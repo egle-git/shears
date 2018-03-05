@@ -158,11 +158,7 @@ void data_comparison_entry::create_histo(const std::string &name, double lumi)
 {
     TH1 *histo = nullptr;
     _file->GetObject(name.c_str(), histo);
-    if (histo == nullptr) {
-        util::logging::warn << "Histogram " << name << " not found in file " << _file->GetName()
-                            << std::endl;
-        return;
-    } else {
+    if (histo != nullptr) {
         _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
         if (_lumi != 0) { // Data
             _histo->Scale(lumi / _lumi / _frac);

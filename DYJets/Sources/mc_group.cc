@@ -31,8 +31,6 @@ std::unique_ptr<TH1> mc_group::get(const std::string &name)
 
         std::unique_ptr<TH1> histo = sd.centry->get(name, 1);
         if (histo == nullptr) {
-            util::logging::warn << "Histogram " << name << " not found for sample " << sd.sample.name()
-                                << std::endl;
             continue;
         }
 
@@ -77,8 +75,9 @@ void mc_group::init(const std::vector<sample> &all_samples,
         }
 
         // Open file
-        sd.centry = std::make_shared<data_comparison_entry>(analyzer_name, sd.sample, input_dir);
-        if (sd.centry == nullptr) {
+        try {
+            sd.centry = std::make_shared<data_comparison_entry>(analyzer_name, sd.sample, input_dir);
+        } catch (std::runtime_error e) {
             util::logging::warn << "File not found for sample " << name << std::endl;
             all_found = false;
         }

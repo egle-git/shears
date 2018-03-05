@@ -1,3 +1,6 @@
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 #include <TCanvas.h>
 #include <TFileIter.h>
 #include <TGaxis.h>
@@ -10,13 +13,17 @@
 #include "logging.h"
 #include "options.h"
 
+namespace po = boost::program_options;
+
+po::options_description options();
+
 int main(int argc, char **argv)
 {
     util::options opt;
     try {
-        opt.default_init(argc, argv, "higgs.yml", {});
+        opt.default_init(argc, argv, "higgs.yml", {options()});
 
-        std::string input_dir = "higgs-histograms-max-files-1";
+        std::string input_dir = opt.map["input"].as<std::string>();
 
         data::mc_comparison_entry mc_entry(opt, "higgs", input_dir);
 
@@ -108,4 +115,17 @@ int main(int argc, char **argv)
     }
 
     return EXIT_SUCCESS;
+}
+
+po::options_description options()
+{
+    po::options_description options = po::options_description("Comparison options");
+    options.add_options()("input,i",
+                          po::value<std::string>()->default_value("higgs-histograms"),
+                          "Sets the directory to search for histogram files");
+    options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
+    options.add_options()("histo,h",
+                          po::value<std::vector<std::string>>(),
+                          "Enable the only given histogram (can be used several times)");
+    return options;
 }

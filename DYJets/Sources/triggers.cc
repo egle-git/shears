@@ -8,18 +8,13 @@
 
 #include <TTree.h>
 
-static const char * const branch_names[trigger::count] = {
-    "TrigHltPhot",
-    "TrigHltMu",
-    "TrigHltDiMu",
-    "TrigHltEl",
-    "TrigHltDiEl",
+static const char *const branch_names[trigger::count] = {
+    "TrigHltPhot", "TrigHltMu", "TrigHltDiMu", "TrigHltEl", "TrigHltDiEl",
 };
 
-static std::vector<std::string> available_triggers(TTree &bitFieldsChain,
-                                                   std::size_t trig)
+static std::vector<std::string> available_triggers(TTree &bitFieldsChain, std::size_t trig)
 {
-    const char * const branch_name = branch_names[trig];
+    const char *const branch_name = branch_names[trig];
 
     // Fetch the mapping between position in bitfield and trigger name
 
@@ -35,9 +30,8 @@ static std::vector<std::string> available_triggers(TTree &bitFieldsChain,
     }
 
     if (bitFieldsChain.GetEntry(0) <= 0) {
-        throw std::invalid_argument(
-                "Failed to read BitFields tree. Is the tree empty? "
-                "Cannot set the trigger bits.");
+        throw std::invalid_argument("Failed to read BitFields tree. Is the tree empty? "
+                                    "Cannot set the trigger bits.");
     }
 
     std::vector<std::string> names;
@@ -57,8 +51,7 @@ static std::vector<std::string> available_triggers(TTree &bitFieldsChain,
 void print_available_triggers(TTree &bitFieldsChain)
 {
     for (unsigned trig = 0; trig < trigger::count; ++trig) {
-        std::cout << "Available triggers for " << branch_names[trig]
-                  << ":";
+        std::cout << "Available triggers for " << branch_names[trig] << ":";
         for (const auto &name : available_triggers(bitFieldsChain, trig)) {
             std::cout << " " << name;
         }
@@ -68,14 +61,9 @@ void print_available_triggers(TTree &bitFieldsChain)
 
 /******************************************************************************/
 
-trigger::~trigger()
-{}
+trigger::~trigger() {}
 
-trigger::trigger(const std::vector<std::string> &names) :
-    _mask(0LL),
-    _veto(0LL),
-    _names(names)
-{}
+trigger::trigger(const std::vector<std::string> &names) : _mask(0LL), _veto(0LL), _names(names) {}
 
 bool trigger::accept(const std::string &name)
 {
@@ -115,8 +103,7 @@ trigger_values::trigger_values(TTree &event_tree)
 
 /******************************************************************************/
 
-trigger_mask::trigger_mask(TTree &bitFieldsChain) :
-    _accepts_any_trigger(false)
+trigger_mask::trigger_mask(TTree &bitFieldsChain) : _accepts_any_trigger(false)
 {
     for (unsigned trig = 0; trig < trigger::count; ++trig) {
         auto trigger_names = available_triggers(bitFieldsChain, trig);
@@ -127,8 +114,8 @@ trigger_mask::trigger_mask(TTree &bitFieldsChain) :
     }
 }
 
-trigger_mask::trigger_mask(TTree &bitFieldsChain, const std::string &definition, bool verbose) :
-    trigger_mask(bitFieldsChain)
+trigger_mask::trigger_mask(TTree &bitFieldsChain, const std::string &definition, bool verbose)
+    : trigger_mask(bitFieldsChain)
 {
     using boost::escaped_list_separator;
     using boost::tokenizer;

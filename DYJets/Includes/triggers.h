@@ -19,15 +19,15 @@ void print_available_triggers(TTree &bitFieldsChain);
  */
 class trigger
 {
-public:
+  public:
     /// \brief The number of trigger categories supported by the implemenation.
     static const unsigned count = 5;
 
-private:
+  private:
     unsigned long long _mask, _veto;
     std::vector<std::string> _names;
 
-public:
+  public:
     /// \brief Constructor.
     explicit trigger(const std::vector<std::string> &names);
 
@@ -47,12 +47,10 @@ public:
     unsigned long long veto_mask() const { return _veto; }
 
     /// \brief Returns \c true if the given \c trigger is accepted.
-    bool accepted(unsigned long long trigger) const
-    { return (_mask & trigger) != 0; }
+    bool accepted(unsigned long long trigger) const { return (_mask & trigger) != 0; }
 
     /// \brief Returns \c true if the given \c trigger triggers a veto.
-    bool is_veto(unsigned long long trigger) const
-    { return (_veto & trigger) != 0; }
+    bool is_veto(unsigned long long trigger) const { return (_veto & trigger) != 0; }
 };
 
 /**
@@ -62,10 +60,10 @@ public:
  */
 class trigger_values
 {
-private:
+  private:
     std::array<unsigned long long, trigger::count> _data;
 
-public:
+  public:
     /**
      * \brief Constructor.
      * \param event_tree The event tree from a bonzai or baobab.
@@ -83,7 +81,7 @@ public:
      * \brief Retrieves the value of the `i`th trigger branch without bound
      *        checking.
      */
-    unsigned long long operator[] (std::size_t i) const { return _data[i]; }
+    unsigned long long operator[](std::size_t i) const { return _data[i]; }
 
     /**
      * \brief Retrieves the value of the `i`th trigger branch with bound
@@ -105,7 +103,7 @@ class trigger_mask
     bool _accepts_any_trigger;
     std::array<std::shared_ptr<trigger>, trigger::count> _triggers;
 
-public:
+  public:
     /**
      * \brief Constructor.
      * \throws std::invalid_argument if \c bitFieldsChain is empty.
@@ -129,7 +127,8 @@ public:
      *
      * \throws std::invalid_argument if \c bitFieldsChain is empty, or a trigger is not found.
      */
-    explicit trigger_mask(TTree &bitFieldsChain, const std::string &definition,
+    explicit trigger_mask(TTree &bitFieldsChain,
+                          const std::string &definition,
                           bool verbose = false);
 
     /**

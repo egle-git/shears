@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <boost/filesystem.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -45,8 +47,18 @@ int main(int argc, char **argv)
 
         // Initialize list of histograms
         std::set<std::string> histogram_names;
-        mc_entry.add_histograms(histogram_names);
-        data_entry.add_histograms(histogram_names);
+        if (opt.map.count("histogram-name") > 0) {
+            // Read from command line
+            std::vector<std::string> names =
+                opt.map["histogram-name"].as<std::vector<std::string>>();
+            std::copy(names.begin(),
+                      names.end(),
+                      std::inserter(histogram_names, histogram_names.begin()));
+        } else {
+            // Detect automatically
+            mc_entry.add_histograms(histogram_names);
+            data_entry.add_histograms(histogram_names);
+        }
 
         util::logging::info << "Found " << histogram_names.size() << " histograms." << std::endl;
 
@@ -145,8 +157,8 @@ po::options_description options()
                           po::value<std::string>()->default_value("higgs-histograms"),
                           "Sets the directory to search for histogram files");
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
-    options.add_options()("histo,h",
+    options.add_options()("histogram-name,n",
                           po::value<std::vector<std::string>>(),
-                          "Enable the only given histogram (can be used several times)");
+                          "Produce the given histogram (can be used several times)");
     return options;
 }

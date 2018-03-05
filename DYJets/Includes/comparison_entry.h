@@ -53,6 +53,12 @@ class mc_comparison_entry : public comparison_entry
     std::unique_ptr<THStack> _stack;
 
   public:
+    /**
+     * \brief Constructor.
+     * \param opt The \c options object (to read MC grouping from)
+     * \param analyzer_name The analyzer name
+     * \param input_dir The location of histogram files
+     */
     explicit mc_comparison_entry(const util::options &opt,
                                  const std::string &analyzer_name,
                                  const std::string &input_dir);
@@ -80,6 +86,9 @@ class data_comparison_entry : public comparison_entry
   public:
     /**
      * \brief Constructor.
+     * \param analyzer_name The analyzer name
+     * \param sample The sample to describe
+     * \param input_dir The location of histogram files
      */
     explicit data_comparison_entry(const std::string &analyzer_name,
                                    const sample &sample,
@@ -93,8 +102,13 @@ class data_comparison_entry : public comparison_entry
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
+    /// \brief Returns the sum of event weights (for MC)
     double wsum() const { return _wsum; }
+
+    /// \brief Returns the cross section (for MC)
     double xsec() const { return _xsec; }
+
+    /// \brief Returns the processed luminosity (for data)
     double lumi() const { return _lumi * _frac; }
 
   private:

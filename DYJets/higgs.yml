@@ -44,11 +44,11 @@ samples:
     - name: data
       type: data
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/
-      catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
+      catalog: Bonzais-SingleMuon-all-VJetPruner-SMu.txt
     - name: DYJets
       type: MC
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
-      catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v6/Catalogs/
+      catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-SMuUnf.txt
     - name: ST-s-channel
       type: MC
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/

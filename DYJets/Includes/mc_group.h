@@ -57,10 +57,14 @@ class mc_group
 
     /// \brief Loads the list of groups from the configuration file.
     static std::vector<mc_group> load(const util::options &opt,
+                                      const std::string &analyzer_name,
+                                      const std::string &input_dir,
                                       const std::vector<data::sample> &all_samples);
 
   private:
-    void init(const std::vector<sample> &all_samples);
+    void init(const std::vector<sample> &all_samples,
+              const std::string &analyzer_name,
+              const std::string &input_dir);
 };
 }
 

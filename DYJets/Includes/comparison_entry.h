@@ -53,7 +53,9 @@ class mc_comparison_entry : public comparison_entry
     std::unique_ptr<THStack> _stack;
 
   public:
-    explicit mc_comparison_entry(const util::options &opt, const std::string &input_dir);
+    explicit mc_comparison_entry(const util::options &opt,
+                                 const std::string &analyzer_name,
+                                 const std::string &input_dir);
 
     /// \brief Destructor.
     virtual ~mc_comparison_entry() = default;

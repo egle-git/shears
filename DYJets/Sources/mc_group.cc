@@ -58,7 +58,9 @@ TH1 *mc_group::get(const std::string &name)
     return res;
 }
 
-void mc_group::init(const std::vector<sample> &all_samples)
+void mc_group::init(const std::vector<sample> &all_samples,
+                    const std::string &analyzer_name,
+                    const std::string &input_dir)
 {
     bool all_found = true;
     for (const std::string &name : _sample_names) {
@@ -79,8 +81,7 @@ void mc_group::init(const std::vector<sample> &all_samples)
         }
 
         // Open file
-        // FIXME Hardcoding
-        sd.file = sd.sample.histogram_file("higgs", "higgs-histograms-max-files-1");
+        sd.file = sd.sample.histogram_file(analyzer_name, input_dir);
 
         if (sd.file == nullptr) {
             util::logging::warn << "File not found for sample " << name << std::endl;
@@ -119,11 +120,13 @@ void mc_group::init(const std::vector<sample> &all_samples)
 }
 
 std::vector<mc_group> mc_group::load(const util::options &opt,
+                                     const std::string &analyzer_name,
+                                     const std::string &input_dir,
                                      const std::vector<sample> &all_samples)
 {
     std::vector<mc_group> groups = opt.config["MC grouping"].as<std::vector<mc_group>>();
     for (mc_group &g : groups) {
-        g.init(all_samples);
+        g.init(all_samples, analyzer_name, input_dir);
     }
     return groups;
 }

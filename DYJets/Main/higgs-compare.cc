@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
         std::string input_dir = "higgs-histograms-max-files-1";
 
-        data::mc_comparison_entry mc_entry(opt, input_dir);
+        data::mc_comparison_entry mc_entry(opt, "higgs", input_dir);
 
         data::sample data;
         std::vector<data::sample> samples = data::sample::load(opt);

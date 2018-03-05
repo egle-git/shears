@@ -11,10 +11,12 @@
 namespace data
 {
 
-mc_comparison_entry::mc_comparison_entry(const util::options &opt, const std::string &input_dir)
+mc_comparison_entry::mc_comparison_entry(const util::options &opt,
+                                         const std::string &analyzer_name,
+                                         const std::string &input_dir)
 {
     std::vector<data::sample> samples = data::sample::load(opt);
-    _groups = data::mc_group::load(opt, samples);
+    _groups = data::mc_group::load(opt, analyzer_name, input_dir, samples);
 }
 
 void mc_comparison_entry::add_histograms(std::set<std::string> &histos)

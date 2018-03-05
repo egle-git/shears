@@ -33,9 +33,11 @@ weights_analyzer::weights_analyzer(util::job::info &info)
 
 void weights_analyzer::operator()()
 {
-    _global_weight = weight_at(0);
     if (weights_count() > 0) {
+        _global_weight = weight_at(0);
         _processed_weights_sum += weight_at(0);
+    } else {
+        _global_weight = 1;
     }
     _processed_events++;
 }

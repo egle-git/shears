@@ -18,7 +18,7 @@ namespace physics
 /**
  * \brief Prints a list of all available triggers.
  */
-void print_available_triggers(TTree &bitFieldsChain);
+void print_available_triggers(util::chains &chains);
 
 /**
  * \brief Represents a category of related triggers.
@@ -110,7 +110,7 @@ class trigger_mask
      * \brief Constructor.
      * \throws std::invalid_argument if \c bitFieldsChain is empty.
      */
-    explicit trigger_mask(TTree &bitFieldsChain);
+    explicit trigger_mask(util::job::info &info);
 
     /**
      * \brief Constructs a trigger mask from user input.
@@ -129,7 +129,7 @@ class trigger_mask
      *
      * \throws std::invalid_argument if \c bitFieldsChain is empty, or a trigger is not found.
      */
-    explicit trigger_mask(TTree &bitFieldsChain,
+    explicit trigger_mask(util::job::info &info,
                           const std::string &definition,
                           bool verbose = false);
 

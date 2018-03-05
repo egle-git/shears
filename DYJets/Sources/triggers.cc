@@ -20,9 +20,11 @@ static const char *const branch_names[trigger::count] = {
 
 } // namespace anonymous
 
-static std::vector<std::string> available_triggers(TTree &bitFieldsChain, std::size_t trig)
+static std::vector<std::string> available_triggers(util::chains &chains, std::size_t trig)
 {
     const char *const branch_name = branch_names[trig];
+
+    TTree &bitFieldsChain = *chains.bit_fields();
 
     // Fetch the mapping between position in bitfield and trigger name
 
@@ -56,11 +58,11 @@ static std::vector<std::string> available_triggers(TTree &bitFieldsChain, std::s
     return names;
 }
 
-void print_available_triggers(TTree &bitFieldsChain)
+void print_available_triggers(util::chains &chains)
 {
     for (unsigned trig = 0; trig < trigger::count; ++trig) {
         std::cout << "Available triggers for " << branch_names[trig] << ":";
-        for (const auto &name : available_triggers(bitFieldsChain, trig)) {
+        for (const auto &name : available_triggers(chains, trig)) {
             std::cout << " " << name;
         }
         std::cout << std::endl;
@@ -106,10 +108,10 @@ trigger_values::trigger_values(util::job::info &info)
 
 /******************************************************************************/
 
-trigger_mask::trigger_mask(TTree &bitFieldsChain) : _accepts_any_trigger(false)
+trigger_mask::trigger_mask(util::job::info &info) : _accepts_any_trigger(false)
 {
     for (unsigned trig = 0; trig < trigger::count; ++trig) {
-        auto trigger_names = available_triggers(bitFieldsChain, trig);
+        auto trigger_names = available_triggers(info.chains, trig);
         switch (trig) {
         default:
             _triggers[trig] = std::make_shared<trigger>(trigger_names);
@@ -117,8 +119,8 @@ trigger_mask::trigger_mask(TTree &bitFieldsChain) : _accepts_any_trigger(false)
     }
 }
 
-trigger_mask::trigger_mask(TTree &bitFieldsChain, const std::string &definition, bool verbose)
-    : trigger_mask(bitFieldsChain)
+trigger_mask::trigger_mask(util::job::info &info, const std::string &definition, bool verbose)
+    : trigger_mask(info)
 {
     using boost::escaped_list_separator;
     using boost::tokenizer;

@@ -1,3 +1,4 @@
+#include <boost/filesystem.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
@@ -24,6 +25,10 @@ int main(int argc, char **argv)
         opt.default_init(argc, argv, "higgs.yml", {options()});
 
         std::string input_dir = opt.map["input"].as<std::string>();
+        std::string output_dir = input_dir + "/plots/";
+        if (opt.map.count("output") > 0) {
+            output_dir = opt.map["output"].as<std::string>();
+        }
 
         data::mc_comparison_entry mc_entry(opt, "higgs", input_dir);
 
@@ -44,6 +49,22 @@ int main(int argc, char **argv)
         data_entry.add_histograms(histogram_names);
 
         util::logging::info << "Found " << histogram_names.size() << " histograms." << std::endl;
+
+        {
+            using namespace boost::filesystem;
+
+            // Create output directory if it doesn't exist
+            if (!is_directory(output_dir)) {
+                if (exists(output_dir)) {
+                    // "output_dir" exists and is not a directory...
+                    throw std::runtime_error("Path " + output_dir +
+                                             " exists and is not a directory");
+                } else {
+                    util::logging::info << "Creating directory " << output_dir << std::endl;
+                    create_directories(output_dir);
+                }
+            }
+        }
 
         for (const std::string &name : histogram_names) {
             util::logging::debug << "Producing histogram: " << name << std::endl;
@@ -103,7 +124,7 @@ int main(int argc, char **argv)
                 ratio->Draw("ep");
             }
 
-            canvas.Print((name + ".png").c_str());
+            canvas.Print((output_dir + name + ".png").c_str());
 
             mc_entry.reset_drawing_state();
             data_entry.reset_drawing_state();

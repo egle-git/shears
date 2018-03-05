@@ -73,13 +73,16 @@ class data_comparison_entry : public comparison_entry
     std::shared_ptr<TFile> _file;
     TH1 *_histo;
 
+    double _frac, _wsum, _lumi, _xsec;
+
   public:
     /**
      * \brief Constructor.
      */
     explicit data_comparison_entry(const std::string &analyzer_name,
                                    const sample &sample,
-                                   const std::string &input_dir);
+                                   const std::string &input_dir,
+                                   bool required = true);
 
     /// \brief Destructor.
     virtual ~data_comparison_entry() = default;
@@ -89,7 +92,9 @@ class data_comparison_entry : public comparison_entry
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
-    double lumi() const;
+    double wsum() const { return _wsum; }
+    double xsec() const { return _xsec; }
+    double lumi() const { return _lumi * _frac; }
 
   private:
     void create_histo(const std::string &name);

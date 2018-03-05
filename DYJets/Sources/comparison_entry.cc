@@ -73,10 +73,34 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
 
 data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
                                              const sample &sample,
-                                             const std::string &input_dir)
+                                             const std::string &input_dir,
+                                             bool required)
     : _file(sample.histogram_file(analyzer_name, input_dir)),
       _histo(nullptr)
 {
+    if (required && _file == nullptr) {
+        throw std::runtime_error("Could not open file for sample " + sample.name());
+    }
+
+    // Read job info histograms
+    TH1 *job_info = nullptr;
+    _file->GetObject("_job_info", job_info);
+    if (job_info == nullptr) {
+        throw std::runtime_error("File " + std::string(_file->GetName()) +
+                                 " doesn't have the _job_info histogram.");
+    }
+
+    TH1 *job_info_average = nullptr;
+    _file->GetObject("_job_info_average", job_info_average);
+    if (job_info_average == nullptr) {
+        throw std::runtime_error("File " + std::string(_file->GetName()) +
+                                 " doesn't have the _job_info_average histogram.");
+    }
+
+    _frac = job_info->GetBinContent(1);
+    _wsum = job_info->GetBinContent(2);
+    _lumi = job_info_average->GetBinContent(1);
+    _xsec = job_info_average->GetBinContent(2);
 }
 
 void data_comparison_entry::add_histograms(std::set<std::string> &histos)
@@ -119,33 +143,6 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
 void data_comparison_entry::reset_drawing_state()
 {
     _histo = nullptr; // Will be deleted by TFile
-}
-
-double data_comparison_entry::lumi() const
-{
-    if (_file == nullptr) {
-        throw std::runtime_error("Trying to get the lumi from a non-existing sample.");
-    }
-
-    // Read job info histograms
-    TH1 *job_info = nullptr;
-    _file->GetObject("_job_info", job_info);
-    if (job_info == nullptr) {
-        throw std::runtime_error("File " + std::string(_file->GetName()) +
-                                 " doesn't have the _job_info histogram.");
-    }
-
-    TH1 *job_info_average = nullptr;
-    _file->GetObject("_job_info_average", job_info_average);
-    if (job_info_average == nullptr) {
-        throw std::runtime_error("File " + std::string(_file->GetName()) +
-                                 " doesn't have the _job_info_average histogram.");
-    }
-
-    double frac = job_info->GetBinContent(1);
-    double lumi = job_info_average->GetBinContent(1);
-
-    return frac * lumi;
 }
 
 void data_comparison_entry::create_histo(const std::string &name)

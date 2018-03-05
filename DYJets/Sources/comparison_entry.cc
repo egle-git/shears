@@ -152,9 +152,9 @@ void data_comparison_entry::create_histo(const std::string &name, double lumi)
     } else {
         _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
         if (_lumi != 0) { // Data
-            _histo->Scale(lumi / _lumi);
+            _histo->Scale(lumi / _lumi / _frac);
         } else { // MC
-            _histo->Scale(lumi  * _xsec / _wsum);
+            _histo->Scale(lumi * _xsec / _wsum);
         }
     }
 }

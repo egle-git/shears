@@ -61,12 +61,12 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
     _stack = std::make_unique<THStack>("stack", "");
     for (auto it = _groups.rbegin(); it != _groups.rend(); ++it) {
         // Get the histogram
-        TH1 *histo = it->get(name);
+        std::unique_ptr<TH1> histo = it->get(name);
 
         // Add it to the stack
         if (histo != nullptr) {
             histo->Scale(lumi);
-            _stack->Add(histo);
+            _stack->Add(dynamic_cast<TH1 *>(histo.get()->Clone()));
         }
     }
 }

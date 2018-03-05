@@ -5,6 +5,7 @@
 #include <TFileIter.h>
 #include <TH1.h>
 
+#include "comparison_entry.h"
 #include "logging.h"
 
 namespace data
@@ -13,40 +14,35 @@ namespace data
 void mc_group::add_histograms(std::set<std::string> &histos)
 {
     for (sample_data &sd : _sample_data) {
-        if (sd.file == nullptr) {
+        if (sd.centry == nullptr) {
             continue;
         }
-
-        // Iterate on keys
-        for (TFileIter it(sd.file.get()); it < it.TotalKeys(); ++it) {
-            histos.insert(it.GetKeyName());
-        }
+        sd.centry->add_histograms(histos);
     }
 }
 
-TH1 *mc_group::get(const std::string &name)
+std::unique_ptr<TH1> mc_group::get(const std::string &name)
 {
-    TH1 *res = nullptr;
+    std::unique_ptr<TH1> res = nullptr;
     for (sample_data &sd : _sample_data) {
-        if (sd.file == nullptr) {
+        if (sd.centry == nullptr) {
             continue;
         }
 
-        TH1 *histo = nullptr;
-        sd.file->GetObject(name.c_str(), histo);
+        std::unique_ptr<TH1> histo = sd.centry->get(name, 1);
         if (histo == nullptr) {
-            util::logging::warn << "Histogram " << name << " not found in file " << sd.file->GetName()
+            util::logging::warn << "Histogram " << name << " not found for sample " << sd.sample.name()
                                 << std::endl;
             continue;
         }
 
-        histo->Scale(sd.scale);
-
         if (res == nullptr) {
-            res = histo;
+            res = std::move(histo);
         } else {
-            res->Add(histo);
+            res->Add(histo.get());
         }
+
+        sd.centry->reset_drawing_state();
     }
     if (res != nullptr) {
         res->SetStats(0);
@@ -81,31 +77,10 @@ void mc_group::init(const std::vector<sample> &all_samples,
         }
 
         // Open file
-        sd.file = sd.sample.histogram_file(analyzer_name, input_dir);
-
-        if (sd.file == nullptr) {
+        sd.centry = std::make_shared<data_comparison_entry>(analyzer_name, sd.sample, input_dir);
+        if (sd.centry == nullptr) {
             util::logging::warn << "File not found for sample " << name << std::endl;
             all_found = false;
-        } else {
-            // Read job info histograms
-            TH1 *job_info = nullptr;
-            sd.file->GetObject("_job_info", job_info);
-            if (job_info == nullptr) {
-                throw std::runtime_error("File " + std::string(sd.file->GetName()) +
-                                         " doesn't have the _job_info histogram.");
-            }
-
-            TH1 *job_info_average = nullptr;
-            sd.file->GetObject("_job_info_average", job_info_average);
-            if (job_info_average == nullptr) {
-                throw std::runtime_error("File " + std::string(sd.file->GetName()) +
-                                         " doesn't have the _job_info_average histogram.");
-            }
-
-            double wsum = job_info->GetBinContent(2);
-            double xsec = job_info_average->GetBinContent(2);
-
-            sd.scale *= xsec / wsum;
         }
 
         _sample_data.push_back(sd);

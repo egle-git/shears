@@ -13,6 +13,8 @@ class TH1;
 namespace data
 {
 
+class comparison_entry;
+
 /// \brief Describes a group of MC samples that will be added together.
 class mc_group
 {
@@ -21,9 +23,8 @@ class mc_group
 
     struct sample_data
     {
-        double scale = 1;
         data::sample sample;
-        std::shared_ptr<TFile> file = nullptr;
+        std::shared_ptr<comparison_entry> centry = nullptr;
     };
 
     bool _required = false;
@@ -53,7 +54,7 @@ class mc_group
      *
      * The histogram will be ready for drawing.
      */
-    TH1 *get(const std::string &name);
+    std::unique_ptr<TH1> get(const std::string &name);
 
     /// \brief Loads the list of groups from the configuration file.
     static std::vector<mc_group> load(const util::options &opt,

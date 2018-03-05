@@ -58,9 +58,10 @@ int main(int argc, char **argv)
             // Detect automatically
             mc_entry.add_histograms(histogram_names);
             data_entry.add_histograms(histogram_names);
+            util::logging::info << "Found " << histogram_names.size() << " histograms."
+                                << std::endl;
         }
 
-        util::logging::info << "Found " << histogram_names.size() << " histograms." << std::endl;
 
         {
             using namespace boost::filesystem;

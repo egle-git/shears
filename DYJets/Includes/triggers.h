@@ -7,6 +7,9 @@
 
 class TTree;
 
+namespace physics
+{
+
 /**
  * \brief Prints a list of all available triggers.
  */
@@ -178,5 +181,6 @@ class trigger_mask
      */
     bool passes(const trigger_values &values) const;
 };
+} // namespace physics
 
 #endif // TRIGGERS_H

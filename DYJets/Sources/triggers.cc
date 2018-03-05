@@ -8,9 +8,17 @@
 
 #include <TTree.h>
 
+namespace physics
+{
+
+namespace /* anonymous */
+{
+
 static const char *const branch_names[trigger::count] = {
     "TrigHltPhot", "TrigHltMu", "TrigHltDiMu", "TrigHltEl", "TrigHltDiEl",
 };
+
+} // namespace anonymous
 
 static std::vector<std::string> available_triggers(TTree &bitFieldsChain, std::size_t trig)
 {
@@ -204,3 +212,4 @@ bool trigger_mask::passes(const trigger_values &values) const
     }
     return pass;
 }
+} // namespace physics

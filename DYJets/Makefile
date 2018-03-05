@@ -93,6 +93,7 @@ muons.cc \
 options.cc \
 sample.cc \
 timer.cc \
+triggers.cc \
 weights.cc
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o

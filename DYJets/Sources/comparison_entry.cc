@@ -30,6 +30,9 @@ void mc_comparison_entry::draw(const std::string &name, double lumi, bool same)
 {
     if (_stack == nullptr) {
         create_stack(name, lumi);
+        if (_stack == nullptr) {
+            return;
+        }
     }
     _stack->Draw(same ? "hist same" : "hist");
     _stack->GetYaxis()->SetLabelSize(0.04);
@@ -43,6 +46,9 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
 {
     if (_stack == nullptr) {
         create_stack(name, lumi);
+        if (_stack == nullptr) {
+            return nullptr;
+        }
     }
     if (_stack->GetNhists() == 0) {
         return nullptr;
@@ -59,6 +65,7 @@ void mc_comparison_entry::reset_drawing_state()
 void mc_comparison_entry::create_stack(const std::string &name, double lumi)
 {
     _stack = std::make_unique<THStack>("stack", "");
+    bool had_histo = false;
     for (auto it = _groups.rbegin(); it != _groups.rend(); ++it) {
         // Get the histogram
         std::unique_ptr<TH1> histo = it->get(name);
@@ -67,7 +74,11 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
         if (histo != nullptr) {
             histo->Scale(lumi);
             _stack->Add(dynamic_cast<TH1 *>(histo.get()->Clone()));
+            had_histo = true;
         }
+    }
+    if (!had_histo) {
+        _stack.reset(); // Prevents crashes
     }
 }
 

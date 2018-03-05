@@ -43,8 +43,8 @@ muons:
 samples:
     - name: data
       type: data
-      bonzai dir: /afs/cern.ch/user/l/lmoureau/shearsop/bonzai-prod/13TeV_2016/Data/v6.2/catalogs/
-      catalog: Bonzais-DoubleMuon-all-VJetPruner-FourLep.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/
+      catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
     - name: DYJets
       type: MC
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/

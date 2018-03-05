@@ -81,8 +81,7 @@ class data_comparison_entry : public comparison_entry
      */
     explicit data_comparison_entry(const std::string &analyzer_name,
                                    const sample &sample,
-                                   const std::string &input_dir,
-                                   bool required = true);
+                                   const std::string &input_dir);
 
     /// \brief Destructor.
     virtual ~data_comparison_entry() = default;

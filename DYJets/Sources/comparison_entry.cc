@@ -73,12 +73,11 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
 
 data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
                                              const sample &sample,
-                                             const std::string &input_dir,
-                                             bool required)
+                                             const std::string &input_dir)
     : _file(sample.histogram_file(analyzer_name, input_dir)),
       _histo(nullptr)
 {
-    if (required && _file == nullptr) {
+    if (_file == nullptr) {
         throw std::runtime_error("Could not open file for sample " + sample.name());
     }
 
@@ -105,9 +104,6 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
 
 void data_comparison_entry::add_histograms(std::set<std::string> &histos)
 {
-    if (_file == nullptr) {
-        return;
-    }
     // Iterate on keys
     for (TFileIter it(_file.get()); it < it.TotalKeys(); ++it) {
         histos.insert(it.GetKeyName());
@@ -147,20 +143,18 @@ void data_comparison_entry::reset_drawing_state()
 
 void data_comparison_entry::create_histo(const std::string &name, double lumi)
 {
-    if (_file != nullptr) {
-        TH1 *histo = nullptr;
-        _file->GetObject(name.c_str(), histo);
-        if (histo == nullptr) {
-            util::logging::warn << "Histogram " << name << " not found in file " << _file->GetName()
-                                << std::endl;
-            return;
-        } else {
-            _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
-            if (_lumi != 0) { // Data
-                _histo->Scale(lumi / _lumi);
-            } else { // MC
-                _histo->Scale(lumi  * _xsec / _wsum);
-            }
+    TH1 *histo = nullptr;
+    _file->GetObject(name.c_str(), histo);
+    if (histo == nullptr) {
+        util::logging::warn << "Histogram " << name << " not found in file " << _file->GetName()
+                            << std::endl;
+        return;
+    } else {
+        _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
+        if (_lumi != 0) { // Data
+            _histo->Scale(lumi / _lumi);
+        } else { // MC
+            _histo->Scale(lumi  * _xsec / _wsum);
         }
     }
 }

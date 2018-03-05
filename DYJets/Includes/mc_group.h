@@ -5,7 +5,6 @@
 #include <set>
 #include <string>
 
-#include "logging.h"
 #include "sample.h"
 
 class TFile;

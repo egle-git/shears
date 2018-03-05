@@ -1,5 +1,9 @@
 #include "comparison_entry.h"
 
+#include <TFile.h>
+#include <TFileIter.h>
+#include <TH1.h>
+#include <THStack.h>
 #include <TList.h>
 
 #include "sample.h"
@@ -20,12 +24,12 @@ void mc_comparison_entry::add_histograms(std::set<std::string> &histos)
     }
 }
 
-void mc_comparison_entry::draw(const std::string &name, double lumi)
+void mc_comparison_entry::draw(const std::string &name, double lumi, bool same)
 {
     if (_stack == nullptr) {
         create_stack(name, lumi);
     }
-    _stack->Draw("HIST");
+    _stack->Draw(same ? "hist same" : "hist");
     _stack->GetYaxis()->SetLabelSize(0.04);
     _stack->GetYaxis()->SetLabelOffset(0.002);
     _stack->GetYaxis()->SetTitle("# Events");
@@ -62,6 +66,71 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
             histo->Scale(lumi);
             _stack->Add(histo);
         }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+data_comparison_entry::data_comparison_entry(const sample &sample, const std::string &input_dir)
+    // FIXME Hardcoding
+    : _file(sample.histogram_file("higgs", input_dir)),
+      _histo(nullptr)
+{
+}
+
+void data_comparison_entry::add_histograms(std::set<std::string> &histos)
+{
+    if (_file == nullptr) {
+        return;
+    }
+    // Iterate on keys
+    for (TFileIter it(_file.get()); it < it.TotalKeys(); ++it) {
+        histos.insert(it.GetKeyName());
+    }
+}
+
+void data_comparison_entry::draw(const std::string &name, double lumi, bool same)
+{
+    if (_histo == nullptr) {
+        create_histo(name);
+        if (_histo == nullptr) {
+            return;
+        }
+    }
+    _histo->Draw(same ? "e same" : "e");;
+    _histo->SetMarkerStyle(20);
+    _histo->SetMarkerColor(kBlack);
+    _histo->SetLineColor(kBlack);
+}
+
+std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double lumi)
+{
+    if (_histo == nullptr) {
+        create_histo(name);
+        if (_histo == nullptr) {
+            return nullptr;
+        }
+    }
+    std::unique_ptr<TH1> res(dynamic_cast<TH1 *>(_histo->Clone()));
+    return res;
+}
+
+void data_comparison_entry::reset_drawing_state()
+{
+    _histo = nullptr; // Will be deleted by TFile
+}
+
+void data_comparison_entry::create_histo(const std::string &name)
+{
+    if (_file != nullptr) {
+        _histo = nullptr;
+        _file->GetObject(name.c_str(), _histo);
+        if (_histo == nullptr) {
+            util::logging::warn << "Histogram " << name << " not found in file " << _file->GetName()
+                                << std::endl;
+            return;
+        }
+
     }
 }
 } // namespace data

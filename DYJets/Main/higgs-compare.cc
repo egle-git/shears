@@ -21,9 +21,20 @@ int main(int argc, char **argv)
 
         data::mc_comparison_entry mc_entry(opt, input_dir);
 
+
+        data::sample data;
+        std::vector<data::sample> samples = data::sample::load(opt);
+        for (data::sample &s : samples) {
+            if (s.name() == "data") {
+                data = s;
+            }
+        }
+        data::data_comparison_entry data_entry(data, input_dir);
+
         // Initialize list of histograms
         std::set<std::string> histogram_names;
         mc_entry.add_histograms(histogram_names);
+        data_entry.add_histograms(histogram_names);
 
         util::logging::info << "Found " << histogram_names.size() << " histograms." << std::endl;
 
@@ -44,7 +55,8 @@ int main(int argc, char **argv)
             */
             canvas.SetLogy();
 
-            mc_entry.draw(name, lumi);
+            data_entry.draw(name, lumi);
+            mc_entry.draw(name, lumi, true);
 
             /*
             // Get back to the canvas
@@ -65,6 +77,7 @@ int main(int argc, char **argv)
             canvas.Print((name + ".png").c_str());
 
             mc_entry.reset_drawing_state();
+            data_entry.reset_drawing_state();
         }
 
     } catch (std::exception &e) {

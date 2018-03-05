@@ -83,6 +83,7 @@ JetCorrectionUncertainty.cc \
 JetCorrectorParameters.cc \
 catalog.cc \
 chains.cc \
+comparison_entry.cc \
 higgs_analyzer.cc \
 histo_set.cc \
 job.cc \

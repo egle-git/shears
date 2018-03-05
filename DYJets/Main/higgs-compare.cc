@@ -43,7 +43,6 @@ int main(int argc, char **argv)
 
             TCanvas canvas(name.c_str(), "", 692, 844);
 
-            /*
             TPad upper("upper", "upper", 0, 0.3, 1, 1);
             upper.SetTopMargin(0.11);
             upper.SetBottomMargin(0.);
@@ -52,13 +51,10 @@ int main(int argc, char **argv)
             upper.SetLogy();
             upper.Draw();
             upper.cd();
-            */
-            canvas.SetLogy();
 
             mc_entry.draw(name, lumi);
             data_entry.draw(name, lumi, true);
 
-            /*
             // Get back to the canvas
             canvas.cd();
 
@@ -71,8 +67,30 @@ int main(int argc, char **argv)
             lower.Draw();
             lower.cd();
 
-            stack.Draw();
-            */
+            std::unique_ptr<TH1> ratio = mc_entry.get(name, lumi);
+            ratio->Divide(data_entry.get(name, lumi).get());
+
+            ratio->SetMarkerStyle(20);
+            ratio->SetMarkerColor(kBlack);
+            ratio->SetLineColor(kBlack);
+
+            ratio->GetXaxis()->SetTickLength(0.03);
+            ratio->GetXaxis()->SetTitleSize(0.1);
+            ratio->GetXaxis()->SetTitleOffset(1.2);
+            ratio->GetXaxis()->SetLabelSize(0.10);
+            ratio->GetXaxis()->SetLabelOffset(0.017);
+
+            ratio->GetYaxis()->SetRangeUser(0, 5);
+            ratio->GetYaxis()->SetNdivisions(5, 5, 0);
+            ratio->GetYaxis()->SetTitle("Simulation/Data");
+            ratio->GetYaxis()->SetTitleSize(0.1);
+            ratio->GetYaxis()->SetTitleOffset(0.5);
+            ratio->GetYaxis()->CenterTitle();
+            ratio->GetYaxis()->SetLabelSize(0.08);
+
+            ratio->SetStats(0);
+            ratio->SetTitle("");
+            ratio->Draw("ep");
 
             canvas.Print((name + ".png").c_str());
 

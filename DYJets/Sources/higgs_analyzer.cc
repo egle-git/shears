@@ -40,6 +40,10 @@ void higgs_analyzer::operator()()
         if (charge_check >= 0) {
             return;
         }
+        if (pZ.M() < 55) {
+            // We don't include the MC below M=50, adding 5 GeV to be sure
+            return;
+        }
         fill_muons(muons, "Zinc0jet");
         fill("mass", "Zinc0jet", pZ.M(), global_weight());
     }

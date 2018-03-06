@@ -18,8 +18,6 @@ static const char *const branch_names[trigger::count] = {
     "TrigHltPhot", "TrigHltMu", "TrigHltDiMu", "TrigHltEl", "TrigHltDiEl",
 };
 
-} // namespace anonymous
-
 static std::vector<std::string> available_triggers(util::chains &chains, std::size_t trig)
 {
     const char *const branch_name = branch_names[trig];
@@ -57,6 +55,8 @@ static std::vector<std::string> available_triggers(util::chains &chains, std::si
 
     return names;
 }
+
+} // namespace anonymous
 
 void print_available_triggers(util::chains &chains)
 {
@@ -208,10 +208,12 @@ bool trigger_mask::passes(const trigger_values &values) const
 {
     bool pass = _accepts_any_trigger;
     for (unsigned i = 0; i < trigger::count; ++i) {
-        if (_triggers[i]->is_veto(values[i])) {
-            return false;
+        if (_triggers[i]->used()) {
+            if (_triggers[i]->is_veto(values[i])) {
+                return false;
+            }
+            pass |= _triggers[i]->accepted(values[i]);
         }
-        pass |= _triggers[i]->accepted(values[i]);
     }
     return pass;
 }

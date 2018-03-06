@@ -48,6 +48,9 @@ class trigger
     /// \brief Sets the given trigger path to be used as a veto.
     bool veto(const std::string &name);
 
+    /// \brief Retrieves whether the trigger is used.
+    bool used() const { return _mask != 0 || _veto != 0; }
+
     /// \brief Retrieves the mask of accepted triggers paths.
     unsigned long long mask() const { return _mask; }
 

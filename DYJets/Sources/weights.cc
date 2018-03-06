@@ -75,6 +75,8 @@ void weights_analyzer::write()
     job_info_average.GetXaxis()->SetBinLabel(2, "xsec"); // For MC
     job_info_average.SetBinContent(2, _xsec);
 
-    util::logging::info << "Processed fraction of sample: " << fraction_processed << std::endl;
+    if (isdata()) {
+        util::logging::info << "Processed fraction of sample: " << fraction_processed << std::endl;
+    }
 }
 } // namespace physics

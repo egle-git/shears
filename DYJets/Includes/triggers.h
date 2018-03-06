@@ -83,14 +83,14 @@ class trigger_values
      * \brief Retrieves the value of the `i`th trigger branch without bound
      *        checking.
      */
-    unsigned long long operator[](std::size_t i) const { return *_values[i]; }
+    unsigned long long operator[](std::size_t i) const { return *(_values[i]); }
 
     /**
      * \brief Retrieves the value of the `i`th trigger branch with bound
      *        checking.
      * \throws std::out_of_range if \c i is out of bounds.
      */
-    unsigned long long at(std::size_t i) const { return *_values.at(i); }
+    unsigned long long at(std::size_t i) const { return *(_values.at(i)); }
 };
 
 /**

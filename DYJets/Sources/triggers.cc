@@ -99,11 +99,17 @@ bool trigger::veto(const std::string &name)
 
 /******************************************************************************/
 
-trigger_values::trigger_values(util::job::info &info)
+trigger_values::trigger_values(util::job::info &info) :
+    _values({
+        TTreeReaderValue<unsigned long long>(info.reader, branch_names[0]),
+        TTreeReaderValue<unsigned long long>(info.reader, branch_names[1]),
+        TTreeReaderValue<unsigned long long>(info.reader, branch_names[2]),
+        TTreeReaderValue<unsigned long long>(info.reader, branch_names[3]),
+        TTreeReaderValue<unsigned long long>(info.reader, branch_names[4])
+    })
 {
-    for (unsigned i = 0; i < trigger::count; ++i) {
-        _values[i] = TTreeReaderValue<unsigned long long>(info.reader, branch_names[i]);
-    }
+    // In case this assert fails: add a new reader above and increase the value.
+    static_assert(trigger::count == 5, "Yon need to add a new trigger reader");
 }
 
 /******************************************************************************/

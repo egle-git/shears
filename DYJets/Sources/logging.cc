@@ -107,7 +107,8 @@ void root_error_handler(int level, bool abort, const char *location, const char 
         fatal << location << ": " << msg << std::endl;
     }
     if (abort) {
-        std::terminate();
+        fatal << "ROOT requested stopping the execution." << std::endl;
+        std::abort();
     }
 }
 

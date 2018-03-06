@@ -10,6 +10,7 @@
 #include "histo_set.h"
 #include "job.h"
 #include "muons.h"
+#include "triggers.h"
 #include "weights.h"
 
 namespace po = boost::program_options;
@@ -19,12 +20,22 @@ class higgs_analyzer : private virtual util::histo_set,
                        private virtual physics::muons_analyzer,
                        private virtual physics::weights_analyzer
 {
+    TTreeReaderValue<unsigned> EvtRunNum;
+
+    physics::trigger_values triggers;
+
+    physics::trigger_mask mask_eraBG;
+    physics::trigger_mask mask_eraH;
+
   public:
     /// \brief Constructor.
     explicit higgs_analyzer(util::job::info &info, const util::options &opt);
 
     /// \brief Function called for every event.
     void operator()();
+
+    /// \brief Checks whether the current event passes the trigger.
+    bool passes_trigger();
 
     /// \brief Function called at the end of the processing.
     void write();

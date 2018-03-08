@@ -1,39 +1,17 @@
 stages:
-  - buildCMSSW
   - build
   - lint
 
 baobabs:
-  stage: buildCMSSW
+  stage: build
   tags: [ cvmfs ]
   script:
-  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=Hello%20here%20the%20shears%20CI&pretty=1&username=shearsDocker" >&  scrunch
-  - wget -nv "https://slack.com/api/chat.postMessage?token=$SLACKTOKEN&channel=slackci&text=testing%20branch%20$CI_COMMIT_REF_NAME%20for%20$GITLAB_USER_NAME&pretty=1&username=shearsDocker" >& scranch
   - .gitlab-ci/compile-scram.sh Baobabs
-  artifacts:
-    paths:
-    - shearsCompilated.tar.gz
-    expire_in: 60 minutes
 
 pruner:
   stage: build
   tags: [ cvmfs ]
   script: .gitlab-ci/compile.sh Bonzais
-  artifacts:
-    paths:
-    - Bonzais/pruner
-    expire_in: 60 minutes
-
-hzz2l2nu:
-  stage: build
-  tags: [ cvmfs ]
-  script:
-    - yum -q -y install boost-devel
-    - .gitlab-ci/compile.sh HZZ2l2nu
-  artifacts:
-    paths:
-    - HZZ2l2nu/runHZZanalysis
-    expire_in: 60 minutes
 
 DYJets:
   stage: build

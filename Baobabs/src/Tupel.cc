@@ -674,6 +674,7 @@ private:
   std::unique_ptr<std::vector<unsigned> > PhotId_;
   std::map<std::string, unsigned>    	PhotIdMap_; //bit assignment
   std::unique_ptr<std::vector<float> >    PhotHoE_;
+  std::unique_ptr<std::vector<float> >    PhotHadTowOverEm_;
   std::unique_ptr<std::vector<bool> >     PhotHasPixelSeed_;
   std::unique_ptr<std::vector<int> >      PhotPassElVeto_;
 
@@ -2461,6 +2462,7 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 
     PhotHoE_->push_back(photon.hadronicOverEm());
+    PhotHadTowOverEm_->push_back(photon.hadTowOverEm());// version of HoE use in the VID 
     PhotHasPixelSeed_->push_back(photon.hasPixelSeed());
    
     //Modified by Clement Leloup
@@ -2881,6 +2883,7 @@ Tupel::beginJob()
     //ADD_BRANCH(PhotSigmaIetaIphi);
     //ADD_BRANCH(PhotSigmaIphiIphi);
     ADD_BRANCH(PhotHoE);
+    ADD_BRANCH(PhotHadTowOverEm);
     ADD_BRANCH(PhotEtaWidth);
     ADD_BRANCH(PhotPhiWidth);
     ADD_BRANCH(PhotR9);

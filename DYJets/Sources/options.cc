@@ -203,7 +203,7 @@ template <> std::string name_for<po::variables_map>(const std::string &name)
 
 template <> bool is_present<YAML::Node>(const std::string &name, const YAML::Node &node)
 {
-    return node[name];
+    return node.IsMap() && node[name];
 }
 
 template <>

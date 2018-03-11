@@ -67,7 +67,9 @@ void job::configure(const class options &opt)
 {
     _samples = data::sample::load(opt);
 
-    configure(opt.config["job"]);
+    if (opt.config["job"]) {
+        configure(opt.config["job"]);
+    }
     configure(opt.map);
 }
 

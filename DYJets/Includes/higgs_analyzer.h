@@ -17,8 +17,7 @@ namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
 class higgs_analyzer : private virtual util::histo_set,
-                       private virtual physics::muons_analyzer,
-                       private virtual physics::weights_analyzer
+                       private virtual physics::muons_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
 
@@ -26,6 +25,8 @@ class higgs_analyzer : private virtual util::histo_set,
 
     physics::trigger_mask mask_eraBG;
     physics::trigger_mask mask_eraH;
+
+    physics::weights weights;
 
   public:
     /// \brief Constructor.

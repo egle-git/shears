@@ -6,8 +6,7 @@ namespace physics
 {
 
 muons_analyzer::muons_analyzer(util::job::info &info, const util::options &opt)
-    : weights_analyzer(info),
-      MuPt(info.reader, "MuPt"),
+    : MuPt(info.reader, "MuPt"),
       MuEta(info.reader, "MuEta"),
       MuPhi(info.reader, "MuPhi"),
       MuE(info.reader, "MuE"),
@@ -53,36 +52,38 @@ std::vector<lepton> muons_analyzer::get_muons()
     return muons;
 }
 
-void muons_analyzer::fill_muons(const std::vector<lepton> &muons, const std::string &tag)
+void muons_analyzer::fill_muons(const std::vector<lepton> &muons,
+                                const weights &w,
+                                const std::string &tag)
 {
     for (const lepton &mu : muons) {
-        fill("muPt", tag, mu.v.Pt(), global_weight());
-        fill("muEta", tag, mu.v.Eta(), global_weight());
-        fill("muPhi", tag, mu.v.Phi(), global_weight());
+        fill("muPt", tag, mu.v.Pt(), w.global_weight());
+        fill("muEta", tag, mu.v.Eta(), w.global_weight());
+        fill("muPhi", tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 0) {
         const lepton &mu = muons[0];
-        fill("muPt", "leading_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "leading_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "leading_" + tag, mu.v.Phi(), global_weight());
+        fill("muPt", "leading_" + tag, mu.v.Pt(), w.global_weight());
+        fill("muEta", "leading_" + tag, mu.v.Eta(), w.global_weight());
+        fill("muPhi", "leading_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 1) {
         const lepton &mu = muons[1];
-        fill("muPt", "subleading_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "subleading_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "subleading_" + tag, mu.v.Phi(), global_weight());
+        fill("muPt", "subleading_" + tag, mu.v.Pt(), w.global_weight());
+        fill("muEta", "subleading_" + tag, mu.v.Eta(), w.global_weight());
+        fill("muPhi", "subleading_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 2) {
         const lepton &mu = muons[2];
-        fill("muPt", "third_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "third_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "third_" + tag, mu.v.Phi(), global_weight());
+        fill("muPt", "third_" + tag, mu.v.Pt(), w.global_weight());
+        fill("muEta", "third_" + tag, mu.v.Eta(), w.global_weight());
+        fill("muPhi", "third_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 3) {
         const lepton &mu = muons[3];
-        fill("muPt", "fourth_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "fourth_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "fourth_" + tag, mu.v.Phi(), global_weight());
+        fill("muPt", "fourth_" + tag, mu.v.Pt(), w.global_weight());
+        fill("muEta", "fourth_" + tag, mu.v.Eta(), w.global_weight());
+        fill("muPhi", "fourth_" + tag, mu.v.Phi(), w.global_weight());
     }
 }
 

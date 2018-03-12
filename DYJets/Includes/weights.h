@@ -17,7 +17,7 @@ namespace physics
  * This class is responsible for the recording of processed event weights, lumiosity and cross
  * section. It does *not* mean that all histograms will be weighted automatically.
  */
-class weights_analyzer : private virtual util::histo_set
+class weights
 {
     TTreeReaderArray<double> EvtWeights;
 
@@ -40,13 +40,13 @@ class weights_analyzer : private virtual util::histo_set
 
   public:
     /// \brief Constructor.
-    explicit weights_analyzer(util::job::info &info);
+    explicit weights(util::job::info &info);
 
     /// \brief Call this for every processed event.
-    void operator()();
+    void process_event();
 
     /// \brief Writes results to the current (ROOT) directory.
-    void write();
+    void write(util::histo_set *histos);
 
     /// \brief Returns the size of the current weight vector.
     std::size_t weights_count() { return EvtWeights.GetSize(); }

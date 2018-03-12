@@ -11,12 +11,12 @@
 #include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
-    : weights_analyzer(info),
-      muons_analyzer(info, opt),
+    : muons_analyzer(info, opt),
       EvtRunNum(info.reader, "EvtRunNum"),
       triggers(info),
       mask_eraBG(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"),
-      mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ")
+      mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
+      weights(info)
 {
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -25,7 +25,7 @@ void higgs_analyzer::operator()()
 {
     using namespace physics;
 
-    weights_analyzer::operator()();
+    weights.process_event();
 
     if (!passes_trigger()) {
         return;
@@ -44,8 +44,8 @@ void higgs_analyzer::operator()()
             // We don't include the MC below M=50, adding 5 GeV to be sure
             return;
         }
-        fill_muons(muons, "Zinc0jet");
-        fill("mass", "Zinc0jet", pZ.M(), global_weight());
+        fill_muons(muons, weights, "Zinc0jet");
+        fill("mass", "Zinc0jet", pZ.M(), weights.global_weight());
     }
 }
 
@@ -53,7 +53,7 @@ bool higgs_analyzer::passes_trigger()
 {
     const unsigned run_threshold = 278820u; // start of Run G
 
-    if (isdata() && *EvtRunNum < run_threshold) {
+    if (weights.isdata() && *EvtRunNum < run_threshold) {
         return mask_eraBG.passes(triggers);
     } else {
         return mask_eraH.passes(triggers);
@@ -62,7 +62,7 @@ bool higgs_analyzer::passes_trigger()
 
 void higgs_analyzer::write()
 {
-    weights_analyzer::write();
+    weights.write(this);
     histo_set::write();
 }
 

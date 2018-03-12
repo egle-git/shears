@@ -91,6 +91,7 @@ logging.cc \
 mc_group.cc \
 muons.cc \
 options.cc \
+pileup.cc \
 sample.cc \
 timer.cc \
 triggers.cc \

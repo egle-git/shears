@@ -54,9 +54,9 @@ bool higgs_analyzer::passes_trigger()
     const unsigned run_threshold = 278820u; // start of Run G
 
     if (_weights.isdata() && *EvtRunNum < run_threshold) {
-        return _mask_eraBG.passes(triggers);
+        return _mask_eraBG.passes(_triggers);
     } else {
-        return _mask_eraH.passes(triggers);
+        return _mask_eraH.passes(_triggers);
     }
 }
 

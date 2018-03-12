@@ -929,21 +929,7 @@ bool isSameBinning(const TAxis &ax1, const TAxis &ax2)
     return true;
 }
 
-#if 0
-void saveCanvas(const char* fileBaseName, const TCanvas* c){
-  if(!c){
-    TVirtualPad* pad = gROOT->GetSelectedPad();
-    if(!pad){
-      c = pad->GetCanvas();
-    }
-  }
-  if(!c) return;
-  c->Print(TString(fileBaseName) + ".pdf");
-  c->Print(TString(fileBaseName) + ".C");
-  c->Print(TString(fileBaseName) + ".root");
-  c->Print(TString(fileBaseName) + ".png");
-}
-#else
+#ifndef DYJETS_NEW_API
 void saveCanvas(TCanvas *c, const char *outputDir, const char *baseName)
 {
     std::string mainFormat = cfg.getS("mainFormat", "pdf");

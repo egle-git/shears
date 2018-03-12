@@ -93,6 +93,7 @@ muons.cc \
 options.cc \
 pileup.cc \
 sample.cc \
+standalone_LumiReWeighting.cc \
 timer.cc \
 triggers.cc \
 weights.cc

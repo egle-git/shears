@@ -13,11 +13,13 @@
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     : EvtRunNum(info.reader, "EvtRunNum"),
       _muons(info, opt, *this),
+      _pileup(info, 2016, 0),
       _triggers(info),
       _mask_eraBG(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"),
       _mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
       _weights(info)
 {
+    _pileup.declare_histograms(*this);
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
 
@@ -44,7 +46,12 @@ void higgs_analyzer::operator()()
             // We don't include the MC below M=50, adding 5 GeV to be sure
             return;
         }
+
+        _pileup.fill(*this, "Zinc0jet_noweight", _weights);
+        _pileup.reweight(_weights);
+
         _muons.fill(*this, "Zinc0jet", muons, _weights);
+        _pileup.fill(*this, "Zinc0jet", _weights);
         fill("mass", "Zinc0jet", pZ.M(), _weights.global_weight());
     }
 }

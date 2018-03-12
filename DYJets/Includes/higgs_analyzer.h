@@ -10,6 +10,7 @@
 #include "histo_set.h"
 #include "job.h"
 #include "muons.h"
+#include "pileup.h"
 #include "triggers.h"
 #include "weights.h"
 
@@ -21,6 +22,7 @@ class higgs_analyzer : private virtual util::histo_set
     TTreeReaderValue<unsigned> EvtRunNum;
 
     physics::muons _muons;
+    physics::pileup _pileup;
 
     physics::trigger_values _triggers;
 

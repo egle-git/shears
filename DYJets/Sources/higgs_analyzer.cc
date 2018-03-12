@@ -11,8 +11,8 @@
 #include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
-    : muons_analyzer(info, opt),
-      EvtRunNum(info.reader, "EvtRunNum"),
+    : EvtRunNum(info.reader, "EvtRunNum"),
+      _muons(info, opt, *this),
       triggers(info),
       mask_eraBG(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"),
       mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
@@ -31,7 +31,7 @@ void higgs_analyzer::operator()()
         return;
     }
 
-    std::vector<lepton> muons = get_muons();
+    std::vector<lepton> muons = _muons.get();
 
     if (muons.size() >= 2) {
         TLorentzVector pZ = muons[0].v + muons[1].v;
@@ -44,7 +44,7 @@ void higgs_analyzer::operator()()
             // We don't include the MC below M=50, adding 5 GeV to be sure
             return;
         }
-        fill_muons(muons, weights, "Zinc0jet");
+        _muons.fill(*this, "Zinc0jet", muons, weights);
         fill("mass", "Zinc0jet", pZ.M(), weights.global_weight());
     }
 }

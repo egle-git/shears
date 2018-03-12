@@ -15,7 +15,7 @@ namespace physics
 {
 
 /// \brief A muon-only analysis.
-class muons_analyzer : private virtual util::histo_set
+class muons
 {
     TTreeReaderArray<float> MuPt;
     TTreeReaderArray<float> MuEta;
@@ -31,7 +31,7 @@ class muons_analyzer : private virtual util::histo_set
 
   public:
     /// \brief Constructor.
-    explicit muons_analyzer(util::job::info &info, const util::options &opt);
+    explicit muons(util::job::info &info, const util::options &opt, util::histo_set &h);
 
     /// \brief Configures the analyzer from user input.
     void configure(const util::options &opt);
@@ -41,16 +41,17 @@ class muons_analyzer : private virtual util::histo_set
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get_muons();
+    std::vector<lepton> get();
 
     /**
      * \brief Fills muon control plots.
      * \param muons The list of muons in the event.
      * \param tag   A tag to pass to \ref util::histo_set
      */
-    void fill_muons(const std::vector<lepton> &muons,
-                    const weights &w,
-                    const std::string &tag = "");
+    void fill(util::histo_set &h,
+              const std::string &tag,
+              const std::vector<lepton> &muons,
+              const weights &w);
 
     /// \brief Writes histograms to the current directory.
     void write();

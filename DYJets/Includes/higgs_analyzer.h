@@ -22,12 +22,12 @@ class higgs_analyzer : private virtual util::histo_set
 
     physics::muons _muons;
 
-    physics::trigger_values triggers;
+    physics::trigger_values _triggers;
 
-    physics::trigger_mask mask_eraBG;
-    physics::trigger_mask mask_eraH;
+    physics::trigger_mask _mask_eraBG;
+    physics::trigger_mask _mask_eraH;
 
-    physics::weights weights;
+    physics::weights _weights;
 
   public:
     /// \brief Constructor.

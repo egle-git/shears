@@ -11,7 +11,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options system)
 find_package(ROOT 6 REQUIRED COMPONENTS Table TreePlayer Unfold)
 find_package(Threads REQUIRED)
-find_package(yaml-cpp 0.5 REQUIRED)
+
+# yaml-cpp requires special treatment
+find_package(SCRAM)
+if(SCRAM_FOUND)
+    SCRAM_FIND_PACKAGE(yaml-cpp 0.5)
+else()
+    FIND_PACKAGE(yaml-cpp 0.5 REQUIRED)
+endif()
 
 ###################################################################################################
 # RooUnfold

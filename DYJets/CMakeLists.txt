@@ -60,7 +60,9 @@ target_include_directories(DYJets PUBLIC Includes)
 target_include_directories(DYJets SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Dependencies
-target_link_libraries(DYJets PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(DYJets PUBLIC boost_filesystem)
+target_link_libraries(DYJets PUBLIC boost_program_options)
+target_link_libraries(DYJets PUBLIC boost_system)
 target_link_libraries(DYJets PUBLIC ${ROOT_LIBRARIES})
 target_link_libraries(DYJets PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(DYJets PUBLIC RooUnfold)

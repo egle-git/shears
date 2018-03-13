@@ -25,6 +25,20 @@ log:
     # Default value: yes
     #override root handler: yes
 
+# Options related to the selection of jets
+jets:
+    # Pt cut [GeV]
+    # Default value: 30
+    pt: 30
+
+    # Eta cut
+    # Default value: 2.4
+    eta: 2.4
+
+    # PU MVA cut
+    # Default value: -0.2
+    pu mva: -0.2
+
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]

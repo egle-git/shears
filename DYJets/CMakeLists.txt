@@ -14,7 +14,7 @@ find_package(Threads REQUIRED)
 
 # yaml-cpp requires special treatment
 find_package(SCRAM)
-if(SCRAM_FOUND)
+if(${SCRAM_FOUND})
     SCRAM_FIND_PACKAGE(yaml-cpp 0.5)
 else()
     FIND_PACKAGE(yaml-cpp 0.5 REQUIRED)

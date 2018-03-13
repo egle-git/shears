@@ -17,7 +17,7 @@ endfunction()
 
 find_program(SCRAM_PATH scram)
 set(SCRAM_PATH "${SCRAM_PATH}" CACHE FILEPATH "Location of the scram executable")
-if("${_scram_path}" STREQUAL "SCRAM_PATH-NOTFOUND")
+if("${SCRAM_PATH}" STREQUAL "SCRAM_PATH-NOTFOUND")
     set(SCRAM_FOUND FALSE)
     return()
 else()

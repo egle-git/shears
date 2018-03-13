@@ -44,8 +44,7 @@ void higgs_analyzer::operator()()
         if (charge_check >= 0) {
             return;
         }
-        if (pZ.M() < 55) {
-            // We don't include the MC below M=50, adding 5 GeV to be sure
+        if (pZ.M() < 71 || pZ.M() > 111) {
             return;
         }
 

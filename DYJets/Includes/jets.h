@@ -8,6 +8,7 @@
 
 #include "histo_set.h"
 #include "job.h"
+#include "lepton.h"
 #include "options.h"
 #include "weights.h"
 
@@ -36,6 +37,7 @@ class jets
     double _pt_cut = 30;
     double _eta_cut = 2.4;
     double _pumva_cut = -0.2;
+    double _deltar_cut = 0.4;
 
   public:
     /// \brief Constructor.
@@ -50,6 +52,9 @@ class jets
      * The list is already filtered according to config file options.
      */
     std::vector<jet> get();
+
+    /// \brief Vetoes \c jets too close to one of the given \c leptons.
+    void veto(std::vector<jet> &jets, const std::vector<lepton> &leptons) const;
 
     /// \brief Declares histograms filled by this class.
     void declare_histograms(util::histo_set &h);

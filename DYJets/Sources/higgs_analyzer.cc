@@ -51,6 +51,7 @@ void higgs_analyzer::operator()()
 
         // Only read jets once we have a Z
         std::vector<jet> jets = _jets.get();
+        _jets.veto(jets, {muons[0], muons[1]});
 
         _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
         _pileup.fill(*this, "Zinc0jet_noweight", _weights);

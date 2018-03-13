@@ -1,6 +1,10 @@
 #include "jets.h"
 
+#include <algorithm>
+
 #include <boost/math/constants/constants.hpp>
+
+#include "functions.h"
 
 namespace physics
 {
@@ -24,6 +28,10 @@ void jets::configure(const util::options &opt)
     util::set_value_safe(node, _pumva_cut, "pu mva", "jet PU MVA cut", [](double val) {
         return val >= -1 && val < 1;
     });
+    util::set_value_safe(
+        node, _deltar_cut, "lepton delta r", "jet-lepton Delta R cut", [](double val) {
+            return val > 0;
+        });
 }
 
 void jets::declare_histograms(util::histo_set &h)
@@ -52,6 +60,21 @@ std::vector<jet> jets::get()
         jets.push_back(j);
     }
     return jets;
+}
+
+void jets::veto(std::vector<jet> &jets, const std::vector<lepton> &leptons) const
+{
+    jets.erase(std::remove_if(jets.begin(),
+                              jets.end(),
+                              [&](const jet &j) {
+                                  for (const lepton &l : leptons) {
+                                      if (deltaR(j.v, l.v) < _deltar_cut) {
+                                          return true;
+                                      }
+                                  }
+                                  return false;
+                              }),
+               jets.end());
 }
 
 void jets::fill(util::histo_set &h,

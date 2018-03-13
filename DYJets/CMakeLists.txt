@@ -3,8 +3,9 @@ cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
 # Use FindROOT from the repo, not the system one -- it doesn't have all the features we need
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-# C++ 14
+# Require C++ 14
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)

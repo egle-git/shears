@@ -19,6 +19,7 @@ class jet
 {
   public:
     TLorentzVector v; ///< Four-momentum
+    float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
 };
 
@@ -29,6 +30,7 @@ class jets
     TTreeReaderArray<float> JetAk04Eta;
     TTreeReaderArray<float> JetAk04Phi;
     TTreeReaderArray<float> JetAk04E;
+    TTreeReaderArray<float> JetAk04Id;
     TTreeReaderArray<float> JetAk04PuMva;
 
     double _pt_cut = 30;

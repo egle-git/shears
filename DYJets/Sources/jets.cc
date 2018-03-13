@@ -10,6 +10,7 @@ jets::jets(util::job::info &info, const util::options &opt)
       JetAk04Eta(info.reader, "JetAk04Eta"),
       JetAk04Phi(info.reader, "JetAk04Phi"),
       JetAk04E(info.reader, "JetAk04E"),
+      JetAk04Id(info.reader, "JetAk04Id"),
       JetAk04PuMva(info.reader, "JetAk04PuMva")
 {
     configure(opt);
@@ -42,10 +43,11 @@ std::vector<jet> jets::get()
     for (unsigned i = 0; i < JetAk04Pt.GetSize(); ++i) {
         jet j;
         if (JetAk04Pt[i] < _pt_cut || std::abs(JetAk04Eta[i]) > _eta_cut ||
-            JetAk04PuMva[i] < _pumva_cut) {
+            JetAk04PuMva[i] < _pumva_cut || JetAk04Id[i] <= 0) {
             continue;
         }
         j.v.SetPtEtaPhiE(JetAk04Pt[i], JetAk04Eta[i], JetAk04Phi[i], JetAk04E[i]);
+        j.id = JetAk04Id[i];
         j.puMva = JetAk04PuMva[i];
         jets.push_back(j);
     }

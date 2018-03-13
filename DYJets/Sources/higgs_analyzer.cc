@@ -12,6 +12,7 @@
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     : EvtRunNum(info.reader, "EvtRunNum"),
+      _jets(info, opt),
       _muons(info, opt, *this),
       _pileup(info, 2016, 0),
       _triggers(info),
@@ -19,6 +20,7 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
       _mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
       _weights(info)
 {
+    _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
     declare("mass", "Dilepton mass", 100, 0, 200);
 }
@@ -47,9 +49,14 @@ void higgs_analyzer::operator()()
             return;
         }
 
+        // Only read jets once we have a Z
+        std::vector<jet> jets = _jets.get();
+
+        _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
         _pileup.fill(*this, "Zinc0jet_noweight", _weights);
         _pileup.reweight(_weights);
 
+        _jets.fill(*this, "Zinc0jet", jets, _weights);
         _muons.fill(*this, "Zinc0jet", muons, _weights);
         _pileup.fill(*this, "Zinc0jet", _weights);
         fill("mass", "Zinc0jet", pZ.M(), _weights.global_weight());

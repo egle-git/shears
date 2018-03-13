@@ -8,6 +8,7 @@
 #include <TTreeReaderValue.h>
 
 #include "histo_set.h"
+#include "jets.h"
 #include "job.h"
 #include "muons.h"
 #include "pileup.h"
@@ -21,6 +22,7 @@ class higgs_analyzer : private virtual util::histo_set
 {
     TTreeReaderValue<unsigned> EvtRunNum;
 
+    physics::jets _jets;
     physics::muons _muons;
     physics::pileup _pileup;
 

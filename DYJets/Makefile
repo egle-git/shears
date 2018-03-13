@@ -86,6 +86,7 @@ chains.cc \
 comparison_entry.cc \
 higgs_analyzer.cc \
 histo_set.cc \
+jets.cc \
 job.cc \
 logging.cc \
 mc_group.cc \

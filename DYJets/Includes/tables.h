@@ -12,11 +12,12 @@ class record
   public:
     double ptLow, ptHi, etaLow, etaHi, effi, effiErrorLow, effiErrorHigh;
 
-    record();
-    record(double, double, double, double, double, double, double);
-    bool belongToEta(double);
-    bool belongTo(double, double);
-    bool equalTo(int num);
+    explicit record() = default;
+    explicit record(double, double, double, double, double, double, double);
+
+    bool belongToEta(double) const;
+    bool belongTo(double, double) const;
+    bool equalTo(int num) const;
 };
 
 class table
@@ -25,12 +26,12 @@ class table
     explicit table() = default;
     explicit table(const std::string &filename);
 
-    double getEfficiency(double, double);
-    double getEfficiencyLow(double, double);
-    double getEfficiencyHigh(double, double);
-    double getTTbarSF(int);
-    double getTTbarSFLow(int);
-    double getTTbarSFHigh(int);
+    double getEfficiency(double, double) const;
+    double getEfficiencyLow(double, double) const;
+    double getEfficiencyHigh(double, double) const;
+    double getTTbarSF(int) const;
+    double getTTbarSFLow(int) const;
+    double getTTbarSFHigh(int) const;
 
   private:
     std::vector<record> recd;

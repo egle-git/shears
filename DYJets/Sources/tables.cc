@@ -6,11 +6,6 @@
 namespace util
 {
 
-record::record()
-    : ptLow(0), ptHi(0), etaLow(0), etaHi(0), effi(0), effiErrorLow(0), effiErrorHigh(0)
-{
-}
-
 record::record(
     double pt1, double pt2, double eta1, double eta2, double eff, double effLow, double effHigh)
     : ptLow(pt1),
@@ -23,12 +18,12 @@ record::record(
 {
 }
 
-bool record::belongTo(double pt, double eta)
+bool record::belongTo(double pt, double eta) const
 {
     return (pt < ptHi && pt >= ptLow) && (eta < etaHi && eta >= etaLow);
 }
 
-bool record::equalTo(int num)
+bool record::equalTo(int num) const
 {
     return (std::abs(num - etaLow) < 0.5); // etaLow means the first value
 }
@@ -48,7 +43,7 @@ table::table(const std::string &filename)
     }
 }
 
-double table::getEfficiency(double pt, double eta)
+double table::getEfficiency(double pt, double eta) const
 {
     double hiPtBin = 0;
     for (unsigned int i = 0; i != recd.size(); i++) {
@@ -60,7 +55,7 @@ double table::getEfficiency(double pt, double eta)
     }
     return hiPtBin;
 }
-double table::getEfficiencyLow(double pt, double eta)
+double table::getEfficiencyLow(double pt, double eta) const
 {
     double hiPtBin = 0;
     for (unsigned int i = 0; i != recd.size(); i++) {
@@ -69,7 +64,7 @@ double table::getEfficiencyLow(double pt, double eta)
     }
     return hiPtBin;
 }
-double table::getEfficiencyHigh(double pt, double eta)
+double table::getEfficiencyHigh(double pt, double eta) const
 {
     double hiPtBin = 0;
     for (unsigned int i = 0; i != recd.size(); i++) {
@@ -79,7 +74,7 @@ double table::getEfficiencyHigh(double pt, double eta)
     return hiPtBin;
 }
 
-double table::getTTbarSF(int NJets)
+double table::getTTbarSF(int NJets) const
 {
     for (unsigned int i = 0; i != recd.size(); i++) {
         if ((recd[i]).equalTo(NJets)) return recd[i].etaHi;
@@ -87,7 +82,7 @@ double table::getTTbarSF(int NJets)
     return 1;
 }
 
-double table::getTTbarSFLow(int NJets)
+double table::getTTbarSFLow(int NJets) const
 {
     for (unsigned int i = 0; i != recd.size(); i++) {
         if ((recd[i]).equalTo(NJets)) return recd[i].etaHi - recd[i].ptLow;
@@ -95,7 +90,7 @@ double table::getTTbarSFLow(int NJets)
     return 1;
 }
 
-double table::getTTbarSFHigh(int NJets)
+double table::getTTbarSFHigh(int NJets) const
 {
     for (unsigned int i = 0; i != recd.size(); i++) {
         if ((recd[i]).equalTo(NJets)) return recd[i].etaHi + recd[i].ptLow;

@@ -25,6 +25,9 @@ log:
     # Default value: yes
     #override root handler: yes
 
+# Year (used for pileup)
+year: 2016
+
 # Options related to the selection of jets
 jets:
     # Pt cut [GeV]

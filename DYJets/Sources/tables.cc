@@ -22,7 +22,7 @@ table::table(const std::string &filename)
 {
     std::ifstream file(filename);
     if (!file) {
-        throw std::invalid_argument("File " + filename + "doesn't exist");
+        throw std::invalid_argument("File " + filename + " doesn't exist");
     }
     double data[7];
     while (file) {

@@ -496,6 +496,12 @@ int ZJets::Loop(bool hasRecoInfo,
     Init(hasRecoInfo, hasGenInfo);
     if (fChain == 0) return -1;
     Long64_t nEntries = fChain->GetEntries();
+    if (nEntries <= 0) {
+        std::cout << "ERROR: The input chain doesn't appear to contain data. Is your proxy valid?"
+                  << std::endl;
+        std::exit(1);
+    }
+
     Long64_t nEventsToProcessTot = 0;
     Long64_t skipEvents =
         cfg.getL("skipEvents",

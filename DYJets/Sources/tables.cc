@@ -72,7 +72,7 @@ double table::getEfficiencyHigh(double pt, double eta) const
 namespace YAML
 {
 
-template <> bool convert<util::table>::decode(const Node &node, util::table &table)
+bool convert<util::table>::decode(const Node &node, util::table &table)
 {
     if (node.IsScalar()) {
         table = util::table("EfficiencyTables/" + node.as<std::string>());

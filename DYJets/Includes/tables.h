@@ -12,6 +12,8 @@ namespace util
  * \brief Handles table of scale factors.
  *
  * The class reads a table from the filesystem, and provides access to its entries.
+ *
+ * YAML string nodes can be converted to tables.
  */
 class table
 {
@@ -51,5 +53,19 @@ class table
 /// \brief A set of tables identified by their name.
 using tables = std::map<std::string, table>;
 } // namespace util
+
+/// \cond
+namespace YAML
+{
+
+class Node;
+template<class T> struct convert;
+
+template <> struct convert<util::table>
+{
+    static bool decode(const Node &node, util::table &table);
+};
+} // namespace YAML
+/// \endcond
 
 #endif // TABLES_H

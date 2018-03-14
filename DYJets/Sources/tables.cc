@@ -3,6 +3,8 @@
 #include <cmath>
 #include <fstream>
 
+#include <yaml-cpp/yaml.h>
+
 namespace util
 {
 
@@ -65,3 +67,19 @@ double table::getEfficiencyHigh(double pt, double eta) const
     return hiPtBin;
 }
 } // namespace util
+
+/// \cond
+namespace YAML
+{
+
+template <> bool convert<util::table>::decode(const Node &node, util::table &table)
+{
+    if (node.IsScalar()) {
+        table = util::table("EfficiencyTables/" + node.as<std::string>());
+        return true;
+    } else {
+        return false;
+    }
+}
+} // namespace YAML
+/// \endcond

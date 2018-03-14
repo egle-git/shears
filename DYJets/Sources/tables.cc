@@ -6,24 +6,12 @@
 namespace util
 {
 
-record::record(
-    double pt1, double pt2, double eta1, double eta2, double eff, double effLow, double effHigh)
-    : ptLow(pt1),
-      ptHi(pt2),
-      etaLow(eta1),
-      etaHi(eta2),
-      effi(eff),
-      effiErrorLow(effLow),
-      effiErrorHigh(effHigh)
-{
-}
-
-bool record::belongTo(double pt, double eta) const
+bool table::record::belongTo(double pt, double eta) const
 {
     return (pt < ptHi && pt >= ptLow) && (eta < etaHi && eta >= etaLow);
 }
 
-bool record::equalTo(int num) const
+bool table::record::equalTo(int num) const
 {
     return (std::abs(num - etaLow) < 0.5); // etaLow means the first value
 }
@@ -39,7 +27,7 @@ table::table(const std::string &filename)
         for (int i(0); i < 7; i++) {
             file >> data[i];
         }
-        recd.push_back(record(data[2], data[3], data[0], data[1], data[4], data[5], data[6]));
+        recd.push_back(record{data[2], data[3], data[0], data[1], data[4], data[5], data[6]});
     }
 }
 

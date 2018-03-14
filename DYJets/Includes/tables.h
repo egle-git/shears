@@ -1,6 +1,7 @@
 #ifndef TABLES_H
 #define TABLES_H
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,9 @@ class table
     /// \brief Returns the upper bound for the efficiency in the given (\c pt, \c eta) bin.
     double getEfficiencyHigh(double pt, double eta) const;
 };
+
+/// \brief A set of tables identified by their name.
+using tables = std::map<std::string, table>;
 } // namespace util
 
 #endif // TABLES_H

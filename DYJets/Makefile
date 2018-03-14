@@ -93,6 +93,7 @@ mc_group.cc \
 muons.cc \
 options.cc \
 pileup.cc \
+tables.cc \
 sample.cc \
 standalone_LumiReWeighting.cc \
 timer.cc \

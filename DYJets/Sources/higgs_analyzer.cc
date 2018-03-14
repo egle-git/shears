@@ -16,8 +16,8 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
       _muons(info, opt, *this),
       _pileup(info, 2016, 0),
       _triggers(info),
-      _mask_eraBG(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"),
-      _mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
+      _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
+      _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
       _weights(info)
 {
     if (opt.config["tables B-F"]) {

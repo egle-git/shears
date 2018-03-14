@@ -69,6 +69,13 @@ muons:
     # Default value: yes
     use tracking scale factors: yes
 
+# Triggers
+#
+# The values below must be strings; use an empty string to disable triggers. See the documentation
+# of pyhsics::trigger_mask for more details.
+triggers B-F: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"
+triggers G-H: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"
+
 # List of available data/MC samples
 samples:
     - name: data

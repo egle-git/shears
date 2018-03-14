@@ -2,6 +2,8 @@
 
 #include <boost/math/constants/constants.hpp>
 
+#include "logging.h"
+
 namespace physics
 {
 
@@ -30,6 +32,11 @@ void muons::configure(const util::options &opt)
     util::set_value_safe(node, _eta_cut, "eta", "muon eta cut", [](double val) { return val > 0; });
     util::set_value_safe(
         node, _iso_cut, "isolation", "muon isolation cut", [](double val) { return val >= 0; });
+    util::set_value_safe(node, _id_sf_enabled, "use id scale factor", "id scale factor toggle");
+    util::set_value_safe(
+        node, _iso_sf_enabled, "use isolation scale factor", "isolation scale factor toggle");
+    util::set_value_safe(
+        node, _trk_sf_enabled, "use tracking scale factor", "tracking scale factor toggle");
 }
 
 std::vector<lepton> muons::get()
@@ -50,6 +57,25 @@ std::vector<lepton> muons::get()
         muons.push_back(l);
     }
     return muons;
+}
+
+void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::tables &tab) const
+{
+    if (w.ismc()) {
+        for (const lepton &mu : muons) {
+            if (_id_sf_enabled) {
+                w.use_weight(tab.at("muon id").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+            }
+            if (_iso_sf_enabled) {
+                w.use_weight(
+                    tab.at("muon isolation").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+            }
+            if (_trk_sf_enabled) {
+                w.use_weight(
+                    tab.at("muon tracking").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+            }
+        }
+    }
 }
 
 void muons::fill(util::histo_set &h,

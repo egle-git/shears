@@ -9,6 +9,7 @@
 #include "job.h"
 #include "lepton.h"
 #include "options.h"
+#include "tables.h"
 #include "weights.h"
 
 namespace physics
@@ -29,6 +30,10 @@ class muons
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
 
+    bool _id_sf_enabled = true;
+    bool _iso_sf_enabled = true;
+    bool _trk_sf_enabled = true;
+
   public:
     /// \brief Constructor.
     explicit muons(util::job::info &info, const util::options &opt, util::histo_set &h);
@@ -42,6 +47,25 @@ class muons
      * The list is already filtered according to config file options.
      */
     std::vector<lepton> get();
+
+    /**
+     * \brief Reweighs an event to take scale factors into account.
+     *
+     * If enabled in the configuration file, the following tables will be used:
+     *
+     * - `muon id`
+     * - `muon isolation`
+     * - `muon tracking`
+     *
+     * It is the user responsibility to load them. An exception is thrown if they're not present.
+     *
+     * \param w Weights to be reweighed
+     * \param muons List of muons to take into account
+     * \param tab Tables to get the scale factors from
+     *
+     * \throws std::out_of_range if a table is enabled and not present.
+     */
+    void apply_sf(weights &w, const std::vector<lepton> &muons, const util::tables &tab) const;
 
     /**
      * \brief Fills muon control plots.

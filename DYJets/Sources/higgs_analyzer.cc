@@ -63,6 +63,8 @@ void higgs_analyzer::operator()()
         _pileup.fill(*this, "Zinc0jet_noweight", _weights);
         _pileup.reweight(_weights);
 
+        _muons.apply_sf(_weights, {muons[0], muons[1]}, _tables_eraBF);
+
         _jets.fill(*this, "Zinc0jet", jets, _weights);
         _muons.fill(*this, "Zinc0jet", muons, _weights);
         _pileup.fill(*this, "Zinc0jet", _weights);

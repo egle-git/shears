@@ -18,7 +18,7 @@ class table
         bool equalTo(int num) const;
     };
 
-    std::vector<record> recd;
+    std::vector<record> _recd;
 
   public:
     explicit table() = default;

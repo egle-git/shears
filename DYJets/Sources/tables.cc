@@ -27,61 +27,62 @@ table::table(const std::string &filename)
         for (int i(0); i < 7; i++) {
             file >> data[i];
         }
-        recd.push_back(record{data[2], data[3], data[0], data[1], data[4], data[5], data[6]});
+        _recd.push_back(record{data[2], data[3], data[0], data[1], data[4], data[5], data[6]});
     }
 }
 
 double table::getEfficiency(double pt, double eta) const
 {
     double hiPtBin = 0;
-    for (unsigned int i = 0; i != recd.size(); i++) {
+    for (unsigned int i = 0; i != _recd.size(); i++) {
         // if finds the proper bin, then return the efficiency
-        if ((recd[i]).belongTo(pt, eta)) return recd[i].effi;
+        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi;
         // else store the average pt of the current bin efficency but do not return and try the next
         // bin
-        if ((recd[i]).belongTo(0.5 * (recd[i].ptHi + recd[i].ptLow), eta)) hiPtBin = recd[i].effi;
+        if ((_recd[i]).belongTo(0.5 * (_recd[i].ptHi + _recd[i].ptLow), eta))
+            hiPtBin = _recd[i].effi;
     }
     return hiPtBin;
 }
 double table::getEfficiencyLow(double pt, double eta) const
 {
     double hiPtBin = 0;
-    for (unsigned int i = 0; i != recd.size(); i++) {
-        if ((recd[i]).belongTo(pt, eta)) return recd[i].effi - recd[i].effiErrorLow;
-        if ((recd[i]).belongTo(350, eta)) hiPtBin = recd[i].effi;
+    for (unsigned int i = 0; i != _recd.size(); i++) {
+        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi - _recd[i].effiErrorLow;
+        if ((_recd[i]).belongTo(350, eta)) hiPtBin = _recd[i].effi;
     }
     return hiPtBin;
 }
 double table::getEfficiencyHigh(double pt, double eta) const
 {
     double hiPtBin = 0;
-    for (unsigned int i = 0; i != recd.size(); i++) {
-        if ((recd[i]).belongTo(pt, eta)) return recd[i].effi + recd[i].effiErrorHigh;
-        if ((recd[i]).belongTo(350, eta)) hiPtBin = recd[i].effi;
+    for (unsigned int i = 0; i != _recd.size(); i++) {
+        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi + _recd[i].effiErrorHigh;
+        if ((_recd[i]).belongTo(350, eta)) hiPtBin = _recd[i].effi;
     }
     return hiPtBin;
 }
 
 double table::getTTbarSF(int NJets) const
 {
-    for (unsigned int i = 0; i != recd.size(); i++) {
-        if ((recd[i]).equalTo(NJets)) return recd[i].etaHi;
+    for (unsigned int i = 0; i != _recd.size(); i++) {
+        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi;
     }
     return 1;
 }
 
 double table::getTTbarSFLow(int NJets) const
 {
-    for (unsigned int i = 0; i != recd.size(); i++) {
-        if ((recd[i]).equalTo(NJets)) return recd[i].etaHi - recd[i].ptLow;
+    for (unsigned int i = 0; i != _recd.size(); i++) {
+        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi - _recd[i].ptLow;
     }
     return 1;
 }
 
 double table::getTTbarSFHigh(int NJets) const
 {
-    for (unsigned int i = 0; i != recd.size(); i++) {
-        if ((recd[i]).equalTo(NJets)) return recd[i].etaHi + recd[i].ptLow;
+    for (unsigned int i = 0; i != _recd.size(); i++) {
+        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi + _recd[i].ptLow;
     }
     return 1;
 }

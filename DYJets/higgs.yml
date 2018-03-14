@@ -57,6 +57,18 @@ muons:
     # Default value: 0.25
     isolation: 0.25
 
+    # Whether to use the identification scale factors
+    # Default value: yes
+    use id scale factors: yes
+
+    # Whether to use the isolation scale factors
+    # Default value: yes
+    use isolation scale factors: yes
+
+    # Whether to use the tracking scale factors
+    # Default value: yes
+    use tracking scale factors: yes
+
 # List of available data/MC samples
 samples:
     - name: data

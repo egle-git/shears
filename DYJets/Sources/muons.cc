@@ -32,11 +32,11 @@ void muons::configure(const util::options &opt)
     util::set_value_safe(node, _eta_cut, "eta", "muon eta cut", [](double val) { return val > 0; });
     util::set_value_safe(
         node, _iso_cut, "isolation", "muon isolation cut", [](double val) { return val >= 0; });
-    util::set_value_safe(node, _id_sf_enabled, "use id scale factor", "id scale factor toggle");
+    util::set_value_safe(node, _id_sf_enabled, "use id scale factors", "id scale factors toggle");
     util::set_value_safe(
-        node, _iso_sf_enabled, "use isolation scale factor", "isolation scale factor toggle");
+        node, _iso_sf_enabled, "use isolation scale factors", "isolation scale factors toggle");
     util::set_value_safe(
-        node, _trk_sf_enabled, "use tracking scale factor", "tracking scale factor toggle");
+        node, _trk_sf_enabled, "use tracking scale factors", "tracking scale factors toggle");
 }
 
 std::vector<lepton> muons::get()

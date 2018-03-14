@@ -12,6 +12,7 @@
 #include "job.h"
 #include "muons.h"
 #include "pileup.h"
+#include "tables.h"
 #include "triggers.h"
 #include "weights.h"
 
@@ -25,6 +26,9 @@ class higgs_analyzer : private virtual util::histo_set
     physics::jets _jets;
     physics::muons _muons;
     physics::pileup _pileup;
+
+    util::tables _tables_eraBF;
+    util::tables _tables_eraGH;
 
     physics::trigger_values _triggers;
 

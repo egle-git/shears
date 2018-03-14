@@ -20,6 +20,13 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
       _mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
       _weights(info)
 {
+    if (opt.config["tables B-F"]) {
+        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
+    }
+    if (opt.config["tables G-H"]) {
+        _tables_eraBF = opt.config["tables G-H"].as<util::tables>();
+    }
+
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
     declare("mass", "Dilepton mass", 100, 0, 200);

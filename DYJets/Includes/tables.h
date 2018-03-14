@@ -37,12 +37,14 @@ class table
      */
     explicit table(const std::string &filename);
 
-    double getEfficiency(double, double) const;
-    double getEfficiencyLow(double, double) const;
-    double getEfficiencyHigh(double, double) const;
-    double getTTbarSF(int) const;
-    double getTTbarSFLow(int) const;
-    double getTTbarSFHigh(int) const;
+    /// \brief Returns the efficiency in the given (\c pt, \c eta) bin.
+    double getEfficiency(double pt, double eta) const;
+
+    /// \brief Returns the lower bound for the efficiency in the given (\c pt, \c eta) bin.
+    double getEfficiencyLow(double pt, double eta) const;
+
+    /// \brief Returns the upper bound for the efficiency in the given (\c pt, \c eta) bin.
+    double getEfficiencyHigh(double pt, double eta) const;
 };
 } // namespace util
 

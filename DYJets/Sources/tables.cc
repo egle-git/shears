@@ -44,6 +44,7 @@ double table::getEfficiency(double pt, double eta) const
     }
     return hiPtBin;
 }
+
 double table::getEfficiencyLow(double pt, double eta) const
 {
     double hiPtBin = 0;
@@ -53,6 +54,7 @@ double table::getEfficiencyLow(double pt, double eta) const
     }
     return hiPtBin;
 }
+
 double table::getEfficiencyHigh(double pt, double eta) const
 {
     double hiPtBin = 0;
@@ -61,29 +63,5 @@ double table::getEfficiencyHigh(double pt, double eta) const
         if ((_recd[i]).belongTo(350, eta)) hiPtBin = _recd[i].effi;
     }
     return hiPtBin;
-}
-
-double table::getTTbarSF(int NJets) const
-{
-    for (unsigned int i = 0; i != _recd.size(); i++) {
-        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi;
-    }
-    return 1;
-}
-
-double table::getTTbarSFLow(int NJets) const
-{
-    for (unsigned int i = 0; i != _recd.size(); i++) {
-        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi - _recd[i].ptLow;
-    }
-    return 1;
-}
-
-double table::getTTbarSFHigh(int NJets) const
-{
-    for (unsigned int i = 0; i != _recd.size(); i++) {
-        if ((_recd[i]).equalTo(NJets)) return _recd[i].etaHi + _recd[i].ptLow;
-    }
-    return 1;
 }
 } // namespace util

@@ -22,7 +22,6 @@ chains::chains(const std::vector<std::string> &files)
         std::string treePath = fullpath + "/tupel/EventTree";
         std::string bonzaiHeaderPath = fullpath + "/tupel/BonzaiHeader";
         std::string bonzaiBitFieldsPath = fullpath + "/tupel/BitFields";
-        _events->Add(treePath.c_str());
 
         TFile *f = TFile::Open(fullpath.c_str());
         if (f && !f->IsZombie()) {
@@ -39,7 +38,9 @@ chains::chains(const std::vector<std::string> &files)
 
                 is_bonzai = true;
                 _bonzai_header->Add(bonzaiHeaderPath.c_str());
-            } else {
+                _bit_fields->Add(bonzaiBitFieldsPath.c_str());
+                _events->Add(treePath.c_str());
+            } else if (f->GetDirectory("tupel")->FindKey("EventTree")) {
                 // This is a baobab
                 if (is_bonzai) {
                     throw std::invalid_argument(
@@ -52,14 +53,21 @@ chains::chains(const std::vector<std::string> &files)
                         << "acceptance correction will be considered. This message can be ignored "
                         << "if for this sample Boabab ntuples are used as input." << std::endl;
                 }
+
+                _bit_fields->Add(bonzaiBitFieldsPath.c_str());
+                _events->Add(treePath.c_str());
+            } else {
+                // The file is just empty
+                logging::warn << "File " << fullpath << " doesn't appear to contain data: skipped."
+                              << std::endl;
             }
+        } else {
+            logging::warn << "Couldn't open file " << fullpath << ": skipped." << std::endl;
         }
         if (f) {
             delete f;
         }
         first_file = false;
-
-        _bit_fields->Add(bonzaiBitFieldsPath.c_str());
     }
 }
 } // namespace util

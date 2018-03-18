@@ -1,3 +1,9 @@
+Warning
+=======
+
+This page documents the Drell-Yan code. The Higgs code documentation is auto-generated using
+Doxygen, and can be found [here](http://homepage.iihe.ac.be/~lmoureau/shears/ci/).
+
 Quick start
 ============
 

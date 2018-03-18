@@ -5,7 +5,7 @@
 namespace physics
 {
 
-weights_analyzer::weights_analyzer(util::job::info &info)
+weights::weights(util::job::info &info)
     : EvtWeights(info.reader, "EvtWeights"),
       _ismc(info.catalog.primary_events() <= 0), // FIXME Improve ?
       _primary_events_total(info.catalog.primary_events()),
@@ -31,7 +31,7 @@ weights_analyzer::weights_analyzer(util::job::info &info)
     }
 }
 
-void weights_analyzer::operator()()
+void weights::process_event()
 {
     if (weights_count() > 0) {
         _global_weight = weight_at(0);
@@ -42,7 +42,7 @@ void weights_analyzer::operator()()
     _processed_events++;
 }
 
-void weights_analyzer::write()
+void weights::write(util::histo_set *histos)
 {
     double fraction_processed = 1;
     if (ismc()) {
@@ -55,8 +55,8 @@ void weights_analyzer::write()
     }
 
     // Declare and fill summed info histogram
-    declare("_job_info", "Job information", 4, 0, 4);
-    histogram_type &job_info = get("_job_info");
+    histos->declare("_job_info", "Job information", 4, 0, 4);
+    util::histo_set::histogram_type &job_info = histos->get("_job_info");
 
     job_info.GetXaxis()->SetBinLabel(1, "fraction_processed"); // For data
     job_info.SetBinContent(1, fraction_processed);
@@ -65,8 +65,8 @@ void weights_analyzer::write()
     job_info.SetBinContent(2, _weights_sum);
 
     // Declare and fill info histogram
-    declare("_job_info_average", "Job information", 4, 0, 4);
-    histogram_type &job_info_average = get("_job_info_average");
+    histos->declare("_job_info_average", "Job information", 4, 0, 4);
+    util::histo_set::histogram_type &job_info_average = histos->get("_job_info_average");
     job_info_average.SetBit(TH1::kIsAverage);
 
     job_info_average.GetXaxis()->SetBinLabel(1, "lumi"); // For data

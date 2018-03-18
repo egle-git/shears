@@ -44,6 +44,7 @@ int main(int argc, char **argv)
         data::data_comparison_entry data_entry("higgs", data, input_dir);
 
         double lumi = data_entry.lumi();
+        util::logging::info << "Normalizing MC to " << (lumi / 1000) << " fb^-1" << std::endl;
 
         // Initialize list of histograms
         std::set<std::string> histogram_names;

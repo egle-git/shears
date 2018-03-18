@@ -5,9 +5,8 @@
 namespace physics
 {
 
-muons_analyzer::muons_analyzer(util::job::info &info, const util::options &opt)
-    : weights_analyzer(info),
-      MuPt(info.reader, "MuPt"),
+muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h)
+    : MuPt(info.reader, "MuPt"),
       MuEta(info.reader, "MuEta"),
       MuPhi(info.reader, "MuPhi"),
       MuE(info.reader, "MuE"),
@@ -19,12 +18,12 @@ muons_analyzer::muons_analyzer(util::job::info &info, const util::options &opt)
 
     const double pi = boost::math::constants::pi<double>();
 
-    declare("muPt", "Muon pt", 40, 0, 200);
-    declare("muEta", "Muon eta", 24, -2.4, 2.4);
-    declare("muPhi", "Muon phi", 24, -pi, pi);
+    h.declare("muPt", "Muon pt", 40, 0, 200);
+    h.declare("muEta", "Muon eta", 24, -2.4, 2.4);
+    h.declare("muPhi", "Muon phi", 24, -pi, pi);
 }
 
-void muons_analyzer::configure(const util::options &opt)
+void muons::configure(const util::options &opt)
 {
     const YAML::Node node = opt.config["muons"];
     util::set_value_safe(node, _pt_cut, "pt", "muon pt cut", [](double val) { return val >= 0; });
@@ -33,7 +32,7 @@ void muons_analyzer::configure(const util::options &opt)
         node, _iso_cut, "isolation", "muon isolation cut", [](double val) { return val >= 0; });
 }
 
-std::vector<lepton> muons_analyzer::get_muons()
+std::vector<lepton> muons::get()
 {
     std::vector<lepton> muons;
     for (unsigned i = 0; i < MuPt.GetSize(); ++i) {
@@ -53,38 +52,39 @@ std::vector<lepton> muons_analyzer::get_muons()
     return muons;
 }
 
-void muons_analyzer::fill_muons(const std::vector<lepton> &muons, const std::string &tag)
+void muons::fill(util::histo_set &h,
+                 const std::string &tag,
+                 const std::vector<lepton> &muons,
+                 const weights &w)
 {
     for (const lepton &mu : muons) {
-        fill("muPt", tag, mu.v.Pt(), global_weight());
-        fill("muEta", tag, mu.v.Eta(), global_weight());
-        fill("muPhi", tag, mu.v.Phi(), global_weight());
+        h.fill("muPt", tag, mu.v.Pt(), w.global_weight());
+        h.fill("muEta", tag, mu.v.Eta(), w.global_weight());
+        h.fill("muPhi", tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 0) {
         const lepton &mu = muons[0];
-        fill("muPt", "leading_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "leading_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "leading_" + tag, mu.v.Phi(), global_weight());
+        h.fill("muPt", "leading_" + tag, mu.v.Pt(), w.global_weight());
+        h.fill("muEta", "leading_" + tag, mu.v.Eta(), w.global_weight());
+        h.fill("muPhi", "leading_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 1) {
         const lepton &mu = muons[1];
-        fill("muPt", "subleading_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "subleading_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "subleading_" + tag, mu.v.Phi(), global_weight());
+        h.fill("muPt", "subleading_" + tag, mu.v.Pt(), w.global_weight());
+        h.fill("muEta", "subleading_" + tag, mu.v.Eta(), w.global_weight());
+        h.fill("muPhi", "subleading_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 2) {
         const lepton &mu = muons[2];
-        fill("muPt", "third_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "third_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "third_" + tag, mu.v.Phi(), global_weight());
+        h.fill("muPt", "third_" + tag, mu.v.Pt(), w.global_weight());
+        h.fill("muEta", "third_" + tag, mu.v.Eta(), w.global_weight());
+        h.fill("muPhi", "third_" + tag, mu.v.Phi(), w.global_weight());
     }
     if (muons.size() > 3) {
         const lepton &mu = muons[3];
-        fill("muPt", "fourth_" + tag, mu.v.Pt(), global_weight());
-        fill("muEta", "fourth_" + tag, mu.v.Eta(), global_weight());
-        fill("muPhi", "fourth_" + tag, mu.v.Phi(), global_weight());
+        h.fill("muPt", "fourth_" + tag, mu.v.Pt(), w.global_weight());
+        h.fill("muEta", "fourth_" + tag, mu.v.Eta(), w.global_weight());
+        h.fill("muPhi", "fourth_" + tag, mu.v.Phi(), w.global_weight());
     }
 }
-
-void muons_analyzer::write() { histo_set::write(); }
 }

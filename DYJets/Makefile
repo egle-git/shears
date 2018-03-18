@@ -86,12 +86,15 @@ chains.cc \
 comparison_entry.cc \
 higgs_analyzer.cc \
 histo_set.cc \
+jets.cc \
 job.cc \
 logging.cc \
 mc_group.cc \
 muons.cc \
 options.cc \
+pileup.cc \
 sample.cc \
+standalone_LumiReWeighting.cc \
 timer.cc \
 triggers.cc \
 weights.cc

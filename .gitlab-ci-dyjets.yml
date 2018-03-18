@@ -1,0 +1,32 @@
+stages:
+  - build
+  - lint
+
+baobabs:
+  stage: build
+  tags: [ cvmfs ]
+  script:
+  - .gitlab-ci/compile-scram.sh Baobabs
+
+pruner:
+  stage: build
+  tags: [ cvmfs ]
+  script: .gitlab-ci/compile.sh Bonzais
+
+DYJets:
+  stage: build
+  tags: [ cvmfs ]
+  script:
+    - yum -q -y install boost-devel
+    - .gitlab-ci/compile.sh DYJets
+
+DYJets doxygen:
+  stage: lint
+  tags: [ cvmfs ]
+  allow_failure: true
+  script:
+    - eval $(.gitlab-ci/cmsenv.sh)
+    - cd DYJets
+    - doxygen
+    - tar -czf doc.tar.gz doc
+    - ../.gitlab-ci/upload-tarball.sh doc doc.tar.gz

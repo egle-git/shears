@@ -1,0 +1,45 @@
+#ifndef PILEUP_H
+#define PILEUP_H
+
+#include <TTreeReaderValue.h>
+
+#include "job.h"
+#include "standalone_LumiReWeighting.h"
+
+namespace util
+{
+class histo_set;
+} // namespace util
+
+namespace physics
+{
+
+class weights;
+
+/// \brief Handles pileup
+class pileup
+{
+    TTreeReaderValue<int> EvtPuCntTruth;
+    TTreeReaderValue<int> EvtVtxCnt;
+
+    standalone_LumiReWeighting _standalone_lrw;
+
+  public:
+    /// \brief Constructor
+    explicit pileup(util::job::info &info, int year, int mode);
+
+    /// \brief Returns the number of pileup vertices
+    int nvtx() { return *EvtVtxCnt; }
+
+    /// \brief Reweights \c weights to take PU into account
+    void reweight(weights &w);
+
+    /// \brief Declares PU control histograms
+    void declare_histograms(util::histo_set &h) const;
+
+    /// \brief Fills PU control histograms
+    void fill(util::histo_set &h, const std::string &tag, const weights &w);
+};
+} // namespace physics
+
+#endif // PILEUP_H

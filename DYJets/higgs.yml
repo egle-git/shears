@@ -25,6 +25,24 @@ log:
     # Default value: yes
     #override root handler: yes
 
+# Options related to the selection of jets
+jets:
+    # Pt cut [GeV]
+    # Default value: 30
+    pt: 30
+
+    # Eta cut
+    # Default value: 2.4
+    eta: 2.4
+
+    # PU MVA cut
+    # Default value: -0.2
+    pu mva: -0.2
+
+    # deltaR(jet, lepton) cut
+    # Default value: 0.4
+    lepton delta r: 0.4
+
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]
@@ -44,7 +62,7 @@ samples:
     - name: data
       type: data
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/
-      catalog: Bonzais-SingleMuon-all-VJetPruner-DMu.txt
+      catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
     - name: DYJets
       type: MC
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v6/Catalogs/

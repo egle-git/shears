@@ -1,6 +1,7 @@
 #ifndef MUONS_H
 #define MUONS_H
 
+#include <memory>
 #include <vector>
 
 #include <TTreeReaderArray.h>
@@ -11,6 +12,8 @@
 #include "options.h"
 #include "tables.h"
 #include "weights.h"
+
+class RoccoR;
 
 namespace physics
 {
@@ -24,6 +27,7 @@ class muons
     TTreeReaderArray<float> MuE;
     TTreeReaderArray<float> MuCh;
     TTreeReaderArray<float> MuPfIso;
+    TTreeReaderArray<int> MuTkLayerCnt;
     TTreeReaderArray<unsigned> MuIdTight;
 
     double _pt_cut = 20;
@@ -33,6 +37,9 @@ class muons
     bool _id_sf_enabled = true;
     bool _iso_sf_enabled = true;
     bool _trk_sf_enabled = true;
+    bool _roccor_enabled = true;
+
+    std::shared_ptr<RoccoR> _roccor = nullptr;
 
   public:
     /// \brief Constructor.
@@ -46,7 +53,7 @@ class muons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get();
+    std::vector<lepton> get(bool isdata);
 
     /**
      * \brief Reweighs an event to take scale factors into account.

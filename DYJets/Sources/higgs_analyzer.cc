@@ -42,7 +42,7 @@ void higgs_analyzer::operator()()
         return;
     }
 
-    std::vector<lepton> muons = _muons.get();
+    std::vector<lepton> muons = _muons.get(_weights.isdata());
 
     if (muons.size() >= 2) {
         TLorentzVector pZ = muons[0].v + muons[1].v;

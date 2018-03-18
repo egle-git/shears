@@ -72,6 +72,15 @@ muons:
     # Default value: yes
     use tracking scale factors: yes
 
+    # Whether to use Rochester correction
+    # Default value: yes
+    use rochester correction: yes
+
+    # Path to the directory containing tables for Rochester corrections. Interpreted relative to
+    # the EfficiencyTables/ directory.
+    # Default value: rcdata.2016.v3
+    rochester correction path: rcdata.2016.v3
+
 # Triggers
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation

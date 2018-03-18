@@ -3,6 +3,7 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "logging.h"
+#include "RoccoR.h"
 
 namespace physics
 {
@@ -14,6 +15,7 @@ muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h
       MuE(info.reader, "MuE"),
       MuCh(info.reader, "MuCh"),
       MuPfIso(info.reader, "MuPfIso"),
+      MuTkLayerCnt(info.reader, "MuTkLayerCnt"),
       MuIdTight(info.reader, "MuIdTight")
 {
     configure(opt);
@@ -37,14 +39,24 @@ void muons::configure(const util::options &opt)
         node, _iso_sf_enabled, "use isolation scale factors", "isolation scale factors toggle");
     util::set_value_safe(
         node, _trk_sf_enabled, "use tracking scale factors", "tracking scale factors toggle");
+    util::set_value_safe(
+        node, _roccor_enabled, "use rochester correction", "rochester correction toggle");
+    if (_roccor_enabled) {
+        std::string roccor_dir = "rcdata.2016.v3";
+        if (node["rochester correction path"]) {
+            roccor_dir = node["rochester correction path"].as<std::string>();
+        }
+        roccor_dir = "EfficiencyTables/" + roccor_dir;
+        _roccor = std::make_shared<RoccoR>(roccor_dir);
+    }
 }
 
-std::vector<lepton> muons::get()
+std::vector<lepton> muons::get(bool isdata)
 {
     std::vector<lepton> muons;
     for (unsigned i = 0; i < MuPt.GetSize(); ++i) {
         lepton l;
-        if (MuPt[i] < _pt_cut || std::abs(MuEta[i]) > _eta_cut || MuPfIso[i] > _iso_cut) {
+        if (std::abs(MuEta[i]) > _eta_cut || MuPfIso[i] > _iso_cut) {
             continue;
         }
         l.v.SetPtEtaPhiE(MuPt[i], MuEta[i], MuPhi[i], MuE[i]);
@@ -52,6 +64,24 @@ std::vector<lepton> muons::get()
         l.iso = MuPfIso[i];
         l.id = MuIdTight[i];
         if (!(l.id & 1)) {
+            continue;
+        }
+        if (_roccor_enabled) {
+            if (isdata) {
+                l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
+            } else {
+                l.v *= _roccor->kScaleAndSmearMC(l.charge,
+                                                 l.v.Pt(),
+                                                 l.v.Eta(),
+                                                 l.v.Phi(),
+                                                 MuTkLayerCnt[i],
+                                                 gRandom->Rndm(), // TODO kill gRandom
+                                                 gRandom->Rndm(), // TODO kill gRandom
+                                                 0,
+                                                 0);
+            }
+        }
+        if (MuPt[i] < _pt_cut) {
             continue;
         }
         muons.push_back(l);

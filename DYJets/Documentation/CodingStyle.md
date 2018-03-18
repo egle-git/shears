@@ -1,4 +1,4 @@
-# Coding Style {#coding-style}
+\page coding-style Coding Style
 
 This page describes several aspects that you should keep in mind while coding. *Please*
 try to apply the recommandations.

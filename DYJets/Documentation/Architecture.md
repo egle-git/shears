@@ -1,4 +1,4 @@
-# Architectural Overview {#architecture}
+\page architecture Architectural Overview
 
 This page describes the code architecture from a high-level perspective. It is designed to give
 you an idea of where to find the code handling a particular part of the analysis.

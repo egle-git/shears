@@ -1,4 +1,4 @@
-# Options Handling {#options}
+\page options Options Handling
 
 Options can come from two different places: the command line or the configuration file. In general,
 options coming from the command-line supersede those in the config file, but not all options are

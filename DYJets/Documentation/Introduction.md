@@ -1,4 +1,4 @@
-# Introduction {#introduction}
+\mainpage Introduction
 
 ## Quick start
 

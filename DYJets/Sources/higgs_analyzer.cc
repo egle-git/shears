@@ -14,12 +14,19 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     : EvtRunNum(info.reader, "EvtRunNum"),
       _jets(info, opt),
       _muons(info, opt, *this),
-      _pileup(info, 2016, 0),
+      _pileup(info, opt.config["year"].as<int>(), 0),
       _triggers(info),
-      _mask_eraBG(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"),
-      _mask_eraH(info, "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"),
+      _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
+      _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
       _weights(info)
 {
+    if (opt.config["tables B-F"]) {
+        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
+    }
+    if (opt.config["tables G-H"]) {
+        _tables_eraBF = opt.config["tables G-H"].as<util::tables>();
+    }
+
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
     declare("mass", "Dilepton mass", 100, 0, 200);
@@ -55,6 +62,8 @@ void higgs_analyzer::operator()()
         _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
         _pileup.fill(*this, "Zinc0jet_noweight", _weights);
         _pileup.reweight(_weights);
+
+        _muons.apply_sf(_weights, {muons[0], muons[1]}, _tables_eraBF);
 
         _jets.fill(*this, "Zinc0jet", jets, _weights);
         _muons.fill(*this, "Zinc0jet", muons, _weights);

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "lepton.h"
+#include "tables.h"
 
 // Beginning of run for 2016
 #define RUNB_2016 273150
@@ -103,33 +104,7 @@ double SpTsub(TLorentzVector, TLorentzVector);
 double SpT(TLorentzVector, TLorentzVector, TLorentzVector, TLorentzVector);
 double SPhi(TLorentzVector, TLorentzVector, TLorentzVector, TLorentzVector);
 
-class record
-{
-  public:
-    double ptLow, ptHi, etaLow, etaHi, effi, effiErrorLow, effiErrorHigh;
-    record();
-    record(double, double, double, double, double, double, double);
-    bool belongToEta(double);
-    bool belongTo(double, double);
-    bool equalTo(int num);
-};
-
-class table
-{
-  public:
-    table();
-    table(string);
-    //        double getEfficiencyEta(double);
-    double getEfficiency(double, double);
-    double getEfficiencyLow(double, double);
-    double getEfficiencyHigh(double, double);
-    double getTTbarSF(int);
-    double getTTbarSFLow(int);
-    double getTTbarSFHigh(int);
-
-  private:
-    vector<record> recd;
-};
+using table = util::table;
 
 char GetRunData(int runNumber);
 char GetRunMC(Long64_t *mcEraBoundary, Long64_t eventNumber);

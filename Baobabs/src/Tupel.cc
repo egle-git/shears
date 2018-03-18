@@ -1284,8 +1284,8 @@ void Tupel::processGenParticles(const edm::Event& iEvent){
 
     int momId = gen[i].numberOfMothers() ? gen[i].mother()->pdgId() : -1 ;
       
-    if (st==1 && (abs(id)==11 || abs(id)==13 || abs(id)==15
-		  || abs(id)==12|| abs(id)==14|| abs(id)==16) /*&& gen[i].pt() > 0.1 && fabs(gen[i].eta())<3.0*/){
+    if ((st==1 && (abs(id)==11 || abs(id)==13 || abs(id)==15
+		  || abs(id)==12|| abs(id)==14|| abs(id)==16))||((st!=1)&&(abs(id)==11 || abs(id)==13))){
 	
       TLorentzVector genLep1(0,0,0,0);
       genLep1.SetPtEtaPhiE(gen[i].pt(),gen[i].eta(),gen[i].phi(),gen[i].energy());

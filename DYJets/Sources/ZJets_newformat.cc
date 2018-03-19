@@ -6546,7 +6546,16 @@ int ZJets::Loop(bool hasRecoInfo,
     cout << endl;
     //==========================================================================================================//
 
-    double data_frac = EvtIsRealData ? (nEventsToProcess / double(nEntries)) : (yieldScale / nJobs);
+    //double data_frac = EvtIsRealData ? (nEventsToProcess / double(nEntries)) : (yieldScale / nJobs);
+    double data_frac = EvtIsRealData ? (nEventsToProcessTot / double(nEntries)): yieldScale;
+
+    if(nJobs > 1){  // AG: in one run on full stat with division nJobs then yieldScale =1
+        //  1./nJobs = nEventsToProcess / double(nentries)
+        double  data_frac_njob = EvtIsRealData ? (nEventsToProcess / double(nEntries)): yieldScale*1./nJobs;
+        Lumi->SetBinContent(1., lumi_ *  data_frac_njob);
+    }
+    else Lumi->SetBinContent(1., lumi_ *  data_frac);
+
 
     JobInfo->SetBinContent(kNEvts, nEventsToProcess);
     JobInfo->SetBinContent(kNEvtsSample, nEntries);
@@ -6569,7 +6578,7 @@ int ZJets::Loop(bool hasRecoInfo,
     JobInfo->SetBinContent(kXsec, xsec_);
 
     // store integrated luminosity in Lumi histogram:
-    Lumi->SetBinContent(1., lumi_ * data_frac);
+    //Lumi->SetBinContent(1., lumi_ * data_frac);
 
     nEffEventsPassingTrigger *= nEvents / genWeightSum;
     nEffEventsVInc0JetsNoTrig *= nEvents / genWeightSum;

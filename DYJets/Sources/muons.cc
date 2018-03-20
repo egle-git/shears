@@ -81,7 +81,7 @@ std::vector<lepton> muons::get(bool isdata)
                                                  0);
             }
         }
-        if (MuPt[i] < _pt_cut) {
+        if (l.v.Pt() < _pt_cut) {
             continue;
         }
         muons.push_back(l);

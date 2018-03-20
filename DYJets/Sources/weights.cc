@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <TVectorD.h>
+
 namespace physics
 {
 
@@ -64,16 +66,13 @@ void weights::write(util::histo_set *histos)
     job_info.GetXaxis()->SetBinLabel(2, "weights_sum"); // For MC
     job_info.SetBinContent(2, _weights_sum);
 
-    // Declare and fill info histogram
-    histos->declare("_job_info_average", "Job information", 4, 0, 4);
-    util::histo_set::histogram_type &job_info_average = histos->get("_job_info_average");
-    job_info_average.SetBit(TH1::kIsAverage);
-
-    job_info_average.GetXaxis()->SetBinLabel(1, "lumi"); // For data
-    job_info_average.SetBinContent(1, _lumi);
-
-    job_info_average.GetXaxis()->SetBinLabel(2, "xsec"); // For MC
-    job_info_average.SetBinContent(2, _xsec);
+    // Declare and fill info vector
+    // We use TVectorD because hadd won't sum them, as it should be for sample lumi and xsec
+    // (TH1::kSetAverage is broken in hadd)
+    TVectorD job_info_average(2);
+    job_info_average[0] = _lumi; // For data
+    job_info_average[1] = _xsec; // For MC
+    job_info_average.Write("_job_info_average");
 
     if (isdata()) {
         util::logging::info << "Processed fraction of sample: " << fraction_processed << std::endl;

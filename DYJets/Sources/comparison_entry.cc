@@ -5,6 +5,7 @@
 #include <TH1.h>
 #include <THStack.h>
 #include <TList.h>
+#include <TVectorD.h>
 
 #include "sample.h"
 
@@ -102,17 +103,17 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
                                  " doesn't have the _job_info histogram.");
     }
 
-    TH1 *job_info_average = nullptr;
+    TVectorD *job_info_average = nullptr;
     _file->GetObject("_job_info_average", job_info_average);
     if (job_info_average == nullptr) {
         throw std::runtime_error("File " + std::string(_file->GetName()) +
-                                 " doesn't have the _job_info_average histogram.");
+                                 " doesn't have the _job_info_average vector.");
     }
 
     _frac = job_info->GetBinContent(1);
     _wsum = job_info->GetBinContent(2);
-    _lumi = job_info_average->GetBinContent(1);
-    _xsec = job_info_average->GetBinContent(2);
+    _lumi = (*job_info_average)[0];
+    _xsec = (*job_info_average)[1];
 }
 
 void data_comparison_entry::add_histograms(std::set<std::string> &histos)

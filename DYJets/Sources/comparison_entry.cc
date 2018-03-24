@@ -41,6 +41,7 @@ void mc_comparison_entry::draw(const std::string &name, double lumi, bool same)
     _stack->GetYaxis()->SetTitle("# Events");
     _stack->GetYaxis()->SetTitleSize(0.04);
     _stack->GetYaxis()->SetTitleOffset(1.32);
+    _stack->SetMinimum(8);
 }
 
 std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lumi)

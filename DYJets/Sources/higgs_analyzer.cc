@@ -74,13 +74,7 @@ void higgs_analyzer::operator()()
 
 bool higgs_analyzer::passes_trigger()
 {
-    const unsigned run_threshold = 278820u; // start of Run G
-
-    if (_weights.isdata() && *EvtRunNum < run_threshold) {
-        return _mask_eraBG.passes(_triggers);
-    } else {
-        return _mask_eraH.passes(_triggers);
-    }
+    return select(_mask_eraBG, _mask_eraH).passes(_triggers);
 }
 
 void higgs_analyzer::write()
@@ -92,4 +86,15 @@ void higgs_analyzer::write()
 po::options_description higgs_analyzer::options()
 {
     return po::options_description("Physics options");
+}
+
+template<class T> T &higgs_analyzer::select(T &eraBG, T &eraGH)
+{
+    const unsigned run_threshold = 278820u; // start of Run G
+
+    if (_weights.isdata() && *EvtRunNum < run_threshold) {
+        return eraBG;
+    } else {
+        return eraGH;
+    }
 }

@@ -29,7 +29,7 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
 
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
-    declare("mass", "Dilepton mass", 100, 0, 200);
+    declare("mass", "Dilepton mass", 40, 71, 111);
 }
 
 void higgs_analyzer::operator()()

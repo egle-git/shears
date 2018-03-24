@@ -24,7 +24,7 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
         _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
     }
     if (opt.config["tables G-H"]) {
-        _tables_eraBF = opt.config["tables G-H"].as<util::tables>();
+        _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
     }
 
     _jets.declare_histograms(*this);
@@ -63,7 +63,7 @@ void higgs_analyzer::operator()()
         _pileup.fill(*this, "Zinc0jet_noweight", _weights);
         _pileup.reweight(_weights);
 
-        _muons.apply_sf(_weights, {muons[0], muons[1]}, _tables_eraBF);
+        _muons.apply_sf(_weights, {muons[0], muons[1]}, select(_tables_eraBF, _tables_eraGH));
 
         _jets.fill(*this, "Zinc0jet", jets, _weights);
         _muons.fill(*this, "Zinc0jet", muons, _weights);

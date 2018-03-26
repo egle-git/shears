@@ -25,6 +25,10 @@ log:
     # Default value: yes
     #override root handler: yes
 
+# Whether to use pileup reweighing
+# Default value: true
+use pileup reweighing: true
+
 # Year (used for pileup)
 year: 2016
 

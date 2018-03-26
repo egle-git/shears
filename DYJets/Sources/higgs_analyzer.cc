@@ -14,7 +14,7 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     : EvtRunNum(info.reader, "EvtRunNum"),
       _jets(info, opt),
       _muons(info, opt, *this),
-      _pileup(info, opt.config["year"].as<int>(), 0),
+      _pileup(info, opt),
       _triggers(info),
       _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
       _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),

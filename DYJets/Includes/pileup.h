@@ -9,6 +9,7 @@
 namespace util
 {
 class histo_set;
+class options;
 } // namespace util
 
 namespace physics
@@ -22,11 +23,12 @@ class pileup
     TTreeReaderValue<int> EvtPuCntTruth;
     TTreeReaderValue<int> EvtVtxCnt;
 
+    bool _reweighing_enabled = true;
     standalone_LumiReWeighting _standalone_lrw;
 
   public:
     /// \brief Constructor
-    explicit pileup(util::job::info &info, int year, int mode);
+    explicit pileup(util::job::info &info, const util::options &opt);
 
     /// \brief Returns the number of pileup vertices
     int nvtx() { return *EvtVtxCnt; }

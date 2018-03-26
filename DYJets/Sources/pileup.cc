@@ -1,21 +1,24 @@
 #include "pileup.h"
 
 #include "histo_set.h"
+#include "options.h"
 #include "weights.h"
 
 namespace physics
 {
 
-pileup::pileup(util::job::info &info, int year, int mode)
+pileup::pileup(util::job::info &info, const util::options &opt)
     : EvtPuCntTruth(info.reader, "EvtPuCntTruth"),
       EvtVtxCnt(info.reader, "EvtVtxCnt"),
-      _standalone_lrw(year, mode)
+      _standalone_lrw(opt.config["year"].as<int>(), 0)
 {
+    util::set_value_safe(
+        opt.config, _reweighing_enabled, "use pileup reweighing", "pileup reweighing toggle");
 }
 
 void pileup::reweight(weights &w)
 {
-    if (w.ismc()) {
+    if (_reweighing_enabled && w.ismc()) {
         w.use_weight(_standalone_lrw.weight(*EvtPuCntTruth));
     }
 }

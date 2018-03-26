@@ -46,6 +46,9 @@ class mc_group
     /// \brief Returns the group legend.
     std::string legend() const { return _legend; }
 
+    /// \brief Returns the list of samples in this group
+    std::vector<sample> samples() const;
+
     /// \brief Adds the name of all available histograms to \c histos
     void add_histograms(std::set<std::string> &histos);
 
@@ -56,16 +59,26 @@ class mc_group
      */
     std::unique_ptr<TH1> get(const std::string &name);
 
-    /// \brief Loads the list of groups from the configuration file.
+    /**
+     * \brief Loads the list of groups from the configuration file.
+     *
+     * \param opt Configuration
+     * \param analyzer_name The name of the analyzer
+     * \param input_dir The directory where files are stored
+     * \param all_samples The list of all available samples
+     * \param open_files Whether to open files (not everything will work if set to \c false)
+     */
     static std::vector<mc_group> load(const util::options &opt,
                                       const std::string &analyzer_name,
                                       const std::string &input_dir,
-                                      const std::vector<data::sample> &all_samples);
+                                      const std::vector<data::sample> &all_samples,
+                                      bool open_files = true);
 
   private:
     void init(const std::vector<sample> &all_samples,
               const std::string &analyzer_name,
-              const std::string &input_dir);
+              const std::string &input_dir,
+              bool open_files);
 };
 }
 

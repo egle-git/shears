@@ -125,6 +125,7 @@ Main/testDecompVar \
 Main/runIntegralCheck \
 Main/plotCrossSections \
 Main/higgs-compare \
+Main/higgs-job-list \
 Main/higgs-loop \
 $(PLOTRESPMATRIX)
 
@@ -146,6 +147,9 @@ $(PLOTRESPMATRIX)
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/higgs-compare: Main/higgs-compare.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+Main/higgs-job-list: Main/higgs-job-list.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/higgs-loop: Main/higgs-loop.o $(OBJLIST) RooUnfold/libRooUnfold.so

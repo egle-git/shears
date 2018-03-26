@@ -54,7 +54,8 @@ std::unique_ptr<TH1> mc_group::get(const std::string &name)
 
 void mc_group::init(const std::vector<sample> &all_samples,
                     const std::string &analyzer_name,
-                    const std::string &input_dir)
+                    const std::string &input_dir,
+                    bool open_files)
 {
     bool all_found = true;
     for (const std::string &name : _sample_names) {
@@ -74,12 +75,14 @@ void mc_group::init(const std::vector<sample> &all_samples,
                                      ") doesn't exist.");
         }
 
-        // Open file
-        try {
-            sd.centry = std::make_shared<data_comparison_entry>(analyzer_name, sd.sample, input_dir);
-        } catch (std::runtime_error e) {
-            util::logging::warn << "File not found for sample " << name << std::endl;
-            all_found = false;
+        if (open_files) {
+            // Open file
+            try {
+                sd.centry = std::make_shared<data_comparison_entry>(analyzer_name, sd.sample, input_dir);
+            } catch (std::runtime_error e) {
+                util::logging::warn << "File not found for sample " << name << std::endl;
+                all_found = false;
+            }
         }
 
         _sample_data.push_back(sd);
@@ -93,14 +96,24 @@ void mc_group::init(const std::vector<sample> &all_samples,
     }
 }
 
+std::vector<sample> mc_group::samples() const
+{
+    std::vector<sample> ret;
+    for (const sample_data &sd : _sample_data) {
+        ret.push_back(sd.sample);
+    }
+    return ret;
+}
+
 std::vector<mc_group> mc_group::load(const util::options &opt,
                                      const std::string &analyzer_name,
                                      const std::string &input_dir,
-                                     const std::vector<sample> &all_samples)
+                                     const std::vector<sample> &all_samples,
+                                     bool open_files)
 {
     std::vector<mc_group> groups = opt.config["MC grouping"].as<std::vector<mc_group>>();
     for (mc_group &g : groups) {
-        g.init(all_samples, analyzer_name, input_dir);
+        g.init(all_samples, analyzer_name, input_dir, open_files);
     }
     return groups;
 }

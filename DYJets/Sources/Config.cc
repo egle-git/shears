@@ -34,8 +34,8 @@ bool Config::read(const char *filename)
         return false;
     }
 
-    std::cout << "\n\tReading configuration from file " << filename << "\n";
-    std::cout << "--------------------------------------------------\n";
+    std::cerr << "\n\tReading configuration from file " << filename << "\n";
+    std::cerr << "--------------------------------------------------\n";
 
     std::string line;
     while (getline(f, line).good()) {
@@ -51,7 +51,7 @@ bool Config::read(const char *filename)
         std::cerr << std::left << key + ": " << value << std::endl;
         table_[key] = value;
     }
-    std::cout << "--------------------------------------------------\n" << std::endl;
+    std::cerr << "--------------------------------------------------\n" << std::endl;
     return true;
 }
 
@@ -191,7 +191,7 @@ template <typename T> void Config::convert(const std::string &str, std::vector<T
         trim(val);
         T val_;
         convert(val, val_);
-        // std::cout << "Adding " << val_ << ", pos = " << pos << std::endl;
+        // std::cerr << "Adding " << val_ << ", pos = " << pos << std::endl;
         x.push_back(val_);
     }
 }
@@ -257,7 +257,7 @@ template <typename T> void Config::set(const char *key, const T &value)
     if (it != table_.end()) {
         convert(it->second, prevValue);
         if (prevValue != value) {
-            std::cout << "Info: the value of " << key << " from configuration has been overwritten "
+            std::cerr << "Info: the value of " << key << " from configuration has been overwritten "
                                                          "from "
                       << it->second << " to " << sVal << "\n";
             it->second = sVal;

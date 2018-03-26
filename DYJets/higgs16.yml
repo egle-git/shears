@@ -93,10 +93,12 @@ triggers G-H: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_Trk
 samples:
     - name: data
       type: data
+      jobs: 6
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/
       catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
     - name: DYJets
       type: MC
+      jobs: 6
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST-s-channel
@@ -137,6 +139,7 @@ samples:
       catalog: Bonzais-ZZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
     - name: TT
       type: MC
+      jobs: 6
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/MC/v3.1/Catalogs/
       catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMu.txt
 

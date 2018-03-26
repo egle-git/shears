@@ -75,6 +75,10 @@ template <> struct convert<data::sample>
         }
         sample._catalog = node["catalog"].as<std::string>();
 
+        util::set_value_safe(node, sample._jobs, "jobs", "number of jobs", [](unsigned val) {
+            return val > 1 && val < 50;
+        });
+
         if (!node["type"]) {
             throw std::runtime_error("Sample type is not set for " + sample._name);
         }

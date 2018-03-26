@@ -34,6 +34,7 @@ class sample
     std::string _bonzai_dir;
     std::string _catalog;
     std::string _name;
+    unsigned _jobs = 1;
 
   public:
     /// \brief Retrives the catalog for this sample.
@@ -56,10 +57,13 @@ class sample
                                           const std::string &mode = "READ",
                                           int job_id = -1) const;
 
-    /// \brief Retrives the name of the sample.
+    /// \brief Retrieves the number of jobs to use for the sample.
+    unsigned jobs() const { return _jobs; }
+
+    /// \brief Retrieves the name of the sample.
     std::string name() const { return _name; }
 
-    /// \brief Retrives the \ref type of the sample.
+    /// \brief Retrieves the \ref type of the sample.
     enum type type() const { return _type; }
 
     /// \brief Loads the list of samples from the configuration file.

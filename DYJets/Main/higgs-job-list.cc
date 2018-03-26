@@ -13,8 +13,14 @@ int main(int argc, char **argv)
 
         for (const data::mc_group &group : groups) {
             for (const data::sample &sample : group.samples()) {
-                std::cout << "Main/higgs-loop -s " << sample.name();
-                std::cout << std::endl;
+                for (unsigned job = 0; job < sample.jobs(); ++job) {
+                    std::cout << "Main/higgs-loop -s " << sample.name();
+                    if (sample.jobs() > 1) {
+                        std::cout << " --job-id " << job;
+                        std::cout << " --job-count " << sample.jobs();
+                    }
+                    std::cout << std::endl;
+                }
             }
         }
     } catch (std::exception &e) {

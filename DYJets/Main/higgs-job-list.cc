@@ -1,4 +1,3 @@
-#include "mc_group.h"
 #include "sample.h"
 
 int main(int argc, char **argv)
@@ -8,19 +7,15 @@ int main(int argc, char **argv)
         opt.default_init(argc, argv, "higgs.yml", {/* No additional options */});
 
         const std::vector<data::sample> samples = data::sample::load(opt);
-        const std::vector<data::mc_group> groups =
-            data::mc_group::load(opt, "higgs", "", samples, false);
 
-        for (const data::mc_group &group : groups) {
-            for (const data::sample &sample : group.samples()) {
-                for (unsigned job = 0; job < sample.jobs(); ++job) {
-                    std::cout << "Main/higgs-loop -s " << sample.name();
-                    if (sample.jobs() > 1) {
-                        std::cout << " --job-id " << job;
-                        std::cout << " --job-count " << sample.jobs();
-                    }
-                    std::cout << std::endl;
+        for (const data::sample &sample : samples) {
+            for (unsigned job = 0; job < sample.jobs(); ++job) {
+                std::cout << "Main/higgs-loop -s " << sample.name();
+                if (sample.jobs() > 1) {
+                    std::cout << " --job-id " << job;
+                    std::cout << " --job-count " << sample.jobs();
                 }
+                std::cout << std::endl;
             }
         }
     } catch (std::exception &e) {

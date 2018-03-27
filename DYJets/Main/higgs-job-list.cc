@@ -26,6 +26,9 @@ int main(int argc, char **argv)
 
             for (unsigned job = 0; job < sample.jobs(); ++job) {
                 std::cout << "Main/higgs-loop -s " << sample.name();
+                if (opt.map.count("config") > 0) {
+                    std::cout << " -c " << opt.config_file();
+                }
                 if (sample.jobs() > 1) {
                     std::cout << " --job-id " << job;
                     std::cout << " --job-count " << sample.jobs();

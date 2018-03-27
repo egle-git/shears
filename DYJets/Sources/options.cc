@@ -59,7 +59,13 @@ void options::process_help()
     }
 }
 
-void options::process_config() { config = YAML::LoadFile(map["config"].as<std::string>()); }
+void options::process_config()
+{
+    if (map.count("config") > 0) {
+        _config_file = map["config"].as<std::string>();
+    }
+    config = YAML::LoadFile(config_file());
+}
 
 namespace /* anonymous */
 {

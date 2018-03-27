@@ -102,43 +102,43 @@ samples:
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMu.txt
     - name: ST-s-channel
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-all-VJetPruner-DMu.txt
     - name: ST-t-channel
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin-all-VJetPruner-DMu.txt
     - name: STbar-tW
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: ST-tW
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: ST-tW
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: WToLNu
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-all-VJetPruner-DMu.txt
     - name: WWTo2L2Nu
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-WWTo2L2Nu_13TeV-powheg-all-VJetPruner-DMu.txt
     - name: WZ
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-WZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
     - name: ZZ
-      type: MC
+      type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ZZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
     - name: TT
-      type: MC
+      type: background
       jobs: 6
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMu.txt

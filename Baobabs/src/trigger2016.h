@@ -136,3 +136,35 @@ DEF_BIT2(TrigHltElMu, 4, HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL);
 DEF_BIT2(TrigHltElMu, 5, HLT_Mu30_Ele30_CaloIdL_GsfTrkIdVL);
 DEF_BIT2(TrigHltElMu, 6, HLT_Mu37_Ele27_CaloIdL_GsfTrkIdVL);
 DEF_BIT2(TrigHltElMu, 7, HLT_Mu27_Ele37_CaloIdL_GsfTrkIdVL);
+
+/// Trigger object
+
+
+///Single muon
+DEF_BIT2(TrigHltMuObj, 0, hltL3crIsoL1sMu20L1f0L2f10QL3f22QL3trkIsoFiltered0p09); //IsoMu22
+DEF_BIT2(TrigHltMuObj, 1, hltL3fL1sMu20L1f0Tkf22QL3trkIsoFiltered0p09); //IsoTkMu22
+DEF_BIT2(TrigHltMuObj, 2, hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09); //IsoMu24
+DEF_BIT2(TrigHltMuObj, 3, hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09); //IsoTkMu24
+//HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ
+DEF_BIT2(TrigHltMuObj, 4, hltL3fL1sDoubleMu114L1f0L2f10OneMuL3Filtered17); //leg17
+DEF_BIT2(TrigHltMuObj, 5, hltL3pfL1sDoubleMu114L1f0L2pf0L3PreFiltered8); //leg8
+DEF_BIT2(TrigHltMuObj, 6, hltL3pfL1sDoubleMu114ORDoubleMu125L1f0L2pf0L3PreFiltered8); //leg8 MC or end of run
+DEF_BIT2(TrigHltMuObj, 7, hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4); //leg passing isolation
+DEF_BIT2(TrigHltMuObj, 8, hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4DzFiltered0p2); //DZ filter
+//HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
+DEF_BIT2(TrigHltMuObj, 9, hltL3fL1sDoubleMu114L1f0L2f10L3Filtered17); //leg17
+DEF_BIT2(TrigHltMuObj, 10, hltDiMuonGlbFiltered17TrkFiltered8); //leg8
+DEF_BIT2(TrigHltMuObj, 11, hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4); // isolated leg
+DEF_BIT2(TrigHltMuObj, 12, hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4DzFiltered0p2); //DZ filter
+
+
+// Single Electrons
+DEF_BIT2(TrigHltElObj, 0, hltEle25erWPTightGsfTrackIsoFilter);
+DEF_BIT2(TrigHltElObj, 1, hltEle27WPTightGsfTrackIsoFilter);
+DEF_BIT2(TrigHltElObj, 2, hltEle32WPTightGsfTrackIsoFilter);
+//Double Electrons
+DEF_BIT2(TrigHltElObj, 3, hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter);
+DEF_BIT2(TrigHltElObj, 4, hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter);
+DEF_BIT2(TrigHltElObj, 5, hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter);
+
+

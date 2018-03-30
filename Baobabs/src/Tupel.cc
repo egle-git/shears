@@ -161,6 +161,9 @@ private:
 
   void defineBitFields();
 
+    
+  enum triggerObjectType { hltmuons, hltelectrons} ;
+
   //help function to compute pseudo rapidity of a TLorentz without
   //ROOT exception in case of infinite pseudo rapidity
   double eta(TLorentzVector v){
@@ -206,9 +209,11 @@ private:
     
   void processMETFilter(const edm::Event& iEvent);
 
-  void processMuons();
+  void processMuons(const edm::Event& iEvent);
 
   void processElectrons(const edm::Event& iEvent);
+    
+  ULong64_t matchWithTriggerObject(const edm::Event&, TLorentzVector, triggerObjectType);
 
   // Modified by Clement Leloup
   void processTaus();
@@ -274,7 +279,9 @@ private:
   edm::EDGetTokenT<std::vector<pat::PackedCandidate> > candidateToken_; 
 
   std::string recoSw_;
-
+    
+  edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> HLTtriggerObjectToken_;
+    
   edm::EDGetTokenT<std::vector<reco::Vertex> > vertexToken_;
 
   edm::EDGetTokenT<double> mSrcRhoToken_;
@@ -382,6 +389,8 @@ private:
   std::unique_ptr<ULong64_t>              TrigHltElMu_;
   std::unique_ptr<std::vector<unsigned> > TrigHltElMu_prescale_;
   std::map<std::string, ULong64_t> TrigHltElMuMap_; //bit assignment
+  std::map<std::string, ULong64_t> TrigHltMuObjMap_;//bit assignment
+  std::map<std::string, ULong64_t> TrigHltElObjMap_;//bit assignment
   struct  TrigHltMapRcd {
     TrigHltMapRcd(): pMap(0), pTrig(0), pPrescale(0) {}
     TrigHltMapRcd(std::map<std::string, ULong64_t>* pMap_, ULong64_t* pTrig_, std::vector<unsigned>* pPrescale_): pMap(pMap_), pTrig(pTrig_), pPrescale(pPrescale_) {
@@ -393,6 +402,7 @@ private:
     std::vector<unsigned>* pPrescale;
   };
   std::vector<TrigHltMapRcd> trigHltMapList_; //list of trigger maps.
+
 
   //Missing energy
   std::unique_ptr<std::vector<float> > METPt_;
@@ -844,8 +854,10 @@ private:
   bool weightsFromLhe_;
     
   std::string checkOnTheFlyMetFilters_;
+  
+  edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
 
-
+ 
   //keep track if GenRunInfoProduct weights which were found:
   enum {UNKNOWN, YES, NO, MIXTURE} weightFromGenEventInfo_ = UNKNOWN;
 
@@ -904,6 +916,7 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
 
   genParticleToken_ = consumes<std::vector<reco::GenParticle> >(iConfig.getUntrackedParameter<edm::InputTag>("genSrc"));
   gjetToken_ = consumes<std::vector<reco::GenJet> >(iConfig.getUntrackedParameter<edm::InputTag>("gjetSrc"));
+  HLTtriggerObjectToken_ = consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getUntrackedParameter<edm::InputTag>("triggerObjectTag"));
   generatorToken_ = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
   lheEventToken_ = consumes<LHEEventProduct>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
   lheRunToken_ = consumes<LHERunInfoProduct, edm::InRun>(iConfig.getUntrackedParameter<edm::InputTag>("lheSrc"));
@@ -1040,6 +1053,9 @@ void Tupel::readEvent(const edm::Event& iEvent){
 
 
   if(recoSw_==std::string("on")){
+      
+    //get trigger objects
+    iEvent.getByToken(HLTtriggerObjectToken_, triggerObjects_);
     
     // get muon collection
     iEvent.getByToken(muonToken_, muons);
@@ -1202,6 +1218,31 @@ void Tupel::processPu(const edm::Event& iEvent){
     *EvtPuCntTruth_ = -2.;
     *EvtPuCnt_ = -2.;
   }
+}
+
+ULong64_t Tupel::matchWithTriggerObject(const edm::Event& iEvent, TLorentzVector leptonMomentum, triggerObjectType theType){
+  ULong64_t matchingResult = 0;
+    
+  std::map<std::string, ULong64_t> TrigObjMap;
+  if (theType==triggerObjectType::hltmuons) TrigObjMap = TrigHltMuObjMap_;
+  else if (theType==triggerObjectType::hltelectrons) TrigObjMap = TrigHltElObjMap_;
+    
+  for (pat::TriggerObjectStandAlone obj : *triggerObjects_) {
+    TString collectionName = obj.collection();
+    if ((theType==triggerObjectType::hltmuons)&&(!(collectionName.Contains("Muon")||collectionName.Contains("muon")))) continue;
+    if ((theType==triggerObjectType::hltelectrons)&&(!(collectionName.Contains("Egamma")))) continue;
+    for(std::map<std::string, ULong64_t>::const_iterator it = TrigObjMap.begin(); it != TrigObjMap.end(); ++it){
+      for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+        if (obj.filterLabels()[h]==it->first.c_str()){
+          TLorentzVector hltCandMomentum(0,0,0,0);
+          hltCandMomentum.SetPtEtaPhiE(obj.pt(), obj.eta(), obj.phi(), obj.energy());
+          float theDeltaR = deltar(leptonMomentum, hltCandMomentum);
+          if (theDeltaR<0.2) matchingResult |= it->second;
+        }
+      }
+    }
+  }
+  return matchingResult;
 }
 
 void Tupel::processGenParticles(const edm::Event& iEvent){
@@ -1936,9 +1977,12 @@ void Tupel::processElectrons(const edm::Event& iEvent){
     ElExpectedMissingInnerHitCnt_->push_back(expectedMissingInnerHits_);
     ElPassConvVeto_->push_back(passConversionVeto_);
 
-    int hltMatch = 0;
 
-    ElHltMatch_->push_back(hltMatch);//no matching yet...BB
+    TLorentzVector electronMomentum(0,0,0,0);
+    electronMomentum.SetPtEtaPhiE(el.pt(),el.eta(),el.phi(),el.energy());
+    ULong64_t electronMatchingResults = matchWithTriggerObject(iEvent, electronMomentum, triggerObjectType::hltelectrons);
+    ElHltMatch_->push_back(electronMatchingResults);
+      
     const std::string mvaTrigV0 = "mvaTrigV0";
     const std::string mvaNonTrigV0 = "mvaNonTrigV0";
 
@@ -2522,7 +2566,7 @@ void Tupel::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
     
     processMETFilter(iEvent);
     
-    if(muon) processMuons();
+    if(muon) processMuons(iEvent);
     
     //electrons B.B.
     if(electron) processElectrons(iEvent);

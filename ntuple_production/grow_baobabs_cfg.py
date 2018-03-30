@@ -32,7 +32,7 @@ opt.inputFiles = [
 ]
 
 #max number of events. #input files. Can be changed on the command line with the option maxEvents=...
-opt.maxEvents = 10000
+opt.maxEvents = 1000
 
 opt.parseArguments()
 
@@ -392,6 +392,7 @@ process.tupel = cms.EDAnalyzer("Tupel",
   elecIDsMap = cms.VInputTag("egmGsfElectronIDs:cutBasedElectronHLTPreselection-Summer16-V1","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-loose","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-medium","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-tight","egmGsfElectronIDs:cutBasedElectronID-Summer16-80X-V1-veto"),
   phoIDsMap = cms.VInputTag("egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-loose","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-medium","egmPhotonIDs:cutBasedPhotonID-Spring16-V2p2-tight"),
   checkOnFlyMETfilters = cms.untracked.string("off"),
+  triggerObjectTag = cms.untracked.InputTag("selectedPatTrigger"),
   triggerMenu = cms.untracked.string(triggerMenu),
   effAreasConfigFile = cms.FileInPath("RecoEgamma/ElectronIdentification/data/Summer16/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_80X.txt")
 )

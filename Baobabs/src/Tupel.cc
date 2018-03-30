@@ -2385,8 +2385,8 @@ void Tupel::processPhotons(const edm::Event& iEvent, const edm::EventSetup& iSet
     PhotE2x5_->push_back(photon.e2x5());
     PhotE5x5_->push_back(photon.e5x5());
     PhotSigmaIetaIeta_->push_back(photon.sigmaIetaIeta());
-    //PhotSigmaIetaIphi_->push_back(...);
-    //PhotSigmaIphiIphi_->push_back(...);
+    PhotSigmaIetaIphi_->push_back(photon.sigmaIetaIphi());
+    PhotSigmaIphiIphi_->push_back(photon.sigmaIphiIphi());
 
     PhotEtaWidth_->push_back(photon.superCluster()->etaWidth());
     PhotPhiWidth_->push_back(photon.superCluster()->phiWidth());
@@ -2880,8 +2880,8 @@ Tupel::beginJob()
     ADD_BRANCH(PhotE2x5);
     ADD_BRANCH(PhotE5x5);
     ADD_BRANCH(PhotSigmaIetaIeta);
-    //ADD_BRANCH(PhotSigmaIetaIphi);
-    //ADD_BRANCH(PhotSigmaIphiIphi);
+    ADD_BRANCH(PhotSigmaIetaIphi);
+    ADD_BRANCH(PhotSigmaIphiIphi);
     ADD_BRANCH(PhotHoE);
     ADD_BRANCH(PhotHadTowOverEm);
     ADD_BRANCH(PhotEtaWidth);

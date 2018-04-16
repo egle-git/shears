@@ -60,6 +60,7 @@ std::vector<lepton> muons::get(bool isdata)
             continue;
         }
         l.v.SetPtEtaPhiE(MuPt[i], MuEta[i], MuPhi[i], MuE[i]);
+        l.raw_v = l.v;
         l.charge = MuCh[i];
         l.iso = MuPfIso[i];
         l.id = MuIdTight[i];
@@ -94,15 +95,16 @@ void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::t
     if (w.ismc()) {
         for (const lepton &mu : muons) {
             if (_id_sf_enabled) {
-                w.use_weight(tab.at("muon id").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                w.use_weight(
+                    tab.at("muon id").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
             }
             if (_iso_sf_enabled) {
-                w.use_weight(
-                    tab.at("muon isolation").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                w.use_weight(tab.at("muon isolation")
+                                 .getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
             }
             if (_trk_sf_enabled) {
                 w.use_weight(
-                    tab.at("muon tracking").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                    tab.at("muon tracking").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
             }
         }
     }

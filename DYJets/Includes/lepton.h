@@ -12,6 +12,7 @@ class lepton
 {
   public:
     TLorentzVector v; ///< Four-momentum
+    TLorentzVector raw_v; ///< Four-momentum as provided by CMSSW (ie before applying corrections)
     float charge;     ///< Charge
     float iso;        ///< Relative isolation
     int id;           ///< Id

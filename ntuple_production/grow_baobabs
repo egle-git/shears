@@ -685,24 +685,20 @@ def db_das_query3(query, att_list):
 
     if args.verbosity > 0:
         sys.stderr.write("\nDAS query: %s\n" % query)
-    das_res=das_client.get_data(host, query, idx, limit, debug, ckey = das_ckey, cert = das_cert)
+
+    cmd = 'dasgoclient -query="%s" -json ' % query
+    das_result=subprocess.Popen(cmd, stdout = subprocess.PIPE, stdin = False, shell = True, universal_newlines=False)
+    rawRes = das_result.communicate()[0].replace("\n","")
+    das_res = json.loads(rawRes)[0]
     res = {}
 
-    if not das_res.has_key('data'):
+    if not das_res.has_key('dataset'):
         sys.stderr.write("\nWarning: das query '%s% failed." % query)
         return res
 
-    data = das_res['data']
-    for f in fields:
-        obj, item = f
-        for r in data:
-            if obj in r:
-                load = r[obj]
-                for x in load:
-                    if item in x:
-                        res["%s.%s" %  (obj, item)] =  x[item]
-                        break
-    return res
+    data = das_res['dataset'][0]
+
+    return data
 
 
 def db_das_query_rint(query):
@@ -2043,15 +2039,15 @@ inserts the task in the database. Return the task_id or None."""
         newDataset = True
         sys.stdout.write("\nChecking if dataset %s is in the DAS database. This operation can take some time..." % dataset)
 #        res = db_das_query2("dataset dataset=%s" % dataset, "dataset.datatype")
-        res = db_das_query3("dataset dataset=%s" % dataset, ["dataset.datatype", "dataset.status"])
+        res = db_das_query3("dataset dataset=%s" % dataset, ["dataset.datatype", "dataset.dataset_access_type"])
         sys.stdout.write(" Done.\n")
-        if not (res.has_key('dataset.datatype') and res.has_key('dataset.status')):
+        if not (res.has_key('datatype') and res.has_key('dataset_access_type')):
             sys.stderr.write("\nDataset %s was not found in DAS. This dataset will be skipped.\n" % dataset)
             return None
-        elif res['dataset.status'] != 'VALID':
+        elif res['dataset_access_type'] != 'VALID':
             sys.stderr.write("\nDataset %s in status %s was skipped. Only VALID dataset are considered. Status will be checked again at next --check call.\n" % (dataset, res['dataset.status']))
             return None
-        datatype = str(res['dataset.datatype'])
+        datatype = str(res['datatype'])
         if datatype not in ["mc", "data"]:
             sys.stderr.write("\nDatatype ('%s') returned by DAS for the dataset %s is not supported. The dataset will be skipped.\n" % (res['datatype'], dataset)) 
             return None

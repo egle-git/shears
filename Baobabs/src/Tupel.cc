@@ -523,6 +523,7 @@ private:
   std::map<std::string, unsigned>       MuIdMap_; //bit assignment
   std::unique_ptr<std::vector<unsigned> > MuIdTight_;
   std::unique_ptr<std::vector<unsigned> > MuIdSoft_;
+  std::unique_ptr<std::vector<unsigned> > MuIdHighPt_;
   std::map<std::string, unsigned>    	MuIdTightMap_; //bit assignment
   std::unique_ptr<std::vector<float> > 	MuCh_;
   std::unique_ptr<std::vector<float> > 	MuVtxZ_;
@@ -1694,6 +1695,7 @@ void Tupel::processMuons()
         unsigned bit = 0;
         unsigned muonTightIds = 0;
         unsigned muonSoftIds = 0;
+        unsigned muonHighPtIds = 0;
         for (const auto &vtx : *pvHandle) {
           if (vtx.isValid() && !vtx.isFake() && mu[j].isTightMuon(vtx)) {
             muonTightIds |= (1 << bit);
@@ -1701,12 +1703,16 @@ void Tupel::processMuons()
           if (vtx.isValid() && !vtx.isFake() && mu[j].isSoftMuon(vtx)) {
             muonSoftIds |= (1 << bit);
           }
+          if (vtx.isValid() && !vtx.isFake() && mu[j].isHighPtMuon(vtx)) {
+            muonHighPtIds |= (1 << bit);
+          }
 
           ++bit;
           if(bit > 31) break;
         }
         MuIdTight_->push_back(muonTightIds);
         MuIdSoft_->push_back(muonSoftIds);
+        MuIdHighPt_->push_back(muonHighPtIds);
       }
 
 
@@ -2743,6 +2749,7 @@ Tupel::beginJob()
   ADD_BRANCH(MuId);
   ADD_BRANCH_D(MuIdTight, "Muon tight id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
   ADD_BRANCH_D(MuIdSoft, "Muon soft id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
+  ADD_BRANCH_D(MuIdHighPt, "Muon high pt id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
   ADD_BRANCH(MuCh);
   ADD_BRANCH(MuVtxZ);
   ADD_BRANCH(MuDxy);

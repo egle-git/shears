@@ -772,8 +772,10 @@ private:
   
 
   //bits
-  unsigned kMuIdLoose_ = 0;
-  unsigned kMuIdCustom_ = 1;
+  // Initialized by DEF_BIT* macros in defineBitFields()
+  unsigned kMuIdLoose_;
+  unsigned kMuIdMedium_;
+  unsigned kMuIdCustom_;
   unsigned kGlobMu_;
   unsigned kTkMu_;
   unsigned kPfMu_;
@@ -994,6 +996,7 @@ void Tupel::defineBitFields(){
   DEF_BIT(TrigHlt, 2, Mu17_TkMu8);
 
   DEF_BIT(MuId, 0, MuIdLoose);
+  DEF_BIT(MuId, 1, MuIdMedium);
   DEF_BIT_L(MuId, 3, MuIdCustom, "Mu Id: isGlobalMuon\n"
 	    "&& isPFMuon\n"
 	    "&& normChi2 < 10\n"
@@ -1754,7 +1757,7 @@ void Tupel::processMuons()
                           && pixelHits>0 && trkLayers>5 );
       unsigned muId = 0;
       if(mu[j].isLooseMuon()) muId |= kMuIdLoose_;
-      //if(mu[j].isMediumMuon()) muId |= kMuIdMedium_;
+      if(mu[j].isMediumMuon()) muId |= kMuIdMedium_;
       if(customMuId) muId |= kMuIdCustom_;
       MuId_->push_back(muId);
 

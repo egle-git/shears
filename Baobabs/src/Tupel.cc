@@ -1667,13 +1667,14 @@ void Tupel::fillTrig(const std::string& trigname, int triggerPrescalesForThisInd
   }
 }
 
-void Tupel::processMuons(){
+void Tupel::processMuons()
+{
   double MuFill = 0;
 
   for (unsigned int j = 0; j < muons->size(); ++j){
     const std::vector<pat::Muon> & mu = *muons;
 
-    if(mu[j].isGlobalMuon()){
+    if (mu[j].isGlobalMuon()) {
       //const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject( muons,j,muonMatch_, iEvent, *triggerEvent ) );
       //if ( trigRef.isAvailable() && trigRef.isNonnull() ) {
       //  Mu17_Mu8_Matched=1;
@@ -1684,24 +1685,23 @@ void Tupel::processMuons(){
       //	}
       //TODO: filled MuHltMatch
       //patMuonIdMedium_->push_back(mu[j].isMediumMuon()); Requires CMSSW >= 4_7_2
-      if(vtxx){
-	unsigned bit = 0;
-	unsigned muonTightIds = 0;
-    unsigned muonSoftIds = 0;
-	for (std::vector<reco::Vertex>::const_iterator vtx = pvHandle->begin(); vtx != pvHandle->end(); ++vtx){
-	  if(vtx->isValid() && !vtx->isFake() && mu[j].isTightMuon(*vtx)){
-	    muonTightIds |= (1 <<bit);
-	  }
-      if(mu[j].isSoftMuon(*vtx)){
-          muonSoftIds |= (1 <<bit);
-      }
+      if (vtxx) {
+        unsigned bit = 0;
+        unsigned muonTightIds = 0;
+        unsigned muonSoftIds = 0;
+        for (const auto &vtx : *pvHandle) {
+          if (vtx.isValid() && !vtx.isFake() && mu[j].isTightMuon(vtx)) {
+            muonTightIds |= (1 << bit);
+          }
+          if (vtx.isValid() && !vtx.isFake() && mu[j].isSoftMuon(vtx)) {
+            muonSoftIds |= (1 << bit);
+          }
 
-	  ++bit;
-	  if(bit > 31) break;
-    
-	}
-	MuIdTight_->push_back(muonTightIds);
-    MuIdSoft_->push_back(muonSoftIds);
+          ++bit;
+          if(bit > 31) break;
+        }
+        MuIdTight_->push_back(muonTightIds);
+        MuIdSoft_->push_back(muonSoftIds);
       }
 
 
@@ -1720,37 +1720,36 @@ void Tupel::processMuons(){
       double nMatches  = -99999;
       double normChi2  = +99999;
       double dZ = -99999;
-      bool isTrackMuon =mu[j].isTrackerMuon();
-      bool isGlobalMuon =mu[j].isGlobalMuon();
-      if(isTrackMuon && isGlobalMuon){
-	trkLayers     = mu[j].innerTrack()->hitPattern().trackerLayersWithMeasurement();
-	pixelHits     = mu[j].innerTrack()->hitPattern().numberOfValidPixelHits();
-	muonHits      = mu[j].globalTrack()->hitPattern().numberOfValidMuonHits();
-	nMatches      = mu[j].numberOfMatchedStations();
-	normChi2      = mu[j].globalTrack()->normalizedChi2();
+
+      bool isTrackMuon = mu[j].isTrackerMuon();
+      bool isGlobalMuon = mu[j].isGlobalMuon();
+      if (isTrackMuon && isGlobalMuon) {
+        trkLayers     = mu[j].innerTrack()->hitPattern().trackerLayersWithMeasurement();
+        pixelHits     = mu[j].innerTrack()->hitPattern().numberOfValidPixelHits();
+        muonHits      = mu[j].globalTrack()->hitPattern().numberOfValidMuonHits();
+        nMatches      = mu[j].numberOfMatchedStations();
+        normChi2      = mu[j].globalTrack()->normalizedChi2();
 
 
-	 if( !pvHandle->empty() && !pvHandle->front().isFake() ) {
-	    const reco::Vertex &vtx = pvHandle->front();
-	   dZ= mu[j].muonBestTrack()->dz(vtx.position());
-  	}
-
-
+        if (!pvHandle->empty() && !pvHandle->front().isFake()) {
+          const reco::Vertex &vtx = pvHandle->front();
+          dZ = mu[j].muonBestTrack()->dz(vtx.position());
+        }
       }
+
       MuTkNormChi2_->push_back(normChi2);
       MuTkHitCnt_->push_back(muonHits);
       MuMatchedStationCnt_->push_back(nMatches);
       MuDz_->push_back(dZ);
       MuPixelHitCnt_->push_back(pixelHits);
-      //std::cout <<  trkLayers << "\n";
       MuTkLayerCnt_->push_back(trkLayers);
 
-      bool customMuId =	( mu[j].isGlobalMuon()
-			  && mu[j].isPFMuon()
-			  && normChi2<10
-			  && muonHits>0 && nMatches>1
-			  && mu[j].dB()<0.2 && dZ<0.5
-			  && pixelHits>0 && trkLayers>5 );
+      bool customMuId = ( mu[j].isGlobalMuon()
+                          && mu[j].isPFMuon()
+                          && normChi2<10
+                          && muonHits>0 && nMatches>1
+                          && mu[j].dB()<0.2 && dZ<0.5
+                          && pixelHits>0 && trkLayers>5 );
       unsigned muId = 0;
       if(mu[j].isLooseMuon()) muId |= kMuIdLoose_;
       //if(mu[j].isMediumMuon()) muId |= kMuIdMedium_;
@@ -1761,11 +1760,13 @@ void Tupel::processMuons(){
       float muEta = mu[j].eta(); // essentially track direction at Vtx (recommended prescription)
       float Aecal=0.041; // initiallize with EE value
       float Ahcal=0.032; // initiallize with HE value
-      if (fabs(muEta)<1.48) {
-	Aecal = 0.074;   // substitute EB value
-	Ahcal = 0.023;   // substitute EE value
+      if (fabs(muEta) < 1.48) {
+        Aecal = 0.074;   // substitute EB value
+        Ahcal = 0.023;   // substitute EE value
       }
-      float muonIsoRho = mu[j].isolationR03().sumPt + std::max(0.,(mu[j].isolationR03().emEt -Aecal*(rhoIso))) + std::max(0.,(mu[j].isolationR03().hadEt-Ahcal*(rhoIso)));
+      float muonIsoRho = mu[j].isolationR03().sumPt
+        + std::max(0.,(mu[j].isolationR03().emEt -Aecal*(rhoIso)))
+        + std::max(0.,(mu[j].isolationR03().hadEt-Ahcal*(rhoIso)));
       double dbeta = muonIsoRho/mu[j].pt();
       MuIsoRho_->push_back(dbeta);
 

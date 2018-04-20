@@ -1674,7 +1674,9 @@ void Tupel::processMuons()
   for (unsigned int j = 0; j < muons->size(); ++j){
     const std::vector<pat::Muon> & mu = *muons;
 
-    if (mu[j].isGlobalMuon()) {
+    if (mu[j].isGlobalMuon()
+        || muon::isGoodMuon(mu[j], muon::TrackerMuonArbitrated)
+        || mu[j].isPFMuon()) {
       //const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject( muons,j,muonMatch_, iEvent, *triggerEvent ) );
       //if ( trigRef.isAvailable() && trigRef.isNonnull() ) {
       //  Mu17_Mu8_Matched=1;

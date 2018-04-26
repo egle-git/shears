@@ -117,10 +117,6 @@ samples:
       type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
       catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
-    - name: ST-tW
-      type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/
-      catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: WToLNu
       type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v1/Catalogs/

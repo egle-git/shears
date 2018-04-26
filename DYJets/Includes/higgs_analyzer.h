@@ -15,6 +15,7 @@
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
+#include "zfinder.h"
 
 namespace po = boost::program_options;
 
@@ -36,6 +37,8 @@ class higgs_analyzer : private virtual util::histo_set
     physics::trigger_mask _mask_eraH;
 
     physics::weights _weights;
+
+    physics::zfinder _zfinder_good, _zfinder_bad;
 
   public:
     /// \brief Constructor.

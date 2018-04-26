@@ -16,6 +16,11 @@ class lepton
     float charge;     ///< Charge
     float iso;        ///< Relative isolation
     int id;           ///< Id
+
+    bool operator== (const lepton &other) const
+    {
+        return v == other.v && raw_v == other.raw_v && charge == other.charge && iso == other.iso && id == other.id;
+    }
 };
 } // namespace physics
 

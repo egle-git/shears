@@ -98,7 +98,8 @@ sample.cc \
 standalone_LumiReWeighting.cc \
 timer.cc \
 triggers.cc \
-weights.cc
+weights.cc \
+zfinder.cc \
 
 PLOTRESPMATRIX_O=Sources/plotRespMatrix.o
 PLOTRESPMATRIX=Main/plotRespMatrix

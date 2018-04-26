@@ -63,6 +63,7 @@ int main(int argc, char **argv)
                                 << std::endl;
         }
 
+        bool log = (opt.map.count("lin") == 0);
 
         {
             using namespace boost::filesystem;
@@ -90,12 +91,14 @@ int main(int argc, char **argv)
             upper.SetBottomMargin(0.);
             upper.SetRightMargin(0.03);
             upper.SetTicks();
-            upper.SetLogy();
+            if (log) {
+                upper.SetLogy();
+            }
             upper.Draw();
             upper.cd();
 
-            mc_entry.draw(name, lumi);
-            data_entry.draw(name, lumi, true);
+            data_entry.draw(name, lumi);
+            mc_entry.draw(name, lumi, true);
 
             // Get back to the canvas
             canvas.cd();
@@ -162,5 +165,6 @@ po::options_description options()
     options.add_options()("histogram-name,n",
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
+    options.add_options()("lin", "Use a linear scale for the y axis (the default is a log scale)");
     return options;
 }

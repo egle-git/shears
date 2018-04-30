@@ -55,7 +55,8 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
     if (_stack->GetNhists() == 0) {
         return nullptr;
     }
-    std::unique_ptr<TH1> res(dynamic_cast<TH1 *>(_stack->GetHists()->Last()));
+    TObjArray *partial_sums = _stack->GetStack(); // Not owned
+    std::unique_ptr<TH1> res(dynamic_cast<TH1 *>(partial_sums->Last()->Clone()));
     return res;
 }
 

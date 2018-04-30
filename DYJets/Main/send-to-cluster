@@ -95,7 +95,10 @@ class submission(object):
         pwd = os.getcwd()
 
         time = datetime.datetime.today().strftime('%Y-%m-%d_%Hh%M')
-        directory = '%s/%s-%s' % (pwd, self.name, time)
+        if os.path.isdir(self.name[-1]):
+            directory = '%s/%s/%s' % (pwd, self.name, time)
+        else:
+            directory = '%s/%s-%s' % (pwd, self.name, time)
         if os.path.isdir(directory):
             raise Exception('Directory %s already exists' % directory)
         os.mkdir(directory)

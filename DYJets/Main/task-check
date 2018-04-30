@@ -256,7 +256,7 @@ def program(stdscr):
             except curses.error:
                 continue
 
-            curses.halfdelay(10)
+            curses.halfdelay(100)
             c = stdscr.getch()
             if c == ord('q'):
                 break

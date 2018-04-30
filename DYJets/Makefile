@@ -84,6 +84,7 @@ JetCorrectorParameters.cc \
 catalog.cc \
 chains.cc \
 comparison_entry.cc \
+dyjets_analyzer.cc \
 higgs_analyzer.cc \
 histo_set.cc \
 jets.cc \
@@ -125,6 +126,9 @@ Main/runCombination \
 Main/testDecompVar \
 Main/runIntegralCheck \
 Main/plotCrossSections \
+Main/dyjets-compare \
+Main/dyjets-job-list \
+Main/dyjets-loop \
 Main/higgs-compare \
 Main/higgs-job-list \
 Main/higgs-loop \
@@ -146,6 +150,15 @@ $(PLOTRESPMATRIX)
 #I'm not sure why this generic rule does not work...
 #run%: run%.o $(OBJLIST) RooUnfold/libRooUnfold.so
 #	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+Main/dyjets-compare: Main/dyjets-compare.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+Main/dyjets-job-list: Main/dyjets-job-list.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
+
+Main/dyjets-loop: Main/dyjets-loop.o $(OBJLIST) RooUnfold/libRooUnfold.so
+	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/higgs-compare: Main/higgs-compare.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)

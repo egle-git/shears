@@ -6,6 +6,8 @@
 #include <fstream>
 #include <thread>
 
+#include <TH1.h>
+
 #include "ansi_seq.h"
 #include "logging.h"
 #include "timer.h"
@@ -13,10 +15,7 @@
 namespace util
 {
 
-options::~options()
-{
-    logging::unset_secondary_stream();
-}
+options::~options() { logging::unset_secondary_stream(); }
 
 void options::add_defaults(const std::string &default_config_file)
 {
@@ -183,6 +182,8 @@ void options::process_easter_egg()
     }
 }
 
+void options::setup_root() const { TH1::SetDefaultSumw2(); }
+
 void options::default_init(int argc,
                            char **argv,
                            const std::string &default_config_file,
@@ -197,6 +198,7 @@ void options::default_init(int argc,
     process_config();
     setup_logging();
     process_easter_egg();
+    setup_root();
 }
 
 /// \cond

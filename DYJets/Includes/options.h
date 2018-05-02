@@ -88,6 +88,9 @@ class options
     /// \brief Sets up the \ref logging module according to the config file and \c --verbose.
     void setup_logging();
 
+    /// \brief Sets up ROOT options like \c SetDefaultSumw2.
+    void setup_root() const;
+
     /**
      * \brief Default init sequence.
      *

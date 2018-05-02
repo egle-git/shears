@@ -15,11 +15,11 @@ NeedCrossSection: yes
 Beams: [p+, p+]
 Energies: [13000]
 Description:
-'Differential cross section measurements of the Z($\rightarrow\mu\mu$) boson production in association with jets are presented, using 13 TeV proton-proton collisions data recorded by the CMS detector at the LHC, corresponding to an integrated luminosity of 2.5 fb$^{-1}$. The cross sections are presented as a function of jet multiplicity, the jet transverse momenta, and the jet rapidity for different jet multiplicities. The cross section measurements are then compared with the predictions from a multileg next-to-leading-order Monte Carlo generator.'
+'Differential cross section measurements of the Z($\rightarrow$ll) boson production in association with jets are presented, using 13 TeV proton-proton collisions data recorded by the CMS detector at the LHC, corresponding to an integrated luminosity of 2.5 fb$^{-1}$. The cross sections are presented as a function of jet multiplicity, the jet transverse momenta, and the jet rapidity for different jet multiplicities. The cross section measurements are then compared with the predictions from a multileg next-to-leading-order Monte Carlo generator.'
 Cuts: 'First two leading electrons or muons with $p_T > 20$ GeV and $|\eta| < 2.4$
      Dilepton invariant mass in the [71,111] GeV range
      Jets $p_T > 30$ GeV and $|\eta| < 2.4$
-     $\Delta{R}($lepton,jet$) > 0.5$'
+     $R($lepton,jet$) > 0.5$'
 BibKey: CMS:2015hfr
 BibTeX: '@article{CMS:2015hfr,
       author         = "CMS Collaboration",

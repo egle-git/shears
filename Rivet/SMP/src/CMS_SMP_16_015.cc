@@ -31,17 +31,18 @@ namespace Rivet {
       FinalState fs; ///< @todo No cuts?
       VisibleFinalState visfs(fs);
 
-      ZFinder zeeFinder(fs, Cuts::abseta < 2.4 && Cuts::pT > 20*GeV, PID::ELECTRON, 71.0*GeV, 111.0*GeV);
+      VetoedFinalState fs_notaudeday(fs);
+      fs_notaudeday.addDecayProductsVeto(PID::TAU);
+      fs_notaudeday.addDecayProductsVeto(-PID::TAU);
+      
+      ZFinder zeeFinder(fs_notaudeday, Cuts::abseta < 2.4 && Cuts::pT > 20*GeV, PID::ELECTRON, 71.0*GeV, 111.0*GeV);
       addProjection(zeeFinder, "ZeeFinder");
 
-      ZFinder zmumuFinder(fs, Cuts::abseta < 2.4 && Cuts::pT > 20*GeV, PID::MUON, 71.0*GeV, 111.0*GeV);
+      ZFinder zmumuFinder(fs_notaudeday, Cuts::abseta < 2.4 && Cuts::pT > 20*GeV, PID::MUON, 71.0*GeV, 111.0*GeV);
       addProjection(zmumuFinder, "ZmumuFinder");
 
-      VetoedFinalState jetConstits(visfs);
-      jetConstits.addVetoOnThisFinalState(zmumuFinder);
-      //jetConstits.addVetoOnThisFinalState(zeeFinder);
 
-      FastJets jets(jetConstits, FastJets::ANTIKT, 0.4);
+      FastJets jets(visfs, FastJets::ANTIKT, 0.4);
       addProjection(jets, "jets");
 
 

@@ -6,6 +6,7 @@ import stat
 import shutil
 import subprocess
 import sys
+import time
 
 class iihe_cluster(object):
     def __init__(self, queue):
@@ -46,17 +47,21 @@ exit $EXIT_CODE
 '''
 
     def submit(self, name, script_path, submit_log_file):
-        try:
-            code = subprocess.check_output(['qsub',
-                                            '-N', name,
-                                            '-q', self.queue,
-                                            '-j', 'oe',
-                                            '-o', submit_log_file,
-                                            '-l', 'walltime=00:30:00',
-                                            script_path])
-            return code
-        except subprocess.CalledProcessError:
-            sys.stderr.write('ERROR: qsub failed.\n')
+        # Try a few times before giving up
+        for i in range(3):
+            try:
+                code = subprocess.check_output(['qsub',
+                                                '-N', name,
+                                                '-q', self.queue,
+                                                '-j', 'oe',
+                                                '-o', submit_log_file,
+                                                '-l', 'walltime=00:30:00',
+                                                script_path])
+                time.sleep(0.4)
+                return code
+            except subprocess.CalledProcessError:
+                time.sleep(10)
+        sys.stderr.write('ERROR: qsub failed.\n')
 
 class submission(object):
     def __init__(self, name, cluster, commands):

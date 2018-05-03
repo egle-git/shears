@@ -37,9 +37,12 @@ chmod go-r $(voms-proxy-info -p) || true
 
 date
 
+set -o pipefail
 {command} 2>&1 | tee {job_log_file}
 
 EXIT_CODE=$?
+set +o pipefail
+
 echo $EXIT_CODE >{job_exit_code_file}
 
 date

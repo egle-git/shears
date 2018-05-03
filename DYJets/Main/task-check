@@ -78,8 +78,10 @@ class job(object):
             # Is the job pending or running, or was it killed?
             try:
                 FNULL = open(os.devnull, 'w')
-                qstat_output = subprocess.check_output(['qstat', j.id], stderr = FNULL)
-                lines = qstat_output.splitlines()
+                lines = []
+                while len(lines) < 3:
+                    qstat_output = subprocess.check_output(['qstat', j.id], stderr = FNULL)
+                    lines = qstat_output.splitlines()
                 job_data = lines[2].split()
                 if job_data[4] == 'Q':
                     j.status = status.pending()

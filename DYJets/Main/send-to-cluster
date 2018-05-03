@@ -33,6 +33,7 @@ eval `scramv1 runtime -sh` # cmsenv
 
 # Setup proxy
 cp {proxy_path} /tmp || true
+chmod go-r $(voms-proxy-info -p) || true
 
 date
 
@@ -75,6 +76,7 @@ class submission(object):
             proxy_path = subprocess.check_output(['voms-proxy-info', '-p']).strip()
             copied_path = directory + '/' + os.path.basename(proxy_path)
             shutil.copyfile(proxy_path, copied_path)
+            shutil.copymode(proxy_path, copied_path)
             return copied_path
         except subprocess.CalledProcessError:
             sys.stderr.write(

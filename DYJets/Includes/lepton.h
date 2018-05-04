@@ -15,7 +15,7 @@ class lepton
     TLorentzVector raw_v; ///< Four-momentum as provided by CMSSW (ie before applying corrections)
     float charge;     ///< Charge
     float iso;        ///< Relative isolation
-    int id;           ///< Id
+    unsigned id;      ///< Id
 
     bool operator== (const lepton &other) const
     {

@@ -43,7 +43,7 @@ struct leptonStruct : public physics::lepton
                  double phi_,
                  double en_,
                  double charge_,
-                 double id_,
+                 unsigned id_,
                  double iso_,
                  double scEta_,
                  int trigger_)

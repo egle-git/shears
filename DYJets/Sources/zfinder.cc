@@ -19,7 +19,7 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
                             << "Will use the defaults." << std::endl;
         return;
     }
-    const YAML::Node node = opt.config["name"];
+    const YAML::Node node = opt.config[name];
 
     if (node["charge mode"]) {
         std::string mode = node["charge mode"].as<std::string>();

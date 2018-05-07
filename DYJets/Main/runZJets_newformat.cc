@@ -211,9 +211,7 @@ int main(int argc, char **argv)
                          "Integrated luminosity set to 1/fb fallback value.\n";
             lumi = 1.;
         } else {
-            TString fullPath;
-            ZJets::canonizeInputFilePath(
-                dataBonzaiDir, TString::Format(input, lepSel.Data()), &fullPath);
+            TString fullPath = TString::Format(input, lepSel.Data());
             data::catalog c(fullPath.Data(), dataBonzaiDir.Data());
             lumi = c.lumi();
             if (lumi > 0) {

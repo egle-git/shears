@@ -51,7 +51,7 @@ jets:
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 20
+    pt: 25
 
     # Eta cut
     # Default value: 2.4

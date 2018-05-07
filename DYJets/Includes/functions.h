@@ -40,7 +40,7 @@ struct leptonStruct
                  double phi_,
                  double en_,
                  double charge_,
-                 double id_,
+                 unsigned id_,
                  double iso_,
                  double scEta_,
                  int trigger_)
@@ -55,7 +55,8 @@ struct leptonStruct
 
     TLorentzVector v;
     double charge, iso, scEta;
-    int id, trigger;
+    int trigger;
+    unsigned id;
 };
 
 struct jetStruct

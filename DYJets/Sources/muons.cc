@@ -87,6 +87,13 @@ std::vector<lepton> muons::get(bool isdata)
         }
         muons.push_back(l);
     }
+    if (_roccor_enabled) {
+        std::sort(muons.begin(), muons.end(), [](const lepton &lhs, const lepton &rhs)
+            {
+                return lhs.v.Pt() > rhs.v.Pt();
+            }
+        );
+    }
     return muons;
 }
 

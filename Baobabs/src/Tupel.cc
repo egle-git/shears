@@ -534,6 +534,7 @@ private:
   std::unique_ptr<std::vector<unsigned> > MuIdTight_;
   std::unique_ptr<std::vector<unsigned> > MuIdSoft_;
   std::unique_ptr<std::vector<unsigned> > MuIdHighPt_;
+  std::unique_ptr<std::vector<unsigned> > MuIdTkHighPt_;
   std::map<std::string, unsigned>    	MuIdTightMap_; //bit assignment
   std::unique_ptr<std::vector<float> > 	MuCh_;
   std::unique_ptr<std::vector<float> > 	MuVtxZ_;
@@ -1733,11 +1734,14 @@ void Tupel::processMuons()
       //	}
       //TODO: filled MuHltMatch
       //patMuonIdMedium_->push_back(mu[j].isMediumMuon()); Requires CMSSW >= 4_7_2
+
+        
       if (vtxx) {
         unsigned bit = 0;
         unsigned muonTightIds = 0;
         unsigned muonSoftIds = 0;
         unsigned muonHighPtIds = 0;
+        unsigned muonTkHighPtIds = 0;
         for (const auto &vtx : *pvHandle) {
           if (vtx.isValid() && !vtx.isFake() && mu[j].isTightMuon(vtx)) {
             muonTightIds |= (1 << bit);
@@ -1748,6 +1752,9 @@ void Tupel::processMuons()
           if (vtx.isValid() && !vtx.isFake() && mu[j].isHighPtMuon(vtx)) {
             muonHighPtIds |= (1 << bit);
           }
+          if (vtx.isValid() && !vtx.isFake() && mu[j].isTrackerMuon() && mu[j].track().isNonnull() && mu[j].numberOfMatchedStations() > 1 && (mu[j].muonBestTrack()->ptError()/mu[j].muonBestTrack()->pt()) < 0.3 && fabs(mu[j].muonBestTrack()->dxy(vtx.position()))<0.2 && fabs(mu[j].muonBestTrack()->dz(vtx.position())) < 0.5 && mu[j].innerTrack()->hitPattern().numberOfValidPixelHits() > 0 && mu[j].innerTrack()->hitPattern().trackerLayersWithMeasurement()>5) {
+            muonTkHighPtIds |= (1 << bit);
+          }
 
           ++bit;
           if(bit > 31) break;
@@ -1755,6 +1762,7 @@ void Tupel::processMuons()
         MuIdTight_->push_back(muonTightIds);
         MuIdSoft_->push_back(muonSoftIds);
         MuIdHighPt_->push_back(muonHighPtIds);
+        MuIdTkHighPt_->push_back(muonTkHighPtIds);
       }
 
 
@@ -2796,6 +2804,7 @@ Tupel::beginJob()
   ADD_BRANCH_D(MuIdTight, "Muon tight id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
   ADD_BRANCH_D(MuIdSoft, "Muon soft id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
   ADD_BRANCH_D(MuIdHighPt, "Muon high pt id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
+  ADD_BRANCH_D(MuIdTkHighPt, "Muon tracker high pt id. Bit field, one bit per primary vertex hypothesis. Bit position corresponds to index in EvtVtx");
   ADD_BRANCH(MuCh);
   ADD_BRANCH(MuVtxZ);
   ADD_BRANCH(MuDxy);

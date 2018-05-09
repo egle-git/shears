@@ -57,7 +57,7 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
 
     // Percentage
     std::cerr << std::fixed << std::setprecision(0) << std::setw(3)
-              << 100. * (_done - _from) / (_steps - _from) << "%\t";
+              << 100. * (_done - _from) / (_steps - _from) << "%\t" << std::setprecision(6);
 
     // done/total
     std::cerr << " " << std::setw(std::ceil(std::log10(steps()))) << _done << "/" << _steps << "\t";

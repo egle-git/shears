@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <random>
 
 #include <TFile.h>
 #include <TH1D.h>
@@ -106,10 +107,24 @@ po::options_description dyjets_analyzer::options()
 template <class T> T &dyjets_analyzer::select(T &eraBG, T &eraGH)
 {
     const unsigned run_threshold = 278820u; // start of Run G
+    const double run_lumi_fraction = 0.5493217216546642; // lumi fraction before run G
 
-    if (_weights.isdata() && *EvtRunNum < run_threshold) {
-        return eraBG;
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<> uniform(0.0, 1.0);
+
+    if (_weights.isdata()) {
+        if (*EvtRunNum < run_threshold) {
+            return eraBG;
+        } else {
+            return eraGH;
+        }
     } else {
-        return eraGH;
+        // Monte-Carlo based era selection
+        if (uniform(gen) < run_lumi_fraction) {
+            return eraBG;
+        } else {
+            return eraGH;
+        }
     }
 }

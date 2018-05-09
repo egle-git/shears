@@ -152,4 +152,4 @@ void muons::fill(util::histo_set &h,
         h.fill("muPhi", "fourth_" + tag, mu.v.Phi(), w.global_weight());
     }
 }
-}
+} // namespace physics

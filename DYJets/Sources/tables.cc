@@ -5,6 +5,8 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "logging.h"
+
 namespace util
 {
 
@@ -20,6 +22,7 @@ bool table::record::equalTo(int num) const
 
 table::table(const std::string &filename)
 {
+    logging::debug << "Loading table: " << filename << std::endl;
     std::ifstream file(filename);
     if (!file) {
         throw std::invalid_argument("File " + filename + " doesn't exist");

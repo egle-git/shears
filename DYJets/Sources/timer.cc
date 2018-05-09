@@ -31,18 +31,18 @@ static void print_time(timer::counter us)
 
     int hours = duration_cast<chrono::hours>(time).count();
     if (hours > 0) {
-        std::cout << hours << "h ";
+        std::cerr << hours << "h ";
         time -= chrono::hours(hours);
     }
     int minutes = duration_cast<chrono::minutes>(time).count();
     if (minutes > 0) {
-        std::cout << std::setw(2) << minutes << "min ";
+        std::cerr << std::setw(2) << minutes << "min ";
         time -= chrono::minutes(minutes);
     }
     if (hours == 0 && minutes < 5) {
         // Use milliseconds to round correctly
         int milliseconds = duration_cast<chrono::milliseconds>(time).count();
-        std::cout << std::setw(2) << std::ceil(milliseconds / 1000.) << "s";
+        std::cerr << std::setw(2) << std::ceil(milliseconds / 1000.) << "s";
     }
 }
 } // namespace anonymous
@@ -53,14 +53,14 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
     using std::chrono::duration_cast;
 
     // Clear line
-    std::cout << "\033[2K";
+    std::cerr << "\033[2K";
 
     // Percentage
-    std::cout << std::fixed << std::setprecision(0) << std::setw(3)
+    std::cerr << std::fixed << std::setprecision(0) << std::setw(3)
               << 100. * (_done - _from) / (_steps - _from) << "%\t";
 
     // done/total
-    std::cout << " " << std::setw(std::ceil(std::log10(steps()))) << _done << "/" << _steps << "\t";
+    std::cerr << " " << std::setw(std::ceil(std::log10(steps()))) << _done << "/" << _steps << "\t";
 
     if (_done - _from > (steps() - _from) / 10 || now - _start > std::chrono::seconds(2)) {
         // Time computations (in microseconds)
@@ -72,24 +72,24 @@ void timer::displayprogress(const timer::time_point &now, bool at_end) const
         double avgspeed = 1e6 * (_done - _from) / totalduration;
 
         if (!at_end) {
-            std::cout << " Speed: " << instspeed << "/s"
+            std::cerr << " Speed: " << instspeed << "/s"
                       << " (average " << avgspeed << "/s)\t";
         } else {
-            std::cout << " Average speed: " << avgspeed << "/s"
+            std::cerr << " Average speed: " << avgspeed << "/s"
                       << " (" << 1e6 / avgspeed << "us)\t";
         }
 
         // ETA
         if (!at_end) {
-            std::cout << " Time left: ";
+            std::cerr << " Time left: ";
             print_time(1e6 * (steps() - _from) / avgspeed - totalduration);
         } else {
-            std::cout << " Duration: ";
+            std::cerr << " Duration: ";
             print_time(totalduration);
         }
     }
 
-    std::cout << "\r" << std::flush; // Back to beginning of line
+    std::cerr << "\r" << std::flush; // Back to beginning of line
 }
 
 void timer::start()
@@ -118,7 +118,7 @@ void timer::start()
         time_point now = clock::now();
         displayprogress(now, true);
 
-        std::cout << std::endl;
+        std::cerr << std::endl;
     });
 }
 

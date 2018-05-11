@@ -13,6 +13,14 @@
 #include "functions.h"
 #include "lepton.h"
 
+namespace /* anonymous */
+{
+    double zpt_binning[] = {0.1,  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,
+                            10.,  11.,  12.,  13.,  14.,  16.,  18.,  20.,  22.,  25.,
+                            28.,  32.,  37.,  43.,  52.,  65.,  85.,  120., 160., 190.,
+                            220., 250., 300., 350., 400., 450., 500., 1000.};
+}
+
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : EvtRunNum(info.reader, "EvtRunNum"),
       _jets(info, opt),
@@ -33,7 +41,9 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
 
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
+
     declare("mass", "Dilepton mass", 40, 71, 111);
+    declare("pt", "Dilepton p_{T}", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
 }
 
 namespace /* anonymous */
@@ -105,6 +115,7 @@ void dyjets_analyzer::operator()()
             _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
             _pileup.fill(*this, tag, _weights);
             fill("mass", tag, Z.v.M(), _weights.global_weight());
+            fill("pt", tag, Z.v.Pt(), _weights.global_weight());
 
             break;
         }

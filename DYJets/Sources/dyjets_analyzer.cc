@@ -85,10 +85,30 @@ void dyjets_analyzer::operator()()
     _muons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
     apply_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
 
-    _jets.fill(*this, "Zinc0jet", jets, _weights);
-    _muons.fill(*this, "Zinc0jet", {Z.a, Z.b}, _weights);
-    _pileup.fill(*this, "Zinc0jet", _weights);
-    fill("mass", "Zinc0jet", Z.v.M(), _weights.global_weight());
+    for (unsigned njets = 0; njets < 3; ++njets) {
+        std::stringstream ss;
+        ss << "Zinc" << njets << "jet";
+        std::string tag = ss.str();
+
+        _jets.fill(*this, tag, jets, _weights);
+        _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+        _pileup.fill(*this, tag, _weights);
+        fill("mass", tag, Z.v.M(), _weights.global_weight());
+        fill("pt", tag, Z.v.Pt(), _weights.global_weight());
+
+        if (jets.size() == njets) {
+            ss.str("");
+            ss << "Zexc" << njets << "jet";
+            std::string tag = ss.str();
+
+            _jets.fill(*this, tag, jets, _weights);
+            _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+            _pileup.fill(*this, tag, _weights);
+            fill("mass", tag, Z.v.M(), _weights.global_weight());
+
+            break;
+        }
+    }
 }
 
 bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).passes(_triggers); }

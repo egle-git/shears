@@ -39,6 +39,7 @@ void jets::declare_histograms(util::histo_set &h)
     const double pi = boost::math::constants::pi<double>();
 
     h.declare("nJets", "Jet multiplicity (excl.)", 7, -0.5, 6.5);
+    h.declare("nJetsIncl", "Jet multiplicity (incl.)", 7, -0.5, 6.5);
     h.declare("jetPuMva", "Jet PU variable from MVA", 40, -1, 1);
     h.declare("jetPt", "Jet pt", 40, 0, 200);
     h.declare("jetEta", "Jet eta", 24, -2.4, 2.4);
@@ -83,6 +84,9 @@ void jets::fill(util::histo_set &h,
                 const weights &w)
 {
     h.fill("nJets", tag, jets.size(), w.global_weight());
+    for (std::size_t njets = 0; njets <= jets.size(); ++njets) {
+        h.fill("nJetsIncl", tag, njets, w.global_weight());
+    }
     for (const jet &j : jets) {
         h.fill("jetPt", tag, j.v.Pt(), w.global_weight());
         h.fill("jetEta", tag, j.v.Eta(), w.global_weight());

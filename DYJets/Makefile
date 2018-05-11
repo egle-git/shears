@@ -85,6 +85,7 @@ catalog.cc \
 chains.cc \
 comparison_entry.cc \
 dyjets_analyzer.cc \
+event_counter.cc \
 higgs_analyzer.cc \
 histo_set.cc \
 jets.cc \

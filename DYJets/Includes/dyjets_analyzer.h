@@ -7,6 +7,7 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "event_counter.h"
 #include "histo_set.h"
 #include "jets.h"
 #include "job.h"
@@ -23,6 +24,8 @@ namespace po = boost::program_options;
 class dyjets_analyzer : private virtual util::histo_set
 {
     TTreeReaderValue<unsigned> EvtRunNum;
+
+    util::event_counter _counter;
 
     physics::jets _jets;
     physics::muons _muons;

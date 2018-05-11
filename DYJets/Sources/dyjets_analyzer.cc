@@ -42,6 +42,11 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
 
+    _counter.declare("Total");
+    _counter.declare("Passing the trigger");
+    _counter.declare("With two good muons");
+    _counter.declare("With a good Z boson");
+
     declare("mass", "Dilepton mass", 40, 71, 111);
     declare("pt", "Dilepton p_{T}", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
 }
@@ -66,20 +71,24 @@ void dyjets_analyzer::operator()()
     using namespace physics;
 
     _weights.process_event();
+    _counter.count("Total", _weights.global_weight());
 
     if (!passes_trigger()) {
         return;
     }
+    _counter.count("Passing the trigger", _weights.global_weight());
 
     std::vector<lepton> muons = _muons.get(_weights.isdata());
     if (muons.size() < 2) {
         return;
     }
+    _counter.count("With two good muons", _weights.global_weight());
 
     std::vector<dilepton> candidates = _zfinder.find({muons[0], muons[1]});
     if (candidates.size() == 0) {
         return;
     }
+    _counter.count("With a good Z boson", _weights.global_weight());
 
     std::sort(candidates.begin(), candidates.end(), dilepton::zmass_ordering);
     dilepton Z = candidates[0];
@@ -126,6 +135,7 @@ bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).
 
 void dyjets_analyzer::write()
 {
+    _counter.print();
     _weights.write(this);
     histo_set::write();
 }

@@ -173,13 +173,16 @@ def program(stdscr):
 
         x = 0
         y = 0
+        update = True
+        jobs = None
 
         while True:
             stdscr.erase()
 
             height, width = stdscr.getmaxyx()
 
-            jobs = load_jobs()
+            if update:
+                jobs = load_jobs()
             if len(jobs) == 0:
                 return
 
@@ -258,6 +261,8 @@ def program(stdscr):
             except curses.error:
                 continue
 
+            update = False
+
             curses.halfdelay(100)
             c = stdscr.getch()
             if c == ord('q'):
@@ -284,6 +289,8 @@ def program(stdscr):
                 y = 0
             elif c == curses.KEY_END:
                 y = len(jobs) - height + 2
+            else:
+                update = True
 
     except KeyboardInterrupt:
         return

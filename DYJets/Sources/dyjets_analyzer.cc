@@ -50,8 +50,8 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     _counter.declare("With two good muons");
     _counter.declare("With a good Z boson");
 
-    declare("mass", "Dilepton mass", 40, 71, 111);
-    declare("pt", "Dilepton p_{T}", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
+    declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
+    declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
 }
 
 namespace /* anonymous */

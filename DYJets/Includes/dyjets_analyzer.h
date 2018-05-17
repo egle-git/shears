@@ -7,6 +7,7 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
 #include "jets.h"
@@ -27,6 +28,7 @@ class dyjets_analyzer : private virtual util::histo_set
 
     util::event_counter _counter;
 
+    physics::electrons _electrons;
     physics::jets _jets;
     physics::muons _muons;
     physics::pileup _pileup;

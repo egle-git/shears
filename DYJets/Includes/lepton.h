@@ -16,10 +16,16 @@ class lepton
     float charge;     ///< Charge
     float iso;        ///< Relative isolation
     unsigned id;      ///< Id
+    int pdgid;        ///< PDG ID (absolute value): electron = 11, muon = 13
 
     bool operator== (const lepton &other) const
     {
-        return v == other.v && raw_v == other.raw_v && charge == other.charge && iso == other.iso && id == other.id;
+        return v == other.v
+            && raw_v == other.raw_v
+            && charge == other.charge
+            && iso == other.iso
+            && id == other.id
+            && pdgid == other.pdgid;
     }
 };
 } // namespace physics

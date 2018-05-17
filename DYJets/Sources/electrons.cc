@@ -55,6 +55,7 @@ std::vector<lepton> electrons::get()
         l.charge = ElCh[i];
         l.iso = ElPfIsoRho[i];
         l.id = ElId[i];
+        l.pdgid = 11;
         if (!(l.id & 2)) { // Loose ID
             continue;
         }

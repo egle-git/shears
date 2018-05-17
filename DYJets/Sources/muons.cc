@@ -64,6 +64,7 @@ std::vector<lepton> muons::get(bool isdata)
         l.charge = MuCh[i];
         l.iso = MuPfIso[i];
         l.id = MuIdTight[i];
+        l.pdgid = 13;
         if (!(l.id & 1)) {
             continue;
         }

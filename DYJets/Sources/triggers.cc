@@ -134,7 +134,7 @@ trigger_mask::trigger_mask(util::job::info &info, const std::string &definition,
     int accepted_count = 0;
 
     // Retrieve tokens
-    escaped_list_separator<char> sep("\\", "\t ,", "\"\'");
+    escaped_list_separator<char> sep("\\", "\t ,\n\r", "\"\'");
     tokenizer<escaped_list_separator<char>> tok(definition, sep);
     for (auto it = tok.begin(); it != tok.end(); ++it) {
         const std::string &token = *it;
@@ -153,9 +153,7 @@ trigger_mask::trigger_mask(util::job::info &info, const std::string &definition,
         } else { // Regular trigger
             accepted_count++;
             if (!accept(token)) {
-                std::string msg = "Could not find trigger ";
-                msg += token.substr(1);
-                throw std::invalid_argument(msg);
+                throw std::invalid_argument("Could not find trigger " + token);
             }
             if (verbose) std::cout << "\tACCEPT\t" << token << std::endl;
         }

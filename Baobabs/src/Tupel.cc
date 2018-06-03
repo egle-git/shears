@@ -1705,7 +1705,7 @@ void Tupel::fillTrig(const std::string& trigname, int triggerPrescalesForThisInd
   }
 }
 
-void Tupel::processMuons()
+void Tupel::processMuons(const edm::Event& iEvent)
 {
   double MuFill = 0;
 
@@ -1715,17 +1715,11 @@ void Tupel::processMuons()
     if (mu[j].isGlobalMuon()
         || muon::isGoodMuon(mu[j], muon::TrackerMuonArbitrated)
         || mu[j].isPFMuon()) {
-      //const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject( muons,j,muonMatch_, iEvent, *triggerEvent ) );
-      //if ( trigRef.isAvailable() && trigRef.isNonnull() ) {
-      //  Mu17_Mu8_Matched=1;
-      //	}
-      //	const pat::TriggerObjectRef trigRef2( matchHelper.triggerMatchObject( muons,j,muonMatch2_, iEvent, *triggerEvent ) );
-      //	if ( trigRef2.isAvailable() && trigRef2.isNonnull() ) {
-      //	  Mu17_TkMu8_Matched=1;
-      //	}
-      //TODO: filled MuHltMatch
-      //patMuonIdMedium_->push_back(mu[j].isMediumMuon()); Requires CMSSW >= 4_7_2
 
+      TLorentzVector muonMomentum(0,0,0,0);
+      muonMomentum.SetPtEtaPhiE(mu[j].pt(), mu[j].eta(),mu[j].phi(), mu[j].energy());
+      Long64_t muonMatchingResults = matchWithTriggerObject(iEvent, muonMomentum, triggerObjectType::hltmuons);
+      MuHltMatch_->push_back(muonMatchingResults);
         
       if (vtxx) {
         unsigned bit = 0;

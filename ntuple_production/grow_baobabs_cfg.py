@@ -327,7 +327,7 @@ my_id_modules = [
                  ]
 
 my_id_modulesPhotons = [
-#                 'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
+                 'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Spring16_V2p2_cff',
                  ]
 
 for idmod in my_id_modules:
@@ -342,12 +342,11 @@ for idmod in my_id_modulesPhotons:
 #                                       )
 
 process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag(electronSrc) #we want to apply the selection on top of the calibrated photons and electrons
-# FIXME 2016 photons
-#process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(photonSrc)
-#process.egmPhotonIsolation.srcToIsolate = cms.InputTag(photonSrc)
-#process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
-#process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
-#process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.egmPhotonIDs.physicsObjectSrc = cms.InputTag(photonSrc)
+process.egmPhotonIsolation.srcToIsolate = cms.InputTag(photonSrc)
+process.photonIDValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonRegressionValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
+process.photonMVAValueMapProducer.srcMiniAOD = cms.InputTag(photonSrc)
 
 
 #--------------------------------------------

@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         for (const std::string &name : histogram_names) {
             util::logging::debug << "Producing histogram: " << name << std::endl;
 
-            TCanvas canvas(name.c_str(), "", 692, 844);
+            TCanvas canvas(name.c_str(), "", 700, 900);
 
             TPad upper("upper", "upper", 0, 0.3, 1, 1);
             upper.SetTopMargin(0.11);
@@ -115,7 +115,6 @@ int main(int argc, char **argv)
             std::unique_ptr<TH1> ratio = mc_entry.get(name, lumi);
             std::unique_ptr<TH1> den = data_entry.get(name, lumi);
 
-
             if (ratio != nullptr && den != nullptr) {
                 ratio->Divide(den.get());
 
@@ -129,7 +128,7 @@ int main(int argc, char **argv)
                 ratio->GetXaxis()->SetLabelSize(0.10);
                 ratio->GetXaxis()->SetLabelOffset(0.017);
 
-                ratio->GetYaxis()->SetRangeUser(0.801, 1.199);
+                ratio->GetYaxis()->SetRangeUser(0.601, 1.399);
                 ratio->GetYaxis()->SetNdivisions(5, 5, 0);
                 ratio->GetYaxis()->SetTitle("Simulation/Data");
                 ratio->GetYaxis()->SetTitleSize(0.1);

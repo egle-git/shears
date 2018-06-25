@@ -88,7 +88,6 @@ int main(int argc, char **argv)
 
             TPad upper("upper", "upper", 0, 0.3, 1, 1);
             upper.SetTopMargin(0.11);
-            upper.SetBottomMargin(0.);
             upper.SetRightMargin(0.03);
             upper.SetTicks();
             if (log) {
@@ -116,6 +115,8 @@ int main(int argc, char **argv)
             std::unique_ptr<TH1> den = data_entry.get(name, lumi);
 
             if (ratio != nullptr && den != nullptr) {
+                upper.SetBottomMargin(0.);
+
                 ratio->Divide(den.get());
 
                 ratio->SetMarkerStyle(20);

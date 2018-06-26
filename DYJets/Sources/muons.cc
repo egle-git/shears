@@ -16,6 +16,7 @@ muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h
       MuCh(info.reader, "MuCh"),
       MuPfIso(info.reader, "MuPfIso"),
       MuTkLayerCnt(info.reader, "MuTkLayerCnt"),
+      MuId(info.reader, "MuId"),
       MuIdTight(info.reader, "MuIdTight")
 {
     configure(opt);
@@ -49,6 +50,19 @@ void muons::configure(const util::options &opt)
         roccor_dir = "EfficiencyTables/" + roccor_dir;
         _roccor = std::make_shared<RoccoR>(roccor_dir);
     }
+
+    if (node["id"]) {
+        std::string id = node["id"].as<std::string>();
+        if (id == "loose") {
+            _id_cut = muons::id::loose;
+        } else if (id == "medium") {
+            _id_cut = muons::id::medium;
+        } else if (id == "tight") {
+            _id_cut = muons::id::tight;
+        } else {
+            throw std::invalid_argument("Unknown muon id: \"" + id + "\"");
+        }
+    }
 }
 
 std::vector<lepton> muons::get(bool isdata)
@@ -63,11 +77,24 @@ std::vector<lepton> muons::get(bool isdata)
         l.raw_v = l.v;
         l.charge = MuCh[i];
         l.iso = MuPfIso[i];
-        l.id = MuIdTight[i];
+        l.id = MuId[i];
         l.pdgid = 13;
-        if (!(l.id & 1)) {
+
+        switch (_id_cut) {
+        case id::loose:
+            l.passes_id = (MuId[i] & 1);
+            break;
+        case id::medium:
+            l.passes_id = (MuId[i] & 2);
+            break;
+        case id::tight:
+            l.passes_id = (MuIdTight[i] & 1);
+            break;
+        }
+        if (!l.passes_id) {
             continue;
         }
+
         if (_roccor_enabled) {
             if (isdata) {
                 l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);

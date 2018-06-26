@@ -21,6 +21,16 @@ namespace physics
 /// \brief A muon-only analysis.
 class muons
 {
+  public:
+    /// \brief Represents muon IDs
+    enum class id
+    {
+        loose,  ///< \brief Loose ID
+        medium, ///< \brief Medium ID
+        tight,  ///< \brief Tight ID
+    };
+
+  private:
     TTreeReaderArray<float> MuPt;
     TTreeReaderArray<float> MuEta;
     TTreeReaderArray<float> MuPhi;
@@ -28,11 +38,13 @@ class muons
     TTreeReaderArray<float> MuCh;
     TTreeReaderArray<float> MuPfIso;
     TTreeReaderArray<int> MuTkLayerCnt;
+    TTreeReaderArray<unsigned> MuId;
     TTreeReaderArray<unsigned> MuIdTight;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
+    id _id_cut = id::tight;
 
     bool _id_sf_enabled = true;
     bool _iso_sf_enabled = true;

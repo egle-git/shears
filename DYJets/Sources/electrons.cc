@@ -37,6 +37,19 @@ void electrons::configure(const util::options &opt)
     util::set_value_safe(node, _id_sf_enabled, "use id scale factors", "id scale factors toggle");
     util::set_value_safe(
         node, _reco_sf_enabled, "use reconstruction scale factors", "reconstruction scale factors toggle");
+
+    if (node["id"]) {
+        std::string id = node["id"].as<std::string>();
+        if (id == "loose") {
+            _id_cut = electrons::id::loose;
+        } else if (id == "medium") {
+            _id_cut = electrons::id::medium;
+        } else if (id == "tight") {
+            _id_cut = electrons::id::tight;
+        } else {
+            throw std::invalid_argument("Unknown electron id: \"" + id + "\"");
+        }
+    }
 }
 
 std::vector<lepton> electrons::get()
@@ -56,9 +69,22 @@ std::vector<lepton> electrons::get()
         l.iso = ElPfIsoRho[i];
         l.id = ElId[i];
         l.pdgid = 11;
-        if (!(l.id & 2)) { // Loose ID
+
+        switch (_id_cut) {
+        case id::loose:
+            l.passes_id = (ElId[i] & 0x2);
+            break;
+        case id::medium:
+            l.passes_id = (ElId[i] & 0x4);
+            break;
+        case id::tight:
+            l.passes_id = (ElId[i] & 0x8);
+            break;
+        }
+        if (!l.passes_id) {
             continue;
         }
+
         if (l.v.Pt() < _pt_cut) {
             continue;
         }

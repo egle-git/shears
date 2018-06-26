@@ -19,6 +19,16 @@ namespace physics
 /// \brief A muon-only analysis.
 class electrons
 {
+  public:
+    /// \brief Represents electron IDs
+    enum class id
+    {
+        loose,  ///< \brief Loose ID
+        medium, ///< \brief Medium ID
+        tight,  ///< \brief Tight ID
+    };
+
+  private:
     TTreeReaderArray<float> ElPt;
     TTreeReaderArray<float> ElEta;
     TTreeReaderArray<float> ElPhi;
@@ -31,6 +41,7 @@ class electrons
     double _pt_cut = 20;
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
+    id _id_cut = id::tight;
 
     bool _id_sf_enabled = true;
     bool _reco_sf_enabled = true;

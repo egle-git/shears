@@ -16,7 +16,7 @@
 namespace physics
 {
 
-/// \brief A muon-only analysis.
+/// \brief Handles electrons.
 class electrons
 {
   public:

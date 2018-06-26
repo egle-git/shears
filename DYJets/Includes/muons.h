@@ -18,7 +18,7 @@ class RoccoR;
 namespace physics
 {
 
-/// \brief A muon-only analysis.
+/// \brief Handles muons.
 class muons
 {
   public:

@@ -26,6 +26,9 @@ static float minGJetPt = 10;
 
 static float minLepPt = 15;
 
+const constexpr static float minElIsoFourLep = 0.4;
+const constexpr static float minMuIsoFourLep = 0.4;
+
 static float minJetAk04Pt = 15;
 
 static float mll_low = 66;
@@ -51,6 +54,9 @@ protected:
   bool filterEl(int iEl);
   bool filterMu(int iMu);
   bool filterJetAk04(int iJetAk04);
+
+  bool filterElFourLep(int iEl);
+  bool filterMuFourLep(int iMu);
   
   void makeFilterMask(bool (VJetPruner::*filter)(int), std::vector<bool>& mask);
   void skimCollections();
@@ -103,21 +109,22 @@ bool VJetPruner::filterEvent(){
 void VJetPruner::skimCollections(){
   std::vector<bool> mask;
 
-  if (iSubSelection_ == FourLep || iSubSelection_ == FourLepUnf) {
-    // No skimming for 4-lepton selections
-    return;
-  }
+  bool isFourLep = (iSubSelection_ == FourLep || iSubSelection_ == FourLepUnf);
   
   //Gen lepton collections:
-  mask.resize(GLepDr01Pt->size());
-  makeFilterMask(&VJetPruner::filterGLep, mask);
-  filter(GLepDr01Pt,  mask);
-  filter(GLepDr01Eta, mask);
-  filter(GLepDr01Phi, mask);
-  filter(GLepDr01E,   mask);
-  filter(GLepDr01Id,  mask);
-  filter(GLepDr01St,  mask);
-  filter(GLepDr01MomId, mask);
+  if (!isFourLep) {
+    mask.resize(GLepDr01Pt->size());
+    makeFilterMask(&VJetPruner::filterGLep, mask);
+    filter(GLepDr01Pt,  mask);
+    filter(GLepDr01Eta, mask);
+    filter(GLepDr01Phi, mask);
+    filter(GLepDr01E,   mask);
+    filter(GLepDr01Id,  mask);
+    filter(GLepDr01St,  mask);
+    filter(GLepDr01MomId, mask);
+    filter(GLepDr01Prompt, mask);
+    filter(GLepDr01TauProd, mask);
+  }
 
   //Gen jet collections:
   mask.resize(GJetAk04Pt->size());
@@ -131,7 +138,7 @@ void VJetPruner::skimCollections(){
   //Reco muon collections:
   mask.resize(MuPt->size());
   //printf("makeFilterMask(&VJetPruner::filterMu, mask);\n");
-  makeFilterMask(&VJetPruner::filterMu, mask);
+  makeFilterMask(isFourLep ? &VJetPruner::filterMuFourLep : &VJetPruner::filterMu, mask);
   filter(MuPt, mask);
   filter(MuEta, mask);
   filter(MuPhi, mask);
@@ -146,6 +153,8 @@ void VJetPruner::skimCollections(){
     //    printf("MuId(%ld)=%d\n",i,MuId->at(i));
     printf("MuIdTight(%ld)=0x%x\n",i,MuIdTight->at(i));
   }
+  filter(MuIdHighPt, mask);
+  filter(MuIdTkHighPt, mask);
 
   filter(MuCh, mask);
   filter(MuVtxZ, mask);
@@ -170,7 +179,7 @@ void VJetPruner::skimCollections(){
 
   //Reco electron collections:
   mask.resize(ElPt->size());
-  makeFilterMask(&VJetPruner::filterEl, mask);
+  makeFilterMask(isFourLep ? &VJetPruner::filterElFourLep : &VJetPruner::filterEl, mask);
   filter(ElPt, mask);
   filter(ElEta, mask);
   filter(ElEtaSc, mask);
@@ -178,6 +187,10 @@ void VJetPruner::skimCollections(){
   filter(ElE, mask);
   filter(ElId, mask);
   filter(ElCh, mask);
+  filter(ElScRawE, mask);
+  filter(ElCorrE, mask);
+  filter(ElEcalIso, mask);
+  filter(ElEcalPfIso, mask);
   filter(ElMvaTrig, mask);
   filter(ElMvaNonTrig, mask);
   filter(ElMvaPresel, mask);
@@ -200,6 +213,9 @@ void VJetPruner::skimCollections(){
   filter(ElPfIsoDbeta, mask);
   filter(ElPfIsoRho, mask);
   filter(ElAEff, mask);
+  filter(ElDr03TkSumPt, mask);
+  filter(ElDr03EcalRecHitSumEt, mask);
+  filter(ElDr03HcalTowerSumEt, mask);
   
   //Reco jet collections:
   mask.resize(JetAk04Pt->size());
@@ -293,6 +309,19 @@ bool VJetPruner::filterMu(int iMu){
 
 bool VJetPruner::filterEl(int iEl){
   return ((*ElPt)[iEl] > minLepPt) && ((*ElId)[iEl] & elIdMask);
+}
+
+bool VJetPruner::filterMuFourLep(int iMu) {
+  bool passesAnyId = ((*MuId)[iMu] != 0);
+  for (auto id : *MuIdTight) passesAnyId |= (id != 0);
+  for (auto id : *MuIdSoft) passesAnyId |= (id != 0);
+  for (auto id : *MuIdHighPt) passesAnyId |= (id != 0);
+  for (auto id : *MuIdTkHighPt) passesAnyId |= (id != 0);
+  return ((*MuPfIso)[iMu] > minMuIsoFourLep && passesAnyId);
+}
+
+bool VJetPruner::filterElFourLep(int iEl) {
+  return ((*ElPfIsoRho)[iEl] > minElIsoFourLep && (*ElId)[iEl] != 0);
 }
 
 bool VJetPruner::filterJetAk04(int iJetAk04){

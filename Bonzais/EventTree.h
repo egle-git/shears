@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Wed Aug  5 22:59:33 2015 by ROOT version 5.34/26
+// Tue Jun 26 14:29:18 2018 by ROOT version 5.34/36
 // from TTree EventTree/ EventTree
-// found on file: ntuple_10.root
+// found on file: /pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root
 //////////////////////////////////////////////////////////
 
 #ifndef EventTree_h
@@ -37,22 +37,36 @@ public :
    Int_t           EvtPuCntTruth;
    vector<double>  *EvtWeights;
    Float_t         EvtFastJetRho;
+   ULong64_t       TrigMET;
    UInt_t          TrigHlt;
    ULong64_t       TrigHltPhot;
+   ULong64_t       TrigHltDiPhot;
    ULong64_t       TrigHltMu;
    ULong64_t       TrigHltDiMu;
-   ULong64_t       TrigHltDiEl;
    ULong64_t       TrigHltEl;
+   ULong64_t       TrigHltDiEl;
    ULong64_t       TrigHltElMu;
+   vector<unsigned int> *TrigHltPhot_prescale;
+   vector<unsigned int> *TrigHltDiPhot_prescale;
+   vector<unsigned int> *TrigHltMu_prescale;
+   vector<unsigned int> *TrigHltDiMu_prescale;
+   vector<unsigned int> *TrigHltEl_prescale;
+   vector<unsigned int> *TrigHltDiEl_prescale;
+   vector<unsigned int> *TrigHltElMu_prescale;
    vector<float>   *METPt;
-   vector<float>   *METPx;
-   vector<float>   *METPy;
-   vector<float>   *METPz;
-   vector<float>   *METE;
+   vector<float>   *METPhi;
+   vector<float>   *METPtType1;
+   vector<float>   *METPhiType1;
+   vector<float>   *METPtType1XY;
+   vector<float>   *METPhiType1XY;
+   vector<float>   *METPtRaw;
+   vector<float>   *METPhiRaw;
    vector<float>   *METsigx2;
    vector<float>   *METsigxy;
    vector<float>   *METsigy2;
    vector<float>   *METsig;
+   vector<float>   *GMETPt;
+   vector<float>   *GMETPhi;
    vector<float>   *GLepDr01Pt;
    vector<float>   *GLepDr01Eta;
    vector<float>   *GLepDr01Phi;
@@ -60,6 +74,8 @@ public :
    vector<int>     *GLepDr01Id;
    vector<int>     *GLepDr01St;
    vector<int>     *GLepDr01MomId;
+   vector<bool>    *GLepDr01Prompt;
+   vector<bool>    *GLepDr01TauProd;
    vector<float>   *GLepBarePt;
    vector<float>   *GLepBareEta;
    vector<float>   *GLepBarePhi;
@@ -67,6 +83,8 @@ public :
    vector<int>     *GLepBareId;
    vector<int>     *GLepBareSt;
    vector<int>     *GLepBareMomId;
+   vector<bool>    *GLepBarePrompt;
+   vector<bool>    *GLepBareTauProd;
    vector<float>   *GLepSt3Pt;
    vector<float>   *GLepSt3Eta;
    vector<float>   *GLepSt3Phi;
@@ -75,6 +93,19 @@ public :
    vector<int>     *GLepSt3St;
    vector<int>     *GLepSt3Mother0Id;
    vector<int>     *GLepSt3MotherCnt;
+   vector<float>   *GPhotPt;
+   vector<float>   *GPhotEta;
+   vector<float>   *GPhotPhi;
+   vector<float>   *GPhotE;
+   vector<int>     *GPhotMotherId;
+   vector<float>   *GPhotPrompt;
+   vector<int>     *GPhotSt;
+   vector<float>   *GPhotIsoEDR03;
+   vector<float>   *GPhotIsoEDR04;
+   vector<float>   *GPhotIsoEDR05;
+   vector<float>   *GPhotIsoSumPtDR03;
+   vector<float>   *GPhotIsoSumPtDR04;
+   vector<float>   *GPhotIsoSumPtDR05;
    vector<float>   *GLepClosePhotPt;
    vector<float>   *GLepClosePhotEta;
    vector<float>   *GLepClosePhotPhi;
@@ -94,6 +125,21 @@ public :
    vector<float>   *GJetAk04ConstEta;
    vector<float>   *GJetAk04ConstPhi;
    vector<float>   *GJetAk04ConstE;
+   vector<float>   *GJetAk04MatchedPartonID;
+   vector<float>   *GJetAk04MatchedPartonDR;
+   vector<float>   *GJetAk08Pt;
+   vector<float>   *GJetAk08Eta;
+   vector<float>   *GJetAk08Phi;
+   vector<float>   *GJetAk08E;
+   vector<float>   *GJetAk08ChFrac;
+   vector<int>     *GJetAk08ConstCnt;
+   vector<int>     *GJetAk08ConstId;
+   vector<float>   *GJetAk08ConstPt;
+   vector<float>   *GJetAk08ConstEta;
+   vector<float>   *GJetAk08ConstPhi;
+   vector<float>   *GJetAk08ConstE;
+   vector<float>   *GJetAk08MatchedPartonID;
+   vector<float>   *GJetAk08MatchedPartonDR;
    vector<int>     *GPdfId1;
    vector<int>     *GPdfId2;
    vector<float>   *GPdfx1;
@@ -107,6 +153,9 @@ public :
    vector<float>   *MuE;
    vector<unsigned int> *MuId;
    vector<unsigned int> *MuIdTight;
+   vector<unsigned int> *MuIdSoft;
+   vector<unsigned int> *MuIdHighPt;
+   vector<unsigned int> *MuIdTkHighPt;
    vector<float>   *MuCh;
    vector<float>   *MuVtxZ;
    vector<float>   *MuDxy;
@@ -134,6 +183,10 @@ public :
    vector<float>   *ElE;
    vector<unsigned int> *ElId;
    vector<float>   *ElCh;
+   vector<float>   *ElScRawE;
+   vector<float>   *ElCorrE;
+   vector<float>   *ElEcalIso;
+   vector<float>   *ElEcalPfIso;
    vector<float>   *ElMvaTrig;
    vector<float>   *ElMvaNonTrig;
    vector<float>   *ElMvaPresel;
@@ -156,6 +209,22 @@ public :
    vector<float>   *ElPfIsoDbeta;
    vector<float>   *ElPfIsoRho;
    vector<float>   *ElAEff;
+   vector<float>   *ElDr03TkSumPt;
+   vector<float>   *ElDr03EcalRecHitSumEt;
+   vector<float>   *ElDr03HcalTowerSumEt;
+   vector<float>   *TauPt;
+   vector<float>   *TauEta;
+   vector<float>   *TauPhi;
+   vector<float>   *TauE;
+   vector<float>   *TauCh;
+   vector<unsigned int> *TauDecayModeFinding;
+   vector<float>   *TauCombinedIsolationDeltaBetaCorrRaw3Hits;
+   vector<unsigned int> *TauDiscMuonLoose;
+   vector<unsigned int> *TauDiscMuonTight;
+   vector<unsigned int> *TauDiscElVLoose;
+   vector<unsigned int> *TauDiscElLoose;
+   vector<unsigned int> *TauDiscElVTight;
+   vector<unsigned int> *TauDiscElTight;
    vector<float>   *PhotPt;
    vector<float>   *PhotEta;
    vector<float>   *PhotPhi;
@@ -176,11 +245,25 @@ public :
    vector<float>   *PhotE2x5;
    vector<float>   *PhotE5x5;
    vector<float>   *PhotSigmaIetaIeta;
+   vector<float>   *PhotSigmaIetaIphi;
+   vector<float>   *PhotSigmaIphiIphi;
+   vector<float>   *PhotHoE;
+   vector<float>   *PhotHadTowOverEm;
    vector<float>   *PhotEtaWidth;
    vector<float>   *PhotPhiWidth;
-   vector<float>   *PhotHoE;
+   vector<float>   *PhotR9;
+   vector<float>   *PhotE1x3;
+   vector<float>   *PhotE2x2;
+   vector<float>   *PhotS4;
+   vector<float>   *PhotE1x5Full5x5;
+   vector<float>   *PhotE2x5Full5x5;
+   vector<float>   *PhotE3x3Full5x5;
+   vector<float>   *PhotE5x5Full5x5;
+   vector<float>   *PhotSigmaIetaIetaFull5x5;
+   vector<float>   *PhotR9Full5x5;
    vector<unsigned int> *PhotId;
    vector<bool>    *PhotHasPixelSeed;
+   vector<int>     *PhotPassElVeto;
    vector<float>   *JetAk04Pt;
    vector<float>   *JetAk04Eta;
    vector<float>   *JetAk04Phi;
@@ -197,7 +280,13 @@ public :
    vector<float>   *JetAk04ChEmFrac;
    vector<float>   *JetAk04NeutralEmFrac;
    vector<float>   *JetAk04ChMult;
+   vector<float>   *JetAk04NeutMult;
    vector<float>   *JetAk04ConstCnt;
+   vector<float>   *JetAk04Beta;
+   vector<float>   *JetAk04BetaClassic;
+   vector<float>   *JetAk04BetaStar;
+   vector<float>   *JetAk04BetaStarClassic;
+   vector<float>   *JetAk04Rms;
    vector<float>   *JetAk04BTagCsv;
    vector<float>   *JetAk04BTagCsvV1;
    vector<float>   *JetAk04BTagCsvSLV1;
@@ -209,6 +298,7 @@ public :
    vector<float>   *JetAk04BDiscSsvhe;
    vector<float>   *JetAk04BDiscSsvhp;
    vector<float>   *JetAk04PartFlav;
+   vector<float>   *JetAk04HadFlav;
    vector<float>   *JetAk04JecUncUp;
    vector<float>   *JetAk04JecUncDwn;
    vector<int>     *JetAk04ConstId;
@@ -217,6 +307,48 @@ public :
    vector<float>   *JetAk04ConstPhi;
    vector<float>   *JetAk04ConstE;
    vector<int>     *JetAk04GenJet;
+   vector<float>   *JetAk08Pt;
+   vector<float>   *JetAk08Eta;
+   vector<float>   *JetAk08Phi;
+   vector<float>   *JetAk08E;
+   vector<float>   *JetAk08Id;
+   vector<float>   *JetAk08RawPt;
+   vector<float>   *JetAk08RawE;
+   vector<float>   *JetAk08HfHadE;
+   vector<float>   *JetAk08HfEmE;
+   vector<float>   *JetAk08ChHadFrac;
+   vector<float>   *JetAk08NeutralHadAndHfFrac;
+   vector<float>   *JetAk08ChEmFrac;
+   vector<float>   *JetAk08NeutralEmFrac;
+   vector<float>   *JetAk08ChMult;
+   vector<float>   *JetAk08ConstCnt;
+   vector<float>   *JetAk08BTagCsv;
+   vector<float>   *JetAk08BTagCsvV1;
+   vector<float>   *JetAk08BTagCsvSLV1;
+   vector<float>   *JetAk08BDiscCisvV2;
+   vector<float>   *JetAk08BDiscJp;
+   vector<float>   *JetAk08BDiscBjp;
+   vector<float>   *JetAk08BDiscTche;
+   vector<float>   *JetAk08BDiscTchp;
+   vector<float>   *JetAk08BDiscSsvhe;
+   vector<float>   *JetAk08BDiscSsvhp;
+   vector<float>   *JetAk08PartFlav;
+   vector<float>   *JetAk08HadFlav;
+   vector<float>   *JetAk08JecUncUp;
+   vector<float>   *JetAk08JecUncDwn;
+   vector<int>     *JetAk08ConstId;
+   vector<float>   *JetAk08ConstPt;
+   vector<float>   *JetAk08ConstEta;
+   vector<float>   *JetAk08ConstPhi;
+   vector<float>   *JetAk08ConstE;
+   vector<int>     *JetAk08GenJet;
+   vector<float>   *JetAk08PrunedMass;
+   vector<float>   *JetAk08FilteredMass;
+   vector<float>   *JetAk08SoftDropMass;
+   vector<float>   *JetAk08TrimmedMass;
+   vector<float>   *JetAk08Tau1;
+   vector<float>   *JetAk08Tau2;
+   vector<float>   *JetAk08Tau3;
 
    // List of branches
    TBranch        *b_EvtIsRealData;   //!
@@ -229,22 +361,36 @@ public :
    TBranch        *b_EvtPuCntTruth;   //!
    TBranch        *b_EvtWeights;   //!
    TBranch        *b_EvtFastJetRho;   //!
+   TBranch        *b_TrigMET;   //!
    TBranch        *b_TrigHlt;   //!
    TBranch        *b_TrigHltPhot;   //!
+   TBranch        *b_TrigHltDiPhot;   //!
    TBranch        *b_TrigHltMu;   //!
    TBranch        *b_TrigHltDiMu;   //!
-   TBranch        *b_TrigHltDiEl;   //!
    TBranch        *b_TrigHltEl;   //!
+   TBranch        *b_TrigHltDiEl;   //!
    TBranch        *b_TrigHltElMu;   //!
+   TBranch        *b_TrigHltPhot_prescale;   //!
+   TBranch        *b_TrigHltDiPhot_prescale;   //!
+   TBranch        *b_TrigHltMu_prescale;   //!
+   TBranch        *b_TrigHltDiMu_prescale;   //!
+   TBranch        *b_TrigHltEl_prescale;   //!
+   TBranch        *b_TrigHltDiEl_prescale;   //!
+   TBranch        *b_TrigHltElMu_prescale;   //!
    TBranch        *b_METPt;   //!
-   TBranch        *b_METPx;   //!
-   TBranch        *b_METPy;   //!
-   TBranch        *b_METPz;   //!
-   TBranch        *b_METE;   //!
+   TBranch        *b_METPhi;   //!
+   TBranch        *b_METPtType1;   //!
+   TBranch        *b_METPhiType1;   //!
+   TBranch        *b_METPtType1XY;   //!
+   TBranch        *b_METPhiType1XY;   //!
+   TBranch        *b_METPtRaw;   //!
+   TBranch        *b_METPhiRaw;   //!
    TBranch        *b_METsigx2;   //!
    TBranch        *b_METsigxy;   //!
    TBranch        *b_METsigy2;   //!
    TBranch        *b_METsig;   //!
+   TBranch        *b_GMETPt;   //!
+   TBranch        *b_GMETPhi;   //!
    TBranch        *b_GLepDr01Pt;   //!
    TBranch        *b_GLepDr01Eta;   //!
    TBranch        *b_GLepDr01Phi;   //!
@@ -252,6 +398,8 @@ public :
    TBranch        *b_GLepDr01Id;   //!
    TBranch        *b_GLepDr01St;   //!
    TBranch        *b_GLepDr01MomId;   //!
+   TBranch        *b_GLepDr01Prompt;   //!
+   TBranch        *b_GLepDr01TauProd;   //!
    TBranch        *b_GLepBarePt;   //!
    TBranch        *b_GLepBareEta;   //!
    TBranch        *b_GLepBarePhi;   //!
@@ -259,6 +407,8 @@ public :
    TBranch        *b_GLepBareId;   //!
    TBranch        *b_GLepBareSt;   //!
    TBranch        *b_GLepBareMomId;   //!
+   TBranch        *b_GLepBarePrompt;   //!
+   TBranch        *b_GLepBareTauProd;   //!
    TBranch        *b_GLepSt3Pt;   //!
    TBranch        *b_GLepSt3Eta;   //!
    TBranch        *b_GLepSt3Phi;   //!
@@ -267,6 +417,19 @@ public :
    TBranch        *b_GLepSt3St;   //!
    TBranch        *b_GLepSt3Mother0Id;   //!
    TBranch        *b_GLepSt3MotherCnt;   //!
+   TBranch        *b_GPhotPt;   //!
+   TBranch        *b_GPhotEta;   //!
+   TBranch        *b_GPhotPhi;   //!
+   TBranch        *b_GPhotE;   //!
+   TBranch        *b_GPhotMotherId;   //!
+   TBranch        *b_GPhotPrompt;   //!
+   TBranch        *b_GPhotSt;   //!
+   TBranch        *b_GPhotIsoEDR03;   //!
+   TBranch        *b_GPhotIsoEDR04;   //!
+   TBranch        *b_GPhotIsoEDR05;   //!
+   TBranch        *b_GPhotIsoSumPtDR03;   //!
+   TBranch        *b_GPhotIsoSumPtDR04;   //!
+   TBranch        *b_GPhotIsoSumPtDR05;   //!
    TBranch        *b_GLepClosePhotPt;   //!
    TBranch        *b_GLepClosePhotEta;   //!
    TBranch        *b_GLepClosePhotPhi;   //!
@@ -286,6 +449,21 @@ public :
    TBranch        *b_GJetAk04ConstEta;   //!
    TBranch        *b_GJetAk04ConstPhi;   //!
    TBranch        *b_GJetAk04ConstE;   //!
+   TBranch        *b_GJetAk04MatchedPartonID;   //!
+   TBranch        *b_GJetAk04MatchedPartonDR;   //!
+   TBranch        *b_GJetAk08Pt;   //!
+   TBranch        *b_GJetAk08Eta;   //!
+   TBranch        *b_GJetAk08Phi;   //!
+   TBranch        *b_GJetAk08E;   //!
+   TBranch        *b_GJetAk08ChFrac;   //!
+   TBranch        *b_GJetAk08ConstCnt;   //!
+   TBranch        *b_GJetAk08ConstId;   //!
+   TBranch        *b_GJetAk08ConstPt;   //!
+   TBranch        *b_GJetAk08ConstEta;   //!
+   TBranch        *b_GJetAk08ConstPhi;   //!
+   TBranch        *b_GJetAk08ConstE;   //!
+   TBranch        *b_GJetAk08MatchedPartonID;   //!
+   TBranch        *b_GJetAk08MatchedPartonDR;   //!
    TBranch        *b_GPdfId1;   //!
    TBranch        *b_GPdfId2;   //!
    TBranch        *b_GPdfx1;   //!
@@ -299,6 +477,9 @@ public :
    TBranch        *b_MuE;   //!
    TBranch        *b_MuId;   //!
    TBranch        *b_MuIdTight;   //!
+   TBranch        *b_MuIdSoft;   //!
+   TBranch        *b_MuIdHighPt;   //!
+   TBranch        *b_MuIdTkHighPt;   //!
    TBranch        *b_MuCh;   //!
    TBranch        *b_MuVtxZ;   //!
    TBranch        *b_MuDxy;   //!
@@ -326,6 +507,10 @@ public :
    TBranch        *b_ElE;   //!
    TBranch        *b_ElId;   //!
    TBranch        *b_ElCh;   //!
+   TBranch        *b_ElScRawE;   //!
+   TBranch        *b_ElCorrE;   //!
+   TBranch        *b_ElEcalIso;   //!
+   TBranch        *b_ElEcalPfIso;   //!
    TBranch        *b_ElMvaTrig;   //!
    TBranch        *b_ElMvaNonTrig;   //!
    TBranch        *b_ElMvaPresel;   //!
@@ -348,6 +533,22 @@ public :
    TBranch        *b_ElPfIsoDbeta;   //!
    TBranch        *b_ElPfIsoRho;   //!
    TBranch        *b_ElAEff;   //!
+   TBranch        *b_ElDr03TkSumPt;   //!
+   TBranch        *b_ElDr03EcalRecHitSumEt;   //!
+   TBranch        *b_ElDr03HcalTowerSumEt;   //!
+   TBranch        *b_TauPt;   //!
+   TBranch        *b_TauEta;   //!
+   TBranch        *b_TauPhi;   //!
+   TBranch        *b_TauE;   //!
+   TBranch        *b_TauCh;   //!
+   TBranch        *b_TauDecayModeFinding;   //!
+   TBranch        *b_TauCombinedIsolationDeltaBetaCorrRaw3Hits;   //!
+   TBranch        *b_TauDiscMuonLoose;   //!
+   TBranch        *b_TauDiscMuonTight;   //!
+   TBranch        *b_TauDiscElVLoose;   //!
+   TBranch        *b_TauDiscElLoose;   //!
+   TBranch        *b_TauDiscElVTight;   //!
+   TBranch        *b_TauDiscElTight;   //!
    TBranch        *b_PhotPt;   //!
    TBranch        *b_PhotEta;   //!
    TBranch        *b_PhotPhi;   //!
@@ -368,11 +569,25 @@ public :
    TBranch        *b_PhotE2x5;   //!
    TBranch        *b_PhotE5x5;   //!
    TBranch        *b_PhotSigmaIetaIeta;   //!
+   TBranch        *b_PhotSigmaIetaIphi;   //!
+   TBranch        *b_PhotSigmaIphiIphi;   //!
+   TBranch        *b_PhotHoE;   //!
+   TBranch        *b_PhotHadTowOverEm;   //!
    TBranch        *b_PhotEtaWidth;   //!
    TBranch        *b_PhotPhiWidth;   //!
-   TBranch        *b_PhotHoE;   //!
+   TBranch        *b_PhotR9;   //!
+   TBranch        *b_PhotE1x3;   //!
+   TBranch        *b_PhotE2x2;   //!
+   TBranch        *b_PhotS4;   //!
+   TBranch        *b_PhotE1x5Full5x5;   //!
+   TBranch        *b_PhotE2x5Full5x5;   //!
+   TBranch        *b_PhotE3x3Full5x5;   //!
+   TBranch        *b_PhotE5x5Full5x5;   //!
+   TBranch        *b_PhotSigmaIetaIetaFull5x5;   //!
+   TBranch        *b_PhotR9Full5x5;   //!
    TBranch        *b_PhotId;   //!
    TBranch        *b_PhotHasPixelSeed;   //!
+   TBranch        *b_PhotPassElVeto;   //!
    TBranch        *b_JetAk04Pt;   //!
    TBranch        *b_JetAk04Eta;   //!
    TBranch        *b_JetAk04Phi;   //!
@@ -389,7 +604,13 @@ public :
    TBranch        *b_JetAk04ChEmFrac;   //!
    TBranch        *b_JetAk04NeutralEmFrac;   //!
    TBranch        *b_JetAk04ChMult;   //!
+   TBranch        *b_JetAk04NeutMult;   //!
    TBranch        *b_JetAk04ConstCnt;   //!
+   TBranch        *b_JetAk04Beta;   //!
+   TBranch        *b_JetAk04BetaClassic;   //!
+   TBranch        *b_JetAk04BetaStar;   //!
+   TBranch        *b_JetAk04BetaStarClassic;   //!
+   TBranch        *b_JetAk04Rms;   //!
    TBranch        *b_JetAk04BTagCsv;   //!
    TBranch        *b_JetAk04BTagCsvV1;   //!
    TBranch        *b_JetAk04BTagCsvSLV1;   //!
@@ -401,6 +622,7 @@ public :
    TBranch        *b_JetAk04BDiscSsvhe;   //!
    TBranch        *b_JetAk04BDiscSsvhp;   //!
    TBranch        *b_JetAk04PartFlav;   //!
+   TBranch        *b_JetAk04HadFlav;   //!
    TBranch        *b_JetAk04JecUncUp;   //!
    TBranch        *b_JetAk04JecUncDwn;   //!
    TBranch        *b_JetAk04ConstId;   //!
@@ -409,6 +631,48 @@ public :
    TBranch        *b_JetAk04ConstPhi;   //!
    TBranch        *b_JetAk04ConstE;   //!
    TBranch        *b_JetAk04GenJet;   //!
+   TBranch        *b_JetAk08Pt;   //!
+   TBranch        *b_JetAk08Eta;   //!
+   TBranch        *b_JetAk08Phi;   //!
+   TBranch        *b_JetAk08E;   //!
+   TBranch        *b_JetAk08Id;   //!
+   TBranch        *b_JetAk08RawPt;   //!
+   TBranch        *b_JetAk08RawE;   //!
+   TBranch        *b_JetAk08HfHadE;   //!
+   TBranch        *b_JetAk08HfEmE;   //!
+   TBranch        *b_JetAk08ChHadFrac;   //!
+   TBranch        *b_JetAk08NeutralHadAndHfFrac;   //!
+   TBranch        *b_JetAk08ChEmFrac;   //!
+   TBranch        *b_JetAk08NeutralEmFrac;   //!
+   TBranch        *b_JetAk08ChMult;   //!
+   TBranch        *b_JetAk08ConstCnt;   //!
+   TBranch        *b_JetAk08BTagCsv;   //!
+   TBranch        *b_JetAk08BTagCsvV1;   //!
+   TBranch        *b_JetAk08BTagCsvSLV1;   //!
+   TBranch        *b_JetAk08BDiscCisvV2;   //!
+   TBranch        *b_JetAk08BDiscJp;   //!
+   TBranch        *b_JetAk08BDiscBjp;   //!
+   TBranch        *b_JetAk08BDiscTche;   //!
+   TBranch        *b_JetAk08BDiscTchp;   //!
+   TBranch        *b_JetAk08BDiscSsvhe;   //!
+   TBranch        *b_JetAk08BDiscSsvhp;   //!
+   TBranch        *b_JetAk08PartFlav;   //!
+   TBranch        *b_JetAk08HadFlav;   //!
+   TBranch        *b_JetAk08JecUncUp;   //!
+   TBranch        *b_JetAk08JecUncDwn;   //!
+   TBranch        *b_JetAk08ConstId;   //!
+   TBranch        *b_JetAk08ConstPt;   //!
+   TBranch        *b_JetAk08ConstEta;   //!
+   TBranch        *b_JetAk08ConstPhi;   //!
+   TBranch        *b_JetAk08ConstE;   //!
+   TBranch        *b_JetAk08GenJet;   //!
+   TBranch        *b_JetAk08PrunedMass;   //!
+   TBranch        *b_JetAk08FilteredMass;   //!
+   TBranch        *b_JetAk08SoftDropMass;   //!
+   TBranch        *b_JetAk08TrimmedMass;   //!
+   TBranch        *b_JetAk08Tau1;   //!
+   TBranch        *b_JetAk08Tau2;   //!
+   TBranch        *b_JetAk08Tau3;   //!
 
    EventTree(TTree *tree=0);
    virtual ~EventTree();
@@ -428,14 +692,15 @@ EventTree::EventTree(TTree *tree) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
-//   if (tree == 0) {
-//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("ntuple_10.root");
-//      if (!f || !f->IsOpen()) {
-//         f = new TFile("ntuple_10.root");
-//      }
-//      TDirectory * dir = (TDirectory*)f->Get("ntuple_10.root:/tupel");
-//      dir->GetObject("EventTree",tree);
-//   }
+   if (tree == 0) {
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root");
+      if (!f || !f->IsOpen()) {
+         f = new TFile("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root");
+      }
+      TDirectory * dir = (TDirectory*)f->Get("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root:/tupel");
+      dir->GetObject("EventTree",tree);
+
+   }
    Init(tree);
 }
 
@@ -476,15 +741,27 @@ void EventTree::Init(TTree *tree)
 
    // Set object pointer
    EvtWeights = 0;
+   TrigHltPhot_prescale = 0;
+   TrigHltDiPhot_prescale = 0;
+   TrigHltMu_prescale = 0;
+   TrigHltDiMu_prescale = 0;
+   TrigHltEl_prescale = 0;
+   TrigHltDiEl_prescale = 0;
+   TrigHltElMu_prescale = 0;
    METPt = 0;
-   METPx = 0;
-   METPy = 0;
-   METPz = 0;
-   METE = 0;
+   METPhi = 0;
+   METPtType1 = 0;
+   METPhiType1 = 0;
+   METPtType1XY = 0;
+   METPhiType1XY = 0;
+   METPtRaw = 0;
+   METPhiRaw = 0;
    METsigx2 = 0;
    METsigxy = 0;
    METsigy2 = 0;
    METsig = 0;
+   GMETPt = 0;
+   GMETPhi = 0;
    GLepDr01Pt = 0;
    GLepDr01Eta = 0;
    GLepDr01Phi = 0;
@@ -492,6 +769,8 @@ void EventTree::Init(TTree *tree)
    GLepDr01Id = 0;
    GLepDr01St = 0;
    GLepDr01MomId = 0;
+   GLepDr01Prompt = 0;
+   GLepDr01TauProd = 0;
    GLepBarePt = 0;
    GLepBareEta = 0;
    GLepBarePhi = 0;
@@ -499,6 +778,8 @@ void EventTree::Init(TTree *tree)
    GLepBareId = 0;
    GLepBareSt = 0;
    GLepBareMomId = 0;
+   GLepBarePrompt = 0;
+   GLepBareTauProd = 0;
    GLepSt3Pt = 0;
    GLepSt3Eta = 0;
    GLepSt3Phi = 0;
@@ -507,6 +788,19 @@ void EventTree::Init(TTree *tree)
    GLepSt3St = 0;
    GLepSt3Mother0Id = 0;
    GLepSt3MotherCnt = 0;
+   GPhotPt = 0;
+   GPhotEta = 0;
+   GPhotPhi = 0;
+   GPhotE = 0;
+   GPhotMotherId = 0;
+   GPhotPrompt = 0;
+   GPhotSt = 0;
+   GPhotIsoEDR03 = 0;
+   GPhotIsoEDR04 = 0;
+   GPhotIsoEDR05 = 0;
+   GPhotIsoSumPtDR03 = 0;
+   GPhotIsoSumPtDR04 = 0;
+   GPhotIsoSumPtDR05 = 0;
    GLepClosePhotPt = 0;
    GLepClosePhotEta = 0;
    GLepClosePhotPhi = 0;
@@ -526,6 +820,21 @@ void EventTree::Init(TTree *tree)
    GJetAk04ConstEta = 0;
    GJetAk04ConstPhi = 0;
    GJetAk04ConstE = 0;
+   GJetAk04MatchedPartonID = 0;
+   GJetAk04MatchedPartonDR = 0;
+   GJetAk08Pt = 0;
+   GJetAk08Eta = 0;
+   GJetAk08Phi = 0;
+   GJetAk08E = 0;
+   GJetAk08ChFrac = 0;
+   GJetAk08ConstCnt = 0;
+   GJetAk08ConstId = 0;
+   GJetAk08ConstPt = 0;
+   GJetAk08ConstEta = 0;
+   GJetAk08ConstPhi = 0;
+   GJetAk08ConstE = 0;
+   GJetAk08MatchedPartonID = 0;
+   GJetAk08MatchedPartonDR = 0;
    GPdfId1 = 0;
    GPdfId2 = 0;
    GPdfx1 = 0;
@@ -537,6 +846,9 @@ void EventTree::Init(TTree *tree)
    MuE = 0;
    MuId = 0;
    MuIdTight = 0;
+   MuIdSoft = 0;
+   MuIdHighPt = 0;
+   MuIdTkHighPt = 0;
    MuCh = 0;
    MuVtxZ = 0;
    MuDxy = 0;
@@ -564,6 +876,10 @@ void EventTree::Init(TTree *tree)
    ElE = 0;
    ElId = 0;
    ElCh = 0;
+   ElScRawE = 0;
+   ElCorrE = 0;
+   ElEcalIso = 0;
+   ElEcalPfIso = 0;
    ElMvaTrig = 0;
    ElMvaNonTrig = 0;
    ElMvaPresel = 0;
@@ -586,6 +902,22 @@ void EventTree::Init(TTree *tree)
    ElPfIsoDbeta = 0;
    ElPfIsoRho = 0;
    ElAEff = 0;
+   ElDr03TkSumPt = 0;
+   ElDr03EcalRecHitSumEt = 0;
+   ElDr03HcalTowerSumEt = 0;
+   TauPt = 0;
+   TauEta = 0;
+   TauPhi = 0;
+   TauE = 0;
+   TauCh = 0;
+   TauDecayModeFinding = 0;
+   TauCombinedIsolationDeltaBetaCorrRaw3Hits = 0;
+   TauDiscMuonLoose = 0;
+   TauDiscMuonTight = 0;
+   TauDiscElVLoose = 0;
+   TauDiscElLoose = 0;
+   TauDiscElVTight = 0;
+   TauDiscElTight = 0;
    PhotPt = 0;
    PhotEta = 0;
    PhotPhi = 0;
@@ -606,11 +938,25 @@ void EventTree::Init(TTree *tree)
    PhotE2x5 = 0;
    PhotE5x5 = 0;
    PhotSigmaIetaIeta = 0;
+   PhotSigmaIetaIphi = 0;
+   PhotSigmaIphiIphi = 0;
+   PhotHoE = 0;
+   PhotHadTowOverEm = 0;
    PhotEtaWidth = 0;
    PhotPhiWidth = 0;
-   PhotHoE = 0;
+   PhotR9 = 0;
+   PhotE1x3 = 0;
+   PhotE2x2 = 0;
+   PhotS4 = 0;
+   PhotE1x5Full5x5 = 0;
+   PhotE2x5Full5x5 = 0;
+   PhotE3x3Full5x5 = 0;
+   PhotE5x5Full5x5 = 0;
+   PhotSigmaIetaIetaFull5x5 = 0;
+   PhotR9Full5x5 = 0;
    PhotId = 0;
    PhotHasPixelSeed = 0;
+   PhotPassElVeto = 0;
    JetAk04Pt = 0;
    JetAk04Eta = 0;
    JetAk04Phi = 0;
@@ -627,7 +973,13 @@ void EventTree::Init(TTree *tree)
    JetAk04ChEmFrac = 0;
    JetAk04NeutralEmFrac = 0;
    JetAk04ChMult = 0;
+   JetAk04NeutMult = 0;
    JetAk04ConstCnt = 0;
+   JetAk04Beta = 0;
+   JetAk04BetaClassic = 0;
+   JetAk04BetaStar = 0;
+   JetAk04BetaStarClassic = 0;
+   JetAk04Rms = 0;
    JetAk04BTagCsv = 0;
    JetAk04BTagCsvV1 = 0;
    JetAk04BTagCsvSLV1 = 0;
@@ -639,6 +991,7 @@ void EventTree::Init(TTree *tree)
    JetAk04BDiscSsvhe = 0;
    JetAk04BDiscSsvhp = 0;
    JetAk04PartFlav = 0;
+   JetAk04HadFlav = 0;
    JetAk04JecUncUp = 0;
    JetAk04JecUncDwn = 0;
    JetAk04ConstId = 0;
@@ -647,6 +1000,48 @@ void EventTree::Init(TTree *tree)
    JetAk04ConstPhi = 0;
    JetAk04ConstE = 0;
    JetAk04GenJet = 0;
+   JetAk08Pt = 0;
+   JetAk08Eta = 0;
+   JetAk08Phi = 0;
+   JetAk08E = 0;
+   JetAk08Id = 0;
+   JetAk08RawPt = 0;
+   JetAk08RawE = 0;
+   JetAk08HfHadE = 0;
+   JetAk08HfEmE = 0;
+   JetAk08ChHadFrac = 0;
+   JetAk08NeutralHadAndHfFrac = 0;
+   JetAk08ChEmFrac = 0;
+   JetAk08NeutralEmFrac = 0;
+   JetAk08ChMult = 0;
+   JetAk08ConstCnt = 0;
+   JetAk08BTagCsv = 0;
+   JetAk08BTagCsvV1 = 0;
+   JetAk08BTagCsvSLV1 = 0;
+   JetAk08BDiscCisvV2 = 0;
+   JetAk08BDiscJp = 0;
+   JetAk08BDiscBjp = 0;
+   JetAk08BDiscTche = 0;
+   JetAk08BDiscTchp = 0;
+   JetAk08BDiscSsvhe = 0;
+   JetAk08BDiscSsvhp = 0;
+   JetAk08PartFlav = 0;
+   JetAk08HadFlav = 0;
+   JetAk08JecUncUp = 0;
+   JetAk08JecUncDwn = 0;
+   JetAk08ConstId = 0;
+   JetAk08ConstPt = 0;
+   JetAk08ConstEta = 0;
+   JetAk08ConstPhi = 0;
+   JetAk08ConstE = 0;
+   JetAk08GenJet = 0;
+   JetAk08PrunedMass = 0;
+   JetAk08FilteredMass = 0;
+   JetAk08SoftDropMass = 0;
+   JetAk08TrimmedMass = 0;
+   JetAk08Tau1 = 0;
+   JetAk08Tau2 = 0;
+   JetAk08Tau3 = 0;
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -663,22 +1058,36 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("EvtPuCntTruth", &EvtPuCntTruth, &b_EvtPuCntTruth);
    fChain->SetBranchAddress("EvtWeights", &EvtWeights, &b_EvtWeights);
    fChain->SetBranchAddress("EvtFastJetRho", &EvtFastJetRho, &b_EvtFastJetRho);
+   fChain->SetBranchAddress("TrigMET", &TrigMET, &b_TrigMET);
    fChain->SetBranchAddress("TrigHlt", &TrigHlt, &b_TrigHlt);
    fChain->SetBranchAddress("TrigHltPhot", &TrigHltPhot, &b_TrigHltPhot);
+   fChain->SetBranchAddress("TrigHltDiPhot", &TrigHltDiPhot, &b_TrigHltDiPhot);
    fChain->SetBranchAddress("TrigHltMu", &TrigHltMu, &b_TrigHltMu);
    fChain->SetBranchAddress("TrigHltDiMu", &TrigHltDiMu, &b_TrigHltDiMu);
-   fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
    fChain->SetBranchAddress("TrigHltEl", &TrigHltEl, &b_TrigHltEl);
+   fChain->SetBranchAddress("TrigHltDiEl", &TrigHltDiEl, &b_TrigHltDiEl);
    fChain->SetBranchAddress("TrigHltElMu", &TrigHltElMu, &b_TrigHltElMu);
+   fChain->SetBranchAddress("TrigHltPhot_prescale", &TrigHltPhot_prescale, &b_TrigHltPhot_prescale);
+   fChain->SetBranchAddress("TrigHltDiPhot_prescale", &TrigHltDiPhot_prescale, &b_TrigHltDiPhot_prescale);
+   fChain->SetBranchAddress("TrigHltMu_prescale", &TrigHltMu_prescale, &b_TrigHltMu_prescale);
+   fChain->SetBranchAddress("TrigHltDiMu_prescale", &TrigHltDiMu_prescale, &b_TrigHltDiMu_prescale);
+   fChain->SetBranchAddress("TrigHltEl_prescale", &TrigHltEl_prescale, &b_TrigHltEl_prescale);
+   fChain->SetBranchAddress("TrigHltDiEl_prescale", &TrigHltDiEl_prescale, &b_TrigHltDiEl_prescale);
+   fChain->SetBranchAddress("TrigHltElMu_prescale", &TrigHltElMu_prescale, &b_TrigHltElMu_prescale);
    fChain->SetBranchAddress("METPt", &METPt, &b_METPt);
-   fChain->SetBranchAddress("METPx", &METPx, &b_METPx);
-   fChain->SetBranchAddress("METPy", &METPy, &b_METPy);
-   fChain->SetBranchAddress("METPz", &METPz, &b_METPz);
-   fChain->SetBranchAddress("METE", &METE, &b_METE);
+   fChain->SetBranchAddress("METPhi", &METPhi, &b_METPhi);
+   fChain->SetBranchAddress("METPtType1", &METPtType1, &b_METPtType1);
+   fChain->SetBranchAddress("METPhiType1", &METPhiType1, &b_METPhiType1);
+   fChain->SetBranchAddress("METPtType1XY", &METPtType1XY, &b_METPtType1XY);
+   fChain->SetBranchAddress("METPhiType1XY", &METPhiType1XY, &b_METPhiType1XY);
+   fChain->SetBranchAddress("METPtRaw", &METPtRaw, &b_METPtRaw);
+   fChain->SetBranchAddress("METPhiRaw", &METPhiRaw, &b_METPhiRaw);
    fChain->SetBranchAddress("METsigx2", &METsigx2, &b_METsigx2);
    fChain->SetBranchAddress("METsigxy", &METsigxy, &b_METsigxy);
    fChain->SetBranchAddress("METsigy2", &METsigy2, &b_METsigy2);
    fChain->SetBranchAddress("METsig", &METsig, &b_METsig);
+   fChain->SetBranchAddress("GMETPt", &GMETPt, &b_GMETPt);
+   fChain->SetBranchAddress("GMETPhi", &GMETPhi, &b_GMETPhi);
    fChain->SetBranchAddress("GLepDr01Pt", &GLepDr01Pt, &b_GLepDr01Pt);
    fChain->SetBranchAddress("GLepDr01Eta", &GLepDr01Eta, &b_GLepDr01Eta);
    fChain->SetBranchAddress("GLepDr01Phi", &GLepDr01Phi, &b_GLepDr01Phi);
@@ -686,6 +1095,8 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("GLepDr01Id", &GLepDr01Id, &b_GLepDr01Id);
    fChain->SetBranchAddress("GLepDr01St", &GLepDr01St, &b_GLepDr01St);
    fChain->SetBranchAddress("GLepDr01MomId", &GLepDr01MomId, &b_GLepDr01MomId);
+   fChain->SetBranchAddress("GLepDr01Prompt", &GLepDr01Prompt, &b_GLepDr01Prompt);
+   fChain->SetBranchAddress("GLepDr01TauProd", &GLepDr01TauProd, &b_GLepDr01TauProd);
    fChain->SetBranchAddress("GLepBarePt", &GLepBarePt, &b_GLepBarePt);
    fChain->SetBranchAddress("GLepBareEta", &GLepBareEta, &b_GLepBareEta);
    fChain->SetBranchAddress("GLepBarePhi", &GLepBarePhi, &b_GLepBarePhi);
@@ -693,6 +1104,8 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("GLepBareId", &GLepBareId, &b_GLepBareId);
    fChain->SetBranchAddress("GLepBareSt", &GLepBareSt, &b_GLepBareSt);
    fChain->SetBranchAddress("GLepBareMomId", &GLepBareMomId, &b_GLepBareMomId);
+   fChain->SetBranchAddress("GLepBarePrompt", &GLepBarePrompt, &b_GLepBarePrompt);
+   fChain->SetBranchAddress("GLepBareTauProd", &GLepBareTauProd, &b_GLepBareTauProd);
    fChain->SetBranchAddress("GLepSt3Pt", &GLepSt3Pt, &b_GLepSt3Pt);
    fChain->SetBranchAddress("GLepSt3Eta", &GLepSt3Eta, &b_GLepSt3Eta);
    fChain->SetBranchAddress("GLepSt3Phi", &GLepSt3Phi, &b_GLepSt3Phi);
@@ -701,6 +1114,19 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("GLepSt3St", &GLepSt3St, &b_GLepSt3St);
    fChain->SetBranchAddress("GLepSt3Mother0Id", &GLepSt3Mother0Id, &b_GLepSt3Mother0Id);
    fChain->SetBranchAddress("GLepSt3MotherCnt", &GLepSt3MotherCnt, &b_GLepSt3MotherCnt);
+   fChain->SetBranchAddress("GPhotPt", &GPhotPt, &b_GPhotPt);
+   fChain->SetBranchAddress("GPhotEta", &GPhotEta, &b_GPhotEta);
+   fChain->SetBranchAddress("GPhotPhi", &GPhotPhi, &b_GPhotPhi);
+   fChain->SetBranchAddress("GPhotE", &GPhotE, &b_GPhotE);
+   fChain->SetBranchAddress("GPhotMotherId", &GPhotMotherId, &b_GPhotMotherId);
+   fChain->SetBranchAddress("GPhotPrompt", &GPhotPrompt, &b_GPhotPrompt);
+   fChain->SetBranchAddress("GPhotSt", &GPhotSt, &b_GPhotSt);
+   fChain->SetBranchAddress("GPhotIsoEDR03", &GPhotIsoEDR03, &b_GPhotIsoEDR03);
+   fChain->SetBranchAddress("GPhotIsoEDR04", &GPhotIsoEDR04, &b_GPhotIsoEDR04);
+   fChain->SetBranchAddress("GPhotIsoEDR05", &GPhotIsoEDR05, &b_GPhotIsoEDR05);
+   fChain->SetBranchAddress("GPhotIsoSumPtDR03", &GPhotIsoSumPtDR03, &b_GPhotIsoSumPtDR03);
+   fChain->SetBranchAddress("GPhotIsoSumPtDR04", &GPhotIsoSumPtDR04, &b_GPhotIsoSumPtDR04);
+   fChain->SetBranchAddress("GPhotIsoSumPtDR05", &GPhotIsoSumPtDR05, &b_GPhotIsoSumPtDR05);
    fChain->SetBranchAddress("GLepClosePhotPt", &GLepClosePhotPt, &b_GLepClosePhotPt);
    fChain->SetBranchAddress("GLepClosePhotEta", &GLepClosePhotEta, &b_GLepClosePhotEta);
    fChain->SetBranchAddress("GLepClosePhotPhi", &GLepClosePhotPhi, &b_GLepClosePhotPhi);
@@ -720,6 +1146,21 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("GJetAk04ConstEta", &GJetAk04ConstEta, &b_GJetAk04ConstEta);
    fChain->SetBranchAddress("GJetAk04ConstPhi", &GJetAk04ConstPhi, &b_GJetAk04ConstPhi);
    fChain->SetBranchAddress("GJetAk04ConstE", &GJetAk04ConstE, &b_GJetAk04ConstE);
+   fChain->SetBranchAddress("GJetAk04MatchedPartonID", &GJetAk04MatchedPartonID, &b_GJetAk04MatchedPartonID);
+   fChain->SetBranchAddress("GJetAk04MatchedPartonDR", &GJetAk04MatchedPartonDR, &b_GJetAk04MatchedPartonDR);
+   fChain->SetBranchAddress("GJetAk08Pt", &GJetAk08Pt, &b_GJetAk08Pt);
+   fChain->SetBranchAddress("GJetAk08Eta", &GJetAk08Eta, &b_GJetAk08Eta);
+   fChain->SetBranchAddress("GJetAk08Phi", &GJetAk08Phi, &b_GJetAk08Phi);
+   fChain->SetBranchAddress("GJetAk08E", &GJetAk08E, &b_GJetAk08E);
+   fChain->SetBranchAddress("GJetAk08ChFrac", &GJetAk08ChFrac, &b_GJetAk08ChFrac);
+   fChain->SetBranchAddress("GJetAk08ConstCnt", &GJetAk08ConstCnt, &b_GJetAk08ConstCnt);
+   fChain->SetBranchAddress("GJetAk08ConstId", &GJetAk08ConstId, &b_GJetAk08ConstId);
+   fChain->SetBranchAddress("GJetAk08ConstPt", &GJetAk08ConstPt, &b_GJetAk08ConstPt);
+   fChain->SetBranchAddress("GJetAk08ConstEta", &GJetAk08ConstEta, &b_GJetAk08ConstEta);
+   fChain->SetBranchAddress("GJetAk08ConstPhi", &GJetAk08ConstPhi, &b_GJetAk08ConstPhi);
+   fChain->SetBranchAddress("GJetAk08ConstE", &GJetAk08ConstE, &b_GJetAk08ConstE);
+   fChain->SetBranchAddress("GJetAk08MatchedPartonID", &GJetAk08MatchedPartonID, &b_GJetAk08MatchedPartonID);
+   fChain->SetBranchAddress("GJetAk08MatchedPartonDR", &GJetAk08MatchedPartonDR, &b_GJetAk08MatchedPartonDR);
    fChain->SetBranchAddress("GPdfId1", &GPdfId1, &b_GPdfId1);
    fChain->SetBranchAddress("GPdfId2", &GPdfId2, &b_GPdfId2);
    fChain->SetBranchAddress("GPdfx1", &GPdfx1, &b_GPdfx1);
@@ -733,6 +1174,9 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("MuE", &MuE, &b_MuE);
    fChain->SetBranchAddress("MuId", &MuId, &b_MuId);
    fChain->SetBranchAddress("MuIdTight", &MuIdTight, &b_MuIdTight);
+   fChain->SetBranchAddress("MuIdSoft", &MuIdSoft, &b_MuIdSoft);
+   fChain->SetBranchAddress("MuIdHighPt", &MuIdHighPt, &b_MuIdHighPt);
+   fChain->SetBranchAddress("MuIdTkHighPt", &MuIdTkHighPt, &b_MuIdTkHighPt);
    fChain->SetBranchAddress("MuCh", &MuCh, &b_MuCh);
    fChain->SetBranchAddress("MuVtxZ", &MuVtxZ, &b_MuVtxZ);
    fChain->SetBranchAddress("MuDxy", &MuDxy, &b_MuDxy);
@@ -760,6 +1204,10 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("ElE", &ElE, &b_ElE);
    fChain->SetBranchAddress("ElId", &ElId, &b_ElId);
    fChain->SetBranchAddress("ElCh", &ElCh, &b_ElCh);
+   fChain->SetBranchAddress("ElScRawE", &ElScRawE, &b_ElScRawE);
+   fChain->SetBranchAddress("ElCorrE", &ElCorrE, &b_ElCorrE);
+   fChain->SetBranchAddress("ElEcalIso", &ElEcalIso, &b_ElEcalIso);
+   fChain->SetBranchAddress("ElEcalPfIso", &ElEcalPfIso, &b_ElEcalPfIso);
    fChain->SetBranchAddress("ElMvaTrig", &ElMvaTrig, &b_ElMvaTrig);
    fChain->SetBranchAddress("ElMvaNonTrig", &ElMvaNonTrig, &b_ElMvaNonTrig);
    fChain->SetBranchAddress("ElMvaPresel", &ElMvaPresel, &b_ElMvaPresel);
@@ -782,6 +1230,22 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("ElPfIsoDbeta", &ElPfIsoDbeta, &b_ElPfIsoDbeta);
    fChain->SetBranchAddress("ElPfIsoRho", &ElPfIsoRho, &b_ElPfIsoRho);
    fChain->SetBranchAddress("ElAEff", &ElAEff, &b_ElAEff);
+   fChain->SetBranchAddress("ElDr03TkSumPt", &ElDr03TkSumPt, &b_ElDr03TkSumPt);
+   fChain->SetBranchAddress("ElDr03EcalRecHitSumEt", &ElDr03EcalRecHitSumEt, &b_ElDr03EcalRecHitSumEt);
+   fChain->SetBranchAddress("ElDr03HcalTowerSumEt", &ElDr03HcalTowerSumEt, &b_ElDr03HcalTowerSumEt);
+   fChain->SetBranchAddress("TauPt", &TauPt, &b_TauPt);
+   fChain->SetBranchAddress("TauEta", &TauEta, &b_TauEta);
+   fChain->SetBranchAddress("TauPhi", &TauPhi, &b_TauPhi);
+   fChain->SetBranchAddress("TauE", &TauE, &b_TauE);
+   fChain->SetBranchAddress("TauCh", &TauCh, &b_TauCh);
+   fChain->SetBranchAddress("TauDecayModeFinding", &TauDecayModeFinding, &b_TauDecayModeFinding);
+   fChain->SetBranchAddress("TauCombinedIsolationDeltaBetaCorrRaw3Hits", &TauCombinedIsolationDeltaBetaCorrRaw3Hits, &b_TauCombinedIsolationDeltaBetaCorrRaw3Hits);
+   fChain->SetBranchAddress("TauDiscMuonLoose", &TauDiscMuonLoose, &b_TauDiscMuonLoose);
+   fChain->SetBranchAddress("TauDiscMuonTight", &TauDiscMuonTight, &b_TauDiscMuonTight);
+   fChain->SetBranchAddress("TauDiscElVLoose", &TauDiscElVLoose, &b_TauDiscElVLoose);
+   fChain->SetBranchAddress("TauDiscElLoose", &TauDiscElLoose, &b_TauDiscElLoose);
+   fChain->SetBranchAddress("TauDiscElVTight", &TauDiscElVTight, &b_TauDiscElVTight);
+   fChain->SetBranchAddress("TauDiscElTight", &TauDiscElTight, &b_TauDiscElTight);
    fChain->SetBranchAddress("PhotPt", &PhotPt, &b_PhotPt);
    fChain->SetBranchAddress("PhotEta", &PhotEta, &b_PhotEta);
    fChain->SetBranchAddress("PhotPhi", &PhotPhi, &b_PhotPhi);
@@ -802,11 +1266,25 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("PhotE2x5", &PhotE2x5, &b_PhotE2x5);
    fChain->SetBranchAddress("PhotE5x5", &PhotE5x5, &b_PhotE5x5);
    fChain->SetBranchAddress("PhotSigmaIetaIeta", &PhotSigmaIetaIeta, &b_PhotSigmaIetaIeta);
+   fChain->SetBranchAddress("PhotSigmaIetaIphi", &PhotSigmaIetaIphi, &b_PhotSigmaIetaIphi);
+   fChain->SetBranchAddress("PhotSigmaIphiIphi", &PhotSigmaIphiIphi, &b_PhotSigmaIphiIphi);
+   fChain->SetBranchAddress("PhotHoE", &PhotHoE, &b_PhotHoE);
+   fChain->SetBranchAddress("PhotHadTowOverEm", &PhotHadTowOverEm, &b_PhotHadTowOverEm);
    fChain->SetBranchAddress("PhotEtaWidth", &PhotEtaWidth, &b_PhotEtaWidth);
    fChain->SetBranchAddress("PhotPhiWidth", &PhotPhiWidth, &b_PhotPhiWidth);
-   fChain->SetBranchAddress("PhotHoE", &PhotHoE, &b_PhotHoE);
+   fChain->SetBranchAddress("PhotR9", &PhotR9, &b_PhotR9);
+   fChain->SetBranchAddress("PhotE1x3", &PhotE1x3, &b_PhotE1x3);
+   fChain->SetBranchAddress("PhotE2x2", &PhotE2x2, &b_PhotE2x2);
+   fChain->SetBranchAddress("PhotS4", &PhotS4, &b_PhotS4);
+   fChain->SetBranchAddress("PhotE1x5Full5x5", &PhotE1x5Full5x5, &b_PhotE1x5Full5x5);
+   fChain->SetBranchAddress("PhotE2x5Full5x5", &PhotE2x5Full5x5, &b_PhotE2x5Full5x5);
+   fChain->SetBranchAddress("PhotE3x3Full5x5", &PhotE3x3Full5x5, &b_PhotE3x3Full5x5);
+   fChain->SetBranchAddress("PhotE5x5Full5x5", &PhotE5x5Full5x5, &b_PhotE5x5Full5x5);
+   fChain->SetBranchAddress("PhotSigmaIetaIetaFull5x5", &PhotSigmaIetaIetaFull5x5, &b_PhotSigmaIetaIetaFull5x5);
+   fChain->SetBranchAddress("PhotR9Full5x5", &PhotR9Full5x5, &b_PhotR9Full5x5);
    fChain->SetBranchAddress("PhotId", &PhotId, &b_PhotId);
    fChain->SetBranchAddress("PhotHasPixelSeed", &PhotHasPixelSeed, &b_PhotHasPixelSeed);
+   fChain->SetBranchAddress("PhotPassElVeto", &PhotPassElVeto, &b_PhotPassElVeto);
    fChain->SetBranchAddress("JetAk04Pt", &JetAk04Pt, &b_JetAk04Pt);
    fChain->SetBranchAddress("JetAk04Eta", &JetAk04Eta, &b_JetAk04Eta);
    fChain->SetBranchAddress("JetAk04Phi", &JetAk04Phi, &b_JetAk04Phi);
@@ -823,7 +1301,13 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("JetAk04ChEmFrac", &JetAk04ChEmFrac, &b_JetAk04ChEmFrac);
    fChain->SetBranchAddress("JetAk04NeutralEmFrac", &JetAk04NeutralEmFrac, &b_JetAk04NeutralEmFrac);
    fChain->SetBranchAddress("JetAk04ChMult", &JetAk04ChMult, &b_JetAk04ChMult);
+   fChain->SetBranchAddress("JetAk04NeutMult", &JetAk04NeutMult, &b_JetAk04NeutMult);
    fChain->SetBranchAddress("JetAk04ConstCnt", &JetAk04ConstCnt, &b_JetAk04ConstCnt);
+   fChain->SetBranchAddress("JetAk04Beta", &JetAk04Beta, &b_JetAk04Beta);
+   fChain->SetBranchAddress("JetAk04BetaClassic", &JetAk04BetaClassic, &b_JetAk04BetaClassic);
+   fChain->SetBranchAddress("JetAk04BetaStar", &JetAk04BetaStar, &b_JetAk04BetaStar);
+   fChain->SetBranchAddress("JetAk04BetaStarClassic", &JetAk04BetaStarClassic, &b_JetAk04BetaStarClassic);
+   fChain->SetBranchAddress("JetAk04Rms", &JetAk04Rms, &b_JetAk04Rms);
    fChain->SetBranchAddress("JetAk04BTagCsv", &JetAk04BTagCsv, &b_JetAk04BTagCsv);
    fChain->SetBranchAddress("JetAk04BTagCsvV1", &JetAk04BTagCsvV1, &b_JetAk04BTagCsvV1);
    fChain->SetBranchAddress("JetAk04BTagCsvSLV1", &JetAk04BTagCsvSLV1, &b_JetAk04BTagCsvSLV1);
@@ -835,6 +1319,7 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("JetAk04BDiscSsvhe", &JetAk04BDiscSsvhe, &b_JetAk04BDiscSsvhe);
    fChain->SetBranchAddress("JetAk04BDiscSsvhp", &JetAk04BDiscSsvhp, &b_JetAk04BDiscSsvhp);
    fChain->SetBranchAddress("JetAk04PartFlav", &JetAk04PartFlav, &b_JetAk04PartFlav);
+   fChain->SetBranchAddress("JetAk04HadFlav", &JetAk04HadFlav, &b_JetAk04HadFlav);
    fChain->SetBranchAddress("JetAk04JecUncUp", &JetAk04JecUncUp, &b_JetAk04JecUncUp);
    fChain->SetBranchAddress("JetAk04JecUncDwn", &JetAk04JecUncDwn, &b_JetAk04JecUncDwn);
    fChain->SetBranchAddress("JetAk04ConstId", &JetAk04ConstId, &b_JetAk04ConstId);
@@ -843,6 +1328,48 @@ void EventTree::Init(TTree *tree)
    fChain->SetBranchAddress("JetAk04ConstPhi", &JetAk04ConstPhi, &b_JetAk04ConstPhi);
    fChain->SetBranchAddress("JetAk04ConstE", &JetAk04ConstE, &b_JetAk04ConstE);
    fChain->SetBranchAddress("JetAk04GenJet", &JetAk04GenJet, &b_JetAk04GenJet);
+   fChain->SetBranchAddress("JetAk08Pt", &JetAk08Pt, &b_JetAk08Pt);
+   fChain->SetBranchAddress("JetAk08Eta", &JetAk08Eta, &b_JetAk08Eta);
+   fChain->SetBranchAddress("JetAk08Phi", &JetAk08Phi, &b_JetAk08Phi);
+   fChain->SetBranchAddress("JetAk08E", &JetAk08E, &b_JetAk08E);
+   fChain->SetBranchAddress("JetAk08Id", &JetAk08Id, &b_JetAk08Id);
+   fChain->SetBranchAddress("JetAk08RawPt", &JetAk08RawPt, &b_JetAk08RawPt);
+   fChain->SetBranchAddress("JetAk08RawE", &JetAk08RawE, &b_JetAk08RawE);
+   fChain->SetBranchAddress("JetAk08HfHadE", &JetAk08HfHadE, &b_JetAk08HfHadE);
+   fChain->SetBranchAddress("JetAk08HfEmE", &JetAk08HfEmE, &b_JetAk08HfEmE);
+   fChain->SetBranchAddress("JetAk08ChHadFrac", &JetAk08ChHadFrac, &b_JetAk08ChHadFrac);
+   fChain->SetBranchAddress("JetAk08NeutralHadAndHfFrac", &JetAk08NeutralHadAndHfFrac, &b_JetAk08NeutralHadAndHfFrac);
+   fChain->SetBranchAddress("JetAk08ChEmFrac", &JetAk08ChEmFrac, &b_JetAk08ChEmFrac);
+   fChain->SetBranchAddress("JetAk08NeutralEmFrac", &JetAk08NeutralEmFrac, &b_JetAk08NeutralEmFrac);
+   fChain->SetBranchAddress("JetAk08ChMult", &JetAk08ChMult, &b_JetAk08ChMult);
+   fChain->SetBranchAddress("JetAk08ConstCnt", &JetAk08ConstCnt, &b_JetAk08ConstCnt);
+   fChain->SetBranchAddress("JetAk08BTagCsv", &JetAk08BTagCsv, &b_JetAk08BTagCsv);
+   fChain->SetBranchAddress("JetAk08BTagCsvV1", &JetAk08BTagCsvV1, &b_JetAk08BTagCsvV1);
+   fChain->SetBranchAddress("JetAk08BTagCsvSLV1", &JetAk08BTagCsvSLV1, &b_JetAk08BTagCsvSLV1);
+   fChain->SetBranchAddress("JetAk08BDiscCisvV2", &JetAk08BDiscCisvV2, &b_JetAk08BDiscCisvV2);
+   fChain->SetBranchAddress("JetAk08BDiscJp", &JetAk08BDiscJp, &b_JetAk08BDiscJp);
+   fChain->SetBranchAddress("JetAk08BDiscBjp", &JetAk08BDiscBjp, &b_JetAk08BDiscBjp);
+   fChain->SetBranchAddress("JetAk08BDiscTche", &JetAk08BDiscTche, &b_JetAk08BDiscTche);
+   fChain->SetBranchAddress("JetAk08BDiscTchp", &JetAk08BDiscTchp, &b_JetAk08BDiscTchp);
+   fChain->SetBranchAddress("JetAk08BDiscSsvhe", &JetAk08BDiscSsvhe, &b_JetAk08BDiscSsvhe);
+   fChain->SetBranchAddress("JetAk08BDiscSsvhp", &JetAk08BDiscSsvhp, &b_JetAk08BDiscSsvhp);
+   fChain->SetBranchAddress("JetAk08PartFlav", &JetAk08PartFlav, &b_JetAk08PartFlav);
+   fChain->SetBranchAddress("JetAk08HadFlav", &JetAk08HadFlav, &b_JetAk08HadFlav);
+   fChain->SetBranchAddress("JetAk08JecUncUp", &JetAk08JecUncUp, &b_JetAk08JecUncUp);
+   fChain->SetBranchAddress("JetAk08JecUncDwn", &JetAk08JecUncDwn, &b_JetAk08JecUncDwn);
+   fChain->SetBranchAddress("JetAk08ConstId", &JetAk08ConstId, &b_JetAk08ConstId);
+   fChain->SetBranchAddress("JetAk08ConstPt", &JetAk08ConstPt, &b_JetAk08ConstPt);
+   fChain->SetBranchAddress("JetAk08ConstEta", &JetAk08ConstEta, &b_JetAk08ConstEta);
+   fChain->SetBranchAddress("JetAk08ConstPhi", &JetAk08ConstPhi, &b_JetAk08ConstPhi);
+   fChain->SetBranchAddress("JetAk08ConstE", &JetAk08ConstE, &b_JetAk08ConstE);
+   fChain->SetBranchAddress("JetAk08GenJet", &JetAk08GenJet, &b_JetAk08GenJet);
+   fChain->SetBranchAddress("JetAk08PrunedMass", &JetAk08PrunedMass, &b_JetAk08PrunedMass);
+   fChain->SetBranchAddress("JetAk08FilteredMass", &JetAk08FilteredMass, &b_JetAk08FilteredMass);
+   fChain->SetBranchAddress("JetAk08SoftDropMass", &JetAk08SoftDropMass, &b_JetAk08SoftDropMass);
+   fChain->SetBranchAddress("JetAk08TrimmedMass", &JetAk08TrimmedMass, &b_JetAk08TrimmedMass);
+   fChain->SetBranchAddress("JetAk08Tau1", &JetAk08Tau1, &b_JetAk08Tau1);
+   fChain->SetBranchAddress("JetAk08Tau2", &JetAk08Tau2, &b_JetAk08Tau2);
+   fChain->SetBranchAddress("JetAk08Tau3", &JetAk08Tau3, &b_JetAk08Tau3);
    Notify();
 }
 

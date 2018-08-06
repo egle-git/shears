@@ -96,43 +96,25 @@ void dyjets_analyzer::operator()()
     std::vector<lepton> muons = _muons.get(_weights.isdata());
     std::vector<lepton> electrons = _electrons.get();
 
-    if (muons.size() < 2 && electrons.size() < 2) {
+    std::vector<lepton> leptons = find_boson(muons, electrons);
+    if (leptons.size() != 2) {
         return;
     }
-    _counter.count("With two good leptons", _weights.global_weight());
-
-    std::vector<lepton> leptons;
-    if (muons.size() >= 2) {
-        _counter.count("With two good muons", _weights.global_weight());
-        leptons = muons;
-    } else {
-        _counter.count("With two good electrons", _weights.global_weight());
-        leptons = electrons;
-    }
-
-    std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
-    if (candidates.size() == 0) {
-        return;
-    }
-    _counter.count("With a good Z boson", _weights.global_weight());
-
-    std::sort(candidates.begin(), candidates.end(), dilepton::zmass_ordering);
-    dilepton Z = candidates[0];
 
     // Only read jets once we have a Z
     std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, {Z.a, Z.b});
+    _jets.veto(jets, leptons);
 
     _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
     _pileup.fill(*this, "Zinc0jet_noweight", _weights);
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
-        _muons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
-        apply_mu_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
+        _muons.apply_sf(_weights, leptons, select(_tables_eraBF, _tables_eraGH));
+        apply_mu_trigger_sf(_weights, leptons[0], leptons[1], select(_tables_eraBF, _tables_eraGH));
     } else {
-        _electrons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
-        apply_el_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
+        _electrons.apply_sf(_weights, leptons, select(_tables_eraBF, _tables_eraGH));
+        apply_el_trigger_sf(_weights, leptons[0], leptons[1], select(_tables_eraBF, _tables_eraGH));
     }
 
     for (unsigned njets = 0; njets < 3; ++njets) {
@@ -142,9 +124,9 @@ void dyjets_analyzer::operator()()
 
         _jets.fill(*this, tag, jets, _weights);
         if (muons.size() >= 2) {
-            _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+            _muons.fill(*this, tag, leptons, _weights);
         } else {
-            _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
+            _electrons.fill(*this, tag, leptons, _weights);
         }
         _pileup.fill(*this, tag, _weights);
         fill("mass", tag, Z.v.M(), _weights.global_weight());
@@ -157,9 +139,9 @@ void dyjets_analyzer::operator()()
 
             _jets.fill(*this, tag, jets, _weights);
             if (muons.size() >= 2) {
-                _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+                _muons.fill(*this, tag, leptons, _weights);
             } else {
-                _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
+                _electrons.fill(*this, tag, leptons, _weights);
             }
             _pileup.fill(*this, tag, _weights);
             fill("mass", tag, Z.v.M(), _weights.global_weight());

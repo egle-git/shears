@@ -55,8 +55,9 @@ class dyjets_analyzer : public physics::boson_jets_analyzer,
     void operator()();
 
     // Overridden from base class
-    std::vector<physics::lepton> find_boson(physics::muons &muons,
-                                            physics::electrons &electrons) override;
+    std::vector<physics::lepton> find_boson(
+        const std::vector<physics::lepton> &muons,
+        const std::vector<physics::lepton> &electrons) override;
 
     /// \brief Checks whether the current event passes the trigger.
     bool passes_trigger();

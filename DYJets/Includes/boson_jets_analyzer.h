@@ -22,8 +22,8 @@ public:
      *
      * This method must be implemented in derived classes.
      */
-    virtual std::vector<lepton> find_boson(class muons &muons,
-                                           class electrons &electrons) = 0;
+    virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
+                                           const std::vector<lepton> &electrons) = 0;
 };
 
 } // namespace physics

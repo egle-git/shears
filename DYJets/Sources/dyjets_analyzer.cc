@@ -171,10 +171,32 @@ void dyjets_analyzer::operator()()
 }
 
 std::vector<physics::lepton> dyjets_analyzer::find_boson(
-    physics::muons &muons,
-    physics::electrons &electrons)
+    const std::vector<physics::lepton> &muons,
+    const std::vector<physics::lepton> &electrons)
 {
-    return std::vector<physics::lepton>();
+    if (muons.size() < 2 && electrons.size() < 2) {
+        return {};
+    }
+    _counter.count("With two good leptons", _weights.global_weight());
+
+    std::vector<physics::lepton> leptons;
+    if (muons.size() >= 2) {
+        _counter.count("With two good muons", _weights.global_weight());
+        leptons = muons;
+    } else {
+        _counter.count("With two good electrons", _weights.global_weight());
+        leptons = electrons;
+    }
+
+    std::vector<physics::dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
+    if (candidates.size() == 0) {
+        return {};
+    }
+    _counter.count("With a good Z boson", _weights.global_weight());
+
+    std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
+    physics::dilepton Z = candidates[0];
+    return { Z.a, Z.b };
 }
 
 bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).passes(_triggers); }

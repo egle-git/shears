@@ -81,6 +81,7 @@ ResultTables.cc TextTools.cc \
 SimpleJetCorrectionUncertainty.cc \
 JetCorrectionUncertainty.cc \
 JetCorrectorParameters.cc \
+boson_jets_analyzer.cc \
 catalog.cc \
 chains.cc \
 comparison_entry.cc \

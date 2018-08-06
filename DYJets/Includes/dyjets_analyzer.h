@@ -7,6 +7,7 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "boson_jets_analyzer.h"
 #include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
@@ -22,7 +23,8 @@
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
-class dyjets_analyzer : private virtual util::histo_set
+class dyjets_analyzer : public physics::boson_jets_analyzer,
+                        private virtual util::histo_set
 {
     TTreeReaderValue<unsigned> EvtRunNum;
 
@@ -51,6 +53,10 @@ class dyjets_analyzer : private virtual util::histo_set
 
     /// \brief Function called for every event.
     void operator()();
+
+    // Overridden from base class
+    std::vector<physics::lepton> find_boson(physics::muons &muons,
+                                            physics::electrons &electrons) override;
 
     /// \brief Checks whether the current event passes the trigger.
     bool passes_trigger();

@@ -22,7 +22,8 @@ namespace /* anonymous */
 }
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : EvtRunNum(info.reader, "EvtRunNum"),
+    : boson_jets_analyzer(info, opt),
+      EvtRunNum(info.reader, "EvtRunNum"),
       _electrons(info, opt, *this),
       _jets(info, opt),
       _muons(info, opt, *this),
@@ -167,6 +168,13 @@ void dyjets_analyzer::operator()()
             break;
         }
     }
+}
+
+std::vector<physics::lepton> dyjets_analyzer::find_boson(
+    physics::muons &muons,
+    physics::electrons &electrons)
+{
+    return std::vector<physics::lepton>();
 }
 
 bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).passes(_triggers); }

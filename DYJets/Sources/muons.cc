@@ -65,8 +65,10 @@ void muons::configure(const util::options &opt)
     }
 }
 
-std::vector<lepton> muons::get(bool isdata)
+std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng)
 {
+    std::uniform_real_distribution<> uniform(0.0, 1.0);
+
     std::vector<lepton> muons;
     for (unsigned i = 0; i < MuPt.GetSize(); ++i) {
         lepton l;
@@ -104,8 +106,8 @@ std::vector<lepton> muons::get(bool isdata)
                                                  l.v.Eta(),
                                                  l.v.Phi(),
                                                  MuTkLayerCnt[i],
-                                                 gRandom->Rndm(), // TODO kill gRandom
-                                                 gRandom->Rndm(), // TODO kill gRandom
+                                                 uniform(rng),
+                                                 uniform(rng),
                                                  0,
                                                  0);
             }

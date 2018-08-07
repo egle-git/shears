@@ -2,6 +2,7 @@
 #define MUONS_H
 
 #include <memory>
+#include <random>
 #include <vector>
 
 #include <TTreeReaderArray.h>
@@ -65,7 +66,7 @@ class muons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get(bool isdata);
+    std::vector<lepton> get(bool isdata, std::mt19937 &rng);
 
     /**
      * \brief Reweighs an event to take scale factors into account.

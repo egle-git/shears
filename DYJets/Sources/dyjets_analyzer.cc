@@ -83,7 +83,7 @@ void dyjets_analyzer::analyze()
     }
     _counter.count("Passing the trigger", weights().global_weight());
 
-    std::vector<lepton> muons = _muons.get(weights().isdata());
+    std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
     std::vector<lepton> electrons = _electrons.get();
 
     std::vector<lepton> leptons = find_boson(muons, electrons);

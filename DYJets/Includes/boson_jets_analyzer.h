@@ -34,19 +34,17 @@ public:
     /// \brief Entry point, called for every event
     virtual void operator()() final;
 
+protected:
     /// \brief Function called for every event.
     virtual void analyze() = 0;
 
     /**
-     * \brief Reconstructs the boson candidate and returns its constituents.
+     * \brief Returns the current era (0 for eraBG, 1 for eraGH).
      *
-     * This method must be implemented in derived classes.
+     * For MC events, the era is chosen randomly.
      */
-    virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
-                                           const std::vector<lepton> &electrons) = 0;
+    int era() const { return _era; }
 
-    physics::weights weights() const { return _weights; }
-protected:
     /**
      * \brief Returns a reference to the random number generator used by the
      *        analyzer.
@@ -60,11 +58,15 @@ protected:
     }
 
     /**
-     * \brief Returns the current era (0 for eraBG, 1 for eraGH).
+     * \brief Reconstructs the boson candidate and returns its constituents.
      *
-     * For MC events, the era is chosen randomly.
+     * This method must be implemented in derived classes.
      */
-    int era() const { return _era; }
+    virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
+                                           const std::vector<lepton> &electrons) = 0;
+
+    /// \brief Retrieves the weight information for the current event.
+    physics::weights weights() const { return _weights; }
 };
 
 } // namespace physics

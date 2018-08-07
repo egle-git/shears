@@ -23,7 +23,6 @@ namespace /* anonymous */
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : boson_jets_analyzer(info, opt),
-      EvtRunNum(info.reader, "EvtRunNum"),
       _electrons(info, opt, *this),
       _jets(info, opt),
       _muons(info, opt, *this),
@@ -109,11 +108,11 @@ void dyjets_analyzer::analyze()
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
-        _muons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
-        apply_mu_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
+        _muons.apply_sf(_weights, {Z.a, Z.b}, era_select(_tables_eraBF, _tables_eraGH));
+        apply_mu_trigger_sf(_weights, Z.a, Z.b, era_select(_tables_eraBF, _tables_eraGH));
     } else {
-        _electrons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
-        apply_el_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
+        _electrons.apply_sf(_weights, {Z.a, Z.b}, era_select(_tables_eraBF, _tables_eraGH));
+        apply_el_trigger_sf(_weights, Z.a, Z.b, era_select(_tables_eraBF, _tables_eraGH));
     }
 
     for (unsigned njets = 0; njets < 3; ++njets) {
@@ -180,7 +179,7 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     return { Z.a, Z.b };
 }
 
-bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).passes(_triggers); }
+bool dyjets_analyzer::passes_trigger() { return era_select(_mask_eraBG, _mask_eraH).passes(_triggers); }
 
 void dyjets_analyzer::write()
 {
@@ -192,27 +191,4 @@ void dyjets_analyzer::write()
 po::options_description dyjets_analyzer::options()
 {
     return po::options_description("Physics options");
-}
-
-template <class T> T &dyjets_analyzer::select(T &eraBG, T &eraGH)
-{
-    const unsigned run_threshold = 278820u; // start of Run G
-    const double run_lumi_fraction = 0.5493217216546642; // lumi fraction before run G
-
-    std::uniform_real_distribution<> uniform(0.0, 1.0);
-
-    if (weights().isdata()) {
-        if (*EvtRunNum < run_threshold) {
-            return eraBG;
-        } else {
-            return eraGH;
-        }
-    } else {
-        // Monte-Carlo based era selection
-        if (uniform(rng()) < run_lumi_fraction) {
-            return eraBG;
-        } else {
-            return eraGH;
-        }
-    }
 }

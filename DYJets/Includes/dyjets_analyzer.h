@@ -25,8 +25,6 @@ namespace po = boost::program_options;
 class dyjets_analyzer : public physics::boson_jets_analyzer,
                         private virtual util::histo_set
 {
-    TTreeReaderValue<unsigned> EvtRunNum;
-
     util::event_counter _counter;
 
     physics::electrons _electrons;

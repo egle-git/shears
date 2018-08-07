@@ -23,17 +23,17 @@ namespace /* anonymous */
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : boson_jets_analyzer(info, opt),
-      _electrons(info, opt, *this),
+      _electrons(info, opt, histo_set),
       _jets(info, opt),
-      _muons(info, opt, *this),
+      _muons(info, opt, histo_set),
       _pileup(info, opt),
       _triggers(info),
       _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
       _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
       _zfinder(opt, "Z")
 {
-    _jets.declare_histograms(*this);
-    _pileup.declare_histograms(*this);
+    _jets.declare_histograms(histo_set);
+    _pileup.declare_histograms(histo_set);
 
     _counter.declare("Total");
     _counter.declare("Passing the trigger");
@@ -42,8 +42,8 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     _counter.declare("With two good muons");
     _counter.declare("With a good Z boson");
 
-    declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
-    declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
+    histo_set.declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
+    histo_set.declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
 }
 
 namespace /* anonymous */
@@ -96,8 +96,8 @@ void dyjets_analyzer::analyze()
     std::vector<jet> jets = _jets.get();
     _jets.veto(jets, {Z.a, Z.b});
 
-    _jets.fill(*this, "Zinc0jet_noweight", jets, weights());
-    _pileup.fill(*this, "Zinc0jet_noweight", weights());
+    _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
+    _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
@@ -113,30 +113,30 @@ void dyjets_analyzer::analyze()
         ss << "Zinc" << njets << "jet";
         std::string tag = ss.str();
 
-        _jets.fill(*this, tag, jets, weights());
+        _jets.fill(histo_set, tag, jets, weights());
         if (muons.size() >= 2) {
-            _muons.fill(*this, tag, {Z.a, Z.b}, weights());
+            _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
         } else {
-            _electrons.fill(*this, tag, {Z.a, Z.b}, weights());
+            _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());
         }
-        _pileup.fill(*this, tag, weights());
-        fill("mass", tag, Z.v.M(), weights().global_weight());
-        fill("pt", tag, Z.v.Pt(), weights().global_weight());
+        _pileup.fill(histo_set, tag, weights());
+        histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
+        histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 
         if (jets.size() == njets) {
             ss.str("");
             ss << "Zexc" << njets << "jet";
             std::string tag = ss.str();
 
-            _jets.fill(*this, tag, jets, weights());
+            _jets.fill(histo_set, tag, jets, weights());
             if (muons.size() >= 2) {
-                _muons.fill(*this, tag, {Z.a, Z.b}, weights());
+                _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
             } else {
-                _electrons.fill(*this, tag, {Z.a, Z.b}, weights());
+                _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());
             }
-            _pileup.fill(*this, tag, weights());
-            fill("mass", tag, Z.v.M(), weights().global_weight());
-            fill("pt", tag, Z.v.Pt(), weights().global_weight());
+            _pileup.fill(histo_set, tag, weights());
+            histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
+            histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 
             break;
         }
@@ -177,8 +177,8 @@ bool dyjets_analyzer::passes_trigger() { return era_select(_mask_eraBG, _mask_er
 void dyjets_analyzer::write()
 {
     _counter.print();
-    weights().write(this);
-    histo_set::write();
+    weights().write(&histo_set);
+    histo_set.write();
 }
 
 po::options_description dyjets_analyzer::options()

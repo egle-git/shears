@@ -28,6 +28,8 @@ protected:
     // TODO Make private
     physics::weights _weights;
 
+    util::histo_set histo_set;
+
 public:
     /// \brief Constructor
     boson_jets_analyzer(util::job::info &info, const util::options &opt);

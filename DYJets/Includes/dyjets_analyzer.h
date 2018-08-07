@@ -62,10 +62,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer,
 
     /// \brief Returns the list of options supported by the analyzer.
     static po::options_description options();
-
-  private:
-    /// \brief Returns the argument corresponding to the current era.
-    template<class T> T &select(T &eraBG, T &eraH);
 };
 
 #endif // HIGGS_ANALYZER_H

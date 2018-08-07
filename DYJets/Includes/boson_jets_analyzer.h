@@ -1,6 +1,7 @@
 #ifndef BOSON_JETS_ANALYZER_H
 #define BOSON_JETS_ANALYZER_H
 
+#include <random>
 #include <vector>
 
 #include "histo_set.h"
@@ -13,6 +14,8 @@ namespace physics
 /// \brief Base class for boson-jets analyzers
 class boson_jets_analyzer
 {
+    std::mt19937 _rng;
+
 public:
     /// \brief Constructor
     boson_jets_analyzer(util::job::info &info, const util::options &opt);
@@ -33,6 +36,13 @@ public:
      */
     virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
                                            const std::vector<lepton> &electrons) = 0;
+
+protected:
+    /**
+     * \brief Returns a reference to the random number generator used by the
+     *        analyzer.
+     */
+    std::mt19937 &rng() { return _rng; }
 };
 
 } // namespace physics

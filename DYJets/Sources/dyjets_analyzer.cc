@@ -100,21 +100,22 @@ void dyjets_analyzer::analyze()
     if (leptons.size() != 2) {
         return;
     }
+    physics::dilepton Z(leptons[0], leptons[1]);
 
     // Only read jets once we have a Z
     std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, leptons);
+    _jets.veto(jets, {Z.a, Z.b});
 
     _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
     _pileup.fill(*this, "Zinc0jet_noweight", _weights);
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
-        _muons.apply_sf(_weights, leptons, select(_tables_eraBF, _tables_eraGH));
-        apply_mu_trigger_sf(_weights, leptons[0], leptons[1], select(_tables_eraBF, _tables_eraGH));
+        _muons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
+        apply_mu_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
     } else {
-        _electrons.apply_sf(_weights, leptons, select(_tables_eraBF, _tables_eraGH));
-        apply_el_trigger_sf(_weights, leptons[0], leptons[1], select(_tables_eraBF, _tables_eraGH));
+        _electrons.apply_sf(_weights, {Z.a, Z.b}, select(_tables_eraBF, _tables_eraGH));
+        apply_el_trigger_sf(_weights, Z.a, Z.b, select(_tables_eraBF, _tables_eraGH));
     }
 
     for (unsigned njets = 0; njets < 3; ++njets) {
@@ -124,9 +125,9 @@ void dyjets_analyzer::analyze()
 
         _jets.fill(*this, tag, jets, _weights);
         if (muons.size() >= 2) {
-            _muons.fill(*this, tag, leptons, _weights);
+            _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
         } else {
-            _electrons.fill(*this, tag, leptons, _weights);
+            _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
         }
         _pileup.fill(*this, tag, _weights);
         fill("mass", tag, Z.v.M(), _weights.global_weight());
@@ -139,9 +140,9 @@ void dyjets_analyzer::analyze()
 
             _jets.fill(*this, tag, jets, _weights);
             if (muons.size() >= 2) {
-                _muons.fill(*this, tag, leptons, _weights);
+                _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
             } else {
-                _electrons.fill(*this, tag, leptons, _weights);
+                _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
             }
             _pileup.fill(*this, tag, _weights);
             fill("mass", tag, Z.v.M(), _weights.global_weight());

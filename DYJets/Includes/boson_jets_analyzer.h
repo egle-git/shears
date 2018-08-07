@@ -7,6 +7,7 @@
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
+#include "tables.h"
 #include "weights.h"
 
 namespace physics
@@ -19,6 +20,9 @@ class boson_jets_analyzer
 
     std::mt19937 _rng;
     int _era;
+
+    util::tables _tables_eraBF;
+    util::tables _tables_eraGH;
 
 protected:
     // TODO Make private
@@ -64,6 +68,11 @@ protected:
      */
     virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
                                            const std::vector<lepton> &electrons) = 0;
+
+    util::tables tables() const
+    {
+        return era_select(_tables_eraBF, _tables_eraGH);
+    }
 
     /// \brief Retrieves the weight information for the current event.
     physics::weights weights() const { return _weights; }

@@ -32,9 +32,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer,
     physics::muons _muons;
     physics::pileup _pileup;
 
-    util::tables _tables_eraBF;
-    util::tables _tables_eraGH;
-
     physics::trigger_values _triggers;
 
     physics::trigger_mask _mask_eraBG;

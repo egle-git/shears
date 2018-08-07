@@ -8,7 +8,14 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     EvtRunNum(info.reader, "EvtRunNum"),
     _rng(std::random_device()()),
     _weights(info)
-{}
+{
+    if (opt.config["tables B-F"]) {
+        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
+    }
+    if (opt.config["tables G-H"]) {
+        _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
+    }
+}
 
 void boson_jets_analyzer::operator()()
 {

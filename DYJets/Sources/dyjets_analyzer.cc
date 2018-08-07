@@ -32,13 +32,6 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
       _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
       _zfinder(opt, "Z")
 {
-    if (opt.config["tables B-F"]) {
-        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
-    }
-    if (opt.config["tables G-H"]) {
-        _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
-    }
-
     _jets.declare_histograms(*this);
     _pileup.declare_histograms(*this);
 
@@ -108,11 +101,11 @@ void dyjets_analyzer::analyze()
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
-        _muons.apply_sf(_weights, {Z.a, Z.b}, era_select(_tables_eraBF, _tables_eraGH));
-        apply_mu_trigger_sf(_weights, Z.a, Z.b, era_select(_tables_eraBF, _tables_eraGH));
+        _muons.apply_sf(_weights, {Z.a, Z.b}, tables());
+        apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
     } else {
-        _electrons.apply_sf(_weights, {Z.a, Z.b}, era_select(_tables_eraBF, _tables_eraGH));
-        apply_el_trigger_sf(_weights, Z.a, Z.b, era_select(_tables_eraBF, _tables_eraGH));
+        _electrons.apply_sf(_weights, {Z.a, Z.b}, tables());
+        apply_el_trigger_sf(_weights, Z.a, Z.b, tables());
     }
 
     for (unsigned njets = 0; njets < 3; ++njets) {

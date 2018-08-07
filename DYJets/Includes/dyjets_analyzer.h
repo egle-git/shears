@@ -51,8 +51,8 @@ class dyjets_analyzer : public physics::boson_jets_analyzer,
     /// \brief Constructor.
     explicit dyjets_analyzer(util::job::info &info, const util::options &opt);
 
-    /// \brief Function called for every event.
-    void operator()();
+    // Overridden from base class
+    void analyze();
 
     // Overridden from base class
     std::vector<physics::lepton> find_boson(

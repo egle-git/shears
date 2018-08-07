@@ -17,6 +17,15 @@ public:
     /// \brief Constructor
     boson_jets_analyzer(util::job::info &info, const util::options &opt);
 
+    /// \brief Destructor
+    virtual ~boson_jets_analyzer() = default;
+
+    /// \brief Entry point, called for every event
+    virtual void operator()() final;
+
+    /// \brief Function called for every event.
+    virtual void analyze() = 0;
+
     /**
      * \brief Reconstructs the boson candidate and returns its constituents.
      *

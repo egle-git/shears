@@ -81,7 +81,7 @@ void apply_el_trigger_sf(physics::weights &w,
 }
 } // namespace anonymous
 
-void dyjets_analyzer::operator()()
+void dyjets_analyzer::analyze()
 {
     using namespace physics;
 

@@ -100,7 +100,7 @@ void dyjets_analyzer::analyze()
     _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
     _pileup.reweight(_weights);
 
-    if (muons.size() >= 2) {
+    if (Z.a.pdgid == 13) {
         _muons.apply_sf(_weights, {Z.a, Z.b}, tables());
         apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
     } else {
@@ -114,7 +114,7 @@ void dyjets_analyzer::analyze()
         std::string tag = ss.str();
 
         _jets.fill(histo_set, tag, jets, weights());
-        if (muons.size() >= 2) {
+        if (Z.a.pdgid == 13) {
             _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
         } else {
             _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());
@@ -129,7 +129,7 @@ void dyjets_analyzer::analyze()
             std::string tag = ss.str();
 
             _jets.fill(histo_set, tag, jets, weights());
-            if (muons.size() >= 2) {
+            if (Z.a.pdgid == 13) {
                 _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
             } else {
                 _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());

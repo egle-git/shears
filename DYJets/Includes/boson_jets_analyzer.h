@@ -7,6 +7,7 @@
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
+#include "weights.h"
 
 namespace physics
 {
@@ -15,6 +16,10 @@ namespace physics
 class boson_jets_analyzer
 {
     std::mt19937 _rng;
+
+protected:
+    // TODO Make private
+    physics::weights _weights;
 
 public:
     /// \brief Constructor
@@ -36,6 +41,8 @@ public:
      */
     virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
                                            const std::vector<lepton> &electrons) = 0;
+
+    physics::weights weights() const { return _weights; }
 
 protected:
     /**

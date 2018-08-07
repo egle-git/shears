@@ -17,7 +17,6 @@
 #include "pileup.h"
 #include "tables.h"
 #include "triggers.h"
-#include "weights.h"
 #include "zfinder.h"
 
 namespace po = boost::program_options;
@@ -42,8 +41,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer,
 
     physics::trigger_mask _mask_eraBG;
     physics::trigger_mask _mask_eraH;
-
-    physics::weights _weights;
 
     physics::zfinder _zfinder;
 

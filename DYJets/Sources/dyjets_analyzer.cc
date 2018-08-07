@@ -31,7 +31,6 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
       _triggers(info),
       _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
       _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
-      _weights(info),
       _zfinder(opt, "Z")
 {
     if (opt.config["tables B-F"]) {
@@ -85,15 +84,14 @@ void dyjets_analyzer::analyze()
 {
     using namespace physics;
 
-    _weights.process_event();
-    _counter.count("Total", _weights.global_weight());
+    _counter.count("Total", weights().global_weight());
 
     if (!passes_trigger()) {
         return;
     }
-    _counter.count("Passing the trigger", _weights.global_weight());
+    _counter.count("Passing the trigger", weights().global_weight());
 
-    std::vector<lepton> muons = _muons.get(_weights.isdata());
+    std::vector<lepton> muons = _muons.get(weights().isdata());
     std::vector<lepton> electrons = _electrons.get();
 
     std::vector<lepton> leptons = find_boson(muons, electrons);
@@ -106,8 +104,8 @@ void dyjets_analyzer::analyze()
     std::vector<jet> jets = _jets.get();
     _jets.veto(jets, {Z.a, Z.b});
 
-    _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
-    _pileup.fill(*this, "Zinc0jet_noweight", _weights);
+    _jets.fill(*this, "Zinc0jet_noweight", jets, weights());
+    _pileup.fill(*this, "Zinc0jet_noweight", weights());
     _pileup.reweight(_weights);
 
     if (muons.size() >= 2) {
@@ -123,30 +121,30 @@ void dyjets_analyzer::analyze()
         ss << "Zinc" << njets << "jet";
         std::string tag = ss.str();
 
-        _jets.fill(*this, tag, jets, _weights);
+        _jets.fill(*this, tag, jets, weights());
         if (muons.size() >= 2) {
-            _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+            _muons.fill(*this, tag, {Z.a, Z.b}, weights());
         } else {
-            _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
+            _electrons.fill(*this, tag, {Z.a, Z.b}, weights());
         }
-        _pileup.fill(*this, tag, _weights);
-        fill("mass", tag, Z.v.M(), _weights.global_weight());
-        fill("pt", tag, Z.v.Pt(), _weights.global_weight());
+        _pileup.fill(*this, tag, weights());
+        fill("mass", tag, Z.v.M(), weights().global_weight());
+        fill("pt", tag, Z.v.Pt(), weights().global_weight());
 
         if (jets.size() == njets) {
             ss.str("");
             ss << "Zexc" << njets << "jet";
             std::string tag = ss.str();
 
-            _jets.fill(*this, tag, jets, _weights);
+            _jets.fill(*this, tag, jets, weights());
             if (muons.size() >= 2) {
-                _muons.fill(*this, tag, {Z.a, Z.b}, _weights);
+                _muons.fill(*this, tag, {Z.a, Z.b}, weights());
             } else {
-                _electrons.fill(*this, tag, {Z.a, Z.b}, _weights);
+                _electrons.fill(*this, tag, {Z.a, Z.b}, weights());
             }
-            _pileup.fill(*this, tag, _weights);
-            fill("mass", tag, Z.v.M(), _weights.global_weight());
-            fill("pt", tag, Z.v.Pt(), _weights.global_weight());
+            _pileup.fill(*this, tag, weights());
+            fill("mass", tag, Z.v.M(), weights().global_weight());
+            fill("pt", tag, Z.v.Pt(), weights().global_weight());
 
             break;
         }
@@ -160,14 +158,14 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     if (muons.size() < 2 && electrons.size() < 2) {
         return {};
     }
-    _counter.count("With two good leptons", _weights.global_weight());
+    _counter.count("With two good leptons", weights().global_weight());
 
     std::vector<physics::lepton> leptons;
     if (muons.size() >= 2) {
-        _counter.count("With two good muons", _weights.global_weight());
+        _counter.count("With two good muons", weights().global_weight());
         leptons = muons;
     } else {
-        _counter.count("With two good electrons", _weights.global_weight());
+        _counter.count("With two good electrons", weights().global_weight());
         leptons = electrons;
     }
 
@@ -175,7 +173,7 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     if (candidates.size() == 0) {
         return {};
     }
-    _counter.count("With a good Z boson", _weights.global_weight());
+    _counter.count("With a good Z boson", weights().global_weight());
 
     std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
     physics::dilepton Z = candidates[0];
@@ -187,7 +185,7 @@ bool dyjets_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).
 void dyjets_analyzer::write()
 {
     _counter.print();
-    _weights.write(this);
+    weights().write(this);
     histo_set::write();
 }
 
@@ -203,7 +201,7 @@ template <class T> T &dyjets_analyzer::select(T &eraBG, T &eraGH)
 
     std::uniform_real_distribution<> uniform(0.0, 1.0);
 
-    if (_weights.isdata()) {
+    if (weights().isdata()) {
         if (*EvtRunNum < run_threshold) {
             return eraBG;
         } else {

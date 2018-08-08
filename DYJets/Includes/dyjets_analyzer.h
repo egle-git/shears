@@ -18,9 +18,6 @@ namespace po = boost::program_options;
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
-    physics::jets _jets;
-    physics::pileup _pileup;
-
     physics::zfinder _zfinder;
 
   public:
@@ -33,7 +30,7 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     /// \brief Fills histograms
     void fill(const std::string &tag,
               const std::vector<physics::lepton> &boson,
-              const std::vector<physics::jet> &jets);
+              const std::vector<physics::jet> &jets) override;
 
     // Overridden from base class
     std::vector<physics::lepton> find_boson(

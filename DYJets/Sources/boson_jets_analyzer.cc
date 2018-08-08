@@ -12,6 +12,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
     _muons(info, opt, histo_set),
     _electrons(info, opt, histo_set),
+    _jets(info, opt),
+    _pileup(info, opt),
     _weights(info)
 {
     if (opt.config["tables B-F"]) {
@@ -20,6 +22,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     if (opt.config["tables G-H"]) {
         _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
     }
+
+    _jets.declare_histograms(histo_set);
+    _pileup.declare_histograms(histo_set);
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
@@ -88,7 +93,35 @@ void boson_jets_analyzer::operator()()
     _muons.fill(histo_set, "Zinc0jet_noweight", chosen_muons, weights());
     _electrons.fill(histo_set, "Zinc0jet_noweight", chosen_electrons, weights());
 
+    /*
+     * Handle jets and pileup
+     */
+    std::vector<jet> jets = _jets.get();
+    _jets.veto(jets, leptons);
+
+    _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
+    _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
+
+    _pileup.reweight(_weights);
+
     analyze(leptons);
+
+    /*
+     * Fill histograms w.r.t. N_jets
+     */
+    // Exclusive
+    if (jets.size() < 3) {
+        std::stringstream ss;
+        ss << "Zexc" << jets.size() << "jet";
+        fill(ss.str(), leptons, jets);
+    }
+
+    // Inclusive
+    for (unsigned njets = 0; njets < 3; ++njets) {
+        std::stringstream ss;
+        ss << "Zinc" << njets << "jet";
+        fill(ss.str(), leptons, jets);
+    }
 }
 
 bool boson_jets_analyzer::passes_trigger()

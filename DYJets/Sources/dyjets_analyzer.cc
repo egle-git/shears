@@ -23,13 +23,8 @@ namespace /* anonymous */
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : boson_jets_analyzer(info, opt),
-      _jets(info, opt),
-      _pileup(info, opt),
       _zfinder(opt, "Z")
 {
-    _jets.declare_histograms(histo_set);
-    _pileup.declare_histograms(histo_set);
-
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
     counter.declare("With two good muons");
@@ -71,32 +66,10 @@ void dyjets_analyzer::analyze(const std::vector<physics::lepton> &leptons)
 
     physics::dilepton Z(leptons[0], leptons[1]);
 
-    // Only read jets once we have a Z
-    std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, leptons);
-
-    _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
-    _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
-    _pileup.reweight(_weights);
-
     if (Z.a.pdgid == 13) {
         apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
     } else {
         apply_el_trigger_sf(_weights, Z.a, Z.b, tables());
-    }
-
-    for (unsigned njets = 0; njets < 3; ++njets) {
-        std::stringstream ss;
-        ss << "Zinc" << njets << "jet";
-        std::string tag = ss.str();
-        fill(ss.str(), leptons, jets);
-
-        if (jets.size() == njets) {
-            ss.str("");
-            ss << "Zexc" << njets << "jet";
-            fill(ss.str(), leptons, jets);
-            break;
-        }
     }
 }
 
@@ -105,9 +78,6 @@ void dyjets_analyzer::fill(const std::string &tag,
                            const std::vector<physics::jet> &jets)
 {
     physics::dilepton Z(boson[0], boson[1]);
-
-    _jets.fill(histo_set, tag, jets, weights());
-    _pileup.fill(histo_set, tag, weights());
 
     histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
     histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());

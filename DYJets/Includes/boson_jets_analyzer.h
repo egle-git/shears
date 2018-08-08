@@ -7,9 +7,11 @@
 #include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
+#include "jets.h"
 #include "job.h"
 #include "lepton.h"
 #include "muons.h"
+#include "pileup.h"
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
@@ -34,6 +36,8 @@ class boson_jets_analyzer
 
     muons _muons;
     electrons _electrons;
+    jets _jets;
+    pileup _pileup;
 
 protected:
     // TODO Make private
@@ -74,6 +78,11 @@ protected:
     {
         return era() == 0 ? eraBG : eraGH;
     }
+
+    /// \brief Fills histograms
+    virtual void fill(const std::string &tag,
+                      const std::vector<physics::lepton> &boson,
+                      const std::vector<physics::jet> &jets) = 0;
 
     /**
      * \brief Reconstructs the boson candidate and returns its constituents.

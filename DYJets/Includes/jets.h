@@ -22,6 +22,7 @@ class jet
     TLorentzVector v; ///< Four-momentum
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
+    float bdisc;
 };
 
 /// \brief Handles jets.
@@ -33,6 +34,8 @@ class jets
     TTreeReaderArray<float> JetAk04E;
     TTreeReaderArray<float> JetAk04Id;
     TTreeReaderArray<float> JetAk04PuMva;
+    TTreeReaderArray<float> JetAk04BDiscCisvV2;
+
 
     double _pt_cut = 30;
     double _eta_cut = 2.4;

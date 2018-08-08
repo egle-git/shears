@@ -15,7 +15,8 @@ jets::jets(util::job::info &info, const util::options &opt)
       JetAk04Phi(info.reader, "JetAk04Phi"),
       JetAk04E(info.reader, "JetAk04E"),
       JetAk04Id(info.reader, "JetAk04Id"),
-      JetAk04PuMva(info.reader, "JetAk04PuMva")
+      JetAk04PuMva(info.reader, "JetAk04PuMva"),
+      JetAk04BDiscCisvV2(info.reader,"JetAk04BDiscCisvV2")
 {
     configure(opt);
 }
@@ -41,6 +42,7 @@ void jets::declare_histograms(util::histo_set &h)
     h.declare("nJets", "Jet multiplicity (excl.)", 7, -0.5, 6.5);
     h.declare("nJetsIncl", "Jet multiplicity (incl.)", 7, -0.5, 6.5);
     h.declare("jetPuMva", "Jet PU variable from MVA", 40, -1, 1);
+    h.declare("jetbdisc", "Jet bdisc variable ", 40, -1, 1);
     h.declare("jetPt", "Jet pt", 40, 0, 200);
     h.declare("jetEta", "Jet eta", 24, -2.4, 2.4);
     h.declare("jetPhi", "Jet phi", 24, -pi, pi);
@@ -58,6 +60,7 @@ std::vector<jet> jets::get()
         j.v.SetPtEtaPhiE(JetAk04Pt[i], JetAk04Eta[i], JetAk04Phi[i], JetAk04E[i]);
         j.id = JetAk04Id[i];
         j.puMva = JetAk04PuMva[i];
+        j.bdisc = JetAk04BDiscCisvV2[i];
         jets.push_back(j);
     }
     return jets;

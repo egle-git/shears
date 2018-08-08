@@ -60,16 +60,13 @@ void apply_el_trigger_sf(physics::weights &w,
 }
 } // namespace anonymous
 
-void dyjets_analyzer::analyze(const std::vector<physics::lepton> &leptons)
+void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
+                                       const std::vector<physics::lepton> &leptons)
 {
-    using namespace physics;
-
-    physics::dilepton Z(leptons[0], leptons[1]);
-
-    if (Z.a.pdgid == 13) {
-        apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
+    if (leptons[0].pdgid == 13) {
+        apply_mu_trigger_sf(weights, leptons[0], leptons[1], tables());
     } else {
-        apply_el_trigger_sf(_weights, Z.a, Z.b, tables());
+        apply_el_trigger_sf(weights, leptons[0], leptons[1], tables());
     }
 }
 

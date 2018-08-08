@@ -104,7 +104,10 @@ void boson_jets_analyzer::operator()()
 
     _pileup.reweight(_weights);
 
-    analyze(leptons);
+    /*
+     * Apply lepton trigger scale factors
+     */
+    apply_trigger_sf(_weights, leptons);
 
     /*
      * Fill histograms w.r.t. N_jets

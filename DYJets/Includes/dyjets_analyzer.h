@@ -25,8 +25,8 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     explicit dyjets_analyzer(util::job::info &info, const util::options &opt);
 
     // Overridden from base class
-    void analyze(const std::vector<physics::lepton> &leptons) override;
-
+    void apply_trigger_sf(physics::weights &weights,
+                          const std::vector<physics::lepton> &leptons) override;
     /// \brief Fills histograms
     void fill(const std::string &tag,
               const std::vector<physics::lepton> &boson,

@@ -2,6 +2,7 @@
 #define BOSON_JETS_ANALYZER_H
 
 #include <random>
+#include <string>
 #include <vector>
 
 #include "electrons.h"
@@ -24,6 +25,8 @@ class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
 
+    std::string _short_name, _long_name;
+
     std::mt19937 _rng;
     int _era;
 
@@ -39,10 +42,9 @@ class boson_jets_analyzer
     jets _jets;
     pileup _pileup;
 
-protected:
-    // TODO Make private
     physics::weights _weights;
 
+protected:
     util::event_counter counter;
     util::histo_set histo_set;
 
@@ -57,8 +59,9 @@ public:
     virtual void operator()() final;
 
 protected:
-    /// \brief Function called for every event.
-    virtual void analyze(const std::vector<lepton> &leptons) = 0;
+    /// \brief Applies trigger scale factors
+    virtual void apply_trigger_sf(class weights &weights,
+                                  const std::vector<physics::lepton> &leptons) = 0;
 
     /**
      * \brief Returns the current era (0 for eraBG, 1 for eraGH).

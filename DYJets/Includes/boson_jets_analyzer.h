@@ -9,6 +9,7 @@
 #include "job.h"
 #include "lepton.h"
 #include "tables.h"
+#include "triggers.h"
 #include "weights.h"
 
 namespace physics
@@ -25,6 +26,9 @@ class boson_jets_analyzer
     util::tables _tables_eraBF;
     util::tables _tables_eraGH;
 
+    trigger_values _triggers;
+    trigger_mask _mask_eraBG;
+    trigger_mask _mask_eraH;
 protected:
     // TODO Make private
     physics::weights _weights;
@@ -72,6 +76,9 @@ protected:
      */
     virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
                                            const std::vector<lepton> &electrons) = 0;
+
+    /// \brief Checks whether the current event passes the trigger.
+    virtual bool passes_trigger();
 
     util::tables tables() const
     {

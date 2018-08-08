@@ -13,8 +13,6 @@
 #include "job.h"
 #include "muons.h"
 #include "pileup.h"
-#include "tables.h"
-#include "triggers.h"
 #include "zfinder.h"
 
 namespace po = boost::program_options;
@@ -26,11 +24,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     physics::jets _jets;
     physics::muons _muons;
     physics::pileup _pileup;
-
-    physics::trigger_values _triggers;
-
-    physics::trigger_mask _mask_eraBG;
-    physics::trigger_mask _mask_eraH;
 
     physics::zfinder _zfinder;
 
@@ -50,9 +43,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     std::vector<physics::lepton> find_boson(
         const std::vector<physics::lepton> &muons,
         const std::vector<physics::lepton> &electrons) override;
-
-    /// \brief Checks whether the current event passes the trigger.
-    bool passes_trigger();
 
     /// \brief Function called at the end of the processing.
     void write();

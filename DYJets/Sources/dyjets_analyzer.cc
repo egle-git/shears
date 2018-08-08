@@ -27,16 +27,11 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
       _jets(info, opt),
       _muons(info, opt, histo_set),
       _pileup(info, opt),
-      _triggers(info),
-      _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
-      _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
       _zfinder(opt, "Z")
 {
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
-    counter.declare("Total");
-    counter.declare("Passing the trigger");
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
     counter.declare("With two good muons");
@@ -75,13 +70,6 @@ void apply_el_trigger_sf(physics::weights &w,
 void dyjets_analyzer::analyze()
 {
     using namespace physics;
-
-    counter.count("Total", weights().global_weight());
-
-    if (!passes_trigger()) {
-        return;
-    }
-    counter.count("Passing the trigger", weights().global_weight());
 
     std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
     std::vector<lepton> electrons = _electrons.get();
@@ -169,8 +157,6 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     physics::dilepton Z = candidates[0];
     return { Z.a, Z.b };
 }
-
-bool dyjets_analyzer::passes_trigger() { return era_select(_mask_eraBG, _mask_eraH).passes(_triggers); }
 
 void dyjets_analyzer::write()
 {

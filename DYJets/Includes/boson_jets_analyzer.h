@@ -4,10 +4,12 @@
 #include <random>
 #include <vector>
 
+#include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
+#include "muons.h"
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
@@ -29,6 +31,10 @@ class boson_jets_analyzer
     trigger_values _triggers;
     trigger_mask _mask_eraBG;
     trigger_mask _mask_eraH;
+
+    muons _muons;
+    electrons _electrons;
+
 protected:
     // TODO Make private
     physics::weights _weights;
@@ -48,7 +54,7 @@ public:
 
 protected:
     /// \brief Function called for every event.
-    virtual void analyze() = 0;
+    virtual void analyze(const std::vector<lepton> &leptons) = 0;
 
     /**
      * \brief Returns the current era (0 for eraBG, 1 for eraGH).

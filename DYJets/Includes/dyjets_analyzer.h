@@ -8,10 +8,8 @@
 #include <TTreeReaderValue.h>
 
 #include "boson_jets_analyzer.h"
-#include "electrons.h"
 #include "jets.h"
 #include "job.h"
-#include "muons.h"
 #include "pileup.h"
 #include "zfinder.h"
 
@@ -20,9 +18,7 @@ namespace po = boost::program_options;
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
-    physics::electrons _electrons;
     physics::jets _jets;
-    physics::muons _muons;
     physics::pileup _pileup;
 
     physics::zfinder _zfinder;
@@ -32,7 +28,7 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     explicit dyjets_analyzer(util::job::info &info, const util::options &opt);
 
     // Overridden from base class
-    void analyze();
+    void analyze(const std::vector<physics::lepton> &leptons) override;
 
     /// \brief Fills histograms
     void fill(const std::string &tag,

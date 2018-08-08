@@ -10,6 +10,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _triggers(info),
     _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
     _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
+    _muons(info, opt, histo_set),
+    _electrons(info, opt, histo_set),
     _weights(info)
 {
     if (opt.config["tables B-F"]) {
@@ -60,7 +62,33 @@ void boson_jets_analyzer::operator()()
         }
     }
 
-    analyze();
+    /*
+     * Read leptons and find the boson
+     */
+    std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
+    std::vector<lepton> electrons = _electrons.get();
+
+    std::vector<lepton> leptons = find_boson(muons, electrons);
+    if (leptons.empty()) {
+        return;
+    }
+
+    // Create lists of chosen muons and electrons
+    std::vector<lepton> chosen_muons, chosen_electrons;
+    std::copy_if(leptons.begin(), leptons.end(), std::back_inserter(chosen_muons),
+                 [](const lepton &lep) { return lep.pdgid == 13; });
+    std::copy_if(leptons.begin(), leptons.end(), std::back_inserter(chosen_electrons),
+                 [](const lepton &lep) { return lep.pdgid == 11; });
+
+    // Apply lepton scale factors
+    _muons.apply_sf(_weights, chosen_muons, tables());
+    _electrons.apply_sf(_weights, chosen_electrons, tables());
+
+    // Fill lepton control plots
+    _muons.fill(histo_set, "Zinc0jet_noweight", chosen_muons, weights());
+    _electrons.fill(histo_set, "Zinc0jet_noweight", chosen_electrons, weights());
+
+    analyze(leptons);
 }
 
 bool boson_jets_analyzer::passes_trigger()

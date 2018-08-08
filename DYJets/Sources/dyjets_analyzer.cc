@@ -23,9 +23,7 @@ namespace /* anonymous */
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : boson_jets_analyzer(info, opt),
-      _electrons(info, opt, histo_set),
       _jets(info, opt),
-      _muons(info, opt, histo_set),
       _pileup(info, opt),
       _zfinder(opt, "Z")
 {
@@ -67,17 +65,10 @@ void apply_el_trigger_sf(physics::weights &w,
 }
 } // namespace anonymous
 
-void dyjets_analyzer::analyze()
+void dyjets_analyzer::analyze(const std::vector<physics::lepton> &leptons)
 {
     using namespace physics;
 
-    std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
-    std::vector<lepton> electrons = _electrons.get();
-
-    std::vector<lepton> leptons = find_boson(muons, electrons);
-    if (leptons.size() != 2) {
-        return;
-    }
     physics::dilepton Z(leptons[0], leptons[1]);
 
     // Only read jets once we have a Z
@@ -89,10 +80,8 @@ void dyjets_analyzer::analyze()
     _pileup.reweight(_weights);
 
     if (Z.a.pdgid == 13) {
-        _muons.apply_sf(_weights, leptons, tables());
         apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
     } else {
-        _electrons.apply_sf(_weights, leptons, tables());
         apply_el_trigger_sf(_weights, Z.a, Z.b, tables());
     }
 
@@ -118,11 +107,6 @@ void dyjets_analyzer::fill(const std::string &tag,
     physics::dilepton Z(boson[0], boson[1]);
 
     _jets.fill(histo_set, tag, jets, weights());
-    if (Z.a.pdgid == 13) {
-        _muons.fill(histo_set, tag, boson, weights());
-    } else {
-        _electrons.fill(histo_set, tag, boson, weights());
-    }
     _pileup.fill(histo_set, tag, weights());
 
     histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());

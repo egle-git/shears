@@ -44,6 +44,11 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     // Overridden from base class
     void analyze();
 
+    /// \brief Fills histograms
+    void fill(const std::string &tag,
+              const std::vector<physics::lepton> &boson,
+              const std::vector<physics::jet> &jets);
+
     // Overridden from base class
     std::vector<physics::lepton> find_boson(
         const std::vector<physics::lepton> &muons,

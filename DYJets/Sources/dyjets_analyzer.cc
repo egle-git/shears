@@ -94,17 +94,17 @@ void dyjets_analyzer::analyze()
 
     // Only read jets once we have a Z
     std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, {Z.a, Z.b});
+    _jets.veto(jets, leptons);
 
     _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
     _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
     _pileup.reweight(_weights);
 
     if (Z.a.pdgid == 13) {
-        _muons.apply_sf(_weights, {Z.a, Z.b}, tables());
+        _muons.apply_sf(_weights, leptons, tables());
         apply_mu_trigger_sf(_weights, Z.a, Z.b, tables());
     } else {
-        _electrons.apply_sf(_weights, {Z.a, Z.b}, tables());
+        _electrons.apply_sf(_weights, leptons, tables());
         apply_el_trigger_sf(_weights, Z.a, Z.b, tables());
     }
 
@@ -112,35 +112,33 @@ void dyjets_analyzer::analyze()
         std::stringstream ss;
         ss << "Zinc" << njets << "jet";
         std::string tag = ss.str();
-
-        _jets.fill(histo_set, tag, jets, weights());
-        if (Z.a.pdgid == 13) {
-            _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
-        } else {
-            _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());
-        }
-        _pileup.fill(histo_set, tag, weights());
-        histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
-        histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
+        fill(ss.str(), leptons, jets);
 
         if (jets.size() == njets) {
             ss.str("");
             ss << "Zexc" << njets << "jet";
-            std::string tag = ss.str();
-
-            _jets.fill(histo_set, tag, jets, weights());
-            if (Z.a.pdgid == 13) {
-                _muons.fill(histo_set, tag, {Z.a, Z.b}, weights());
-            } else {
-                _electrons.fill(histo_set, tag, {Z.a, Z.b}, weights());
-            }
-            _pileup.fill(histo_set, tag, weights());
-            histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
-            histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
-
+            fill(ss.str(), leptons, jets);
             break;
         }
     }
+}
+
+void dyjets_analyzer::fill(const std::string &tag,
+                           const std::vector<physics::lepton> &boson,
+                           const std::vector<physics::jet> &jets)
+{
+    physics::dilepton Z(boson[0], boson[1]);
+
+    _jets.fill(histo_set, tag, jets, weights());
+    if (Z.a.pdgid == 13) {
+        _muons.fill(histo_set, tag, boson, weights());
+    } else {
+        _electrons.fill(histo_set, tag, boson, weights());
+    }
+    _pileup.fill(histo_set, tag, weights());
+
+    histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
+    histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 }
 
 std::vector<physics::lepton> dyjets_analyzer::find_boson(

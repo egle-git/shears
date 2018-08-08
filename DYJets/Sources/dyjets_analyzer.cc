@@ -74,6 +74,8 @@ void dyjets_analyzer::fill(const std::string &tag,
                            const std::vector<physics::lepton> &boson,
                            const std::vector<physics::jet> &jets)
 {
+    boson_jets_analyzer::fill(tag, boson, jets);
+
     physics::dilepton Z(boson[0], boson[1]);
 
     histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());

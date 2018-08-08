@@ -127,6 +127,25 @@ void boson_jets_analyzer::operator()()
     }
 }
 
+void boson_jets_analyzer::fill(const std::string &tag,
+                               const std::vector<physics::lepton> &chosen_leptons,
+                               const std::vector<physics::jet> &jets)
+{
+    _jets.fill(histo_set, tag, jets, weights());
+    _pileup.fill(histo_set, tag, weights());
+
+    // Create lists of chosen muons and electrons
+    std::vector<lepton> chosen_muons, chosen_electrons;
+    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_muons),
+                 [](const lepton &lep) { return lep.pdgid == 13; });
+    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_electrons),
+                 [](const lepton &lep) { return lep.pdgid == 11; });
+
+    // Fill lepton control plots
+    _muons.fill(histo_set, tag, chosen_muons, weights());
+    _electrons.fill(histo_set, tag, chosen_electrons, weights());
+}
+
 bool boson_jets_analyzer::passes_trigger()
 {
     return era_select(_mask_eraBG, _mask_eraH).passes(_triggers);

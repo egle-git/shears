@@ -58,6 +58,9 @@ public:
     /// \brief Entry point, called for every event
     virtual void operator()() final;
 
+    /// \brief Function called at the end of the processing.
+    virtual void write();
+
 protected:
     /// \brief Applies trigger scale factors
     virtual void apply_trigger_sf(class weights &weights,

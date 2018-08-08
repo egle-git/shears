@@ -37,9 +37,6 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
         const std::vector<physics::lepton> &muons,
         const std::vector<physics::lepton> &electrons) override;
 
-    /// \brief Function called at the end of the processing.
-    void write();
-
     /// \brief Returns the list of options supported by the analyzer.
     static po::options_description options();
 };

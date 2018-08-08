@@ -132,4 +132,11 @@ bool boson_jets_analyzer::passes_trigger()
     return era_select(_mask_eraBG, _mask_eraH).passes(_triggers);
 }
 
+void boson_jets_analyzer::write()
+{
+    counter.print();
+    weights().write(&histo_set);
+    histo_set.write();
+}
+
 } // namespace physics

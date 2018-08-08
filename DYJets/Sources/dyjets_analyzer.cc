@@ -109,13 +109,6 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     return { Z.a, Z.b };
 }
 
-void dyjets_analyzer::write()
-{
-    counter.print();
-    weights().write(&histo_set);
-    histo_set.write();
-}
-
 po::options_description dyjets_analyzer::options()
 {
     return po::options_description("Physics options");

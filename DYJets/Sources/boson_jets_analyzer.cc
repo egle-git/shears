@@ -30,6 +30,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     counter.declare("Passing the trigger");
 }
 
+boson_jets_analyzer::~boson_jets_analyzer()
+{}
+
 void boson_jets_analyzer::operator()()
 {
     _weights.process_event();

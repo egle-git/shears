@@ -54,7 +54,7 @@ public:
     boson_jets_analyzer(util::job::info &info, const util::options &opt);
 
     /// \brief Destructor
-    virtual ~boson_jets_analyzer() = default;
+    virtual ~boson_jets_analyzer();
 
     /// \brief Entry point, called for every event
     virtual void operator()() final;

@@ -110,13 +110,34 @@ void boson_jets_analyzer::operator()()
     apply_trigger_sf(_weights, leptons);
 
     /*
-     * Fill histograms w.r.t. N_jets
+     * Fill histograms w.r.t. N_jets and invariant mass
      */
+    TLorentzVector boson_p;
+    for (const auto &lepton : leptons) {
+        boson_p += lepton.v;
+    }
+    double boson_mass = boson_p.M();
+    std::string mass_tag;
+    if (boson_mass > 50 && boson_mass < 71) {
+        mass_tag = "_mass50_71";
+    } else if (boson_mass > 71 && boson_mass < 111) {
+        mass_tag = "_mass71_111";
+    } else if (boson_mass > 111 && boson_mass < 130) {
+        mass_tag = "_mass111_130";
+    } else if (boson_mass > 130 && boson_mass < 170) {
+        mass_tag = "_mass130_170";
+    } else if (boson_mass > 170 && boson_mass < 250) {
+        mass_tag = "_mass170_250";
+    } else if (boson_mass > 250 && boson_mass < 320) {
+        mass_tag = "_mass250_320";
+    }
+
     // Exclusive
     if (jets.size() < 3) {
         std::stringstream ss;
         ss << "Zexc" << jets.size() << "jet";
         fill(ss.str(), leptons, jets);
+        fill(ss.str() + mass_tag, leptons, jets);
     }
 
     // Inclusive
@@ -124,6 +145,7 @@ void boson_jets_analyzer::operator()()
         std::stringstream ss;
         ss << "Zinc" << njets << "jet";
         fill(ss.str(), leptons, jets);
+        fill(ss.str() + mass_tag, leptons, jets);
     }
 }
 
@@ -154,7 +176,7 @@ bool boson_jets_analyzer::passes_trigger()
 void boson_jets_analyzer::write()
 {
     counter.print();
-    weights().write(&histo_set);
+    _weights.write(&histo_set);
     histo_set.write();
 }
 

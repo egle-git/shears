@@ -25,6 +25,11 @@ class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
 
+protected:
+    util::event_counter counter;
+    util::histo_set histo_set;
+
+private:
     std::string _short_name, _long_name;
 
     std::mt19937 _rng;
@@ -43,10 +48,6 @@ class boson_jets_analyzer
     pileup _pileup;
 
     physics::weights _weights;
-
-protected:
-    util::event_counter counter;
-    util::histo_set histo_set;
 
 public:
     /// \brief Constructor
@@ -107,7 +108,7 @@ protected:
     }
 
     /// \brief Retrieves the weight information for the current event.
-    physics::weights weights() const { return _weights; }
+    const physics::weights &weights() const { return _weights; }
 };
 
 } // namespace physics

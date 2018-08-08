@@ -9,7 +9,6 @@
 
 #include "boson_jets_analyzer.h"
 #include "electrons.h"
-#include "event_counter.h"
 #include "jets.h"
 #include "job.h"
 #include "muons.h"
@@ -23,8 +22,6 @@ namespace po = boost::program_options;
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
-    util::event_counter _counter;
-
     physics::electrons _electrons;
     physics::jets _jets;
     physics::muons _muons;

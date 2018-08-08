@@ -4,6 +4,7 @@
 #include <random>
 #include <vector>
 
+#include "event_counter.h"
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
@@ -28,6 +29,7 @@ protected:
     // TODO Make private
     physics::weights _weights;
 
+    util::event_counter counter;
     util::histo_set histo_set;
 
 public:

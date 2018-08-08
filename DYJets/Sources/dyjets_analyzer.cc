@@ -35,12 +35,12 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
-    _counter.declare("Total");
-    _counter.declare("Passing the trigger");
-    _counter.declare("With two good leptons");
-    _counter.declare("With two good electrons");
-    _counter.declare("With two good muons");
-    _counter.declare("With a good Z boson");
+    counter.declare("Total");
+    counter.declare("Passing the trigger");
+    counter.declare("With two good leptons");
+    counter.declare("With two good electrons");
+    counter.declare("With two good muons");
+    counter.declare("With a good Z boson");
 
     histo_set.declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
     histo_set.declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
@@ -76,12 +76,12 @@ void dyjets_analyzer::analyze()
 {
     using namespace physics;
 
-    _counter.count("Total", weights().global_weight());
+    counter.count("Total", weights().global_weight());
 
     if (!passes_trigger()) {
         return;
     }
-    _counter.count("Passing the trigger", weights().global_weight());
+    counter.count("Passing the trigger", weights().global_weight());
 
     std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
     std::vector<lepton> electrons = _electrons.get();
@@ -148,14 +148,14 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     if (muons.size() < 2 && electrons.size() < 2) {
         return {};
     }
-    _counter.count("With two good leptons", weights().global_weight());
+    counter.count("With two good leptons", weights().global_weight());
 
     std::vector<physics::lepton> leptons;
     if (muons.size() >= 2) {
-        _counter.count("With two good muons", weights().global_weight());
+        counter.count("With two good muons", weights().global_weight());
         leptons = muons;
     } else {
-        _counter.count("With two good electrons", weights().global_weight());
+        counter.count("With two good electrons", weights().global_weight());
         leptons = electrons;
     }
 
@@ -163,7 +163,7 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     if (candidates.size() == 0) {
         return {};
     }
-    _counter.count("With a good Z boson", weights().global_weight());
+    counter.count("With a good Z boson", weights().global_weight());
 
     std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
     physics::dilepton Z = candidates[0];
@@ -174,7 +174,7 @@ bool dyjets_analyzer::passes_trigger() { return era_select(_mask_eraBG, _mask_er
 
 void dyjets_analyzer::write()
 {
-    _counter.print();
+    counter.print();
     weights().write(&histo_set);
     histo_set.write();
 }

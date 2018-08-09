@@ -30,6 +30,11 @@ class dilepton
     double distance_to_z() const { return std::abs(v.M() - 91.1876); }
 
     /**
+     * \brief Returns the \f$ \phi^* \f$ variable
+     */
+    double phistar() const;
+
+    /**
      * \brief Returns \c true if \c a is closer to the Z mass than \c b.
      *
      * This function is intended to be used in functions requiring a \c Compare predicate (e.g.

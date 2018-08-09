@@ -1,8 +1,11 @@
 #include "zfinder.h"
 
-#include "logging.h"
-
 #include <cmath>
+
+#include <boost/math/constants/constants.hpp>
+
+#include "functions.h" // deltaPhi
+#include "logging.h"
 
 namespace physics
 {
@@ -10,6 +13,21 @@ namespace physics
 dilepton::dilepton(const lepton &a, const lepton &b)
     : v(a.v + b.v), charge_product(a.charge * b.charge), a(a), b(b)
 {
+}
+
+double dilepton::phistar() const
+{
+    const double pi = boost::math::constants::pi<double>();
+
+    double phi_acop = pi - deltaPhi(a.v, b.v);
+    double costhetastar;
+    if (a.charge < 0) {
+        costhetastar = std::tanh((a.v.Eta() - b.v.Eta()) / 2.);
+    } else {
+        costhetastar = std::tanh((b.v.Eta() - a.v.Eta()) / 2.);
+    }
+    double sinthetastar = std::sqrt(1. - costhetastar * costhetastar);
+    return std::tan(phi_acop / 2.) * sinthetastar;
 }
 
 zfinder::zfinder(const util::options &opt, const std::string &name)

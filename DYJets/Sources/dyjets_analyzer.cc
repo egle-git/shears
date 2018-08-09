@@ -15,6 +15,11 @@
 
 namespace /* anonymous */
 {
+    double phistar_binning[] = {0.001, 0.004, 0.008, 0.012, 0.016, 0.020, 0.024, 0.029,
+                                0.034, 0.039, 0.045, 0.051, 0.057, 0.064, 0.072, 0.081,
+                                0.091, 0.102, 0.114, 0.128, 0.145, 0.165, 0.189, 0.219,
+                                0.258, 0.312, 0.391, 0.524, 0.695, 0.918, 1.153, 1.496,
+                                1.947, 2.522, 3.277};
     double zpt_binning[] = {0.1,  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,
                             10.,  11.,  12.,  13.,  14.,  16.,  18.,  20.,  22.,  25.,
                             28.,  32.,  37.,  43.,  52.,  65.,  85.,  120., 160., 190.,
@@ -32,6 +37,10 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
 
     histo_set.declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
     histo_set.declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
+    histo_set.declare("phistar",
+                      "#phi^{*}_{#eta};#phi^{*}_{#eta}",
+                      sizeof(phistar_binning) / sizeof(double) - 1,
+                      phistar_binning);
 }
 
 namespace /* anonymous */
@@ -79,6 +88,7 @@ void dyjets_analyzer::fill(const std::string &tag,
     physics::dilepton Z(boson[0], boson[1]);
 
     histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
+    histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
     histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 }
 

@@ -150,6 +150,10 @@ template <> struct convert<data::mc_group>
         }
         group._sample_names = node["samples"].as<std::vector<std::string>>();
 
+        if (node["is signal"] && node["is signal"].as<bool>()) {
+            group._is_signal = true;
+        }
+
         return true;
     }
 };

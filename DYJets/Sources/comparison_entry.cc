@@ -14,10 +14,25 @@ namespace data
 
 mc_comparison_entry::mc_comparison_entry(const util::options &opt,
                                          const std::string &analyzer_name,
-                                         const std::string &input_dir)
+                                         const std::string &input_dir,
+                                         bool keep_signal,
+                                         bool keep_background)
 {
     std::vector<data::sample> samples = data::sample::load(opt);
     _groups = data::mc_group::load(opt, analyzer_name, input_dir, samples);
+    if (!keep_signal) {
+        _groups.erase(std::remove_if(_groups.begin(),
+                                     _groups.end(),
+                                     [](const mc_group &g) { return g.is_signal(); }),
+                      _groups.end());
+    }
+    if (!keep_background) {
+        _groups.erase(std::remove_if(_groups.begin(),
+                                     _groups.end(),
+                                     [](const mc_group &g) {
+                                         return !g.is_signal(); }),
+                      _groups.end());
+    }
 }
 
 void mc_comparison_entry::add_histograms(std::set<std::string> &histos)

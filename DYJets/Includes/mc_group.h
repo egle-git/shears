@@ -30,6 +30,7 @@ class mc_group
     bool _required = false;
     double _scale_factor = 1;
     int _color;
+    bool _is_signal = false;
     std::string _legend;
     std::vector<sample_data> _sample_data;
     std::vector<std::string> _sample_names;
@@ -42,6 +43,9 @@ class mc_group
 
     /// \brief Returns the group color (using \c ROOT conventions).
     int color() const { return _color; }
+
+    /// \brief Returns whether the group is tagged as 'signal'
+    bool is_signal() const { return _is_signal; }
 
     /// \brief Returns the group legend.
     std::string legend() const { return _legend; }

@@ -61,7 +61,9 @@ class mc_comparison_entry : public comparison_entry
      */
     explicit mc_comparison_entry(const util::options &opt,
                                  const std::string &analyzer_name,
-                                 const std::string &input_dir);
+                                 const std::string &input_dir,
+                                 bool keep_signal = true,
+                                 bool keep_background = true);
 
     /// \brief Destructor.
     virtual ~mc_comparison_entry() = default;

@@ -115,6 +115,8 @@ int main(int argc, char **argv)
                 signal->Draw("ep");
 
                 background_entry.draw(name, lumi, true);
+                signal->Draw("epsame");
+
             }
 
             // Get back to the canvas

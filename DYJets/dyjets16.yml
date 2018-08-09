@@ -220,7 +220,8 @@ MC grouping:
       required: yes
       samples: [ DYJets ]
       color: 408 # kGreen - 8
-      #scale factor: 1
+      scale factor: 1.0287
+      is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]
       color: 600 # kBlue

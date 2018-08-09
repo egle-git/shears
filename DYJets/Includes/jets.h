@@ -22,7 +22,7 @@ class jet
     TLorentzVector v; ///< Four-momentum
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
-    float bdisc;
+    float bdisc;      ///< b-tag ID score
 };
 
 /// \brief Handles jets.

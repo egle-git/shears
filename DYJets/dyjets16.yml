@@ -135,7 +135,7 @@ Z:
     #   - neutral: Keep only lepton pairs of opposite sign
     #   - same sign: Keep only lepton pairs of the same sign
     # Default value: neutral
-    charge check: neutral
+    charge mode: neutral
 
 # Triggers
 #

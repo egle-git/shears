@@ -123,11 +123,11 @@ muons:
 Z:
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 71
+    low mass: 50
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 111
+    high mass: 320
 
     # Charge check mode
     # Possible values:

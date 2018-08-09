@@ -23,6 +23,11 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
         _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
     }
 
+    if (opt.config["b jet veto"]) {
+        util::set_value_safe(opt.config["b jet veto"], _bjet_veto, "use", "use b jet veto");
+        util::set_value_safe(opt.config["b jet veto"], _bjet_veto_cut, "cut", "b jet veto cut");
+    }
+
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
@@ -101,6 +106,14 @@ void boson_jets_analyzer::operator()()
      */
     std::vector<jet> jets = _jets.get();
     _jets.veto(jets, leptons);
+
+    // Veto events with b jets
+    if (_bjet_veto &&
+        std::any_of(jets.begin(),
+                    jets.end(),
+                    [&](const jet &j) { return j.bdisc > _bjet_veto_cut; })) {
+        return;
+    }
 
     _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
     _pileup.fill(histo_set, "Zinc0jet_noweight", weights());

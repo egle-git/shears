@@ -47,6 +47,16 @@ jets:
     # Default value: 0.4
     lepton delta r: 0.4
 
+# Options of the b jet veto
+b jet veto:
+    # Whether to cut events with b jets
+    # Default value: yes
+    use: yes
+
+    # Cut value; see the b tagging POG TWiki for recommended working points
+    # Default value: 0.5426 (loose)
+    cut: 0.5426
+
 # Options related to the selection of electrons
 electrons:
     # Pt cut [GeV]

@@ -49,6 +49,9 @@ private:
 
     physics::weights _weights;
 
+    bool _bjet_veto = true;
+    double _bjet_veto_cut = 0.5426;
+
 public:
     /// \brief Constructor
     boson_jets_analyzer(util::job::info &info, const util::options &opt);

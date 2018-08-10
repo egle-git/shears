@@ -82,6 +82,7 @@ SimpleJetCorrectionUncertainty.cc \
 JetCorrectionUncertainty.cc \
 JetCorrectorParameters.cc \
 boson_jets_analyzer.cc \
+BTagCalibrationStandalone.cc \
 catalog.cc \
 chains.cc \
 comparison_entry.cc \

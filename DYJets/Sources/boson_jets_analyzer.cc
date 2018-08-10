@@ -33,6 +33,12 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
+    counter.declare("Total b-flavor jets");
+    counter.declare("Total c-flavor jets");
+    counter.declare("Total udsg-flavor jets");
+    counter.declare("Total b-flavor jets, b-tagged");
+    counter.declare("Total c-flavor jets, b-tagged");
+    counter.declare("Total udsg-flavor jets, b-tagged");
 }
 
 boson_jets_analyzer::~boson_jets_analyzer()
@@ -82,9 +88,9 @@ void boson_jets_analyzer::operator()()
     std::vector<lepton> electrons = _electrons.get();
 
     std::vector<lepton> leptons = find_boson(muons, electrons);
-    if (leptons.empty()) {
+    if (leptons.empty()) { 
         return;
-    }
+    }// means that a boson is found
 
     // Create lists of chosen muons and electrons
     std::vector<lepton> chosen_muons, chosen_electrons;
@@ -106,6 +112,25 @@ void boson_jets_analyzer::operator()()
      */
     std::vector<jet> jets = _jets.get();
     _jets.veto(jets, leptons);
+ 
+    // Calculate b efficiencies and apply scale factors
+    if(jets.size()>0){
+         for (const auto &jet : jets){ 
+            if(fabs(jet.hadflav)==5){
+              counter.count("Total b-flavor jets", weights().global_weight());
+              if(jet.bdisc>_bjet_veto_cut)counter.count("Total b-flavor jets, b-tagged", weights().global_weight());
+           }
+           else if(fabs(jet.hadflav)==4){
+              counter.count("Total c-flavor jets", weights().global_weight());
+              if(jet.bdisc>_bjet_veto_cut)counter.count("Total c-flavor jets, b-tagged", weights().global_weight());
+           }
+           else{
+              counter.count("Total udsg-flavor jets", weights().global_weight());
+              if(jet.bdisc>_bjet_veto_cut)counter.count("Total udsg-flavor jets, b-tagged", weights().global_weight());
+
+           }
+       }
+    }
 
     // Veto events with b jets
     if (_bjet_veto &&

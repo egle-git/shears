@@ -23,6 +23,7 @@ class jet
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
     float bdisc;      ///< b-tag ID score
+    float hadflav;    ///< jet hadron flavor  
 };
 
 /// \brief Handles jets.
@@ -35,6 +36,7 @@ class jets
     TTreeReaderArray<float> JetAk04Id;
     TTreeReaderArray<float> JetAk04PuMva;
     TTreeReaderArray<float> JetAk04BDiscCisvV2;
+    TTreeReaderArray<float> JetAk04HadFlav;
 
 
     double _pt_cut = 30;

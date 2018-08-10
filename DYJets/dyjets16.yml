@@ -55,7 +55,8 @@ b jet veto:
 
     # Cut value; see the b tagging POG TWiki for recommended working points
     # Default value: 0.5426 (loose)
-    cut: 0.5426
+    cut: 0.8484 #medium 
+    #cut: 0.9535  #tight
 
 # Options related to the selection of electrons
 electrons:

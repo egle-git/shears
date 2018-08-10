@@ -16,7 +16,8 @@ jets::jets(util::job::info &info, const util::options &opt)
       JetAk04E(info.reader, "JetAk04E"),
       JetAk04Id(info.reader, "JetAk04Id"),
       JetAk04PuMva(info.reader, "JetAk04PuMva"),
-      JetAk04BDiscCisvV2(info.reader,"JetAk04BDiscCisvV2")
+      JetAk04BDiscCisvV2(info.reader,"JetAk04BDiscCisvV2"),
+      JetAk04HadFlav(info.reader,"JetAk04HadFlav")
 {
     configure(opt);
 }
@@ -61,6 +62,7 @@ std::vector<jet> jets::get()
         j.id = JetAk04Id[i];
         j.puMva = JetAk04PuMva[i];
         j.bdisc = JetAk04BDiscCisvV2[i];
+        j.hadflav = JetAk04HadFlav[i];
         jets.push_back(j);
     }
     return jets;

@@ -95,6 +95,7 @@ void jets::fill(util::histo_set &h,
         h.fill("jetEta", tag, j.v.Eta(), w.global_weight());
         h.fill("jetPhi", tag, j.v.Phi(), w.global_weight());
         h.fill("jetPuMva", tag, j.puMva, w.global_weight());
+        h.fill("jetbdisc",tag, j.bdisc,w.global_weight());
     }
     if (jets.size() > 0) {
         const jet &j = jets[0];

@@ -7,6 +7,7 @@
 #include <TList.h>
 #include <TVectorD.h>
 
+#include "logging.h"
 #include "sample.h"
 
 namespace data
@@ -128,6 +129,11 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
     }
 
     _frac = job_info->GetBinContent(1);
+    if (_frac < 0 || _frac > 1) {
+        util::logging::warn << "Inconsistent processed fraction of sample: "
+                            << _frac << ". Setting it to 1." << std::endl;
+        _frac = 1;
+    }
     _wsum = job_info->GetBinContent(2);
     _lumi = (*job_info_average)[0];
     _xsec = (*job_info_average)[1];

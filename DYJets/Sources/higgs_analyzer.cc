@@ -66,7 +66,7 @@ void higgs_analyzer::operator()()
     _pileup.fill(*this, "Zinc0jet_noweight", _weights);
     _pileup.reweight(_weights);
 
-    std::vector<lepton> muons = _muons.get(_weights.isdata());
+    std::vector<lepton> muons; // = _muons.get(_weights.isdata());
 
     TLorentzVector zz_p;
     bool found = false;

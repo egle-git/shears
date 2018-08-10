@@ -44,14 +44,6 @@ void boson_jets_analyzer::operator()()
     counter.count("Total", weights().global_weight());
 
     /*
-     * Handle the trigger
-     */
-    if (!passes_trigger()) {
-        return;
-    }
-    counter.count("Passing the trigger", weights().global_weight());
-
-    /*
      * Choose the right era for this event
      */
     const unsigned run_threshold = 278820u; // start of Run G
@@ -74,6 +66,14 @@ void boson_jets_analyzer::operator()()
             _era = 1;
         }
     }
+
+    /*
+     * Handle the trigger
+     */
+    if (!passes_trigger()) {
+        return;
+    }
+    counter.count("Passing the trigger", weights().global_weight());
 
     /*
      * Read leptons and find the boson

@@ -1,5 +1,7 @@
 #include "comparison_entry.h"
 
+#include <cmath>
+
 #include <TFile.h>
 #include <TFileIter.h>
 #include <TH1.h>
@@ -129,7 +131,7 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
     }
 
     _frac = job_info->GetBinContent(1);
-    if (_frac < 0 || _frac > 1) {
+    if (std::isnan(_frac) || _frac < 0 || _frac > 1) {
         util::logging::warn << "Inconsistent processed fraction of sample: "
                             << _frac << ". Setting it to 1." << std::endl;
         _frac = 1;

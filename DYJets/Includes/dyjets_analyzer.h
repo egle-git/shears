@@ -24,6 +24,9 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     /// \brief Constructor.
     explicit dyjets_analyzer(util::job::info &info, const util::options &opt);
 
+    /// \brief Destructor.
+    virtual ~dyjets_analyzer() = default;
+
     // Overridden from base class
     void apply_trigger_sf(physics::weights &weights,
                           const std::vector<physics::lepton> &leptons) override;

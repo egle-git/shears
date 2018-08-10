@@ -15,6 +15,14 @@
 
 namespace /* anonymous */
 {
+    double mass_binning[] = {20,   35,   50,   55,   60,   65,   70,   75,   80,   85,   90,
+                             95,   100,  105,  110,  115,  120,  125,  130,  135,  140,  145,
+                             150,  160,  170,  180,  190,  200,  220,  240,  260,  280,  300,
+                             320,  340,  360,  380,  400,  420,  440,  460,  480,  500,  520,
+                             540,  560,  580,  600,  630,  660,  690,  720,  750,  780,  810,
+                             840,  870,  900,  940,  980,  1020, 1060, 1100, 1140, 1180, 1220,
+                             1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1660, 1720, 1780,
+                             1840, 1900, 1980, 2060, 2140};
     double phistar_binning[] = {0.001, 0.004, 0.008, 0.012, 0.016, 0.020, 0.024, 0.029,
                                 0.034, 0.039, 0.045, 0.051, 0.057, 0.064, 0.072, 0.081,
                                 0.091, 0.102, 0.114, 0.128, 0.145, 0.165, 0.189, 0.219,
@@ -36,6 +44,10 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     counter.declare("With a good Z boson");
 
     histo_set.declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
+    histo_set.declare("mass_wide_range",
+                      "Dilepton mass;M(ll) [GeV]",
+                      sizeof(mass_binning) / sizeof(double) - 1,
+                      mass_binning);
     histo_set.declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
     histo_set.declare("phistar",
                       "#phi^{*}_{#eta};#phi^{*}_{#eta}",
@@ -88,6 +100,7 @@ void dyjets_analyzer::fill(const std::string &tag,
     physics::dilepton Z(boson[0], boson[1]);
 
     histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
+    histo_set.fill("mass_wide_range", tag, Z.v.M(), weights().global_weight());
     histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
     histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 }

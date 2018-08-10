@@ -53,10 +53,15 @@ b jet veto:
     # Default value: yes
     use: yes
 
-    # Cut value; see the b tagging POG TWiki for recommended working points
-    # Default value: 0.5426 (loose)
-    cut: 0.8484 #medium 
-    #cut: 0.9535  #tight
+    # Working point; see the b tagging POG TWiki for recommended working points
+    # Allowed values: loose, medium, tight
+    # Default value: loose
+    working point: loose
+
+    # Location of the scale factors csv file. Interpreted relative to the
+    # EfficiencyTables/ directory.
+    # Default value: CSVv2_Moriond17_B_H.csv
+    scale factor path: CSVv2_Moriond17_B_H.csv
 
 # Options related to the selection of electrons
 electrons:

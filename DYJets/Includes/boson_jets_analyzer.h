@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "BTagCalibrationStandalone.h"
 #include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
@@ -51,6 +52,8 @@ private:
 
     bool _bjet_veto = true;
     double _bjet_veto_cut = 0.5426;
+    std::array<double, 3> _bjet_tag_eff;
+    BTagCalibrationReader _btag_calibration_reader;
 
 public:
     /// \brief Constructor

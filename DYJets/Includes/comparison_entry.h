@@ -11,6 +11,7 @@
 class TFile;
 class TH1;
 class THStack;
+class TLegend;
 
 namespace data
 {
@@ -26,6 +27,9 @@ class comparison_entry
 
     /// \brief Adds the name of all available histograms to \c histos
     virtual void add_histograms(std::set<std::string> &histos) = 0;
+
+    /// \brief Adds the current entry to the given legend.
+    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) = 0;
 
     /**
      * \brief Draws the histogram with the given \c name on the current canvas.
@@ -51,6 +55,7 @@ class mc_comparison_entry : public comparison_entry
 {
     std::vector<mc_group> _groups;
     std::unique_ptr<THStack> _stack;
+    std::vector<std::string> _legend;
 
   public:
     /**
@@ -69,6 +74,7 @@ class mc_comparison_entry : public comparison_entry
     virtual ~mc_comparison_entry() = default;
 
     virtual void add_histograms(std::set<std::string> &histos) override;
+    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
@@ -100,6 +106,7 @@ class data_comparison_entry : public comparison_entry
     virtual ~data_comparison_entry() = default;
 
     virtual void add_histograms(std::set<std::string> &histos) override;
+    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;

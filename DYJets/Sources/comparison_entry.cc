@@ -6,6 +6,7 @@
 #include <TFileIter.h>
 #include <TH1.h>
 #include <THStack.h>
+#include <TLegend.h>
 #include <TList.h>
 #include <TVectorD.h>
 
@@ -42,6 +43,26 @@ void mc_comparison_entry::add_histograms(std::set<std::string> &histos)
 {
     for (data::mc_group &group : _groups) {
         group.add_histograms(histos);
+    }
+}
+
+void mc_comparison_entry::add_to_legend(TLegend &legend, const std::string &plotname, double lumi)
+{
+    if (_stack == nullptr) {
+        create_stack(plotname, lumi);
+        if (_stack == nullptr) {
+            return;
+        }
+    }
+    if (_stack->GetNhists() == 0) {
+        return;
+    }
+    TList *histograms = _stack->GetHists(); // Not owned
+    if ((unsigned) histograms->GetSize() != _legend.size()) {
+        throw std::logic_error("Inconsistent sizes in mc_comparison_entry::add_to_legend");
+    }
+    for (int i = _legend.size() - 1; i >= 0; --i) {
+        legend.AddEntry(dynamic_cast<TH1 *>(histograms->At(i)), _legend[i].c_str());
     }
 }
 
@@ -86,6 +107,7 @@ void mc_comparison_entry::reset_drawing_state()
 void mc_comparison_entry::create_stack(const std::string &name, double lumi)
 {
     _stack = std::make_unique<THStack>("stack", "");
+    _legend.clear();
     bool had_histo = false;
     for (auto it = _groups.rbegin(); it != _groups.rend(); ++it) {
         // Get the histogram
@@ -95,6 +117,7 @@ void mc_comparison_entry::create_stack(const std::string &name, double lumi)
         if (histo != nullptr) {
             histo->Scale(lumi);
             _stack->Add(dynamic_cast<TH1 *>(histo.get()->Clone()));
+            _legend.push_back(it->legend());
             had_histo = true;
         }
     }
@@ -147,6 +170,17 @@ void data_comparison_entry::add_histograms(std::set<std::string> &histos)
     for (TFileIter it(_file.get()); it < it.TotalKeys(); ++it) {
         histos.insert(it.GetKeyName());
     }
+}
+
+void data_comparison_entry::add_to_legend(TLegend &legend, const std::string &plotname, double lumi)
+{
+    if (_histo == nullptr) {
+        create_histo(plotname, lumi);
+        if (_histo == nullptr) {
+            return;
+        }
+    }
+    legend.AddEntry(_histo.get(), "Data");
 }
 
 void data_comparison_entry::draw(const std::string &name, double lumi, bool same)

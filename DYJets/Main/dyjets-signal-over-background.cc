@@ -9,6 +9,7 @@
 #include <TGaxis.h>
 #include <TH1.h>
 #include <THStack.h>
+#include <TLegend.h>
 #include <TPad.h>
 #include <TROOT.h>
 
@@ -118,6 +119,17 @@ int main(int argc, char **argv)
                 signal->Draw("epsame");
 
             }
+
+            // Legend
+            TLegend legend(0.63, 0.60, 0.81, 0.87);
+            legend.SetTextSize(0.042);
+            legend.SetFillStyle(0);
+            legend.SetBorderSize(0);
+            legend.SetTextFont(42);
+            legend.Draw();
+
+            signal_entry.add_to_legend(legend, name, lumi);
+            background_entry.add_to_legend(legend, name, lumi);
 
             // Get back to the canvas
             canvas.cd();

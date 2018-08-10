@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
                 signal->SetStats(0);
                 signal->SetTitle("");
-                signal->Draw("ep");
+                signal->Draw("e2");
 
                 background_entry.draw(name, lumi, true);
                 signal->Draw("epsame");

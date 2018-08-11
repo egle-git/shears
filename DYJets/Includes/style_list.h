@@ -23,6 +23,9 @@ class style_list
 
   public:
     /// \brief Constructor
+    explicit style_list() = default;
+
+    /// \brief Constructor
     explicit style_list(const YAML::Node &specification);
 
     /// \brief Destructor

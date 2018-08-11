@@ -34,6 +34,13 @@ int main(int argc, char **argv)
             output_dir = opt.map["output"].as<std::string>();
         }
 
+        // Read style
+        util::style_list style;
+        if (opt.config["plots"]) {
+            style = util::style_list(opt.config["plots"]);
+        }
+
+        // Read plots
         data::mc_comparison_entry mc_entry(opt, "dyjets", input_dir);
 
         data::sample data;
@@ -65,16 +72,13 @@ int main(int argc, char **argv)
                                 << std::endl;
 
             // Remove histograms vetoed by style
-            if (opt.config["plots"]) {
-                util::style_list style(opt.config["plots"]);
-                for (auto it = histogram_names.begin(); it != histogram_names.end(); ) {
-                    if (style.get<bool>("produce", *it, true)) {
-                        ++it;
-                    } else {
-                        util::logging::debug << "Not producing histogram " << *it
-                                             << " due to plot rules." << std::endl;
-                        it = histogram_names.erase(it);
-                    }
+            for (auto it = histogram_names.begin(); it != histogram_names.end(); ) {
+                if (style.get<bool>("produce", *it, true)) {
+                    ++it;
+                } else {
+                    util::logging::debug << "Not producing histogram " << *it
+                                         << " due to plot rules." << std::endl;
+                    it = histogram_names.erase(it);
                 }
             }
         }
@@ -167,6 +171,12 @@ int main(int argc, char **argv)
                 ratio->SetStats(0);
                 ratio->SetTitle("");
                 ratio->Draw("ep");
+            }
+
+            // Apply style
+            if (style.get<bool>("log x", name, false)) {
+                upper.SetLogx();
+                lower.SetLogx();
             }
 
             canvas.Print((output_dir + name + ".png").c_str());

@@ -250,7 +250,9 @@ MC grouping:
 #
 # Supported properties:
 #   - produce (yes): Whether to make the plot
+#   - log x (no): Whether to x axis should use a log scale
 plots:
+    # Excluded plots
     - selector: '^_.*'
       produce: no
     - selector: '.*[12]jet.*'
@@ -269,3 +271,8 @@ plots:
       produce: no
     - selector: '.*Zexcl.*'
       produce: no
+    # Style changes
+    - selector: '^phistar.*'
+      log x: yes
+    - selector: '^pt.*'
+      log x: yes

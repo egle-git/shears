@@ -269,8 +269,12 @@ plots:
       produce: no
     - selector: 'jet.*fourth.*'
       produce: no
-    - selector: '.*Zexcl.*'
+    - selector: '.*Zexc.*'
       produce: no
+    - selector: 'nJets.*_Zinc.*'
+      produce: no
+    - selector: 'nJets.*_Zinc0jet.*'
+      produce: yes
     # Style changes
     - selector: '^phistar.*'
       log x: yes

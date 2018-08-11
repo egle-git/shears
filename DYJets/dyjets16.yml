@@ -280,3 +280,5 @@ plots:
       log x: yes
     - selector: '^pt.*'
       log x: yes
+    - selector: '^mass_wide.*'
+      log x: yes

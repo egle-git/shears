@@ -222,7 +222,7 @@ tables G-H:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma^{*} #rightarrow ll"
+    - legend: "Z/#gamma* #rightarrow ll"
       required: yes
       samples: [ DYJets ]
       color: 408 # kGreen - 8

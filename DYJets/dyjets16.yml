@@ -240,3 +240,32 @@ MC grouping:
     - legend: W
       samples: [ WToLNu ]
       color: 800 # kOrange
+
+# Plot properties
+#
+# The sole mandatory field is the "selector", containing a regex that is matched
+# against plot names. When a plot name matches the regex, properties listed in
+# other fields are assigned to it. Rules lower in the list take precedence over
+# the ones above them.
+#
+# Supported properties:
+#   - produce (yes): Whether to make the plot
+plots:
+    - selector: '^_.*'
+      produce: no
+    - selector: '.*[12]jet.*'
+      produce: no
+    - selector: 'el.*'
+      produce: no
+    - selector: 'mu.*'
+      produce: no
+    - selector: 'jet.*leading.*'
+      produce: no
+    - selector: 'jet.*subleading.*'
+      produce: no
+    - selector: 'jet.*third.*'
+      produce: no
+    - selector: 'jet.*fourth.*'
+      produce: no
+    - selector: '.*Zexcl.*'
+      produce: no

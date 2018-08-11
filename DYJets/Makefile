@@ -101,6 +101,7 @@ pileup.cc \
 tables.cc \
 sample.cc \
 standalone_LumiReWeighting.cc \
+style_list.cc \
 timer.cc \
 triggers.cc \
 weights.cc \

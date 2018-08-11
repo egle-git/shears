@@ -16,6 +16,7 @@
 #include "comparison_entry.h"
 #include "logging.h"
 #include "options.h"
+#include "style_list.h"
 
 namespace po = boost::program_options;
 
@@ -62,6 +63,20 @@ int main(int argc, char **argv)
             data_entry.add_histograms(histogram_names);
             util::logging::info << "Found " << histogram_names.size() << " histograms."
                                 << std::endl;
+
+            // Remove histograms vetoed by style
+            if (opt.config["plots"]) {
+                util::style_list style(opt.config["plots"]);
+                for (auto it = histogram_names.begin(); it != histogram_names.end(); ) {
+                    if (style.get<bool>("produce", *it, true)) {
+                        ++it;
+                    } else {
+                        util::logging::debug << "Not producing histogram " << *it
+                                             << " due to plot rules." << std::endl;
+                        it = histogram_names.erase(it);
+                    }
+                }
+            }
         }
 
         bool log = (opt.map.count("lin") == 0);

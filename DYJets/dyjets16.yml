@@ -154,7 +154,7 @@ triggers G-H: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_Trk
 samples:
     - name: data
       type: data
-      jobs: 10
+      jobs: 32
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v6/Catalogs/
       catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
     - name: DYJets

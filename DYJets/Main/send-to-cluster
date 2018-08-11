@@ -59,7 +59,7 @@ exit $EXIT_CODE
                                                 '-q', self.queue,
                                                 '-j', 'oe',
                                                 '-o', submit_log_file,
-                                                '-l', 'walltime=00:30:00',
+                                                '-l', 'walltime=01:00:00',
                                                 script_path])
                 time.sleep(0.4)
                 return code

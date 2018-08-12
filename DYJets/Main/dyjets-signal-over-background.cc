@@ -16,6 +16,7 @@
 #include "comparison_entry.h"
 #include "logging.h"
 #include "options.h"
+#include "style_list.h"
 
 namespace po = boost::program_options;
 
@@ -33,6 +34,13 @@ int main(int argc, char **argv)
             output_dir = opt.map["output"].as<std::string>();
         }
 
+        // Read style
+        util::style_list style;
+        if (opt.config["plots"]) {
+            style = util::style_list(opt.config["plots"]);
+        }
+
+        // Read plots
         data::mc_comparison_entry signal_entry(opt, "dyjets", input_dir, true, false);
         data::mc_comparison_entry background_entry(opt, "dyjets", input_dir, false, true);
 
@@ -63,6 +71,17 @@ int main(int argc, char **argv)
             background_entry.add_histograms(histogram_names);
             util::logging::info << "Found " << histogram_names.size() << " histograms."
                                 << std::endl;
+
+            // Remove histograms vetoed by style
+            for (auto it = histogram_names.begin(); it != histogram_names.end(); ) {
+                if (style.get<bool>("produce", *it, true)) {
+                    ++it;
+                } else {
+                    util::logging::debug << "Not producing histogram " << *it
+                                         << " due to plot rules." << std::endl;
+                    it = histogram_names.erase(it);
+                }
+            }
         }
 
         bool log = (opt.map.count("lin") == 0);
@@ -172,6 +191,12 @@ int main(int argc, char **argv)
                 ratio->SetStats(0);
                 ratio->SetTitle("");
                 ratio->Draw("ep");
+            }
+
+            // Apply style
+            if (style.get<bool>("log x", name, false)) {
+                upper.SetLogx();
+                lower.SetLogx();
             }
 
             canvas.Print((output_dir + name + ".png").c_str());

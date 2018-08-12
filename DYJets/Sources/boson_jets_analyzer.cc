@@ -153,27 +153,33 @@ void boson_jets_analyzer::operator()()
     if (_bjet_veto) {
          for (const auto &jet : jets){
              BTagEntry::JetFlavor flavor;
+             bool tagged = jet.bdisc > _bjet_veto_cut;
             if(fabs(jet.hadflav)==5){
               counter.count("Total b-flavor jets", weights().global_weight());
-              if(jet.bdisc>_bjet_veto_cut)counter.count("Total b-flavor jets, b-tagged", weights().global_weight());
+                if (tagged) {
+                    counter.count("Total b-flavor jets, b-tagged", weights().global_weight());
+                }
               flavor = BTagEntry::FLAV_B;
            }
            else if(fabs(jet.hadflav)==4){
               counter.count("Total c-flavor jets", weights().global_weight());
-              if(jet.bdisc>_bjet_veto_cut)counter.count("Total c-flavor jets, b-tagged", weights().global_weight());
+                if (tagged) {
+                    counter.count("Total c-flavor jets, b-tagged", weights().global_weight());
+                }
               flavor = BTagEntry::FLAV_C;
            }
            else{
               counter.count("Total udsg-flavor jets", weights().global_weight());
-              if(jet.bdisc>_bjet_veto_cut)counter.count("Total udsg-flavor jets, b-tagged", weights().global_weight());
+                if (tagged) {
+                    counter.count("Total udsg-flavor jets, b-tagged", weights().global_weight());
+                }
                 flavor = BTagEntry::FLAV_UDSG;
            }
             double sf = _btag_calibration_reader.eval_auto_bounds(
                 "central", flavor, std::abs(jet.v.Eta()), jet.v.Pt());
             double eff = _bjet_tag_eff[flavor];
 
-            // By assumption, not a single jet is tagged
-            _weights.use_weight((1 - sf * eff) / (1 - eff));
+            _weights.use_weight(tagged ? sf : (1 - sf * eff) / (1 - eff));
         }
 
         // Veto events with b jets

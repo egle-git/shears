@@ -85,6 +85,7 @@ boson_jets_analyzer.cc \
 BTagCalibrationStandalone.cc \
 catalog.cc \
 chains.cc \
+compare_builder_base.cc \
 comparison_entry.cc \
 dyjets_analyzer.cc \
 electrons.cc \

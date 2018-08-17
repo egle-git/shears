@@ -5,12 +5,13 @@
 #include <set>
 #include <string>
 
+#include <THStack.h>
+
 #include "mc_group.h"
 #include "options.h"
 
 class TFile;
 class TH1;
-class THStack;
 class TLegend;
 
 namespace data

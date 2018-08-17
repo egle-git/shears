@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "reco_compare_builder.h"
 #include "signal_bg_compare_builder.h"
+#include "ss_yield_compare_builder.h"
 
 void usage(const std::string &program_name);
 
@@ -18,6 +19,8 @@ int main(int argc, char **argv)
             builder = std::make_unique<util::reco_compare_builder>("dyjets");
         } else if (tool == "signal-over-background") {
             builder = std::make_unique<util::signal_bg_compare_builder>("dyjets");
+        } else if (tool == "ss-yield") {
+            builder = std::make_unique<util::ss_yield_compare_builder>("dyjets");
         } else {
             throw std::runtime_error("Unknown tool '" + tool + "'");
         }
@@ -40,6 +43,7 @@ void usage(const std::string &program_name)
               << "Available tools:" << std::endl
               << "\treco-level-agreement (default)" << std::endl
               << "\tsignal-over-background" << std::endl
+              << "\tss-yield" << std::endl
               << std::endl
               << "Use " << program_name
               << " <tool> --help for the corresponding list of options." << std::endl;

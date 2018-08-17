@@ -102,6 +102,7 @@ pileup.cc \
 reco_compare_builder.cc \
 signal_bg_compare_builder.cc \
 sample.cc \
+ss_yield_compare_builder.cc \
 standalone_LumiReWeighting.cc \
 style_list.cc \
 tables.cc \

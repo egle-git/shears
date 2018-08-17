@@ -2,6 +2,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <TAxis.h>
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <TPad.h>
@@ -86,7 +87,9 @@ void compare_builder_base::build()
         lower.Draw();
         lower.cd();
 
-        fill_lower_panel(name);
+        if (fill_lower_panel(name)) {
+            upper.SetBottomMargin(0.);
+        }
 
         // Apply style
         if (_style.get<bool>("log x", name, false)) {
@@ -124,6 +127,26 @@ std::unique_ptr<data::mc_comparison_entry> compare_builder_base::load_mc(
     auto ptr = std::make_unique<data::mc_comparison_entry>(_opt, _analyzer_name, input_dir);
     ptr->add_histograms(_histogram_names);
     return ptr;
+}
+
+void compare_builder_base::format_lower_x_axis(TAxis &axis) const
+{
+    axis.SetTickLength(0.03);
+    axis.SetTitleSize(0.1);
+    axis.SetTitleOffset(1.2);
+    axis.SetLabelSize(0.10);
+    axis.SetLabelOffset(0.017);
+}
+
+void compare_builder_base::format_lower_y_axis(TAxis &axis, const std::string &title) const
+{
+    axis.SetRangeUser(0.601, 1.399);
+    axis.SetNdivisions(5, 5, 0);
+    axis.SetTitle(title.c_str());
+    axis.SetTitleSize(0.1);
+    axis.SetTitleOffset(0.5);
+    axis.CenterTitle();
+    axis.SetLabelSize(0.08);
 }
 
 void compare_builder_base::create_output_dir() const
@@ -182,7 +205,7 @@ void compare_builder_base::filter_histogram_names()
         }
 
         auto removed = before_filter - _histogram_names.size();
-        util::logging::info << removed << " histograms excluded due to style rules."
+        util::logging::info << removed << " histograms skipped due to style rules."
                             << std::endl;
     }
 }

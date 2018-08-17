@@ -3,6 +3,8 @@
 
 #include "compare_builder_base.h"
 
+class TH1;
+
 namespace util
 {
 
@@ -10,6 +12,8 @@ class reco_compare_builder : public compare_builder_base
 {
     std::unique_ptr<data::data_comparison_entry> _data_entry;
     std::unique_ptr<data::mc_comparison_entry> _mc_entry;
+
+    std::unique_ptr<TH1> _ratio;
 
     double _lumi;
 
@@ -31,7 +35,7 @@ class reco_compare_builder : public compare_builder_base
     void fill_legend(TLegend &legend, const std::string &name) override;
 
     // Overriden from base class
-    void fill_lower_panel(const std::string &name) override;
+    bool fill_lower_panel(const std::string &name) override;
 
     // Overriden from base class
     void reset_drawing_state() override;

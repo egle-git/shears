@@ -8,6 +8,7 @@
 #include "comparison_entry.h"
 #include "style_list.h"
 
+class TAxis;
 class TLegend;
 
 namespace po = boost::program_options;
@@ -61,6 +62,12 @@ class compare_builder_base
     /// \brief Gives access to the options object
     const util::options &parsed_options() const { return _opt; }
 
+    /// \brief Formats the lower panel's x axis
+    void format_lower_x_axis(TAxis &axis) const;
+
+    /// \brief Formats the lower panel's y axis
+    void format_lower_y_axis(TAxis &axis, const std::string &title = "") const;
+
     /// \brief Returns the options supported by this builder
     virtual po::options_description options() const = 0;
 
@@ -74,7 +81,7 @@ class compare_builder_base
     virtual void fill_legend(TLegend &legend, const std::string &name) = 0;
 
     /// \brief Fills the lower panel with plots
-    virtual void fill_lower_panel(const std::string &name) = 0;
+    virtual bool fill_lower_panel(const std::string &name) = 0;
 
     /// \brief Resets drawing state after a plot was made
     virtual void reset_drawing_state() = 0;

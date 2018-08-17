@@ -41,22 +41,35 @@ void reco_compare_builder::fill_legend(TLegend &legend, const std::string &name)
     _mc_entry->add_to_legend(legend, name, _lumi);
 }
 
-void reco_compare_builder::fill_lower_panel(const std::string &name)
+bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
-    std::unique_ptr<TH1> ratio = _mc_entry->get(name, _lumi);
+    _ratio = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
 
-    if (ratio != nullptr && den != nullptr) {
-        ratio->Divide(den.get());
-        ratio->GetYaxis()->SetTitle("Simulation/Data");
-        ratio->Draw("ep");
+    if (_ratio == nullptr || den == nullptr) {
+        return false;
     }
+
+    _ratio->Divide(den.get());
+
+    format_lower_x_axis(*_ratio->GetXaxis());
+    format_lower_y_axis(*_ratio->GetYaxis(), "Simulation/Data");
+
+    _ratio->SetMarkerStyle(20);
+    _ratio->SetMarkerColor(kBlack);
+    _ratio->SetLineColor(kBlack);
+    _ratio->SetStats(0);
+    _ratio->SetTitle("");
+    _ratio->Draw("ep");
+
+    return true;
 }
 
 void reco_compare_builder::reset_drawing_state()
 {
     _mc_entry->reset_drawing_state();
     _data_entry->reset_drawing_state();
+    _ratio.reset();
 }
 
 } // namespace util

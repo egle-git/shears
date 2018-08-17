@@ -99,6 +99,7 @@ mc_group.cc \
 muons.cc \
 options.cc \
 pileup.cc \
+reco_compare_builder.cc \
 tables.cc \
 sample.cc \
 standalone_LumiReWeighting.cc \

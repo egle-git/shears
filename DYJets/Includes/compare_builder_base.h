@@ -8,6 +8,8 @@
 #include "comparison_entry.h"
 #include "style_list.h"
 
+class TLegend;
+
 namespace po = boost::program_options;
 
 namespace util
@@ -45,20 +47,23 @@ class compare_builder_base
     /// \brief Loads MC samples
     std::unique_ptr<data::mc_comparison_entry> load_mc(const std::string &input_dir);
 
+    /// \brief Gives access to the options object
+    const util::options &parsed_options() const { return _opt; }
+
     /// \brief Returns the options supported by this builder
-    virtual po::options_description  options() = 0;
+    virtual po::options_description options() const = 0;
 
     /// \brief Loads all needed \ref comparison_entry
     virtual void load() = 0;
 
     /// \brief Fills the upper panel with plots
-    virtual void fill_upper_panel() = 0;
+    virtual void fill_upper_panel(const std::string &name) = 0;
 
     /// \brief Fills the legend with plots
-    virtual void fill_legend_panel() = 0;
+    virtual void fill_legend(TLegend &legend, const std::string &name) = 0;
 
     /// \brief Fills the lower panel with plots
-    virtual void fill_lower_panel() = 0;
+    virtual void fill_lower_panel(const std::string &name) = 0;
 
     /// \brief Resets drawing state after a plot was made
     virtual void reset_drawing_state() = 0;

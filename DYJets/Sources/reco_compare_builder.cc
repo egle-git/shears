@@ -54,6 +54,7 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
 
     format_lower_x_axis(*_ratio->GetXaxis());
     format_lower_y_axis(*_ratio->GetYaxis(), "Simulation/Data");
+    _ratio->GetYaxis()->SetRangeUser(0.601, 1.399);
 
     _ratio->SetMarkerStyle(20);
     _ratio->SetMarkerColor(kBlack);

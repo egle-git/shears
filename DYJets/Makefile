@@ -100,10 +100,11 @@ muons.cc \
 options.cc \
 pileup.cc \
 reco_compare_builder.cc \
-tables.cc \
+signal_bg_compare_builder.cc \
 sample.cc \
 standalone_LumiReWeighting.cc \
 style_list.cc \
+tables.cc \
 timer.cc \
 triggers.cc \
 weights.cc \

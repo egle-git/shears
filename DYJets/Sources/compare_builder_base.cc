@@ -87,6 +87,8 @@ void compare_builder_base::build()
         lower.Draw();
         lower.cd();
 
+        override_lower_panel_settings(lower);
+
         if (fill_lower_panel(name)) {
             upper.SetBottomMargin(0.);
         }
@@ -122,11 +124,26 @@ std::unique_ptr<data::data_comparison_entry> compare_builder_base::load_data(
 }
 
 std::unique_ptr<data::mc_comparison_entry> compare_builder_base::load_mc(
-        const std::string &input_dir)
+        const std::string &input_dir,
+        bool keep_signal,
+        bool keep_background)
 {
-    auto ptr = std::make_unique<data::mc_comparison_entry>(_opt, _analyzer_name, input_dir);
+    auto ptr = std::make_unique<data::mc_comparison_entry>(_opt,
+                                                           _analyzer_name,
+                                                           input_dir,
+                                                           keep_signal,
+                                                           keep_background);
     ptr->add_histograms(_histogram_names);
     return ptr;
+}
+
+void compare_builder_base::format_upper_y_axis(TAxis &axis, const std::string &title) const
+{
+    axis.SetLabelSize(0.04);
+    axis.SetLabelOffset(0.002);
+    axis.SetTitle(title.c_str());
+    axis.SetTitleSize(0.04);
+    axis.SetTitleOffset(1.32);
 }
 
 void compare_builder_base::format_lower_x_axis(TAxis &axis) const
@@ -140,7 +157,6 @@ void compare_builder_base::format_lower_x_axis(TAxis &axis) const
 
 void compare_builder_base::format_lower_y_axis(TAxis &axis, const std::string &title) const
 {
-    axis.SetRangeUser(0.601, 1.399);
     axis.SetNdivisions(5, 5, 0);
     axis.SetTitle(title.c_str());
     axis.SetTitleSize(0.1);

@@ -10,6 +10,7 @@
 
 class TAxis;
 class TLegend;
+class TPad;
 
 namespace po = boost::program_options;
 
@@ -52,15 +53,20 @@ class compare_builder_base
     /// \brief Make all plots
     void build();
 
+    /// \brief Gives access to the options object
+    const util::options &parsed_options() const { return _opt; }
+
   protected:
     /// \brief Loads data samples
     std::unique_ptr<data::data_comparison_entry> load_data(const std::string &input_dir);
 
     /// \brief Loads MC samples
-    std::unique_ptr<data::mc_comparison_entry> load_mc(const std::string &input_dir);
+    std::unique_ptr<data::mc_comparison_entry> load_mc(const std::string &input_dir,
+                                                       bool keep_signal = true,
+                                                       bool keep_background = true);
 
-    /// \brief Gives access to the options object
-    const util::options &parsed_options() const { return _opt; }
+    /// \brief Formats the upper panel's y axis
+    void format_upper_y_axis(TAxis &axis, const std::string &title = "# Events") const;
 
     /// \brief Formats the lower panel's x axis
     void format_lower_x_axis(TAxis &axis) const;
@@ -82,6 +88,9 @@ class compare_builder_base
 
     /// \brief Fills the lower panel with plots
     virtual bool fill_lower_panel(const std::string &name) = 0;
+
+    /// \brief Can be used to override lower \c TPad settings
+    virtual void override_lower_panel_settings(TPad &) {}
 
     /// \brief Resets drawing state after a plot was made
     virtual void reset_drawing_state() = 0;

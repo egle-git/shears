@@ -138,8 +138,6 @@ Main/plotCrossSections \
 Main/dyjets-compare \
 Main/dyjets-job-list \
 Main/dyjets-loop \
-Main/dyjets-signal-over-background \
-Main/dyjets-ss-yield \
 Main/higgs-compare \
 Main/higgs-job-list \
 Main/higgs-loop \
@@ -169,12 +167,6 @@ Main/dyjets-job-list: Main/dyjets-job-list.o $(OBJLIST) RooUnfold/libRooUnfold.s
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/dyjets-loop: Main/dyjets-loop.o $(OBJLIST) RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-Main/dyjets-signal-over-background: Main/dyjets-signal-over-background.o $(OBJLIST) RooUnfold/libRooUnfold.so
-	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
-
-Main/dyjets-ss-yield: Main/dyjets-ss-yield.o $(OBJLIST) RooUnfold/libRooUnfold.so
 	$(CXX) -o $@ $(LIBDIRLIST) $(LIBDIRLISTRTL) $^ $(ROOTGLIBS) $(LIBLIST)
 
 Main/higgs-compare: Main/higgs-compare.o $(OBJLIST) RooUnfold/libRooUnfold.so

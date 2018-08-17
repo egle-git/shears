@@ -28,14 +28,25 @@ class compare_builder_base
   public:
     /// \brief Constructor
     explicit compare_builder_base(const std::string &analyzer_name,
-                                  const std::string &default_config_file,
-                                  const std::string &default_output_dir);
+                                  const std::string &default_config_file);
 
     /// \brief Destructor
     virtual ~compare_builder_base() = default;
 
     /// \brief Parses options passed to the program
     void parse_options(int argc, char **argv);
+
+    /**
+     * \brief Sets the default output directory
+     *
+     * It can be overriden using command line option \c -o.
+     */
+    void set_default_output_dir(const std::string &output)
+    {
+        if (_output_dir_name.empty()) {
+            _output_dir_name = output;
+        }
+    }
 
     /// \brief Make all plots
     void build();

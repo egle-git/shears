@@ -2,15 +2,17 @@
 
 #include <boost/filesystem.hpp>
 
+#include <TCanvas.h>
+#include <TLegend.h>
+#include <TPad.h>
+
 namespace util
 {
 
 compare_builder_base::compare_builder_base(const std::string &analyzer_name,
-                                           const std::string &default_config_file,
-                                           const std::string &default_output_dir) :
+                                           const std::string &default_config_file) :
     _analyzer_name(analyzer_name),
-    _default_config_file(default_config_file),
-    _output_dir_name(default_output_dir)
+    _default_config_file(default_config_file)
 {
 }
 
@@ -40,6 +42,64 @@ void compare_builder_base::build()
     load();
     create_output_dir();
     filter_histogram_names();
+
+    bool log = (_opt.map.count("lin") == 0);
+
+    for (const std::string &name : _histogram_names) {
+        util::logging::debug << "Producing histogram: " << name << std::endl;
+
+        TCanvas canvas(name.c_str(), "", 700, 900);
+
+        // Upper panel
+        TPad upper("upper", "upper", 0, 0.3, 1, 1);
+        upper.SetTopMargin(0.11);
+        upper.SetRightMargin(0.03);
+        upper.SetTicks();
+        if (log) {
+            upper.SetLogy();
+        }
+        upper.Draw();
+        upper.cd();
+
+        fill_upper_panel(name);
+
+        // Legend
+        TLegend legend(0.63, 0.60, 0.81, 0.87);
+        legend.SetTextSize(0.042);
+        legend.SetFillStyle(0);
+        legend.SetBorderSize(0);
+        legend.SetTextFont(42);
+        legend.Draw();
+
+        fill_legend(legend, name);
+
+        // Get back to the canvas
+        canvas.cd();
+
+        // Lower panel
+        TPad lower("lower", "lower", 0, 0.05, 1, 0.3);
+        lower.SetTopMargin(0.);
+        lower.SetBottomMargin(0.3);
+        lower.SetRightMargin(0.03);
+        lower.SetGridy();
+        lower.SetTicks();
+        lower.Draw();
+        lower.cd();
+
+        fill_lower_panel(name);
+
+        // Apply style
+        if (_style.get<bool>("log x", name, false)) {
+            upper.SetLogx();
+            lower.SetLogx();
+        }
+
+        // Write file
+        canvas.Print((_output_dir_name + "/" + name + ".png").c_str());
+
+        // Cleanup
+        reset_drawing_state();
+    }
 }
 
 std::unique_ptr<data::data_comparison_entry> compare_builder_base::load_data(
@@ -122,7 +182,7 @@ void compare_builder_base::filter_histogram_names()
         }
 
         auto removed = before_filter - _histogram_names.size();
-        util::logging::info << removed << " histograms not produced due to style rules."
+        util::logging::info << removed << " histograms excluded due to style rules."
                             << std::endl;
     }
 }

@@ -4,7 +4,7 @@ namespace util
 {
 
 reco_compare_builder::reco_compare_builder(const std::string &analyzer_name) :
-    compare_builder_base(analyzer_name, analyzer_name + ".yml", "plots")
+    compare_builder_base(analyzer_name, analyzer_name + ".yml")
 {
 }
 
@@ -20,6 +20,8 @@ po::options_description reco_compare_builder::options() const
 void reco_compare_builder::load()
 {
     std::string input_dir = parsed_options().map["input"].as<std::string>();
+    set_default_output_dir(input_dir + "/plots");
+
     _data_entry = load_data(input_dir);
     _mc_entry = load_mc(input_dir);
 
@@ -29,8 +31,7 @@ void reco_compare_builder::load()
 
 void reco_compare_builder::fill_upper_panel(const std::string &name)
 {
-    _data_entry->draw(name, _lumi);
-    _mc_entry->draw(name, _lumi, true);
+    _mc_entry->draw(name, _lumi);
     _data_entry->draw(name, _lumi, true);
 }
 

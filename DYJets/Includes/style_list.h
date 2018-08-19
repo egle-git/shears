@@ -2,6 +2,7 @@
 #define STYLE_LIST_H
 
 #include <regex>
+#include <stdexcept>
 #include <string>
 
 #include <yaml-cpp/yaml.h>
@@ -34,6 +35,18 @@ class style_list
     /**
      * \brief Gets the value of a field according to the specification.
      *
+     * An error is thrown if the value is undefined.
+     *
+     * \arg name The name of the field
+     * \arg rule_match The string to match to the specification's rules
+     */
+    template <class T>
+    T get(const std::string &name,
+          const std::string &rule_match) const;
+
+    /**
+     * \brief Gets the value of a field according to the specification.
+     *
      * \arg name The name of the field
      * \arg rule_match The string to match to the specification's rules
      * \arg default_value The default value
@@ -41,8 +54,20 @@ class style_list
     template <class T>
     T get(const std::string &name,
           const std::string &rule_match,
-          const T &default_value = T()) const;
+          const T &default_value) const;
 };
+
+template <class T>
+T style_list::get(const std::string &name,
+                  const std::string &rule_match) const
+{
+    for (auto it = _rules.crbegin(); it != _rules.crend(); ++it) {
+        if (it->node[name] && std::regex_match(rule_match, it->regex)) {
+            return it->node[name].as<T>();
+        }
+    }
+    throw std::runtime_error("Could not find a match for '" + rule_match + "' with key '" + name + "'");
+}
 
 template <class T>
 T style_list::get(const std::string &name,

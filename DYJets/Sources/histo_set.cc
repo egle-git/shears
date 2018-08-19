@@ -16,6 +16,8 @@ histo_set::histogram_type &histo_set::get(const std::string &name, const std::st
         // Try to create from style
         auto res = create_from_style(name, tag);
         if (res != _histograms.end()) {
+            logging::debug << "Properties of histogram '" << hname << "' taken from stylesheet"
+                           << std::endl;
             return res->second;
         } else {
             // Try to find a model
@@ -52,20 +54,20 @@ auto histo_set::create_from_style(const std::string &name, const std::string &ta
     -> decltype(_histograms)::iterator
 {
     std::string fullname = combined_name(name, tag);
-    std::string method = _style.get<std::string>("binning", fullname, "undefined");
-    if (method == "undefined") {
+    std::string method = _style.get<std::string>("binning", fullname, "ignored");
+    if (method == "ignored") {
         return _histograms.end();
     } else if (method == "uniform") {
         int bin_count = _style.get<int>("bin count", fullname, 100);
-        double binning_min = _style.get<double>("binning min", fullname, 0);
-        double binning_max = _style.get<double>("binning max", fullname, 1);
+        double binning_min = _style.get<double>("binning min", fullname);
+        double binning_max = _style.get<double>("binning max", fullname);
         auto res = _histograms.emplace(
             std::make_pair(name, tag),
             histogram_type(
                 fullname.c_str(), fullname.c_str(), bin_count, binning_min, binning_max));
         return res.first;
     } else if (method == "custom") {
-        auto bins = _style.get<std::vector<double>>("bin edges", fullname, {0., 1.});
+        auto bins = _style.get<std::vector<double>>("bin edges", fullname);
         auto res = _histograms.emplace(
             std::make_pair(name, tag),
             histogram_type(fullname.c_str(), fullname.c_str(), bins.size() - 1, bins.data()));

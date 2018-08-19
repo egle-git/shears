@@ -241,6 +241,10 @@ MC grouping:
       samples: [ WToLNu ]
       color: 800 # kOrange
 
+# The file below defines the binnings for histograms relevant to the analysis.
+# Default value: dyjets-binnings.yml
+binning file: dyjets-binnings.yml
+
 # Plot properties
 #
 # The sole mandatory field is the "selector", containing a regex that is matched

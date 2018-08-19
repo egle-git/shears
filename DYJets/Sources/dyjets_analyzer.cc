@@ -13,27 +13,6 @@
 #include "functions.h"
 #include "lepton.h"
 
-namespace /* anonymous */
-{
-    double mass_binning[] = {20,   35,   50,   55,   60,   65,   70,   75,   80,   85,   90,
-                             95,   100,  105,  110,  115,  120,  125,  130,  135,  140,  145,
-                             150,  160,  170,  180,  190,  200,  220,  240,  260,  280,  300,
-                             320,  340,  360,  380,  400,  420,  440,  460,  480,  500,  520,
-                             540,  560,  580,  600,  630,  660,  690,  720,  750,  780,  810,
-                             840,  870,  900,  940,  980,  1020, 1060, 1100, 1140, 1180, 1220,
-                             1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1660, 1720, 1780,
-                             1840, 1900, 1980, 2060, 2140};
-    double phistar_binning[] = {0.001, 0.004, 0.008, 0.012, 0.016, 0.020, 0.024, 0.029,
-                                0.034, 0.039, 0.045, 0.051, 0.057, 0.064, 0.072, 0.081,
-                                0.091, 0.102, 0.114, 0.128, 0.145, 0.165, 0.189, 0.219,
-                                0.258, 0.312, 0.391, 0.524, 0.695, 0.918, 1.153, 1.496,
-                                1.947, 2.522, 3.277};
-    double zpt_binning[] = {0.1,  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,
-                            10.,  11.,  12.,  13.,  14.,  16.,  18.,  20.,  22.,  25.,
-                            28.,  32.,  37.,  43.,  52.,  65.,  85.,  120., 160., 190.,
-                            220., 250., 300., 350., 400., 450., 500., 1000.};
-}
-
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
     : boson_jets_analyzer(info, opt),
       _zfinder(opt, "Z")
@@ -43,16 +22,12 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     counter.declare("With two good muons");
     counter.declare("With a good Z boson");
 
-    histo_set.declare("mass", "Dilepton mass;M(ll) [GeV]", 40, 71, 111);
-    histo_set.declare("mass_wide_range",
-                      "Dilepton mass;M(ll) [GeV]",
-                      sizeof(mass_binning) / sizeof(double) - 1,
-                      mass_binning);
-    histo_set.declare("pt", "Dilepton p_{T};p_{T}(ll) [GeV]", sizeof(zpt_binning) / sizeof(double) - 1, zpt_binning);
-    histo_set.declare("phistar",
-                      "#phi^{*}_{#eta};#phi^{*}_{#eta}",
-                      sizeof(phistar_binning) / sizeof(double) - 1,
-                      phistar_binning);
+    std::string binning_file = "dyjets-binnings.yml";
+    if (opt.config["binning file"]) {
+        binning_file = opt.config["binning file"].as<std::string>();
+    }
+    util::logging::info << "Taking binnings from file " << binning_file << std::endl;
+    histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
 namespace /* anonymous */

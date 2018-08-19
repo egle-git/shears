@@ -12,13 +12,21 @@ histo_set::histogram_type &histo_set::get(const std::string &name, const std::st
         return it->second;
     } else {
         // Histogram doesn't exist (yet), create it
-        auto model = _models.find(name);
-        if (model != _models.end()) {
-            // We rely on the model's copy constructor
-            auto res = _histograms.emplace(std::make_pair(name, tag), model->second);
-            return res.first->second;
+        std::string hname = combined_name(name, tag);
+        // Try to create from style
+        auto res = create_from_style(name, tag);
+        if (res != _histograms.end()) {
+            return res->second;
         } else {
-            throw std::logic_error("Histogram not declared: " + name);
+            // Try to find a model
+            auto model = _models.find(name);
+            if (model != _models.end()) {
+                // We rely on the model's copy constructor
+                auto res = _histograms.emplace(std::make_pair(name, tag), model->second);
+                return res.first->second;
+            } else {
+                throw std::logic_error("Histogram not declared: " + name);
+            }
         }
     }
 }
@@ -38,5 +46,33 @@ std::string histo_set::combined_name(const std::string &name, const std::string 
         return name;
     }
     return name + "_" + tag;
+}
+
+auto histo_set::create_from_style(const std::string &name, const std::string &tag)
+    -> decltype(_histograms)::iterator
+{
+    std::string fullname = combined_name(name, tag);
+    std::string method = _style.get<std::string>("binning", fullname, "undefined");
+    if (method == "undefined") {
+        return _histograms.end();
+    } else if (method == "uniform") {
+        int bin_count = _style.get<int>("bin count", fullname, 100);
+        double binning_min = _style.get<double>("binning min", fullname, 0);
+        double binning_max = _style.get<double>("binning max", fullname, 1);
+        auto res = _histograms.emplace(
+            std::make_pair(name, tag),
+            histogram_type(
+                fullname.c_str(), fullname.c_str(), bin_count, binning_min, binning_max));
+        return res.first;
+    } else if (method == "custom") {
+        auto bins = _style.get<std::vector<double>>("bin edges", fullname, {0., 1.});
+        auto res = _histograms.emplace(
+            std::make_pair(name, tag),
+            histogram_type(fullname.c_str(), fullname.c_str(), bins.size() - 1, bins.data()));
+        return res.first;
+    } else {
+        throw std::runtime_error("Undefined binning method '" + method +
+                                 "' matched by histogram '" + fullname + "'");
+    }
 }
 } // namespace util

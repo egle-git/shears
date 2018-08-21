@@ -90,6 +90,7 @@ comparison_entry.cc \
 dyjets_analyzer.cc \
 electrons.cc \
 event_counter.cc \
+genleps.cc \
 higgs_analyzer.cc \
 histo_set.cc \
 jets.cc \

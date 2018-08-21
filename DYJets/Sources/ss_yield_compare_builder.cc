@@ -54,6 +54,9 @@ void ss_yield_compare_builder::fill_upper_panel(const std::string &name)
     _ss_data_entry->draw(name, _lumi);
     _ss_mc_entry->draw(name, _lumi, true);
     _ss_data_entry->draw(name, _lumi, true);
+
+    format_upper_x_axis(*_ss_data_entry->get_x_axis(name, _lumi));
+    format_upper_x_axis(*_ss_mc_entry->get_x_axis(name, _lumi));
 }
 
 void ss_yield_compare_builder::fill_legend(TLegend &legend, const std::string &name)

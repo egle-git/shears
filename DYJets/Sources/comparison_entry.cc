@@ -99,6 +99,20 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
     return res;
 }
 
+TAxis *mc_comparison_entry::get_x_axis(const std::string &name, double lumi)
+{
+    if (_stack == nullptr) {
+        create_stack(name, lumi);
+        if (_stack == nullptr) {
+            return nullptr;
+        }
+    }
+    if (_stack->GetNhists() == 0) {
+        return nullptr;
+    }
+    return _stack->GetXaxis();
+}
+
 void mc_comparison_entry::reset_drawing_state()
 {
     _stack.reset();
@@ -207,6 +221,17 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
     }
     std::unique_ptr<TH1> res(dynamic_cast<TH1 *>(_histo->Clone()));
     return res;
+}
+
+TAxis *data_comparison_entry::get_x_axis(const std::string &name, double lumi)
+{
+    if (_histo == nullptr) {
+        create_histo(name, lumi);
+        if (_histo == nullptr) {
+            return nullptr;
+        }
+    }
+    return _histo->GetXaxis();
 }
 
 void data_comparison_entry::reset_drawing_state()

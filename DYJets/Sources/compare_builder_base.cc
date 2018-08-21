@@ -49,6 +49,9 @@ void compare_builder_base::build()
     for (const std::string &name : _histogram_names) {
         util::logging::debug << "Producing histogram: " << name << std::endl;
 
+        // Apply style
+        _logx = _style.get<bool>("log x", name, false);
+
         TCanvas canvas(name.c_str(), "", 700, 900);
 
         // Upper panel
@@ -94,7 +97,7 @@ void compare_builder_base::build()
         }
 
         // Apply style
-        if (_style.get<bool>("log x", name, false)) {
+        if (_logx) {
             upper.SetLogx();
             lower.SetLogx();
         }
@@ -137,6 +140,58 @@ std::unique_ptr<data::mc_comparison_entry> compare_builder_base::load_mc(
     return ptr;
 }
 
+namespace /* anonymous */ {
+    /**
+     * \brief Tunes an axis to be used on a log scale.
+     *
+     * If the first bin extends to 0, it is modified to start from a higher
+     * value. This is needed because otherwise ROOT will make it span half of
+     * the plots.
+     *
+     * \note Histograms with a uniform binning are not supported.
+     */
+    void prepare_axis_for_log(TAxis &axis)
+    {
+        if (axis.GetXmin() > 0 || axis.GetNbins() < 2) {
+            // Nothing to do
+            return;
+        }
+
+        // Get the bin edges in a safe container (std::vector over TArray).
+        const double *edges_ptr = axis.GetXbins()->GetArray();
+        if (edges_ptr == nullptr) {
+            // Happens when the histogram has a uniform binning.
+            return;
+        }
+        std::vector<double> edges(edges_ptr, edges_ptr + axis.GetNbins() + 1);
+
+        // First, we get the extent of the second bin. It's proportional to the
+        // ratio of the edges.
+        double ratio = edges[2] / edges[1];
+
+        // Then, we modify the first bin boundaries so that it gets the same
+        // displayed size.
+        edges[0] = edges[1] / ratio;
+
+        // We want the lower bound to be a round number, so we round it. It's
+        // more complicated that a simple floor() because we want 0.25 to become
+        // 0.2 and not 0.0.
+        double logfactor = std::pow(10, std::ceil(std::log10(edges[0])) - 1);
+        edges[0] = logfactor * std::floor(edges[0] / logfactor);
+        edges[0] *= 1.001; // Avoid tick labels.
+
+        // Modify the axis to use the new bin edges.
+        axis.Set(edges.size() - 1, edges.data());
+    }
+} // namespace anonymous
+
+void compare_builder_base::format_upper_x_axis(TAxis &axis) const
+{
+    if (_logx) {
+        prepare_axis_for_log(axis);
+    }
+}
+
 void compare_builder_base::format_upper_y_axis(TAxis &axis, const std::string &title) const
 {
     axis.SetLabelSize(0.04);
@@ -153,6 +208,10 @@ void compare_builder_base::format_lower_x_axis(TAxis &axis) const
     axis.SetTitleOffset(1.2);
     axis.SetLabelSize(0.10);
     axis.SetLabelOffset(0.017);
+
+    if (_logx) {
+        prepare_axis_for_log(axis);
+    }
 }
 
 void compare_builder_base::format_lower_y_axis(TAxis &axis, const std::string &title) const

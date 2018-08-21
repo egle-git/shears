@@ -27,6 +27,8 @@ class compare_builder_base
     util::options _opt;
     util::style_list _style;
 
+    bool _logx;
+
   public:
     /// \brief Constructor
     explicit compare_builder_base(const std::string &analyzer_name,
@@ -64,6 +66,9 @@ class compare_builder_base
     std::unique_ptr<data::mc_comparison_entry> load_mc(const std::string &input_dir,
                                                        bool keep_signal = true,
                                                        bool keep_background = true);
+
+    /// \brief Formats the upper panel's x axis
+    void format_upper_x_axis(TAxis &axis) const;
 
     /// \brief Formats the upper panel's y axis
     void format_upper_y_axis(TAxis &axis, const std::string &title = "# Events") const;

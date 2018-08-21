@@ -10,6 +10,7 @@
 #include "mc_group.h"
 #include "options.h"
 
+class TAxis;
 class TFile;
 class TH1;
 class TLegend;
@@ -47,6 +48,16 @@ class comparison_entry
      */
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) = 0;
 
+    /**
+     * \brief Returns a pointer to the \c TAxis corresponding to the horizontal
+     *        axis.
+     *
+     * In case the axis doesn't make sense, \c nullptr shall be returned. The
+     * pointer may not be invalidated until \ref reset_drawing_state is called.
+     */
+    virtual TAxis *get_x_axis(const std::string &/* name */, double /* lumi */)
+    { return nullptr; }
+
     /// \brief Discards any internal state bound to the last histogram.
     virtual void reset_drawing_state() = 0;
 };
@@ -78,6 +89,7 @@ class mc_comparison_entry : public comparison_entry
     virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
+    virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
   private:
@@ -110,6 +122,7 @@ class data_comparison_entry : public comparison_entry
     virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
+    virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
     /// \brief Returns the sum of event weights (for MC)

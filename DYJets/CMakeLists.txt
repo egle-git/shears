@@ -224,5 +224,23 @@ target_link_libraries(DYJets-legacy PUBLIC yaml-cpp)
 # Legacy targets
 ###################################################################################################
 
+add_executable(plotCrossSections Main/plotCrossSections.cc)
+target_link_libraries(plotCrossSections PRIVATE DYJets-legacy)
+
+add_executable(plotRespMatrix Sources/plotRespMatrix.cc)
+target_link_libraries(plotRespMatrix PRIVATE DYJets-legacy)
+
+add_executable(runIntegralCheck Main/runIntegralCheck.cc)
+target_link_libraries(runIntegralCheck PRIVATE DYJets-legacy)
+
+add_executable(runRecoComparison Main/runRecoComparison.cc)
+target_link_libraries(runRecoComparison PRIVATE DYJets-legacy)
+
 add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
 target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)
+
+add_executable(testDecompVar Sources/testDecompVar.cc)
+target_link_libraries(testDecompVar PRIVATE DYJets-legacy)
+
+add_executable(testPrintTable Sources/testPrintTable.cc)
+target_link_libraries(testPrintTable PRIVATE DYJets-legacy)

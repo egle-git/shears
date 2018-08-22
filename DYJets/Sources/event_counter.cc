@@ -1,6 +1,7 @@
 #include "event_counter.h"
 
 #include <iomanip>
+#include <sstream>
 
 #include "logging.h"
 
@@ -16,8 +17,10 @@ void event_counter::print() const
         const counter &c = _counts.at(name);
         countlength = std::max(std::to_string(c.count).size(), countlength);
 
-        int effcount = c.effcount / c.effabscount * c.count;
-        effcountlength = std::max(std::to_string(effcount).size(), effcountlength);
+        double effcount = c.effcount / c.effabscount * c.count;
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(0) << effcount;
+        effcountlength = std::max(ss.str().size(), effcountlength);
     }
     // Table header labels
     const std::string namelabel = "Counter";
@@ -61,7 +64,9 @@ void event_counter::print() const
                       << c.count
                       << "  "
                       << std::setw(effcountlength)
-                      << int(c.effcount / c.effabscount * c.count)
+                      << std::fixed
+                      << std::setprecision(0)
+                      << (c.effcount / c.effabscount * c.count)
                       << std::resetiosflags(std::ios_base::right)
                       << std::endl;
     }

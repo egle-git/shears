@@ -35,12 +35,6 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
-    counter.declare("Total b-flavor jets");
-    counter.declare("Total c-flavor jets");
-    counter.declare("Total udsg-flavor jets");
-    counter.declare("Total b-flavor jets, b-tagged");
-    counter.declare("Total c-flavor jets, b-tagged");
-    counter.declare("Total udsg-flavor jets, b-tagged");
 }
 
 boson_jets_analyzer::~boson_jets_analyzer()

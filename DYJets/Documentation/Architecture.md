@@ -67,5 +67,16 @@ in recent (`>= 8.0`) `CMSSW` environments. The following libraries are required:
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (version 0.5 or later), used by the `Higgs` code
   to parse the configuration files.
 
-In addition, GNU `make` and a C++ 14 compiler is required. Again, recent `CMSSW` environments
-should provide these tools.
+In addition, `cmake` >= 3.6 and a C++ 14 compiler is required. Again, recent `CMSSW` environments
+should provide these tools. A valid version of `cmake` can be found at:
+
+```
+/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/cmake/3.7.0-oenich/
+```
+
+It is enabled by running the following command:
+
+```
+source /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/cmake/3.7.0-oenich/etc/profile.d/init.sh
+```
+

@@ -125,7 +125,7 @@ endif
 
 #CXXFLAGS += -std=c++11
 #LDFLAGS += -std=c++11
-CPPFLAGS += -std=c++11
+CPPFLAGS += -std=c++14
 
 # === RooUnfold directories ========================================
 

@@ -70,6 +70,7 @@ END_HTML */
 #include <cmath>
 #include <vector>
 
+#include "TBuffer.h"
 #include "TClass.h"
 #include "TMatrixD.h"
 #include "TNamed.h"

@@ -43,20 +43,30 @@ ROOT_GENERATE_DICTIONARY(RooUnfold
 
 # Files added by hand to avoid importing too many static variables from the old code...
 add_library(DYJets
+    Sources/BTagCalibrationStandalone.cc
+    Sources/btagger.cc
     Sources/catalog.cc
     Sources/chains.cc
     Sources/comparison_entry.cc
+    Sources/electrons.cc
+    Sources/event_counter.cc
     Sources/functions.cc
     Sources/histo_set.cc
+    Sources/jets.cc
     Sources/job.cc
     Sources/logging.cc
     Sources/mc_group.cc
     Sources/muons.cc
     Sources/options.cc
+    Sources/pileup.cc
+    Sources/RoccoR.cc
     Sources/sample.cc
+    Sources/standalone_LumiReWeighting.cc
+    Sources/tables.cc
     Sources/timer.cc
     Sources/triggers.cc
     Sources/weights.cc
+    Sources/zfinder.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

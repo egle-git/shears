@@ -43,6 +43,37 @@ ROOT_GENERATE_DICTIONARY(RooUnfold
 )
 
 ###################################################################################################
+# Utilities library
+###################################################################################################
+
+add_library(DYJets-util
+    Sources/chains.cc
+    Sources/event_counter.cc
+    Sources/histo_set.cc
+    Sources/job.cc
+    Sources/logging.cc
+    Sources/options.cc
+    Sources/style_list.cc
+    Sources/tables.cc
+    Sources/timer.cc
+)
+
+# Preprocessor macro to disable incompatible parts of the old code
+target_compile_definitions(DYJets-util PUBLIC DYJETS_NEW_API)
+
+# Required headers
+target_include_directories(DYJets-util PUBLIC Includes)
+target_include_directories(DYJets-util SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
+
+# Dependencies
+target_link_libraries(DYJets-util PUBLIC boost_filesystem)
+target_link_libraries(DYJets-util PUBLIC boost_program_options)
+target_link_libraries(DYJets-util PUBLIC boost_system)
+target_link_libraries(DYJets-util PUBLIC ${ROOT_LIBRARIES})
+target_link_libraries(DYJets-util PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(DYJets-util PUBLIC yaml-cpp)
+
+###################################################################################################
 # New DYJets library
 ###################################################################################################
 
@@ -51,24 +82,16 @@ add_library(DYJets
     Sources/BTagCalibrationStandalone.cc
     Sources/btagger.cc
     Sources/catalog.cc
-    Sources/chains.cc
     Sources/comparison_entry.cc
     Sources/electrons.cc
-    Sources/event_counter.cc
     Sources/functions.cc
-    Sources/histo_set.cc
     Sources/jets.cc
-    Sources/job.cc
-    Sources/logging.cc
     Sources/mc_group.cc
     Sources/muons.cc
-    Sources/options.cc
     Sources/pileup.cc
     Sources/RoccoR.cc
     Sources/sample.cc
     Sources/standalone_LumiReWeighting.cc
-    Sources/tables.cc
-    Sources/timer.cc
     Sources/triggers.cc
     Sources/weights.cc
     Sources/zfinder.cc
@@ -82,6 +105,7 @@ target_include_directories(DYJets PUBLIC Includes)
 target_include_directories(DYJets SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Dependencies
+target_link_libraries(DYJets PUBLIC DYJets-util)
 target_link_libraries(DYJets PUBLIC boost_filesystem)
 target_link_libraries(DYJets PUBLIC boost_program_options)
 target_link_libraries(DYJets PUBLIC boost_system)

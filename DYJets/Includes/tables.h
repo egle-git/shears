@@ -54,6 +54,8 @@ class table
 using tables = std::map<std::string, table>;
 } // namespace util
 
+#ifdef DYJETS_NEW_API
+
 /// \cond
 namespace YAML
 {
@@ -67,5 +69,7 @@ template <> struct convert<util::table>
 };
 } // namespace YAML
 /// \endcond
+
+#endif // DYJETS_NEW_API
 
 #endif // TABLES_H

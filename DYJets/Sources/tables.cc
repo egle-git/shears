@@ -3,7 +3,9 @@
 #include <cmath>
 #include <fstream>
 
-#include <yaml-cpp/yaml.h>
+#ifdef DYJETS_NEW_API
+#   include <yaml-cpp/yaml.h>
+#endif // DYJETS_NEW_API
 
 #include "logging.h"
 
@@ -71,6 +73,8 @@ double table::getEfficiencyHigh(double pt, double eta) const
 }
 } // namespace util
 
+#ifdef DYJETS_NEW_API
+
 /// \cond
 namespace YAML
 {
@@ -86,3 +90,5 @@ bool convert<util::table>::decode(const Node &node, util::table &table)
 }
 } // namespace YAML
 /// \endcond
+
+#endif // DYJETS_NEW_API

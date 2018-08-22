@@ -8,8 +8,8 @@ The following commands assume that you have checked out a `CMSSW` release (8.0 o
 ~~~{.sh}
 cmsenv
 cd shears/DYJets
-make -j$(nproc) # This attempt fails
-make -j$(nproc) # This attempt works
+cmake3 . # Or "cmake ." if your cmake version is >= 3.6
+make -j$(nproc)
 ~~~
 
 You're now ready to run the code. Programs relevant to the Higgs analysis are located in the `Main`

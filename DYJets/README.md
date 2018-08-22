@@ -24,8 +24,8 @@ Once you have cloned the repository, you should move to the `shears/DYJets` dire
 
 ```
     $ cd shears/DYJets
-    $ make clean
-    $ make
+    $ cmake .
+    $ make -j$(nproc)
 ```
 
 Unless you have already your own configuration file, copy the example:
@@ -39,7 +39,7 @@ cp example.cfg vjets.cfg
 To run the Z+jet analysis, execute:
 
 ```
-    $ ./runZJets_newformat
+    $ bin/runZJets_newformat
 ```
 
 With the default configuration file, the histograms will be store in the HistoFiles directory.
@@ -49,7 +49,7 @@ Note: if you have many "Warning: parameter XYZ was not found in configuration fi
 To use as input ntuple in the Run 1 format, run `runZJets` instead of `runZJets_newformat`. To use Run 1 format you should use the code from the Run1_format branch, as the Run 1 format is not maintained on the master branch.
 
 ```
-    $ ./runZJets
+    $ bin/runZJets
 ```
 
 Important: we recommand to use Run 2 format. The instructions has been tested with this format.
@@ -82,10 +82,10 @@ To produce data/MC comparison plot, you need to run on data, DY+jet and backgrou
 ```
 cd DYJets
 make
-./runZJets_newformat doWhat=data
-./runZJets_newformat doWhat=dyjets
-./runZJets_newformat doWhat=background
-./runRecoComparison
+bin/runZJets_newformat doWhat=data
+bin/runZJets_newformat doWhat=dyjets
+bin/runZJets_newformat doWhat=background
+bin/runRecoComparison
 ```
 
 The plots can then be found in RecoComparison.
@@ -102,10 +102,10 @@ The script will display errors which can be ignored.
 If you are impatient you can run on a subset of events. This can be done by replacing the steps 5 to 8 by the following ones:
 
 ```
-  ./runZJets_newformat doWhat=data maxEvents=10000
-  ./runZJets_newformat doWhat=dyjets maxEvents=10000 mcYieldScale=-1
-  ./runZJets_newformat doWhat=background maxEvents=10000 mcYieldScale=-1
-  ./runRecoComparison histoDir=HistoFiles_10000evts/
+  bin/runZJets_newformat doWhat=data maxEvents=10000
+  bin/runZJets_newformat doWhat=dyjets maxEvents=10000 mcYieldScale=-1
+  bin/runZJets_newformat doWhat=background maxEvents=10000 mcYieldScale=-1
+  bin/runRecoComparison histoDir=HistoFiles_10000evts/
 ```
 
 Note 1: the mcYieldScale=-1 is required to get the proper normalizations of the MC sample. The option is used to pass the fraction of data events which has been processed. With the special value -1 used here the value is read from the file `histoDir/.mcYieldScale` that is created when running on data (doWhat=data). Note that the value is print on screen in addition to be store in this file. The histoDir=HistoFiles_10000evts/ is required because when limiting the number of events, the histogram are stored in a different directory than the default HistoFiles: it is to prevent to delete histograms produced from a long run, when running a short test.
@@ -118,13 +118,13 @@ Run the unfolding
 Before running the unfolding you need to produce the histogran for all the variations of the systematic sources. This can be achived by setting doSysRunning option to 1 either in the vjet.cfg configuration file or on the command line and runing runZJets_newformat:
 
 ```
-./runZJets_newformat doSysRunning=1
+bin/runZJets_newformat doSysRunning=1
 ```
 
 Once this stop done the unfolding can be ran with the following command:
 
 ```
-./runUnfoldingZJets
+bin/runUnfoldingZJets
 ```
 
 The unfolded result can then be found in the UnfoldedFiles directory and the control plots in the UnfoldingCheck.

@@ -1,33 +1,11 @@
 # git will ignore the executable files:
 Bonzais/pruner
-runVJets
-runZJets_newformat
-runRecoComparison
-runFinalUnfold
-runUnfoldingZJets
-runCombination
-runHiggs
-testDecompVar
-dispatcher
-runMakeStatisticsTable
-DYJets/Sources/plotRespMatrix
-DYJets/runDMu.sh
-DYJets/runDE.sh
-plotCrossSections
-plotRespMatrix
-runIntegralCheck
 
 # git will not consider the following files:
 *.root
 *.o
 *.pyc
 __init__.py
-DYJets/RooUnfold-1.1.1/libRooUnfold.rootmap
-DYJets/RooUnfold-1.1.1/tmp
-DYJets/RooUnfold/libRooUnfold.rootmap
-DYJets/RooUnfold/tmp
-DYJets/RooUnfold/*.pcm
-DYJets/RooUnfold/tmp/linuxx8664gcc/Roo*
 *.so
 *.d
 !crab.d
@@ -39,7 +17,6 @@ copyToPNFS.sh
 *~
 *.pyc
 *.pdf
-#*#
 
 # git will ignore the nohup output files
 .nfs*
@@ -50,14 +27,26 @@ copyToPNFS.sh
 DYJets/Recos/
 DYJets/Unfolds/
 DYJets/logs/
+DYJets/bin/
+DYJets/lib/
 
+# Ignore cmake files
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
 
+DYJets/Makefile
 
 # ignores input data files
 Data_Z_5311
 Data_Z_5311_New
 DataW
 DataTTbarEMu
+
+# Ignore analysis byproducts
+DYJets/.histList
+DYJets/mcYieldScale.txt
+DYJets/log*.txt
 
 # ignores output root files
 DYJets/HistoFiles*

@@ -138,12 +138,12 @@ target_link_libraries(DYJets-compare PUBLIC DYJets-data)
 # Higgs targets
 ###################################################################################################
 
+add_executable(higgs-compare Main/higgs-compare.cc)
+target_link_libraries(higgs-compare PRIVATE DYJets-compare)
+
 add_executable(higgs-job-list Main/higgs-job-list.cc)
 target_link_libraries(higgs-job-list PRIVATE DYJets-data)
 
 add_executable(higgs-loop Main/higgs-loop.cc Sources/higgs_analyzer.cc)
 target_link_libraries(higgs-loop PRIVATE DYJets-data)
 target_link_libraries(higgs-loop PRIVATE DYJets-physics)
-
-add_executable(higgs-compare Main/higgs-compare.cc)
-target_link_libraries(higgs-compare PRIVATE DYJets-compare)

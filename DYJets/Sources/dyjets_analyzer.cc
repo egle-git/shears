@@ -109,6 +109,32 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
     return { Z.a, Z.b };
 }
 
+std::vector<physics::lepton> dyjets_analyzer::find_gen_boson(
+    const std::vector<physics::lepton> &genleps)
+{
+    if (genleps.size() < 2) {
+        return {};
+    }
+    counter.count("With two good gen leptons", weights().global_weight());
+
+    if (std::abs(genleps[0].pdgid) == 13) {
+        counter.count("With two good gen muons", weights().global_weight());
+    } else {
+        counter.count("With two good gen electrons", weights().global_weight());
+    }
+
+    std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});
+    if (candidates.size() == 0) {
+        return {};
+    }
+    counter.count("With a good gen Z boson", weights().global_weight());
+
+    std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
+    physics::dilepton Z = candidates[0];
+    return { Z.a, Z.b };
+}
+
+
 po::options_description dyjets_analyzer::options()
 {
     return po::options_description("Physics options");

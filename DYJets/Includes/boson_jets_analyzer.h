@@ -104,6 +104,8 @@ protected:
     virtual std::vector<lepton> find_boson(const std::vector<lepton> &muons,
                                            const std::vector<lepton> &electrons) = 0;
 
+    virtual std::vector<lepton> find_gen_boson(const std::vector<lepton> &genleps) = 0;
+
     /// \brief Checks whether the current event passes the trigger.
     virtual bool passes_trigger();
 

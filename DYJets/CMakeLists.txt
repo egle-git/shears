@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
-find_package(Boost REQUIRED COMPONENTS filesystem program_options system)
+find_package(Boost REQUIRED COMPONENTS filesystem iostreams program_options system)
 find_package(ROOT 6 REQUIRED COMPONENTS Table TreePlayer Unfold)
 find_package(Threads REQUIRED)
 
@@ -170,3 +170,59 @@ target_link_libraries(dyjets-job-list PRIVATE DYJets-data)
 add_executable(dyjets-loop Main/dyjets-loop.cc Sources/dyjets_analyzer.cc)
 target_link_libraries(dyjets-loop PRIVATE DYJets-data)
 target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
+
+###################################################################################################
+# Legacy library
+###################################################################################################
+
+add_library(DYJets-legacy
+    Sources/ArgParser.cc
+    Sources/BLUEMeth.cc
+    Sources/Combination.cc
+    Sources/Config.cc
+    Sources/ConfigVJets.cc
+    Sources/fixYscale.cc
+    Sources/functions.cc
+    Sources/getFilesAndHistogramsZJets.cc
+    Sources/HistoSetZJets.cc
+    Sources/JetCorrectionUncertainty.cc
+    Sources/JetCorrectorParameters.cc
+    Sources/JetResolution.cc
+    Sources/JetResolutionObject.cc
+    Sources/printTable.cc
+    Sources/PlotSettings.cc
+    Sources/RecoComparison.cc
+    Sources/ResultTables.cc
+    Sources/RoccoR.cc
+    Sources/rootFunctions.cc
+    Sources/SectionedConfig.cc
+    Sources/SimpleJetCorrectionUncertainty.cc
+    Sources/TextTools.cc
+    Sources/Uncertainties.cc
+    Sources/UnfoldingZJets.cc
+    Sources/variablesOfInterestZJets.cc
+
+    # Some sources shared with the new code
+    Sources/catalog.cc
+    Sources/logging.cc
+    Sources/standalone_LumiReWeighting.cc
+    Sources/tables.cc
+)
+
+# Required headers
+target_include_directories(DYJets-legacy PUBLIC Includes)
+target_include_directories(DYJets-legacy SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+target_include_directories(DYJets-legacy SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
+
+# Dependencies
+target_link_libraries(DYJets-legacy PUBLIC ${ROOT_LIBRARIES})
+target_link_libraries(DYJets-legacy PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(DYJets-legacy PUBLIC RooUnfold)
+target_link_libraries(DYJets-legacy PUBLIC yaml-cpp)
+
+###################################################################################################
+# Legacy targets
+###################################################################################################
+
+add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
+target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)

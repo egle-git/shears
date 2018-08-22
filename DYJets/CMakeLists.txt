@@ -59,7 +59,6 @@ add_library(DYJets-util
     Sources/timer.cc
 )
 
-# Preprocessor macro to disable incompatible parts of the old code
 target_compile_definitions(DYJets-util PUBLIC DYJETS_NEW_API)
 
 # Required headers
@@ -98,9 +97,9 @@ target_link_libraries(DYJets-data PUBLIC DYJets-util)
 # Physics library
 ###################################################################################################
 
-# Files added by hand to avoid importing too many static variables from the old code...
 add_library(DYJets-physics
     Sources/BTagCalibrationStandalone.cc
+    Sources/boson_jets_analyzer.cc
     Sources/btagger.cc
     Sources/electrons.cc
     Sources/jets.cc
@@ -123,9 +122,12 @@ target_link_libraries(DYJets-physics PUBLIC DYJets-util)
 # Comparison library
 ###################################################################################################
 
-# Files added by hand to avoid importing too many static variables from the old code...
 add_library(DYJets-compare
     Sources/comparison_entry.cc
+    Sources/compare_builder_base.cc
+    Sources/reco_compare_builder.cc
+    Sources/signal_bg_compare_builder.cc
+    Sources/ss_yield_compare_builder.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code
@@ -147,3 +149,17 @@ target_link_libraries(higgs-job-list PRIVATE DYJets-data)
 add_executable(higgs-loop Main/higgs-loop.cc Sources/higgs_analyzer.cc)
 target_link_libraries(higgs-loop PRIVATE DYJets-data)
 target_link_libraries(higgs-loop PRIVATE DYJets-physics)
+
+###################################################################################################
+# Drell-Yan targets
+###################################################################################################
+
+add_executable(dyjets-compare Main/dyjets-compare.cc)
+target_link_libraries(dyjets-compare PRIVATE DYJets-compare)
+
+add_executable(dyjets-job-list Main/dyjets-job-list.cc)
+target_link_libraries(dyjets-job-list PRIVATE DYJets-data)
+
+add_executable(dyjets-loop Main/dyjets-loop.cc Sources/dyjets_analyzer.cc)
+target_link_libraries(dyjets-loop PRIVATE DYJets-data)
+target_link_libraries(dyjets-loop PRIVATE DYJets-physics)

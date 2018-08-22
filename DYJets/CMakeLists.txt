@@ -89,6 +89,9 @@ target_link_libraries(DYJets PUBLIC yaml-cpp)
 # Higgs targets
 ###################################################################################################
 
+add_executable(higgs-job-list Main/higgs-job-list.cc)
+target_link_libraries(higgs-job-list PRIVATE DYJets)
+
 add_executable(higgs-loop Main/higgs-loop.cc Sources/higgs_analyzer.cc)
 target_link_libraries(higgs-loop PRIVATE DYJets)
 

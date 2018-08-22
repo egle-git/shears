@@ -46,8 +46,8 @@ ROOT_GENERATE_DICTIONARY(RooUnfold
 # Python tools
 ###################################################################################################
 
-file(INSTALL Main/send-to-cluster DESTINATION bin)
-file(INSTALL Main/task-check      DESTINATION bin)
+file(COPY Main/send-to-cluster DESTINATION bin)
+file(COPY Main/task-check      DESTINATION bin)
 
 ###################################################################################################
 # Utilities library
@@ -241,6 +241,3 @@ target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)
 
 add_executable(testDecompVar Sources/testDecompVar.cc)
 target_link_libraries(testDecompVar PRIVATE DYJets-legacy)
-
-add_executable(testPrintTable Sources/testPrintTable.cc)
-target_link_libraries(testPrintTable PRIVATE DYJets-legacy)

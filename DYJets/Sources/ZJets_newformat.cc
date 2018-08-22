@@ -5,7 +5,6 @@
 #include "ZJets_newformat.h"
 #include "ConfigVJets.h"
 #include "JetResolution.h"
-#include "LHAPDF/LHAPDF.h"
 #include "catalog.h"
 #include "functions.h"
 #include "standalone_LumiReWeighting.h"
@@ -66,8 +65,6 @@ int ZJets::Loop(bool hasRecoInfo,
     m_JetResolutionScaleFactor =
         new JME::JetResolutionScaleFactor("EfficiencyTables/Spring16_25nsV10_MC_SF_AK4PFchs.txt");
     m_JetParameters = new JME::JetParameters();
-    //--- Initialize PDF from LHAPDF if needed ---
-    if (pdfSet != "") initLHAPDF(pdfSet, pdfMember);
     //--------------------------------------------
 
     // store job id
@@ -6840,17 +6837,6 @@ int ZJets::Loop(bool hasRecoInfo,
     std::cout << buffer << std::endl;
 
     return 0;
-}
-
-void ZJets::initLHAPDF(TString pdfSet, int pdfMember)
-{
-    LHAPDF::initPDFSet(1, pdfSet.Data(), pdfMember);
-    // LHAPDF::initPDFSet(1, "CT10.LHgrid");
-    LHAPDF::initPDFSet(2, "cteq6ll.LHpdf");
-    if (pdfMember > LHAPDF::numberPDF(1) + 1) {
-        cout << "Warning pdfMember to high" << endl;
-        return;
-    }
 }
 
 double ZJets::computePDFWeight()

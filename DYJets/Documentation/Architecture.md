@@ -61,7 +61,6 @@ in recent (`>= 8.0`) `CMSSW` environments. The following libraries are required:
     - The Program Options library to handle command-line options;
     - The Filesystem library to handle filesystem operation such as creating directories;
     - The String Algorithms library for operations on strings.
-- [LHAPDF](https://lhapdf.hepforge.org/) for... PDFs.
 - The well-known (among CERN physicists) [ROOT](http://root.cern.ch) toolkit (version `6.x`).
 - [RooUnfold](http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html), used for unfolding. A
   modified copy is kept in the source tree.

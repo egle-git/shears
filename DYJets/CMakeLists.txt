@@ -109,6 +109,7 @@ add_library(DYJets-physics
     Sources/boson_jets_analyzer.cc
     Sources/btagger.cc
     Sources/electrons.cc
+    Sources/genleps.cc
     Sources/jets.cc
     Sources/muons.cc
     Sources/pileup.cc

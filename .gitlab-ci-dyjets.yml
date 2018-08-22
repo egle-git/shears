@@ -18,7 +18,7 @@ DYJets:
   tags: [ cvmfs ]
   script:
     - yum -q -y install boost-devel
-    - .gitlab-ci/compile.sh DYJets
+    - .gitlab-ci/compile-cmake.sh DYJets
 
 DYJets doxygen:
   stage: lint

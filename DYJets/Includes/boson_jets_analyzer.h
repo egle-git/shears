@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "BTagCalibrationStandalone.h"
+#include "btagger.h"
 #include "electrons.h"
 #include "event_counter.h"
 #include "histo_set.h"
@@ -47,13 +48,11 @@ private:
     electrons _electrons;
     jets _jets;
     pileup _pileup;
-
-    physics::weights _weights;
+    btagger _btagger;
 
     bool _bjet_veto = true;
-    double _bjet_veto_cut = 0.5426;
-    std::array<double, 3> _bjet_tag_eff;
-    BTagCalibrationReader _btag_calibration_reader;
+
+    physics::weights _weights;
 
 public:
     /// \brief Constructor

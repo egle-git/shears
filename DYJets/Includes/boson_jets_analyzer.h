@@ -9,6 +9,7 @@
 #include "btagger.h"
 #include "electrons.h"
 #include "event_counter.h"
+#include "genleps.h"
 #include "histo_set.h"
 #include "jets.h"
 #include "job.h"
@@ -43,7 +44,8 @@ private:
     trigger_values _triggers;
     trigger_mask _mask_eraBG;
     trigger_mask _mask_eraH;
-
+    
+    genleps _genleps;
     muons _muons;
     electrons _electrons;
     jets _jets;

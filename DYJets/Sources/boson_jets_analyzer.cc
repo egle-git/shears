@@ -7,6 +7,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     EvtRunNum(info.reader, "EvtRunNum"),
     _rng(std::random_device()()),
+    _genleps(info, opt, histo_set),
     _triggers(info),
     _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
     _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
@@ -69,7 +70,20 @@ void boson_jets_analyzer::operator()()
         }
     }
 
-    /*
+    std::cout << "Genleps size before"<< std::endl;
+
+    std::vector<lepton> genleps = _genleps.get();
+      std::cout << "Genleps size " << genleps.size() << std::endl;
+
+    std::vector<lepton> genleptons = find_gen_boson(genleps);
+
+    if(!genleptons.empty()){
+      std::cout << "Found gen lep pair " << (genleptons[0].v + genleptons[1].v).M() << std::endl;
+
+     _genleps.fill(histo_set, "genZinc0jet_noweight", genleptons, weights());  
+
+    }
+ /*
      * Handle the trigger
      */
     if (!passes_trigger()) {

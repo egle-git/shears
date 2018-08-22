@@ -120,31 +120,30 @@ target_compile_definitions(DYJets-physics PUBLIC DYJETS_NEW_API)
 target_link_libraries(DYJets-physics PUBLIC DYJets-util)
 
 ###################################################################################################
-# New DYJets library
+# Comparison library
 ###################################################################################################
 
 # Files added by hand to avoid importing too many static variables from the old code...
-add_library(DYJets
+add_library(DYJets-compare
     Sources/comparison_entry.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code
-target_compile_definitions(DYJets PUBLIC DYJETS_NEW_API)
+target_compile_definitions(DYJets-compare PUBLIC DYJETS_NEW_API)
 
 # Dependencies
-target_link_libraries(DYJets PUBLIC DYJets-util)
-target_link_libraries(DYJets PUBLIC DYJets-data)
-target_link_libraries(DYJets PUBLIC DYJets-physics)
+target_link_libraries(DYJets-compare PUBLIC DYJets-data)
 
 ###################################################################################################
 # Higgs targets
 ###################################################################################################
 
 add_executable(higgs-job-list Main/higgs-job-list.cc)
-target_link_libraries(higgs-job-list PRIVATE DYJets)
+target_link_libraries(higgs-job-list PRIVATE DYJets-data)
 
 add_executable(higgs-loop Main/higgs-loop.cc Sources/higgs_analyzer.cc)
-target_link_libraries(higgs-loop PRIVATE DYJets)
+target_link_libraries(higgs-loop PRIVATE DYJets-data)
+target_link_libraries(higgs-loop PRIVATE DYJets-physics)
 
 add_executable(higgs-compare Main/higgs-compare.cc)
-target_link_libraries(higgs-compare PRIVATE DYJets)
+target_link_libraries(higgs-compare PRIVATE DYJets-compare)

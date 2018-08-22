@@ -25,7 +25,7 @@ int main(int argc, char **argv)
             }
 
             for (unsigned job = 0; job < sample.jobs(); ++job) {
-                std::cout << "Main/dyjets-loop -s " << sample.name() << " -o {results}";
+                std::cout << "bin/dyjets-loop -s " << sample.name() << " -o {results}";
                 if (opt.map.count("config") > 0) {
                     std::cout << " -c " << opt.config_file();
                 }

@@ -30,14 +30,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ###################################################################################################
 
 file(GLOB RooUnfold_src "RooUnfold/src/*.cxx")
-add_library(RooUnfold ${RooUnfold_src} RooUnfoldDict.cxx)
+add_library(RooUnfold ${RooUnfold_src} CMakeFiles/RooUnfold.dir/RooUnfoldDict.cxx)
 
 target_include_directories(RooUnfold PUBLIC "RooUnfold/src")
 target_include_directories(RooUnfold SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Generate dictionary
 ROOT_GENERATE_DICTIONARY(RooUnfold
-    RooUnfoldDict
+    CMakeFiles/RooUnfold.dir/RooUnfoldDict
     "RooUnfold/src/*.h"
     LINKDEF "RooUnfold_LinkDef.h"
 )

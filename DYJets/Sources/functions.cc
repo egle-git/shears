@@ -1,6 +1,5 @@
 #include "functions.h"
 #include "ConfigVJets.h"
-#include "RooUnfoldResponse.h"
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -22,6 +21,10 @@
 #include <sstream>
 #include <stdlib.h>
 #include <vector>
+
+#ifndef DYJETS_NEW_API
+#   include "RooUnfoldResponse.h"
+#endif // DYJETS_NEW_API
 
 extern ConfigVJets cfg;
 
@@ -754,6 +757,9 @@ bool isRootFile(const char *path)
     }
 }
 
+
+#ifndef DYJETS_NEW_API
+
 bool mergeHistFiles(const std::vector<std::string> &src, const std::string &dest)
 {
     TH1::SetDefaultSumw2();
@@ -807,6 +813,8 @@ bool mergeHistFiles(const std::vector<std::string> &src, const std::string &dest
     return true;
 }
 
+#endif // DYJETS_NEW_API
+
 // Check that two Root TAxis have indentical boudaries and binning:
 bool isSameBinning(const TAxis &ax1, const TAxis &ax2)
 {
@@ -828,6 +836,7 @@ bool isSameBinning(const TAxis &ax1, const TAxis &ax2)
 }
 
 #ifndef DYJETS_NEW_API
+
 void saveCanvas(TCanvas *c, const char *outputDir, const char *baseName)
 {
     std::string mainFormat = cfg.getS("mainFormat", "pdf");
@@ -846,6 +855,7 @@ void saveCanvas(TCanvas *c, const char *outputDir, const char *baseName)
         c->SaveAs(TString(outputDir) + "/" + ext + "/" + baseName + canvas + "." + ext.c_str());
     }
 }
+
 #endif
 
 /** Round a number to n digits before or after the decimal point.

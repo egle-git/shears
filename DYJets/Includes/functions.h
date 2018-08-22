@@ -1,7 +1,6 @@
 #ifndef _functions_h_
 #define _functions_h_
 
-#include <RooUnfoldResponse.h>
 #include <TLorentzVector.h>
 #include <cstdarg>
 #include <iostream>
@@ -28,6 +27,7 @@
 #define LUMI_RUNG_2016 7.540
 #define LUMI_RUNH_2016 8.606
 
+class TAxis;
 class TCanvas;
 
 using namespace std;
@@ -153,12 +153,16 @@ bool mergeHistFiles(const std::vector<std::string> &src, const std::string &dest
 
 bool isSameBinning(const TAxis &ax1, const TAxis &ax2);
 
+#ifndef DYJETS_NEW_API
+
 // void saveCanvas(const char* fileBaseName, const TCanvas* c = 0);
 
 /** Save a root canvas in the file formats defined in the configuration
  * parameters mainFormat and extraFormats
  */
 void saveCanvas(TCanvas *c, const char *outputDir, const char *baseName);
+
+#endif // DYJETS_NEW_API
 
 ///@{
 /** Rounds figures of a measurement according to CMS convention

@@ -49,6 +49,7 @@ ROOT_GENERATE_DICTIONARY(RooUnfold
 add_library(DYJets-util
     Sources/chains.cc
     Sources/event_counter.cc
+    Sources/functions.cc # Legacy
     Sources/histo_set.cc
     Sources/job.cc
     Sources/logging.cc
@@ -74,23 +75,38 @@ target_link_libraries(DYJets-util PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(DYJets-util PUBLIC yaml-cpp)
 
 ###################################################################################################
-# New DYJets library
+# Data library
+###################################################################################################
+
+add_library(DYJets-data
+    Sources/catalog.cc
+    Sources/mc_group.cc
+    Sources/sample.cc
+)
+
+# Preprocessor macro to disable incompatible parts of the old code
+target_compile_definitions(DYJets-data PUBLIC DYJETS_NEW_API)
+
+# Required headers
+target_include_directories(DYJets-data PUBLIC Includes)
+target_include_directories(DYJets-data SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
+
+# Dependencies
+target_link_libraries(DYJets-data PUBLIC DYJets-util)
+
+###################################################################################################
+# Physics library
 ###################################################################################################
 
 # Files added by hand to avoid importing too many static variables from the old code...
-add_library(DYJets
+add_library(DYJets-physics
     Sources/BTagCalibrationStandalone.cc
     Sources/btagger.cc
-    Sources/catalog.cc
-    Sources/comparison_entry.cc
     Sources/electrons.cc
-    Sources/functions.cc
     Sources/jets.cc
-    Sources/mc_group.cc
     Sources/muons.cc
     Sources/pileup.cc
     Sources/RoccoR.cc
-    Sources/sample.cc
     Sources/standalone_LumiReWeighting.cc
     Sources/triggers.cc
     Sources/weights.cc
@@ -98,21 +114,27 @@ add_library(DYJets
 )
 
 # Preprocessor macro to disable incompatible parts of the old code
-target_compile_definitions(DYJets PUBLIC DYJETS_NEW_API)
+target_compile_definitions(DYJets-physics PUBLIC DYJETS_NEW_API)
 
-# Required headers
-target_include_directories(DYJets PUBLIC Includes)
-target_include_directories(DYJets SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
+# Dependencies
+target_link_libraries(DYJets-physics PUBLIC DYJets-util)
+
+###################################################################################################
+# New DYJets library
+###################################################################################################
+
+# Files added by hand to avoid importing too many static variables from the old code...
+add_library(DYJets
+    Sources/comparison_entry.cc
+)
+
+# Preprocessor macro to disable incompatible parts of the old code
+target_compile_definitions(DYJets PUBLIC DYJETS_NEW_API)
 
 # Dependencies
 target_link_libraries(DYJets PUBLIC DYJets-util)
-target_link_libraries(DYJets PUBLIC boost_filesystem)
-target_link_libraries(DYJets PUBLIC boost_program_options)
-target_link_libraries(DYJets PUBLIC boost_system)
-target_link_libraries(DYJets PUBLIC ${ROOT_LIBRARIES})
-target_link_libraries(DYJets PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(DYJets PUBLIC RooUnfold)
-target_link_libraries(DYJets PUBLIC yaml-cpp)
+target_link_libraries(DYJets PUBLIC DYJets-data)
+target_link_libraries(DYJets PUBLIC DYJets-physics)
 
 ###################################################################################################
 # Higgs targets

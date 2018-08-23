@@ -14,8 +14,8 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
       GenLepPhi(info.reader, "GLepDr01Phi"),
       GenLepE(info.reader, "GLepDr01E"),
       GenLepId(info.reader, "GLepDr01Id"),
-      GenLepPrompt(info.reader,"GLepDr01Prompt_"),
-      GenLepTauProd(info.reader,"GLepDr01TauProd_")
+      GenLepPrompt(info.reader,"GLepDr01Prompt"),
+      GenLepTauProd(info.reader,"GLepDr01TauProd")
 {
     configure(opt);
 
@@ -39,7 +39,7 @@ std::vector<lepton> genleps::get()
     std::vector<lepton> genleps;
     for (unsigned i = 0; i < GenLepPt.GetSize(); ++i) {
         lepton l;
-        if (std::abs(GenLepEta[i]) > _eta_cut || !GenLepPrompt[i]|| GenLepTauProd[i]) {
+        if (std::abs(GenLepEta[i]) > _eta_cut || !GenLepPrompt->at(i) || GenLepTauProd->at(i)) {
             continue;
         }
         l.v.SetPtEtaPhiE(GenLepPt[i], GenLepEta[i], GenLepPhi[i], GenLepE[i]);

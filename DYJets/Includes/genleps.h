@@ -29,9 +29,9 @@ class genleps
     TTreeReaderArray<float> GenLepEta;
     TTreeReaderArray<float> GenLepPhi;
     TTreeReaderArray<float> GenLepE;
-    TTreeReaderArray<unsigned> GenLepId;
-    TTreeReaderArray<float> GenLepPrompt;
-    TTreeReaderArray<float> GenLepTauProd;
+    TTreeReaderArray<int> GenLepId;
+    TTreeReaderValue<std::vector<bool>> GenLepPrompt;
+    TTreeReaderValue<std::vector<bool>> GenLepTauProd;
 
 
     double _pt_cut = 20;

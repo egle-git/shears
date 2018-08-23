@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
-find_package(Boost REQUIRED COMPONENTS filesystem iostreams program_options system)
+find_package(Boost 1.41.0 REQUIRED COMPONENTS filesystem iostreams program_options system)
 find_package(ROOT 6 REQUIRED COMPONENTS Table TreePlayer Unfold)
 find_package(Threads REQUIRED)
 

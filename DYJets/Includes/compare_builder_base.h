@@ -67,6 +67,9 @@ class compare_builder_base
                                                        bool keep_signal = true,
                                                        bool keep_background = true);
 
+    /// \brief Gives access to the style
+    const util::style_list &style() const { return _style; }
+
     /// \brief Formats the upper panel's x axis
     void format_upper_x_axis(TAxis &axis) const;
 

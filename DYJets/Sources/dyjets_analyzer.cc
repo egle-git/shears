@@ -21,6 +21,10 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     counter.declare("With two good electrons");
     counter.declare("With two good muons");
     counter.declare("With a good Z boson");
+    counter.declare("With two good gen leptons");
+    counter.declare("With two good gen electrons");
+    counter.declare("With two good gen muons");
+    counter.declare("With a good gen Z boson");
 
     std::string binning_file = "dyjets-binnings.yml";
     if (opt.config["binning file"]) {
@@ -116,7 +120,6 @@ std::vector<physics::lepton> dyjets_analyzer::find_gen_boson(
         return {};
     }
     counter.count("With two good gen leptons", weights().global_weight());
-    util::logging::info << "In dyjets::find_gen_boson " << (genleps[0].v + genleps[1].v).M() << std::endl;
 
     if (std::abs(genleps[0].pdgid) == 13) {
         counter.count("With two good gen muons", weights().global_weight());
@@ -126,8 +129,6 @@ std::vector<physics::lepton> dyjets_analyzer::find_gen_boson(
 
     std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});
     if (candidates.size() == 0) {
-      util::logging::info << "In dyjets::find_gen_boson no candidates found by zfinder" << (genleps[0].v + genleps[1].v).M() << std::endl;
-
         return {};
     }
     counter.count("With a good gen Z boson", weights().global_weight());

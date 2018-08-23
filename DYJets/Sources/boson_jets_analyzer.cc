@@ -70,20 +70,13 @@ void boson_jets_analyzer::operator()()
         }
     }
 
-    std::cout << "Genleps size before"<< std::endl;
-
     std::vector<lepton> genleps = _genleps.get();
-      std::cout << "Genleps size " << genleps.size() << std::endl;
-
     std::vector<lepton> genleptons = find_gen_boson(genleps);
 
-    if(!genleptons.empty()){
-      std::cout << "Found gen lep pair " << (genleptons[0].v + genleptons[1].v).M() << std::endl;
-
-     _genleps.fill(histo_set, "genZinc0jet_noweight", genleptons, weights());  
-
+    if (!genleptons.empty()) {
+        _genleps.fill(histo_set, "genZinc0jet_noweight", genleptons, weights());
     }
- /*
+    /*
      * Handle the trigger
      */
     if (!passes_trigger()) {

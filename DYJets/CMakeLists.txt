@@ -46,8 +46,8 @@ ROOT_GENERATE_DICTIONARY(RooUnfold
 # Python tools
 ###################################################################################################
 
-file(COPY Main/send-to-cluster DESTINATION bin)
-file(COPY Main/task-check      DESTINATION bin)
+file(INSTALL Main/send-to-cluster DESTINATION bin USE_SOURCE_PERMISSIONS)
+file(INSTALL Main/task-check      DESTINATION bin USE_SOURCE_PERMISSIONS)
 
 ###################################################################################################
 # Utilities library

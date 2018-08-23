@@ -35,6 +35,11 @@ eval `scramv1 runtime -sh` # cmsenv
 cp {proxy_path} /tmp || true
 chmod go-r $(voms-proxy-info -p) || true
 
+echo "Working directory:"
+pwd
+echo "Contents:"
+ls
+echo "Start time:"
 date
 
 set -o pipefail
@@ -45,7 +50,10 @@ set +o pipefail
 
 echo $EXIT_CODE >{job_exit_code_file}
 
+echo "End time:"
 date
+echo "Exit code:"
+echo $EXIT_CODE
 
 exit $EXIT_CODE
 '''
@@ -118,6 +126,7 @@ class submission(object):
         if os.path.isdir(directory):
             raise Exception('Directory %s already exists' % directory)
         os.mkdir(directory)
+        sys.stderr.write('%s/%s\n' % (self.name, time))
 
         info_directory = directory + '/info'
         os.mkdir(info_directory)

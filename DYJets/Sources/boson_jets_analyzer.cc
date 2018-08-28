@@ -15,7 +15,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _electrons(info, opt, histo_set),
     _jets(info, opt),
     _pileup(info, opt),
-    _btagger(opt),
+    _btagger(opt,histo_set2D),
     _weights(info)
 {
     if (opt.config["tables B-F"]) {
@@ -117,7 +117,7 @@ void boson_jets_analyzer::operator()()
     _jets.veto(jets, leptons);
 
     // Calculate b efficiencies and apply scale factors
-    if (_bjet_veto && _btagger.any(jets, _weights)) {
+    if (_bjet_veto && _btagger.any(jets, _weights,histo_set2D)) {
         return;
     }
 
@@ -200,6 +200,8 @@ void boson_jets_analyzer::write()
     counter.print();
     _weights.write(&histo_set);
     histo_set.write();
+    histo_set2D.write();
+
 }
 
 } // namespace physics

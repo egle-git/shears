@@ -58,6 +58,7 @@ add_library(DYJets-util
     Sources/event_counter.cc
     Sources/functions.cc # Legacy
     Sources/histo_set.cc
+    Sources/histo_set2D.cc
     Sources/job.cc
     Sources/logging.cc
     Sources/options.cc

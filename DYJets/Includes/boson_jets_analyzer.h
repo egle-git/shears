@@ -11,6 +11,7 @@
 #include "event_counter.h"
 #include "genleps.h"
 #include "histo_set.h"
+#include "histo_set2D.h"
 #include "jets.h"
 #include "job.h"
 #include "lepton.h"
@@ -31,6 +32,7 @@ class boson_jets_analyzer
 protected:
     util::event_counter counter;
     util::histo_set histo_set;
+    util::histo_set2D histo_set2D;
 
 private:
     std::string _short_name, _long_name;

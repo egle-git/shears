@@ -5,11 +5,13 @@
 namespace physics
 {
 
-btagger::btagger(const util::options &opt)
+btagger::btagger(const util::options &opt, util::histo_set2D &h)
 {
     if (!opt.config["b jet veto"]) {
         throw std::runtime_error("Missing mandatory section in config file: \"b jet veto\"");
     }
+
+    h.declare("bjetPtEta", "bjet p_{T} [GeV]", "bjet eta ", 40, 0, 200, 40,-2.5,2.5);
 
     // Calibration file
     std::string calib_file = "EfficiencyTables/CSVv2_Moriond17_B_H.csv";
@@ -47,28 +49,35 @@ btagger::btagger(const util::options &opt)
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_UDSG, "mujets");
 }
 
-bool btagger::any(const std::vector<jet> &jets, weights &w) const
+bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h) const
 {
     for (const auto &jet : jets) {
-        apply_sf(jet, w);
+        apply_sf(jet, w, h);
     }
     return std::any_of(jets.begin(),
                        jets.end(),
                        [&](const jet &j) { return j.bdisc > _bjet_cut; });
 }
 
-void btagger::apply_sf(const jet &j, weights &w) const
+void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h) const
 {
+     std::string tg="";
     BTagEntry::JetFlavor flavor;
     if (std::abs(j.hadflav) == 5) {
         flavor = BTagEntry::FLAV_B;
+        tg="bjet";
     } else if (std::abs(j.hadflav) == 4) {
         flavor = BTagEntry::FLAV_C;
+        tg="cjet";
     } else {
         flavor = BTagEntry::FLAV_UDSG;
+        tg="udsgjet";
     }
 
     bool tagged = j.bdisc > _bjet_cut;
+    if(tagged) tg+="_tagged";
+    h.fill("bjetPtEta", tg, j.v.Pt(),j.v.Eta(), w.global_weight());
+
     double sf = _btag_calibration_reader.eval_auto_bounds(
         "central", flavor, std::abs(j.v.Eta()), j.v.Pt());
     double eff = _bjet_tag_eff[flavor];

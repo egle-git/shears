@@ -88,8 +88,8 @@ class GenH1D : public TH1D
             return Fill(x, commonWeight * weights.at(0)); // for sherpa2 compatibility
         if (weights.size() == 11) return FillGeneva(x, commonWeight, weights); // for Geneva
         if (!uncHistBooked) bookUncHist();
-        if ((weights.size() != pdfWeightMinIndex + hPdfs.size()) &&
-            (weights.size() != pdfWeightMinIndex + hPdfs.size() + 2)) {
+        if (weights.size() < pdfWeightMinIndex + hPdfs.size()
+            ) {
             std::cerr << "Unexpected weights.size() (" << weights.size() << "). "
                       << "Expecting " << pdfWeightMinIndex + hPdfs.size() << " or "
                       << pdfWeightMinIndex + hPdfs.size() + 2 << "\n";

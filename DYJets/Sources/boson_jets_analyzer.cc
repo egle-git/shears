@@ -192,6 +192,9 @@ void boson_jets_analyzer::fill(const std::string &tag,
 
 bool boson_jets_analyzer::passes_trigger()
 {
+    if (_weights.ismc()) {
+        return _mask_eraH.passes(_triggers);
+    }
     return era_select(_mask_eraBG, _mask_eraH).passes(_triggers);
 }
 

@@ -94,6 +94,14 @@ class job(object):
 
         return j
 
+    def log_file(self):
+        if (self.status == status.finished() or
+            self.status == status.error() or
+            self.status == status.killed):
+            return sys.argv[1] + '/logs/submit-log-%02d.txt' % self.index
+        else:
+            return sys.argv[1] + '/logs/log-%02d.txt' % self.index
+
 def job_format_for_status(status):
     colors = {
         -5: 1,
@@ -159,6 +167,21 @@ def count_jobs_with_status(jobs, status):
             count += 1
     return count
 
+def get_string(message, stdscr, color_pair=7):
+    height, width = stdscr.getmaxyx()
+
+    # Clear
+    stdscr.addstr(height - 1, 0, ' ' * (width - 1), curses.color_pair(0))
+
+    # Message
+    stdscr.addstr(height - 1, 0, message, curses.color_pair(color_pair))
+
+    curses.echo()
+    s = stdscr.getstr(height - 1, len(message) + 1).decode(encoding="utf-8")
+    curses.noecho()
+
+    return s
+
 def program(stdscr):
     try:
         curses.curs_set(0)
@@ -168,6 +191,7 @@ def program(stdscr):
         curses.init_pair(4, curses.COLOR_CYAN, curses.COLOR_BLACK)
         curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(6, curses.COLOR_BLACK, curses.COLOR_GREEN)
+        curses.init_pair(7, curses.COLOR_BLACK, curses.COLOR_CYAN)
 
         jf = job_formatter()
 
@@ -249,6 +273,21 @@ def program(stdscr):
                     else:
                         pad.insstr(i, col_pos[c], contents)
 
+            # Footer
+            pos = 0
+            stdscr.addstr(height - 1, pos, ' Q ', curses.color_pair(0))
+            pos += len(' Q ')
+            stdscr.addstr(height - 1, pos, 'Quit     ', curses.color_pair(7))
+            pos += len('Quit     ')
+            stdscr.addstr(height - 1, pos, ' L ', curses.color_pair(0))
+            pos += len(' L ')
+            stdscr.addstr(height - 1, pos, 'Show log ', curses.color_pair(7))
+            pos += len('Show log ')
+            stdscr.addstr(height - 1, pos, ' K ', curses.color_pair(0))
+            pos += len(' K ')
+            stdscr.addstr(height - 1, pos, 'Kill     ', curses.color_pair(7))
+            pos += len('Kill     ')
+
             try:
                 stdscr.nooutrefresh()
                 header_pad.noutrefresh(0, x,
@@ -256,7 +295,7 @@ def program(stdscr):
                                        1, width - 1)
                 pad.noutrefresh(y, x,
                                 2, 0,
-                                height - 1, width - 1)
+                                height - 2, width - 1)
                 curses.doupdate()
             except curses.error:
                 continue
@@ -265,8 +304,28 @@ def program(stdscr):
 
             curses.halfdelay(100)
             c = stdscr.getch()
-            if c == ord('q'):
+            if c == ord('q') or c == ord('Q'):
                 break
+            if c == ord('l') or c == ord('L'):
+                index = get_string('Job ID?', stdscr)
+                try:
+                    j = jobs[int(index)]
+                    curses.endwin()
+                    import subprocess
+                    if subprocess.call(['less', j.log_file()]) != 0:
+                        curses.flash()
+                except:
+                    curses.flash()
+            if c == ord('k') or c == ord('K'):
+                index = get_string('Job ID to kill?', stdscr, 1)
+                try:
+                    j = jobs[int(index)]
+                    curses.endwin()
+                    import subprocess
+                    if subprocess.call(['qdel', '-a', j.id]) != 0:
+                        curses.flash()
+                except:
+                    curses.flash()
             elif c == curses.KEY_UP:
                 y = max(y - 1, 0)
             elif c == curses.KEY_RIGHT:

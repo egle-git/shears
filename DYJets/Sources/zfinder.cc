@@ -53,6 +53,26 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
         }
     }
 
+    if (node["flavor mode"]) {
+        std::string mode = node["flavor mode"].as<std::string>();
+        util::logging::debug << "Setting Z finder \"" << name << "\" flavor mode to \"" << mode
+                             << "\"" << std::endl;
+        if (mode == "none") {
+            _flavor_mode = flavor_mode::none;
+        } else if (mode == "same") {
+            _flavor_mode = flavor_mode::same;
+        } else if (mode == "ee") {
+            _flavor_mode = flavor_mode::ee;
+        } else if (mode == "mumu") {
+            _flavor_mode = flavor_mode::mumu;
+        } else if (mode == "emu") {
+            _flavor_mode = flavor_mode::emu;
+        } else {
+            throw std::invalid_argument("Invalid flavor mode for Z finder \"" + name + "\": " +
+                                        mode);
+        }
+    }
+
     util::set_value_safe(node, _mass_low, "low mass", "low mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _mass_high, "high mass", "high mass for Z finder \"" + name + "\"");
 }
@@ -73,11 +93,30 @@ std::vector<dilepton> zfinder::find(const std::vector<lepton> &inputs) const
 
 bool zfinder::valid(const dilepton &candidate) const
 {
+    // Check charge
     if (_charge_mode == charge_mode::neutral && candidate.charge_product > 0) {
         return false;
     } else if (_charge_mode == charge_mode::same_sign && candidate.charge_product < 0) {
         return false;
     }
+
+    // Check flavor
+    if (_flavor_mode == flavor_mode::same &&
+        std::abs(candidate.a.pdgid) != std::abs(candidate.b.pdgid)) {
+        return false;
+    } else if (_flavor_mode == flavor_mode::ee &&
+               (std::abs(candidate.a.pdgid) != 11 || std::abs(candidate.b.pdgid) != 11)) {
+        return false;
+    } else if (_flavor_mode == flavor_mode::mumu &&
+               (std::abs(candidate.a.pdgid) != 13 || std::abs(candidate.b.pdgid) != 13)) {
+        return false;
+    } else if (_flavor_mode == flavor_mode::emu &&
+               (std::abs(candidate.a.pdgid) != 13 || std::abs(candidate.b.pdgid) != 11) &&
+               (std::abs(candidate.a.pdgid) != 11 || std::abs(candidate.b.pdgid) != 13)) {
+        return false;
+    }
+
+    // Check mass
     double mass = candidate.v.M();
     return _mass_low < mass && mass < _mass_high;
 }

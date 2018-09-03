@@ -143,6 +143,16 @@ Z:
     # Default value: neutral
     charge mode: neutral
 
+    # Flavor check mode
+    # Possible values:
+    #   - none: No check
+    #   - same: Two leptons of the same flavor
+    #   - ee: Two electrons
+    #   - mumu: Two muons
+    #   - emu: One electron and one muon
+    # Default value: same
+    flavor mode: mumu
+
 # Triggers
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation

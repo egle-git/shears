@@ -54,10 +54,21 @@ class zfinder
   public:
     enum class charge_mode { none, same_sign, neutral };
 
+    /// \brief Modes for the flavor check
+    enum class flavor_mode
+    {
+        none, ///< No check
+        same, ///< Same flavor
+        ee,   ///< Two electrons
+        mumu, ///< Two muons
+        emu   ///< Electron and muon
+    };
+
   private:
     double _mass_low = 0;
     double _mass_high = std::numeric_limits<double>::max();
     charge_mode _charge_mode = charge_mode::neutral;
+    flavor_mode _flavor_mode = flavor_mode::same;
 
   public:
     /**

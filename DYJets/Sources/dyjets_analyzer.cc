@@ -14,8 +14,7 @@
 #include "lepton.h"
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt),
-      _zfinder(opt, "Z")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z")
 {
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
@@ -43,8 +42,13 @@ void apply_mu_trigger_sf(physics::weights &w,
                          const util::tables &tab)
 {
     if (w.ismc()) {
-        w.use_weight(tab.at("dimu trigger")
-                        .getEfficiency(std::abs(mu1.raw_v.Eta()), std::abs(mu2.raw_v.Eta())));
+        if (mu1.raw_v.Pt() > mu2.raw_v.Pt()) {
+            w.use_weight(tab.at("dimu trigger")
+                             .getEfficiency(std::abs(mu1.raw_v.Eta()), std::abs(mu2.raw_v.Eta())));
+        } else {
+            w.use_weight(tab.at("dimu trigger")
+                             .getEfficiency(std::abs(mu2.raw_v.Eta()), std::abs(mu1.raw_v.Eta())));
+        }
     }
 }
 
@@ -55,7 +59,7 @@ void apply_el_trigger_sf(physics::weights &w,
 {
     if (w.ismc()) {
         w.use_weight(tab.at("diel trigger")
-                        .getEfficiency(std::abs(e1.raw_v.Eta()), std::abs(e2.raw_v.Eta())));
+                         .getEfficiency(std::abs(e1.raw_v.Eta()), std::abs(e2.raw_v.Eta())));
     }
 }
 } // namespace anonymous
@@ -84,9 +88,9 @@ void dyjets_analyzer::fill(const std::string &tag,
     histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 }
 
-std::vector<physics::lepton> dyjets_analyzer::find_boson(
-    const std::vector<physics::lepton> &muons,
-    const std::vector<physics::lepton> &electrons)
+std::vector<physics::lepton>
+dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
+                            const std::vector<physics::lepton> &electrons)
 {
     if (muons.size() < 2 && electrons.size() < 2) {
         return {};
@@ -110,11 +114,11 @@ std::vector<physics::lepton> dyjets_analyzer::find_boson(
 
     std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
     physics::dilepton Z = candidates[0];
-    return { Z.a, Z.b };
+    return {Z.a, Z.b};
 }
 
-std::vector<physics::lepton> dyjets_analyzer::find_gen_boson(
-    const std::vector<physics::lepton> &genleps)
+std::vector<physics::lepton>
+dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
 {
     if (genleps.size() < 2) {
         return {};
@@ -135,9 +139,8 @@ std::vector<physics::lepton> dyjets_analyzer::find_gen_boson(
 
     std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
     physics::dilepton Z = candidates[0];
-    return { Z.a, Z.b };
+    return {Z.a, Z.b};
 }
-
 
 po::options_description dyjets_analyzer::options()
 {

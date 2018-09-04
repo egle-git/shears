@@ -134,8 +134,11 @@ class ZJets : public HistoSetZJets
     vector<float> *MuEta;
     vector<float> *MuPhi;
     vector<float> *MuE;
-    //   vector<int>     *MuId;
     vector<unsigned int> *MuIdTight;
+    vector<unsigned int> *MuIdSoft;
+    vector<unsigned int> *MuIdHighPt;
+    vector<unsigned int> *MuIdTkHighPt;
+    vector<unsigned int> *MuId;
     vector<float> *MuCh;
     vector<float> *MuVtxZ;
     vector<float> *MuDxy;
@@ -593,6 +596,10 @@ class ZJets : public HistoSetZJets
     // ULong64_t triggerMask_;
     std::array<ULong64_t, triggerCount> triggerMask_EraBG;
     std::array<ULong64_t, triggerCount> triggerMask_EraH;
+    std::array<ULong64_t, triggerCount> triggerMask_SMu;
+    std::array<ULong64_t, triggerCount> triggerMask_MC;
+    std::array<ULong64_t, triggerCount> triggerMask_veto_EraBG;
+    std::array<ULong64_t, triggerCount> triggerMask_veto_EraH;
     bool triggerMaskSet_;
     double muIso_;
     double eIso_;

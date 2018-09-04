@@ -46,7 +46,8 @@ struct leptonStruct : public physics::lepton
                  unsigned id_,
                  double iso_,
                  double scEta_,
-                 int trigger_)
+                 int trigger_,
+                 int TkLayerCnt_)
     {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
@@ -54,9 +55,12 @@ struct leptonStruct : public physics::lepton
         iso = iso_;
         scEta = scEta_;
         trigger = trigger_;
+        TkLayerCnt = TkLayerCnt_;
     }
 
+    TLorentzVector v;
     double scEta;
+    int TkLayerCnt;
     int trigger;
 };
 

@@ -1110,7 +1110,7 @@ void configXaxis(TH1 *grCentralSyst, TH1 *gen1, TString variable)
 
     if (variable.Index("ZPt_") >= 0) {
         TAxis *a = grCentralSyst->GetXaxis();
-        a->SetRangeUser(1.25, a->GetBinUpEdge(a->GetNbins()));
+        a->SetRangeUser(0.1, 1000.);
     }
 
     if (grCentralSyst) {
@@ -1295,7 +1295,7 @@ TCanvas *makeCrossSectionPlot(TString lepSel,
 {
     //    if(gens.size() > 3){
     //	std::cerr << "Warning. Maxium three generator comparison is supported. Only the first three
-    //will be considered."
+    // will be considered."
     //		  << " (" << __FILE__ << ":" << __LINE__ << ").\n";
     //	gens.resize(3);
     //    }
@@ -1789,11 +1789,11 @@ TCanvas *makeCrossSectionPlot(TString lepSel,
         ref_shortname = ref_shortname(0, ref_shortname.Index(" "));
         if (ref_shortname.Length() == 0) ref_shortname = "Measurement";
         //	customizeRatioGraph(hSyst, dataRatioToCentral[igen], dataRatioScaleSyst[igen],
-        //dataRatioPDFSyst[igen], igen + 1,
+        // dataRatioPDFSyst[igen], igen + 1,
         //			    //TString("#frac{") + generator + "}{" + ref_shortname + "}",
-        //ratioFrames.size(), legend);
+        // ratioFrames.size(), legend);
         //			    TString::Format("#frac{Prediction}{%s}", ref_shortname.Data()),
-        //ratioFrames.size(), legend);
+        // ratioFrames.size(), legend);
 
         configXaxis(hAxis, 0, variable);
         hAxis->GetXaxis()->SetLabelSize(0);

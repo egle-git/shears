@@ -1035,6 +1035,48 @@ int ZJets::Loop(bool hasRecoInfo,
                 if (DJALOG) printf("Weight + PU + Evt + SF = %F\n", weight);
                 weightSum += weight;
 
+                // Apply Rochester corrections after the SFs since the SFs are derived without the
+                // Rochester corrections. Muons only.
+                // printf("Rochester Correction\n");
+
+                if (doRochester && lepSel == "DMu") {
+                    double SF = 1;
+                    for (size_t iLep = 0; iLep < leptons.size(); iLep++) {
+                        // if(leptons[iLep].flavor == 'M'){
+                        if (!EvtIsRealData) {
+                            //        	SF = rochCorr2016->kScaleAndSmearMC(leptons[iLep].charge,
+                            //        leptons[iLep].v.Pt(), leptons[iLep].v.Eta(),
+                            //        leptons[iLep].v.Phi(),
+                            //					    leptons[iLep].TkLayerCnt, gRandom->Rndm(),
+                            //gRandom->Rndm(),
+                            //					    0, 0);
+                            SF = rochCorr2016->kScaleAndSmearMC(leptons[iLep].charge,
+                                                                leptons[iLep].v.Pt(),
+                                                                leptons[iLep].v.Eta(),
+                                                                leptons[iLep].v.Phi(),
+                                                                leptons[iLep].TkLayerCnt,
+                                                                gRandom->Rndm(),
+                                                                gRandom->Rndm(),
+                                                                0,
+                                                                0);
+                            // printf("MC SF = %F\n",SF);
+                        } else {
+                            SF = rochCorr2016->kScaleDT(leptons[iLep].charge,
+                                                        leptons[iLep].v.Pt(),
+                                                        leptons[iLep].v.Eta(),
+                                                        leptons[iLep].v.Phi(),
+                                                        0,
+                                                        0);
+                            // printf("Date SF = %F\n",SF);
+                        }
+                        leptons[iLep].v.SetPtEtaPhiE(leptons[iLep].v.Pt() * SF,
+                                                     leptons[iLep].v.Eta(),
+                                                     leptons[iLep].v.Phi(),
+                                                     leptons[iLep].v.E() * SF);
+                    }
+                    //}
+                }
+
                 EWKBoson = leptons[0].v + leptons[1].v;
                 // apply trigger, charge, mass cut
                 if (passesTrigger && (leptons[0].charge * leptons[1].charge < 0)) {

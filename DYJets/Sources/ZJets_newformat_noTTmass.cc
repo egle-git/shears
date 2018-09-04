@@ -485,7 +485,7 @@ void ZJets::Loop(bool hasRecoInfo,
         //			  <<  " is null or was not specified. We will assume the event"
         //			  << " weights are normalizes such that the cross section on pb "
         //			  << " is equal to the sum of weights divivided by the numnber of
-        //events\n";
+        // events\n";
         //		norm_ = yieldScale * lumi_ * 1. * xsecFactor_ * skimAccep_[0];
         //	    } else{
         //		norm_ = yieldScale * lumi_ * xsec_ * xsecFactor_ * skimAccep_[0];
@@ -999,7 +999,7 @@ void ZJets::Loop(bool hasRecoInfo,
             }
 
             //--- if there are taus, but we do not run on the Tau file, thus we run on the DYJets
-            //file,
+            // file,
             //    then we don't count the event at reco.
             if (countTauS3 > 0 && fileName.Index("Tau") < 0 && fileName.Index("Sherpa") < 0 &&
                 fileName.Index("MG5") < 0) {
@@ -1032,7 +1032,7 @@ void ZJets::Loop(bool hasRecoInfo,
                     }
                 }
                 //--- if there are taus we don't want the gen level (think about NoMass flag
-                //here!!!)
+                // here!!!)
                 // if (countTauS3 > 0 && fileName.Index("Bugra") < 0 && fileName.Index("MG5") < 0)
                 // passesgenLeptonCut = 0;
             } else if ((lepSel == "SMu" || lepSel == "SE") && (ngenLeptons >= 2)) {
@@ -1291,7 +1291,7 @@ void ZJets::Loop(bool hasRecoInfo,
                               passesBJets);
 
                 //-- apply jet energy scale uncertainty (need to change the scale when initiating
-                //the object)
+                // the object)
                 double jetEnergyCorr = 0.;
                 bool jetPassesPtCut(jet.v.Pt() >= 10);
                 jetEnergyCorr = TableJESunc.getEfficiency(jet.v.Pt(), jet.v.Eta());
@@ -5039,7 +5039,7 @@ void ZJets::Loop(bool hasRecoInfo,
 
         //	if(passesLeptonCut && !passesgenLeptonCut){
         //	    std::cout << "Event " << nEvents << " passes Reco cut but not gen cuts: reco -
-        //gen\n"
+        // gen\n"
         //		      << "Nleptons: " << nLeptons << " - " << ngenLeptons << "\n"
         //		      << "Pt l1:    "
         //		      << (nLeptons > 0 ? leptons[0].v.Pt() : -1) << " - "
@@ -5408,7 +5408,7 @@ void ZJets::getMuons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoMu
         //	const Long64_t mutrigmask = 18 | 22;
         //        if (lepSel == "DMu" && (TrigHltDiMu  & dimutrigmask)) muPassesTrig = 1;
         //	else if (lepSel == "SMu" && (mu.trigger & mutrigmask)) muPassesTrig = 1;  //
-        //HLT_IsoMu24_eta2p1_v
+        // HLT_IsoMu24_eta2p1_v
 
         //--- veto muons ---
         bool muPassesVetoPtCut(mu.v.Pt() >= 15);

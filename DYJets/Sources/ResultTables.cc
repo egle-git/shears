@@ -136,7 +136,7 @@ void createTable(TString outputFilePath,
         // numbers.Form("%#.3g", xs);
         // table += numbers + " & ";
         //	double totUnc = sqrt(covuxaxb[0]->GetBinContent(i,i) +
-        //covxaxbSyst->GetBinContent(i,i));
+        // covxaxbSyst->GetBinContent(i,i));
         double totUnc =
             sqrt(covuxaxb[0]->GetBinContent(i, i) + covuxaxb[kTotSys]->GetBinContent(i, i));
         if (sepLumiUnc) {

@@ -942,9 +942,10 @@ void getStatistics(TString lepSel, int jetPtMin, int jetEtaMax, const TString &v
 
     FILE *outFile = fopen(nameStr.str().c_str(), "w");
     fprintf(outFile, "\\footnotesize{\n\\begin{tabular}{l|cccccccc} \n ");
-    fprintf(outFile, " &  $N_{\\text{jets}} = 0 $ & $N_{\\text{jets}} = 1 $ & $N_{\\text{jets}} = "
-                     "2 $ & $N_{\\text{jets}} = 3 $ & $N_{\\text{jets}} = 4 $ & $N_{\\text{jets}} "
-                     "= 5 $ & $N_{\\text{jets}} = 6 $ & $N_{\\text{jets}} = 7$ \\\\ \\hline \n ");
+    fprintf(outFile,
+            " &  $N_{\\text{jets}} = 0 $ & $N_{\\text{jets}} = 1 $ & $N_{\\text{jets}} = "
+            "2 $ & $N_{\\text{jets}} = 3 $ & $N_{\\text{jets}} = 4 $ & $N_{\\text{jets}} "
+            "= 5 $ & $N_{\\text{jets}} = 6 $ & $N_{\\text{jets}} = 7$ \\\\ \\hline \n ");
 
     //// print statistics of all the MC samples
     for (int i = 1; i < usedFiles + 1; i++) {

@@ -371,11 +371,11 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
             //		    << " " << hRecDataMinusFakes->GetBinError(1)
             //	    / sqrt(hRecDataMinusFakes->GetBinContent(1))
             //		    << "\t" << hRecDataMinusFakes->GetBinContent(1) /
-            //hRecData[iData]->GetBinContent(1)
+            // hRecData[iData]->GetBinContent(1)
             //	    	    << "\t" << hRecDataMinusFakes->GetBinError(3)
             //	    / sqrt(hRecDataMinusFakes->GetBinContent(3))
             //		    << "\t" << hRecDataMinusFakes->GetBinContent(3) /
-            //hRecData[iData]->GetBinContent(3)
+            // hRecData[iData]->GetBinContent(3)
             //		    << "\n";
             //	}
 
@@ -415,8 +415,9 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
             if (iSyst == 0) {
                 fixNIterTo = nIter[0];
                 //	    if(variable=="VisPt_Zinc3jetQun" && lepSel == "DMu"){
-                //		std::cout << "Forcing number of iteration of VisPt_Zinc3jetQun of DMu
-                //to 4";
+                //		std::cout << "Forcing number of iteration of VisPt_Zinc3jetQun of
+                //DMu
+                // to 4";
                 //		fixNIterTo = 4;
                 //	    }
                 //	    if(variable=="JetsHT_Zinc1jet" ){
@@ -478,9 +479,9 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
         //	 int nCovs = nSysts > 17 ? 11 : 10;
 
         //	 if(hUnfDataStatCov[0]) hCov[kStat] = (TH2*)
-        //hUnfDataStatCov[0]->Clone("CovDataStat");
+        // hUnfDataStatCov[0]->Clone("CovDataStat");
         //	 if(hUnfMCStatCov[0])   hCov[kUnfStat] = (TH2*)
-        //hUnfMCStatCov[0]->Clone("CovMCStat");
+        // hUnfMCStatCov[0]->Clone("CovMCStat");
         if (hUnfDataStatCov[0]) hCov[kStat] = (TH2 *)hUnfDataStatCov[0]->Clone(covName(kStat));
         if (hUnfMCStatCov[0]) hCov[kUnfStat] = (TH2 *)hUnfMCStatCov[0]->Clone(covName(kUnfStat));
 
@@ -508,10 +509,10 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
 
         ////	 //DEBUG>>
         ////	 std::cerr << ">>> " << (hUnfData[kLumiUp]->GetBinContent(4) -
-        ///hUnfData[kLumiDwn]->GetBinContent(4))
+        /// hUnfData[kLumiDwn]->GetBinContent(4))
         ////	     / 2. / hUnfData[0]->GetBinContent(4) << "\n";
         ////	 std::cerr << sqrt(hCov[kLumi]->GetBinContent(4,4)) /
-        ///hUnfData[0]->GetBinContent(4) << "\n";
+        /// hUnfData[0]->GetBinContent(4) << "\n";
         //<<<<
 
         if (hUnfData[kSFup])
@@ -566,16 +567,16 @@ void UnfoldingZJets(const SectionedConfig &unfCfg,
             //	 for (int j = 0; j <= 11; ++j) {
             //	     if(hCov[j]){
             //		 cout << " +/- " <<
-            //sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
+            // sqrt(hCov[j]->GetBinContent(i,i))*100./hUnfData[0]->GetBinContent(i) << "%";
             //	     }
             //	 }
             //	 cout << endl;
             //}
             ////	     for(int i = 1; i <= hCov[kLumi]->GetNbinsX(); ++i){
             ////		 std::cout << ">>>> " << i << "\t" <<
-            ///sqrt(hCov[kLumi]->GetBinContent(i,i))
+            /// sqrt(hCov[kLumi]->GetBinContent(i,i))
             ////			   << "\t" << sqrt(hCov[kLumi]->GetBinContent(i,i))  /
-            ///hUnfData[0]->GetBinContent(i)
+            /// hUnfData[0]->GetBinContent(i)
             ////			   << "\n";
             ////	     }
             createTable(outputFileName + "_withLERS",
@@ -796,7 +797,7 @@ void createInclusivePlots(bool doNormalized,
     std::vector<TH2 *> hCovInc(kTotSys + 1, 0);
     for (unsigned i = 0; i < kUncCnt; ++i) {
         //	if(hCov[i]) hCovInc[i] = (TH2*) hCov[i]->Clone(hCov[i[-TString::Format("Cov%s",
-        //uncShortNames[i]));
+        // uncShortNames[i]));
         if (hCov[i]) hCovInc[i] = (TH2 *)hCov[i]->Clone();
     }
     int nBins = hInc->GetNbinsX();
@@ -2111,7 +2112,7 @@ TH2D *makeCovFromUpAndDown(const TH1D *hUnfDataCentral,
     ////		  << "\t"  << hUnfDataUp->GetBinContent(4)
     ////		  << "\t"  << hUnfDataDown->GetBinContent(4)
     ////		  << "\t"  <<
-    ///0.5*(hUnfDataUp->GetBinContent(4)-hUnfDataDown->GetBinContent(4))/hUnfDataCentral->GetBinContent(4)
+    /// 0.5*(hUnfDataUp->GetBinContent(4)-hUnfDataDown->GetBinContent(4))/hUnfDataCentral->GetBinContent(4)
     ///<<"\n";
     ////    }
 
@@ -2621,8 +2622,9 @@ std::vector<double> chi2FromToy(RooUnfold::Algorithm algo,
                 }
             }
             //	    if(iter>0){
-            //		double chi2II = MyChi2Test(hRefs->at(iter), hUnfs->at(iter), nFirstBinsToSkip,
-            //nLastBinsToSkip, res, hRefs->at(iter), false);
+            //		double chi2II = MyChi2Test(hRefs->at(iter), hUnfs->at(iter),
+            //nFirstBinsToSkip,
+            // nLastBinsToSkip, res, hRefs->at(iter), false);
             //		if(hChi2II) hChi2II->at(iter)->Fill(chi2II);
             //		accII[iter] += chi2II;
             //		acc2II[iter] += chi2II*chi2II;

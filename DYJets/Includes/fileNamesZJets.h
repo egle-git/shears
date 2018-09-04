@@ -25,7 +25,7 @@ struct processInfoStruct
 // 8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
     //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen -
-    //legendReco - legendGen
+    // legendReco - legendGen
     /* 0*/ {"Data", ' ', 1., 1., 1, 1, kBlack, kBlack, " Data", " Data"},
     /* 1*/ {"TT", ' ', 1., 1., 1, 0.00, kBlue, kBlue, " t#bar{t}", " t#bar{t}"},
     /* 2*/ {"ST_sch",
@@ -118,7 +118,7 @@ const processInfoStruct Samples[] = {
             kBlue - 2,
             " Z/#gamma^{*} #rightarrow ll",
             "GE + PY8 (NNLL'_{#tau}+NNLO_{0}) #alpha_{s}=0.1135"},
-    /*17*/ {"DYJets_GE10as118",
+    /*18*/ {"DYJets_GE10as118",
             ' ',
             1.,
             1.,
@@ -128,10 +128,12 @@ const processInfoStruct Samples[] = {
             kBlue - 2,
             " Z/#gamma^{*} #rightarrow ll",
             "GE + PY8 (NNLL'_{#tau}+NNLO_{0})"},
+    /* 19*/ {"Data_SMu", ' ', 1., 1., 1, 1, kBlack, kBlack, " Data_SMu", " Data_SMu"},
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);
 const int DATA = 0;
+const int DATA_SMu = 19;
 const int DYJETS = 12; // Signal MC
 
 /** Total number of samples after sample grouping, including real data, background MC, and signal MC

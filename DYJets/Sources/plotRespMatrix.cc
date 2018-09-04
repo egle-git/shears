@@ -28,12 +28,10 @@ int main(int argc, char **argv)
     gStyle->SetOptStat(0);
     gStyle->SetPaintTextFormat("4.0f");
 
-    TString outputFileName = "../ResponseMatrixPtZ/" + lepSel + "_" + variable + "_ResponseMatrix";
+    TString outputFileName = "ResponseMatrix/" + lepSel + "_" + variable + "_ResponseMatrix";
     TString respName = "hresponse" + variable;
 
-    TFile *fMad =
-        new TFile("../HistoFilesV21/" + lepSel +
-                  "_13TeV_DYJets_UNFOLDING_TrigCorr_1_Syst_0_JetPtMin_30_JetEtaMax_24.root");
+    TFile *fMad = new TFile("HistoFilesBarrel/" + lepSel + "_13TeV_DYJets_UNFOLDING_Syst_0.root");
     TH1D *hMad = (TH1D *)fMad->Get(variable);
     TH2D *hrespMad = (TH2D *)fMad->Get(respName);
     TH2D *hrespNormMad = (TH2D *)hrespMad->Clone();
@@ -93,8 +91,8 @@ int main(int argc, char **argv)
     padMad->SetLeftMargin(0.12);
     padMad->SetBottomMargin(0.12);
     if (variable.Index("Pt") >= 0 || variable.Index("HT") >= 0) {
-        padMad->SetLogy(0);
-        padMad->SetLogx(0);
+        padMad->SetLogy();
+        padMad->SetLogx();
     }
     padMad->Draw();
     padMad->cd();

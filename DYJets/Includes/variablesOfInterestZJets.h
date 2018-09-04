@@ -18,24 +18,24 @@ struct variableStruct
 
 const variableStruct VAROFINTERESTZJETS[] = {
     //--  Name  ------------------ log x - log y - decrease - Mu SVD kterm - Mu Bayes kterm - E SVD
-    //kterm - E Bayes kterm  - E Bayes kterm COMBINE
+    // kterm - E Bayes kterm  - E Bayes kterm COMBINE
     //-- jet Pt distribution
     // PAPER//{"FirstJetPt_Zinc1jet",          1, 1,      1,          11,              5,
     // 9,            9 ,               6    }, // 1
     //{"FirstJetPtMatch_Zinc1jet",          1, 1,      1,          11,              5,
-    //9,            9 ,               6    }, // 1
+    // 9,            9 ,               6    }, // 1
     // PAPER//{"SecondJetPt_Zinc2jet",         1, 1,      1,          14,              8,
     // 11,            7 ,               7    }, // 2
     //{"SecondJetPtMatch_Zinc2jet",         1, 1,      1,          14,              8,
-    //11,            7 ,               7    }, // 2
+    // 11,            7 ,               7    }, // 2
     // PAPER//{"ThirdJetPt_Zinc3jet",          1, 1,      1,           6,              9,
     // 8,            7 ,               7    }, // 3
     //{"ThirdJetPtMatch_Zinc3jet",          1, 1,      1,           6,              9,
-    //8,            7 ,               7    }, // 3
+    // 8,            7 ,               7    }, // 3
     // PAPER//{"FourthJetPt_Zinc4jet",         1, 1,      1,           4,              4,
     // 6,            5 ,               4    }, // 4
     //{"FourthJetPtMatch_Zinc4jet",         1, 1,      1,           4,              4,
-    //6,            5 ,               4    }, // 4
+    // 6,            5 ,               4    }, // 4
     // PAPER//{"FifthJetPt_Zinc5jet",          1, 1,      1,           3,              2,
     // 4,            3 ,               2    }, // 5
     //-- jets HT distribution
@@ -64,44 +64,59 @@ const variableStruct VAROFINTERESTZJETS[] = {
     // PAPER//{"FirstJetAbsRapidity_Zinc1jet",         0, 0,      1,          10,              4,
     // 18,            4 ,               5    }, // 11
     //{"FirstJetAbsRapidityMatch_Zinc1jet",         0, 0,      1,          10,              4,
-    //18,            4 ,               5    }, // 11
+    // 18,            4 ,               5    }, // 11
     // PAPER//{"SecondJetAbsRapidity_Zinc2jet",        0, 0,      1,           6,              5,
     // 16,            5 ,               5    }, // 12
     //{"SecondJetAbsRapidityMatch_Zinc2jet",        0, 0,      1,           6,              5,
-    //16,            5 ,               5    }, // 12
+    // 16,            5 ,               5    }, // 12
     // PAPER//{"ThirdJetAbsRapidity_Zinc3jet",         0, 0,      1,           4,              4,
     // 8,            4 ,               5    }, // 13
     //{"ThirdJetAbsRapidityMatch_Zinc3jet",         0, 0,      1,           4,              4,
-    //8,            4 ,               5    }, // 13
+    // 8,            4 ,               5    }, // 13
     // PAPER//{"FourthJetAbsRapidity_Zinc4jet",        0, 0,      1,           4,              4,
     // 4,            5 ,               4    }, // 14
     //{"FourthJetAbsRapidityMatch_Zinc4jet",        0, 0,      1,           4,              4,
-    //4,            5 ,               4    }, // 14
+    // 4,            5 ,               4    }, // 14
     // PAPER//{"FifthJetAbsRapidity_Zinc5jet",         0, 0,      1,           3,              2,
     // 2,            2 ,               1    }, // 15
     //-- Jets Mass distribution
     //{"JetsMass_Zinc2jet",            0, 0,      1,           9,              5,            13,
-    //11 ,               5    }, // 16
+    // 11 ,               5    }, // 16
+    {"Phistar_Zinc0jetM50_71", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
     {"Phistar_Zinc0jet", 1, 0, 1, 9, 5, 13, 11, 5},         // 17
     {"Phistar_Zinc0jetM111_130", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"Phistar_Zinc0jetM130_170", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"Phistar_Zinc0jetM170_250", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"Phistar_Zinc0jetM250_3", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
-    {"ZPt_Zinc0jetM15_50", 1, 0, 1, 9, 5, 13, 11, 5},       // 17
-    {"ZPt_Zinc0jetM50_71", 1, 0, 1, 9, 5, 13, 11, 5},       // 17
-    {"ZPt_Zinc0jet", 1, 0, 1, 9, 5, 13, 11, 5},             // 17
-    //  {"ZPt_Zinc0jetM115_135",                 1, 0,      1,           9,              5,
-    //  13,           11 ,               5    }, // 17
+                                                            //
+    {"Phistar_Zinc1jetM50_71", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
+    {"Phistar_Zinc1jet", 1, 0, 1, 9, 5, 13, 11, 5},         // 17
+    {"Phistar_Zinc1jetM111_130", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"Phistar_Zinc1jetM130_170", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"Phistar_Zinc1jetM170_250", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"Phistar_Zinc1jetM250_3", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
+    //  {"ZPt_Zinc0jetM15_50", 1, 0, 1, 9, 5, 13, 11, 5},       // 17
+    {"ZPt_Zinc0jetM50_71", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
+    {"ZPt_Zinc0jet", 1, 0, 1, 9, 5, 13, 11, 5},         // 17
+    {"ZPt_Zinc0jetM115_135", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"ZPt_Zinc0jetM111_130", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"ZPt_Zinc0jetM130_170", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"ZPt_Zinc0jetM170_250", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
     {"ZPt_Zinc0jetM250_3", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
+    {"ZPt_Zinc1jetM50_71", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
+    {"ZPt_Zinc1jet", 1, 0, 1, 9, 5, 13, 11, 5},         // 17
+    //  {"ZPt_Zinc0jetM115_135",                 1, 0,      1,           9,              5,
+    //  13,           11 ,               5    }, // 17
+    {"ZPt_Zinc1jetM111_130", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"ZPt_Zinc1jetM130_170", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"ZPt_Zinc1jetM170_250", 1, 0, 1, 9, 5, 13, 11, 5}, // 17
+    {"ZPt_Zinc1jetM250_3", 1, 0, 1, 9, 5, 13, 11, 5},   // 17
     //  {"ZPt_Zinc0jetM135_170",                 1, 0,      1,           9,              5,
     //  13,           11 ,               5    }, // 17
     //  {"ZPt_Zinc0jetM170_3",                   1, 0,      1,           9,              5,
     //  13,           11 ,               5    }, // 17
     //{"ZAbsRapidity_Zinc1jet",        0, 0,      1,           9,              5,            13,
-    //11 ,               5    }, // 18
+    // 11 ,               5    }, // 18
     //    {"SumZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,
     //    11 ,               5    }, // 19
     //    {"DifZJetRapidity_Zinc1jet",     0, 0,      1,           9,              5,            13,
@@ -130,7 +145,7 @@ const variableStruct VAROFINTERESTZJETS[] = {
     //   {"DifZJetRapidity_Zexc1jet",          0, 1,      1,           3,              3,
     //   3,            3 ,               3    }, // 1
     //{"AbsZRapidity_Zinc2jet",         0, 1,      1,           3,              3,             3,
-    //3 ,               3    }, // 1
+    // 3 ,               3    }, // 1
     //    {"AbsFirstJetRapidity_Zinc2jet",          0, 1,      1,           3,              3,
     //    3,            3 ,               3    }, // 1
     //    {"SumZFirstJetRapidity_Zinc2jet",          0, 1,      1,           3,              3,

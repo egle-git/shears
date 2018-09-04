@@ -40,10 +40,11 @@ struct leptonStruct
                  double phi_,
                  double en_,
                  double charge_,
-                 unsigned id_,
+                 unsigned int id_,
                  double iso_,
                  double scEta_,
-                 int trigger_)
+                 int trigger_,
+                 int TkLayerCnt_)
     {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         charge = charge_;
@@ -51,12 +52,13 @@ struct leptonStruct
         iso = iso_;
         scEta = scEta_;
         trigger = trigger_;
+        TkLayerCnt = TkLayerCnt_;
     }
 
     TLorentzVector v;
     double charge, iso, scEta;
-    int trigger;
-    unsigned id;
+    int TkLayerCnt;
+    int id, trigger;
 };
 
 struct jetStruct

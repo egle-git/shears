@@ -7455,7 +7455,10 @@ void ZJets::canonizeInputFilePath(const TString &bonzaiDir,
 void ZJets::readCatalog(const TString &fullFileName, const TString &bonzaiDir, int maxFiles)
 {
     data::catalog c(fullFileName.Data(), bonzaiDir.Data(), maxFiles);
-    lumi_ = c.lumi();
+    if (lumi_ == 0) {
+        // lumi_ may be set in the constructor
+        lumi_ = c.lumi();
+    }
     xsec_ = c.xsec();
     fChain = c.event_chain();
     fBonzaiHeaderChain = c.bonzai_header_chain();

@@ -67,6 +67,16 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
                        << std::endl;
     }
 
+    regex_t dataTypeLine;
+    rc = regcomp(&dataTypeLine, "[#*][[:space:]]*data type[[:space:]:=]\\+\\(.*\\+\\)", 0);
+    if (rc) {
+        char buffer[256];
+        regerror(rc, &dataTypeLine, buffer, sizeof(buffer));
+        buffer[sizeof(buffer) - 1] = 0;
+        logging::fatal << "Bug found in " << __FILE__ << ":" << __LINE__ << ": " << buffer
+                       << std::endl;
+    }
+
     if (isRootFile(fullpath.c_str())) {
         logging::info << "Loading file: " << fullpath << endl;
         _files.push_back(fullpath);
@@ -123,6 +133,21 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
                         logging::error << "Primary events parameter value, "
                                        << line + pmatch[1].rm_so << " found in file " << fullpath
                                        << " is not valid." << std::endl;
+                    }
+                } else if (!regexec(&dataTypeLine,
+                                    line,
+                                    sizeof(pmatch) / sizeof(pmatch[0]),
+                                    pmatch,
+                                    0)) {
+                    line[pmatch[1].rm_eo] = 0;
+                    std::string type = line + pmatch[1].rm_so;
+                    if (type == "data") {
+                        _isdata = true;
+                    } else if (type == "mc") {
+                        _isdata = false;
+                    } else {
+                        logging::error << "Data type parameter value, " << type << " found in file "
+                                       << fullpath << " is not valid." << std::endl;
                     }
                 }
 

@@ -25,6 +25,7 @@ class catalog
     std::vector<std::string> _files;
     double _lumi, _xsec;
     long long _primary_events = -1;
+    bool _isdata = false;
 
   public:
     /**
@@ -82,6 +83,12 @@ class catalog
 
     /// \brief Returns the integrated cross section read from the catalog.
     double xsec() const { return _xsec; }
+
+    /// \brief Returns true if the catalog contains data.
+    bool isdata() const { return _isdata; }
+
+    /// \brief Returns true if the catalog contains an MC dataset.
+    bool ismc() const { return !_isdata; }
 
     /// \brief Returns the number of primary events in the dataset.
     long long primary_events() const { return _primary_events; }

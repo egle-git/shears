@@ -9,7 +9,7 @@ namespace physics
 
 weights::weights(util::job::info &info)
     : EvtWeights(info.reader, "EvtWeights"),
-      _ismc(info.catalog.primary_events() <= 0), // FIXME Improve ?
+      _ismc(info.catalog.ismc()),
       _primary_events_total(info.catalog.primary_events()),
       _events_in_chain(info.reader.GetEntries(true)),
       _xsec(info.catalog.xsec()),

@@ -98,6 +98,11 @@ class zfinder
      * \brief Checks if a dilepton candidate meets this finder's criteria.
      */
     bool valid(const dilepton &candidate) const;
+
+    /**
+     * \brief Returns the flavor mode for this finder.
+     */
+    flavor_mode get_flavor_mode() const { return _flavor_mode; }
 };
 
 } // namespace physics

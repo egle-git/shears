@@ -48,7 +48,7 @@ void muons::configure(const util::options &opt)
             roccor_dir = node["rochester correction path"].as<std::string>();
         }
         roccor_dir = "EfficiencyTables/" + roccor_dir;
-        _roccor = std::make_shared<RoccoR>("EfficiencyTables/RoccoR2016.txt");//hardcoded now, since there is a problem with yml
+        _roccor = std::make_shared<RoccoR>(roccor_dir);//hardcoded now, since there is a problem with yml
     }
 
     if (node["id"]) {
@@ -119,7 +119,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
 
                 }
                 else{
-                l.v *= _roccor->kSmearMC(l.charge,
+                l.v *= _roccor->kScaleAndSmearMC(l.charge,
                                                  l.v.Pt(),
                                                  l.v.Eta(),
                                                  l.v.Phi(),

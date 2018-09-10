@@ -107,13 +107,13 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                 gll=v;match=true;
                 }}
                 if(match){
-                l.v *= _roccor->kSpreadMC(l.charge,
+                l.v *= _roccor->kScaleFromGenMC(l.charge,
                                                  l.v.Pt(),
                                                  l.v.Eta(),
                                                  l.v.Phi(),
-                 //                                MuTkLayerCnt[i],
+                                                 MuTkLayerCnt[i],
                                                  gll.v.Pt(),
-                                                 //uniform(rng),
+                                                 uniform(rng),
                                                  0,
                                                  0);
 
@@ -123,9 +123,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  l.v.Pt(),
                                                  l.v.Eta(),
                                                  l.v.Phi(),
-                 //                                MuTkLayerCnt[i],
+                                                 MuTkLayerCnt[i],
                                                  uniform(rng),
-                 //                                uniform(rng),
+                                                 uniform(rng),
                                                  0,
                                                  0);
 		}

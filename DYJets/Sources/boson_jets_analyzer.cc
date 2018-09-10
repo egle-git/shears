@@ -87,7 +87,7 @@ void boson_jets_analyzer::operator()()
     /*
      * Read leptons and find the boson
      */
-    std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
+    std::vector<lepton> muons = _muons.get(weights().isdata(), rng(),genleps);
     std::vector<lepton> electrons = _electrons.get();
 
     std::vector<lepton> leptons = find_boson(muons, electrons);

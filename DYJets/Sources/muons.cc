@@ -48,7 +48,7 @@ void muons::configure(const util::options &opt)
             roccor_dir = node["rochester correction path"].as<std::string>();
         }
         roccor_dir = "EfficiencyTables/" + roccor_dir;
-        _roccor = std::make_shared<RoccoR>(roccor_dir);
+        _roccor = std::make_shared<RoccoR>("EfficiencyTables/RoccoR2016.txt");//hardcoded now, since there is a problem with yml
     }
 
     if (node["id"]) {

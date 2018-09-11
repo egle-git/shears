@@ -49,18 +49,19 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_UDSG, "mujets");
 }
 
-bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h) const
+bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t) const
 {
     for (const auto &jet : jets) {
-        apply_sf(jet, w, h);
+        apply_sf(jet, w, h,t);
     }
     return std::any_of(jets.begin(),
                        jets.end(),
                        [&](const jet &j) { return j.bdisc > _bjet_cut; });
 }
 
-void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h) const
+void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab) const
 {
+    if (w.isdata())return;
      std::string tg="";
     BTagEntry::JetFlavor flavor;
     if (std::abs(j.hadflav) == 5) {
@@ -73,14 +74,15 @@ void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h) const
         flavor = BTagEntry::FLAV_UDSG;
         tg="udsgjet";
     }
-
+    double eff = tab.at(tg + " eff").getEfficiency(j.v.Pt(), j.v.Eta());
+    std::cout <<eff<<"  " <<j.v.Pt()<<" "<<j.v.Eta()<<std::endl;
     bool tagged = j.bdisc > _bjet_cut;
     if(tagged) tg+="_tagged";
     h.fill("bjetPtEta", tg, j.v.Pt(),j.v.Eta(), w.global_weight());
 
     double sf = _btag_calibration_reader.eval_auto_bounds(
         "central", flavor, std::abs(j.v.Eta()), j.v.Pt());
-    double eff = _bjet_tag_eff[flavor];
+   // double eff = _bjet_tag_eff[flavor];
 
     w.use_weight(tagged ? sf : (1 - sf * eff) / (1 - eff));
 }

@@ -114,6 +114,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  MuTkLayerCnt[i],
                                                  gll.v.Pt(),
                                                  uniform(rng),
+		//				gRandom->Rndm(),
                                                  0,
                                                  0);
 
@@ -126,6 +127,8 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  MuTkLayerCnt[i],
                                                  uniform(rng),
                                                  uniform(rng),
+	//					gRandom->Rndm(),
+	//					gRandom->Rndm(),
                                                  0,
                                                  0);
 		}

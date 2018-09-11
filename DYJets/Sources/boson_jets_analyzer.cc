@@ -117,7 +117,7 @@ void boson_jets_analyzer::operator()()
     _jets.veto(jets, leptons);
 
     // Calculate b efficiencies and apply scale factors
-    if (_bjet_veto && _btagger.any(jets, _weights,histo_set2D)) {
+    if (_bjet_veto && _btagger.any(jets, _weights,histo_set2D,tables())) {
         return;
     }
 

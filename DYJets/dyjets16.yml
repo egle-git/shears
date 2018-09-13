@@ -51,7 +51,7 @@ jets:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: yes
+    use: no
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -228,10 +228,10 @@ tables B-F:
 tables G-H:
     electron id:    Electron_Id_Loose_SF_2016.txt
     electron reco:  Electron_Reco_2016_SF_converted_new.txt
-    muon id:        Eff_SF_ID_GH_6_16_2017.txt
-    muon isolation: Eff_SF_ISO_GH_6_16_2017.txt
-    muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZ_RunGH_Brussels.txt
+    muon id:        Eff_SF_ID_BF_6_16_2017.txt
+    muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
+    muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
+    dimu trigger:   ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
     bjet eff:       btag-b.txt
     cjet eff:       btag-c.txt
@@ -245,7 +245,7 @@ MC grouping:
       required: yes
       samples: [ DYJets ]
       color: 408 # kGreen - 8
-      scale factor: 1.0287
+      scale factor: 1.0287 #1.0287
       is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]

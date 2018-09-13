@@ -6,12 +6,14 @@
 #include <TLorentzVector.h>
 #include <TTreeReaderArray.h>
 
+#include "JetResolution.h"
+#include "JetResolutionObject.h"
+#include "TRandom3.h"
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
 #include "options.h"
 #include "weights.h"
-
 namespace physics
 {
 
@@ -23,7 +25,7 @@ class jet
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
     float bdisc;      ///< b-tag ID score
-    float hadflav;    ///< jet hadron flavor  
+    float hadflav;    ///< jet hadron flavor
 };
 
 /// \brief Handles jets.
@@ -37,7 +39,18 @@ class jets
     TTreeReaderArray<float> JetAk04PuMva;
     TTreeReaderArray<float> JetAk04BDiscCisvV2;
     TTreeReaderArray<float> JetAk04HadFlav;
+    TTreeReaderValue<float> EvtFastJetRho;
 
+    TTreeReaderArray<float> GJetAk04Pt;
+    TTreeReaderArray<float> GJetAk04Eta;
+    TTreeReaderArray<float> GJetAk04Phi;
+    TTreeReaderArray<float> GJetAk04E;
+    JME::JetResolution *m_JetResolution;
+    JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;
+    JME::JetParameters *m_JetParameters;
+    float jetSF;
+    double jetResolution;
+    Variation m_Variation = Variation::NOMINAL;
 
     double _pt_cut = 30;
     double _eta_cut = 2.4;
@@ -56,7 +69,9 @@ class jets
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<jet> get();
+    std::vector<jet> get(bool isdata);
+
+    std::vector<jet> getGen();
 
     /// \brief Vetoes \c jets too close to one of the given \c leptons.
     void veto(std::vector<jet> &jets, const std::vector<lepton> &leptons) const;

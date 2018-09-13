@@ -51,12 +51,12 @@ jets:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
     # Default value: loose
-    working point: loose
+    working point: tight
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
@@ -221,9 +221,17 @@ tables B-F:
     muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
-    bjet eff:       btag-b.txt
-    cjet eff:       btag-c.txt
-    udsgjet eff:    btag-udsg.txt
+    bjet loose eff:       btag-loose-b.txt
+    cjet loose eff:       btag-loose-c.txt
+    udsgjet loose eff:    btag-loose-udsg.txt
+    bjet medium eff:       btag-medium-b.txt
+    cjet medium eff:       btag-medium-c.txt
+    udsgjet medium eff:    btag-medium-udsg.txt
+    bjet tight eff:       btag-tight-b.txt
+    cjet tight eff:       btag-tight-c.txt
+    udsgjet tight eff:    btag-tight-udsg.txt
+
+
 
 tables G-H:
     electron id:    Electron_Id_Loose_SF_2016.txt
@@ -233,9 +241,15 @@ tables G-H:
     muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
-    bjet eff:       btag-b.txt
-    cjet eff:       btag-c.txt
-    udsgjet eff:    btag-udsg.txt
+    bjet loose eff:       btag-loose-b.txt
+    cjet loose eff:       btag-loose-c.txt
+    udsgjet loose eff:    btag-loose-udsg.txt
+    bjet medium eff:       btag-medium-b.txt
+    cjet medium eff:       btag-medium-c.txt
+    udsgjet medium eff:    btag-medium-udsg.txt
+    bjet tight eff:       btag-tight-b.txt
+    cjet tight eff:       btag-tight-c.txt
+    udsgjet tight eff:    btag-tight-udsg.txt
 
 
 

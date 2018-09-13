@@ -16,6 +16,7 @@ namespace physics
 class btagger
 {
     double _bjet_cut = 0.5426;
+    std::string bjet_cut; 
     std::array<double, 3> _bjet_tag_eff;
     BTagCalibrationReader _btag_calibration_reader;
 
@@ -28,7 +29,9 @@ class btagger
 
   private:
     /// \brief Applies the b-tagging scale factors for the given jet
-    void apply_sf(const jet &j, weights &w,util::histo_set2D &h, const util::tables &tab) const;
+    void apply_sf(const jet &j, weights &w,util::histo_set2D &h, const util::tables &tab, double &wu) const;
+    void fill_eff(const jet &j, weights &w, util::histo_set2D &h, double wu) const;
+
 };
 
 } // namespace physics

@@ -28,6 +28,7 @@ namespace physics
 class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
+    TTreeReaderValue<unsigned> EvtNum;
 
 protected:
     util::event_counter counter;

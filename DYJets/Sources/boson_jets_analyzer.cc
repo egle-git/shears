@@ -42,6 +42,7 @@ boson_jets_analyzer::~boson_jets_analyzer() {}
 
 void boson_jets_analyzer::operator()()
 {
+     //if(weights().isdata()&& *EvtRunNum<=302029)return;//is the first run in Run D 2017
     // if(!(*EvtNum==317714931 || *EvtNum==318251268 || *EvtNum==14697305 || *EvtNum==15162076 ||
     // *EvtNum==36896977)) return;
     _weights.process_event();
@@ -163,18 +164,18 @@ void boson_jets_analyzer::operator()()
     }
 
     std::string mass_tag;
-    if (boson_mass > 50 && boson_mass < 71) {
-        mass_tag = "_mass50_71";
-    } else if (boson_mass > 71 && boson_mass < 111) {
-        mass_tag = "_mass71_111";
-    } else if (boson_mass > 111 && boson_mass < 130) {
-        mass_tag = "_mass111_130";
-    } else if (boson_mass > 130 && boson_mass < 170) {
-        mass_tag = "_mass130_170";
-    } else if (boson_mass > 170 && boson_mass < 250) {
-        mass_tag = "_mass170_250";
-    } else if (boson_mass > 250 && boson_mass < 320) {
-        mass_tag = "_mass250_320";
+    if (boson_mass > 50 && boson_mass < 76) {
+        mass_tag = "_mass50_76";
+    } else if (boson_mass > 76 && boson_mass < 106) {
+        mass_tag = "_mass76_106";
+    } else if (boson_mass > 106 && boson_mass < 170) {
+        mass_tag = "_mass106_170";
+    } else if (boson_mass > 170 && boson_mass < 350) {
+        mass_tag = "_mass170_350";
+    } else if (boson_mass > 350 && boson_mass < 1000) {
+        mass_tag = "_mass350_1000";
+    } else if (boson_mass > 1000 && boson_mass < 2000) {
+        mass_tag = "_mass1000_2000";
     }
 
     // Exclusive

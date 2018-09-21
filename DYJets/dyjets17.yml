@@ -24,7 +24,7 @@ log:
 
 # Whether to use pileup reweighing
 # Default value: true
-use pileup reweighing: true
+use pileup reweighing: false
 
 # Year (used for pileup)
 year: 2017
@@ -106,19 +106,19 @@ muons:
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: yes
+    use id scale factors: no
 
     # Whether to use the isolation scale factors
     # Default value: yes
-    use isolation scale factors: yes
+    use isolation scale factors: no
 
     # Whether to use the tracking scale factors
     # Default value: yes
-    use tracking scale factors: yes
+    use tracking scale factors: no
 
     # Whether to use Rochester correction
     # Default value: yes
-    use rochester correction: yes
+    use rochester correction: no
 
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
@@ -142,6 +142,15 @@ Z:
     #   - same sign: Keep only lepton pairs of the same sign
     # Default value: neutral
     charge mode: neutral
+    # Flavor check mode
+    # Possible values:
+    #   - none: No check
+    #   - same: Two leptons of the same flavor
+    #   - ee: Two electrons
+    #   - mumu: Two muons
+    #   - emu: One electron and one muon
+    # Default value: same
+    flavor mode: mumu
 
 # Triggers
 #
@@ -154,12 +163,12 @@ triggers G-H: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8, HLT_Mu17_TrkIsoVVL_Mu8
 samples:
     - name: data
       type: data
-      jobs: 10
+      jobs: 32
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/Data/v10/Catalogs/
       catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
     - name: DYJets
       type: MC
-      jobs: 16
+      jobs: 32
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2017/MC/v10/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST-s-channel
@@ -292,5 +301,6 @@ plots:
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-                                                                                                                                                                                                                            290,1         Bot
-
+    - selector: 'mass_Zinc0jet'
+      ratio min: 0.641
+      ratio max: 1.419

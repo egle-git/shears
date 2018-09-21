@@ -294,7 +294,7 @@ plots:
     # Excluded plots
     - selector: '^_.*'
       produce: no
-    - selector: '.*[12]jet.*'
+    - selector: '.*[2]jet.*'
       produce: no
     - selector: 'el.*'
       produce: no

@@ -46,7 +46,7 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     _btag_calibration_reader = BTagCalibrationReader(wp, "central", {"up", "down"});
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_B, "mujets");
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_C, "mujets");
-    _btag_calibration_reader.load(calib, BTagEntry::FLAV_UDSG, "mujets");
+    _btag_calibration_reader.load(calib, BTagEntry::FLAV_UDSG, "incl");
 }
 
 bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t) const
@@ -104,19 +104,14 @@ void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util
         tg="udsgjet";
     }
     double eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.v.Pt(), j.v.Eta());
-    //std::cout <<tg + " "+bjet_cut+" eff "<<eff<<"  " <<j.v.Pt()<<" "<<j.v.Eta()<<std::endl;
     bool tagged = j.bdisc > _bjet_cut;
     if(tagged) tg+="_tagged";
     if(wu==-999.)wu=w.global_weight();
-    //h.fill("bjetPtEta", tg, j.v.Pt(),j.v.Eta(), wu);
 
     double sf = _btag_calibration_reader.eval_auto_bounds(
         "central", flavor, std::abs(j.v.Eta()), j.v.Pt());
-   // double eff = _bjet_tag_eff[flavor];
 
     w.use_weight(tagged ? sf : (1 - sf * eff) / (1 - eff));
-//    cout<<tg<<" "<<tagged<<" "<<sf<<" "<< eff<<" "<<(tagged ? sf : (1 - sf * eff) / (1 - eff))<<endl;
-    //cout<<wu<<"  "<<(tagged ? sf : (1 - sf * eff) / (1 - eff))<<"  "<<w.global_weight()<<endl;
 }
 
 } // namespace physics

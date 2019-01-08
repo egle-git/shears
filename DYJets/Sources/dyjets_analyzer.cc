@@ -86,6 +86,36 @@ void dyjets_analyzer::fill(const std::string &tag,
     histo_set.fill("mass_wide_range", tag, Z.v.M(), weights().global_weight());
     histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
     histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
+
+    /*
+     * Variables in Z rest frame
+     */
+
+    TLorentzVector pZ = Z.v;
+    TLorentzVector pLep1 = Z.a.v;
+    TLorentzVector pLep2 = Z.b.v;
+    if (Z.a.charge > 0) {
+        std::swap(pLep1, pLep2);
+    }
+
+    // Rotate to decay frame with Z axis parallel to boson momentum
+    double phi = Z.v.Phi();
+    double theta = Z.v.Theta();
+
+    pZ.RotateZ(-phi);
+    pZ.RotateY(-theta);
+    pLep1.RotateZ(-phi);
+    pLep1.RotateY(-theta);
+    pLep2.RotateZ(-phi);
+    pLep2.RotateY(-theta);
+
+    // Boost to decay frame with boson at rest
+    pLep1.Boost(-pZ.BoostVector());
+    pLep2.Boost(-pZ.BoostVector());
+    pZ.Boost(-pZ.BoostVector());
+
+    histo_set.fill("decay_costheta", tag,
+                   std::cos(pLep1.Theta()), weights().global_weight());
 }
 
 std::vector<physics::lepton>

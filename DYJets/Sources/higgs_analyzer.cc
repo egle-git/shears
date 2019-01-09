@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <utility>
 
 #include <TFile.h>
 #include <TH1D.h>
@@ -10,66 +11,71 @@
 #include <TTreeReaderValue.h>
 
 #include "functions.h"
-#include "lepton.h"
 
 higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
-    : EvtRunNum(info.reader, "EvtRunNum"),
-      _jets(info, opt),
-      _muons(info, opt, *this),
-      _pileup(info, opt),
-      _triggers(info),
-      _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
-      _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
-      _weights(info),
+    : boson_jets_analyzer(info, opt),
       _zfinder_good(opt, "good Z"),
       _zfinder_bad(opt, "bad Z")
 {
-    if (opt.config["tables B-F"]) {
-        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
-    }
-    if (opt.config["tables G-H"]) {
-        _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
-    }
+    counter.declare("With four good leptons");
+    counter.declare("With four good electrons");
+    counter.declare("With four good muons");
+    counter.declare("ZZ->4e");
+    counter.declare("ZZ->4mu");
+    counter.declare("ZZ->2e2mu");
 
-    _jets.declare_histograms(*this);
-    _pileup.declare_histograms(*this);
-    declare("mass", "Dilepton mass", 40, 71, 111);
-    declare("m4l", "Four-lepton mass", 48, 70, 310);
+    std::string binning_file = "higgs-binnings.yml";
+    if (opt.config["binning file"]) {
+        binning_file = opt.config["binning file"].as<std::string>();
+    }
+    util::logging::info << "Taking binnings from file " << binning_file << std::endl;
+    histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
-namespace /* anonymous */
+void higgs_analyzer::fill(const std::string &tag,
+                          const std::vector<physics::lepton> &boson,
+                          const std::vector<physics::jet> &jets)
 {
+    boson_jets_analyzer::fill(tag, boson, jets);
 
-void apply_trigger_sf(physics::weights &w,
-                      const physics::lepton &mu1,
-                      const physics::lepton &mu2,
-                      const util::tables &tab)
-{
-    if (w.ismc()) {
-        w.use_weight(tab.at("dimu trigger")
-                         .getEfficiency(std::abs(mu1.raw_v.Eta()), std::abs(mu2.raw_v.Eta())));
-    }
+    physics::dilepton good_Z(boson[0], boson[1]);
+    physics::dilepton bad_Z(boson[2], boson[3]);
+
+    TLorentzVector higgs = good_Z.v + bad_Z.v;
+
+    histo_set.fill("mass", tag, higgs.M(), weights().global_weight());
+//     FIXME
+//     histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
+    histo_set.fill("pt", tag, higgs.Pt(), weights().global_weight());
 }
-} // namespace anonymous
 
-void higgs_analyzer::operator()()
+void higgs_analyzer::apply_trigger_sf(
+    physics::weights &weights, const std::vector<physics::lepton> &leptons)
 {
-    using namespace physics;
+    // FIXME
+}
 
-    _weights.process_event();
+std::vector<physics::lepton>
+higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
+                            const std::vector<physics::lepton> &electrons)
+{
+    using physics::dilepton;
+    using physics::lepton;
 
-    if (!passes_trigger()) {
-        return;
+    if (muons.size() + electrons.size() < 4) {
+        return {};
+    }
+    counter.count("With four good leptons", weights().global_weight());
+
+    if (electrons.size() >= 4) {
+        counter.count("With four good electrons", weights().global_weight());
+    }
+    if (muons.size() >= 4) {
+        counter.count("With four good muons", weights().global_weight());
     }
 
-
-    _pileup.fill(*this, "Zinc0jet_noweight", _weights);
-    _pileup.reweight(_weights);
-
-    std::vector<lepton> muons; // = _muons.get(_weights.isdata());
-
-    TLorentzVector zz_p;
     bool found = false;
+    std::pair<dilepton, dilepton> chosen_pair;
 
     std::vector<dilepton> good = _zfinder_good.find(muons);
     for (const dilepton &z1 : good) {
@@ -124,12 +130,9 @@ void higgs_analyzer::operator()()
                 }
             }
 
-            zz_p = z1.v + z2.v;
+            chosen_pair = {z1, z2};
             found = true;
 
-            _muons.apply_sf(_weights,
-                            {z1.a, z1.b, z2.a, z2.b},
-                            select(_tables_eraBF, _tables_eraGH));
             break;
         }
         if (found) {
@@ -137,53 +140,31 @@ void higgs_analyzer::operator()()
         }
     }
 
-    if (found) {
-        _muons.fill(*this, "Zinc0jet", muons, _weights);
-        _pileup.fill(*this, "Zinc0jet", _weights);
-        fill("m4l", "Hinc0jet", zz_p.M(), _weights.global_weight());
+    if (std::abs(chosen_pair.first.a.pdgid) == 11 &&
+        std::abs(chosen_pair.second.a.pdgid) == 11) {
+        counter.count("ZZ->4e", weights().global_weight());
+    } else if (std::abs(chosen_pair.first.a.pdgid) == 13 &&
+               std::abs(chosen_pair.second.a.pdgid) == 13) {
+        counter.count("ZZ->4mu", weights().global_weight());
+    } else {
+        counter.count("ZZ->2e2mu", weights().global_weight());
     }
 
-#if 0
-    // Only read jets once we have a Z
-    std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, {best_candidate.a, best_candidate.b});
-
-    _jets.fill(*this, "Zinc0jet_noweight", jets, _weights);
-    _pileup.fill(*this, "Zinc0jet_noweight", _weights);
-    _pileup.reweight(_weights);
-
-    _muons.apply_sf(
-        _weights, {best_candidate.a, best_candidate.b}, select(_tables_eraBF, _tables_eraGH));
-    apply_trigger_sf(
-        _weights, best_candidate.a, best_candidate.b, select(_tables_eraBF, _tables_eraGH));
-
-    _jets.fill(*this, "Zinc0jet", jets, _weights);
-    _muons.fill(*this, "Zinc0jet", muons, _weights);
-    _pileup.fill(*this, "Zinc0jet", _weights);
-    fill("mass", "Zinc0jet", best_candidate.v.M(), _weights.global_weight());
-#endif
+    return {
+        chosen_pair.first.a,
+        chosen_pair.first.b,
+        chosen_pair.second.a,
+        chosen_pair.second.b};
 }
 
-bool higgs_analyzer::passes_trigger() { return select(_mask_eraBG, _mask_eraH).passes(_triggers); }
-
-void higgs_analyzer::write()
+std::vector<physics::lepton>
+higgs_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
 {
-    _weights.write(this);
-    histo_set::write();
+    // TODO
+    return {};
 }
 
 po::options_description higgs_analyzer::options()
 {
     return po::options_description("Physics options");
-}
-
-template <class T> T &higgs_analyzer::select(T &eraBG, T &eraGH)
-{
-    const unsigned run_threshold = 278820u; // start of Run G
-
-    if (_weights.isdata() && *EvtRunNum < run_threshold) {
-        return eraBG;
-    } else {
-        return eraGH;
-    }
 }

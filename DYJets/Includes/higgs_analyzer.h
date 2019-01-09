@@ -7,58 +7,45 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
-#include "histo_set.h"
+#include "boson_jets_analyzer.h"
 #include "jets.h"
 #include "job.h"
-#include "muons.h"
-#include "pileup.h"
-#include "tables.h"
-#include "triggers.h"
-#include "weights.h"
 #include "zfinder.h"
 
 namespace po = boost::program_options;
 
 /// \brief Implements a \f$ H \to 4l \f$ analysis.
-class higgs_analyzer : private virtual util::histo_set
+class higgs_analyzer : public physics::boson_jets_analyzer
 {
-    TTreeReaderValue<unsigned> EvtRunNum;
-
-    physics::jets _jets;
-    physics::muons _muons;
-    physics::pileup _pileup;
-
-    util::tables _tables_eraBF;
-    util::tables _tables_eraGH;
-
-    physics::trigger_values _triggers;
-
-    physics::trigger_mask _mask_eraBG;
-    physics::trigger_mask _mask_eraH;
-
-    physics::weights _weights;
-
     physics::zfinder _zfinder_good, _zfinder_bad;
 
   public:
     /// \brief Constructor.
     explicit higgs_analyzer(util::job::info &info, const util::options &opt);
 
-    /// \brief Function called for every event.
-    void operator()();
+    /// \brief Destructor.
+    virtual ~higgs_analyzer() = default;
 
-    /// \brief Checks whether the current event passes the trigger.
-    bool passes_trigger();
+    // Overridden from base class
+    void apply_trigger_sf(physics::weights &weights,
+                          const std::vector<physics::lepton> &leptons) override;
 
-    /// \brief Function called at the end of the processing.
-    void write();
+    /// \brief Fills histograms
+    void fill(const std::string &tag,
+              const std::vector<physics::lepton> &boson,
+              const std::vector<physics::jet> &jets) override;
+
+    // Overridden from base class
+    std::vector<physics::lepton> find_boson(
+        const std::vector<physics::lepton> &muons,
+        const std::vector<physics::lepton> &electrons) override;
+
+    // Overridden from base class
+    std::vector<physics::lepton> find_gen_boson(
+        const std::vector<physics::lepton> &genleps) override;
 
     /// \brief Returns the list of options supported by the analyzer.
     static po::options_description options();
-
-  private:
-    /// \brief Returns the argument corresponding to the current era.
-    template<class T> T &select(T &eraBG, T &eraH);
 };
 
 #endif // HIGGS_ANALYZER_H

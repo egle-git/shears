@@ -22,6 +22,7 @@ class compare_builder_base
     std::string _analyzer_name;
     std::string _default_config_file;
     std::string _output_dir_name;
+    std::string _output_format;
     std::set<std::string> _histogram_names;
 
     util::options _opt;

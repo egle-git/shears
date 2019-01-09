@@ -27,6 +27,9 @@ void compare_builder_base::parse_options(int argc, char **argv)
     auto options = this->options();
 
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
+    options.add_options()("format,f",
+                          po::value<std::string>()->default_value("png"),
+                          "Sets the output format (png, pdf, ...)");
     options.add_options()("histogram-name,n",
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
@@ -37,6 +40,7 @@ void compare_builder_base::parse_options(int argc, char **argv)
     if (_opt.map.count("output") > 0) {
         _output_dir_name = _opt.map["output"].as<std::string>();
     }
+    _output_format = _opt.map["format"].as<std::string>();
 
     if (_opt.config["plots"]) {
         _style = util::style_list(_opt.config["plots"]);
@@ -137,7 +141,8 @@ void compare_builder_base::build()
         }
 
         // Write file
-        canvas.Print((_output_dir_name + "/" + name + ".png").c_str());
+        canvas.Print(
+            (_output_dir_name + "/" + name + "." + _output_format).c_str());
 
         // Cleanup
         reset_drawing_state();

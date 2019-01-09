@@ -17,7 +17,8 @@ namespace util
 compare_builder_base::compare_builder_base(const std::string &analyzer_name,
                                            const std::string &default_config_file) :
     _analyzer_name(analyzer_name),
-    _default_config_file(default_config_file)
+    _default_config_file(default_config_file),
+    _preliminary(true)
 {
 }
 
@@ -39,6 +40,10 @@ void compare_builder_base::parse_options(int argc, char **argv)
 
     if (_opt.config["plots"]) {
         _style = util::style_list(_opt.config["plots"]);
+    }
+
+    if (_opt.config["preliminary"]) {
+        _preliminary = _opt.config["preliminary"].as<bool>();
     }
 }
 
@@ -70,6 +75,15 @@ void compare_builder_base::build()
         upper.cd();
 
         fill_upper_panel(name);
+
+        // CMS label
+        TLatex cms;
+        cms.SetTextSize(0.04);
+        cms.SetTextFont(61);
+        cms.SetTextAlign(kHAlignLeft + kVAlignBottom);
+        cms.SetNDC();
+        cms.SetText(0.1, 0.9, _preliminary ? "CMS Preliminary" : "CMS");
+        cms.Draw();
 
         // Lumi label
         double lumi = get_lumi();

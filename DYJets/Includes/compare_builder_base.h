@@ -26,6 +26,7 @@ class compare_builder_base
 
     util::options _opt;
     util::style_list _style;
+    bool _preliminary;
 
     bool _logx;
 

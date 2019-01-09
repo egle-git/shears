@@ -29,6 +29,9 @@ use pileup reweighing: true
 # Year (used for pileup)
 year: 2016
 
+# Whether results are preliminary (for plots)
+preliminary: yes
+
 # Options related to the selection of jets
 jets:
     # Pt cut [GeV]

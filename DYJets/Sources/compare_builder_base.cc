@@ -1,9 +1,13 @@
 #include "compare_builder_base.h"
 
+#include <iomanip>
+#include <sstream>
+
 #include <boost/filesystem.hpp>
 
 #include <TAxis.h>
 #include <TCanvas.h>
+#include <TLatex.h>
 #include <TLegend.h>
 #include <TPad.h>
 
@@ -66,6 +70,22 @@ void compare_builder_base::build()
         upper.cd();
 
         fill_upper_panel(name);
+
+        // Lumi label
+        double lumi = get_lumi();
+        TLatex label;
+        if (lumi > 0) {
+            label.SetTextSize(0.04);
+            label.SetTextFont(42);
+            label.SetTextAlign(kHAlignRight + kVAlignBottom);
+            label.SetNDC();
+
+            std::stringstream ss;
+            ss << std::setprecision(3) << (lumi / 1000);
+            ss << " fb^{-1} (13 TeV)";
+            label.SetText(0.97, 0.9, ss.str().c_str());
+            label.Draw();
+        }
 
         // Legend
         TLegend legend(0.63, 0.60, 0.81, 0.87);

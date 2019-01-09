@@ -88,6 +88,9 @@ class compare_builder_base
     /// \brief Loads all needed \ref comparison_entry
     virtual void load() = 0;
 
+    /// \brief Gets the luminosity
+    virtual double get_lumi() const { return 0; }
+
     /// \brief Fills the upper panel with plots
     virtual void fill_upper_panel(const std::string &name) = 0;
 

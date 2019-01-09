@@ -83,10 +83,12 @@ void compare_builder_base::build()
         // CMS label
         TLatex cms;
         cms.SetTextSize(0.04);
-        cms.SetTextFont(61);
+        cms.SetTextFont(42);
         cms.SetTextAlign(kHAlignLeft + kVAlignBottom);
         cms.SetNDC();
-        cms.SetText(0.1, 0.9, _preliminary ? "CMS Preliminary" : "CMS");
+        cms.SetText(0.1,
+                    0.9,
+                    _preliminary ? "#bf{CMS} #it{Preliminary}" : "#bf{CMS}");
         cms.Draw();
 
         // Lumi label

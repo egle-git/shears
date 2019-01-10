@@ -57,7 +57,7 @@ void higgs_analyzer::apply_trigger_sf(
 
 std::vector<physics::lepton>
 higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
-                            const std::vector<physics::lepton> &electrons)
+                           const std::vector<physics::lepton> &electrons)
 {
     using physics::dilepton;
     using physics::lepton;
@@ -74,18 +74,23 @@ higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         counter.count("With four good muons", weights().global_weight());
     }
 
+    std::vector<lepton> leptons = muons;
+    leptons.insert(leptons.end(), electrons.begin(), electrons.end());
+
     bool found = false;
     std::pair<dilepton, dilepton> chosen_pair;
 
-    std::vector<dilepton> good = _zfinder_good.find(muons);
+    std::vector<dilepton> good = _zfinder_good.find(leptons);
     for (const dilepton &z1 : good) {
         // Build a lepton list without the ones used to build the good Z candidate
-        std::vector<lepton> vetoed_muons = muons;
-        vetoed_muons.erase(std::find(vetoed_muons.begin(), vetoed_muons.end(), z1.a));
-        vetoed_muons.erase(std::find(vetoed_muons.begin(), vetoed_muons.end(), z1.b));
+        std::vector<lepton> vetoed_leptons = leptons;
+        vetoed_leptons.erase(
+            std::find(vetoed_leptons.begin(), vetoed_leptons.end(), z1.a));
+        vetoed_leptons.erase(
+            std::find(vetoed_leptons.begin(), vetoed_leptons.end(), z1.b));
 
         // Loop on all bad Z candidates
-        std::vector<dilepton> bad = _zfinder_bad.find(vetoed_muons);
+        std::vector<dilepton> bad = _zfinder_bad.find(vetoed_leptons);
         for (const dilepton &z2 : bad) {
             if (!dilepton::zmass_ordering(z1, z2)) {
                 continue;
@@ -138,6 +143,10 @@ higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         if (found) {
             break;
         }
+    }
+
+    if (!found) {
+        return {};
     }
 
     if (std::abs(chosen_pair.first.a.pdgid) == 11 &&

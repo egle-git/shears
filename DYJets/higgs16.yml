@@ -243,20 +243,69 @@ tables G-H:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma^{*} #rightarrow ll"
-      required: yes
-      samples: [ DYJets, DYJets-10to50 ]
-      color: 408 # kGreen - 8
-      #scale factor: 1
-    - legend: "t#bar{t}"
-      samples: [ TT ]
-      color: 600 # kBlue
-    - legend: VV
-      samples: [ ZZ, WWTo2L2Nu, WZ ]
+    - legend: "Higgs"
+      #required: yes
+      samples: [ ggH, VBF ]
+      color: 867 # kAzure + 8
+      scale factor: 1.5
+    #- legend: "Z/#gamma^{*}"
+      #required: yes
+      #samples: [ DYJets ]
+      #color: 408 # kGreen - 8
+    - legend: "ZZ"
+      #required: yes
+      samples: [ ZZ ]
       color: 633 # kRed + 1
-    - legend: Single top
-      samples: [ ST-s-channel, ST-t-channel, STbar-tW, ST-tW ]
-      color: 616 # kMagenta
-    - legend: W
-      samples: [ WToLNu ]
-      color: 800 # kOrange
+      scale factor: 0.5
+
+# The file below defines the binnings for histograms relevant to the analysis.
+# Default value: higgs-binnings.yml
+binning file: higgs-binnings.yml
+
+# Plot properties
+#
+# The sole mandatory field is the "selector", containing a regex that is matched
+# against plot names. When a plot name matches the regex, properties listed in
+# other fields are assigned to it. Rules lower in the list take precedence over
+# the ones above them.
+#
+# Supported properties:
+#   - produce (yes): Whether to make the plot
+#   - log x (no): Whether to x axis should use a log scale
+#   - ratio min (0.601): The minimum value shown on data/mc ratio plots
+#   - ratio max (1.399): The maximum value shown on data/mc ratio plots
+plots:
+    # Excluded plots
+    - selector: '^_.*'
+      produce: no
+    - selector: '.*[12]jet.*'
+      produce: no
+    - selector: 'el.*'
+      produce: no
+    - selector: 'mu.*'
+      produce: no
+    - selector: 'jet.*leading.*'
+      produce: no
+    - selector: 'jet.*subleading.*'
+      produce: no
+    - selector: 'jet.*third.*'
+      produce: no
+    - selector: 'jet.*fourth.*'
+      produce: no
+    - selector: '.*Zexc.*'
+      produce: no
+    - selector: 'mass.*mass.*'
+      produce: no
+    - selector: 'nJets.*_Zinc.*'
+      produce: no
+    - selector: 'nJets.*_Zinc0jet.*'
+      produce: yes
+    # Style changes
+    - selector: '.*'
+      ratio min: 0.501
+      ratio max: 1.499
+    - selector: '^phistar.*'
+      log x: yes
+    - selector: '^pt.*'
+      log x: yes
+    - selector: 'mass_Zinc0jet'

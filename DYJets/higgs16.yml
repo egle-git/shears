@@ -247,16 +247,14 @@ MC grouping:
       #required: yes
       samples: [ ggH, VBF ]
       color: 867 # kAzure + 8
-      scale factor: 1.5
-    #- legend: "Z/#gamma^{*}"
+    - legend: "Z/#gamma^{*}"
       #required: yes
-      #samples: [ DYJets ]
-      #color: 408 # kGreen - 8
+      samples: [ DYJets ]
+      color: 408 # kGreen - 8
     - legend: "ZZ"
       #required: yes
       samples: [ ZZ ]
       color: 633 # kRed + 1
-      scale factor: 0.5
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: higgs-binnings.yml

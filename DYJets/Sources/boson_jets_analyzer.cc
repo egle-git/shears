@@ -166,10 +166,11 @@ void boson_jets_analyzer::operator()()
     /*
      * Fill histograms w.r.t. N_jets and invariant mass
      */
-    TLorentzVector boson_p;
-    for (const auto &lepton : leptons) {
-        boson_p += lepton.v;
-    }
+    TLorentzVector boson_p = std::accumulate(
+        leptons.begin(),
+        leptons.end(),
+        TLorentzVector(),
+        [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
 
     std::string mass_tag = make_tag(_mass_bins, boson_p.M());
     if (!mass_tag.empty()) {

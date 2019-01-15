@@ -186,6 +186,10 @@ bad Z:
     # Default value: same
     flavor mode: same
 
+# How the measurement is binned in mass
+# Default value: empty
+mass bins: [ 0, 125, 135, 320 ]
+
 # Triggers
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation

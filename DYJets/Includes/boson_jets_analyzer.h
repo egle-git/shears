@@ -55,6 +55,7 @@ private:
     btagger _btagger;
 
     bool _bjet_veto = true;
+    std::vector<double> _mass_bins;
 
     physics::weights _weights;
 

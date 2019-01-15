@@ -1,7 +1,34 @@
 #include "boson_jets_analyzer.h"
 
+#include <algorithm>
+
 namespace physics
 {
+
+namespace /* anonymous */
+{
+
+/**
+ * \brief Returns a tag of the form @c low_high where low and high are the bounds of the
+ *        bin that contains @c value.
+ *
+ * Returns @c "" if the value doesn't fit in a bin.
+ */
+std::string make_tag(const std::vector<double> &bins, double value)
+{
+    auto low = std::lower_bound(bins.begin(), bins.end(), value);
+    if (low == bins.end()) {
+        // Out of bounds
+        return "";
+    }
+    auto up = std::next(low);
+
+    std::stringstream ss;
+    ss << *low << "_" << *up;
+    return ss.str();
+}
+
+} // anonymous namespace
 
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
@@ -30,6 +57,11 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     }
 
     util::set_value_safe(opt.config["b jet veto"], _bjet_veto, "use", "use b jet veto");
+
+    if (opt.config["mass bins"]) {
+        _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
+        std::sort(_mass_bins.begin(), _mass_bins.end());
+    }
 
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
@@ -138,20 +170,10 @@ void boson_jets_analyzer::operator()()
     for (const auto &lepton : leptons) {
         boson_p += lepton.v;
     }
-    double boson_mass = boson_p.M();
-    std::string mass_tag;
-    if (boson_mass > 50 && boson_mass < 71) {
-        mass_tag = "_mass50_71";
-    } else if (boson_mass > 71 && boson_mass < 111) {
-        mass_tag = "_mass71_111";
-    } else if (boson_mass > 111 && boson_mass < 130) {
-        mass_tag = "_mass111_130";
-    } else if (boson_mass > 130 && boson_mass < 170) {
-        mass_tag = "_mass130_170";
-    } else if (boson_mass > 170 && boson_mass < 250) {
-        mass_tag = "_mass170_250";
-    } else if (boson_mass > 250 && boson_mass < 320) {
-        mass_tag = "_mass250_320";
+
+    std::string mass_tag = make_tag(_mass_bins, boson_p.M());
+    if (!mass_tag.empty()) {
+        mass_tag = "_mass" + mass_tag;
     }
 
     // Exclusive

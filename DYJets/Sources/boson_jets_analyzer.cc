@@ -106,7 +106,7 @@ void boson_jets_analyzer::operator()()
     std::vector<lepton> genleptons = find_gen_boson(genleps);
 
     if (!genleptons.empty()) {
-        _genleps.fill(histo_set, "genZinc0jet_noweight", genleptons, weights());
+        _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
     }
     /*
      * Handle the trigger
@@ -139,8 +139,8 @@ void boson_jets_analyzer::operator()()
     _electrons.apply_sf(_weights, chosen_electrons, tables());
 
     // Fill lepton control plots
-    _muons.fill(histo_set, "Zinc0jet_noweight", chosen_muons, weights());
-    _electrons.fill(histo_set, "Zinc0jet_noweight", chosen_electrons, weights());
+    _muons.fill(histo_set, "inc0jet_noweight", chosen_muons, weights());
+    _electrons.fill(histo_set, "inc0jet_noweight", chosen_electrons, weights());
 
     /*
      * Handle jets and pileup
@@ -153,8 +153,8 @@ void boson_jets_analyzer::operator()()
         return;
     }
 
-    _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
-    _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
+    _jets.fill(histo_set, "inc0jet_noweight", jets, weights());
+    _pileup.fill(histo_set, "inc0jet_noweight", weights());
 
     _pileup.reweight(_weights);
 
@@ -179,7 +179,7 @@ void boson_jets_analyzer::operator()()
     // Exclusive
     if (jets.size() < 3) {
         std::stringstream ss;
-        ss << "Zexc" << jets.size() << "jet";
+        ss << "exc" << jets.size() << "jet";
         fill(ss.str(), leptons, jets);
         fill(ss.str() + mass_tag, leptons, jets);
     }
@@ -187,7 +187,7 @@ void boson_jets_analyzer::operator()()
     // Inclusive
     for (unsigned njets = 0; njets < 3; ++njets) {
         std::stringstream ss;
-        ss << "Zinc" << njets << "jet";
+        ss << "inc" << njets << "jet";
         fill(ss.str(), leptons, jets);
         fill(ss.str() + mass_tag, leptons, jets);
     }

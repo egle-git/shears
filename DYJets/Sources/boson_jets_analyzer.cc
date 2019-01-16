@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "matched.h"
-
 namespace physics
 {
 
@@ -259,6 +257,22 @@ void boson_jets_analyzer::fill(const std::string &tag,
     // Fill lepton control plots
     _muons.fill(histo_set, tag, chosen_muons, weights());
     _electrons.fill(histo_set, tag, chosen_electrons, weights());
+}
+
+/// \brief Fills histograms for an unfolded variable
+void boson_jets_analyzer::fill_unfolded(const std::string &name,
+                                        const std::string &tag,
+                                        const util::matched<double> &value)
+{
+    if (value.rec) {
+        histo_set.fill(name, tag, *value.rec);
+    }
+    if (value.gen) {
+        histo_set.fill(name, tag + "-gen", *value.gen);
+    }
+    if (value.rec && value.gen) {
+        histo_set2D.fill(name, tag + "-matrix", *value.rec, *value.gen);
+    }
 }
 
 bool boson_jets_analyzer::passes_trigger()

@@ -15,6 +15,7 @@
 #include "jets.h"
 #include "job.h"
 #include "lepton.h"
+#include "matched.h"
 #include "muons.h"
 #include "pileup.h"
 #include "tables.h"
@@ -113,6 +114,11 @@ protected:
 
     /// \brief Checks whether the current event passes the trigger.
     virtual bool passes_trigger();
+
+    /// \brief Fills histograms for an unfolded variable
+    void fill_unfolded(const std::string &name,
+                       const std::string &tag,
+                       const util::matched<double> &value);
 
     util::tables tables() const
     {

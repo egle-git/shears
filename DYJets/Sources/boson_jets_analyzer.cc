@@ -22,6 +22,10 @@ std::string make_tag(const std::vector<double> &bins, double value)
         return "";
     }
     auto up = std::next(low);
+    if (up == bins.end()) {
+        // Out of bounds
+        return "";
+    }
 
     std::stringstream ss;
     ss << *low << "_" << *up;

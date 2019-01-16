@@ -31,9 +31,7 @@ class higgs_analyzer : public physics::boson_jets_analyzer
                           const std::vector<physics::lepton> &leptons) override;
 
     /// \brief Fills histograms
-    void fill(const std::string &tag,
-              const std::vector<physics::lepton> &boson,
-              const std::vector<physics::jet> &jets) override;
+    void fill(const std::string &tag, const util::matched<event_contents> &evt) override;
 
     // Overridden from base class
     std::vector<physics::lepton> find_boson(

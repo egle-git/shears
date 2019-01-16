@@ -234,37 +234,38 @@ void boson_jets_analyzer::operator()()
         if (evt.rec->jets.size() < 3) {
             std::stringstream ss;
             ss << "exc" << evt.rec->jets.size() << "jet";
-            fill(ss.str(), evt.rec->leptons, evt.rec->jets);
-            fill(ss.str() + *mass_tags.rec, evt.rec->leptons, evt.rec->jets);
+            fill(ss.str(), evt);
+            fill(ss.str() + *mass_tags.rec, evt);
         }
 
         // Inclusive
         for (unsigned njets = 0; njets < 3; ++njets) {
             std::stringstream ss;
             ss << "inc" << njets << "jet";
-            fill(ss.str(), evt.rec->leptons, evt.rec->jets);
-            fill(ss.str() + *mass_tags.rec, evt.rec->leptons, evt.rec->jets);
+            fill(ss.str(), evt);
+            fill(ss.str() + *mass_tags.rec, evt);
         }
     }
 }
 
 void boson_jets_analyzer::fill(const std::string &tag,
-                               const std::vector<physics::lepton> &chosen_leptons,
-                               const std::vector<physics::jet> &jets)
+                               const util::matched<event_contents> &evt)
 {
-    _jets.fill(histo_set, tag, jets, weights());
-    _pileup.fill(histo_set, tag, weights());
+    if (evt.rec) {
+        _jets.fill(histo_set, tag, evt.rec->jets, weights());
+        _pileup.fill(histo_set, tag, weights());
 
-    // Create lists of chosen muons and electrons
-    std::vector<lepton> chosen_muons, chosen_electrons;
-    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_muons),
-                 [](const lepton &lep) { return lep.pdgid == 13; });
-    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_electrons),
-                 [](const lepton &lep) { return lep.pdgid == 11; });
+        // Create lists of chosen muons and electrons
+        std::vector<lepton> chosen_muons, chosen_electrons;
+        std::copy_if(evt.rec->leptons.begin(), evt.rec->leptons.end(), std::back_inserter(chosen_muons),
+                    [](const lepton &lep) { return lep.pdgid == 13; });
+        std::copy_if(evt.rec->leptons.begin(), evt.rec->leptons.end(), std::back_inserter(chosen_electrons),
+                    [](const lepton &lep) { return lep.pdgid == 11; });
 
-    // Fill lepton control plots
-    _muons.fill(histo_set, tag, chosen_muons, weights());
-    _electrons.fill(histo_set, tag, chosen_electrons, weights());
+        // Fill lepton control plots
+        _muons.fill(histo_set, tag, chosen_muons, weights());
+        _electrons.fill(histo_set, tag, chosen_electrons, weights());
+    }
 }
 
 /// \brief Fills histograms for an unfolded variable

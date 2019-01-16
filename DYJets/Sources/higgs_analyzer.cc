@@ -33,10 +33,16 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
 }
 
 void higgs_analyzer::fill(const std::string &tag,
-                          const std::vector<physics::lepton> &boson,
-                          const std::vector<physics::jet> &jets)
+                          const util::matched<event_contents> &evt)
 {
-    boson_jets_analyzer::fill(tag, boson, jets);
+    boson_jets_analyzer::fill(tag, evt);
+
+    if (!evt.rec) {
+        return;
+    }
+
+    const auto boson = evt.rec->leptons;
+    const auto jets = evt.rec->jets;
 
     physics::dilepton good_Z(boson[0], boson[1]);
     physics::dilepton bad_Z(boson[2], boson[3]);

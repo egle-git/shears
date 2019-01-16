@@ -117,8 +117,7 @@ protected:
 
     /// \brief Fills histograms
     virtual void fill(const std::string &tag,
-                      const std::vector<physics::lepton> &chosen_leptons,
-                      const std::vector<physics::jet> &jets);
+                      const util::matched<event_contents> &evt);
 
     /**
      * \brief Reconstructs the boson candidate and returns its constituents.

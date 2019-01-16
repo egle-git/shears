@@ -292,13 +292,13 @@ plots:
       produce: no
     - selector: 'jet.*fourth.*'
       produce: no
-    - selector: '.*Zexc.*'
+    - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
       produce: no
-    - selector: 'nJets.*_Zinc.*'
+    - selector: 'nJets.*_inc.*'
       produce: no
-    - selector: 'nJets.*_Zinc0jet.*'
+    - selector: 'nJets.*_inc0jet.*'
       produce: yes
     # Style changes
     - selector: '.*'
@@ -310,6 +310,6 @@ plots:
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-    - selector: 'mass_Zinc0jet'
+    - selector: 'mass_inc0jet'
       ratio min: 0.941
       ratio max: 1.019

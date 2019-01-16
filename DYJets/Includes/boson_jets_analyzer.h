@@ -61,6 +61,24 @@ private:
     physics::weights _weights;
 
 public:
+    /// \brief Groups together the contents of a boson-jets event
+    class event_contents
+    {
+      public:
+        std::vector<lepton> leptons; ///< \brief Leptons making up the boson
+        TLorentzVector boson_p;      ///< \brief Reconstructed boson 4-momentum
+        std::vector<jet> jets;       ///< \brief Jets in the event
+
+        /// \brief Returns the list of leptons making up the boson
+        const std::vector<lepton> &get_leptons() const { return leptons; }
+
+        /// \brief Returns the reconstructed boson 4-momentum
+        TLorentzVector get_boson_p() const { return boson_p; }
+
+        /// \brief Returns the list of jets
+        const std::vector<jet> &get_jets() const { return jets; }
+    };
+
     /// \brief Constructor
     boson_jets_analyzer(util::job::info &info, const util::options &opt);
 

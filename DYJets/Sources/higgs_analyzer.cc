@@ -30,6 +30,7 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     }
     util::logging::info << "Taking binnings from file " << binning_file << std::endl;
     histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
+    histo_set2D.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
 void higgs_analyzer::fill(const std::string &tag,

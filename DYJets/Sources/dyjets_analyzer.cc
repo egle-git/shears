@@ -31,6 +31,7 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     }
     util::logging::info << "Taking binnings from file " << binning_file << std::endl;
     histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
+    histo_set2D.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
 namespace /* anonymous */
@@ -79,6 +80,14 @@ void dyjets_analyzer::fill(const std::string &tag,
 {
     boson_jets_analyzer::fill(tag, evt);
 
+    auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
+    fill_unfolded("mass", tag, mass);
+    fill_unfolded("mass_wide_range", tag, mass);
+
+    auto pt = evt.apply(&event_contents::get_boson_p)
+                 .apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
+    fill_unfolded("pt", tag, pt);
+
     if (!evt.rec) {
         return;
     }
@@ -88,10 +97,7 @@ void dyjets_analyzer::fill(const std::string &tag,
 
     physics::dilepton Z(boson[0], boson[1]);
 
-    histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
-    histo_set.fill("mass_wide_range", tag, Z.v.M(), weights().global_weight());
     histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
-    histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
 
     /*
      * Variables in Z rest frame

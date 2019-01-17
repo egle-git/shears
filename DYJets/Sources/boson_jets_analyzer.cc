@@ -274,13 +274,13 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                                         const util::matched<double> &value)
 {
     if (value.rec) {
-        histo_set.fill(name, tag, *value.rec);
+        histo_set.fill(name, tag, *value.rec, weights().global_weight());
     }
     if (value.gen) {
-        histo_set.fill(name, tag + "-gen", *value.gen);
+        histo_set.fill(name, tag + "-gen", *value.gen, weights().global_weight());
     }
     if (value.rec && value.gen) {
-        histo_set2D.fill(name, tag + "-matrix", *value.rec, *value.gen);
+        histo_set2D.fill(name, tag + "-matrix", *value.rec, *value.gen, weights().global_weight());
     }
 }
 

@@ -166,6 +166,9 @@ target_link_libraries(higgs-loop PRIVATE DYJets-physics)
 add_executable(dyjets-compare Main/dyjets-compare.cc)
 target_link_libraries(dyjets-compare PRIVATE DYJets-compare)
 
+add_executable(dyjets-matrix Main/dyjets-matrix.cc)
+target_link_libraries(dyjets-matrix PRIVATE DYJets-compare)
+
 add_executable(dyjets-job-list Main/dyjets-job-list.cc)
 target_link_libraries(dyjets-job-list PRIVATE DYJets-data)
 

@@ -34,8 +34,12 @@ void reco_compare_builder::fill_upper_panel(const std::string &name)
     _mc_entry->draw(name, _lumi);
     _data_entry->draw(name, _lumi, true);
 
-    format_upper_x_axis(*_mc_entry->get_x_axis(name, _lumi));
-    format_upper_x_axis(*_data_entry->get_x_axis(name, _lumi));
+    if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
+        format_upper_x_axis(*axis);
+    }
+    if (auto axis = _data_entry->get_x_axis(name, _lumi)) {
+        format_upper_x_axis(*axis);
+    }
 }
 
 void reco_compare_builder::fill_legend(TLegend &legend, const std::string &name)

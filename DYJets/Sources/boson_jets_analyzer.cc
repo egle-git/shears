@@ -37,7 +37,7 @@ std::string make_tag(double value, const std::vector<double> &bins)
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     EvtRunNum(info.reader, "EvtRunNum"),
-    _rng(std::random_device()()),
+    _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),
     _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),

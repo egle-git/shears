@@ -47,12 +47,16 @@ void signal_bg_compare_builder::fill_upper_panel(const std::string &name)
         _background_entry->draw(name, _lumi, true);
         _signal->Draw("epsame");
 
-        format_upper_x_axis(*_background_entry->get_x_axis(name, _lumi));
+        if (auto axis = _background_entry->get_x_axis(name, _lumi)) {
+            format_upper_x_axis(*axis);
+        }
         format_upper_x_axis(*_signal->GetXaxis());
     } else {
         _background_entry->draw(name, _lumi);
 
-        format_upper_x_axis(*_background_entry->get_x_axis(name, _lumi));
+        if (auto axis = _background_entry->get_x_axis(name, _lumi)) {
+            format_upper_x_axis(*axis);
+        }
     }
 }
 

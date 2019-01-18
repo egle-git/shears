@@ -116,7 +116,7 @@ protected:
     }
 
     /// \brief Fills histograms
-    virtual void fill(const std::string &tag,
+    virtual void fill(const util::matched<std::string> &tags,
                       const util::matched<event_contents> &evt);
 
     /**
@@ -134,7 +134,7 @@ protected:
 
     /// \brief Fills histograms for an unfolded variable
     void fill_unfolded(const std::string &name,
-                       const std::string &tag,
+                       const util::matched<std::string> &tags,
                        const util::matched<double> &value);
 
     util::tables tables() const

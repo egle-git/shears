@@ -75,20 +75,20 @@ void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
     }
 }
 
-void dyjets_analyzer::fill(const std::string &tag,
+void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                            const util::matched<event_contents> &evt)
 {
-    boson_jets_analyzer::fill(tag, evt);
+    boson_jets_analyzer::fill(tags, evt);
 
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
-    fill_unfolded("mass", tag, mass);
-    fill_unfolded("mass_wide_range", tag, mass);
+    fill_unfolded("mass", tags, mass);
+    fill_unfolded("mass_wide_range", tags, mass);
 
     auto pt = evt.apply(&event_contents::get_boson_p)
                  .apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
-    fill_unfolded("pt", tag, pt);
+    fill_unfolded("pt", tags, pt);
 
-    if (!evt.rec) {
+    if (!tags.rec || !evt.rec) {
         return;
     }
 
@@ -97,7 +97,7 @@ void dyjets_analyzer::fill(const std::string &tag,
 
     physics::dilepton Z(boson[0], boson[1]);
 
-    histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
+    histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
 
     /*
      * Variables in Z rest frame
@@ -126,7 +126,7 @@ void dyjets_analyzer::fill(const std::string &tag,
     pLep2.Boost(-pZ.BoostVector());
     pZ.Boost(-pZ.BoostVector());
 
-    histo_set.fill("decay_costheta", tag,
+    histo_set.fill("decay_costheta", *tags.rec,
                    std::cos(pLep1.Theta()), weights().global_weight());
 }
 

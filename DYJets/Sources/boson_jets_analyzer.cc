@@ -229,31 +229,57 @@ void boson_jets_analyzer::operator()()
         mass_tags.rec = "_mass" + *mass_tags.rec;
     }
 
-    if (evt.rec) {
+    auto njets = evt.apply(&event_contents::get_jets)
+                    .apply(&std::vector<jet>::size);
+
+    {
         // Exclusive
-        if (evt.rec->jets.size() < 3) {
-            std::stringstream ss;
-            ss << "exc" << evt.rec->jets.size() << "jet";
-            fill(ss.str(), evt);
-            fill(ss.str() + *mass_tags.rec, evt);
+        util::matched<std::string> tags; // eg "exc1jet"
+        util::matched<std::string> tags_mass; // eg "exc1jet_mass50_71"
+
+        if (njets.rec && *njets.rec < 3) {
+            tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
+            tags_mass.rec = *tags.rec + *mass_tags.rec;
+        }
+        if (njets.gen && *njets.gen < 3) {
+            tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
+            tags_mass.gen = *tags.gen + *mass_tags.gen;
         }
 
-        // Inclusive
-        for (unsigned njets = 0; njets < 3; ++njets) {
-            std::stringstream ss;
-            ss << "inc" << njets << "jet";
-            fill(ss.str(), evt);
-            fill(ss.str() + *mass_tags.rec, evt);
+        if (tags.gen || tags.rec) {
+            fill(tags, evt);
+            fill(tags_mass, evt);
+        }
+    }
+
+    // Inclusive
+    for (std::size_t nj = 0; nj < 3; ++nj) {
+        // Exclusive
+        util::matched<std::string> tags; // eg "inc1jet"
+        util::matched<std::string> tags_mass; // eg "inc1jet_mass50_71"
+
+        if (njets.rec && *njets.rec >= nj) {
+            tags.rec = "inc" + std::to_string(nj) + "jet";
+            tags_mass.rec = *tags.rec + *mass_tags.rec;
+        }
+        if (njets.gen && *njets.gen >= nj) {
+            tags.gen = "inc" + std::to_string(nj) + "jet";
+            tags_mass.gen = *tags.gen + *mass_tags.gen;
+        }
+
+        if (tags.gen || tags.rec) {
+            fill(tags, evt);
+            fill(tags_mass, evt);
         }
     }
 }
 
-void boson_jets_analyzer::fill(const std::string &tag,
+void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
                                const util::matched<event_contents> &evt)
 {
-    if (evt.rec) {
-        _jets.fill(histo_set, tag, evt.rec->jets, weights());
-        _pileup.fill(histo_set, tag, weights());
+    if (tags.rec && evt.rec) {
+        _jets.fill(histo_set, *tags.rec, evt.rec->jets, weights());
+        _pileup.fill(histo_set, *tags.rec, weights());
 
         // Create lists of chosen muons and electrons
         std::vector<lepton> chosen_muons, chosen_electrons;
@@ -263,24 +289,34 @@ void boson_jets_analyzer::fill(const std::string &tag,
                     [](const lepton &lep) { return lep.pdgid == 11; });
 
         // Fill lepton control plots
-        _muons.fill(histo_set, tag, chosen_muons, weights());
-        _electrons.fill(histo_set, tag, chosen_electrons, weights());
+        _muons.fill(histo_set, *tags.rec, chosen_muons, weights());
+        _electrons.fill(histo_set, *tags.rec, chosen_electrons, weights());
     }
 }
 
-/// \brief Fills histograms for an unfolded variable
 void boson_jets_analyzer::fill_unfolded(const std::string &name,
-                                        const std::string &tag,
+                                        const util::matched<std::string> &tags,
                                         const util::matched<double> &value)
 {
-    if (value.rec) {
-        histo_set.fill(name, tag, *value.rec, weights().global_weight());
+    // Fill 1D distributions
+    if (tags.rec && value.rec) {
+        histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
     }
-    if (value.gen) {
-        histo_set.fill(name, tag + "-gen", *value.gen, weights().global_weight());
+    if (tags.gen && value.gen) {
+        histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().global_weight());
     }
-    if (value.rec && value.gen) {
-        histo_set2D.fill(name, tag + "-matrix", *value.rec, *value.gen, weights().global_weight());
+    // Fill response matrix
+    if (tags.rec && tags.gen && value.rec && value.gen) {
+        if (tags.rec == tags.gen) {
+            histo_set2D.fill(name,
+                             *tags.rec + "-matrix",
+                             *value.rec,
+                             *value.gen, weights().global_weight());
+        } else {
+            // Different tags -> different distributions -> one miss and one fake
+            histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
+            histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().global_weight());
+        }
     }
 }
 

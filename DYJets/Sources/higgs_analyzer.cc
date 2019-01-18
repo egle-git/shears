@@ -33,12 +33,12 @@ higgs_analyzer::higgs_analyzer(util::job::info &info, const util::options &opt)
     histo_set2D.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
-void higgs_analyzer::fill(const std::string &tag,
+void higgs_analyzer::fill(const util::matched<std::string> &tags,
                           const util::matched<event_contents> &evt)
 {
-    boson_jets_analyzer::fill(tag, evt);
+    boson_jets_analyzer::fill(tags, evt);
 
-    if (!evt.rec) {
+    if (!tags.rec || !evt.rec) {
         return;
     }
 
@@ -50,10 +50,10 @@ void higgs_analyzer::fill(const std::string &tag,
 
     TLorentzVector higgs = good_Z.v + bad_Z.v;
 
-    histo_set.fill("mass", tag, higgs.M(), weights().global_weight());
+    histo_set.fill("mass", *tags.rec, higgs.M(), weights().global_weight());
 //     FIXME
-//     histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
-    histo_set.fill("pt", tag, higgs.Pt(), weights().global_weight());
+//     histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
+    histo_set.fill("pt", *tags.rec, higgs.Pt(), weights().global_weight());
 }
 
 void higgs_analyzer::apply_trigger_sf(

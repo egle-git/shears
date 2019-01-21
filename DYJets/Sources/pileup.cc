@@ -20,6 +20,7 @@ void pileup::reweight(weights &w)
 {
     if (_reweighing_enabled && w.ismc()) {
         w.use_weight(_standalone_lrw.weight(*EvtPuCntTruth));
+        w.use_gen_weight(_standalone_lrw.weight(*EvtPuCntTruth));
     }
 }
 

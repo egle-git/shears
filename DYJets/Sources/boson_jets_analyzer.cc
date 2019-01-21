@@ -16,20 +16,13 @@ namespace /* anonymous */
  */
 std::string make_tag(double value, const std::vector<double> &bins)
 {
-    auto low = std::lower_bound(bins.begin(), bins.end(), value);
-    if (low == bins.end()) {
+    auto high = std::lower_bound(bins.begin(), bins.end(), value);
+    if (high == bins.begin() || high == bins.end()) {
         // Out of bounds
         return "";
     }
-    auto up = std::next(low);
-    if (up == bins.end()) {
-        // Out of bounds
-        return "";
-    }
-
-    std::stringstream ss;
-    ss << *low << "_" << *up;
-    return ss.str();
+    auto low = std::prev(high);
+    return std::to_string(int(*low)) + "_" + std::to_string(int(*high));
 }
 
 } // anonymous namespace
@@ -227,6 +220,9 @@ void boson_jets_analyzer::operator()()
                         .apply(make_tag, _mass_bins);
     if (mass_tags.rec && !mass_tags.rec->empty()) {
         mass_tags.rec = "_mass" + *mass_tags.rec;
+    }
+    if (mass_tags.gen && !mass_tags.gen->empty()) {
+        mass_tags.gen = "_mass" + *mass_tags.gen;
     }
 
     auto njets = evt.apply(&event_contents::get_jets)

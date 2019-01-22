@@ -36,6 +36,7 @@ class weights
     double _xsec;
     double _lumi;
 
+    double _gen_weight;
     double _global_weight;
 
   public:
@@ -54,11 +55,17 @@ class weights
     /// \brief Returns the contents of the current weight vector at index \c i (checked).
     double weight_at(std::size_t i) { return EvtWeights.At(i); }
 
+    /// \brief Returns the gen-level weight of the event.
+    double gen_weight() const { return _gen_weight; }
+
     /// \brief Returns the global weight of the event.
     double global_weight() const { return _global_weight; }
 
     /// \brief Edits the global weight of the event.
     void use_weight(double weight) { _global_weight *= weight; }
+
+    /// \brief Edits the global weight of the event.
+    void use_gen_weight(double weight) { _gen_weight *= weight; }
 
     /// \brief Checks whether the current event is from MC.
     bool ismc() const { return _ismc; }

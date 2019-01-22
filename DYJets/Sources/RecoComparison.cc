@@ -21,6 +21,51 @@
 
 using namespace std;
 
+namespace /* anonymous */ {
+    /**
+     * \brief Tunes an axis to be used on a log scale.
+     *
+     * If the first bin extends to 0, it is modified to start from a higher
+     * value. This is needed because otherwise ROOT will make it span half of
+     * the plots.
+     *
+     * \note Histograms with a uniform binning are not supported.
+     */
+    void prepare_axis_for_log(TAxis &axis)
+    {
+        if (axis.GetXmin() > 0 || axis.GetNbins() < 2) {
+            // Nothing to do
+            return;
+        }
+
+        // Get the bin edges in a safe container (std::vector over TArray).
+        const double *edges_ptr = axis.GetXbins()->GetArray();
+        if (edges_ptr == nullptr) {
+            // Happens when the histogram has a uniform binning.
+            return;
+        }
+        std::vector<double> edges(edges_ptr, edges_ptr + axis.GetNbins() + 1);
+
+        // First, we get the extent of the second bin. It's proportional to the
+        // ratio of the edges.
+        double ratio = edges[2] / edges[1];
+
+        // Then, we modify the first bin boundaries so that it gets the same
+        // displayed size.
+        edges[0] = edges[1] / ratio;
+
+        // We want the lower bound to be a round number, so we round it. It's
+        // more complicated that a simple floor() because we want 0.25 to become
+        // 0.2 and not 0.0.
+        double logfactor = std::pow(10, std::ceil(std::log10(edges[0])) - 1);
+        edges[0] = logfactor * std::floor(edges[0] / logfactor);
+        edges[0] *= 1.001; // Avoid tick labels.
+
+        // Modify the axis to use the new bin edges.
+        axis.Set(edges.size() - 1, edges.data());
+    }
+} // namespace anonymous
+
 /** Draw data/MC comparison plots from the histograms of the individual contributions.
  * The list of histograms to superimposed is taken from Samples array defined in fileNamesZJets.h.
  * Histogram colours and labels are defined in the same array.
@@ -457,10 +502,17 @@ void RecoComparison(
         pad2->Draw();
         pad2->cd();
 
+        bool logx = false;
+
         if (vhNames[i].Index("Phistar") >= 0 || vhNames[i].Index("Mass_Zinc0jet") >= 0 ||
-            vhNames[i].Index("ZPt_Zinc") >= 0)
+            vhNames[i].Index("ZPt_Zinc") >= 0) {
+            logx = true;
             pad2->SetLogx();
-        if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) pad2->SetLogx(0);
+        }
+        if (vhNames[i].Index("ZPt_Zinc0jetM115_135") >= 0) {
+            logx = false;
+            pad2->SetLogx(0);
+        }
 
         hRatio->SetStats(0);
         hRatio->SetTitle("");
@@ -475,10 +527,9 @@ void RecoComparison(
         hRatio->GetXaxis()->SetLabelSize(0.10);
         hRatio->GetXaxis()->SetLabelOffset(0.017);
 
-        // to cut away firts bin which starts at 0 for logx()
-        if (vhNames[i].Index("Phistar") >= 0) hRatio->GetXaxis()->SetRangeUser(0.004, 3.277);
-        // if (vhNames[i].Index("ZPt_Zinc0") >= 0 ) hRatio->GetXaxis()->SetRangeUser(1.25,1000.);
-        if (vhNames[i].Index("ZPt_Zinc1") >= 0) hRatio->GetXaxis()->SetRangeUser(2.5, 1000.);
+        if (logx) {
+            prepare_axis_for_log(*hRatio->GetXaxis());
+        }
         // DJALOG
         // Change the axes of the jet pt to be the cut value.
         if (vhNames[i].Index("JetPt") >= 0) {

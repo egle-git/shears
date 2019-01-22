@@ -1,9 +1,13 @@
 #include "compare_builder_base.h"
 
+#include <iomanip>
+#include <sstream>
+
 #include <boost/filesystem.hpp>
 
 #include <TAxis.h>
 #include <TCanvas.h>
+#include <TLatex.h>
 #include <TLegend.h>
 #include <TPad.h>
 
@@ -13,7 +17,8 @@ namespace util
 compare_builder_base::compare_builder_base(const std::string &analyzer_name,
                                            const std::string &default_config_file) :
     _analyzer_name(analyzer_name),
-    _default_config_file(default_config_file)
+    _default_config_file(default_config_file),
+    _preliminary(true)
 {
 }
 
@@ -22,6 +27,9 @@ void compare_builder_base::parse_options(int argc, char **argv)
     auto options = this->options();
 
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
+    options.add_options()("format,f",
+                          po::value<std::string>()->default_value("png"),
+                          "Sets the output format (png, pdf, ...)");
     options.add_options()("histogram-name,n",
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
@@ -32,9 +40,14 @@ void compare_builder_base::parse_options(int argc, char **argv)
     if (_opt.map.count("output") > 0) {
         _output_dir_name = _opt.map["output"].as<std::string>();
     }
+    _output_format = _opt.map["format"].as<std::string>();
 
     if (_opt.config["plots"]) {
         _style = util::style_list(_opt.config["plots"]);
+    }
+
+    if (_opt.config["preliminary"]) {
+        _preliminary = _opt.config["preliminary"].as<bool>();
     }
 }
 
@@ -66,6 +79,33 @@ void compare_builder_base::build()
         upper.cd();
 
         fill_upper_panel(name);
+
+        // CMS label
+        TLatex cms;
+        cms.SetTextSize(0.04);
+        cms.SetTextFont(42);
+        cms.SetTextAlign(kHAlignLeft + kVAlignBottom);
+        cms.SetNDC();
+        cms.SetText(0.1,
+                    0.9,
+                    _preliminary ? "#bf{CMS} #it{Preliminary}" : "#bf{CMS}");
+        cms.Draw();
+
+        // Lumi label
+        double lumi = get_lumi();
+        TLatex label;
+        if (lumi > 0) {
+            label.SetTextSize(0.04);
+            label.SetTextFont(42);
+            label.SetTextAlign(kHAlignRight + kVAlignBottom);
+            label.SetNDC();
+
+            std::stringstream ss;
+            ss << std::setprecision(3) << (lumi / 1000);
+            ss << " fb^{-1} (13 TeV)";
+            label.SetText(0.97, 0.9, ss.str().c_str());
+            label.Draw();
+        }
 
         // Legend
         TLegend legend(0.63, 0.60, 0.81, 0.87);
@@ -103,7 +143,8 @@ void compare_builder_base::build()
         }
 
         // Write file
-        canvas.Print((_output_dir_name + "/" + name + ".png").c_str());
+        canvas.Print(
+            (_output_dir_name + "/" + name + "." + _output_format).c_str());
 
         // Cleanup
         reset_drawing_state();

@@ -29,6 +29,9 @@ class reco_compare_builder : public compare_builder_base
     void load() override;
 
     // Overriden from base class
+    double get_lumi() const override { return _lumi; }
+
+    // Overriden from base class
     void fill_upper_panel(const std::string &name) override;
 
     // Overriden from base class

@@ -22,10 +22,12 @@ class compare_builder_base
     std::string _analyzer_name;
     std::string _default_config_file;
     std::string _output_dir_name;
+    std::string _output_format;
     std::set<std::string> _histogram_names;
 
     util::options _opt;
     util::style_list _style;
+    bool _preliminary;
 
     bool _logx;
 
@@ -87,6 +89,9 @@ class compare_builder_base
 
     /// \brief Loads all needed \ref comparison_entry
     virtual void load() = 0;
+
+    /// \brief Gets the luminosity
+    virtual double get_lumi() const { return 0; }
 
     /// \brief Fills the upper panel with plots
     virtual void fill_upper_panel(const std::string &name) = 0;

@@ -31,6 +31,7 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     }
     util::logging::info << "Taking binnings from file " << binning_file << std::endl;
     histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
+    histo_set2D.set_style(util::style_list(YAML::LoadFile(binning_file)));
 }
 
 namespace /* anonymous */
@@ -74,18 +75,59 @@ void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
     }
 }
 
-void dyjets_analyzer::fill(const std::string &tag,
-                           const std::vector<physics::lepton> &boson,
-                           const std::vector<physics::jet> &jets)
+void dyjets_analyzer::fill(const util::matched<std::string> &tags,
+                           const util::matched<event_contents> &evt)
 {
-    boson_jets_analyzer::fill(tag, boson, jets);
+    boson_jets_analyzer::fill(tags, evt);
+
+    auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
+    fill_unfolded("mass", tags, mass);
+    fill_unfolded("mass_wide_range", tags, mass);
+
+    auto pt = evt.apply(&event_contents::get_boson_p)
+                 .apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
+    fill_unfolded("pt", tags, pt);
+
+    if (!tags.rec || !evt.rec) {
+        return;
+    }
+
+    const auto boson = evt.rec->leptons;
+    const auto jets = evt.rec->jets;
 
     physics::dilepton Z(boson[0], boson[1]);
 
-    histo_set.fill("mass", tag, Z.v.M(), weights().global_weight());
-    histo_set.fill("mass_wide_range", tag, Z.v.M(), weights().global_weight());
-    histo_set.fill("phistar", tag, Z.phistar(), weights().global_weight());
-    histo_set.fill("pt", tag, Z.v.Pt(), weights().global_weight());
+    histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
+
+    /*
+     * Variables in Z rest frame
+     */
+
+    TLorentzVector pZ = Z.v;
+    TLorentzVector pLep1 = Z.a.v;
+    TLorentzVector pLep2 = Z.b.v;
+    if (Z.a.charge > 0) {
+        std::swap(pLep1, pLep2);
+    }
+
+    // Rotate to decay frame with Z axis parallel to boson momentum
+    double phi = Z.v.Phi();
+    double theta = Z.v.Theta();
+
+    pZ.RotateZ(-phi);
+    pZ.RotateY(-theta);
+    pLep1.RotateZ(-phi);
+    pLep1.RotateY(-theta);
+    pLep2.RotateZ(-phi);
+    pLep2.RotateY(-theta);
+
+    // Boost to decay frame with boson at rest
+    pLep1.Boost(-pZ.BoostVector());
+    pLep2.Boost(-pZ.BoostVector());
+    pZ.Boost(-pZ.BoostVector());
+
+    histo_set.fill("decay_costheta", *tags.rec,
+                   std::cos(pLep1.Theta()), weights().global_weight());
 }
 
 std::vector<physics::lepton>

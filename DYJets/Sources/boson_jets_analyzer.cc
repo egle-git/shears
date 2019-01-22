@@ -1,12 +1,36 @@
 #include "boson_jets_analyzer.h"
 
+#include <algorithm>
+
 namespace physics
 {
+
+namespace /* anonymous */
+{
+
+/**
+ * \brief Returns a tag of the form @c low_high where low and high are the bounds of the
+ *        bin that contains @c value.
+ *
+ * Returns @c "" if the value doesn't fit in a bin.
+ */
+std::string make_tag(double value, const std::vector<double> &bins)
+{
+    auto high = std::lower_bound(bins.begin(), bins.end(), value);
+    if (high == bins.begin() || high == bins.end()) {
+        // Out of bounds
+        return "";
+    }
+    auto low = std::prev(high);
+    return std::to_string(int(*low)) + "_" + std::to_string(int(*high));
+}
+
+} // anonymous namespace
 
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     EvtRunNum(info.reader, "EvtRunNum"),
-    _rng(std::random_device()()),
+    _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),
     _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
@@ -30,6 +54,11 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     }
 
     util::set_value_safe(opt.config["b jet veto"], _bjet_veto, "use", "use b jet veto");
+
+    if (opt.config["mass bins"]) {
+        _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
+        std::sort(_mass_bins.begin(), _mass_bins.end());
+    }
 
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
@@ -70,124 +99,221 @@ void boson_jets_analyzer::operator()()
         }
     }
 
+    // Event
+    util::matched<event_contents> evt;
+
     std::vector<lepton> genleps = _genleps.get();
     std::vector<lepton> genleptons = find_gen_boson(genleps);
 
     if (!genleptons.empty()) {
-        _genleps.fill(histo_set, "genZinc0jet_noweight", genleptons, weights());
+        // Gen boson found
+        evt.gen = event_contents();
+        evt.gen->leptons = genleptons;
+        evt.gen->boson_p = std::accumulate(
+            genleptons.begin(),
+            genleptons.end(),
+            TLorentzVector(),
+            [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
+
+        _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
     }
+
     /*
      * Handle the trigger
      */
-    if (!passes_trigger()) {
+    bool triggered = passes_trigger();
+    if (!evt.gen && !triggered) {
+        // End early if nothing to do
         return;
+    } else if (triggered) {
+        counter.count("Passing the trigger", weights().global_weight());
     }
-    counter.count("Passing the trigger", weights().global_weight());
 
     /*
      * Read leptons and find the boson
      */
-    std::vector<lepton> muons = _muons.get(weights().isdata(), rng(),genleps);
-    std::vector<lepton> electrons = _electrons.get();
+    if (triggered) {
+        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps);
+        std::vector<lepton> electrons = _electrons.get();
 
-    std::vector<lepton> leptons = find_boson(muons, electrons);
-    if (leptons.empty()) {
+        std::vector<lepton> leptons = find_boson(muons, electrons);
+        if (!leptons.empty()) {
+            // Rec boson found
+            evt.rec = event_contents();
+            evt.rec->leptons = leptons;
+            evt.rec->boson_p = std::accumulate(
+                leptons.begin(),
+                leptons.end(),
+                TLorentzVector(),
+                [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
+        }
+    }
+
+    if (!evt.gen && !evt.rec) {
+        // End early if nothing to do
         return;
-    }// means that a boson is found
+    }
 
-    // Create lists of chosen muons and electrons
-    std::vector<lepton> chosen_muons, chosen_electrons;
-    std::copy_if(leptons.begin(), leptons.end(), std::back_inserter(chosen_muons),
-                 [](const lepton &lep) { return lep.pdgid == 13; });
-    std::copy_if(leptons.begin(), leptons.end(), std::back_inserter(chosen_electrons),
-                 [](const lepton &lep) { return lep.pdgid == 11; });
+    /*
+     * At this point at least one boson was found, either gen or rec.
+     * Apply rec scale factors and load rec jets, then apply b tagging.
+     */
 
-    // Apply lepton scale factors
-    _muons.apply_sf(_weights, chosen_muons, tables());
-    _electrons.apply_sf(_weights, chosen_electrons, tables());
+    // Create lists of chosen muons and electrons to use for scale factors
+    if (evt.rec) {
+        std::vector<lepton> chosen_muons, chosen_electrons;
+        std::copy_if(evt.rec->leptons.begin(),
+                     evt.rec->leptons.end(),
+                     std::back_inserter(chosen_muons),
+                     [](const lepton &lep) { return lep.pdgid == 13; });
+        std::copy_if(evt.rec->leptons.begin(),
+                     evt.rec->leptons.end(),
+                     std::back_inserter(chosen_electrons),
+                     [](const lepton &lep) { return lep.pdgid == 11; });
 
-    // Fill lepton control plots
-    _muons.fill(histo_set, "Zinc0jet_noweight", chosen_muons, weights());
-    _electrons.fill(histo_set, "Zinc0jet_noweight", chosen_electrons, weights());
+        // Apply lepton scale factors
+        _muons.apply_sf(_weights, chosen_muons, tables());
+        _electrons.apply_sf(_weights, chosen_electrons, tables());
+
+        // Fill lepton control plots
+        _muons.fill(histo_set, "inc0jet_noweight", chosen_muons, weights());
+        _electrons.fill(histo_set, "inc0jet_noweight", chosen_electrons, weights());
+    }
 
     /*
      * Handle jets and pileup
      */
-    std::vector<jet> jets = _jets.get();
-    _jets.veto(jets, leptons);
+    // TODO Gen jets
+    if (evt.rec) {
+        evt.rec->jets = _jets.get();
+        _jets.veto(evt.rec->jets, evt.rec->leptons);
 
-    // Calculate b efficiencies and apply scale factors
-    if (_bjet_veto && _btagger.any(jets, _weights,histo_set2D,tables())) {
-        return;
+        // Calculate b efficiencies and apply scale factors
+        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
+            evt.rec = boost::none;
+            if (!evt.gen && !evt.rec) {
+                // End early if vetoed and no gen boson
+                return;
+            }
+        }
+
+        if (evt.rec) { // May have been zero'ed by b veto
+            _jets.fill(histo_set, "inc0jet_noweight", evt.rec->jets, weights());
+            _pileup.fill(histo_set, "inc0jet_noweight", weights());
+
+            _pileup.reweight(_weights);
+        }
     }
-
-    _jets.fill(histo_set, "Zinc0jet_noweight", jets, weights());
-    _pileup.fill(histo_set, "Zinc0jet_noweight", weights());
-
-    _pileup.reweight(_weights);
 
     /*
      * Apply lepton trigger scale factors
      */
-    apply_trigger_sf(_weights, leptons);
+    if (evt.rec) {
+        apply_trigger_sf(_weights, evt.rec->leptons);
+    }
 
     /*
      * Fill histograms w.r.t. N_jets and invariant mass
      */
-    TLorentzVector boson_p;
-    for (const auto &lepton : leptons) {
-        boson_p += lepton.v;
+    auto mass_tags = evt.apply(&event_contents::get_boson_p)
+                        .apply(&TLorentzVector::M)
+                        .apply(make_tag, _mass_bins);
+    if (mass_tags.rec && !mass_tags.rec->empty()) {
+        mass_tags.rec = "_mass" + *mass_tags.rec;
     }
-    double boson_mass = boson_p.M();
-    std::string mass_tag;
-    if (boson_mass > 50 && boson_mass < 71) {
-        mass_tag = "_mass50_71";
-    } else if (boson_mass > 71 && boson_mass < 111) {
-        mass_tag = "_mass71_111";
-    } else if (boson_mass > 111 && boson_mass < 130) {
-        mass_tag = "_mass111_130";
-    } else if (boson_mass > 130 && boson_mass < 170) {
-        mass_tag = "_mass130_170";
-    } else if (boson_mass > 170 && boson_mass < 250) {
-        mass_tag = "_mass170_250";
-    } else if (boson_mass > 250 && boson_mass < 320) {
-        mass_tag = "_mass250_320";
+    if (mass_tags.gen && !mass_tags.gen->empty()) {
+        mass_tags.gen = "_mass" + *mass_tags.gen;
     }
 
-    // Exclusive
-    if (jets.size() < 3) {
-        std::stringstream ss;
-        ss << "Zexc" << jets.size() << "jet";
-        fill(ss.str(), leptons, jets);
-        fill(ss.str() + mass_tag, leptons, jets);
+    auto njets = evt.apply(&event_contents::get_jets)
+                    .apply(&std::vector<jet>::size);
+
+    {
+        // Exclusive
+        util::matched<std::string> tags; // eg "exc1jet"
+        util::matched<std::string> tags_mass; // eg "exc1jet_mass50_71"
+
+        if (njets.rec && *njets.rec < 3) {
+            tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
+            tags_mass.rec = *tags.rec + *mass_tags.rec;
+        }
+        if (njets.gen && *njets.gen < 3) {
+            tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
+            tags_mass.gen = *tags.gen + *mass_tags.gen;
+        }
+
+        if (tags.gen || tags.rec) {
+            fill(tags, evt);
+            fill(tags_mass, evt);
+        }
     }
 
     // Inclusive
-    for (unsigned njets = 0; njets < 3; ++njets) {
-        std::stringstream ss;
-        ss << "Zinc" << njets << "jet";
-        fill(ss.str(), leptons, jets);
-        fill(ss.str() + mass_tag, leptons, jets);
+    for (std::size_t nj = 0; nj < 3; ++nj) {
+        // Exclusive
+        util::matched<std::string> tags; // eg "inc1jet"
+        util::matched<std::string> tags_mass; // eg "inc1jet_mass50_71"
+
+        if (njets.rec && *njets.rec >= nj) {
+            tags.rec = "inc" + std::to_string(nj) + "jet";
+            tags_mass.rec = *tags.rec + *mass_tags.rec;
+        }
+        if (njets.gen && *njets.gen >= nj) {
+            tags.gen = "inc" + std::to_string(nj) + "jet";
+            tags_mass.gen = *tags.gen + *mass_tags.gen;
+        }
+
+        if (tags.gen || tags.rec) {
+            fill(tags, evt);
+            fill(tags_mass, evt);
+        }
     }
 }
 
-void boson_jets_analyzer::fill(const std::string &tag,
-                               const std::vector<physics::lepton> &chosen_leptons,
-                               const std::vector<physics::jet> &jets)
+void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
+                               const util::matched<event_contents> &evt)
 {
-    _jets.fill(histo_set, tag, jets, weights());
-    _pileup.fill(histo_set, tag, weights());
+    if (tags.rec && evt.rec) {
+        _jets.fill(histo_set, *tags.rec, evt.rec->jets, weights());
+        _pileup.fill(histo_set, *tags.rec, weights());
 
-    // Create lists of chosen muons and electrons
-    std::vector<lepton> chosen_muons, chosen_electrons;
-    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_muons),
-                 [](const lepton &lep) { return lep.pdgid == 13; });
-    std::copy_if(chosen_leptons.begin(), chosen_leptons.end(), std::back_inserter(chosen_electrons),
-                 [](const lepton &lep) { return lep.pdgid == 11; });
+        // Create lists of chosen muons and electrons
+        std::vector<lepton> chosen_muons, chosen_electrons;
+        std::copy_if(evt.rec->leptons.begin(), evt.rec->leptons.end(), std::back_inserter(chosen_muons),
+                    [](const lepton &lep) { return lep.pdgid == 13; });
+        std::copy_if(evt.rec->leptons.begin(), evt.rec->leptons.end(), std::back_inserter(chosen_electrons),
+                    [](const lepton &lep) { return lep.pdgid == 11; });
 
-    // Fill lepton control plots
-    _muons.fill(histo_set, tag, chosen_muons, weights());
-    _electrons.fill(histo_set, tag, chosen_electrons, weights());
+        // Fill lepton control plots
+        _muons.fill(histo_set, *tags.rec, chosen_muons, weights());
+        _electrons.fill(histo_set, *tags.rec, chosen_electrons, weights());
+    }
+}
+
+void boson_jets_analyzer::fill_unfolded(const std::string &name,
+                                        const util::matched<std::string> &tags,
+                                        const util::matched<double> &value)
+{
+    // Fill 1D distributions
+    if (tags.rec && value.rec) {
+        histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
+    }
+    if (tags.gen && value.gen) {
+        histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
+    }
+    // Fill response matrix
+    if (tags.rec && tags.gen && value.rec && value.gen) {
+        if (tags.rec == tags.gen) {
+            histo_set2D.fill(name,
+                             *tags.rec + "-matrix",
+                             *value.rec,
+                             *value.gen, weights().global_weight());
+        } else {
+            // Different tags -> different distributions -> one miss and one fake
+            histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
+            histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
+        }
+    }
 }
 
 bool boson_jets_analyzer::passes_trigger()

@@ -27,9 +27,9 @@
 # On-shell
 - selector: 'mass.*'
   binning: uniform
-  binning min: 71
-  binning max: 111
-  bin count: 40
+  binning min: 70
+  binning max: 370
+  bin count: 150
 
 # Wide range
 - selector: 'mass_wide_range.*'
@@ -47,28 +47,28 @@
 ################################################################################
 
 # Default binning, 0 jet
-- selector: 'pt_(inc|exc)0jet.*'
+- selector: 'pt_Z(inc|exc)0jet.*'
   binning: custom
   bin edges: [
     0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
 
 # Default binning, 1 and 2 jets
-- selector: 'pt_(inc|exc)[12]jet.*'
+- selector: 'pt_Z(inc|exc)[12]jet.*'
   binning: custom
   bin edges: [ 0, 4, 8, 12, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
 
 # Highest mass range, 0 jet
-- selector: 'pt_(inc|exc)0jet_mass250_320.*'
+- selector: 'pt_Z(inc|exc)0jet_mass250_320'
   binning: custom
   bin edges: [ 0, 2.5, 5, 7.5, 10, 13, 18, 22, 28, 40, 90, 200, 1000 ]
 
 # Highest mass range, 1 and 2 jets
-- selector: 'pt_(inc|exc)[12]jet_mass250_320.*'
+- selector: 'pt_Z(inc|exc)[12]jet_mass250_320'
   binning: custom
   bin edges: [ 0,  8,  18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
 
 # On-shell, 0, 1 and 2 jets
-- selector: 'pt_(inc|exc)[012]jet_mass71_111.*'
+- selector: 'pt_Z(inc|exc)[012]jet_mass71_111'
   binning: custom
   bin edges: [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20, 22, 25, 28,

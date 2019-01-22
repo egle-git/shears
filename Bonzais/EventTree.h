@@ -693,12 +693,14 @@ EventTree::EventTree(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
+       /*
       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root");
       if (!f || !f->IsOpen()) {
          f = new TFile("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root");
       }
       TDirectory * dir = (TDirectory*)f->Get("/pnfs/iihe/cms/store/user/agrebeny/Bonzai/13TeV_2016/Data/v8.0/Ntuple//CRAB_PrivateMC/crab_DoubleMuon-VJetPruner-DMu/180608_161513/0000/Bonzai-DoubleMuon-VJetPruner-DMu_10.root:/tupel");
       dir->GetObject("EventTree",tree);
+      */
 
    }
    Init(tree);

@@ -97,7 +97,7 @@ class job(object):
     def log_file(self):
         if (self.status == status.finished() or
             self.status == status.error() or
-            self.status == status.killed):
+            self.status == status.killed()):
             return sys.argv[1] + '/logs/submit-log-%02d.txt' % self.index
         else:
             return sys.argv[1] + '/logs/log-%02d.txt' % self.index
@@ -333,21 +333,21 @@ def program(stdscr):
                 if x < 0:
                     x = 0
             elif c == curses.KEY_DOWN:
-                y = min(y + 1, len(jobs) - height + 2)
+                y = min(y + 1, len(jobs) - height + 3)
                 if y < 0:
                     y = 0
             elif c == curses.KEY_LEFT:
                 x = max(x - 5, 0)
             elif c == curses.KEY_PPAGE:
-                y = max(y - height + 2, 0)
+                y = max(y - height + 3, 0)
             elif c == curses.KEY_NPAGE:
-                y = min(y + height - 2, len(jobs) - height + 2)
+                y = min(y + height - 2, len(jobs) - height + 3)
                 if y < 0:
                     y = 0
             elif c == curses.KEY_HOME:
                 y = 0
             elif c == curses.KEY_END:
-                y = len(jobs) - height + 2
+                y = len(jobs) - height + 3
             else:
                 update = True
 

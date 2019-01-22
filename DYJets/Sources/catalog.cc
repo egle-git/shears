@@ -25,7 +25,7 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
       _xsec(0)
 {
     std::string fullpath = filename;
-    if (filename[0] == '/') { // Absolute path
+    if (filename[0] == '/' || boost::contains(filename, "://")) { // Absolute path
         fullpath = filename;
     } else {
         fullpath = bonzaiDir + "/" + filename;
@@ -140,7 +140,7 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
 
                 TString filePath = TString(line);
 
-                if (filePath[0] != '/' && !filePath.BeginsWith("root:")) {
+                if (filePath[0] != '/' && !filePath.Contains("://")) {
                     filePath.Insert(0, TString(bonzaiDir) + "/");
                 }
                 if (filePath.BeginsWith("/store/")) {

@@ -20,6 +20,11 @@ class dilepton
     lepton a, b;          ///< \brief The leptons used to create the dilepton
 
     /**
+     * \brief Constructs a dilepton with two default-constructed leptons.
+     */
+    explicit dilepton() = default;
+
+    /**
      * \brief Constructs a dilepton from two leptons.
      */
     explicit dilepton(const lepton &a, const lepton &b);

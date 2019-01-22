@@ -75,7 +75,6 @@ void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util
         tg="udsgjet";
     }
     double eff = tab.at(tg + " eff").getEfficiency(j.v.Pt(), j.v.Eta());
-    std::cout <<eff<<"  " <<j.v.Pt()<<" "<<j.v.Eta()<<std::endl;
     bool tagged = j.bdisc > _bjet_cut;
     if(tagged) tg+="_tagged";
     h.fill("bjetPtEta", tg, j.v.Pt(),j.v.Eta(), w.global_weight());

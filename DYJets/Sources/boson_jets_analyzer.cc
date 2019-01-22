@@ -133,7 +133,7 @@ void boson_jets_analyzer::operator()()
      * Read leptons and find the boson
      */
     if (triggered) {
-        std::vector<lepton> muons = _muons.get(weights().isdata(), rng());
+        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps);
         std::vector<lepton> electrons = _electrons.get();
 
         std::vector<lepton> leptons = find_boson(muons, electrons);
@@ -189,7 +189,7 @@ void boson_jets_analyzer::operator()()
         _jets.veto(evt.rec->jets, evt.rec->leptons);
 
         // Calculate b efficiencies and apply scale factors
-        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights,histo_set2D)) {
+        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
             evt.rec = boost::none;
             if (!evt.gen && !evt.rec) {
                 // End early if vetoed and no gen boson

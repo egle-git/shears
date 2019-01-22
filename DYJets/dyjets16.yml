@@ -126,8 +126,9 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: rcdata.2016.v3
-
+     #rochester correction path: rcdata.2016.v3
+     #rochester correction path: RoccoR2017.txt.
+     #rochester correction path: rcdata.2016.v3
 # Good Z boson settings
 Z:
     # Low mass bound [GeV]
@@ -227,6 +228,9 @@ tables B-F:
     muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
+    bjet eff:       btag-b.txt
+    cjet eff:       btag-c.txt
+    udsgjet eff:    btag-udsg.txt
 
 tables G-H:
     electron id:    Electron_Id_Loose_SF_2016.txt
@@ -236,6 +240,11 @@ tables G-H:
     muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZ_RunGH_Brussels.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
+    bjet eff:       btag-b.txt
+    cjet eff:       btag-c.txt
+    udsgjet eff:    btag-udsg.txt
+
+
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:

@@ -47,9 +47,9 @@ std::vector<lepton> genleps::get()
         l.charge = GenLepId[i]/std::abs(GenLepId[i]);
         l.pdgid = GenLepId[i];
 
-        if (l.v.Pt() < _pt_cut) {
-            continue;
-        }
+        //if (l.v.Pt() < _pt_cut) {
+         //   continue;
+        //}
         genleps.push_back(l);
     }
     return genleps;

@@ -48,7 +48,7 @@ void muons::configure(const util::options &opt)
             roccor_dir = node["rochester correction path"].as<std::string>();
         }
         roccor_dir = "EfficiencyTables/" + roccor_dir;
-        _roccor = std::make_shared<RoccoR>(roccor_dir);
+        _roccor = std::make_shared<RoccoR>(roccor_dir);//hardcoded now, since there is a problem with yml
     }
 
     if (node["id"]) {
@@ -65,7 +65,7 @@ void muons::configure(const util::options &opt)
     }
 }
 
-std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng)
+std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl)
 {
     std::uniform_real_distribution<> uniform(0.0, 1.0);
 
@@ -101,6 +101,25 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng)
             if (isdata) {
                 l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
             } else {
+                lepton gll;double drmin=99.;bool match =false;
+                for (auto &v : gl) {
+                if(fabs(v.pdgid)==13 &&v.v.DeltaR(l.v)<0.1 && v.v.DeltaR(l.v)<drmin){
+                gll=v;match=true;
+                }}
+                if(match){
+                l.v *= _roccor->kScaleFromGenMC(l.charge,
+                                                 l.v.Pt(),
+                                                 l.v.Eta(),
+                                                 l.v.Phi(),
+                                                 MuTkLayerCnt[i],
+                                                 gll.v.Pt(),
+                                                 uniform(rng),
+		//				gRandom->Rndm(),
+                                                 0,
+                                                 0);
+
+                }
+                else{
                 l.v *= _roccor->kScaleAndSmearMC(l.charge,
                                                  l.v.Pt(),
                                                  l.v.Eta(),
@@ -108,8 +127,11 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng)
                                                  MuTkLayerCnt[i],
                                                  uniform(rng),
                                                  uniform(rng),
+	//					gRandom->Rndm(),
+	//					gRandom->Rndm(),
                                                  0,
                                                  0);
+		}
             }
         }
         if (l.v.Pt() < _pt_cut) {

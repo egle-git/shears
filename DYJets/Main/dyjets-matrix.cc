@@ -135,7 +135,6 @@ config parse_options(int argc, char **argv, util::options &options)
     optdesc.add_options()("histogram-name,n",
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
-    optdesc.add_options()("lin", "Use a linear scale for the z axis (the default is a log scale)");
     optdesc.add_options()("vertical", "Normalize on columns instead of rows");
 
     options.default_init(argc, argv, "dyjets.yml", {optdesc});

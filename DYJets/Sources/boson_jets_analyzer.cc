@@ -302,17 +302,11 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
         histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
     }
     // Fill response matrix
-    if (tags.rec && tags.gen && value.rec && value.gen) {
-        if (tags.rec == tags.gen) {
-            histo_set2D.fill(name,
-                             *tags.rec + "-matrix",
-                             *value.rec,
-                             *value.gen, weights().global_weight());
-        } else {
-            // Different tags -> different distributions -> one miss and one fake
-            histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
-            histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
-        }
+    if (tags.rec && tags.gen && value.rec && value.gen && tags.rec == tags.gen) {
+        histo_set2D.fill(name,
+                         *tags.rec + "-matrix",
+                         *value.rec,
+                         *value.gen, weights().global_weight());
     }
 }
 

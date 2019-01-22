@@ -18,6 +18,7 @@ struct config
     std::string output_format = "png";
     util::style_list style;
     bool preliminary = true;
+    bool verticalNormalization = false;
 };
 
 config parse_options(int argc, char **argv, util::options &options);
@@ -72,14 +73,27 @@ int main(int argc, char **argv)
             int nBinsX = matrix->GetNbinsX();
             int nBinsY = matrix->GetNbinsY();
 
-            for (int y = 0; y <= nBinsY + 1; y++) {
-                double row_total = 0;
+            if (c.verticalNormalization) {
                 for (int x = 0; x <= nBinsX + 1; x++) {
-                    row_total += matrix->GetBinContent(x, y);
+                    double row_total = 0;
+                    for (int y = 0; y <= nBinsY + 1; y++) {
+                        row_total += matrix->GetBinContent(x, y);
+                    }
+                    for (int y = 0; y <= nBinsY + 1; y++) {
+                        double contents = matrix->GetBinContent(x, y);
+                        matrix->SetBinContent(x, y, 100 * contents / row_total);
+                    }
                 }
-                for (int x = 0; x <= nBinsX + 1; x++) {
-                    double contents = matrix->GetBinContent(x, y);
-                    matrix->SetBinContent(x, y, 100 * contents / row_total);
+            } else {
+                for (int y = 0; y <= nBinsY + 1; y++) {
+                    double row_total = 0;
+                    for (int x = 0; x <= nBinsX + 1; x++) {
+                        row_total += matrix->GetBinContent(x, y);
+                    }
+                    for (int x = 0; x <= nBinsX + 1; x++) {
+                        double contents = matrix->GetBinContent(x, y);
+                        matrix->SetBinContent(x, y, 100 * contents / row_total);
+                    }
                 }
             }
 
@@ -122,6 +136,7 @@ config parse_options(int argc, char **argv, util::options &options)
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
     optdesc.add_options()("lin", "Use a linear scale for the z axis (the default is a log scale)");
+    optdesc.add_options()("vertical", "Normalize on columns instead of rows");
 
     options.default_init(argc, argv, "dyjets.yml", {optdesc});
 
@@ -146,6 +161,10 @@ config parse_options(int argc, char **argv, util::options &options)
 
     if (options.config["preliminary"]) {
         c.preliminary = options.config["preliminary"].as<bool>();
+    }
+
+    if (options.config["vertical"]) {
+        c.verticalNormalization = options.config["vertical"].as<bool>();
     }
 
     return c;

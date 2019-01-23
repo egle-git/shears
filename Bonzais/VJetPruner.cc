@@ -28,6 +28,7 @@ static float minLepPt = 15;
 
 const constexpr static float maxElIsoFourLep = 0.3;
 const constexpr static float maxMuIsoFourLep = 0.4;
+const constexpr static float minPtFourLep = 4;
 
 static float minJetAk04Pt = 15;
 
@@ -317,11 +318,11 @@ bool VJetPruner::filterMuFourLep(int iMu) {
   for (auto id : *MuIdSoft) passesAnyId |= (id != 0);
   for (auto id : *MuIdHighPt) passesAnyId |= (id != 0);
   for (auto id : *MuIdTkHighPt) passesAnyId |= (id != 0);
-  return ((*MuPfIso)[iMu] < maxMuIsoFourLep && passesAnyId);
+  return ((*MuPt)[iMu] > minPtFourLep && (*MuPfIso)[iMu] < maxMuIsoFourLep && passesAnyId);
 }
 
 bool VJetPruner::filterElFourLep(int iEl) {
-  return ((*ElPfIsoRho)[iEl] < maxElIsoFourLep && (*ElId)[iEl] != 0);
+  return ((*ElPt)[iEl] > minPtFourLep && (*ElPfIsoRho)[iEl] < maxElIsoFourLep && (*ElId)[iEl] != 0);
 }
 
 bool VJetPruner::filterJetAk04(int iJetAk04){

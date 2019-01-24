@@ -148,6 +148,10 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         leptons = electrons;
     }
 
+    if (leptons[0].v.Pt() < 25) {
+        return {};
+    }
+
     std::vector<physics::dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
     if (candidates.size() == 0) {
         return {};

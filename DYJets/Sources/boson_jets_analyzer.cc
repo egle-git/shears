@@ -234,10 +234,14 @@ void boson_jets_analyzer::operator()()
     auto mass_tags = evt.apply(&event_contents::get_boson_p)
                         .apply(&TLorentzVector::M)
                         .apply(make_tag, _mass_bins);
-    if (mass_tags.rec && !mass_tags.rec->empty()) {
+    if (mass_tags.rec && mass_tags.rec->empty()) {
+        mass_tags.rec = boost::none;
+    } else if (mass_tags.rec) {
         mass_tags.rec = "_mass" + *mass_tags.rec;
     }
-    if (mass_tags.gen && !mass_tags.gen->empty()) {
+    if (mass_tags.gen && mass_tags.gen->empty()) {
+        mass_tags.gen = boost::none;
+    } else if (mass_tags.gen) {
         mass_tags.gen = "_mass" + *mass_tags.gen;
     }
 

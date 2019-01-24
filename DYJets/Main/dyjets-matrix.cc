@@ -162,9 +162,7 @@ config parse_options(int argc, char **argv, util::options &options)
         c.preliminary = options.config["preliminary"].as<bool>();
     }
 
-    if (options.config["vertical"]) {
-        c.verticalNormalization = options.config["vertical"].as<bool>();
-    }
+    c.verticalNormalization = (options.map.count("vertical") > 0);
 
     return c;
 }

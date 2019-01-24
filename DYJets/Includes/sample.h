@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "catalog.h"
 #include "options.h"
@@ -36,6 +37,9 @@ class sample
     std::string _name;
     unsigned _jobs = 1;
 
+    std::pair<bool, bool> _has_triggers;
+    std::pair<std::string, std::string> _triggers;
+
   public:
     /// \brief Retrives the catalog for this sample.
     data::catalog catalog() const;
@@ -62,6 +66,12 @@ class sample
 
     /// \brief Retrieves the name of the sample.
     std::string name() const { return _name; }
+
+    /// \brief Returns the list of triggers to be used in this sample
+    std::pair<std::string, std::string> triggers() const { return _triggers; }
+
+    /// \brief Returns the list of triggers to be used in this sample
+    std::pair<bool, bool> has_triggers() const { return _has_triggers; }
 
     /// \brief Retrieves the \ref type of the sample.
     enum type type() const { return _type; }

@@ -47,6 +47,7 @@ class job
         explicit info(const data::catalog &catalog, const util::chains &chains);
 
         data::catalog catalog;
+        data::sample sample;
         util::chains chains;
         TTreeReader reader;
     };
@@ -152,6 +153,7 @@ template <class Analyzer, class... Args> void job::run(Args &... args)
 
         util::chains chains(files);
         struct info info(catalog, chains);
+        info.sample = sample();
 
         Analyzer ana(info, args...);
 

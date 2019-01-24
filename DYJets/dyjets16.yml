@@ -159,14 +159,23 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 71, 111, 130, 170, 250, 320 ]
+mass bins: [ 50, 76, 106, 170, 350 ]
 
 # Triggers
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers B-F: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"
-triggers G-H: "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"
+triggers B-F: |
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
+    HLT_IsoMu24,
+    HLT_IsoTkMu24
+
+triggers G-H: |
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
+    HLT_IsoMu24,
+    HLT_IsoTkMu24
 
 # List of available data/MC samples
 samples:
@@ -175,6 +184,28 @@ samples:
       jobs: 32
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v8.0/Catalogs/
       catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
+      triggers B-F: |
+          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
+          HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
+      triggers G-H: |
+          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
+          HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
+    # Note: This sample has to be hadd-ed with 'data'.
+    - name: data-smu
+      type: data
+      jobs: 16
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v8.0/Catalogs/
+      catalog: Bonzais-SingleMuon-all-VJetPruner-DMu.txt
+      triggers B-F: |
+          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
+          ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
+          HLT_IsoMu24,
+          HLT_IsoTkMu24
+      triggers G-H: |
+          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
+          ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
+          HLT_IsoMu24,
+          HLT_IsoTkMu24
     - name: DYJets
       type: MC
       jobs: 32
@@ -226,7 +257,7 @@ tables B-F:
     muon id:        Eff_SF_ID_BF_6_16_2017.txt
     muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
     muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8_RunBF_Brussels.txt
+    dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_RunBF.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
     bjet eff:       btag-b.txt
     cjet eff:       btag-c.txt
@@ -238,7 +269,7 @@ tables G-H:
     muon id:        Eff_SF_ID_GH_6_16_2017.txt
     muon isolation: Eff_SF_ISO_GH_6_16_2017.txt
     muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZ_RunGH_Brussels.txt
+    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_RunGH.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
     bjet eff:       btag-b.txt
     cjet eff:       btag-c.txt

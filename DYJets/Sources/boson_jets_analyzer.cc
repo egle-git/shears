@@ -25,6 +25,22 @@ std::string make_tag(double value, const std::vector<double> &bins)
     return std::to_string(int(*low)) + "_" + std::to_string(int(*high));
 }
 
+/**
+ * \brief Retrives the trigger list for the current @ref sample.
+ */
+std::string get_triggers(util::job::info &info, const util::options &opt, int era)
+{
+    if (era == 0 && info.sample.has_triggers().first) {
+        return info.sample.triggers().first;
+    } else if (era == 1 && info.sample.has_triggers().second) {
+        return info.sample.triggers().second;
+    }
+    std::string name = (era == 0) ? "triggers B-F" : "triggers G-H";
+    if (opt.config[name]) {
+        return opt.config[name].as<std::string>();
+    }
+}
+
 } // anonymous namespace
 
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
@@ -33,8 +49,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),
-    _mask_eraBG(info, opt.config["triggers B-F"].as<std::string>()),
-    _mask_eraH(info, opt.config["triggers G-H"].as<std::string>()),
+    _mask_eraBG(info, get_triggers(info, opt, 0)),
+    _mask_eraH(info, get_triggers(info, opt, 1)),
     _muons(info, opt, histo_set),
     _electrons(info, opt, histo_set),
     _jets(info, opt),

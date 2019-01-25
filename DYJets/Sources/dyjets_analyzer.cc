@@ -177,6 +177,10 @@ dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
         counter.count("With two good gen electrons", weights().global_weight());
     }
 
+    if (leptons[0].v.Pt() < 25) {
+        return {};
+    }
+
     std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});
     if (candidates.size() == 0) {
         return {};

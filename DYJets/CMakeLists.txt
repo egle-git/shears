@@ -243,6 +243,7 @@ add_executable(runRecoComparison Main/runRecoComparison.cc)
 target_link_libraries(runRecoComparison PRIVATE DYJets-legacy)
 
 add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
+target_compile_options(runZJets_newformat PRIVATE -fno-var-tracking-assignments) # Unfortunate :'(
 target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)
 
 add_executable(testDecompVar Sources/testDecompVar.cc)

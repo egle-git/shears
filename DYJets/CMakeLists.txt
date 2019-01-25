@@ -183,6 +183,7 @@ target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
 add_library(DYJets-legacy
     Sources/ArgParser.cc
     Sources/BLUEMeth.cc
+    Sources/BTagCalibrationStandalone.cc
     Sources/Combination.cc
     Sources/Config.cc
     Sources/ConfigVJets.cc

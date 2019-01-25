@@ -205,7 +205,6 @@ add_library(DYJets-legacy
     Sources/SimpleJetCorrectionUncertainty.cc
     Sources/TextTools.cc
     Sources/Uncertainties.cc
-    Sources/UnfoldingZJets.cc
     Sources/variablesOfInterestZJets.cc
 
     # Some sources shared with the new code
@@ -241,6 +240,9 @@ target_link_libraries(runIntegralCheck PRIVATE DYJets-legacy)
 
 add_executable(runRecoComparison Main/runRecoComparison.cc)
 target_link_libraries(runRecoComparison PRIVATE DYJets-legacy)
+
+add_executable(runUnfoldingZJets Main/runUnfoldingZJets.cc Sources/UnfoldingZJets.cc)
+target_link_libraries(runUnfoldingZJets PRIVATE DYJets-legacy)
 
 add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
 target_compile_options(runZJets_newformat PRIVATE -fno-var-tracking-assignments) # Unfortunate :'(

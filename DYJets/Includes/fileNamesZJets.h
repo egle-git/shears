@@ -25,7 +25,7 @@ struct processInfoStruct
 // 8TeV colours: MLM: kBlue-10, Sherpa: kOrange-2, FXFX: kGreen-8
 const processInfoStruct Samples[] = {
     //--  Name    --- merge - #events  -- xsec   - BR - xsec rel. unc. - colorReco - colorGen -
-    // legendReco - legendGen
+    //legendReco - legendGen
     /* 0*/ {"Data", ' ', 1., 1., 1, 1, kBlack, kBlack, " Data", " Data"},
     /* 1*/ {"TT", ' ', 1., 1., 1, 0.00, kBlue, kBlue, " t#bar{t}", " t#bar{t}"},
     /* 2*/ {"ST_sch",
@@ -129,6 +129,8 @@ const processInfoStruct Samples[] = {
             " Z/#gamma^{*} #rightarrow ll",
             "GE + PY8 (NNLL'_{#tau}+NNLO_{0})"},
     /* 19*/ {"Data_SMu", ' ', 1., 1., 1, 1, kBlack, kBlack, " Data_SMu", " Data_SMu"},
+      /*20*/{"DYJets_FxFx", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS)"},	
+           /*21*/{"DYJets_UNFOLDING_UNC", ' ', 1.,    1.,      1,  0.06,     kGreen-8,  kGreen-8,  " Z/#gamma^{*} #rightarrow ll", "MG5_aMC + PY8 (#leq 2j NLO + PS) Reweighted"},
 };
 
 const int NSamples = sizeof(Samples) / sizeof(Samples[0]);

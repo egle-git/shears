@@ -147,14 +147,14 @@ int main(int argc, char **argv)
 
             //--- asking for help ---
             else if (currentArg.Contains("help") || currentArg.BeginsWith("-h")) {
-                std::cout << "\nUsage: ./runZJets [dataBonzaiDir=(path)] [mcBonzaiDir=(path)] "
+                std::cout << "\nUsage: Main/runZJets [dataBonzaiDir=(path)] [mcBonzaiDir=(path)] "
                              "[fixedDir=(1,0)] [histoDir=(path)] [lepSel=(DMu, DE)] [algo=(Bayes, "
                              "SVD)] [lepPtMin=(int)] [lepEtaMax=(int*10)] [jetPtMin=(int)] "
                              "[jetEtaMax=(int*10)] ";
                 std::cout << "[doWhat=(sample)] [doSysRunning=(1,0)] [doCentral=(1,0)] "
                              "[maxEvents=-1|N] [--help]"
                           << std::endl;
-                std::cout << "eg: ./runZJets lepSel=DMu jetEtaMax=24" << std::endl;
+                std::cout << "eg: Main/runZJets lepSel=DMu jetEtaMax=24" << std::endl;
                 std::cout << "unspecified options will be read from vjets.cfg\n" << std::endl;
                 return 0;
             }
@@ -240,9 +240,21 @@ int main(int argc, char **argv)
             if (iSyst != (unsigned)whichSyst) continue;
         }
 
+
+      cout << "NSamples = " << NSamples << "\n";
         for (unsigned iSample = 0; iSample < NSamples; ++iSample) {
             if (iSample == DATA) {
-                if (doWhat != "DATA" && doWhat != "ALL") continue;
+                if (iSample == DATA && doWhat != "DATA" && doWhat != "ALL") continue;
+                if (iSyst >= NSystData) continue;
+                hasRecoInfo = true;
+                hasGenInfo = false;
+                syst = dataSyst;
+                systDir = dataDir;
+                bonzaiDir = dataBonzaiDir;
+                yieldScale = 1.;
+            } else if (iSample == DATA_SMu) {
+                //cout << iSample << " , " << Samples[iSample].name  << " , " << DATA_SMu << " , " << doWhat << "\n";
+                if (iSample == DATA_SMu && doWhat != "DATA_SMU" && doWhat != "ALL") continue;
                 if (iSyst >= NSystData) continue;
                 hasRecoInfo = true;
                 hasGenInfo = false;
@@ -297,7 +309,6 @@ int main(int argc, char **argv)
                 bonzaiDir = mcBonzaiDir;
                 yieldScale = mcYieldScale;
             }
-
             // read the MC yield scale from file in case of auto scale mode
             // this is done in the loop as the file is created at the
             // first iteration in the case of the doWhat=ALL option

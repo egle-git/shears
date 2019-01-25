@@ -721,7 +721,26 @@ void BTagModification(double randNumber, double pt, double eta, int jetFlavour, 
 
     } ////////flavour lop
 }
+/*
+double BTagweight(double randNumber, double pt, double eta, int jetFlavour, bool passBJets) {
+   std::string tg="";
+   BTagEntry::JetFlavor flavor;
+    if (std::abs(jetFlavour) == 5) {
+        flavor = BTagEntry::FLAV_B;
+        tg="bjet";
+    } else if (std::abs(jetFlavour) == 4) {
+        flavor = BTagEntry::FLAV_C;
+        tg="cjet";
+    } else {
+        flavor = BTagEntry::FLAV_UDSG;
+        tg="udsgjet";
+    }
 
+    double sf = _btag_calibration_reader.eval_auto_bounds(
+        "central", flavor, std::abs(j.v.Eta()), j.v.Pt());
+   // double eff = _bjet_tag_eff[flavor];
+   //
+}*/
 FILE *eosOpen(const char *path, int (**closeFunc)(FILE *))
 {
     TString tspath(path);

@@ -437,6 +437,7 @@ void RecoComparison(
                     0.5,
                     0.77,
                     TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", lumi / 1000.));
+                    //  TString::Format("#int L dt = %.3g fb^{-1},  #sqrt{s} = 13 TeV", 35.9));
             else
                 intLumi->DrawLatex(0.5, 0.77, "#sqrt{s} = 13 TeV");
         }
@@ -514,6 +515,8 @@ void RecoComparison(
             pad2->SetLogx(0);
         }
 
+
+
         hRatio->SetStats(0);
         hRatio->SetTitle("");
 
@@ -548,7 +551,22 @@ void RecoComparison(
         hRatio->GetYaxis()->CenterTitle();
         hRatio->GetYaxis()->SetLabelSize(0.08);
 
+/*
+      if(vhNames[i].Index("ZMass_Zinc0jet") >= 0){
+          for(int j =1 ; j<=hRatio->GetNbinsX();j++)    
+                  std::cout<<hRatio->GetBinContent(j) << ","; //<< hist[0][i] ->GetBinContent(j) <<"\n ";
+                  std::cout<<std::endl;
+         }
+*/
+
         hRatio->Divide(hist[0][i]);
+
+
+     //  if(vhNames[i].Index("ZMass_Zinc0jet") >= 0){
+     //       for(int i =1 ; i<=hRatio->GetNbinsX();i++)    
+      //            std::cout<<hRatio->GetBinContent(i)<<" , ";
+     //             std::cout<<std::endl;
+     //    }
         hRatio->DrawCopy("EP");
 
         canvas->cd();

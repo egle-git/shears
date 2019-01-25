@@ -134,10 +134,10 @@ class ZJets : public HistoSetZJets
     vector<float> *MuEta;
     vector<float> *MuPhi;
     vector<float> *MuE;
-    vector<unsigned int> *MuIdTight;
-    vector<unsigned int> *MuIdSoft;
-    vector<unsigned int> *MuIdHighPt;
-    vector<unsigned int> *MuIdTkHighPt;
+   vector<unsigned int> *MuIdTight;
+   vector<unsigned int> *MuIdSoft;
+   vector<unsigned int> *MuIdHighPt;
+   vector<unsigned int> *MuIdTkHighPt;
     vector<unsigned int> *MuId;
     vector<float> *MuCh;
     vector<float> *MuVtxZ;
@@ -242,7 +242,7 @@ class ZJets : public HistoSetZJets
     vector<float> *JetAk04BDiscTchp;
     vector<float> *JetAk04BDiscSsvhe;
     vector<float> *JetAk04BDiscSsvhp;
-    vector<float> *JetAk04PartFlav;
+    vector<float> *JetAk04HadFlav;
     vector<float> *JetAk04JecUncUp;
     vector<float> *JetAk04JecUncDwn;
     vector<int> *JetAk04ConstId;
@@ -437,7 +437,7 @@ class ZJets : public HistoSetZJets
     TBranch *b_JetAk04BDiscTchp;             //!
     TBranch *b_JetAk04BDiscSsvhe;            //!
     TBranch *b_JetAk04BDiscSsvhp;            //!
-    TBranch *b_JetAk04PartFlav;              //!
+    TBranch *b_JetAk04HadFlav;              //!
     TBranch *b_JetAk04JecUncUp;              //!
     TBranch *b_JetAk04JecUncDwn;             //!
     TBranch *b_JetAk04ConstId;               //!
@@ -575,7 +575,7 @@ class ZJets : public HistoSetZJets
     Long_t nMaxEvents;
     TString lepSel;
     bool rejectBTagEvents;
-
+    BTagCalibrationReader _btag_calibration_reader;
     uint64_t triggerMaskRunB, triggerMaskRunC, triggerMaskRunD, triggerMaskRunE, triggerMaskRunF,
         triggerMaskRunG, triggerMaskRunH, triggerMaskMCA, triggerMaskMCB;
 

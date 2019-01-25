@@ -5,6 +5,8 @@
 #include <cstdarg>
 #include <iostream>
 #include <vector>
+#include "BTagCalibrationStandalone.h"
+
 
 #include "lepton.h"
 #include "tables.h"
@@ -38,15 +40,16 @@ struct leptonStruct : public physics::lepton
 {
 
     leptonStruct();
-    leptonStruct(double pt_,
-                 double eta_,
-                 double phi_,
-                 double en_,
-                 double charge_,
+    leptonStruct(float pt_,
+                 float eta_,
+                 float phi_,
+                 float en_,
+                 float charge_,
                  unsigned id_,
-                 double iso_,
-                 double scEta_,
+                 float iso_,
+                 float scEta_,
                  int trigger_,
+                 char flavor_,
                  int TkLayerCnt_)
     {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
@@ -55,6 +58,7 @@ struct leptonStruct : public physics::lepton
         iso = iso_;
         scEta = scEta_;
         trigger = trigger_;
+        flavor = flavor_;
         TkLayerCnt = TkLayerCnt_;
     }
 
@@ -62,16 +66,17 @@ struct leptonStruct : public physics::lepton
     double scEta;
     int TkLayerCnt;
     int trigger;
+    char flavor;
 };
 
 struct jetStruct
 {
     jetStruct();
-    jetStruct(double pt_, double eta_, double phi_, double en_, int patIndex_, bool isBJet_)
+    jetStruct(double pt_, double eta_, double phi_, double en_, int patIndex_, float jetw_)
     {
         v.SetPtEtaPhiE(pt_, eta_, phi_, en_);
         patIndex = patIndex_;
-        isBJet = isBJet_;
+        jetw = jetw_;
     }
 
     void setSmearMatch(bool match) { smearMatch = match; }
@@ -79,7 +84,7 @@ struct jetStruct
 
     TLorentzVector v;
     int patIndex;
-    bool isBJet;
+    float jetw;
     bool smearMatch; // True implies a gen match was found for smearing, vs false is guassian smear.
     size_t genMatchIndex;
 };
@@ -120,6 +125,9 @@ double SmearJetPt(double, double, int);
 void bestTwoJetsCandidatesPt(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
 void bestTwoJetsCandidatesPhi(vector<jetStruct>, pair<TLorentzVector, TLorentzVector> &);
 void BTagModification(double randNumber, double pt, double eta, int jetFlavour, bool &passBJets);
+double BTagweight(double randNumber, double pt, double eta, int jetFlavour, bool passBJets);
+
+//    BTagCalibrationReader _btag_calibration_reader;
 
 /** Open in read mode a file on eos or a local file. For EOS file,
  * performance might be limited and it should be kept to small file:

@@ -134,13 +134,31 @@ std::vector<physics::lepton>
 dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
                             const std::vector<physics::lepton> &electrons)
 {
-    if (muons.size() < 2 && electrons.size() < 2) {
+    using physics::dilepton;
+    using physics::lepton;
+    using physics::zfinder;
+
+    if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::emu) {
+        // Special treatment for same flavor mode
+        if (muons.size() + electrons.size() < 2) {
+            return {};
+        }
+    } else if (muons.size() < 2 && electrons.size() < 2) {
         return {};
     }
     counter.count("With two good leptons", weights().global_weight());
 
-    std::vector<physics::lepton> leptons;
-    if (muons.size() >= 2) {
+    std::vector<lepton> leptons;
+    if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::emu) {
+        leptons.insert(leptons.end(), muons.begin(), muons.end());
+        leptons.insert(leptons.end(), electrons.begin(), electrons.end());
+        // Sort the merged collection
+        std::sort(leptons.begin(), leptons.end(), [](const lepton &lhs, const lepton &rhs)
+            {
+                return lhs.v.Pt() > rhs.v.Pt();
+            }
+        );
+    } else if (muons.size() >= 2) {
         counter.count("With two good muons", weights().global_weight());
         leptons = muons;
     } else {
@@ -152,14 +170,14 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         return {};
     }
 
-    std::vector<physics::dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
+    std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
     if (candidates.size() == 0) {
         return {};
     }
     counter.count("With a good Z boson", weights().global_weight());
 
-    std::sort(candidates.begin(), candidates.end(), physics::dilepton::zmass_ordering);
-    physics::dilepton Z = candidates[0];
+    std::sort(candidates.begin(), candidates.end(), dilepton::zmass_ordering);
+    dilepton Z = candidates[0];
     return {Z.a, Z.b};
 }
 

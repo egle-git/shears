@@ -80,6 +80,11 @@ electrons:
     # Default value: 0.25
     isolation: 0.15
 
+    # Id
+    # Possible values: loose, medium, tight
+    # Default value: tight
+    id: loose
+
     # Whether to use the identification scale factors
     # Default value: yes
     use id scale factors: yes

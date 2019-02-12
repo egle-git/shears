@@ -112,6 +112,8 @@ add_library(DYJets-physics
     Sources/electrons.cc
     Sources/genleps.cc
     Sources/jets.cc
+    Sources/JetResolution.cc
+    Sources/JetResolutionObject.cc
     Sources/muons.cc
     Sources/pileup.cc
     Sources/RoccoR.cc
@@ -119,6 +121,7 @@ add_library(DYJets-physics
     Sources/triggers.cc
     Sources/weights.cc
     Sources/zfinder.cc
+
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

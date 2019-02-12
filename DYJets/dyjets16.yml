@@ -265,9 +265,15 @@ tables B-F:
     smu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_RunBF.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
-    bjet eff:       btag-medium-b.txt
-    cjet eff:       btag-medium-c.txt
-    udsgjet eff:    btag-medium-udsg.txt
+    bjet loose eff:       btag-loose-b.txt
+    cjet loose eff:       btag-loose-c.txt
+    udsgjet loose eff:    btag-loose-udsg.txt
+    bjet medium eff:       btag-medium-b.txt
+    cjet medium eff:       btag-medium-c.txt
+    udsgjet medium eff:    btag-medium-udsg.txt
+    bjet tight eff:       btag-tight-b.txt
+    cjet tight eff:       btag-tight-c.txt
+    udsgjet tight eff:    btag-tight-udsg.txt
 
 tables G-H:
     electron id:    Electron_Id_Loose_SF_2016.txt
@@ -278,11 +284,15 @@ tables G-H:
     smu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_RunGH.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
-    bjet eff:       btag-medium-b.txt
-    cjet eff:       btag-medium-c.txt
-    udsgjet eff:    btag-medium-udsg.txt
-
-
+    bjet loose eff:       btag-loose-b.txt
+    cjet loose eff:       btag-loose-c.txt
+    udsgjet loose eff:    btag-loose-udsg.txt
+    bjet medium eff:       btag-medium-b.txt
+    cjet medium eff:       btag-medium-c.txt
+    udsgjet medium eff:    btag-medium-udsg.txt
+    bjet tight eff:       btag-tight-b.txt
+    cjet tight eff:       btag-tight-c.txt
+    udsgjet tight eff:    btag-tight-udsg.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:

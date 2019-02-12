@@ -201,7 +201,7 @@ void boson_jets_analyzer::operator()()
      */
     // TODO Gen jets
     if (evt.rec) {
-        evt.rec->jets = _jets.get();
+        evt.rec->jets = _jets.get(weights().isdata());
         _jets.veto(evt.rec->jets, evt.rec->leptons);
 
         // Calculate b efficiencies and apply scale factors

@@ -17,7 +17,6 @@ class btagger
 {
     double _bjet_cut = 0.5426;
     std::string bjet_cut; 
-    std::array<double, 3> _bjet_tag_eff;
     BTagCalibrationReader _btag_calibration_reader;
 
   public:

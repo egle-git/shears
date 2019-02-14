@@ -30,15 +30,12 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     if (bjet_cut == "loose") {
         _bjet_cut = 0.5426;
         wp = BTagEntry::OP_LOOSE;
-        _bjet_tag_eff = { 0.848, 0.383, 0.095 };
     } else if (bjet_cut == "medium") {
         _bjet_cut = 0.8484;
         wp = BTagEntry::OP_MEDIUM;
-        _bjet_tag_eff = { 0.674, 0.123, 0.010 };
     } else if (bjet_cut == "tight") {
         _bjet_cut = 0.9535;
         wp = BTagEntry::OP_TIGHT;
-        _bjet_tag_eff = { 0.484, 0.016, 0.001 };
     } else {
         throw std::runtime_error("Unkown b jet veto working point: " + bjet_cut);
     }
@@ -81,10 +78,10 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h, double wu
     bool tagged_loose = j.bdisc > 0.5426;
     bool tagged_medium = j.bdisc >0.8484 ;
     bool tagged_tight = j.bdisc >0.9535 ;
-    h.fill("bjetPtEta", tg, j.v.Pt(),j.v.Eta(), wu);
-    if(tagged_loose)    h.fill("bjetPtEta", tg+"_tagged_loose", j.v.Pt(),j.v.Eta(), wu);
-    if(tagged_medium)    h.fill("bjetPtEta", tg+"_tagged_medium", j.v.Pt(),j.v.Eta(), wu);
-    if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.v.Pt(),j.v.Eta(), wu);
+    h.fill("bjetPtEta", tg, j.raw_v.Pt(),j.raw_v.Eta(), wu);
+    if(tagged_loose)    h.fill("bjetPtEta", tg+"_tagged_loose", j.raw_v.Pt(),j.raw_v.Eta(), wu);
+    if(tagged_medium)    h.fill("bjetPtEta", tg+"_tagged_medium", j.raw_v.Pt(),j.raw_v.Eta(), wu);
+    if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.raw_v.Pt(),j.raw_v.Eta(), wu);
 }
 
 
@@ -103,13 +100,13 @@ void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util
         flavor = BTagEntry::FLAV_UDSG;
         tg="udsgjet";
     }
-    double eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.v.Pt(), j.v.Eta());
+    double eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.raw_v.Pt(), j.raw_v.Eta());
     bool tagged = j.bdisc > _bjet_cut;
     if(tagged) tg+="_tagged";
     if(wu==-999.)wu=w.global_weight();
 
     double sf = _btag_calibration_reader.eval_auto_bounds(
-        "central", flavor, std::abs(j.v.Eta()), j.v.Pt());
+        "central", flavor, std::abs(j.raw_v.Eta()), j.raw_v.Pt());
 
     w.use_weight(tagged ? sf : (1 - sf * eff) / (1 - eff));
 }

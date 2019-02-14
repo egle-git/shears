@@ -46,6 +46,7 @@ void jets::configure(const util::options &opt)
         node, _deltar_cut, "lepton delta r", "jet-lepton Delta R cut", [](double val) {
             return val > 0;
         });
+    util::set_value_safe(node, _jer_smearing, "JER smearing", "JER smearing toggle");
 }
 
 void jets::declare_histograms(util::histo_set &h)
@@ -86,6 +87,7 @@ std::vector<jet> jets::get(bool isdata)
             continue;
         }
         j.v.SetPtEtaPhiE(JetAk04Pt[i], JetAk04Eta[i], JetAk04Phi[i], JetAk04E[i]);
+        j.raw_v = j.v;
         j.id = JetAk04Id[i];
         j.puMva = JetAk04PuMva[i];
         j.bdisc = JetAk04BDiscCisvV2[i];
@@ -96,7 +98,9 @@ std::vector<jet> jets::get(bool isdata)
         m_JetParameters->setRho(*EvtFastJetRho);
         jetResolution = m_JetResolution->getResolution(*m_JetParameters);
         jetSF = m_JetResolutionScaleFactor->getScaleFactor(*m_JetParameters, m_Variation);
-        /*if (!isdata) { // replace with doJER
+
+        // Jet energy resolution (JER) smearing
+        if (!isdata && _jer_smearing) {
             float smearFactor = 1.0;
             if (GJetAk04Pt.GetSize() != 0) {
                 for (unsigned i = 0; i < GJetAk04Pt.GetSize(); ++i) {
@@ -118,11 +122,12 @@ std::vector<jet> jets::get(bool isdata)
                 smearFactor =
                     1.0 +
                     random->Gaus(0.0, jetResolution) * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
+                delete random;
             }
             float oldJetPt = j.v.Pt();
             float newJetPt = oldJetPt * smearFactor;
             j.v.SetPtEtaPhiE(newJetPt, j.v.Eta(), j.v.Phi(), j.v.E() * newJetPt / oldJetPt);
-        }*/
+        }
         if (j.v.Pt() < _pt_cut) continue;
 
         jets.push_back(j);

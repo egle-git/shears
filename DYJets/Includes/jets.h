@@ -21,6 +21,7 @@ namespace physics
 class jet
 {
   public:
+    TLorentzVector raw_v; ///< Unsmeared four-momentum
     TLorentzVector v; ///< Four-momentum
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
@@ -56,6 +57,7 @@ class jets
     double _eta_cut = 2.4;
     double _pumva_cut = -0.2;
     double _deltar_cut = 0.4;
+    bool _jer_smearing = true;
 
   public:
     /// \brief Constructor.

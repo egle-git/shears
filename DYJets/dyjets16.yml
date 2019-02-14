@@ -50,6 +50,10 @@ jets:
     # Default value: 0.4
     lepton delta r: 0.4
 
+    # Whether to apply jet energy smearing
+    # Default value: yes
+    JER smearing: yes
+
 # Options of the b jet veto
 b jet veto:
     # Whether to cut events with b jets

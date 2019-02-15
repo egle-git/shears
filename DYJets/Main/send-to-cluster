@@ -149,11 +149,11 @@ class submission(object):
         template = self.cluster.script_template()
 
         for index in range(len(self.commands)):
-            script_path = '%s/%02d.sh' % (scripts_directory, index)
-            submit_log_path = '%s/submit-log-%02d.txt' % (logs_directory, index)
-            job_file_path = '%s/job-%02d' % (jobs_directory, index)
-            job_command_file_path = '%s/job-%02d-command' % (jobs_directory, index)
-            job_exit_code_file_path = '%s/job-%02d-exit-code' % (jobs_directory, index)
+            script_path = '%s/%03d.sh' % (scripts_directory, index)
+            submit_log_path = '%s/submit-log-%03d.txt' % (logs_directory, index)
+            job_file_path = '%s/job-%03d' % (jobs_directory, index)
+            job_command_file_path = '%s/job-%03d-command' % (jobs_directory, index)
+            job_exit_code_file_path = '%s/job-%03d-exit-code' % (jobs_directory, index)
 
             # Format the command
             command = self.format_command(self.commands[index], results_directory)
@@ -162,7 +162,7 @@ class submission(object):
             with open(script_path, 'w') as script_file:
                 args = {
                     'command': command,
-                    'job_log_file': '%s/log-%02d.txt' % (logs_directory, index),
+                    'job_log_file': '%s/log-%03d.txt' % (logs_directory, index),
                     'job_exit_code_file': job_exit_code_file_path,
                     'proxy_path': proxy_path or '',
                     'working_directory': pwd,
@@ -177,7 +177,7 @@ class submission(object):
                 job_command_file.write(command)
 
             # Add to script list
-            self.scripts.append(('%s-%02d' % (self.name, index), script_path, submit_log_path, job_file_path))
+            self.scripts.append(('%s-%03d' % (self.name, index), script_path, submit_log_path, job_file_path))
 
     def submit(self):
         for name, script, log, job_file_path in self.scripts:

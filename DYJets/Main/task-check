@@ -48,7 +48,7 @@ class job(object):
 
     @staticmethod
     def load(directory, index):
-        job_file_path = '%s/jobs/job-%02d' % (directory, index)
+        job_file_path = '%s/jobs/job-%03d' % (directory, index)
         if not os.path.isfile(job_file_path):
             return None
 
@@ -58,14 +58,14 @@ class job(object):
             j.id = job_file.read().strip()
 
         # Read the job command
-        job_command_file_path = '%s/jobs/job-%02d-command' % (directory, index)
+        job_command_file_path = '%s/jobs/job-%03d-command' % (directory, index)
         if os.path.isfile(job_command_file_path):
             with open(job_command_file_path, 'r') as job_command_file:
                 j.command = job_command_file.read().strip()
         else:
             j.command = '<unknown>'
 
-        job_exit_code_file_path = '%s/jobs/job-%02d-exit-code' % (directory, index)
+        job_exit_code_file_path = '%s/jobs/job-%03d-exit-code' % (directory, index)
         if os.path.isfile(job_exit_code_file_path):
             # We have the job exit code
             with open(job_exit_code_file_path, 'r') as job_exit_code_file:
@@ -98,9 +98,9 @@ class job(object):
         if (self.status == status.finished() or
             self.status == status.error() or
             self.status == status.killed()):
-            return sys.argv[1] + '/logs/submit-log-%02d.txt' % self.index
+            return sys.argv[1] + '/logs/submit-log-%03d.txt' % self.index
         else:
-            return sys.argv[1] + '/logs/log-%02d.txt' % self.index
+            return sys.argv[1] + '/logs/log-%03d.txt' % self.index
 
 def job_format_for_status(status):
     colors = {
@@ -119,7 +119,7 @@ def job_format_for_status(status):
 class job_formatter(object):
     def columns(self, jobs):
         return [
-            ('ID', 2),
+            ('ID', 3),
             ('', 0),
             #('QUEUE', 10),
             ('ClustID', max([len(j.id) for j in jobs])),
@@ -129,7 +129,7 @@ class job_formatter(object):
 
     def cell(self, col, job):
         if col == 0:
-            return '%02d' % job.index
+            return '%03d' % job.index
         if col == 1:
             return ''
             #return job.queue or '<unknown>'
@@ -199,6 +199,7 @@ def program(stdscr):
         y = 0
         update = True
         jobs = None
+
 
         while True:
             stdscr.erase()

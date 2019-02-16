@@ -1,7 +1,5 @@
 #include "weights.h"
 
-#include <iostream>
-
 #include <TVectorD.h>
 
 namespace physics
@@ -10,6 +8,7 @@ namespace physics
 weights::weights(util::job::info &info)
     : EvtWeights(info.reader, "EvtWeights"),
       _ismc(info.catalog.ismc()),
+      _is_weights_sum_divided(false),
       _primary_events_total(info.catalog.primary_events()),
       _events_in_chain(info.reader.GetEntries(true)),
       _xsec(info.catalog.xsec()),
@@ -36,13 +35,26 @@ weights::weights(util::job::info &info)
 void weights::process_event()
 {
     if (weights_count() > 0) {
-        _gen_weight = weight_at(0);
-        _global_weight = weight_at(0);
+        if (!_is_weights_sum_divided) {
+            // This needs to be done in case several samples are merged (think
+            // exclusive 0, 1, 2 jets). Their weights will in general not be on
+            // the same scale.
+
+            // We assume that all abs(weight) are equal. Additional support in
+            // the pruner is needed if this assumption is not correct.
+
+            _weights_sum /= std::abs(weight_at(0));
+            _is_weights_sum_divided = true;
+        }
+
+        _gen_weight = weight_at(0) / std::abs(weight_at(0));
+        _global_weight = weight_at(0) / std::abs(weight_at(0));
         _processed_weights_sum += weight_at(0);
     } else {
         _gen_weight = 1;
         _global_weight = 1;
     }
+
     _processed_events++;
 }
 

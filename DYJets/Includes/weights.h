@@ -22,6 +22,7 @@ class weights
     TTreeReaderArray<double> EvtWeights;
 
     bool _ismc;
+    bool _is_weights_sum_divided;
 
     long long _primary_events_in_chain = 0;
     long long _primary_events_total = 0;

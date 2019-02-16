@@ -36,6 +36,7 @@ class sample
     std::string _catalog;
     std::string _name;
     unsigned _jobs = 1;
+    double _xsec = -1;
 
     std::pair<bool, bool> _has_triggers;
     std::pair<std::string, std::string> _triggers;
@@ -66,6 +67,9 @@ class sample
 
     /// \brief Retrieves the name of the sample.
     std::string name() const { return _name; }
+
+    /// \brief Retrieves the name of the sample.
+    double xsec() const { return _xsec; }
 
     /// \brief Returns the list of triggers to be used in this sample
     std::pair<std::string, std::string> triggers() const { return _triggers; }

@@ -103,6 +103,10 @@ template <> struct convert<data::sample>
             sample._triggers.second = node["triggers G-H"].as<std::string>();
         }
 
+        if (node["xsec"]) {
+            sample._xsec = node["xsec"].as<double>();
+        }
+
         return true;
     }
 };

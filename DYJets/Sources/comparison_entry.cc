@@ -175,7 +175,7 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
     }
     _wsum = job_info->GetBinContent(2);
     _lumi = (*job_info_average)[0];
-    _xsec = (*job_info_average)[1];
+    _xsec = sample.xsec() > 0 ? sample.xsec() : (*job_info_average)[1];
 }
 
 void data_comparison_entry::add_histograms(std::set<std::string> &histos)

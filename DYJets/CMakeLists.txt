@@ -179,6 +179,10 @@ add_executable(dyjets-loop Main/dyjets-loop.cc Sources/dyjets_analyzer.cc)
 target_link_libraries(dyjets-loop PRIVATE DYJets-data)
 target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
 
+add_executable(dyjets-sample-weights Main/dyjets-sample-weights.cc)
+target_link_libraries(dyjets-sample-weights PRIVATE DYJets-data)
+target_link_libraries(dyjets-sample-weights PRIVATE DYJets-physics)
+
 ###################################################################################################
 # Legacy library
 ###################################################################################################

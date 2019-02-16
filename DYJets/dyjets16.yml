@@ -220,6 +220,21 @@ samples:
       jobs: 32
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-0J
+      type: MC
+      jobs: 24
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-1J
+      type: MC
+      jobs: 24
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-2J
+      type: MC
+      jobs: 24
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST-s-channel
       type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
@@ -299,6 +314,24 @@ tables G-H:
     bjet tight eff:       btag-tight-b.txt
     cjet tight eff:       btag-tight-c.txt
     udsgjet tight eff:    btag-tight-udsg.txt
+
+# Reweighing (eg for merged samples)
+#
+# For each possible reweighing, the syntax is:
+#
+#   sample name: table.txt
+#
+# The table should contain the numbers needed for reweighing. In order to be
+# useful, several samples will often share the same table.
+#
+# The tables can be derived by tweaking Main/dyjets-sample-weights.cc.
+reweighing:
+    # Based on the number of partons npNLO
+    npNLO:
+        DYJets:     merging-DYJets-npNLO.txt
+        DYJets-0J:  merging-DYJets-npNLO.txt
+        DYJets-1J:  merging-DYJets-npNLO.txt
+        DYJets-2J:  merging-DYJets-npNLO.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:

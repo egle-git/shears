@@ -119,6 +119,7 @@ add_library(DYJets-physics
     Sources/RoccoR.cc
     Sources/standalone_LumiReWeighting.cc
     Sources/triggers.cc
+    Sources/reweighing.cc
     Sources/weights.cc
     Sources/zfinder.cc
 

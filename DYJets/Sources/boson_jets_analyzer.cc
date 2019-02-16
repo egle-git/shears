@@ -56,6 +56,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _jets(info, opt),
     _pileup(info, opt),
     _btagger(opt,histo_set2D),
+    _reweighing(info, opt),
     _weights(info)
 {
     if (opt.config["tables B-F"]) {
@@ -89,6 +90,8 @@ boson_jets_analyzer::~boson_jets_analyzer()
 void boson_jets_analyzer::operator()()
 {
     _weights.process_event();
+    _reweighing.reweigh(_weights);
+
     counter.count("Total", weights().global_weight());
 
     /*

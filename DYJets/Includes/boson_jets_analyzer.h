@@ -18,6 +18,7 @@
 #include "matched.h"
 #include "muons.h"
 #include "pileup.h"
+#include "reweighing.h"
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
@@ -29,7 +30,6 @@ namespace physics
 class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
-    TTreeReaderValue<unsigned> EvtNum;
 
 protected:
     util::event_counter counter;
@@ -59,6 +59,7 @@ private:
     bool _bjet_veto = true;
     std::vector<double> _mass_bins;
 
+    physics::reweighing _reweighing;
     physics::weights _weights;
 
 public:

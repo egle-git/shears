@@ -26,6 +26,7 @@ muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h
     h.declare("muPt", "Muon pt;Muon p_{T} [GeV]", 40, 0, 200);
     h.declare("muEta", "Muon eta;Muon #eta", 24, -2.4, 2.4);
     h.declare("muPhi", "Muon phi;Muon #phi", 24, -pi, pi);
+    h.declare("muIso", "Muon relative isolation;Muon relative isolation", 40, 0, 1);
 }
 
 void muons::configure(const util::options &opt)
@@ -178,30 +179,35 @@ void muons::fill(util::histo_set &h,
         h.fill("muPt", tag, mu.v.Pt(), w.global_weight());
         h.fill("muEta", tag, mu.v.Eta(), w.global_weight());
         h.fill("muPhi", tag, mu.v.Phi(), w.global_weight());
+        h.fill("muIso", tag, mu.iso, w.global_weight());
     }
     if (muons.size() > 0) {
         const lepton &mu = muons[0];
         h.fill("muPt", "leading_" + tag, mu.v.Pt(), w.global_weight());
         h.fill("muEta", "leading_" + tag, mu.v.Eta(), w.global_weight());
         h.fill("muPhi", "leading_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("muIso", "leading_" + tag, mu.iso, w.global_weight());
     }
     if (muons.size() > 1) {
         const lepton &mu = muons[1];
         h.fill("muPt", "subleading_" + tag, mu.v.Pt(), w.global_weight());
         h.fill("muEta", "subleading_" + tag, mu.v.Eta(), w.global_weight());
         h.fill("muPhi", "subleading_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("muIso", "subleading_" + tag, mu.iso, w.global_weight());
     }
     if (muons.size() > 2) {
         const lepton &mu = muons[2];
         h.fill("muPt", "third_" + tag, mu.v.Pt(), w.global_weight());
         h.fill("muEta", "third_" + tag, mu.v.Eta(), w.global_weight());
         h.fill("muPhi", "third_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("muIso", "third_" + tag, mu.iso, w.global_weight());
     }
     if (muons.size() > 3) {
         const lepton &mu = muons[3];
         h.fill("muPt", "fourth_" + tag, mu.v.Pt(), w.global_weight());
         h.fill("muEta", "fourth_" + tag, mu.v.Eta(), w.global_weight());
         h.fill("muPhi", "fourth_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("muIso", "fourth_" + tag, mu.iso, w.global_weight());
     }
 }
 } // namespace physics

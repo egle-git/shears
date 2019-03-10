@@ -15,6 +15,8 @@ class reco_compare_builder : public compare_builder_base
 
     std::unique_ptr<TH1> _ratio;
 
+    bool _reversed;
+
     double _lumi;
 
   public:

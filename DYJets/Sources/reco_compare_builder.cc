@@ -4,7 +4,8 @@ namespace util
 {
 
 reco_compare_builder::reco_compare_builder(const std::string &analyzer_name) :
-    compare_builder_base(analyzer_name, analyzer_name + ".yml")
+    compare_builder_base(analyzer_name, analyzer_name + ".yml"),
+    _reversed(false)
 {
 }
 
@@ -14,6 +15,7 @@ po::options_description reco_compare_builder::options() const
     options.add_options()("input,i",
                           po::value<std::string>()->default_value("dyjets-histograms"),
                           "Sets the directory to search for histogram files");
+    options.add_options()("reversed,r", "Plot Data/MC instead of MC/Data");
     return options;
 }
 
@@ -21,6 +23,8 @@ void reco_compare_builder::load()
 {
     std::string input_dir = parsed_options().map["input"].as<std::string>();
     set_default_output_dir(input_dir + "/plots");
+
+    _reversed = (parsed_options().map.count("reversed") > 0);
 
     _data_entry = load_data(input_dir);
     _mc_entry = load_mc(input_dir);
@@ -50,17 +54,25 @@ void reco_compare_builder::fill_legend(TLegend &legend, const std::string &name)
 
 bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
-    _ratio = _mc_entry->get(name, _lumi);
+    std::unique_ptr<TH1> num = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
 
-    if (_ratio == nullptr || den == nullptr) {
+    if (num == nullptr || den == nullptr) {
         return false;
     }
+
+    if (_reversed) {
+        std::swap(num, den);
+    }
+
+    _ratio = std::move(num);
+    num = nullptr;
 
     _ratio->Divide(den.get());
 
     format_lower_x_axis(*_ratio->GetXaxis());
-    format_lower_y_axis(*_ratio->GetYaxis(), "Simulation/Data");
+    format_lower_y_axis(*_ratio->GetYaxis(),
+                        _reversed ? "Data/Simulation" : "Simulation/Data");
 
     double ratio_min = style().get<double>("ratio min", name, 0.601);
     double ratio_max = style().get<double>("ratio max", name, 1.399);

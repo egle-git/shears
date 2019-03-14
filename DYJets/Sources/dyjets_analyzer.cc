@@ -59,8 +59,10 @@ void apply_el_trigger_sf(physics::weights &w,
                          const util::tables &tab)
 {
     if (w.ismc()) {
-        w.use_weight(tab.at("diel trigger")
-                         .getEfficiency(std::abs(e1.raw_v.Eta()), std::abs(e2.raw_v.Eta())));
+        w.use_weight(tab.at("diel trigger leg1")
+                        .getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
+        w.use_weight(tab.at("diel trigger leg2")
+                        .getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
     }
 }
 } // namespace anonymous

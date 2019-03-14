@@ -64,7 +64,7 @@ std::vector<lepton> electrons::get()
             continue;
         }
         l.v.SetPtEtaPhiE(ElPt[i], ElEta[i], ElPhi[i], ElE[i]);
-        l.raw_v = l.v;
+        l.raw_v.SetPtEtaPhiE(ElPt[i], ElEtaSc[i], ElPhi[i], ElE[i]);
         l.charge = ElCh[i];
         l.iso = ElPfIsoRho[i];
         l.id = ElId[i];
@@ -106,11 +106,11 @@ void electrons::apply_sf(weights &w,
         for (const lepton &el : electrons) {
             if (_reco_sf_enabled) {
                 w.use_weight(
-                    tab.at("electron reco").getEfficiency(el.raw_v.Pt(), el.raw_v.Eta()));
+                    tab.at("electron reco").getEfficiency(el.v.Pt(), el.raw_v.Eta()));
             }
             if (_id_sf_enabled) {
                 w.use_weight(tab.at("electron id")
-                                .getEfficiency(el.raw_v.Pt(), el.raw_v.Eta()));
+                                .getEfficiency(el.v.Pt(), el.raw_v.Eta()));
             }
         }
     }

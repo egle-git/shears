@@ -156,7 +156,7 @@ void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::t
         for (const lepton &mu : muons) {
             if (_id_sf_enabled) {
                 w.use_weight(
-                    tab.at("muon id").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
+                    tab.at("muon id").getEfficiency(mu.raw_v.Pt(), mu.raw_v.Eta()));
             }
             if (_iso_sf_enabled) {
                 w.use_weight(tab.at("muon isolation")

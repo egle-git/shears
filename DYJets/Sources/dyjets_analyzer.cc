@@ -145,13 +145,26 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         if (muons.size() + electrons.size() < 2) {
             return {};
         }
-    } else if (muons.size() < 2 && electrons.size() < 2) {
-        return {};
     }
-    counter.count("With two good leptons", weights().global_weight());
+
+    if (muons.size() >= 2) {
+        counter.count("With two good muons", weights().global_weight());
+    }
+    if (electrons.size() >= 2) {
+        counter.count("With two good electrons", weights().global_weight());
+    }
 
     std::vector<lepton> leptons;
-    if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::emu) {
+    switch (_zfinder.get_flavor_mode()) {
+    case zfinder::flavor_mode::mumu:
+        leptons = muons;
+        break;
+    case zfinder::flavor_mode::ee:
+        leptons = electrons;
+        break;
+    case zfinder::flavor_mode::emu:
+    case zfinder::flavor_mode::same:
+    case zfinder::flavor_mode::none:
         leptons.insert(leptons.end(), muons.begin(), muons.end());
         leptons.insert(leptons.end(), electrons.begin(), electrons.end());
         // Sort the merged collection
@@ -160,17 +173,14 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
                 return lhs.v.Pt() > rhs.v.Pt();
             }
         );
-    } else if (muons.size() >= 2) {
-        counter.count("With two good muons", weights().global_weight());
-        leptons = muons;
-    } else {
-        counter.count("With two good electrons", weights().global_weight());
-        leptons = electrons;
+        break;
     }
 
-    if (leptons[0].v.Pt() < 25) {
+    if (leptons.size() < 2 || leptons[0].v.Pt() < 25) {
         return {};
     }
+
+    counter.count("With two good leptons", weights().global_weight());
 
     std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
     if (candidates.size() == 0) {

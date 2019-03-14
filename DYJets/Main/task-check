@@ -328,7 +328,10 @@ def program(stdscr, task):
                     jobs_to_kill = []
                     if index < 0:
                         # Kill all jobs
-                        jobs_to_kill = jobs
+                        jobs_to_kill = filter(
+                            lambda j: (j.status == status.running() or
+                                       j.status == status.pending()),
+                            jobs)
                     else:
                         jobs_to_kill = [ jobs[index] ]
 

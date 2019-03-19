@@ -29,6 +29,7 @@ class muons
         loose,  ///< \brief Loose ID
         medium, ///< \brief Medium ID
         tight,  ///< \brief Tight ID
+        custom, ///< \brief Custom ID
     };
 
   private:

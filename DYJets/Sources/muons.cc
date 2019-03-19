@@ -60,6 +60,8 @@ void muons::configure(const util::options &opt)
             _id_cut = muons::id::medium;
         } else if (id == "tight") {
             _id_cut = muons::id::tight;
+        } else if (id == "custom") {
+            _id_cut = muons::id::custom;
         } else {
             throw std::invalid_argument("Unknown muon id: \"" + id + "\"");
         }
@@ -92,6 +94,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
             break;
         case id::tight:
             l.passes_id = (MuIdTight[i] & 1);
+            break;
+        case id::custom:
+            l.passes_id = (MuId[i] & 8);
             break;
         }
         if (!l.passes_id) {
@@ -155,16 +160,15 @@ void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::t
     if (w.ismc()) {
         for (const lepton &mu : muons) {
             if (_id_sf_enabled) {
-                w.use_weight(
-                    tab.at("muon id").getEfficiency(mu.raw_v.Pt(), mu.raw_v.Eta()));
+                w.use_weight(tab.at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta()));
             }
             if (_iso_sf_enabled) {
                 w.use_weight(tab.at("muon isolation")
-                                 .getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
+                                .getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
             }
             if (_trk_sf_enabled) {
                 w.use_weight(
-                    tab.at("muon tracking").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta())));
+                    tab.at("muon tracking").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
             }
         }
     }

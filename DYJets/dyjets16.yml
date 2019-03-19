@@ -58,7 +58,7 @@ jets:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: yes
+    use: no
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -109,12 +109,12 @@ muons:
 
     # Relative isolation cut
     # Default value: 0.25
-    isolation: 0.25
+    isolation: 0.15
 
     # Id
-    # Possible values: loose, medium, tight
+    # Possible values: loose, medium, tight, custom
     # Default value: tight
-    id: tight
+    id: custom
 
     # Whether to use the identification scale factors
     # Default value: yes
@@ -126,7 +126,7 @@ muons:
 
     # Whether to use the tracking scale factors
     # Default value: yes
-    use tracking scale factors: yes
+    use tracking scale factors: no
 
     # Whether to use Rochester correction
     # Default value: yes
@@ -146,7 +146,7 @@ Z:
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 320
+    high mass: 1000
 
     # Charge check mode
     # Possible values:
@@ -168,7 +168,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 76, 106, 170, 350 ]
+mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 
 # Triggers
 #
@@ -191,7 +191,7 @@ samples:
     - name: data
       type: data
       jobs: 32
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v8.0/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v10.0/Catalogs/
       catalog: Bonzais-DoubleMuon-all-VJetPruner-DMu.txt
       triggers B-F: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
@@ -203,7 +203,7 @@ samples:
     - name: data-smu
       type: data
       jobs: 16
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v8.0/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v10.0/Catalogs/
       catalog: Bonzais-SingleMuon-all-VJetPruner-DMu.txt
       triggers B-F: |
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
@@ -218,63 +218,61 @@ samples:
     - name: DYJets
       type: MC
       jobs: 32
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: DYJets-0J
       type: MC
       jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: DYJets-1J
       type: MC
       jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: DYJets-2J
       type: MC
       jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST-s-channel
       type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-all-VJetPruner-DMu.txt
     - name: ST-t-channel
       type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin-all-VJetPruner-DMu.txt
     - name: STbar-tW
       type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: ST-tW
       type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
     - name: WToLNu
       type: background
       jobs: 8
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-all-VJetPruner-DMu.txt
     - name: WWTo2L2Nu
       type: background
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-WWTo2L2Nu_13TeV-powheg-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-WWTo2L2Nu_13TeV-powheg-all-VJetPruner-DMu.txt
     - name: WZ
       type: background
-      # Not produced for v9.5
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v8.0/Catalogs
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-WZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
     - name: ZZ
       type: background
-      # Not produced for v9.5
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v8.0/Catalogs
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
       catalog: Bonzais-ZZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
     - name: TT
       type: background
       jobs: 10
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/MC/v9.5/Catalogs/
-      catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMuUnf.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v10.0/Catalogs/
+      catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMu.txt
 
 # Scale factors
 tables B-F:
@@ -282,9 +280,9 @@ tables B-F:
     electron reco:  Electron_Reco_2016_SF_converted_new.txt
     muon id:        SMP_17_010_BCDEF_MediumID.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
-    muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
+    #muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
     smu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_RunBF.txt
+    dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_MediumID_RunBF.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
     bjet loose eff:       btag-loose-b.txt
     cjet loose eff:       btag-loose-c.txt
@@ -301,9 +299,9 @@ tables G-H:
     electron reco:  Electron_Reco_2016_SF_converted_new.txt
     muon id:        SMP_17_010_GH_MediumID.txt
     #muon isolation: Eff_SF_ISO_GH_6_16_2017.txt
-    muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
+    #muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
     smu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_RunGH.txt
+    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
     diel trigger:   Efficiency_HLTEle23Ele12CaloIdLTrackIdLIsoVLDZ_Ratio.txt
     bjet loose eff:       btag-loose-b.txt
     cjet loose eff:       btag-loose-c.txt

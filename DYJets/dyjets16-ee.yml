@@ -113,7 +113,7 @@ muons:
     isolation: 0.25
 
     # Id
-    # Possible values: loose, medium, tight
+    # Possible values: loose, medium, tight, custom
     # Default value: tight
     id: tight
 

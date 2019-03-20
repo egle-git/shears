@@ -13,7 +13,7 @@
 
 #include "TObject.h"
 #include "ShearsTChain.h"
-
+#include "TH1F.h"
 #define DECLARE_PRUNER(Class, Descr)				\
   extern "C" Pruner::ClassRecord *shearsLoadPlugin() { \
     Pruner::ClassRecord *rcd = new Pruner::ClassRecord; \
@@ -22,7 +22,7 @@
     rcd->instance = new Class(); \
     return rcd; \
   }
-
+#define NPNLOBINS 3
 class TFile;
 
 
@@ -185,7 +185,22 @@ protected:
    */
   std::vector<Double_t> passedEvtWeightSums_;
 
-  
+int npNLO_;
+  std::vector<float> LHEZPx_;
+  std::vector<float> LHEZPy_;
+float LHEZPt_; 
+
+  std::vector<float> npNLOBinnedEvtWeightSums_;
+
+  std::vector<float> passednpNLOBinnedEvtWeightSums_;
+ 
+  std::vector<float> LHEZPtBinnedEvtWeightSums_;
+  std::vector<float> passedLHEZPtBinnedEvtWeightSums_;
+ 
+  TH1F * hnpNLO_;
+  TH1F * hWeightednpNLO_;
+  TH1F * hLHEZPt_;
+  TH1F * hWeightedLHEZPt_;
   /** Current input file base name
    */
   std::string fileBaseName_;

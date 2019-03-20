@@ -150,6 +150,18 @@ void Pruner::fillGlobalSummary(){
   t->Branch("InEvtCount", &nRead_);
   t->Branch("InEvtWeightSums", &evtWeightSums_);
   t->Branch("EvtWeightSums", &passedEvtWeightSums_);
+  t->Branch("npNLOBinnedEvtWeightSums", &npNLOBinnedEvtWeightSums_);
+  t->Branch("passednpNLOBinnedEvtWeightSums", &passednpNLOBinnedEvtWeightSums_);
+  t->Branch("LHEZPtBinnedEvtWeightSums", &LHEZPtBinnedEvtWeightSums_);
+  t->Branch("hnpNLO","TH1F",&hnpNLO_);
+  t->Branch("hWeightednpNLO","TH1F",&hWeightednpNLO_);
+
+  t->Branch("LHEZPtBinnedEvtWeightSums", &LHEZPtBinnedEvtWeightSums_);
+  t->Branch("passedLHEZPtBinnedEvtWeightSums", &passedLHEZPtBinnedEvtWeightSums_);
+  t->Branch("hLHEZPt","TH1F",&hLHEZPt_);
+  t->Branch("hWeightedLHEZPt","TH1F",&hWeightedLHEZPt_);
+
+
   t->Fill();
   t->Write();
 }
@@ -219,6 +231,12 @@ void Pruner::run(){
 
   nCopied_ = 0;
   nRead_ = 0;
+  hnpNLO_ = new TH1F("hnpNLO","npNLO histo",4,-0.5,3.5);
+  hWeightednpNLO_ = new TH1F("hWeightednpNLO","npNLO with event weight histo",4,-0.5,3.5);
+  hLHEZPt_= new TH1F("hLHEZPt","hLHEZPt histo",6,-0.5,5.5);
+  hWeightedLHEZPt_= new TH1F("hWeightedLHEZPt","hWeightedLHEZPt histo",6,-0.5,5.5);
+
+
   for(Long64_t i = 1; i <= nevts; ++i){
     ++nRead_;
     nextEvent();
@@ -226,6 +244,10 @@ void Pruner::run(){
     if(i==1 && evtWeights_){
       evtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
       passedEvtWeightSums_ = std::vector<double>(evtWeights_->size(), 0);
+      npNLOBinnedEvtWeightSums_ = std::vector<float>(3, 0);
+      passednpNLOBinnedEvtWeightSums_ = std::vector<float>(3, 0);
+      LHEZPtBinnedEvtWeightSums_ = std::vector<float>(6, 0);
+      passedLHEZPtBinnedEvtWeightSums_ = std::vector<float>(6, 0);
     }
     
     bool passed = filterEvent();
@@ -233,14 +255,72 @@ void Pruner::run(){
       copyEvent();
       ++nCopied_;
     }
-    
+    if(LHEZPx_.size()>0){
+      LHEZPt_ =  sqrt(LHEZPx_[0]*LHEZPx_[0] + LHEZPy_[0]*LHEZPy_[0]);
+    }
+hLHEZPt_->Fill(LHEZPt_);
+    hnpNLO_->Fill(npNLO_);
     if(evtWeights_){
-      for(unsigned i = 0; i < evtWeights_->size(); ++i){
-	evtWeightSums_[i] += (*evtWeights_)[i];
-	if(passed) passedEvtWeightSums_[i] += (*evtWeights_)[i];
+
+      if(evtWeights_->size() > 0){
+	float eventWeight_0 = 1.0;
+	for(unsigned iWeight = 0; iWeight < evtWeights_->size(); ++iWeight){
+	  if(iWeight == 0){
+	    eventWeight_0 = abs((*evtWeights_)[iWeight]);
+	    if(npNLO_ == 0){
+	      npNLOBinnedEvtWeightSums_[0] += (*evtWeights_)[iWeight]/eventWeight_0;
+	      if(passed) passednpNLOBinnedEvtWeightSums_[0] += (*evtWeights_)[iWeight]/eventWeight_0;
+	    }
+	    if(npNLO_ == 1){
+	      npNLOBinnedEvtWeightSums_[1] += (*evtWeights_)[iWeight]/eventWeight_0;
+	      if(passed) passednpNLOBinnedEvtWeightSums_[1] += (*evtWeights_)[iWeight]/eventWeight_0;	      
+	    }
+	    if(npNLO_ == 2){
+	      npNLOBinnedEvtWeightSums_[2] += (*evtWeights_)[iWeight]/eventWeight_0;
+	      if(passed) passednpNLOBinnedEvtWeightSums_[2] += (*evtWeights_)[iWeight]/eventWeight_0;
+	    }
+
+            if(LHEZPt_ < 50 && LHEZPt_ >=0){
+               LHEZPtBinnedEvtWeightSums_[0]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[0]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+            if(LHEZPt_ < 100 && LHEZPt_ >=50){
+               LHEZPtBinnedEvtWeightSums_[1]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[1]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+            if(LHEZPt_ < 250 && LHEZPt_ >=100){
+               LHEZPtBinnedEvtWeightSums_[2]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[2]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+            if(LHEZPt_ < 400 && LHEZPt_ >=250){
+               LHEZPtBinnedEvtWeightSums_[3]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[3]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+            if(LHEZPt_ < 650 && LHEZPt_ >=400){
+               LHEZPtBinnedEvtWeightSums_[4]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[4]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+            if( LHEZPt_ >=650){
+               LHEZPtBinnedEvtWeightSums_[5]+=(*evtWeights_)[iWeight]/eventWeight_0;
+               if(passed) passedLHEZPtBinnedEvtWeightSums_[5]+=(*evtWeights_)[iWeight]/eventWeight_0;
+
+            }
+
+
+	  }
+	  evtWeightSums_[iWeight] += (*evtWeights_)[iWeight]/eventWeight_0;
+	  if(passed) passedEvtWeightSums_[iWeight] += (*evtWeights_)[iWeight]/eventWeight_0;
+	}
+	hWeightednpNLO_->Fill(npNLO_,evtWeights_->at(0)/eventWeight_0);
+        hWeightedLHEZPt_->Fill(LHEZPt_,evtWeights_->at(0)/eventWeight_0);
       }
     }
-    
+
     const static int step = interactive ? 100 : 100000;
     //begin-of-line character: in interactive we stay on same line,
     //when stdout is a file we go to next line
@@ -373,7 +453,27 @@ void Pruner::setBranchAdd(){
   if(chain_.GetBranch("EvtWeights")){
     chain_.SetBranchAddress("EvtWeights", &evtWeights_);
   }
+
+  npNLO_ = 0;    
+  if(chain_.GetBranch("npNLO")){
+    chain_.SetBranchAddress("npNLO", &npNLO_);
+  }
+
+ // LHEZPx_=0;
+  if(chain_.GetBranch("LHEZPx")){
+    chain_.SetBranchAddress("LHEZPx", &LHEZPx_);
+  }
+
+
+  //LHEZPy_=0;
+ if(chain_.GetBranch("LHEZPy")){
+    chain_.SetBranchAddress("LHEZPy", &LHEZPy_);
+  }
+   
+
 }
+
+
 
 bool Pruner::setInput(const char* catalog, int maxFiles, int skipFiles){
   bool rc = chain_.setCatalog(catalog, maxFiles, skipFiles);

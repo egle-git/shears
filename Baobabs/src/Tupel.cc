@@ -247,6 +247,10 @@ private:
   std::string elecMatch_;
   std::string muonMatch_;
   std::string muonMatch2_;
+  edm::EDGetTokenT< double > prefweight_token;
+  edm::EDGetTokenT< double > prefweightup_token;
+  edm::EDGetTokenT< double > prefweightdown_token;
+
 
   edm::EDGetTokenT<std::vector<pat::Electron> > elecToken_;
   edm::EDGetToken elecForIDToken_;
@@ -349,6 +353,7 @@ private:
   // ----------member data ---------------------------
   TTree *myTree;
   std::unique_ptr<TreeHelper> treeHelper_;
+  std::unique_ptr<std::vector<double> >   EvtPrefiringweight_;
 
   //Event
   std::unique_ptr<int>      EvtIsRealData_;
@@ -522,6 +527,28 @@ private:
   std::unique_ptr<std::vector<float> > GPdfScale_;
   std::unique_ptr<float>               GBinningValue_;
   std::unique_ptr<int>                 GNup_;
+
+  std::unique_ptr<int>                   npNLO_;
+std::unique_ptr<std::vector<int> >      LHEZMother1id_;
+  std::unique_ptr<std::vector<int> >      LHEZMother2id_;
+  std::unique_ptr<std::vector<int> >      LHEZChild1id_;
+  std::unique_ptr<std::vector<int> >      LHEZChild2id_;
+  std::unique_ptr<std::vector<int> >      LHEZChild1Status_;
+  std::unique_ptr<std::vector<int> >      LHEZChild2Status_;
+  std::unique_ptr<std::vector<int> >      LHEZid_;
+  std::unique_ptr<std::vector<int> >      LHEZStatus_;
+  std::unique_ptr<std::vector<float> >    LHEZPx_;
+  std::unique_ptr<std::vector<float> >    LHEZPy_;
+  std::unique_ptr<std::vector<float> >    LHEZPz_;
+  std::unique_ptr<std::vector<float> >    LHEZE_;
+  std::unique_ptr<std::vector<float> >    LHEChild1Px_;
+  std::unique_ptr<std::vector<float> >    LHEChild1Py_;
+  std::unique_ptr<std::vector<float> >    LHEChild1Pz_;
+  std::unique_ptr<std::vector<float> >    LHEChild1E_;
+  std::unique_ptr<std::vector<float> >    LHEChild2Px_;
+  std::unique_ptr<std::vector<float> >    LHEChild2Py_;
+  std::unique_ptr<std::vector<float> >    LHEChild2Pz_;
+  std::unique_ptr<std::vector<float> >    LHEChild2E_;
 
 
   ///Muons
@@ -882,6 +909,10 @@ Tupel::Tupel(const edm::ParameterSet& iConfig):
   elecMatch_( iConfig.getParameter< std::string >( "elecMatch" ) ),
   muonMatch_( iConfig.getParameter< std::string >( "muonMatch" ) ),
   muonMatch2_( iConfig.getParameter< std::string >( "muonMatch2" ) ),
+  prefweight_token (consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProb"))),
+  prefweightup_token( consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbUp"))),
+  prefweightdown_token( consumes< double >(edm::InputTag("prefiringweight:NonPrefiringProbDown"))),
+
 
   elecToken_(consumes<std::vector<pat::Electron> >(iConfig.getUntrackedParameter<edm::InputTag>("electronSrc"))),
   elecForIDToken_(consumes<edm::View<reco::GsfElectron> >(iConfig.getUntrackedParameter<edm::InputTag>("electronSrc"))),
@@ -1388,7 +1419,70 @@ void Tupel::processGenJets(const edm::Event& iEvent){
     //*GNup_ = lheH->hepeup().NUP;
     //cout << " lheH.isValid() " << lheH.isValid() << " GNup_ " << *GNup_ << endl;
     
-  if(!genjetColl_.failedToGet()){
+    if(lheH.isValid()) {
+      *npNLO_ = lheH->npNLO();
+      for(int iParticle=0; iParticle<lheH->hepeup().NUP; iParticle++ ) {
+        int pdgid = abs(lheH->hepeup().IDUP[iParticle]);
+        int status = lheH->hepeup().ISTUP[iParticle];
+        int mom1Index = lheH->hepeup().MOTHUP[iParticle].first;
+        int mom2Index = lheH->hepeup().MOTHUP[iParticle].second;
+        int mom1id = mom1Index==0 ? 0 : abs(lheH->hepeup().IDUP[mom1Index-1]);
+        int mom2id = mom2Index==0 ? 0 : abs(lheH->hepeup().IDUP[mom2Index-1]);
+        float px = (lheH->hepeup().PUP[iParticle])[0];
+        float py = (lheH->hepeup().PUP[iParticle])[1];
+        //Check for DY
+        //if( (pdgid==22 || pdgid==23) && mom1id < 7 && mom2id < 7 && mom1id==mom2id){
+        if( (pdgid==22 || pdgid==23) ){
+        //Loop over all particles to find the children.
+          int nChild=0;
+          for(int jParticle=0; jParticle<lheH->hepeup().NUP; jParticle++ ) {
+            if( lheH->hepeup().MOTHUP[jParticle].first == (iParticle+1) || lheH->hepeup().MOTHUP[jParticle].second == (iParticle+1) ){
+              if(nChild==0){
+                LHEZChild1id_->push_back(abs(lheH->hepeup().IDUP[jParticle]));
+                LHEZChild1Status_->push_back(lheH->hepeup().ISTUP[jParticle]);
+                LHEChild1Px_->push_back((lheH->hepeup().PUP[jParticle])[0]);
+                LHEChild1Py_->push_back((lheH->hepeup().PUP[jParticle])[1]);
+                LHEChild1Pz_->push_back((lheH->hepeup().PUP[jParticle])[2]);
+                LHEChild1E_->push_back((lheH->hepeup().PUP[jParticle])[3]);
+              }else{
+                LHEZChild2id_->push_back(abs(lheH->hepeup().IDUP[jParticle]));
+                LHEZChild2Status_->push_back(lheH->hepeup().ISTUP[jParticle]);
+                LHEChild2Px_->push_back((lheH->hepeup().PUP[jParticle])[0]);
+                LHEChild2Py_->push_back((lheH->hepeup().PUP[jParticle])[1]);
+                LHEChild2Pz_->push_back((lheH->hepeup().PUP[jParticle])[2]);
+                LHEChild2E_->push_back((lheH->hepeup().PUP[jParticle])[3]);
+              }
+
+              nChild++;
+              /*
+              if( lheH->hepeup().ISTUP[jParticle]== 1 &&(abs(lheH->hepeup().IDUP[jParticle]) == 11 || abs(lheH->hepeup().IDUP[jParticle]) == 13)){
+              printf("Lepton from Z\n");
+              printf("ID: %d\n",abs(lheH->hepeup().IDUP[jParticle]));
+              }else{
+              printf("Failed Lepton\n");
+              printf("ID: %d\n",abs(lheH->hepeup().IDUP[jParticle]));
+              }
+              */
+            }
+          }
+
+
+          //printf("pdgid = %d\n",pdgid);
+          //printf("status = %d\n",status);
+          //printf("mom1id = %d\n",mom1id);
+          //printf("mom2id = %d\n\n",mom2id);
+          LHEZMother1id_->push_back(mom1id);
+          LHEZMother2id_->push_back(mom2id);
+          LHEZid_->push_back(pdgid);
+          LHEZStatus_->push_back(status);
+          LHEZPx_->push_back(px);
+          LHEZPy_->push_back(py);
+          LHEZPz_->push_back((lheH->hepeup().PUP[iParticle])[2]);
+          LHEZE_->push_back((lheH->hepeup().PUP[iParticle])[3]);
+       }
+     } // Loop over generator particles
+   }
+   if(!genjetColl_.failedToGet()){
     const reco::GenJetCollection & genjet = *genjetColl_;
     for(unsigned int k=0; k < genjet.size(); ++k){
       GJetAk04Pt_->push_back(genjet[k].pt());
@@ -1446,6 +1540,7 @@ void Tupel::processGenFatJets(const edm::Event& iEvent){
   if(lheH.isValid()) *GNup_ = lheH->hepeup().NUP;
     //*GNup_ = lheH->hepeup().NUP;
     //cout << " lheH.isValid() " << lheH.isValid() << " GNup_ " << *GNup_ << endl;
+
     
   if(!genfatJetColl_.failedToGet()){
     const reco::GenJetCollection & genfatjet = *genfatJetColl_;
@@ -1497,6 +1592,26 @@ void Tupel::processGenFatJets(const edm::Event& iEvent){
 }
 
 void Tupel::processPdfInfo(const edm::Event& iEvent){
+
+edm::Handle< double > theprefweight;
+iEvent.getByToken(prefweight_token, theprefweight ) ;
+
+edm::Handle< double > theprefweightup;
+iEvent.getByToken(prefweightup_token, theprefweightup ) ;
+
+edm::Handle< double > theprefweightdown;
+iEvent.getByToken(prefweightdown_token, theprefweightdown ) ;
+
+double _prefiringweightdown =(*theprefweightdown);
+double _prefiringweight =(*theprefweight);
+double _prefiringweightup =(*theprefweightup);
+
+EvtPrefiringweight_->push_back(_prefiringweight);
+EvtPrefiringweight_->push_back(_prefiringweightup);
+  EvtPrefiringweight_->push_back(_prefiringweightdown);
+
+
+
   edm::Handle<GenEventInfoProduct> genEventInfoProd;
   if (iEvent.getByToken(generatorToken_, genEventInfoProd)) {
     if (genEventInfoProd->hasBinningValues()){
@@ -1715,7 +1830,6 @@ void Tupel::processMuons(const edm::Event& iEvent)
     if (mu[j].isGlobalMuon()
         || muon::isGoodMuon(mu[j], muon::TrackerMuonArbitrated)
         || mu[j].isPFMuon()) {
-
       TLorentzVector muonMomentum(0,0,0,0);
       muonMomentum.SetPtEtaPhiE(mu[j].pt(), mu[j].eta(),mu[j].phi(), mu[j].energy());
       Long64_t muonMatchingResults = matchWithTriggerObject(iEvent, muonMomentum, triggerObjectType::hltmuons);
@@ -1790,12 +1904,27 @@ void Tupel::processMuons(const edm::Event& iEvent)
       MuPixelHitCnt_->push_back(pixelHits);
       MuTkLayerCnt_->push_back(trkLayers);
 
-      bool customMuId = ( mu[j].isGlobalMuon()
+/*      bool customMuId = ( mu[j].isGlobalMuon()
                           && mu[j].isPFMuon()
                           && normChi2<10
                           && muonHits>0 && nMatches>1
                           && mu[j].dB()<0.2 && dZ<0.5
                           && pixelHits>0 && trkLayers>5 );
+*/
+ 
+
+    bool goodGlb = mu[j].isGlobalMuon() && 
+         mu[j].globalTrack()->normalizedChi2() < 3. && 
+         mu[j].combinedQuality().chi2LocalPosition < 12. && 
+         mu[j].combinedQuality().trkKink < 20.;
+
+      //bool customMuId = (mu[j].innerTrack()->validFraction() > 0.49 && (::muon::segmentCompatibility(mu[j]) > (goodGlb ? 0.303 : 0.451)));
+
+//      std::cout<<mu[j].isGlobalMuon()<< " " <<mu[j].isTrackerMuon()<<std::endl;
+      bool customMuId = false;
+       if(mu[j].isLooseMuon())customMuId=(mu[j].innerTrack()->validFraction() > 0.49 && (mu[j].segmentCompatibility()> (goodGlb ? 0.303 : 0.451)));
+//       if(mu[j].isLooseMuon()) std::cout<<"standard med id "<<mu[j].isMediumMuon()<<" customMuId "<< customMuId <<" validFraction "<< mu[j].innerTrack()->validFraction()<<std::endl;
+//       std::cout<<mu[j].isLooseMuon() << " " <<mu[j].isMediumMuon()<< " " << customMuId<<std::endl;
       unsigned muId = 0;
       if(mu[j].isLooseMuon()) muId |= kMuIdLoose_;
       if(mu[j].isMediumMuon()) muId |= kMuIdMedium_;
@@ -2576,7 +2705,7 @@ void Tupel::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     //photons. Ph. G.
     //if(photons) processPhotons(); 
-    if(photons) processPhotons(iEvent, iSetup);
+    if(false) processPhotons(iEvent, iSetup);
     
     //tracks G.N.
     if(candidates) processPfCands();
@@ -2637,6 +2766,7 @@ Tupel::beginJob()
   ADD_BRANCH_D(EvtPuCntTruth, "True number of pile-up events");
   ADD_BRANCH(EvtWeights); //description filled in endRun()
   ADD_BRANCH_D(EvtFastJetRho, "Fastjet pile-up variable \\rho");
+  ADD_BRANCH_D(EvtPrefiringweight,"Vector of three elements per event: prefiring weight, up and down variations");
     
   ADD_BRANCH(TrigMET);
 
@@ -2778,6 +2908,30 @@ Tupel::beginJob()
   ADD_BRANCH_D(GPdfScale, "PDF energy scale");
   ADD_BRANCH_D(GBinningValue, "Value of the observable used to split the MC sample generation (e.g. pt_hat for a pt_hat binned MC sample).");
   ADD_BRANCH_D(GNup, "Number of particles/partons included in the matrix element.");
+
+  ADD_BRANCH_D(npNLO,"npNLO");
+  ADD_BRANCH(LHEZMother1id);
+  ADD_BRANCH(LHEZMother2id);
+  ADD_BRANCH(LHEZChild1id);
+  ADD_BRANCH(LHEZChild2id);
+  ADD_BRANCH(LHEZChild1Status);
+  ADD_BRANCH(LHEZChild2Status);
+  ADD_BRANCH(LHEZid);
+  ADD_BRANCH(LHEZStatus);
+  ADD_BRANCH(LHEZPx);
+  ADD_BRANCH(LHEZPy);
+  ADD_BRANCH(LHEZPz);
+  ADD_BRANCH(LHEZE);
+  ADD_BRANCH(LHEChild1Px);
+  ADD_BRANCH(LHEChild1Py);
+  ADD_BRANCH(LHEChild1Pz);
+  ADD_BRANCH(LHEChild1E);
+  ADD_BRANCH(LHEChild2Px);
+  ADD_BRANCH(LHEChild2Py);
+  ADD_BRANCH(LHEChild2Pz);
+  ADD_BRANCH(LHEChild2E);
+
+
 
   //Muons
   treeHelper_->addDescription("Mu", "PF reconstruced muons.");

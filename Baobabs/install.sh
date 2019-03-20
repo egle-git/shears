@@ -3,7 +3,7 @@
 set -e
 
 cmssw_location=$1
-cmssw_version=CMSSW_8_0_30
+cmssw_version=CMSSW_8_0_32
 
 [ -z "$cmssw_location" ] && cmssw_location="."
 

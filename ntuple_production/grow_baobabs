@@ -568,6 +568,7 @@ def crab_get_config(dataset, task_id, json_file, datatype, runs, unitsPerJob, ou
     if os.path.lexists('Summer15_25nsV5_DATA.db') :
         config.JobType.inputFiles = ['Summer15_25nsV5_DATA.db']
     #endif
+    config.JobType.inputFiles = ['L1PrefiringMaps_new.root']
 
 # Output files that need to be collected, besides default CMSSW outputs
 #    config.JobType.outputFiles = [ 'configDump_cfg.py' ]

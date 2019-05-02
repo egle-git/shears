@@ -15,6 +15,21 @@ make -j$(nproc)
 You're now ready to run the code. Programs relevant to the Higgs analysis are located in the `Main`
 directory and start with `higgs-`. Use the `--help` option for usage information.
 
+## Build options
+
+There are some options that change how things are built. They can be passed to `cmake` after the dot:
+
+~~~{.sh}
+cmake3 . -DOPTION=VALUE
+~~~
+
+Here is a list of the most important options:
+
+| Option             | Contents
+|:-------------------|:---------
+| `DEBUG_PRINTOUT`   | Enable output for event-by-event debugging.
+| `CMAKE_BUILD_TYPE` | See the [documentation](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html). `RelWithDebInfo` is the recommended setting.
+
 ## Pointers to relevant documentation
 
 - The \ref architecture "Architectural Overview" documents the code structure

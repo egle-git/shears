@@ -10,11 +10,12 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
+#include "cmake_config.h" // DEBUG_PRINTOUT
 #include "functions.h"
 #include "lepton.h"
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), EvtNum(info.reader, "EvtNum")
 {
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
@@ -83,6 +84,81 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     boson_jets_analyzer::fill(tags, evt);
 
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
+
+#ifdef DEBUG_PRINTOUT
+    if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
+        std::cout << "----\n";
+        for (const auto &mu : (*evt.rec).leptons) {
+            double sf = tables().at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta());
+            std::cout << "Mu eta, pt, sf  "
+                      << setprecision(5)
+                      << mu.v.Eta()
+                      << ", "
+                      << mu.v.Pt()
+                      << ", "
+                      << (weights().ismc() ? sf : 1.0)
+                      << "\n";
+        }
+        std::cout << "EvtNum "
+                  << *EvtNum
+                  << ", weight  = "
+                  << weights().global_weight()
+                  << "\n";
+        // Sort wrt raw_v for Rochester input
+        auto lep_copy = (*evt.rec).leptons;
+        std::sort(lep_copy.begin(),
+                  lep_copy.end(),
+                  [](const physics::lepton &a, const physics::lepton &b) {
+                      return a.raw_v.Pt() > b.raw_v.Pt();
+                  });
+        for (const auto &l : lep_copy) {
+            std::cout << "Rochester input eta, pt, phi, charge, function name : "
+                << setprecision(5)
+                << l.raw_v.Eta()
+                << ", "
+                << l.raw_v.Pt()
+                << ", "
+                << l.raw_v.Phi()
+                << ", "
+                << l.charge;
+            switch (l.fnUsed) {
+                case 0:
+                    cout << ", kScaleFromGenMC\n";
+                    break;
+                case 1:
+                    cout << ", kScaleAndSmearMC\n";
+                    break;
+                case 2:
+                    cout << ", kScaleDT\n";
+                    break;
+                default:
+                    cout << ", UNKNOWN\n";
+                    break;
+            }
+        }
+
+        if (mass.gen && tags.gen
+                     && *tags.gen == "inc0jet_mass76_106"
+                     && evt.gen->leptons.size() >= 2
+                     && std::abs(evt.gen->leptons[0].v.Eta()) < 2.4
+                     && std::abs(evt.gen->leptons[1].v.Eta()) < 2.4
+                     && std::abs(evt.gen->leptons[0].v.Pt()) > 20
+                     && std::abs(evt.gen->leptons[1].v.Pt()) > 20) {
+            for (const auto &l : (*evt.gen).leptons) {
+                std::cout << "Gen mu eta, pt, phi "
+                          << setprecision(5)
+                          << l.v.Eta()
+                          << ", "
+                          << l.v.Pt()
+                          << ", "
+                          << l.v.Phi()
+                          << "\n";
+            }
+            std::cout << "EvtNum " << *EvtNum << "\n";
+        }
+    }
+#endif // DEBUG_PRINTOUT
+
     fill_unfolded("mass", tags, mass);
     fill_unfolded("mass_wide_range", tags, mass);
 

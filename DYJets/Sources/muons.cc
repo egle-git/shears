@@ -84,6 +84,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
         l.iso = MuPfIso[i];
         l.id = MuId[i];
         l.pdgid = 13;
+#ifdef DEBUG_PRINTOUT
+        l.tkLayerCnt = MuTkLayerCnt[i];
+#endif // DEBUG_PRINTOUT
 
         switch (_id_cut) {
         case id::loose:
@@ -106,6 +109,10 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
         if (_roccor_enabled) {
             if (isdata) {
                 l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
+#ifdef DEBUG_PRINTOUT
+                l.fnUsed = 2;
+                l.gllPt = 0;
+#endif // DEBUG_PRINTOUT
             } else {
                 lepton gll;double drmin=99.;bool match =false;
                 for (auto &v : gl) {
@@ -123,7 +130,10 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
 		//				gRandom->Rndm(),
                                                  0,
                                                  0);
-
+#ifdef DEBUG_PRINTOUT
+                l.fnUsed = 0;
+                l.gllPt = gll.v.Pt();
+#endif // DEBUG_PRINTOUT
                 }
                 else{
                 l.v *= _roccor->kScaleAndSmearMC(l.charge,
@@ -137,6 +147,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
 	//					gRandom->Rndm(),
                                                  0,
                                                  0);
+#ifdef DEBUG_PRINTOUT
+                l.fnUsed = 1;
+#endif // DEBUG_PRINTOUT
 		}
             }
         }

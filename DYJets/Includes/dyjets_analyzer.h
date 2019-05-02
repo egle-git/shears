@@ -1,5 +1,5 @@
-#ifndef HIGGS_ANALYZER_H
-#define HIGGS_ANALYZER_H
+#ifndef DYJETS_ANALYZER_H
+#define DYJETS_ANALYZER_H
 
 #include <boost/program_options/options_description.hpp>
 
@@ -19,6 +19,7 @@ namespace po = boost::program_options;
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
     physics::zfinder _zfinder;
+    TTreeReaderValue<unsigned> EvtNum;
 
   public:
     /// \brief Constructor.
@@ -45,4 +46,4 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     static po::options_description options();
 };
 
-#endif // HIGGS_ANALYZER_H
+#endif // DYJETS_ANALYZER_H

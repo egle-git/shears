@@ -3,6 +3,8 @@
 
 #include <TLorentzVector.h>
 
+#include "cmake_config.h"
+
 /// \brief Namespace for physics objects.
 namespace physics
 {
@@ -18,6 +20,12 @@ class lepton
     bool passes_id;   ///< Does the lepton pass the Id cut?
     unsigned id;      ///< Id
     int pdgid;        ///< PDG ID (absolute value): electron = 11, muon = 13
+
+#ifdef DEBUG_PRINTOUT
+    int tkLayerCnt;
+    int fnUsed;
+    int gllPt;
+#endif // DEBUG_PRINTOUT
 
     bool operator== (const lepton &other) const
     {

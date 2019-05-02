@@ -50,6 +50,12 @@ file(INSTALL Main/send-to-cluster DESTINATION bin USE_SOURCE_PERMISSIONS)
 file(INSTALL Main/task-check      DESTINATION bin USE_SOURCE_PERMISSIONS)
 
 ###################################################################################################
+# Configuration
+###################################################################################################
+
+configure_file(Includes/cmake_config.h.in Includes/cmake_config.h)
+
+###################################################################################################
 # Utilities library
 ###################################################################################################
 

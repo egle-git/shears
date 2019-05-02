@@ -52,6 +52,11 @@ std::vector<lepton> genleps::get()
         //}
         genleps.push_back(l);
     }
+    std::sort(genleps.begin(), genleps.end(), [](const lepton &lhs, const lepton &rhs)
+        {
+            return lhs.v.Pt() > rhs.v.Pt();
+        }
+    );
     return genleps;
 }
 void genleps::fill(util::histo_set &h,

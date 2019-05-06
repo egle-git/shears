@@ -118,6 +118,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                 for (auto &v : gl) {
                 if(fabs(v.pdgid)==13 &&v.v.DeltaR(l.v)<0.1 && v.v.DeltaR(l.v)<drmin){
                 gll=v;match=true;
+                drmin=v.v.DeltaR(l.v);
                 }}
                 if(match){
                 l.v *= _roccor->kScaleFromGenMC(l.charge,

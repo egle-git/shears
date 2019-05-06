@@ -76,7 +76,7 @@ add_library(DYJets-util
 target_compile_definitions(DYJets-util PUBLIC DYJETS_NEW_API)
 
 # Required headers
-target_include_directories(DYJets-util PUBLIC Includes)
+target_include_directories(DYJets-util PUBLIC Includes ${CMAKE_BINARY_DIR}/Includes)
 target_include_directories(DYJets-util SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Dependencies
@@ -229,7 +229,7 @@ add_library(DYJets-legacy
 )
 
 # Required headers
-target_include_directories(DYJets-legacy PUBLIC Includes)
+target_include_directories(DYJets-legacy PUBLIC Includes ${CMAKE_BINARY_DIR}/Includes)
 target_include_directories(DYJets-legacy SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_include_directories(DYJets-legacy SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 

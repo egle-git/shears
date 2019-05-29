@@ -21,7 +21,7 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
 
     const double pi = boost::math::constants::pi<double>();
 
-    h.declare("genLepPt", "Muon pt;Muon p_{T} [GeV]", 40, 0, 200);
+    h.declare("genLepPt", "Muon pt;Muon p_{T} [GeV]", 50, 0, 200);
     h.declare("genLepEta", "Muon eta;Muon #eta", 24, -2.4, 2.4);
     h.declare("genLepPhi", "Muon phi;Muon #phi", 24, -pi, pi);
 }

@@ -23,7 +23,7 @@ muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h
 
     const double pi = boost::math::constants::pi<double>();
 
-    h.declare("muPt", "Muon pt;Muon p_{T} [GeV]", 40, 0, 200);
+    h.declare("muPt", "Muon pt;Muon p_{T} [GeV]", 50, 0, 200);
     h.declare("muEta", "Muon eta;Muon #eta", 24, -2.4, 2.4);
     h.declare("muPhi", "Muon phi;Muon #phi", 24, -pi, pi);
     h.declare("muIso", "Muon relative isolation;Muon relative isolation", 40, 0, 1);

@@ -65,33 +65,33 @@ void genleps::fill(util::histo_set &h,
                  const weights &w)
 {
     for (const lepton &mu : genleps) {
-        h.fill("genLepPt", tag, mu.v.Pt(), w.global_weight());
-        h.fill("genLepEta", tag, mu.v.Eta(), w.global_weight());
-        h.fill("genLepPhi", tag, mu.v.Phi(), w.global_weight());
+        h.fill("genLepPt", tag, mu.v.Pt(), w.gen_weight());
+        h.fill("genLepEta", tag, mu.v.Eta(), w.gen_weight());
+        h.fill("genLepPhi", tag, mu.v.Phi(), w.gen_weight());
     }
     if (genleps.size() > 0) {
         const lepton &mu = genleps[0];
-        h.fill("genLepPt", "leading_" + tag, mu.v.Pt(), w.global_weight());
-        h.fill("genLepEta", "leading_" + tag, mu.v.Eta(), w.global_weight());
-        h.fill("genLepPhi", "leading_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("genLepPt", "leading_" + tag, mu.v.Pt(), w.gen_weight());
+        h.fill("genLepEta", "leading_" + tag, mu.v.Eta(), w.gen_weight());
+        h.fill("genLepPhi", "leading_" + tag, mu.v.Phi(), w.gen_weight());
     }
     if (genleps.size() > 1) {
         const lepton &mu = genleps[1];
-        h.fill("genLepPt", "subleading_" + tag, mu.v.Pt(), w.global_weight());
-        h.fill("genLepEta", "subleading_" + tag, mu.v.Eta(), w.global_weight());
-        h.fill("genLepPhi", "subleading_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("genLepPt", "subleading_" + tag, mu.v.Pt(), w.gen_weight());
+        h.fill("genLepEta", "subleading_" + tag, mu.v.Eta(), w.gen_weight());
+        h.fill("genLepPhi", "subleading_" + tag, mu.v.Phi(), w.gen_weight());
     }
     if (genleps.size() > 2) {
         const lepton &mu = genleps[2];
-        h.fill("genLepPt", "third_" + tag, mu.v.Pt(), w.global_weight());
-        h.fill("genLepEta", "third_" + tag, mu.v.Eta(), w.global_weight());
-        h.fill("genLepPhi", "third_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("genLepPt", "third_" + tag, mu.v.Pt(), w.gen_weight());
+        h.fill("genLepEta", "third_" + tag, mu.v.Eta(), w.gen_weight());
+        h.fill("genLepPhi", "third_" + tag, mu.v.Phi(), w.gen_weight());
     }
     if (genleps.size() > 3) {
         const lepton &mu = genleps[3];
-        h.fill("genLepPt", "fourth_" + tag, mu.v.Pt(), w.global_weight());
-        h.fill("genLepEta", "fourth_" + tag, mu.v.Eta(), w.global_weight());
-        h.fill("genLepPhi", "fourth_" + tag, mu.v.Phi(), w.global_weight());
+        h.fill("genLepPt", "fourth_" + tag, mu.v.Pt(), w.gen_weight());
+        h.fill("genLepEta", "fourth_" + tag, mu.v.Eta(), w.gen_weight());
+        h.fill("genLepPhi", "fourth_" + tag, mu.v.Phi(), w.gen_weight());
     }
 }
 } // namespace physics

@@ -311,6 +311,9 @@ void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
         _muons.fill(histo_set, *tags.rec, chosen_muons, weights());
         _electrons.fill(histo_set, *tags.rec, chosen_electrons, weights());
     }
+    if (tags.gen && evt.gen) {
+        _genleps.fill(histo_set, *tags.gen, evt.gen->leptons, weights());
+    }
 }
 
 void boson_jets_analyzer::fill_unfolded(const std::string &name,

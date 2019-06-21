@@ -89,14 +89,15 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
         std::cout << "----\n";
         for (const auto &mu : (*evt.rec).leptons) {
-            double sf = tables().at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta());
+            double musf = tables().at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta());
+            double elsf = tables().at("electron reco").getEfficiency(mu.v.Pt(), mu.raw_v.Eta());
             std::cout << "Mu eta, pt, sf  "
                       << setprecision(5)
                       << mu.v.Eta()
                       << ", "
                       << mu.v.Pt()
                       << ", "
-                      << (weights().ismc() ? sf : 1.0)
+                      << (weights().ismc() ? elsf : 1.0)
                       << "\n";
         }
         std::cout << "EvtNum "
@@ -104,36 +105,38 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                   << ", weight  = "
                   << weights().global_weight()
                   << "\n";
-        // Sort wrt raw_v for Rochester input
-        auto lep_copy = (*evt.rec).leptons;
-        std::sort(lep_copy.begin(),
-                  lep_copy.end(),
-                  [](const physics::lepton &a, const physics::lepton &b) {
-                      return a.raw_v.Pt() > b.raw_v.Pt();
-                  });
-        for (const auto &l : lep_copy) {
-            std::cout << "Rochester input eta, pt, phi, charge, function name : "
-                << setprecision(5)
-                << l.raw_v.Eta()
-                << ", "
-                << l.raw_v.Pt()
-                << ", "
-                << l.raw_v.Phi()
-                << ", "
-                << l.charge;
-            switch (l.fnUsed) {
-                case 0:
-                    cout << ", kScaleFromGenMC\n";
-                    break;
-                case 1:
-                    cout << ", kScaleAndSmearMC\n";
-                    break;
-                case 2:
-                    cout << ", kScaleDT\n";
-                    break;
-                default:
-                    cout << ", UNKNOWN\n";
-                    break;
+        if (std::abs(evt.rec->leptons[0].pdgid) == 13) {
+            // Sort wrt raw_v for Rochester input
+            auto lep_copy = (*evt.rec).leptons;
+            std::sort(lep_copy.begin(),
+                    lep_copy.end(),
+                    [](const physics::lepton &a, const physics::lepton &b) {
+                        return a.raw_v.Pt() > b.raw_v.Pt();
+                    });
+            for (const auto &l : lep_copy) {
+                std::cout << "Rochester input eta, pt, phi, charge, function name : "
+                    << setprecision(5)
+                    << l.raw_v.Eta()
+                    << ", "
+                    << l.raw_v.Pt()
+                    << ", "
+                    << l.raw_v.Phi()
+                    << ", "
+                    << l.charge;
+                switch (l.fnUsed) {
+                    case 0:
+                        cout << ", kScaleFromGenMC\n";
+                        break;
+                    case 1:
+                        cout << ", kScaleAndSmearMC\n";
+                        break;
+                    case 2:
+                        cout << ", kScaleDT\n";
+                        break;
+                    default:
+                        cout << ", UNKNOWN\n";
+                        break;
+                }
             }
         }
 

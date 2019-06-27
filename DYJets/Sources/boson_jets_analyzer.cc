@@ -202,7 +202,6 @@ void boson_jets_analyzer::operator()()
     /*
      * Handle jets and pileup
      */
-    // TODO Gen jets
     if (evt.rec) {
         evt.rec->jets = _jets.get(weights().isdata());
         _jets.veto(evt.rec->jets, evt.rec->leptons);
@@ -222,6 +221,10 @@ void boson_jets_analyzer::operator()()
 
             _pileup.reweight(_weights);
         }
+    }
+    if (evt.gen) {
+        evt.gen->jets = _jets.getGen();
+        _jets.veto(evt.gen->jets, evt.gen->leptons);
     }
 
     /*

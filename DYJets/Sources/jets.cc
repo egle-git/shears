@@ -72,7 +72,7 @@ std::vector<jet> jets::getGen()
             continue;
         }
         j.v.SetPtEtaPhiE(GJetAk04Pt[i], GJetAk04Eta[i], GJetAk04Phi[i], GJetAk04E[i]);
-        if (j.v.Rapidity() > _y_cut) {
+        if (std::abs(j.v.Rapidity()) > _y_cut) {
             continue;
         }
         Gjets.push_back(j);

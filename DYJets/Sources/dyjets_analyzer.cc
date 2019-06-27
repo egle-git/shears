@@ -97,7 +97,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                       << ", "
                       << mu.v.Pt()
                       << ", "
-                      << (weights().ismc() ? elsf : 1.0)
+                      << (weights().ismc() ?
+                            (std::abs(mu.pdgid) == 11 ? elsf : musf) : 1.0)
                       << "\n";
         }
         std::cout << "EvtNum "
@@ -158,6 +159,13 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                           << "\n";
             }
             std::cout << "EvtNum " << *EvtNum << "\n";
+        }
+        auto jets = evt.apply(&event_contents::get_jets);
+        if (jets.rec) {
+            std::cout << jets.rec->size() << std::endl;
+            for (const auto &j : *jets.rec) {
+                std::cout << "Jet " << j.v.Eta() << ", " << j.v.Pt() << std::endl;
+            }
         }
     }
 #endif // DEBUG_PRINTOUT

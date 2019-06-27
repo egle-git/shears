@@ -54,7 +54,7 @@ class jets
     Variation m_Variation = Variation::NOMINAL;
 
     double _pt_cut = 30;
-    double _eta_cut = 2.4;
+    double _y_cut = 2.4;
     double _pumva_cut = -0.2;
     double _deltar_cut = 0.4;
     bool _jer_smearing = true;

@@ -38,9 +38,9 @@ jets:
     # Default value: 30
     pt: 30
 
-    # Eta cut
+    # Rapidity cut
     # Default value: 2.4
-    eta: 2.4
+    rapidity: 2.4
 
     # PU MVA cut
     # Default value: -0.2

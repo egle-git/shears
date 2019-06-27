@@ -38,7 +38,7 @@ void jets::configure(const util::options &opt)
 
     const YAML::Node node = opt.config["jets"];
     util::set_value_safe(node, _pt_cut, "pt", "jet pt cut", [](double val) { return val >= 0; });
-    util::set_value_safe(node, _eta_cut, "eta", "jet eta cut", [](double val) { return val > 0; });
+    util::set_value_safe(node, _y_cut, "rapidity", "jet rapidity cut", [](double val) { return val > 0; });
     util::set_value_safe(node, _pumva_cut, "pu mva", "jet PU MVA cut", [](double val) {
         return val >= -1 && val < 1;
     });
@@ -68,10 +68,13 @@ std::vector<jet> jets::getGen()
     std::vector<jet> Gjets;
     for (unsigned i = 0; i < GJetAk04Pt.GetSize(); ++i) {
         jet j;
-        if (GJetAk04Pt[i] < _pt_cut || std::abs(GJetAk04Eta[i]) > _eta_cut) {
+        if (GJetAk04Pt[i] < _pt_cut) {
             continue;
         }
         j.v.SetPtEtaPhiE(GJetAk04Pt[i], GJetAk04Eta[i], GJetAk04Phi[i], GJetAk04E[i]);
+        if (j.v.Rapidity() > _y_cut) {
+            continue;
+        }
         Gjets.push_back(j);
     }
     return Gjets;
@@ -82,11 +85,13 @@ std::vector<jet> jets::get(bool isdata)
     std::vector<jet> jets;
     for (unsigned i = 0; i < JetAk04Pt.GetSize(); ++i) {
         jet j;
-        if (std::abs(JetAk04Eta[i]) > _eta_cut || JetAk04PuMva[i] < _pumva_cut ||
-            JetAk04Id[i] <= 0) {
+        if (JetAk04PuMva[i] < _pumva_cut || JetAk04Id[i] <= 0) {
             continue;
         }
         j.v.SetPtEtaPhiE(JetAk04Pt[i], JetAk04Eta[i], JetAk04Phi[i], JetAk04E[i]);
+        if (std::abs(j.v.Rapidity()) > _y_cut) {
+            continue;
+        }
         j.raw_v = j.v;
         j.id = JetAk04Id[i];
         j.puMva = JetAk04PuMva[i];

@@ -112,7 +112,7 @@ std::vector<jet> jets::get(bool isdata)
                     TLorentzVector jg;
                     jg.SetPtEtaPhiE(GJetAk04Pt[i], GJetAk04Eta[i], GJetAk04Phi[i], GJetAk04E[i]);
 
-                    if (GJetAk04Pt[i] < 15. || std::abs(GJetAk04Eta[i]) > _eta_cut) {
+                    if (GJetAk04Pt[i] < 15. || std::abs(GJetAk04Eta[i]) > _y_cut) {
                         float deltarjj = jg.DeltaR(j.v);
                         float dPt = abs(j.v.Pt() - jg.Pt());
 

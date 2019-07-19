@@ -68,13 +68,13 @@ void muons::configure(const util::options &opt)
     }
 }
 
-std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl)
+std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl, int &nVetoMuons)
 {
     std::uniform_real_distribution<> uniform(0.0, 1.0);
-
+    nVetoMuons =0 ;
     std::vector<lepton> muons;
     for (unsigned i = 0; i < MuPt.GetSize(); ++i) {
-        lepton l;
+       lepton l;
         if (std::abs(MuEta[i]) > _eta_cut || MuPfIso[i] > _iso_cut) {
             continue;
         }
@@ -127,8 +127,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  l.v.Phi(),
                                                  MuTkLayerCnt[i],
                                                  gll.v.Pt(),
-                                                 uniform(rng),
-		//				gRandom->Rndm(),
+//                                                 uniform(rng),
+						gRandom->Rndm(),
+  //0.75,
                                                  0,
                                                  0);
 #ifdef DEBUG_PRINTOUT
@@ -142,10 +143,13 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  l.v.Eta(),
                                                  l.v.Phi(),
                                                  MuTkLayerCnt[i],
-                                                 uniform(rng),
-                                                 uniform(rng),
-	//					gRandom->Rndm(),
-	//					gRandom->Rndm(),
+//  0.75,                                          
+//  0.75,                                          
+
+//                                                 uniform(rng),
+//                                                 uniform(rng),
+						gRandom->Rndm(),
+						gRandom->Rndm(),
                                                  0,
                                                  0);
 #ifdef DEBUG_PRINTOUT

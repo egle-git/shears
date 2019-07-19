@@ -46,6 +46,8 @@ std::string get_triggers(util::job::info &info, const util::options &opt, int er
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     EvtRunNum(info.reader, "EvtRunNum"),
+    EvtNum(info.reader, "EvtNum"),
+    EvtPrefiringweight(info.reader, "EvtPrefiringweight"),
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),
@@ -72,7 +74,12 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     util::set_value_safe(opt.config["b jet veto"], _bjet_veto, "use", "use b jet veto");
 
-    if (opt.config["mass bins"]) {
+   if (!opt.config["prefiring weights"]) {
+        throw std::runtime_error("Missing mandatory section in config file: \"prefiring weights\"");
+    }
+       util::set_value_safe(opt.config["prefiring weights"], _pref, "use", "use apply prefiring weights");
+
+ if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
         std::sort(_mass_bins.begin(), _mass_bins.end());
     }
@@ -89,10 +96,10 @@ boson_jets_analyzer::~boson_jets_analyzer()
 
 void boson_jets_analyzer::operator()()
 {
+    //if(*EvtNum!=16121885)return;
     _weights.process_event();
     _reweighing.reweigh(_weights);
-
-    counter.count("Total", weights().global_weight());
+   counter.count("Total", weights().global_weight());
 
     /*
      * Choose the right era for this event
@@ -123,7 +130,7 @@ void boson_jets_analyzer::operator()()
 
     std::vector<lepton> genleps = _genleps.get();
     std::vector<lepton> genleptons = find_gen_boson(genleps);
-
+    
     if (!genleptons.empty()) {
         // Gen boson found
         evt.gen = event_contents();
@@ -147,16 +154,19 @@ void boson_jets_analyzer::operator()()
     } else if (triggered) {
         counter.count("Passing the trigger", weights().global_weight());
     }
-
+if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_weights.use_weight(EvtPrefiringweight[0]);
     /*
      * Read leptons and find the boson
      */
     if (triggered) {
-        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps);
-        std::vector<lepton> electrons = _electrons.get();
+        int nVetoMuons=0;
+        int nVetoElecs=0;
 
+        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps,nVetoMuons);
+        std::vector<lepton> electrons = _electrons.get(nVetoElecs);
+        //nVetoMuons=0;nVetoElecs=0;
         std::vector<lepton> leptons = find_boson(muons, electrons);
-        if (!leptons.empty()) {
+        if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
             // Rec boson found
             evt.rec = event_contents();
             evt.rec->leptons = leptons;
@@ -167,7 +177,7 @@ void boson_jets_analyzer::operator()()
                 [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
         }
     }
-
+    
     if (!evt.gen && !evt.rec) {
         // End early if nothing to do
         return;
@@ -203,7 +213,9 @@ void boson_jets_analyzer::operator()()
      * Handle jets and pileup
      */
     if (evt.rec) {
-        evt.rec->jets = _jets.get(weights().isdata());
+       std:vector<lepton> l ;
+if (evt.gen)l =evt.gen->leptons;
+        evt.rec->jets = _jets.get(weights().isdata(),l);
         _jets.veto(evt.rec->jets, evt.rec->leptons);
 
         // Calculate b efficiencies and apply scale factors

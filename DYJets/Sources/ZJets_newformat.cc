@@ -7418,9 +7418,9 @@ void ZJets::getMuons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoMu
         //--- veto muons ---
         bool muPassesVetoPtCut(mu.v.Pt() >= 15);
         bool muPassesVetoEtaCut(fabs(mu.v.Eta()) <= 2.4);
-        // bool muPassesVetoIdCut(mu.id > 0); // muon Id  // CommentAG: not sure
-        // what does it mean
-
+         bool muPassesVetoIdCut(mu.id > 0); // muon Id  // CommentAG: not sure
+        // what does it meant
+	//Comment BB: it is true, it applies a veto id criteria. It matches the MIT definition.
         /// for files obtained form bugra
         if (fileName.Index("Sherpa_Bugra_1_13_UNFOLDING") >= 0 && mu.trigger > 0)
             muPassesTrig = 1; // Bugra only keeps the double electron trigger !!!!!
@@ -7449,8 +7449,7 @@ void ZJets::getMuons(vector<leptonStruct> &leptons, vector<leptonStruct> &vetoMu
         }
         // select the veto muons
         else if (lepSel == "SMu" && muPassesVetoPtCut &&
-                 muPassesVetoEtaCut) { // CommentAG:  need to check
-            // muPassesVetoIdCut!
+                 muPassesVetoEtaCut && muPassesVetoIdCut) { // CommentBB: Checked veto.
             vetoMuons.push_back(mu);
         }
 

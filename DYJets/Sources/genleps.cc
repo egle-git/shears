@@ -15,7 +15,16 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
       GenLepE(info.reader, "GLepDr01E"),
       GenLepId(info.reader, "GLepDr01Id"),
       GenLepPrompt(info.reader,"GLepDr01Prompt"),
-      GenLepTauProd(info.reader,"GLepDr01TauProd")
+      GenLepTauProd(info.reader,"GLepDr01TauProd"),
+      GenLepSt(info.reader, "GLepDr01St"),
+      LHEZChild1Id(info.reader, "LHEZChild1id"),
+      LHEZChild2Id(info.reader, "LHEZChild2id"),
+      LHEZChild1Px(info.reader, "LHEChild1Px"),
+      LHEZChild2Px(info.reader, "LHEChild2Px"),
+      LHEZChild1Py(info.reader, "LHEChild1Py"),
+      LHEZChild2Py(info.reader, "LHEChild2Py")
+
+
 {
     configure(opt);
 
@@ -35,11 +44,17 @@ void genleps::configure(const util::options &opt)
 
 std::vector<lepton> genleps::get()
 {
-
+//    std::cout<<"________"<<std::endl;
     std::vector<lepton> genleps;
     for (unsigned i = 0; i < GenLepPt.GetSize(); ++i) {
         lepton l;
-        if (std::abs(GenLepEta[i]) > _eta_cut || !GenLepPrompt->at(i) || GenLepTauProd->at(i)) {
+//if( std::abs(GenLepEta[i]- 1.74) < 0.1 && std::abs(GenLepPt[i]-61.388) <0.1&& std::abs(GenLepPhi[i]-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<std::endl;
+//if( std::abs(GenLepEta[i]- 1.8009) < 0.1 && std::abs(GenLepPt[i]-37.348) <0.1&& std::abs(GenLepPhi[i]+0.37286)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<std::endl;
+
+//std::cout<<"EBENINAMIAQ"<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<" "<<std::endl;
+//if(LHEZChild1Id.GetSize()>0 &&LHEZChild2Id.GetSize()>0)std::cout<<LHEZChild1Id[0]<<" "<<LHEZChild2Id[0]<<" "<<   LHEZChild1Px[0]<<" "<<LHEZChild1Py[0]<<" "<<   LHEZChild2Px[0]<<" "<<LHEZChild2Py[0]<< std::endl;
+
+        if (std::abs(GenLepEta[i]) > _eta_cut || !GenLepPrompt->at(i)||GenLepSt[i]!=1 /*|| GenLepTauProd->at(i)*/) {
             continue;
         }
         l.v.SetPtEtaPhiE(GenLepPt[i], GenLepEta[i], GenLepPhi[i], GenLepE[i]);
@@ -47,9 +62,9 @@ std::vector<lepton> genleps::get()
         l.charge = GenLepId[i]/std::abs(GenLepId[i]);
         l.pdgid = GenLepId[i];
 
-        //if (l.v.Pt() < _pt_cut) {
-         //   continue;
-        //}
+        if (l.v.Pt() < _pt_cut) {
+           continue;
+        }
         genleps.push_back(l);
     }
     std::sort(genleps.begin(), genleps.end(), [](const lepton &lhs, const lepton &rhs)

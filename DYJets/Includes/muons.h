@@ -67,7 +67,7 @@ class muons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl);
+    std::vector<lepton> get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl,int &nVetoMuons);
 
     /**
      * \brief Reweighs an event to take scale factors into account.

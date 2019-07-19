@@ -52,10 +52,12 @@ void electrons::configure(const util::options &opt)
     }
 }
 
-std::vector<lepton> electrons::get()
+std::vector<lepton> electrons::get(int & nVetoElecs)
 {
+    nVetoElecs=0;
     std::vector<lepton> electrons;
     for (unsigned i = 0; i < ElPt.GetSize(); ++i) {
+        if(ElPt[i] >= 10&&(ElId[i] & (1 << 4))&&ElPfIsoRho[i] < 0.25)nVetoElecs++;
         lepton l;
         if (std::abs(ElEtaSc[i]) > _eta_cut || ElPfIsoRho[i] > _iso_cut) {
             continue;

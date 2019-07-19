@@ -53,19 +53,23 @@ void compare_builder_base::parse_options(int argc, char **argv)
 
 void compare_builder_base::build()
 {
+    std::cout<<"1"<<std::endl;
     load();
     create_output_dir();
     filter_histogram_names();
 
     bool log = (_opt.map.count("lin") == 0);
+    std::cout<<"2"<<std::endl;
 
     for (const std::string &name : _histogram_names) {
         util::logging::debug << "Producing histogram: " << name << std::endl;
+    std::cout<<"2--1"<<std::endl;
 
         // Apply style
         _logx = _style.get<bool>("log x", name, false);
 
         TCanvas canvas(name.c_str(), "", 700, 900);
+    std::cout<<"2--2"<<std::endl;
 
         // Upper panel
         TPad upper("upper", "upper", 0, 0.3, 1, 1);
@@ -77,6 +81,7 @@ void compare_builder_base::build()
         }
         upper.Draw();
         upper.cd();
+    std::cout<<"2--3"<<std::endl;
 
         fill_upper_panel(name);
 
@@ -90,6 +95,7 @@ void compare_builder_base::build()
                     0.9,
                     _preliminary ? "#bf{CMS} #it{Preliminary}" : "#bf{CMS}");
         cms.Draw();
+    std::cout<<"2--4"<<std::endl;
 
         // Lumi label
         double lumi = get_lumi();
@@ -106,6 +112,7 @@ void compare_builder_base::build()
             label.SetText(0.97, 0.9, ss.str().c_str());
             label.Draw();
         }
+    std::cout<<"2--5"<<std::endl;
 
         // Legend
         TLegend legend(0.63, 0.60, 0.81, 0.87);
@@ -119,6 +126,7 @@ void compare_builder_base::build()
 
         // Get back to the canvas
         canvas.cd();
+    std::cout<<"2--6"<<std::endl;
 
         // Lower panel
         TPad lower("lower", "lower", 0, 0.05, 1, 0.3);
@@ -135,20 +143,26 @@ void compare_builder_base::build()
         if (fill_lower_panel(name)) {
             upper.SetBottomMargin(0.);
         }
+    std::cout<<"2--7"<<std::endl;
 
         // Apply style
         if (_logx) {
             upper.SetLogx();
             lower.SetLogx();
         }
-
+    std::cout<<"2--71 "<<(_output_dir_name + "/" + name + "." + _output_format).c_str()<<std::endl;
         // Write file
-        canvas.Print(
+        /*if(! (name.find("decay_costheta_inc0jet") != std::string::npos ||name.find("gen") != std::string::npos))*/canvas.Print(
             (_output_dir_name + "/" + name + "." + _output_format).c_str());
+    std::cout<<"2--72"<<std::endl;
 
         // Cleanup
         reset_drawing_state();
+    std::cout<<"2--8"<<std::endl;
+
     }
+    std::cout<<"3"<<std::endl;
+
 }
 
 std::unique_ptr<data::data_comparison_entry> compare_builder_base::load_data(

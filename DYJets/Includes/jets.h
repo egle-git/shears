@@ -46,6 +46,7 @@ class jets
     TTreeReaderArray<float> GJetAk04Eta;
     TTreeReaderArray<float> GJetAk04Phi;
     TTreeReaderArray<float> GJetAk04E;
+
     JME::JetResolution *m_JetResolution;
     JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;
     JME::JetParameters *m_JetParameters;
@@ -71,9 +72,10 @@ class jets
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<jet> get(bool isdata);
+    std::vector<jet> get(bool isdata,const std::vector<lepton> &leptons);
 
     std::vector<jet> getGen();
+    std::vector<jet> getGen(double ptmin, double rapmax);
 
     /// \brief Vetoes \c jets too close to one of the given \c leptons.
     void veto(std::vector<jet> &jets, const std::vector<lepton> &leptons) const;

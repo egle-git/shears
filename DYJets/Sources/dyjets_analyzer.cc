@@ -15,7 +15,7 @@
 #include "lepton.h"
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), EvtNum(info.reader, "EvtNum")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), EvtNum(info.reader, "EvtNum"),EvtRunNum(info.reader, "EvtRunNum")
 {
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
@@ -86,8 +86,22 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
 
 #ifdef DEBUG_PRINTOUT
+ if(*EvtNum==16121885) std::cout << "EvtNum "
+                  << *EvtNum
+                  <<std::endl;
+
+ if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
+        std::cout << "EvtNum "
+                  << *EvtNum
+		  <<std::endl;
+    //if(true){
+//Gen mu eta, pt, phi 1.74, 61.388, 2.907                                                             |  ---------------------------------------------------------------------------------------------------
+
+//if(evt.gen &&std::abs(evt.gen->leptons[1].v.Eta()- 1.74) < 0.1
+//                     && std::abs(evt.gen->leptons[1].v.Pt()-61.388) <0.1&& std::abs(evt.gen->leptons[1].v.Phi()-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE"<<std::endl;
+
     if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
-        std::cout << "----\n";
+        //std::cout << "----\n";
         for (const auto &mu : (*evt.rec).leptons) {
             double musf = tables().at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta());
             double elsf = tables().at("electron reco").getEfficiency(mu.v.Pt(), mu.raw_v.Eta());
@@ -97,8 +111,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                       << ", "
                       << mu.v.Pt()
                       << ", "
-                      << (weights().ismc() ?
-                            (std::abs(mu.pdgid) == 11 ? elsf : musf) : 1.0)
+   //                   << (weights().ismc() ?
+   //                         (std::abs(mu.pdgid) == 11 ? elsf : musf) : 1.0)
                       << "\n";
         }
         std::cout << "EvtNum "
@@ -140,14 +154,16 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                 }
             }
         }
-
-        if (mass.gen && tags.gen
-                     && *tags.gen == "inc0jet_mass76_106"
+      }
+       /* if (mass.gen && tags.gen
+                     && *tags.gen == "inc0jet"
                      && evt.gen->leptons.size() >= 2
                      && std::abs(evt.gen->leptons[0].v.Eta()) < 2.4
                      && std::abs(evt.gen->leptons[1].v.Eta()) < 2.4
                      && std::abs(evt.gen->leptons[0].v.Pt()) > 20
                      && std::abs(evt.gen->leptons[1].v.Pt()) > 20) {
+        std::cout << "----\n";
+
             for (const auto &l : (*evt.gen).leptons) {
                 std::cout << "Gen mu eta, pt, phi "
                           << setprecision(5)
@@ -158,13 +174,14 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                           << l.v.Phi()
                           << "\n";
             }
+            std::cout<< "Mll "<<(evt.gen->leptons[0].v +evt.gen->leptons[1].v).M()<<std::endl;
             std::cout << "EvtNum " << *EvtNum << "\n";
-        }
+        }*/
         auto jets = evt.apply(&event_contents::get_jets);
         if (jets.rec) {
             std::cout << jets.rec->size() << std::endl;
             for (const auto &j : *jets.rec) {
-                std::cout << "Jet " << j.v.Eta() << ", " << j.v.Pt() << std::endl;
+                std::cout <<setprecision(5)<< "Jet " << j.v.Eta() << ", " << j.v.Pt() << std::endl;
             }
         }
     }
@@ -233,15 +250,15 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
             return {};
         }
     }
-
+//if (*EvtNum==16121885)std::cout<<"Size of muons for this event "<<muons.size() <<std::endl;
     if (muons.size() >= 2) {
         counter.count("With two good muons", weights().global_weight());
     }
     if (electrons.size() >= 2) {
         counter.count("With two good electrons", weights().global_weight());
     }
-
     std::vector<lepton> leptons;
+  // for (const auto &lep: muons )std::cout<<lep.v.Pt()<<std::endl;
     switch (_zfinder.get_flavor_mode()) {
     case zfinder::flavor_mode::mumu:
         leptons = muons;
@@ -283,6 +300,15 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
 std::vector<physics::lepton>
 dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
 {
+
+//if( genleps.size()>0 &&std::abs(genleps[0].v.Eta()- 1.74) < 0.1
+//                     && std::abs(genleps[0].v.Pt()-61.388) <0.1&& std::abs(genleps[0].v.Phi()-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<genleps[0].v.Eta()<< " "<<genleps[0].v.Pt()<<" "<<genleps[0].v.Phi()<<" "<<genleps.size()<<std::endl;
+/*if( genleps.size()>0 &&std::abs(genleps[0].v.Eta()-
+1.1129) < 0.1
+                     &&std::abs(genleps[0].v.Pt()-
+53.029) <0.1&&
+std::abs(genleps[0].v.Phi()+0.96477)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<genleps[0].v.Eta()<< " "<<genleps[0].v.Pt()<<" "<<genleps[0].v.Phi()<<" "<<genleps.size()<<" "<<*EvtRunNum<<":"<<* EvtNum<<std::endl;
+*/
     if (genleps.size() < 2) {
         return {};
     }
@@ -300,6 +326,7 @@ dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
 
     std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});
     if (candidates.size() == 0) {
+        //std::cout<<"ULANNIYEBURDASINAQ"<<std::endl;
         return {};
     }
     counter.count("With a good gen Z boson", weights().global_weight());

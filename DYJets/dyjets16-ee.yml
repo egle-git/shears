@@ -187,9 +187,8 @@ samples:
       catalog: Bonzais-DoubleEG-all-VJetPruner-DE.txt
     - name: DYJets
       type: MC
-      jobs: 32
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
+      bonzai dir: /user/bbilin/public/
+      catalog: fakecatalog_ee_all.txt
       #xsec: 6225.42 #5765.4
     - name: DYJets-0J
       type: MC

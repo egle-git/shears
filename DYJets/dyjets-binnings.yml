@@ -29,8 +29,8 @@
   binning: uniform
   binning min: 71
   binning max: 111
-  bin count: 40
-
+#  bin count: 40
+  bin count: 120
 # Wide range
 - selector: 'mass_wide_range.*'
   binning: custom

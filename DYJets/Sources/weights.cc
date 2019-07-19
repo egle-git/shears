@@ -35,7 +35,7 @@ weights::weights(util::job::info &info)
 void weights::process_event()
 {
     if (weights_count() > 0) {
-        if (!_is_weights_sum_divided) {
+        /*if (!_is_weights_sum_divided) {
             // This needs to be done in case several samples are merged (think
             // exclusive 0, 1, 2 jets). Their weights will in general not be on
             // the same scale.
@@ -45,7 +45,7 @@ void weights::process_event()
 
             _weights_sum /= std::abs(weight_at(0));
             _is_weights_sum_divided = true;
-        }
+        }*/
 
         _gen_weight = weight_at(0) / std::abs(weight_at(0));
         _global_weight = weight_at(0) / std::abs(weight_at(0));
@@ -54,7 +54,6 @@ void weights::process_event()
         _gen_weight = 1;
         _global_weight = 1;
     }
-
     _processed_events++;
 }
 

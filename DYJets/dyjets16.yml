@@ -53,13 +53,15 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
-
+    #JER smearing: no
 # Options of the b jet veto
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
-
+    use: yes
+prefiring weights:
+    #apply prefiring weights to MC, default false
+    use: yes
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
     # Default value: loose
@@ -217,24 +219,54 @@ samples:
           HLT_IsoTkMu24
     - name: DYJets
       type: MC
-      jobs: 32
+      jobs: 40
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    - name: DYJets-0J
+
+      #bonzai dir: /user/bbilin/public/ 
+      #catalog: fakecatalog_mm_all.txt 
+ #   - name: DYJets-0J
+ #     type: MC
+ #     jobs: 24
+ #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+ #     catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+ #   - name: DYJets-1J
+ #     type: MC
+ #     jobs: 24
+ #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+ #     catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+ #   - name: DYJets-2J
+ #     type: MC
+ #     jobs: 24
+ #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+ #     catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-pt0-50
       type: MC
-      jobs: 24
+      jobs: 27
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    - name: DYJets-1J
+      catalog: Bonzais-DYJetsToLL_Zpt-0To50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt 
+    - name: DYJets-pt50-100
       type: MC
-      jobs: 24
+      jobs: 18
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    - name: DYJets-2J
+      catalog: Bonzais-DYJetsToLL_Pt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-pt100-250
       type: MC
-      jobs: 24
+      jobs: 2
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+      catalog: Bonzais-DYJetsToLL_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-pt250-400
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+      catalog: Bonzais-DYJetsToLL_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-pt400-650
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+      catalog: Bonzais-DYJetsToLL_Pt-400To650_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-pt650-inf
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+      catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST-s-channel
       type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
@@ -278,7 +310,8 @@ samples:
 tables B-F:
     electron id:    Electron_Id_Loose_SF_2016.txt
     electron reco:  Electron_Reco_2016_SF_converted_new.txt
-    muon id:        SMP_17_010_BCDEF_MediumID.txt
+    #muon id:        SMP_17_010_BCDEF_MediumID.txt
+    muon id:        SMP_17_010_BCDEF_MediumID_fromDylanGit.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
     #muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
     smu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
@@ -297,7 +330,8 @@ tables B-F:
 tables G-H:
     electron id:    Electron_Id_Loose_SF_2016.txt
     electron reco:  Electron_Reco_2016_SF_converted_new.txt
-    muon id:        SMP_17_010_GH_MediumID.txt
+#    muon id:        SMP_17_010_GH_MediumID.txt
+    muon id:        SMP_17_010_GH_MediumID_fromDylanGit.txt
     #muon isolation: Eff_SF_ISO_GH_6_16_2017.txt
     #muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
     smu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
@@ -323,21 +357,22 @@ tables G-H:
 # useful, several samples will often share the same table.
 #
 # The tables can be derived by tweaking Main/dyjets-sample-weights.cc.
-reweighing:
-    # Based on the number of partons npNLO
-    npNLO:
-        DYJets:     merging-DYJets-npNLO.txt
-        DYJets-0J:  merging-DYJets-npNLO.txt
-        DYJets-1J:  merging-DYJets-npNLO.txt
-        DYJets-2J:  merging-DYJets-npNLO.txt
+#reweighing:
+#    # Based on the number of partons npNLO
+#    npNLO:
+#        DYJets:     merging-DYJets-npNLO.txt
+#        DYJets-0J:  merging-DYJets-npNLO.txt
+#        DYJets-1J:  merging-DYJets-npNLO.txt
+#        DYJets-2J:  merging-DYJets-npNLO.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
     - legend: "Z/#gamma* #rightarrow ll"
       required: yes
-      samples: [ DYJets ]
+      #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
+      samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
       color: 408 # kGreen - 8
-      scale factor: 1.0287
+      scale factor: 1.0
       is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]
@@ -396,8 +431,8 @@ plots:
       produce: yes
     # Style changes
     - selector: '.*'
-      ratio min: 0.901
-      ratio max: 1.099
+      ratio min: 0.601
+      ratio max: 1.399
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
@@ -405,5 +440,5 @@ plots:
     - selector: '^mass_wide.*'
       log x: yes
     - selector: 'mass_inc0jet'
-      ratio min: 0.941
-      ratio max: 1.019
+      ratio min: 0.601
+      ratio max: 1.399

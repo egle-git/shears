@@ -58,7 +58,7 @@ class electrons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get();
+    std::vector<lepton> get( int & nVetoElecs);
 
     /**
      * \brief Reweighs an event to take scale factors into account.

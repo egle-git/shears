@@ -20,6 +20,7 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
 {
     physics::zfinder _zfinder;
     TTreeReaderValue<unsigned> EvtNum;
+    TTreeReaderValue<unsigned> EvtRunNum;
 
   public:
     /// \brief Constructor.

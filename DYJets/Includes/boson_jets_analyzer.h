@@ -30,7 +30,8 @@ namespace physics
 class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
-
+    TTreeReaderValue<unsigned> EvtNum;
+    TTreeReaderArray<float> EvtPrefiringweight;
 protected:
     util::event_counter counter;
     util::histo_set histo_set;
@@ -57,6 +58,7 @@ private:
     btagger _btagger;
 
     bool _bjet_veto = true;
+    bool _pref =false;
     std::vector<double> _mass_bins;
 
     physics::reweighing _reweighing;

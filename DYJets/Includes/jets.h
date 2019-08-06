@@ -72,7 +72,7 @@ class jets
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<jet> get(bool isdata,const std::vector<lepton> &leptons);
+    std::vector<jet> get(bool isdata, const std::vector<lepton> &leptons, double ptcut = -1);
 
     std::vector<jet> getGen();
     std::vector<jet> getGen(double ptmin, double rapmax);

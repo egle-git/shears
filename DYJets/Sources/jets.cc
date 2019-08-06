@@ -84,8 +84,12 @@ std::vector<jet> jets::getGen(double ptmin, double rapmax)
     return Gjets;
 }
 
-std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons )
+std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, double ptcut)
 {
+    if (ptcut < 0) {
+        ptcut = _pt_cut;
+    }
+
     std::vector<jet> jets;
     for (unsigned i = 0; i < JetAk04Pt.GetSize(); ++i) {
         jet j;
@@ -172,7 +176,7 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons )
             float newJetPt = oldJetPt * smearFactor;
             j.v.SetPtEtaPhiE(newJetPt, j.v.Eta(), j.v.Phi(), j.v.E() * newJetPt / oldJetPt);
         }*/
-        if (j.v.Pt() < _pt_cut) continue;
+        if (j.v.Pt() < ptcut) continue;
         jets.push_back(j);
     }
         std::sort(jets.begin(), jets.end(), [](const jet &lhs, const jet &rhs)

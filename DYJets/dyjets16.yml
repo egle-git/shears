@@ -54,14 +54,17 @@ jets:
     # Default value: yes
     JER smearing: yes
     #JER smearing: no
+
+prefiring weights:
+    #apply prefiring weights to MC, default false
+    use: yes
+
 # Options of the b jet veto
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
     use: yes
-prefiring weights:
-    #apply prefiring weights to MC, default false
-    use: yes
+
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
     # Default value: loose

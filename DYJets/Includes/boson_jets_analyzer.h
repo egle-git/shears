@@ -31,7 +31,7 @@ class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> EvtRunNum;
     TTreeReaderValue<unsigned> EvtNum;
-    TTreeReaderArray<float> EvtPrefiringweight;
+    TTreeReaderArray<double> EvtPrefiringweight;
 protected:
     util::event_counter counter;
     util::histo_set histo_set;

@@ -186,7 +186,7 @@ void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::t
             }
             if (_trk_sf_enabled) {
                 w.use_weight(
-                    tab.at("muon tracking").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                    tab.at("muon tracking").getEfficiency(mu.raw_v.Pt(), mu.raw_v.Eta()));
             }
         }
     }

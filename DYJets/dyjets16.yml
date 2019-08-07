@@ -416,6 +416,8 @@ plots:
       produce: no
     - selector: 'mu.*'
       produce: no
+    - selector: 'genLep.*'
+      produce: no
     - selector: 'jet.*leading.*'
       produce: no
     - selector: 'jet.*subleading.*'

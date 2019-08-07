@@ -109,23 +109,21 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
             float smearFactor = 1.0;
             std::vector<jet> gjet = getGen(10 , 5);
             veto(gjet, leptons);
-	    for (const auto &gj: gjet) {
-              float deltarjj = gj.v.DeltaR(j.v);
-              float dPt = abs(j.v.Pt() - gj.v.Pt());
-              if(deltarjj<deltarjjmin &&dPt<(3 *j.v.Pt()*jetResolution)){
-		deltarjjmin=deltarjj;
-                smearFactor = 1.0 + (jetSF - 1.0) * (j.v.Pt() - gj.v.Pt()) / j.v.Pt();
-		matched=true;
-
-	      }
-            }
-	    if(!matched){
+            for (const auto &gj: gjet) {
+                float deltarjj = gj.v.DeltaR(j.v);
+                float dPt = abs(j.v.Pt() - gj.v.Pt());
+                if (deltarjj < deltarjjmin && dPt < (3 * j.v.Pt() * jetResolution)) {
+                    deltarjjmin = deltarjj;
+                    smearFactor = 1.0 + (jetSF - 1.0) * (j.v.Pt() - gj.v.Pt()) / j.v.Pt();
+                    matched = true;
+                }
+           }
+           if (!matched) {
                 TRandom3 *random = new TRandom3(0);
                 smearFactor =
                     1.0 +
                     /*random->Gaus(0.0,*/ jetResolution * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
                 delete random;
-
             }
             float oldJetPt = j.v.Pt();
             float newJetPt = oldJetPt * smearFactor;

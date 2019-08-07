@@ -216,10 +216,12 @@ if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_
        std:vector<lepton> l ;
 if (evt.gen)l =evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
+        evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto
         _jets.veto(evt.rec->jets, evt.rec->leptons);
+        _jets.veto(evt.rec->jets20, evt.rec->leptons);
 
         // Calculate b efficiencies and apply scale factors
-        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
+        if (_bjet_veto && _btagger.any(evt.rec->jets20, _weights, histo_set2D, tables())) {
             evt.rec = boost::none;
             if (!evt.gen && !evt.rec) {
                 // End early if vetoed and no gen boson

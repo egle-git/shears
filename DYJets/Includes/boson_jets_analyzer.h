@@ -72,6 +72,7 @@ public:
         std::vector<lepton> leptons; ///< \brief Leptons making up the boson
         TLorentzVector boson_p;      ///< \brief Reconstructed boson 4-momentum
         std::vector<jet> jets;       ///< \brief Jets in the event
+        std::vector<jet> jets20;     ///< \brief Jets with 20 GeV cut
 
         /// \brief Returns the list of leptons making up the boson
         const std::vector<lepton> &get_leptons() const { return leptons; }

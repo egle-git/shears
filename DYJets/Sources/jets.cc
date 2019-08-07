@@ -104,10 +104,10 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
         jetSF = m_JetResolutionScaleFactor->getScaleFactor(*m_JetParameters, m_Variation);
 
         double deltarjjmin =0.2;
-	bool matched =false;
+        bool matched =false;
         if (!isdata && _jer_smearing) {
             float smearFactor = 1.0;
-            std::vector<jet> gjet = getGen(10 , 5); 
+            std::vector<jet> gjet = getGen(10 , 5);
             veto(gjet, leptons);
 	    for (const auto &gj: gjet) {
               float deltarjj = gj.v.DeltaR(j.v);
@@ -140,43 +140,9 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
         j.puMva = JetAk04PuMva[i];
         j.bdisc = JetAk04BDiscCisvV2[i];
         j.hadflav = JetAk04HadFlav[i];
-/*
-        m_JetParameters->setJetPt(j.v.Pt());
-        m_JetParameters->setJetEta(j.v.Eta());
-        m_JetParameters->setRho(*EvtFastJetRho);
-        jetResolution = m_JetResolution->getResolution(*m_JetParameters);
-        jetSF = m_JetResolutionScaleFactor->getScaleFactor(*m_JetParameters, m_Variation);
 
-        // Jet energy resolution (JER) smearing
-        if (!isdata && _jer_smearing) {
-            float smearFactor = 1.0;
-            if (GJetAk04Pt.GetSize() != 0) {
-                for (unsigned i = 0; i < GJetAk04Pt.GetSize(); ++i) {
-                    TLorentzVector jg;
-                    jg.SetPtEtaPhiE(GJetAk04Pt[i], GJetAk04Eta[i], GJetAk04Phi[i], GJetAk04E[i]);
-
-                    if (GJetAk04Pt[i] > 15. || std::abs(GJetAk04Eta[i]) < _y_cut) {
-                        float deltarjj = jg.DeltaR(j.v);
-                        float dPt = abs(j.v.Pt() - jg.Pt());
-
-                        if (deltarjj < 0.2 && dPt < (3 * j.v.Pt() * jetResolution)) {
-                            smearFactor = 1.0 + (jetSF - 1.0) * (j.v.Pt() - jg.Pt()) / j.v.Pt();
-                        }
-                    }
-                }
-            }
-            if (smearFactor == 1) {
-                TRandom3 *random = new TRandom3(0);
-                smearFactor =
-                    1.0 +
-                    random->Gaus(0.0, jetResolution) * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
-                delete random;
-            }
-            float oldJetPt = j.v.Pt();
-            float newJetPt = oldJetPt * smearFactor;
-            j.v.SetPtEtaPhiE(newJetPt, j.v.Eta(), j.v.Phi(), j.v.E() * newJetPt / oldJetPt);
-        }*/
         if (j.v.Pt() < ptcut) continue;
+
         jets.push_back(j);
     }
         std::sort(jets.begin(), jets.end(), [](const jet &lhs, const jet &rhs)

@@ -96,10 +96,9 @@ boson_jets_analyzer::~boson_jets_analyzer()
 
 void boson_jets_analyzer::operator()()
 {
-    //if(*EvtNum!=16121885)return;
     _weights.process_event();
     _reweighing.reweigh(_weights);
-   counter.count("Total", weights().global_weight());
+    counter.count("Total", weights().global_weight());
 
     /*
      * Choose the right era for this event
@@ -130,7 +129,7 @@ void boson_jets_analyzer::operator()()
 
     std::vector<lepton> genleps = _genleps.get();
     std::vector<lepton> genleptons = find_gen_boson(genleps);
-    
+
     if (!genleptons.empty()) {
         // Gen boson found
         evt.gen = event_contents();
@@ -154,7 +153,14 @@ void boson_jets_analyzer::operator()()
     } else if (triggered) {
         counter.count("Passing the trigger", weights().global_weight());
     }
-if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_weights.use_weight(EvtPrefiringweight[0]);
+
+    /*
+     * Pre-firing weight
+     */
+    if (EvtPrefiringweight.GetSize() > 0 && _pref) {
+        _weights.use_weight(EvtPrefiringweight[0]);
+    }
+
     /*
      * Read leptons and find the boson
      */
@@ -164,7 +170,6 @@ if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_
 
         std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps,nVetoMuons);
         std::vector<lepton> electrons = _electrons.get(nVetoElecs);
-        //nVetoMuons=0;nVetoElecs=0;
         std::vector<lepton> leptons = find_boson(muons, electrons);
         if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
             // Rec boson found
@@ -177,7 +182,7 @@ if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_
                 [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
         }
     }
-    
+
     if (!evt.gen && !evt.rec) {
         // End early if nothing to do
         return;
@@ -214,7 +219,7 @@ if(/*EvtPrefiringweight != nullptr &&*/ EvtPrefiringweight.GetSize()>0 &&_pref)_
      */
     if (evt.rec) {
        std:vector<lepton> l ;
-if (evt.gen)l =evt.gen->leptons;
+        if (evt.gen) l = evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
         evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto
         _jets.veto(evt.rec->jets, evt.rec->leptons);

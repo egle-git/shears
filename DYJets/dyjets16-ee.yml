@@ -54,6 +54,10 @@ jets:
     # Default value: yes
     JER smearing: yes
 
+prefiring weights:
+    # Whether to apply prefiring weights
+    use: yes
+
 # Options of the b jet veto
 b jet veto:
     # Whether to cut events with b jets
@@ -187,24 +191,25 @@ samples:
       catalog: Bonzais-DoubleEG-all-VJetPruner-DE.txt
     - name: DYJets
       type: MC
-      bonzai dir: /user/bbilin/public/
-      catalog: fakecatalog_ee_all.txt
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs
+      catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
+      jobs: 32
       #xsec: 6225.42 #5765.4
-    - name: DYJets-0J
-      type: MC
-      jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
-    - name: DYJets-1J
-      type: MC
-      jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
-    - name: DYJets-2J
-      type: MC
-      jobs: 24
-      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
+#    - name: DYJets-0J
+#      type: MC
+#      jobs: 24
+#      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+#      catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
+#    - name: DYJets-1J
+#      type: MC
+#      jobs: 24
+#      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+#      catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
+#    - name: DYJets-2J
+#      type: MC
+#      jobs: 24
+#      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
+#      catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DEUnf.txt
     - name: ST-s-channel
       type: background
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs

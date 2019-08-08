@@ -91,11 +91,11 @@ electrons:
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: no
+    use id scale factors: yes
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
-    use reconstruction scale factors: yes
+    use reconstruction scale factors: no
     #use reconstruction scale factors: no
 
 # Options related to the selection of muons
@@ -255,7 +255,7 @@ samples:
 
 # Scale factors
 tables B-F:
-    electron id:    Electron_Id_Loose_SF_2016.txt
+    electron id:    scalefactors_Medium_Electron_period1.txt
     electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
     muon id:        SMP_17_010_BCDEF_MediumID.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
@@ -275,7 +275,7 @@ tables B-F:
     udsgjet tight eff:    btag-tight-udsg.txt
 
 tables G-H:
-    electron id:    Electron_Id_Loose_SF_2016.txt
+    electron id:    scalefactors_Medium_Electron_period2.txt
     electron reco:  SMP_17_010_GH_MediumID_electrons.txt
     muon id:        SMP_17_010_GH_MediumID.txt
     #muon isolation: Eff_SF_ISO_GH_6_16_2017.txt
@@ -304,13 +304,13 @@ tables G-H:
 # useful, several samples will often share the same table.
 #
 # The tables can be derived by tweaking Main/dyjets-sample-weights.cc.
-reweighing:
-    # Based on the number of partons npNLO
-    npNLO:
-        DYJets:     merging-DYJets-npNLO.txt
-        DYJets-0J:  merging-DYJets-npNLO.txt
-        DYJets-1J:  merging-DYJets-npNLO.txt
-        DYJets-2J:  merging-DYJets-npNLO.txt
+#reweighing:
+#    # Based on the number of partons npNLO
+#    npNLO:
+#        DYJets:     merging-DYJets-npNLO.txt
+#        DYJets-0J:  merging-DYJets-npNLO.txt
+#        DYJets-1J:  merging-DYJets-npNLO.txt
+#        DYJets-2J:  merging-DYJets-npNLO.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
@@ -318,7 +318,6 @@ MC grouping:
       required: yes
       samples: [ DYJets ]
       color: 408 # kGreen - 8
-      scale factor: 1.0287
       is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]

@@ -86,16 +86,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
 
 #ifdef DEBUG_PRINTOUT
- if(*EvtNum==16121885) std::cout << "EvtNum "
-                  << *EvtNum
-                  <<std::endl;
-
- if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
-        std::cout << "EvtNum "
-                  << *EvtNum
-                  << std::endl;
-
     if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
+        std::cout << "----\n";
         for (const auto &mu : (*evt.rec).leptons) {
             double musf = tables().at("muon id").getEfficiency(mu.v.Pt(), mu.v.Eta());
             double elsf = tables().at("electron reco").getEfficiency(mu.v.Pt(), mu.raw_v.Eta());
@@ -147,16 +139,20 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                 }
             }
         }
-      }
-       /* if (mass.gen && tags.gen
-                     && *tags.gen == "inc0jet"
+        auto jets = evt.apply(&event_contents::get_jets);
+        if (jets.rec) {
+            std::cout << jets.rec->size() << std::endl;
+            for (const auto &j : *jets.rec) {
+                std::cout <<setprecision(5)<< "Jet " << j.v.Eta() << ", " << j.v.Pt() << std::endl;
+            }
+        }
+        if (mass.gen && tags.gen
+                     && *tags.gen == "inc0jet_mass76_106"
                      && evt.gen->leptons.size() >= 2
                      && std::abs(evt.gen->leptons[0].v.Eta()) < 2.4
                      && std::abs(evt.gen->leptons[1].v.Eta()) < 2.4
-                     && std::abs(evt.gen->leptons[0].v.Pt()) > 20
+                     && std::abs(evt.gen->leptons[0].v.Pt()) > 25
                      && std::abs(evt.gen->leptons[1].v.Pt()) > 20) {
-        std::cout << "----\n";
-
             for (const auto &l : (*evt.gen).leptons) {
                 std::cout << "Gen mu eta, pt, phi "
                           << setprecision(5)
@@ -167,15 +163,7 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                           << l.v.Phi()
                           << "\n";
             }
-            std::cout<< "Mll "<<(evt.gen->leptons[0].v +evt.gen->leptons[1].v).M()<<std::endl;
             std::cout << "EvtNum " << *EvtNum << "\n";
-        }*/
-        auto jets = evt.apply(&event_contents::get_jets);
-        if (jets.rec) {
-            std::cout << jets.rec->size() << std::endl;
-            for (const auto &j : *jets.rec) {
-                std::cout <<setprecision(5)<< "Jet " << j.v.Eta() << ", " << j.v.Pt() << std::endl;
-            }
         }
     }
 #endif // DEBUG_PRINTOUT

@@ -49,7 +49,7 @@ class job(object):
         self.status = status.unknown()
 
     @staticmethod
-    def load(directory, index):
+    def load_fast(directory, index):
         job_file_path = '%s/jobs/job-%03d' % (directory, index)
         if not os.path.isfile(job_file_path):
             return None
@@ -66,6 +66,12 @@ class job(object):
                 j.command = job_command_file.read().strip()
         else:
             j.command = '<unknown>'
+
+        return j
+
+    @staticmethod
+    def load(directory, index):
+        j = job.load_fast(directory, index)
 
         job_exit_code_file_path = '%s/jobs/job-%03d-exit-code' % (directory, index)
         if os.path.isfile(job_exit_code_file_path):
@@ -154,12 +160,18 @@ def load_jobs(task):
     jobs = []
     index = 0
     while True:
-        j = job.load(task, index)
+        j = job.load_fast(task, index)
         if j != None:
             jobs.append(j)
             index += 1
         else:
             break
+    return jobs
+
+def update_job(task, jobs, i):
+    j = job.load(task, i)
+    if j != None:
+        jobs[i] = j
     return jobs
 
 def count_jobs_with_status(jobs, status):
@@ -199,17 +211,18 @@ def program(stdscr, task):
 
         x = 0
         y = 0
-        update = True
+        update = -1
         jobs = None
-
 
         while True:
             stdscr.erase()
 
             height, width = stdscr.getmaxyx()
 
-            if update:
+            if update == -1: # Initial
                 jobs = load_jobs(task)
+            elif update >= 0: # Refresh job
+                jobs = update_job(task, jobs, update)
             if len(jobs) == 0:
                 return
 
@@ -303,9 +316,12 @@ def program(stdscr, task):
             except curses.error:
                 continue
 
-            update = False
+            if update >= -1:
+                update = update + 1 # Update next job
+                if update >= len(jobs):
+                    update = -2 # Stop updating
 
-            curses.halfdelay(100)
+            curses.halfdelay(20 if update == -2 else 0)
             c = stdscr.getch()
             if c == ord('q') or c == ord('Q'):
                 break
@@ -366,8 +382,6 @@ def program(stdscr, task):
                 y = 0
             elif c == curses.KEY_END:
                 y = len(jobs) - height + 3
-            else:
-                update = True
 
     except KeyboardInterrupt:
         return

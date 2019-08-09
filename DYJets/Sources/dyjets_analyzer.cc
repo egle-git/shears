@@ -38,10 +38,10 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
 namespace /* anonymous */
 {
 
-void apply_mu_trigger_sf(physics::weights &w,
-                         const physics::lepton &mu1,
-                         const physics::lepton &mu2,
-                         const util::tables &tab)
+void apply_dimu_trigger_sf(physics::weights &w,
+                           const physics::lepton &mu1,
+                           const physics::lepton &mu2,
+                           const util::tables &tab)
 {
     if (w.ismc()) {
         if (mu1.raw_v.Pt() > mu2.raw_v.Pt()) {
@@ -54,10 +54,10 @@ void apply_mu_trigger_sf(physics::weights &w,
     }
 }
 
-void apply_el_trigger_sf(physics::weights &w,
-                         const physics::lepton &e1,
-                         const physics::lepton &e2,
-                         const util::tables &tab)
+void apply_diel_trigger_sf(physics::weights &w,
+                           const physics::lepton &e1,
+                           const physics::lepton &e2,
+                           const util::tables &tab)
 {
     if (w.ismc()) {
         w.use_weight(tab.at("diel trigger leg1")
@@ -66,15 +66,43 @@ void apply_el_trigger_sf(physics::weights &w,
                         .getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
     }
 }
+
+void apply_emu_trigger_sf(physics::weights &w,
+                          const physics::lepton &l1,
+                          const physics::lepton &l2,
+                          const util::tables &tab)
+{
+    if (w.ismc()) {
+        auto mu = l1.pdgid == 13 ? l1 : l2;
+        w.use_weight(tab.at("emu trigger")
+                        .getEfficiency(l1.v.Pt(), l1.raw_v.Eta()));
+    }
+}
 } // namespace anonymous
 
 void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
                                        const std::vector<physics::lepton> &leptons)
 {
-    if (leptons[0].pdgid == 13) {
-        apply_mu_trigger_sf(weights, leptons[0], leptons[1], tables());
-    } else {
-        apply_el_trigger_sf(weights, leptons[0], leptons[1], tables());
+    using physics::zfinder;
+
+    switch (_zfinder.get_flavor_mode()) {
+    case zfinder::flavor_mode::mumu:
+        apply_dimu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        break;
+    case zfinder::flavor_mode::ee:
+        apply_diel_trigger_sf(weights, leptons[0], leptons[1], tables());
+        break;
+    case zfinder::flavor_mode::emu:
+        apply_emu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        break;
+    case zfinder::flavor_mode::same:
+    case zfinder::flavor_mode::none:
+        if (leptons[0].pdgid == 13) {
+            apply_dimu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        } else {
+            apply_diel_trigger_sf(weights, leptons[0], leptons[1], tables());
+        }
+        break;
     }
 }
 
@@ -261,8 +289,18 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
         break;
     }
 
-    if (leptons.size() < 2 || leptons[0].v.Pt() < 25) {
+    if (leptons.size() < 2) {
         return {};
+    }
+
+    if (_zfinder.get_flavor_mode() != zfinder::flavor_mode::emu && leptons[0].v.Pt() < 25) {
+        return {};
+    } else if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::emu) {
+        // Since we use an SMu trigger, always cut on the muon
+        auto mu = leptons[0].pdgid == 13 ? leptons[0] : leptons[1];
+        if (mu.v.Pt() < 25) {
+            return {};
+        }
     }
 
     counter.count("With two good leptons", weights().global_weight());

@@ -213,6 +213,7 @@ def program(stdscr, task):
         y = 0
         update = -1
         jobs = None
+        sleep_start = time.time()
 
         while True:
             stdscr.erase()
@@ -221,6 +222,9 @@ def program(stdscr, task):
 
             if update == -1: # Initial
                 jobs = load_jobs(task)
+            elif update == -2 and time.time() - sleep_start > 5: # Restart updating
+                update = 0
+                jobs = update_job(task, jobs, 0)
             elif update >= 0: # Refresh job
                 jobs = update_job(task, jobs, update)
             if len(jobs) == 0:
@@ -286,6 +290,8 @@ def program(stdscr, task):
                         contents = contents[:columns[c][1]]
                     if fmt:
                         pad.insstr(i, col_pos[c], contents, fmt)
+                    elif c != 3 and i == update:
+                        pad.insstr(i, col_pos[c], contents, curses.A_BOLD)
                     else:
                         pad.insstr(i, col_pos[c], contents)
 
@@ -317,11 +323,16 @@ def program(stdscr, task):
                 continue
 
             if update >= -1:
-                update = update + 1 # Update next job
+                update = update + 1 # Update next job...
+                while (update < len(jobs) and
+                        (jobs[update].status == status.finished() or
+                         jobs[update].status == status.error())):
+                    update = update + 1 # ...but don't update jobs whose status won't change
                 if update >= len(jobs):
                     update = -2 # Stop updating
+                    sleep_start = time.time()
 
-            curses.halfdelay(20 if update == -2 else 1)
+            curses.halfdelay(1)
             c = stdscr.getch()
             if c == ord('q') or c == ord('Q'):
                 break

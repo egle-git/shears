@@ -410,6 +410,10 @@ plots:
     # Excluded plots
     - selector: '^_.*'
       produce: no
+    - selector: '.*-gen$'
+      produce: no
+    - selector: '.*-matrix$'
+      produce: no
     - selector: '.*[12]jet.*'
       produce: no
     - selector: 'el.*'
@@ -417,6 +421,8 @@ plots:
     - selector: 'mu.*'
       produce: no
     - selector: 'genLep.*'
+      produce: no
+    - selector: 'bjet.*'
       produce: no
     - selector: 'jet.*leading.*'
       produce: no

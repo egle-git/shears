@@ -321,7 +321,7 @@ def program(stdscr, task):
                 if update >= len(jobs):
                     update = -2 # Stop updating
 
-            curses.halfdelay(20 if update == -2 else 0)
+            curses.halfdelay(20 if update == -2 else 1)
             c = stdscr.getch()
             if c == ord('q') or c == ord('Q'):
                 break

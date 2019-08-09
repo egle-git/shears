@@ -242,6 +242,7 @@ void data_comparison_entry::reset_drawing_state()
 void data_comparison_entry::create_histo(const std::string &name, double lumi)
 {
     TH1 *histo = nullptr;
+    _file->cd();
     _file->GetObject(name.c_str(), histo);
     if (histo != nullptr) {
         _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
@@ -250,6 +251,8 @@ void data_comparison_entry::create_histo(const std::string &name, double lumi)
         } else { // MC
             _histo->Scale(lumi * _xsec / _wsum);
         }
+    } else {
+        _histo.reset();
     }
 }
 } // namespace data

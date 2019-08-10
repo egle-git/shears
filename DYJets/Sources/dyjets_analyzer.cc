@@ -75,7 +75,7 @@ void apply_emu_trigger_sf(physics::weights &w,
     if (w.ismc()) {
         auto mu = l1.pdgid == 13 ? l1 : l2;
         w.use_weight(tab.at("emu trigger")
-                        .getEfficiency(l1.v.Pt(), l1.raw_v.Eta()));
+                        .getEfficiency(l1.v.Pt(), std::abs(l1.raw_v.Eta())));
     }
 }
 } // namespace anonymous

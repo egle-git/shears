@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "catalog.h"
 #include "options.h"
@@ -40,6 +41,8 @@ class sample
 
     std::pair<bool, bool> _has_triggers;
     std::pair<std::string, std::string> _triggers;
+
+    std::vector<std::string> _flags;
 
   public:
     /// \brief Retrives the catalog for this sample.
@@ -79,6 +82,8 @@ class sample
 
     /// \brief Retrieves the \ref type of the sample.
     enum type type() const { return _type; }
+
+    std::vector<std::string> flags() const { return _flags; }
 
     /// \brief Loads the list of samples from the configuration file.
     static std::vector<sample> load(const util::options &opt);

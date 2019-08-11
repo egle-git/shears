@@ -93,6 +93,10 @@ template <> struct convert<data::sample>
             throw std::runtime_error("Sample type is not \"data\" or \"MC\" for " + sample._name);
         }
 
+        if (node["flags"]) {
+            sample._flags = node["flags"].as<std::vector<std::string>>();
+        }
+
         if (node["triggers B-F"]) {
             sample._has_triggers.first = true;
             sample._triggers.first = node["triggers B-F"].as<std::string>();

@@ -1,28 +1,30 @@
+image: "gitlab-registry.cern.ch/ci-tools/ci-worker:slc6"
+
 stages:
   - build
   - lint
 
 baobabs:
   stage: build
-  tags: [ cvmfs ]
+  tags: [ cvmfs, docker ]
   script:
   - .gitlab-ci/compile-scram.sh Baobabs
 
 pruner:
   stage: build
-  tags: [ cvmfs ]
+  tags: [ cvmfs, docker ]
   script: .gitlab-ci/compile.sh Bonzais
 
 DYJets:
   stage: build
-  tags: [ cvmfs ]
+  tags: [ cvmfs, docker ]
   script:
     - yum -q -y install boost-devel
     - .gitlab-ci/compile-cmake.sh DYJets
 
 DYJets doxygen:
   stage: lint
-  tags: [ cvmfs ]
+  tags: [ cvmfs, docker ]
   allow_failure: true
   script:
     - eval $(.gitlab-ci/cmsenv.sh)

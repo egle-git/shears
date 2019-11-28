@@ -99,7 +99,7 @@ electrons:
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
-    use reconstruction scale factors: no
+    use reconstruction scale factors: yes
 
 # Options related to the selection of muons
 muons:
@@ -260,7 +260,7 @@ samples:
 # Scale factors
 tables B-F:
     electron id:    scalefactors_Medium_Electron_period1.txt
-    electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
+    electron reco:  scalefactors_Tracking_Electron_SMP_17_010_period1.txt
     muon id:        scalefactors_Medium_Muon_period1_July.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
     muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
@@ -280,7 +280,7 @@ tables B-F:
 
 tables G-H:
     electron id:    scalefactors_Medium_Electron_period2.txt
-    electron reco:  SMP_17_010_GH_MediumID_electrons.txt
+    electron reco:  scalefactors_Tracking_Electron_SMP_17_010_period2.txt
     muon id:        scalefactors_Medium_Muon_period2_July.txt
     muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
     emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt

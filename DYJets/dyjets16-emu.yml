@@ -382,3 +382,22 @@ plots:
     - selector: 'mass_inc0jet'
       ratio min: 0.601
       ratio max: 1.399
+    # Axis labels
+    - selector: '^mass.*'
+      x axis label: 'M_{ll}'
+      x axis unit: 'GeV'
+    - selector: '^nJets.*'
+      x axis label: 'Exclusive number of jets'
+    - selector: '^nJetsIncl.*'
+      x axis label: 'Inclusive number of jets'
+    - selector: '^phistar.*'
+      x axis label: '#phi*'
+    - selector: '^pt.*'
+      x axis label: 'p_{T}^{ll}'
+      x axis unit: 'GeV'
+    - selector: '.+mass(.*)_(.*).*'
+      x axis detail: '$1 #leq M_{ll} < $2 GeV'
+    - selector: '.*inc(1|2)jet.*'
+      x axis detail: 'N_{jets} #geq $1'
+    - selector: '.*exc(1|2)jet.*'
+      x axis detail: 'N_{jets} = $1'

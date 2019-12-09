@@ -255,7 +255,11 @@ void compare_builder_base::format_lower_x_axis(TAxis &axis) const
     if (_logx) {
         prepare_axis_for_log(axis);
     }
-    if (std::strlen(axis.GetTitle()) == 0) {
+
+    std::string label = _style.get<std::string>("x axis label", _current_histo_name, "");
+    if (!label.empty()) {
+        axis.SetTitle(label.c_str());
+    } else if (std::strlen(axis.GetTitle()) == 0) {
         axis.SetTitle(_current_histo_name.c_str());
     }
 }

@@ -29,6 +29,7 @@ class compare_builder_base
     util::style_list _style;
     bool _preliminary;
 
+    std::string _current_histo_name;
     bool _logx;
 
   public:

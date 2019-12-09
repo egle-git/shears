@@ -63,6 +63,7 @@ void compare_builder_base::build()
         util::logging::debug << "Producing histogram: " << name << std::endl;
 
         // Apply style
+        _current_histo_name = name;
         _logx = _style.get<bool>("log x", name, false);
 
         TCanvas canvas(name.c_str(), "", 700, 900);
@@ -253,6 +254,9 @@ void compare_builder_base::format_lower_x_axis(TAxis &axis) const
 
     if (_logx) {
         prepare_axis_for_log(axis);
+    }
+    if (std::strlen(axis.GetTitle()) == 0) {
+        axis.SetTitle(_current_histo_name.c_str());
     }
 }
 

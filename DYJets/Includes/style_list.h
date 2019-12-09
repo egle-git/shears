@@ -4,6 +4,7 @@
 #include <regex>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <yaml-cpp/yaml.h>
 
@@ -15,6 +16,7 @@ class style_list
 {
     struct rule
     {
+        std::string selector;
         std::regex regex;
         YAML::Node node;
     };
@@ -55,6 +57,30 @@ class style_list
     T get(const std::string &name,
           const std::string &rule_match,
           const T &default_value) const;
+
+    /**
+     * \brief Gets the value of a "formatted" string field.
+     *
+     * Formatted fields can use captures from the selector regex.
+     *
+     * \arg name The name of the field
+     * \arg rule_match The string to match to the specification's rules
+     */
+    std::string get_formatted(const std::string &name,
+                              const std::string &rule_match,
+                              const std::string &default_value) const;
+
+    /**
+     * \brief Gets a list of all matched rules for a field.
+     *
+     * The list contains one entry for each rule matching \c name. An
+     * empty vector is returned if there is no match.
+     *
+     * \arg name The name of the field
+     * \arg rule_match The string to match to the specification's rules
+     */
+    std::vector<std::string> get_formatted_all(const std::string &name,
+                                               const std::string &rule_match) const;
 };
 
 template <class T>
@@ -81,7 +107,6 @@ T style_list::get(const std::string &name,
     }
     return default_value;
 }
-
 } // namespace util
 
 #endif // STYLE_LIST_H

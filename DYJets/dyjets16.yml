@@ -396,14 +396,22 @@ binning file: dyjets-binnings.yml
 #
 # The sole mandatory field is the "selector", containing a regex that is matched
 # against plot names. When a plot name matches the regex, properties listed in
-# other fields are assigned to it. Rules lower in the list take precedence over
-# the ones above them.
+# other fields are assigned to it. In general, rules lower in the list take
+# precedence over the ones above them, but for some properties they add up.
 #
 # Supported properties:
 #   - produce (yes): Whether to make the plot
 #   - log x (no): Whether to x axis should use a log scale
 #   - ratio min (0.601): The minimum value shown on data/mc ratio plots
 #   - ratio max (1.399): The maximum value shown on data/mc ratio plots
+#   - x axis label: The label of the x axis. Captures from the selector can be
+#                   used to provide dynamic labels.
+#   - x axis detail: Text that will appear in parenthesis after the axis label.
+#                    Several labels can be added this way. Captures from the
+#                    selector can be used to provide dynamic labels.
+#   - x axis unit: The unit of the x axis. Appears between square brackets after
+#                  the main label. Captures from the selector can be used to
+#                  provide dynamic labels.
 plots:
     # Excluded plots
     - selector: '^_.*'

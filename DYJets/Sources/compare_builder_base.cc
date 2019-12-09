@@ -1,8 +1,10 @@
 #include "compare_builder_base.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
 #include <TAxis.h>
@@ -256,8 +258,16 @@ void compare_builder_base::format_lower_x_axis(TAxis &axis) const
         prepare_axis_for_log(axis);
     }
 
-    std::string label = _style.get<std::string>("x axis label", _current_histo_name, "");
+    std::string label = _style.get_formatted("x axis label", _current_histo_name, "");
     if (!label.empty()) {
+        auto precisions = _style.get_formatted_all("x axis detail", _current_histo_name);
+        if (!precisions.empty()) {
+            label += " (" + boost::algorithm::join(precisions, ", ") + ")";
+        }
+        auto unit = _style.get_formatted("x axis unit", _current_histo_name, "");
+        if (!unit.empty()) {
+            label += " [" + unit + "]";
+        }
         axis.SetTitle(label.c_str());
     } else if (std::strlen(axis.GetTitle()) == 0) {
         axis.SetTitle(_current_histo_name.c_str());

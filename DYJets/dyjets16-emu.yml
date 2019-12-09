@@ -158,7 +158,7 @@ Z:
     #   - neutral: Keep only lepton pairs of opposite sign
     #   - same sign: Keep only lepton pairs of the same sign
     # Default value: neutral
-    charge mode: same sign
+    charge mode: neutral
 
     # Flavor check mode
     # Possible values:

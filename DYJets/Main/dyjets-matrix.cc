@@ -5,6 +5,7 @@
 #include <TFileIter.h>
 #include <TH2.h>
 #include <TStyle.h>
+#include <TVectorD.h>
 
 #include "logging.h"
 #include "options.h"
@@ -23,10 +24,11 @@ struct config
 
 config parse_options(int argc, char **argv, util::options &options);
 void create_output_dir(const config &c);
-data::sample load(const util::options &options);
+std::vector<data::sample> load(const util::options &options);
 void filter_histogram_names(const util::options &options,
                             const config &c,
                             std::set<std::string> &histogram_names);
+double get_xsec_wsum(const data::sample &sample, std::shared_ptr<TFile> &file);
 void prepare_axis_for_log(TAxis &axis);
 
 int main(int argc, char **argv)
@@ -36,9 +38,12 @@ int main(int argc, char **argv)
         util::options options;
         config c = parse_options(argc, argv, options);
 
-        // Load file
-        auto sample = load(options);
-        auto file = sample.histogram_file("dyjets", c.input_dir_name);
+        // Load files
+        auto samples = load(options);
+        std::vector<std::shared_ptr<TFile>> files;
+        for (auto &s : samples) {
+            files.push_back(s.histogram_file("dyjets", c.input_dir_name));
+        }
 
         create_output_dir(c);
 
@@ -48,10 +53,12 @@ int main(int argc, char **argv)
 
         // Find response matrices
         std::set<std::string> matrices;
-        for (TFileIter it(file.get()); it < it.TotalKeys(); ++it) {
-            std::string name = it.GetKeyName();
-            if (boost::ends_with(name, "-matrix")) {
-                matrices.insert(it.GetKeyName());
+        for (auto &file : files) {
+            for (TFileIter it(file.get()); it < it.TotalKeys(); ++it) {
+                std::string name = it.GetKeyName();
+                if (boost::ends_with(name, "-matrix")) {
+                    matrices.insert(it.GetKeyName());
+                }
             }
         }
 
@@ -62,10 +69,37 @@ int main(int argc, char **argv)
             util::logging::debug << "Plotting matrix " << name << std::endl;
 
             // Get matrix
-            TH2 *matrix = nullptr;
-            file->GetObject(name.c_str(), matrix);
+            std::unique_ptr<TH2> matrix = nullptr;
+            for (std::size_t i = 0; i < files.size(); ++i) {
+                auto &file = files[i];
+
+                TH2 *m = nullptr;
+                file->GetObject(name.c_str(), m);
+                if (m == nullptr) {
+                    util::logging::warn << "Could not read matrix "
+                                        << name
+                                        << " for sample "
+                                        << samples[i].name()
+                                        << std::endl;
+                    continue;
+                }
+
+                std::cout << samples[i].name() << " "
+                          << get_xsec_wsum(samples[i], file)
+                          << " " << m
+                          << " " << matrix.get()
+                          << std::endl;
+                m->Scale(get_xsec_wsum(samples[i], file));
+                if (matrix == nullptr) {
+                    matrix.reset(m); // Can't clone, seems to triggers an issue.
+                } else {
+                    matrix->Add(m);
+                }
+            }
             if (matrix == nullptr) {
-                util::logging::warn << "Could not read matrix " << name << std::endl;
+                util::logging::warn << "Could not read any matrix: "
+                                    << name
+                                    << std::endl;
                 continue;
             }
 
@@ -79,9 +113,11 @@ int main(int argc, char **argv)
                     for (int y = 0; y <= nBinsY + 1; y++) {
                         row_total += matrix->GetBinContent(x, y);
                     }
-                    for (int y = 0; y <= nBinsY + 1; y++) {
-                        double contents = matrix->GetBinContent(x, y);
-                        matrix->SetBinContent(x, y, 100 * contents / row_total);
+                    if (row_total != 0) {
+                        for (int y = 0; y <= nBinsY + 1; y++) {
+                            double contents = matrix->GetBinContent(x, y);
+                            matrix->SetBinContent(x, y, 100 * contents / row_total);
+                        }
                     }
                 }
             } else {
@@ -90,9 +126,11 @@ int main(int argc, char **argv)
                     for (int x = 0; x <= nBinsX + 1; x++) {
                         row_total += matrix->GetBinContent(x, y);
                     }
-                    for (int x = 0; x <= nBinsX + 1; x++) {
-                        double contents = matrix->GetBinContent(x, y);
-                        matrix->SetBinContent(x, y, 100 * contents / row_total);
+                    if (row_total != 0) {
+                        for (int x = 0; x <= nBinsX + 1; x++) {
+                            double contents = matrix->GetBinContent(x, y);
+                            matrix->SetBinContent(x, y, 100 * contents / row_total);
+                        }
                     }
                 }
             }
@@ -109,6 +147,28 @@ int main(int argc, char **argv)
                 canvas.SetLogy(true);
                 prepare_axis_for_log(*matrix->GetXaxis());
                 prepare_axis_for_log(*matrix->GetYaxis());
+            }
+
+            // Title
+            std::string title = c.style.get_formatted("x axis label", name, "");
+            if (!title.empty()) {
+                auto precisions = c.style.get_formatted_all("x axis detail", name);
+                if (!precisions.empty()) {
+                    title += " (" + boost::algorithm::join(precisions, ", ") + ")";
+                }
+                matrix->SetTitle(("Response matrix for " + title).c_str());
+            } else if (std::strlen(matrix->GetTitle()) == 0) {
+                matrix->SetTitle(("Response matrix for " + name).c_str());
+            }
+
+            // Axis labels
+            auto unit = c.style.get_formatted("x axis unit", name, "");
+            if (!unit.empty()) {
+                matrix->GetXaxis()->SetTitle(("Reconstructed level [" + unit + "]").c_str());
+                matrix->GetYaxis()->SetTitle(("Generated level [" + unit + "]").c_str());
+            } else {
+                matrix->GetXaxis()->SetTitle("Reconstructed level");
+                matrix->GetYaxis()->SetTitle("Generated level");
             }
 
             canvas.Print((c.output_dir_name + "/" + name + "." + c.output_format).c_str());
@@ -167,16 +227,38 @@ config parse_options(int argc, char **argv, util::options &options)
     return c;
 }
 
-data::sample load(const util::options &options)
+std::vector<data::sample> load(const util::options &options)
 {
-    data::sample mc;
     std::vector<data::sample> samples = data::sample::load(options);
-    for (data::sample &s : samples) {
-        if (s.type() == data::sample::mc) {
-            mc = s;
-        }
+    // Keep only MC
+    samples.erase(std::remove_if(
+            samples.begin(),
+            samples.end(),
+            [](const data::sample &s) { return s.type() != data::sample::mc; }
+        ), samples.end());
+    return samples;
+}
+
+double get_xsec_wsum(const data::sample &sample, std::shared_ptr<TFile> &file)
+{
+    // Read job info histograms
+    TH1 *job_info = nullptr;
+    file->GetObject("_job_info", job_info);
+    if (job_info == nullptr) {
+        throw std::runtime_error("File " + std::string(file->GetName()) +
+                                 " doesn't have the _job_info histogram.");
     }
-    return mc;
+
+    TVectorD *job_info_average = nullptr;
+    file->GetObject("_job_info_average", job_info_average);
+    if (job_info_average == nullptr) {
+        throw std::runtime_error("File " + std::string(file->GetName()) +
+                                 " doesn't have the _job_info_average vector.");
+    }
+
+    double wsum = job_info->GetBinContent(2);
+    double xsec = sample.xsec() > 0 ? sample.xsec() : (*job_info_average)[1];
+    return xsec / wsum;
 }
 
 void create_output_dir(const config &c)

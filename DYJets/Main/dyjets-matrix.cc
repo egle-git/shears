@@ -42,7 +42,11 @@ int main(int argc, char **argv)
         auto samples = load(options);
         std::vector<std::shared_ptr<TFile>> files;
         for (auto &s : samples) {
-            files.push_back(s.histogram_file("dyjets", c.input_dir_name));
+            auto file = s.histogram_file("dyjets", c.input_dir_name);
+            if (file == nullptr) {
+                throw std::runtime_error("Could not open files");
+            }
+            files.push_back(file);
         }
 
         create_output_dir(c);

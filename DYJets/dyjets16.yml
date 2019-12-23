@@ -146,7 +146,7 @@ muons:
 Z:
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 50
+    low mass: 10
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -172,7 +172,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 76, 106, 170, 350, 1000 ]
+mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
 
 # Triggers
 #
@@ -224,6 +224,11 @@ samples:
       jobs: 40
       bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
       catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets-10to50
+      type: MC
+      bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs
+      catalog: Bonzais-DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+      jobs: 10
 
       #bonzai dir: /user/bbilin/public/ 
       #catalog: fakecatalog_mm_all.txt 

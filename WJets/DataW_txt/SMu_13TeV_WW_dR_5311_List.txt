@@ -1,1 +1,0 @@
-/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns/MC/v13.1/Ntuples/CRAB_PrivateMC/crab_WWTo2L2Nu_13TeV-powheg-VJetPruner-SMu/151203_223523/0000/Bonzai-WWTo2L2Nu_13TeV-powheg-VJetPruner-SMu_1.root

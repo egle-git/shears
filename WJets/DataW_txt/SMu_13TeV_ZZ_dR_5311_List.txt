@@ -1,1 +1,0 @@
-/store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_25ns/MC/v13.1/Ntuples/CRAB_PrivateMC/crab_ZZ_TuneCUETP8M1_13TeV-pythia8-VJetPruner-SMu/151203_223643/0000/Bonzai-ZZ_TuneCUETP8M1_13TeV-pythia8-VJetPruner-SMu_1.root

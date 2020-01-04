@@ -19,15 +19,17 @@ DYJets:
   stage: build
   tags: [ cvmfs, docker ]
   script:
-    - yum -q -y install boost-devel
-    - .gitlab-ci/compile-cmake.sh DYJets
+    - source DYJets/lcg-env.sh
+    - cd DYJets
+    - cmake .
+    - make
 
 DYJets doxygen:
   stage: lint
   tags: [ cvmfs, docker ]
   allow_failure: true
   script:
-    - eval $(.gitlab-ci/cmsenv.sh)
+    - source DYJets/lcg-env.sh
     - cd DYJets
     - doxygen
     - tar -czf doc.tar.gz doc

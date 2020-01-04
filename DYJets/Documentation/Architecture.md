@@ -13,7 +13,7 @@ The code is split in three:
 
 Files in the `Includes` and `Sources` directory may be used by several programs.
 
-The main configuration files (`vjets.cfg`, `unfolding.cfg` and `higgs.yml`) are kept at the root
+The main configuration files (`dyjets*.yml`, `dyjets-binnings.yml`) are kept at the root
 of the tree (i.e. in the `DYJets` directory). Other, less important, directories exist, listed in
 the summary below.
 
@@ -25,7 +25,6 @@ the summary below.
 | `Main`             | Source (`.cc`) files used to build programs
 | `RooUnfold`        | A (modified) copy of the `RooUnfold` library
 | `Sources`          | Source (`.cc`) files
-| `Tools`            | ?
 
 ## Code architecture
 
@@ -55,28 +54,17 @@ eventually be moved to a more appropriate location.
 ## Dependencies
 
 The code uses a number of select libraries to avoid reinventing the wheel. They are all available
-in recent (`>= 8.0`) `CMSSW` environments. The following libraries are required:
+in recent LCG environments. The following libraries are required:
 
 - The [Boost C++ Libraries](http://boost.org), and in particular:
     - The Program Options library to handle command-line options;
     - The Filesystem library to handle filesystem operation such as creating directories;
     - The String Algorithms library for operations on strings.
-- The well-known (among CERN physicists) [ROOT](http://root.cern.ch) toolkit (version `6.x`).
+- The well-known (among CERN physicists) [ROOT](http://root.cern.ch) toolkit (at least version `6.12`).
 - [RooUnfold](http://hepunx.rl.ac.uk/~adye/software/unfold/RooUnfold.html), used for unfolding. A
   modified copy is kept in the source tree.
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (version 0.5 or later), used by the `Higgs` code
   to parse the configuration files.
 
-In addition, `cmake` >= 3.6 and a C++ 14 compiler is required. Again, recent `CMSSW` environments
-should provide these tools. A valid version of `cmake` can be found at:
-
-```
-/cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/cmake/3.7.0-oenich/
-```
-
-It is enabled by running the following command:
-
-```
-source /cvmfs/cms.cern.ch/slc6_amd64_gcc530/external/cmake/3.7.0-oenich/etc/profile.d/init.sh
-```
-
+In addition, `cmake` >= 3.8 and a C++ 17 compiler are required. Again, recent LCG environments
+should provide these tools.

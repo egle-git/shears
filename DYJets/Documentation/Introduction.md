@@ -2,18 +2,44 @@
 
 ## Quick start
 
-The following commands assume that you have checked out a `CMSSW` release (8.0 or later) and cloned
-`shears` in the `src` directory.
+Clone the shears project to your working directory, and move to the analysis
+folder:
 
 ~~~{.sh}
-cmsenv
+git clone ssh://git@gitlab.cern.ch:7999/shears/shears.git
 cd shears/DYJets
-cmake3 . # Or "cmake ." if your cmake version is >= 3.6
+~~~
+
+The code relies on recent versions of the C++ standard and ROOT libraries. They
+are distributed by the [CERN LCG](http://lcginfo.cern.ch/) environment. A
+supported version can be activated using:
+
+~~~{.sh}
+source lcg-env.sh
+~~~
+
+You're free to try any other environment (CMSSW environments are known NOT to
+work).
+
+The code relies on [CMake](https://cmake.org/) for building (building
+out-of-source is *not* supported). The initial compilation is done as follows:
+
+~~~{.sh}
+cmake . -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j$(nproc)
 ~~~
 
-You're now ready to run the code. Programs relevant to the Higgs analysis are located in the `Main`
-directory and start with `higgs-`. Use the `--help` option for usage information.
+See below for more information about CMake options.
+
+After the first compilation, the code can be rebuilt simply by running `make`
+again:
+
+~~~{.sh}
+make -j$(nproc)
+~~~
+
+You're now ready to run the code. Programs relevant to the Drell-Yan analysis are located in the `Main`
+directory and start with `dyjets-`. Use the `--help` option for usage information.
 
 ## Build options
 

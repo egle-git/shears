@@ -1,3 +1,5 @@
+#include <numeric>
+
 #include <TChain.h>
 #include <TH1F.h>
 #include <TTreeReader.h>

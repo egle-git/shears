@@ -218,7 +218,7 @@ void boson_jets_analyzer::operator()()
      * Handle jets and pileup
      */
     if (evt.rec) {
-       std:vector<lepton> l ;
+       std::vector<lepton> l ;
         if (evt.gen) l = evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
         evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto

@@ -18,6 +18,9 @@ copyToPNFS.sh
 *.pyc
 *.pdf
 
+# git will ignore GDB history files
+.gdb_history
+
 # git will ignore the nohup output files
 .nfs*
 # git will ignore the config files

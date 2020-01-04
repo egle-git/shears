@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.6 FATAL_ERROR)
+# CMake 3.8 is required for C++ 17 support
+cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 
 project(DYJets)
 
@@ -11,16 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Dependencies
 find_package(Boost 1.41.0 REQUIRED COMPONENTS filesystem iostreams program_options system)
-find_package(ROOT 6 REQUIRED COMPONENTS Table TreePlayer Unfold)
+find_package(ROOT 6.12 REQUIRED COMPONENTS Hist Physics TreePlayer Unfold)
 find_package(Threads REQUIRED)
-
-# yaml-cpp requires special treatment
-find_package(SCRAM)
-if(${SCRAM_FOUND})
-    SCRAM_FIND_PACKAGE(yaml-cpp 0.5)
-else()
-    FIND_PACKAGE(yaml-cpp 0.5 REQUIRED)
-endif()
+FIND_PACKAGE(yaml-cpp 0.5 REQUIRED)
 
 # Directories
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -31,18 +25,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # RooUnfold
 ###################################################################################################
 
+# Generate dictionary
+include(GNUInstallDirs) # Otherwise ROOT_GENERATE_DICTIONARY fails
+include(${ROOT_USE_FILE})
+ROOT_GENERATE_DICTIONARY(
+    "${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict"
+    "RooUnfold/src/*.h"
+    LINKDEF "RooUnfold/src/RooUnfold_LinkDef.h"
+)
+
 file(GLOB RooUnfold_src "RooUnfold/src/*.cxx")
-add_library(RooUnfold ${RooUnfold_src} CMakeFiles/RooUnfold.dir/RooUnfoldDict.cxx)
+add_library(RooUnfold ${RooUnfold_src} "${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict.cxx")
 
 target_include_directories(RooUnfold PUBLIC "RooUnfold/src")
-target_include_directories(RooUnfold SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
-
-# Generate dictionary
-ROOT_GENERATE_DICTIONARY(RooUnfold
-    CMakeFiles/RooUnfold.dir/RooUnfoldDict
-    "RooUnfold/src/*.h"
-    LINKDEF "RooUnfold_LinkDef.h"
-)
+target_include_directories(RooUnfold SYSTEM PUBLIC ROOT::Hist ROOT::Unfold)
 
 ###################################################################################################
 # Python tools
@@ -79,13 +75,13 @@ target_compile_definitions(DYJets-util PUBLIC DYJETS_NEW_API)
 
 # Required headers
 target_include_directories(DYJets-util PUBLIC Includes ${CMAKE_BINARY_DIR}/Includes)
-target_include_directories(DYJets-util SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Dependencies
-target_link_libraries(DYJets-util PUBLIC boost_filesystem)
-target_link_libraries(DYJets-util PUBLIC boost_program_options)
-target_link_libraries(DYJets-util PUBLIC boost_system)
-target_link_libraries(DYJets-util PUBLIC ${ROOT_LIBRARIES})
+target_link_libraries(DYJets-util PUBLIC Boost::filesystem)
+target_link_libraries(DYJets-util PUBLIC Boost::program_options)
+target_link_libraries(DYJets-util PUBLIC Boost::system)
+target_link_libraries(DYJets-util PUBLIC ROOT::Physics)
+target_link_libraries(DYJets-util PUBLIC ROOT::TreePlayer)
 target_link_libraries(DYJets-util PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(DYJets-util PUBLIC yaml-cpp)
 
@@ -104,10 +100,10 @@ target_compile_definitions(DYJets-data PUBLIC DYJETS_NEW_API)
 
 # Required headers
 target_include_directories(DYJets-data PUBLIC Includes)
-target_include_directories(DYJets-data SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
 # Dependencies
 target_link_libraries(DYJets-data PUBLIC DYJets-util)
+target_link_libraries(DYJets-data PUBLIC ROOT::Hist)
 
 ###################################################################################################
 # Physics library
@@ -266,3 +262,4 @@ target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
 
 #add_executable(testDecompVar Sources/testDecompVar.cc)
 #target_link_libraries(testDecompVar PRIVATE DYJets-legacy)
+

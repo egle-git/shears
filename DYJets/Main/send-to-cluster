@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import re
 import stat
 import shutil
 import subprocess
@@ -16,11 +17,29 @@ class iihe_cluster(object):
             raise ValueError(queue)
 
     def script_template(self):
+        env_code = ''
+        if 'LCG_VERSION' in os.environ and 'CMAKE_PREFIX_PATH' in os.environ:
+            arch = os.path.split(os.environ['CMAKE_PREFIX_PATH'])[1]
+            # Check that 'arch' indeed looks like an LCG arch string
+            # eg x86_64-slc6-gcc8-opt
+            pattern = re.compile('x86_64-(?:slc6|cc7)-(?:clang|gcc)[\d]+-.+')
+            assert(not (pattern.match(arch) is None))
+            env_code = '''
+source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_{version} {arch}
+            '''.format(version = os.environ['LCG_VERSION'],
+                       arch = arch)
+        elif 'CMSSW_BASE' in os.environ:
+            env_code = '''
+eval `scramv1 runtime -sh` # cmsenv
+            '''
+        else:
+            print('Warning: Will run using bare OS environment (no LCG or cmsenv)')
+
         return '''#! /usr/bin/env bash
 
 set -e # Fail on errors during bootstrap
 
-cd {working_directory}
+cd {{working_directory}}
 
 # Setup CMS
 source $VO_CMS_SW_DIR/cmsset_default.sh
@@ -28,11 +47,11 @@ export SCRAM_ARCH=slc6_amd64_gcc530
 
 set +e # Accept errors from now on
 
-# Setup CMS environment
-eval `scramv1 runtime -sh` # cmsenv
+# Setup environment
+{env_code}
 
 # Setup proxy
-cp {proxy_path} /tmp || true
+cp {{proxy_path}} /tmp || true
 chmod go-r $(voms-proxy-info -p) || true
 
 echo "Working directory:"
@@ -43,12 +62,12 @@ echo "Start time:"
 date
 
 set -o pipefail
-{command} 2>&1 | tee {job_log_file}
+{{command}} 2>&1 | tee {{job_log_file}}
 
 EXIT_CODE=$?
 set +o pipefail
 
-echo $EXIT_CODE >{job_exit_code_file}
+echo $EXIT_CODE >{{job_exit_code_file}}
 
 echo "End time:"
 date
@@ -56,7 +75,7 @@ echo "Exit code:"
 echo $EXIT_CODE
 
 exit $EXIT_CODE
-'''
+'''.format(env_code = env_code)
 
     def submit(self, name, script_path, submit_log_file):
         # Try a few times before giving up

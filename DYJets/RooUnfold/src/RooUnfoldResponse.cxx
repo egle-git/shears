@@ -27,6 +27,7 @@ END_HTML */
 #include <assert.h>
 #include <cmath>
 
+#include "TBuffer.h"
 #include "TClass.h"
 #include "TNamed.h"
 #include "TH1.h"

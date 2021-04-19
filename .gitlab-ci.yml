@@ -1,30 +1,22 @@
-image: gitlab-registry.cern.ch/linuxsupport/cc7-base
-
 stages:
   - build
-  - lint
 
-pruner:
-  stage: build
-  tags: [ cvmfs, docker ]
-  script: .gitlab-ci/compile.sh Bonzais
+#pruner:
+#  stage: build
+#  tags: [ cvmfs, docker ]
+#  script: .gitlab-ci/compile.sh Bonzais
 
 DYJets:
   stage: build
-  tags: [ cvmfs, docker ]
+  tags: [ cvmfs ]
   script:
     - source DYJets/lcg-env.sh
     - cd DYJets
     - cmake .
-    - make
+    - make -j$(nproc)
+  artifacts:
+    when: on_failure
+    paths:
+      - DYJets/CMakeFiles
+      - DYJets/CMakeCache.txt
 
-DYJets doxygen:
-  stage: lint
-  tags: [ cvmfs, docker ]
-  allow_failure: true
-  script:
-    - source DYJets/lcg-env.sh
-    - cd DYJets
-    - doxygen
-    - tar -czf doc.tar.gz doc
-    - ../.gitlab-ci/upload-tarball.sh doc doc.tar.gz

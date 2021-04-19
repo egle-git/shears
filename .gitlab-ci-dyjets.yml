@@ -4,12 +4,6 @@ stages:
   - build
   - lint
 
-baobabs:
-  stage: build
-  tags: [ cvmfs, docker ]
-  script:
-  - .gitlab-ci/compile-scram.sh Baobabs
-
 pruner:
   stage: build
   tags: [ cvmfs, docker ]

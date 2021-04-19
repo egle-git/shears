@@ -15,12 +15,12 @@ namespace /* anonymous */
 {
 
 static const char *const branch_names[trigger::count] = {
-    /*"TrigHltPhot"*/ "HLT_IsoTkMu24", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",/* "TrigHltEl", "TrigHltDiEl",*/
+    "TrigHltPhot", "HLT_IsoTkMu24", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "TrigHltEl", "TrigHltDiEl",
 };
 //Every available trigger in nano is single branch
 static std::vector<std::string> available_triggers(util::chains &chains, std::size_t trig)
 {
-    const char *const branch_name = branch_names[trig];
+    const char *const branch_name = ""; //branch_names[trig];
 
     TTree &Events = *chains.events();
 
@@ -101,14 +101,14 @@ bool trigger::veto(const std::string &name)
 
 /******************************************************************************/
 
-trigger_values::trigger_values(util::job::info &info) :
-    _values({
+trigger_values::trigger_values(util::job::info &info) //:
+//    _values(
 //        TTreeReaderValue<unsigned long long>(info.reader, branch_names[0]),
 //        TTreeReaderValue<unsigned long long>(info.reader, branch_names[1]),
 //        TTreeReaderValue<unsigned long long>(info.reader, branch_names[2]),
 //        TTreeReaderValue<unsigned long long>(info.reader, branch_names[3]),
 //        TTreeReaderValue<unsigned long long>(info.reader, branch_names[4])
-    })
+//    )
 {
     // In case this assert fails: add a new reader above and increase the value.
    // static_assert(trigger::count == 5, "Yon need to add a new trigger reader");

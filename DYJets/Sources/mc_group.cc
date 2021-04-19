@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 
-#include <TFileIter.h>
 #include <TH1.h>
 
 #include "comparison_entry.h"

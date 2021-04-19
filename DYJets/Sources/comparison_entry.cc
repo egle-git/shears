@@ -3,9 +3,9 @@
 #include <cmath>
 
 #include <TFile.h>
-#include <TFileIter.h>
 #include <TH1.h>
 #include <THStack.h>
+#include <TKey.h>
 #include <TLegend.h>
 #include <TList.h>
 #include <TVectorD.h>
@@ -181,8 +181,10 @@ data_comparison_entry::data_comparison_entry(const std::string &analyzer_name,
 void data_comparison_entry::add_histograms(std::set<std::string> &histos)
 {
     // Iterate on keys
-    for (TFileIter it(_file.get()); it < it.TotalKeys(); ++it) {
-        histos.insert(it.GetKeyName());
+    for (const auto &&obj : *_file->GetListOfKeys()) {
+        if (auto key = dynamic_cast<const TKey *>(obj)) {
+            histos.insert(key->GetName());
+        }
     }
 }
 

@@ -2,8 +2,9 @@
 #include <boost/filesystem.hpp>
 
 #include <TCanvas.h>
-#include <TFileIter.h>
 #include <TH2.h>
+#include <TFile.h>
+#include <TKey.h>
 #include <TStyle.h>
 #include <TVectorD.h>
 
@@ -58,10 +59,12 @@ int main(int argc, char **argv)
         // Find response matrices
         std::set<std::string> matrices;
         for (auto &file : files) {
-            for (TFileIter it(file.get()); it < it.TotalKeys(); ++it) {
-                std::string name = it.GetKeyName();
-                if (boost::ends_with(name, "-matrix")) {
-                    matrices.insert(it.GetKeyName());
+            for (const auto &&obj : *file->GetListOfKeys()) {
+                if (auto key = dynamic_cast<const TKey *>(obj)) {
+                    std::string name = key->GetName();
+                    if (boost::ends_with(name, "-matrix")) {
+                        matrices.insert(name);
+                    }
                 }
             }
         }

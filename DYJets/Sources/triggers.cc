@@ -206,6 +206,8 @@ bool trigger_mask::veto(const std::vector<std::string> &names)
 
 bool trigger_mask::passes(const trigger_values &values) const
 {
+    return true;
+/*
     bool pass = _accepts_any_trigger;
     for (unsigned i = 0; i < trigger::count; ++i) {
         if (_triggers[i]->used()) {
@@ -216,5 +218,6 @@ bool trigger_mask::passes(const trigger_values &values) const
         }
     }
     return pass;
+*/
 }
 } // namespace physics

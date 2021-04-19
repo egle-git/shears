@@ -37,11 +37,11 @@ class muons
     TTreeReaderArray<float> Muon_eta;
     TTreeReaderArray<float> Muon_phi;
     TTreeReaderArray<float> Muon_mass;
-    TTreeReaderArray<float> Muon_charge;
-    TTreeReaderArray<unsigned> Muon_pfIsoId;
+    TTreeReaderArray<int> Muon_charge;
+    TTreeReaderArray<unsigned char> Muon_pfIsoId;
     TTreeReaderArray<int> Muon_nTrackerLayers;
     TTreeReaderArray<float> Muon_pfRelIso04_all;
-    TTreeReaderArray<unsigned> Muon_tightId;
+    TTreeReaderArray<bool> Muon_tightId;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;

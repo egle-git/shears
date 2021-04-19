@@ -36,7 +36,7 @@ class jets
     TTreeReaderArray<float> Jet_eta;
     TTreeReaderArray<float> Jet_phi;
     TTreeReaderArray<float> Jet_mass;
-    TTreeReaderArray<float> Jet_jetId;
+    TTreeReaderArray<int> Jet_jetId;
     TTreeReaderArray<float> Jet_puIdDisc;
     TTreeReaderArray<float> Jet_btagCSVV2;
     //TTreeReaderArray<float> Jet_hadronFlavour;

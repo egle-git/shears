@@ -31,7 +31,7 @@ class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned long long> event;
-    TTreeReaderArray<double> L1PreFiringWeight_Nom; //check: Iti
+    TTreeReaderArray<float> L1PreFiringWeight_Nom; //check: Iti
 protected:
     util::event_counter counter;
     util::histo_set histo_set;

@@ -26,16 +26,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ###################################################################################################
 
 # Generate dictionary
-include(GNUInstallDirs) # Otherwise ROOT_GENERATE_DICTIONARY fails
-include(${ROOT_USE_FILE})
-ROOT_GENERATE_DICTIONARY(
-    "${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict"
-    "RooUnfold/src/*.h"
-    LINKDEF "RooUnfold/src/RooUnfold_LinkDef.h"
-)
+#include(GNUInstallDirs) # Otherwise ROOT_GENERATE_DICTIONARY fails
+#include(${ROOT_USE_FILE})
+#ROOT_GENERATE_DICTIONARY(
+#    "${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict"
+#    "RooUnfold/src/*.h"
+#    LINKDEF "RooUnfold/src/RooUnfold_LinkDef.h"
+#)
 
 file(GLOB RooUnfold_src "RooUnfold/src/*.cxx")
-add_library(RooUnfold ${RooUnfold_src} "${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict.cxx")
+add_library(RooUnfold ${RooUnfold_src})  #"${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict.cxx")
 
 target_include_directories(RooUnfold PUBLIC "RooUnfold/src")
 target_include_directories(RooUnfold SYSTEM PUBLIC ROOT::Hist ROOT::Unfold)

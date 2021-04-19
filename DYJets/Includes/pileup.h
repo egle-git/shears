@@ -20,8 +20,8 @@ class weights;
 /// \brief Handles pileup
 class pileup
 {
-    TTreeReaderValue<int> Pileup_nTrueInt;
-    TTreeReaderValue<int> Pileup_nPU;
+    //TTreeReaderValue<int> Pileup_nTrueInt;
+    TTreeReaderValue<int> PV_npvsGood;
 
     bool _reweighing_enabled = true;
     standalone_LumiReWeighting _standalone_lrw;
@@ -31,7 +31,7 @@ class pileup
     explicit pileup(util::job::info &info, const util::options &opt);
 
     /// \brief Returns the number of pileup vertices
-    int nvtx() { return *Pileup_nPU; }
+    int nvtx() { return *PV_npvsGood; }
 
     /// \brief Reweights \c weights to take PU into account
     void reweight(weights &w);

@@ -65,8 +65,8 @@ template <> struct convert<data::sample>
         }
         sample._name = node["name"].as<std::string>();
 
-        if (!node["bonzai dir"]) {
-            throw std::runtime_error("Sample bonzai dir is not set for " + sample._name);
+        if (!node["nano dir"]) {
+            throw std::runtime_error("Sample nano dir is not set for " + sample._name);
         }
         sample._nano_dir = node["nano dir"].as<std::string>();
 

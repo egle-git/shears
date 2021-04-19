@@ -17,13 +17,13 @@ jets::jets(util::job::info &info, const util::options &opt)
       Jet_jetId(info.reader, "Jet_jetId"),
       Jet_puIdDisc(info.reader, "Jet_puIdDisc"),//Iti:check
       Jet_btagCSVV2(info.reader, "Jet_btagCSVV2"),
-      Jet_hadronFlavour(info.reader, "Jet_hadronFlavour"),
+      //Jet_hadronFlavour(info.reader, "Jet_hadronFlavour"),
       //EvtFastJetRho(info.reader, "EvtFastJetRho"),
-      fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll"), //Iti:check
-      GenJet_pt(info.reader, "GenJet_pt"),
-      GenJet_eta(info.reader, "GenJet_eta"),
-      GenJet_phi(info.reader, "GenJet_phi"),
-      GenJet_mass(info.reader, "GenJet_mass")
+      fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll") //Iti:check
+      //GenJet_pt(info.reader, "GenJet_pt"),
+      //GenJet_eta(info.reader, "GenJet_eta"),
+      //GenJet_phi(info.reader, "GenJet_phi"),
+      //GenJet_mass(info.reader, "GenJet_mass")
 {
     configure(opt);
     m_JetResolution =
@@ -71,17 +71,17 @@ std::vector<jet> jets::getGen()
 std::vector<jet> jets::getGen(double ptmin, double rapmax)
 {
     std::vector<jet> Gjets;
-    for (unsigned i = 0; i < GenJet_pt.GetSize(); ++i) {
-        jet j;
-        if (GenJet_pt[i] < ptmin) {
-            continue;
-        }
-        j.v.SetPtEtaPhiM(GenJet_pt[i], GenJet_eta[i], GenJet_phi[i], GenJet_mass[i]);
-        if (std::abs(j.v.Rapidity()) > rapmax) {
-            continue;
-        }
-        Gjets.push_back(j);
-    }
+//    for (unsigned i = 0; i < GenJet_pt.GetSize(); ++i) {
+//        jet j;
+//        if (GenJet_pt[i] < ptmin) {
+//            continue;
+//        }
+//        j.v.SetPtEtaPhiM(GenJet_pt[i], GenJet_eta[i], GenJet_phi[i], GenJet_mass[i]);
+//        if (std::abs(j.v.Rapidity()) > rapmax) {
+//            continue;
+//        }
+//        Gjets.push_back(j);
+//    }
     return Gjets;
 }
 
@@ -138,7 +138,7 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
         j.id = Jet_jetId[i];
         j.puMva = Jet_puIdDisc[i];
         j.bdisc = Jet_btagCSVV2[i];
-        j.hadflav = Jet_hadronFlavour[i];
+        j.hadflav = 0;
 
         if (j.v.Pt() < ptcut) continue;
 

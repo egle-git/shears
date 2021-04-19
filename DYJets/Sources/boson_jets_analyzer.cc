@@ -47,7 +47,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     run(info.reader, "run"),
     event(info.reader, "event"),
-    EvtPrefiringweight(info.reader, "L1PreFiringWeight_Nom"), //Iti: check
+    L1PreFiringWeight_Nom(info.reader, "L1PreFiringWeight_Nom"), //Iti: check
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),

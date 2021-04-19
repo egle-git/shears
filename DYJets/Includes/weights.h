@@ -19,20 +19,14 @@ namespace physics
  */
 class weights
 {
-    TTreeReaderArray<double> EvtWeights;
+    //TTreeReaderArray<double> genWeight;
 
     bool _ismc;
-    bool _is_weights_sum_divided;
-
-    long long _primary_events_in_chain = 0;
-    long long _primary_events_total = 0;
 
     long long _processed_events = 0;
     long long _events_in_chain = 0;
 
     double _processed_weights_sum = 0;
-    double _weights_sum = 0;
-    double _weights_sum_in_chain = 0;
 
     double _xsec;
     double _lumi;
@@ -51,10 +45,10 @@ class weights
     void write(util::histo_set *histos);
 
     /// \brief Returns the size of the current weight vector.
-    std::size_t weights_count() { return EvtWeights.GetSize(); }
+    std::size_t weights_count() { return 1; }
 
     /// \brief Returns the contents of the current weight vector at index \c i (checked).
-    double weight_at(std::size_t i) { return EvtWeights.At(i); }
+    double weight_at(std::size_t i) { return 1; }
 
     /// \brief Returns the gen-level weight of the event.
     double gen_weight() const { return _gen_weight; }

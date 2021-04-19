@@ -39,13 +39,13 @@ class jets
     TTreeReaderArray<float> Jet_jetId;
     TTreeReaderArray<float> Jet_puIdDisc;
     TTreeReaderArray<float> Jet_btagCSVV2;
-    TTreeReaderArray<float> Jet_hadronFlavour;
+    //TTreeReaderArray<float> Jet_hadronFlavour;
     TTreeReaderValue<float> fixedGridRhoFastjetAll;
 
-    TTreeReaderArray<float> GenJet_pt;
-    TTreeReaderArray<float> GenJet_eta;
-    TTreeReaderArray<float> GenJet_phi;
-    TTreeReaderArray<float> GenJet_mass;
+    //TTreeReaderArray<float> GenJet_pt;
+    //TTreeReaderArray<float> GenJet_eta;
+    //TTreeReaderArray<float> GenJet_phi;
+    //TTreeReaderArray<float> GenJet_mass;
 
     JME::JetResolution *m_JetResolution;
     JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;

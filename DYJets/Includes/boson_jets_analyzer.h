@@ -30,7 +30,7 @@ namespace physics
 class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> run;
-    TTreeReaderValue<unsigned> event;
+    TTreeReaderValue<unsigned long long> event;
     TTreeReaderArray<double> L1PreFiringWeight_Nom; //check: Iti
 protected:
     util::event_counter counter;

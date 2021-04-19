@@ -26,7 +26,7 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
     if (filename[0] == '/' || boost::contains(filename, "://")) { // Absolute path
         fullpath = filename;
     } else {
-        fullpath = nanoDir + "/" + filename;
+        fullpath = bonzaiDir + "/" + filename;
     }
 
     if (boost::starts_with(fullpath, "/store/")) {
@@ -192,10 +192,10 @@ void catalog::initialize_chains()
 
     for (const std::string &fullpath : _files) {
         logging::debug << fullpath << std::endl;
-        std::string treePath = fullpath + "Events";
-        if (_event_chain) _event_chain->Add(treePath.c_str());
+        std::string nanotreePath = fullpath + "Events";
+        if (_event_chain) _event_chain->Add(nanotreePath.c_str());
             TFile *f = TFile::Open(fullpath.c_str());
-            
+    }            
     _chains_initialized = true;
     logging::info << "Chains initialized." << std::endl;
 }

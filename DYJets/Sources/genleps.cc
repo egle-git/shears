@@ -9,17 +9,17 @@ namespace physics
 {
 
 genleps::genleps(util::job::info &info, const util::options &opt, util::histo_set &h)
-    : GenDressedLepton_pt(info.reader, "GenDressedLepton_pt"),
-      GenDressedLepton_eta(info.reader, "GenDressedLepton_eta"),
-      GenDressedLepton_phi(info.reader, "GenDressedLepton_phi"),
-      //GenLepE(info.reader, "GLepDr01E"),
-      GenDressedLepton_mass(info.reader, "GenDressedLepton_mass"),
-      GenDressedLepton_pdgId(info.reader, "GenDressedLepton_pdgId"),
-      //GenLepPrompt(info.reader,"GenLepPrompt"),
-      GenPart_statusFlags(info.reader,"GenPart_statusFlags"), //Iti: check
-      GenDressedLepton_hasTauAnc(info.reader,"GenDressedLepton_hasTauAnc"),
-      //GenLepSt(info.reader, "GLepDr01St"),
-      GenPart_status(info.reader, "GenPart_status") //Iti: check
+//    : GenDressedLepton_pt(info.reader, "GenDressedLepton_pt"),
+//      GenDressedLepton_eta(info.reader, "GenDressedLepton_eta"),
+//      GenDressedLepton_phi(info.reader, "GenDressedLepton_phi"),
+//      //GenLepE(info.reader, "GLepDr01E"),
+//      GenDressedLepton_mass(info.reader, "GenDressedLepton_mass"),
+//      GenDressedLepton_pdgId(info.reader, "GenDressedLepton_pdgId"),
+//      //GenLepPrompt(info.reader,"GenLepPrompt"),
+//      GenPart_statusFlags(info.reader,"GenPart_statusFlags"), //Iti: check
+//      GenDressedLepton_hasTauAnc(info.reader,"GenDressedLepton_hasTauAnc"),
+//      //GenLepSt(info.reader, "GLepDr01St"),
+//      GenPart_status(info.reader, "GenPart_status") //Iti: check
       //LHEZChild1Id(info.reader, "LHEZChild1id"),
       //LHEZChild2Id(info.reader, "LHEZChild2id"),
       //LHEZChild1Px(info.reader, "LHEChild1Px"),
@@ -49,33 +49,34 @@ std::vector<lepton> genleps::get()
 {
 //    std::cout<<"________"<<std::endl;
     std::vector<lepton> genleps;
-    for (unsigned i = 0; i < GenDressedLepton_pt.GetSize(); ++i) {
-        lepton l;
-//if( std::abs(GenLepEta[i]- 1.74) < 0.1 && std::abs(GenLepPt[i]-61.388) <0.1&& std::abs(GenLepPhi[i]-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<std::endl;
-//if( std::abs(GenLepEta[i]- 1.8009) < 0.1 && std::abs(GenLepPt[i]-37.348) <0.1&& std::abs(GenLepPhi[i]+0.37286)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<std::endl;
-
-//std::cout<<"EBENINAMIAQ"<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<" "<<std::endl;
-//if(LHEZChild1Id.GetSize()>0 &&LHEZChild2Id.GetSize()>0)std::cout<<LHEZChild1Id[0]<<" "<<LHEZChild2Id[0]<<" "<<   LHEZChild1Px[0]<<" "<<LHEZChild1Py[0]<<" "<<   LHEZChild2Px[0]<<" "<<LHEZChild2Py[0]<< std::endl;
-
-        if (std::abs(GenDressedLepton_eta[i]) > _eta_cut /*|| !GenPart_statusFlags[i] & isPrompt*/ ||GenPart_status[i]!=1 /*|| GenLepTauProd->at(i)*/) {
-            continue;
-        }
-        l.v.SetPtEtaPhiM(GenDressedLepton_pt[i], GenDressedLepton_eta[i], GenDressedLepton_phi[i], GenDressedLepton_mass[i]);
-        l.raw_v = l.v;
-        l.charge = GenDressedLepton_pdgId[i]/std::abs(GenDressedLepton_pdgId[i]);
-        l.pdgid = GenDressedLepton_pdgId[i];
-
-        if (l.v.Pt() < _pt_cut) {
-           continue;
-        }
-        genleps.push_back(l);
-    }
-    std::sort(genleps.begin(), genleps.end(), [](const lepton &lhs, const lepton &rhs)
-        {
-            return lhs.v.Pt() > rhs.v.Pt();
-        }
-    );
     return genleps;
+//    for (unsigned i = 0; i < GenDressedLepton_pt.GetSize(); ++i) {
+//        lepton l;
+////if( std::abs(GenLepEta[i]- 1.74) < 0.1 && std::abs(GenLepPt[i]-61.388) <0.1&& std::abs(GenLepPhi[i]-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<std::endl;
+////if( std::abs(GenLepEta[i]- 1.8009) < 0.1 && std::abs(GenLepPt[i]-37.348) <0.1&& std::abs(GenLepPhi[i]+0.37286)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<std::endl;
+
+////std::cout<<"EBENINAMIAQ"<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<" "<<std::endl;
+////if(LHEZChild1Id.GetSize()>0 &&LHEZChild2Id.GetSize()>0)std::cout<<LHEZChild1Id[0]<<" "<<LHEZChild2Id[0]<<" "<<   LHEZChild1Px[0]<<" "<<LHEZChild1Py[0]<<" "<<   LHEZChild2Px[0]<<" "<<LHEZChild2Py[0]<< std::endl;
+
+//        if (std::abs(GenDressedLepton_eta[i]) > _eta_cut /*|| !GenPart_statusFlags[i] & isPrompt*/|| GenDressedLepton_hasTauAnc[i] ||GenPart_status[i]!=1 /*|| GenLepTauProd->at(i)*/) {
+//            continue;
+//        }
+//        l.v.SetPtEtaPhiM(GenDressedLepton_pt[i], GenDressedLepton_eta[i], GenDressedLepton_phi[i], GenDressedLepton_mass[i]);
+//        l.raw_v = l.v;
+//        l.charge = GenDressedLepton_pdgId[i]/std::abs(GenDressedLepton_pdgId[i]);
+//        l.pdgid = GenDressedLepton_pdgId[i];
+
+//        if (l.v.Pt() < _pt_cut) {
+//           continue;
+//        }
+//        genleps.push_back(l);
+//    }
+//    std::sort(genleps.begin(), genleps.end(), [](const lepton &lhs, const lepton &rhs)
+//        {
+//            return lhs.v.Pt() > rhs.v.Pt();
+//        }
+//    );
+//    return genleps;
 }
 void genleps::fill(util::histo_set &h,
                  const std::string &tag,

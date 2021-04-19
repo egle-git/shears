@@ -186,81 +186,81 @@ add_executable(dyjets-loop Main/dyjets-loop.cc Sources/dyjets_analyzer.cc)
 target_link_libraries(dyjets-loop PRIVATE DYJets-data)
 target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
 
-add_executable(dyjets-sample-weights Main/dyjets-sample-weights.cc)
-target_link_libraries(dyjets-sample-weights PRIVATE DYJets-data)
-target_link_libraries(dyjets-sample-weights PRIVATE DYJets-physics)
+#add_executable(dyjets-sample-weights Main/dyjets-sample-weights.cc)
+#target_link_libraries(dyjets-sample-weights PRIVATE DYJets-data)
+#target_link_libraries(dyjets-sample-weights PRIVATE DYJets-physics)
 
 ###################################################################################################
 # Legacy library
 ###################################################################################################
 
-add_library(DYJets-legacy
-    Sources/ArgParser.cc
-    Sources/BLUEMeth.cc
-    Sources/BTagCalibrationStandalone.cc
-    Sources/Combination.cc
-    Sources/Config.cc
-    Sources/ConfigVJets.cc
-    Sources/fixYscale.cc
-    Sources/functions.cc
-    Sources/getFilesAndHistogramsZJets.cc
-    Sources/HistoSetZJets.cc
-    Sources/JetCorrectionUncertainty.cc
-    Sources/JetCorrectorParameters.cc
-    Sources/JetResolution.cc
-    Sources/JetResolutionObject.cc
-    Sources/printTable.cc
-    Sources/PlotSettings.cc
-    Sources/RecoComparison.cc
-    Sources/ResultTables.cc
-    Sources/RoccoR.cc
-    Sources/rootFunctions.cc
-    Sources/SectionedConfig.cc
-    Sources/SimpleJetCorrectionUncertainty.cc
-    Sources/TextTools.cc
-    Sources/Uncertainties.cc
-    Sources/variablesOfInterestZJets.cc
+#add_library(DYJets-legacy
+#    Sources/ArgParser.cc
+#    Sources/BLUEMeth.cc
+#    Sources/BTagCalibrationStandalone.cc
+#    Sources/Combination.cc
+#    Sources/Config.cc
+#    Sources/ConfigVJets.cc
+#    Sources/fixYscale.cc
+#    Sources/functions.cc
+#    Sources/getFilesAndHistogramsZJets.cc
+#    Sources/HistoSetZJets.cc
+#    Sources/JetCorrectionUncertainty.cc
+#    Sources/JetCorrectorParameters.cc
+#    Sources/JetResolution.cc
+#    Sources/JetResolutionObject.cc
+#    Sources/printTable.cc
+#    Sources/PlotSettings.cc
+#    Sources/RecoComparison.cc
+#    Sources/ResultTables.cc
+#    Sources/RoccoR.cc
+#    Sources/rootFunctions.cc
+#    Sources/SectionedConfig.cc
+#    Sources/SimpleJetCorrectionUncertainty.cc
+#    Sources/TextTools.cc
+#    Sources/Uncertainties.cc
+#    Sources/variablesOfInterestZJets.cc
 
-    # Some sources shared with the new code
-    Sources/catalog.cc
-    Sources/logging.cc
-    Sources/standalone_LumiReWeighting.cc
-    Sources/tables.cc
-)
+#    # Some sources shared with the new code
+#    Sources/catalog.cc
+#    Sources/logging.cc
+#    Sources/standalone_LumiReWeighting.cc
+#    Sources/tables.cc
+#)
 
-# Required headers
-target_include_directories(DYJets-legacy PUBLIC Includes ${CMAKE_BINARY_DIR}/Includes)
-target_include_directories(DYJets-legacy SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_include_directories(DYJets-legacy SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
+## Required headers
+#target_include_directories(DYJets-legacy PUBLIC Includes ${CMAKE_BINARY_DIR}/Includes)
+#target_include_directories(DYJets-legacy SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
+#target_include_directories(DYJets-legacy SYSTEM PUBLIC ${ROOT_INCLUDE_DIRS})
 
-# Dependencies
-target_link_libraries(DYJets-legacy PUBLIC ${ROOT_LIBRARIES})
-target_link_libraries(DYJets-legacy PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries(DYJets-legacy PUBLIC RooUnfold)
-target_link_libraries(DYJets-legacy PUBLIC yaml-cpp)
+## Dependencies
+#target_link_libraries(DYJets-legacy PUBLIC ${ROOT_LIBRARIES})
+#target_link_libraries(DYJets-legacy PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+#target_link_libraries(DYJets-legacy PUBLIC RooUnfold)
+#target_link_libraries(DYJets-legacy PUBLIC yaml-cpp)
 
-###################################################################################################
-# Legacy targets
-###################################################################################################
+####################################################################################################
+## Legacy targets
+####################################################################################################
 
-add_executable(plotCrossSections Main/plotCrossSections.cc)
-target_link_libraries(plotCrossSections PRIVATE DYJets-legacy)
+#add_executable(plotCrossSections Main/plotCrossSections.cc)
+#target_link_libraries(plotCrossSections PRIVATE DYJets-legacy)
 
-add_executable(plotRespMatrix Sources/plotRespMatrix.cc)
-target_link_libraries(plotRespMatrix PRIVATE DYJets-legacy)
+#add_executable(plotRespMatrix Sources/plotRespMatrix.cc)
+#target_link_libraries(plotRespMatrix PRIVATE DYJets-legacy)
 
-add_executable(runIntegralCheck Main/runIntegralCheck.cc)
-target_link_libraries(runIntegralCheck PRIVATE DYJets-legacy)
+#add_executable(runIntegralCheck Main/runIntegralCheck.cc)
+#target_link_libraries(runIntegralCheck PRIVATE DYJets-legacy)
 
-add_executable(runRecoComparison Main/runRecoComparison.cc)
-target_link_libraries(runRecoComparison PRIVATE DYJets-legacy)
+#add_executable(runRecoComparison Main/runRecoComparison.cc)
+#target_link_libraries(runRecoComparison PRIVATE DYJets-legacy)
 
-add_executable(runUnfoldingZJets Main/runUnfoldingZJets.cc Sources/UnfoldingZJets.cc)
-target_link_libraries(runUnfoldingZJets PRIVATE DYJets-legacy)
+#add_executable(runUnfoldingZJets Main/runUnfoldingZJets.cc Sources/UnfoldingZJets.cc)
+#target_link_libraries(runUnfoldingZJets PRIVATE DYJets-legacy)
 
-add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
-target_compile_options(runZJets_newformat PRIVATE -fno-var-tracking-assignments) # Unfortunate :'(
-target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)
+#add_executable(runZJets_newformat Main/runZJets_newformat.cc Sources/ZJets_newformat.cc)
+#target_compile_options(runZJets_newformat PRIVATE -fno-var-tracking-assignments) # Unfortunate :'(
+#target_link_libraries(runZJets_newformat PRIVATE DYJets-legacy)
 
-add_executable(testDecompVar Sources/testDecompVar.cc)
-target_link_libraries(testDecompVar PRIVATE DYJets-legacy)
+#add_executable(testDecompVar Sources/testDecompVar.cc)
+#target_link_libraries(testDecompVar PRIVATE DYJets-legacy)

@@ -15,14 +15,14 @@ namespace /* anonymous */
 {
 
 static const char *const branch_names[trigger::count] = {
-    /*"TrigHltPhot"*/, "HLT_IsoTkMu24", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",/* "TrigHltEl", "TrigHltDiEl",*/
+    /*"TrigHltPhot"*/ "HLT_IsoTkMu24", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",/* "TrigHltEl", "TrigHltDiEl",*/
 };
 //Every available trigger in nano is single branch
 static std::vector<std::string> available_triggers(util::chains &chains, std::size_t trig)
 {
     const char *const branch_name = branch_names[trig];
 
-    TTree &Events = *chains._event_chain();
+    TTree &Events = *chains.events();
 
     // Fetch the mapping between position in bitfield and trigger name
 
@@ -77,91 +77,93 @@ trigger::trigger(const std::vector<std::string> &names) : _mask(0LL), _veto(0LL)
 
 bool trigger::accept(const std::string &name)
 {
-    for (std::size_t i = 0; i < _names.size(); ++i) {
-        if (_names[i] == name) {
-            _mask |= (1LL << i);
-            return true;
-        }
-    }
-    return false;
+//    for (std::size_t i = 0; i < _names.size(); ++i) {
+//        if (_names[i] == name) {
+//            _mask |= (1LL << i);
+//            return true;
+//        }
+//    }
+//    return false;
+      return true;
 }
 
 bool trigger::veto(const std::string &name)
 {
-    for (std::size_t i = 0; i < _names.size(); ++i) {
-        if (_names[i] == name) {
-            _veto |= (1LL << i);
-            return true;
-        }
-    }
-    return false;
+//    for (std::size_t i = 0; i < _names.size(); ++i) {
+//        if (_names[i] == name) {
+//            _veto |= (1LL << i);
+//            return true;
+//        }
+//    }
+//    return false;
+      return true;
 }
 
 /******************************************************************************/
 
 trigger_values::trigger_values(util::job::info &info) :
     _values({
-        TTreeReaderValue<unsigned long long>(info.reader, branch_names[0]),
-        TTreeReaderValue<unsigned long long>(info.reader, branch_names[1]),
-        TTreeReaderValue<unsigned long long>(info.reader, branch_names[2]),
-        TTreeReaderValue<unsigned long long>(info.reader, branch_names[3]),
-        TTreeReaderValue<unsigned long long>(info.reader, branch_names[4])
+//        TTreeReaderValue<unsigned long long>(info.reader, branch_names[0]),
+//        TTreeReaderValue<unsigned long long>(info.reader, branch_names[1]),
+//        TTreeReaderValue<unsigned long long>(info.reader, branch_names[2]),
+//        TTreeReaderValue<unsigned long long>(info.reader, branch_names[3]),
+//        TTreeReaderValue<unsigned long long>(info.reader, branch_names[4])
     })
 {
     // In case this assert fails: add a new reader above and increase the value.
-    static_assert(trigger::count == 5, "Yon need to add a new trigger reader");
+   // static_assert(trigger::count == 5, "Yon need to add a new trigger reader");
 }
 
 /******************************************************************************/
 
 trigger_mask::trigger_mask(util::job::info &info) : _accepts_any_trigger(false)
 {
-    for (unsigned trig = 0; trig < trigger::count; ++trig) {
-        auto trigger_names = available_triggers(info.chains, trig);
-        switch (trig) {
-        default:
-            _triggers[trig] = std::make_shared<trigger>(trigger_names);
-        }
-    }
+//    for (unsigned trig = 0; trig < trigger::count; ++trig) {
+//        auto trigger_names = available_triggers(info.chains, trig);
+//        switch (trig) {
+//        default:
+//            _triggers[trig] = std::make_shared<trigger>(trigger_names);
+//        }
+//    }
 }
 
 trigger_mask::trigger_mask(util::job::info &info, const std::string &definition, bool verbose)
     : trigger_mask(info)
 {
-    using boost::escaped_list_separator;
-    using boost::tokenizer;
+//    using boost::escaped_list_separator;
+//    using boost::tokenizer;
 
-    int accepted_count = 0;
+//    int accepted_count = 0;
 
-    // Retrieve tokens
-    escaped_list_separator<char> sep("\\", "\t ,\n\r", "\"\'");
-    tokenizer<escaped_list_separator<char>> tok(definition, sep);
-    for (auto it = tok.begin(); it != tok.end(); ++it) {
-        const std::string &token = *it;
+//    // Retrieve tokens
+//    escaped_list_separator<char> sep("\\", "\t ,\n\r", "\"\'");
+//    tokenizer<escaped_list_separator<char>> tok(definition, sep);
+//    for (auto it = tok.begin(); it != tok.end(); ++it) {
+//        const std::string &token = *it;
 
-        if (token.empty()) {
-            continue;
-        }
+//        if (token.empty()) {
+//            continue;
+//        }
 
-        if (token[0] == '^') { // Trigger is a veto
-            if (!veto(token.substr(1))) {
-                std::string msg = "Could not find trigger ";
-                msg += token.substr(1);
-                throw std::invalid_argument(msg);
-            }
-            if (verbose) std::cout << "\tVETO\t" << token.substr(1) << std::endl;
-        } else { // Regular trigger
-            accepted_count++;
-            if (!accept(token)) {
-                throw std::invalid_argument("Could not find trigger " + token);
-            }
-            if (verbose) std::cout << "\tACCEPT\t" << token << std::endl;
-        }
-    }
-    if (accepted_count == 0) {
+//        if (token[0] == '^') { // Trigger is a veto
+//            if (!veto(token.substr(1))) {
+//                std::string msg = "Could not find trigger ";
+//                msg += token.substr(1);
+//                throw std::invalid_argument(msg);
+//            }
+//            if (verbose) std::cout << "\tVETO\t" << token.substr(1) << std::endl;
+//        } else { // Regular trigger
+//            accepted_count++;
+//            if (!accept(token)) {
+//                throw std::invalid_argument("Could not find trigger " + token);
+//            }
+//            if (verbose) std::cout << "\tACCEPT\t" << token << std::endl;
+//        }
+//    }
+//    if (accepted_count == 0) {
         set_accepts_any_trigger(true);
-        if (verbose) std::cout << "\tACCEPT ANY TRIGGER" << std::endl;
-    }
+//        if (verbose) std::cout << "\tACCEPT ANY TRIGGER" << std::endl;
+//    }
 }
 
 bool trigger_mask::accept(const std::string &name)

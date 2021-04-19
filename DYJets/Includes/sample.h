@@ -33,7 +33,7 @@ class sample
     friend struct YAML::convert<data::sample>;
 
     type _type;
-    std::string _bonzai_dir;
+    std::string _nano_dir;
     std::string _catalog;
     std::string _name;
     unsigned _jobs = 1;

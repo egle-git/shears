@@ -29,14 +29,14 @@ class electrons
     };
 
   private:
-    TTreeReaderArray<float> ElPt;
-    TTreeReaderArray<float> ElEta;
-    TTreeReaderArray<float> ElPhi;
-    TTreeReaderArray<float> ElE;
-    TTreeReaderArray<float> ElCh;
-    TTreeReaderArray<float> ElEtaSc;
-    TTreeReaderArray<float> ElPfIsoRho;
-    TTreeReaderArray<unsigned> ElId;
+    TTreeReaderArray<float> Electron_pt;
+    TTreeReaderArray<float> Electron_eta;
+    TTreeReaderArray<float> Electron_phi;
+    TTreeReaderArray<float> Electron_mass;
+    TTreeReaderArray<float> Electron_charge;
+    TTreeReaderArray<float> Electron_deltaEtaSC;
+    TTreeReaderArray<float> Electron_miniPFRelIso_all;
+    TTreeReaderArray<unsigned> Electron_cutBased;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;

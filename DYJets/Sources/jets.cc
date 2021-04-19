@@ -10,19 +10,20 @@ namespace physics
 {
 
 jets::jets(util::job::info &info, const util::options &opt)
-    : JetAk04Pt(info.reader, "JetAk04Pt"),
-      JetAk04Eta(info.reader, "JetAk04Eta"),
-      JetAk04Phi(info.reader, "JetAk04Phi"),
-      JetAk04E(info.reader, "JetAk04E"),
-      JetAk04Id(info.reader, "JetAk04Id"),
-      JetAk04PuMva(info.reader, "JetAk04PuMva"),
-      JetAk04BDiscCisvV2(info.reader, "JetAk04BDiscCisvV2"),
-      JetAk04HadFlav(info.reader, "JetAk04HadFlav"),
-      EvtFastJetRho(info.reader, "EvtFastJetRho"),
-      GJetAk04Pt(info.reader, "GJetAk04Pt"),
-      GJetAk04Eta(info.reader, "GJetAk04Eta"),
-      GJetAk04Phi(info.reader, "GJetAk04Phi"),
-      GJetAk04E(info.reader, "GJetAk04E")
+    : Jet_pt(info.reader, "Jet_pt"),
+      Jet_eta(info.reader, "Jet_eta"),
+      Jet_phi(info.reader, "Jet_phi"),
+      Jet_mass(info.reader, "Jet_mass"),
+      Jet_jetId(info.reader, "Jet_jetId"),
+      Jet_puIdDisc(info.reader, "Jet_puIdDisc"),//Iti:check
+      Jet_btagCSVV2(info.reader, "Jet_btagCSVV2"),
+      Jet_hadronFlavour(info.reader, "Jet_hadronFlavour"),
+      //EvtFastJetRho(info.reader, "EvtFastJetRho"),
+      fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll"), //Iti:check
+      GenJet_pt(info.reader, "GenJet_pt"),
+      GenJet_eta(info.reader, "GenJet_eta"),
+      GenJet_phi(info.reader, "GenJet_phi"),
+      GenJet_mass(info.reader, "GenJet_mass")
 {
     configure(opt);
     m_JetResolution =
@@ -70,12 +71,12 @@ std::vector<jet> jets::getGen()
 std::vector<jet> jets::getGen(double ptmin, double rapmax)
 {
     std::vector<jet> Gjets;
-    for (unsigned i = 0; i < GJetAk04Pt.GetSize(); ++i) {
+    for (unsigned i = 0; i < GenJet_pt.GetSize(); ++i) {
         jet j;
-        if (GJetAk04Pt[i] < ptmin) {
+        if (GenJet_pt[i] < ptmin) {
             continue;
         }
-        j.v.SetPtEtaPhiE(GJetAk04Pt[i], GJetAk04Eta[i], GJetAk04Phi[i], GJetAk04E[i]);
+        j.v.SetPtEtaPhiM(GenJet_pt[i], GenJet_eta[i], GenJet_phi[i], GenJet_mass[i]);
         if (std::abs(j.v.Rapidity()) > rapmax) {
             continue;
         }
@@ -91,15 +92,15 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
     }
 
     std::vector<jet> jets;
-    for (unsigned i = 0; i < JetAk04Pt.GetSize(); ++i) {
+    for (unsigned i = 0; i < Jet_pt.GetSize(); ++i) {
         jet j;
-        if (JetAk04PuMva[i] < _pumva_cut || JetAk04Id[i] <= 0) {
+        if (Jet_puIdDisc[i] < _pumva_cut || Jet_jetId[i] <= 0) {
             continue;
         }
-        j.v.SetPtEtaPhiE(JetAk04Pt[i], JetAk04Eta[i], JetAk04Phi[i], JetAk04E[i]);
+        j.v.SetPtEtaPhiM(Jet_pt[i], Jet_eta[i], Jet_phi[i], Jet_mass[i]);
         m_JetParameters->setJetPt(j.v.Pt());
         m_JetParameters->setJetEta(j.v.Eta());
-        m_JetParameters->setRho(*EvtFastJetRho);
+        m_JetParameters->setRho(*fixedGridRhoFastjetAll);
         jetResolution = m_JetResolution->getResolution(*m_JetParameters);
         jetSF = m_JetResolutionScaleFactor->getScaleFactor(*m_JetParameters, m_Variation);
 
@@ -127,17 +128,17 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
             }
             float oldJetPt = j.v.Pt();
             float newJetPt = oldJetPt * smearFactor;
-            j.v.SetPtEtaPhiE(newJetPt, j.v.Eta(), j.v.Phi(), j.v.E() * newJetPt / oldJetPt);
+            j.v.SetPtEtaPhiM(newJetPt, j.v.Eta(), j.v.Phi(), j.v.M() * newJetPt / oldJetPt);
         }
 
         if (std::abs(j.v.Rapidity()) > _y_cut) {
             continue;
         }
         j.raw_v = j.v;
-        j.id = JetAk04Id[i];
-        j.puMva = JetAk04PuMva[i];
-        j.bdisc = JetAk04BDiscCisvV2[i];
-        j.hadflav = JetAk04HadFlav[i];
+        j.id = Jet_jetId[i];
+        j.puMva = Jet_puIdDisc[i];
+        j.bdisc = Jet_btagCSVV2[i];
+        j.hadflav = Jet_hadronFlavour[i];
 
         if (j.v.Pt() < ptcut) continue;
 

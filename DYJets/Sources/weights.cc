@@ -6,7 +6,8 @@ namespace physics
 {
 
 weights::weights(util::job::info &info)
-    : EvtWeights(info.reader, "EvtWeights"),
+    : EvtWeights(info.reader, "EvtWeights"), //I: from tuppel: EvtWeights_->push_back(genEventInfoProd->weight()); EvtWeights_->push_back(lheEvent->weights()[iw].wgt)
+//available in nano: genWeight, LHEPdfWeight, LHEReweightingWeight, LHEScaleWeight, LHEWeight, PSWeight (w_var / w_nominal), )
       _ismc(info.catalog.ismc()),
       _is_weights_sum_divided(false),
       _primary_events_total(info.catalog.primary_events()),
@@ -30,7 +31,7 @@ weights::weights(util::job::info &info)
         }
         _primary_events_in_chain += *InEvtCount;
     }
-}
+} //I: the pruner is dealing with these but I didn't menage to adapt it
 
 void weights::process_event()
 {

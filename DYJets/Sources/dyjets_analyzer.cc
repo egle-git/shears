@@ -15,7 +15,7 @@
 #include "lepton.h"
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), EvtNum(info.reader, "EvtNum"),EvtRunNum(info.reader, "EvtRunNum")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), event(info.reader, "event"),run(info.reader, "run")
 {
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
@@ -128,8 +128,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                       << (weights().ismc() ? (std::abs(mu.pdgid) == 11 ? elsf : musf) : 1.0)
                       << "\n";
         }
-        std::cout << "EvtNum "
-                  << *EvtNum
+        std::cout << "event "
+                  << *event
                   << ", weight  = "
                   << weights().global_weight()
                   << "\n";
@@ -191,7 +191,7 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
                           << l.v.Phi()
                           << "\n";
             }
-            std::cout << "EvtNum " << *EvtNum << "\n";
+            std::cout << "event " << *event << "\n";
         }
     }
 #endif // DEBUG_PRINTOUT

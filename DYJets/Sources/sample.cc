@@ -9,7 +9,7 @@
 namespace data
 {
 
-catalog sample::catalog() const { return data::catalog(_catalog, _bonzai_dir); }
+catalog sample::catalog() const { return data::catalog(_catalog, _nano_dir); }
 
 std::shared_ptr<TFile> sample::histogram_file(const std::string &analyzer_name,
                                               const std::string &directory,
@@ -68,7 +68,7 @@ template <> struct convert<data::sample>
         if (!node["bonzai dir"]) {
             throw std::runtime_error("Sample bonzai dir is not set for " + sample._name);
         }
-        sample._bonzai_dir = node["bonzai dir"].as<std::string>();
+        sample._nano_dir = node["nano dir"].as<std::string>();
 
         if (!node["catalog"]) {
             throw std::runtime_error("Sample catalog is not set for " + sample._name);

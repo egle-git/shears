@@ -9,14 +9,15 @@ namespace physics
 {
 
 electrons::electrons(util::job::info &info, const util::options &opt, util::histo_set &h)
-    : ElPt(info.reader, "ElPt"),
-      ElEta(info.reader, "ElEta"),
-      ElPhi(info.reader, "ElPhi"),
-      ElE(info.reader, "ElE"),
-      ElCh(info.reader, "ElCh"),
-      ElEtaSc(info.reader, "ElEtaSc"),
-      ElPfIsoRho(info.reader, "ElPfIsoRho"),
-      ElId(info.reader, "ElId")
+    : Electron_pt(info.reader, "Electron_pt"),
+      Electron_eta(info.reader, "Electron_eta"),
+      Electron_phi(info.reader, "Electron_phi"),
+      Electron_mass(info.reader, "Electron_mass"),
+      Electron_charge(info.reader, "Electron_charge"),
+      Electron_deltaEtaSC(info.reader, "Electron_deltaEtaSC"), //Iti: check
+      //ElPfIsoRho(info.reader, "ElPfIsoRho"),
+      Electron_miniPFRelIso_all(info.reader, "Electron_miniPFRelIso_all"),//Iti: check
+      Electron_cutBased(info.reader, "Electron_cutBased")
 {
     configure(opt);
 
@@ -56,31 +57,31 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
 {
     nVetoElecs=0;
     std::vector<lepton> electrons;
-    for (unsigned i = 0; i < ElPt.GetSize(); ++i) {
-        if(ElPt[i] >= 10&&(ElId[i] & (1 << 4))&&ElPfIsoRho[i] < 0.25)nVetoElecs++;
+    for (unsigned i = 0; i < Electron_pt.GetSize(); ++i) {
+        if(Electron_pt[i] >= 10&&(Electron_cutBased[i] & (1 << 4))&&Electron_miniPFRelIso_all[i] < 0.25)nVetoElecs++;
         lepton l;
-        if (std::abs(ElEtaSc[i]) > _eta_cut || ElPfIsoRho[i] > _iso_cut) {
+        if (std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) > _eta_cut || Electron_miniPFRelIso_all[i] > _iso_cut) {
             continue;
-        } else if (std::abs(ElEtaSc[i]) > 1.4442 && std::abs(ElEtaSc[i]) < 1.566) {
+        } else if (std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) > 1.4442 && std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) < 1.566) {
             // Veto endcap-barrel transition
             continue;
         }
-        l.v.SetPtEtaPhiE(ElPt[i], ElEta[i], ElPhi[i], ElE[i]);
-        l.raw_v.SetPtEtaPhiE(ElPt[i], ElEtaSc[i], ElPhi[i], ElE[i]);
-        l.charge = ElCh[i];
-        l.iso = ElPfIsoRho[i];
-        l.id = ElId[i];
+        l.v.SetPtEtaPhiM(Electron_pt[i], Electron_eta[i], Electron_phi[i], Electron_mass[i]);
+        l.raw_v.SetPtEtaPhiM(Electron_pt[i], (Electron_deltaEtaSC[i]+Electron_eta[i]), Electron_phi[i], Electron_mass[i]);
+        l.charge = Electron_charge[i];
+        l.iso = Electron_miniPFRelIso_all[i];
+        l.id = Electron_cutBased[i];
         l.pdgid = 11;
 
         switch (_id_cut) {
         case id::loose:
-            l.passes_id = (ElId[i] & 0x2);
+            l.passes_id = (Electron_cutBased[i] & 0x2);
             break;
         case id::medium:
-            l.passes_id = (ElId[i] & 0x4);
+            l.passes_id = (Electron_cutBased[i] & 0x4);
             break;
         case id::tight:
-            l.passes_id = (ElId[i] & 0x8);
+            l.passes_id = (Electron_cutBased[i] & 0x8);
             break;
         }
         if (!l.passes_id) {

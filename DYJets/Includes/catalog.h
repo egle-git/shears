@@ -18,8 +18,6 @@ namespace data
 class catalog
 {
     std::shared_ptr<TChain> _event_chain;
-    std::shared_ptr<TChain> _bonzai_header_chain;
-    std::shared_ptr<TChain> _bit_fields_chain;
     bool _chains_initialized;
 
     std::vector<std::string> _files;
@@ -42,7 +40,7 @@ class catalog
      * \param maxFiles The maximum number of files to be used (-1 for no limit).
      */
     explicit catalog(const std::string &filename,
-                     const std::string &bonzaiDir,
+                     const std::string &nanoDir,
                      std::size_t maxFiles = std::numeric_limits<int>::max());
 
     /// \brief Destructor
@@ -57,23 +55,6 @@ class catalog
         return _event_chain;
     }
 
-    /// \brief Returns a \c TChain pointing to bonzai header data.
-    [[deprecated]] std::shared_ptr<TChain> bonzai_header_chain()
-    {
-        if (!_chains_initialized) {
-            initialize_chains();
-        }
-        return _bonzai_header_chain;
-    }
-
-    /// \brief Returns a \c TChain pointing to bit fields header data.
-    [[deprecated]] std::shared_ptr<TChain> bit_fields_chain()
-    {
-        if (!_chains_initialized) {
-            initialize_chains();
-        }
-        return _bit_fields_chain;
-    }
 
     /// \brief Returns the list of files read from the catalog.
     std::vector<std::string> files() const { return _files; }

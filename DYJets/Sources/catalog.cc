@@ -18,8 +18,6 @@ namespace data
 
 catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std::size_t maxFiles)
     : _event_chain(std::make_shared<TChain>()),
-      _bonzai_header_chain(std::make_shared<TChain>()),
-      _bit_fields_chain(std::make_shared<TChain>()),
       _chains_initialized(false),
       _lumi(0),
       _xsec(0)
@@ -28,7 +26,7 @@ catalog::catalog(const std::string &filename, const std::string &bonzaiDir, std:
     if (filename[0] == '/' || boost::contains(filename, "://")) { // Absolute path
         fullpath = filename;
     } else {
-        fullpath = bonzaiDir + "/" + filename;
+        fullpath = nanoDir + "/" + filename;
     }
 
     if (boost::starts_with(fullpath, "/store/")) {
@@ -194,33 +192,10 @@ void catalog::initialize_chains()
 
     for (const std::string &fullpath : _files) {
         logging::debug << fullpath << std::endl;
-        std::string treePath = fullpath + "/tupel/EventTree";
-        std::string bonzaiHeaderPath = fullpath + "/tupel/BonzaiHeader";
-        std::string bonzaiBitFieldsPath = fullpath + "/tupel/BitFields";
+        std::string treePath = fullpath + "Events";
         if (_event_chain) _event_chain->Add(treePath.c_str());
-        if (_bonzai_header_chain && (isBonzai == Unknown)) {
-            // Check presence of the BonzaiHeader tree. It is checked
-            // only on the first file which can be succesfully opened
-            // assuming that all files of the catalog are the same.
             TFile *f = TFile::Open(fullpath.c_str());
-            if (f && !f->IsZombie()) {
-                if (f->GetDirectory("tupel")->FindKey("BonzaiHeader")) {
-                    _bonzai_header_chain->Add(bonzaiHeaderPath.c_str());
-                } else {
-                    logging::warn
-                        << "The tree BonzaiHeader was not found in file " << fullpath
-                        << ". We will assume we run on a boabab file and not Baobab->Bonzai "
-                        << "acceptance correction will be considered. This message can be ignored "
-                        << "if for this sample Boabab ntuples are usd as input." << std::endl;
-                }
-            }
-            if (f) {
-                delete f;
-            }
-        }
-        if (_bit_fields_chain) _bit_fields_chain->Add(bonzaiBitFieldsPath.c_str());
-    }
-
+            
     _chains_initialized = true;
     logging::info << "Chains initialized." << std::endl;
 }

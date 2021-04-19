@@ -29,9 +29,9 @@ namespace physics
 /// \brief Base class for boson-jets analyzers
 class boson_jets_analyzer
 {
-    TTreeReaderValue<unsigned> EvtRunNum;
-    TTreeReaderValue<unsigned> EvtNum;
-    TTreeReaderArray<double> EvtPrefiringweight;
+    TTreeReaderValue<unsigned> run;
+    TTreeReaderValue<unsigned> event;
+    TTreeReaderArray<double> L1PreFiringWeight_Nom; //check: Iti
 protected:
     util::event_counter counter;
     util::histo_set histo_set;

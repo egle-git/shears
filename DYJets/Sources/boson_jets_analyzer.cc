@@ -45,9 +45,9 @@ std::string get_triggers(util::job::info &info, const util::options &opt, int er
 
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
-    EvtRunNum(info.reader, "EvtRunNum"),
-    EvtNum(info.reader, "EvtNum"),
-    EvtPrefiringweight(info.reader, "EvtPrefiringweight"),
+    run(info.reader, "run"),
+    event(info.reader, "event"),
+    EvtPrefiringweight(info.reader, "L1PreFiringWeight_Nom"), //Iti: check
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _triggers(info),
@@ -110,7 +110,7 @@ void boson_jets_analyzer::operator()()
 
     if (weights().isdata()) {
         // Run number based era selection
-        if (*EvtRunNum < run_threshold) {
+        if (*run < run_threshold) {
             _era = 0;
         } else {
             _era = 1;
@@ -157,9 +157,9 @@ void boson_jets_analyzer::operator()()
     /*
      * Pre-firing weight
      */
-    if (EvtPrefiringweight.GetSize() > 0 && _pref) {
-        _weights.use_weight(EvtPrefiringweight[0]);
-    }
+    //if (EvtPrefiringweight.GetSize() > 0 && _pref) {
+      //  _weights.use_weight(EvtPrefiringweight[0]);
+    //}
 
     /*
      * Read leptons and find the boson

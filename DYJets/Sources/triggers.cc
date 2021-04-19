@@ -15,30 +15,30 @@ namespace /* anonymous */
 {
 
 static const char *const branch_names[trigger::count] = {
-    "TrigHltPhot", "TrigHltMu", "TrigHltDiMu", "TrigHltEl", "TrigHltDiEl",
+    /*"TrigHltPhot"*/, "HLT_IsoTkMu24", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",/* "TrigHltEl", "TrigHltDiEl",*/
 };
-
+//Every available trigger in nano is single branch
 static std::vector<std::string> available_triggers(util::chains &chains, std::size_t trig)
 {
     const char *const branch_name = branch_names[trig];
 
-    TTree &bitFieldsChain = *chains.bit_fields();
+    TTree &Events = *chains._event_chain();
 
     // Fetch the mapping between position in bitfield and trigger name
 
     std::vector<std::string> *names_ptr = nullptr;
 
-    if (bitFieldsChain.GetBranch(branch_name)) {
-        bitFieldsChain.SetBranchAddress(branch_name, &names_ptr);
+    if (Events.GetBranch(branch_name)) {
+        Events.SetBranchAddress(branch_name, &names_ptr);
     } else {
         std::string msg = "Cannot set the trigger bits, because the branch ";
         msg += branch_name;
-        msg += " was not found in the tree BitFields.";
+        msg += " was not found in the tree Events.";
         throw std::invalid_argument(msg);
     }
 
-    if (bitFieldsChain.GetEntry(0) <= 0) {
-        throw std::invalid_argument("Failed to read BitFields tree. Is the tree empty? "
+    if (Events.GetEntry(0) <= 0) {
+        throw std::invalid_argument("Failed to read Events tree. Is the tree empty? "
                                     "Cannot set the trigger bits.");
     }
 
@@ -51,7 +51,7 @@ static std::vector<std::string> available_triggers(util::chains &chains, std::si
 
     // The line below is needed to prevent ROOT from holding a dangling
     // pointer (which leads to memory corruption).
-    bitFieldsChain.SetBranchAddress(branch_name, nullptr);
+    Events.SetBranchAddress(branch_name, nullptr);
 
     return names;
 }

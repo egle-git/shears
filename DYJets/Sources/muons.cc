@@ -9,15 +9,15 @@ namespace physics
 {
 
 muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h)
-    : MuPt(info.reader, "MuPt"),
-      MuEta(info.reader, "MuEta"),
-      MuPhi(info.reader, "MuPhi"),
-      MuE(info.reader, "MuE"),
-      MuCh(info.reader, "MuCh"),
-      MuPfIso(info.reader, "MuPfIso"),
-      MuTkLayerCnt(info.reader, "MuTkLayerCnt"),
-      MuId(info.reader, "MuId"),
-      MuIdTight(info.reader, "MuIdTight")
+    : Muon_pt(info.reader, "Muon_pt"),
+      Muon_eta(info.reader, "Muon_eta"),
+      Muon_phi(info.reader, "Muon_phi"),
+      Muon_mass(info.reader, "Muon_mass"),
+      Muon_charge(info.reader, "Muon_charge"),
+      Muon_pfRelIso04_all(info.reader, "Muon_pfRelIso04_all"), //Iti: check
+      Muon_nTrackerLayers(info.reader, "Muon_nTrackerLayers"),
+      Muon_pfIsoId(info.reader, "Muon_pfIsoId"), //Iti: check
+      Muon_tightId(info.reader, "Muon_tightId")
 {
     configure(opt);
 
@@ -73,33 +73,33 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
     std::uniform_real_distribution<> uniform(0.0, 1.0);
     nVetoMuons =0 ;
     std::vector<lepton> muons;
-    for (unsigned i = 0; i < MuPt.GetSize(); ++i) {
+    for (unsigned i = 0; i < Muon_pt.GetSize(); ++i) {
        lepton l;
-        if (std::abs(MuEta[i]) > _eta_cut || MuPfIso[i] > _iso_cut) {
+        if (std::abs(Muon_eta[i]) > _eta_cut || Muon_pfRelIso04_all[i] > _iso_cut) {
             continue;
         }
-        l.v.SetPtEtaPhiE(MuPt[i], MuEta[i], MuPhi[i], MuE[i]);
+        l.v.SetPtEtaPhiE(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
         l.raw_v = l.v;
-        l.charge = MuCh[i];
-        l.iso = MuPfIso[i];
-        l.id = MuId[i];
+        l.charge = Muon_charge[i];
+        l.iso = Muon_pfRelIso04_all[i];
+        l.id = Muon_pfIsoId[i];
         l.pdgid = 13;
 #ifdef DEBUG_PRINTOUT
-        l.tkLayerCnt = MuTkLayerCnt[i];
+        l.tkLayerCnt = Muon_nTrackerLayers[i];
 #endif // DEBUG_PRINTOUT
 
         switch (_id_cut) {
         case id::loose:
-            l.passes_id = (MuId[i] & 1);
+            l.passes_id = (Muon_pfIsoId[i] & 2);
             break;
         case id::medium:
-            l.passes_id = (MuId[i] & 2);
+            l.passes_id = (Muon_pfIsoId[i] & 3);
             break;
         case id::tight:
-            l.passes_id = (MuIdTight[i] & 1);
+            l.passes_id = (Muon_tightId[i] & 4);
             break;
         case id::custom:
-            l.passes_id = (MuId[i] & 8);
+            l.passes_id = (Muon_pfIsoId[i] & 6);
             break;
         }
         if (!l.passes_id) {
@@ -125,7 +125,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  l.v.Pt(),
                                                  l.v.Eta(),
                                                  l.v.Phi(),
-                                                 MuTkLayerCnt[i],
+                                                 Muon_nTrackerLayers[i],
                                                  gll.v.Pt(),
 //                                                 uniform(rng),
 						gRandom->Rndm(),
@@ -142,7 +142,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
                                                  l.v.Pt(),
                                                  l.v.Eta(),
                                                  l.v.Phi(),
-                                                 MuTkLayerCnt[i],
+                                                 Muon_nTrackerLayers[i],
 //  0.75,                                          
 //  0.75,                                          
 

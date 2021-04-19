@@ -19,8 +19,8 @@ namespace po = boost::program_options;
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
     physics::zfinder _zfinder;
-    TTreeReaderValue<unsigned> EvtNum;
-    TTreeReaderValue<unsigned> EvtRunNum;
+    TTreeReaderValue<unsigned> event;
+    TTreeReaderValue<unsigned> run;
 
   public:
     /// \brief Constructor.

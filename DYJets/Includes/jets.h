@@ -32,20 +32,20 @@ class jet
 /// \brief Handles jets.
 class jets
 {
-    TTreeReaderArray<float> JetAk04Pt;
-    TTreeReaderArray<float> JetAk04Eta;
-    TTreeReaderArray<float> JetAk04Phi;
-    TTreeReaderArray<float> JetAk04E;
-    TTreeReaderArray<float> JetAk04Id;
-    TTreeReaderArray<float> JetAk04PuMva;
-    TTreeReaderArray<float> JetAk04BDiscCisvV2;
-    TTreeReaderArray<float> JetAk04HadFlav;
-    TTreeReaderValue<float> EvtFastJetRho;
+    TTreeReaderArray<float> Jet_pt;
+    TTreeReaderArray<float> Jet_eta;
+    TTreeReaderArray<float> Jet_phi;
+    TTreeReaderArray<float> Jet_mass;
+    TTreeReaderArray<float> Jet_jetId;
+    TTreeReaderArray<float> Jet_puIdDisc;
+    TTreeReaderArray<float> Jet_btagCSVV2;
+    TTreeReaderArray<float> Jet_hadronFlavour;
+    TTreeReaderValue<float> fixedGridRhoFastjetAll;
 
-    TTreeReaderArray<float> GJetAk04Pt;
-    TTreeReaderArray<float> GJetAk04Eta;
-    TTreeReaderArray<float> GJetAk04Phi;
-    TTreeReaderArray<float> GJetAk04E;
+    TTreeReaderArray<float> GenJet_pt;
+    TTreeReaderArray<float> GenJet_eta;
+    TTreeReaderArray<float> GenJet_phi;
+    TTreeReaderArray<float> GenJet_mass;
 
     JME::JetResolution *m_JetResolution;
     JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;

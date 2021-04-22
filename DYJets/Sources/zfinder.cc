@@ -99,7 +99,8 @@ bool zfinder::valid(const dilepton &candidate) const
     } else if (_charge_mode == charge_mode::same_sign && candidate.charge_product < 0) {
         return false;
     }
-
+    //cout <<"Zfinder, charge prod: " <<candidate.charge_product << ", mass: " << candidate.v.M() <<endl;
+    
     // Check flavor
     if (_flavor_mode == flavor_mode::same &&
         std::abs(candidate.a.pdgid) != std::abs(candidate.b.pdgid)) {

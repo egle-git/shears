@@ -29,8 +29,16 @@ class muons
         loose,  ///< \brief Loose ID
         medium, ///< \brief Medium ID
         tight,  ///< \brief Tight ID
-        custom, ///< \brief Custom ID
     };
+
+    enum class iso
+    {
+        veryloose,
+        loose,  ///< \brief Loose ID
+        medium, ///< \brief Medium ID
+        tight,  ///< \brief Tight ID
+    };
+
 
   private:
     TTreeReaderArray<float> Muon_pt;
@@ -42,10 +50,12 @@ class muons
     TTreeReaderArray<int> Muon_nTrackerLayers;
     TTreeReaderArray<float> Muon_pfRelIso04_all;
     TTreeReaderArray<bool> Muon_tightId;
+    TTreeReaderArray<bool> Muon_mediumId;
+    TTreeReaderArray<bool> Muon_looseId;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
-    double _iso_cut = 0.25;
+    iso _iso_cut = iso::tight;
     id _id_cut = id::tight;
 
     bool _id_sf_enabled = true;

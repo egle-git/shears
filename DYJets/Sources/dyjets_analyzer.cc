@@ -262,7 +262,9 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
 
     if (muons.size() >= 2) {
         counter.count("With two good muons", weights().global_weight());
+        
     }
+    //cout << "mu size" <<muons.size() << endl;
     if (electrons.size() >= 2) {
         counter.count("With two good electrons", weights().global_weight());
     }
@@ -292,6 +294,19 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
     if (leptons.size() < 2) {
         return {};
     }
+    
+//    std::cout << "Event no, Mu pt, Mu eta "
+//                      << setprecision(5)
+//                      << *event
+//                      << ", "
+//                      << leptons[0].v.Pt()
+//                      << ", "
+//                      << leptons[1].v.Pt()
+//                      << ", "
+//                      << leptons[0].v.Eta()
+//                      << ", "
+//                      << leptons[1].v.Eta()
+//                      << "\n";
 
     if (_zfinder.get_flavor_mode() != zfinder::flavor_mode::emu && leptons[0].v.Pt() < 25) {
         return {};

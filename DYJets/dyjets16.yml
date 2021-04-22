@@ -113,12 +113,16 @@ muons:
 
     # Relative isolation cut
     # Default value: 0.25
-    isolation: 0.15
+    #isolation: 0.15
+
+    #Iso
+    # Possible values: veryloose, loose, medium, tight
+    iso: tight
 
     # Id
-    # Possible values: loose, medium, tight, custom
+    # Possible values: loose, medium, tight
     # Default value: tight
-    id: custom
+    id: tight
 
     # Whether to use the identification scale factors
     # Default value: yes

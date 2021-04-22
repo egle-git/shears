@@ -17,7 +17,9 @@ muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h
       Muon_pfRelIso04_all(info.reader, "Muon_pfRelIso04_all"), //Iti: check
       Muon_nTrackerLayers(info.reader, "Muon_nTrackerLayers"),
       Muon_pfIsoId(info.reader, "Muon_pfIsoId"), //Iti: check
-      Muon_tightId(info.reader, "Muon_tightId")
+      Muon_tightId(info.reader, "Muon_tightId"),
+      Muon_mediumId(info.reader, "Muon_mediumId"),
+      Muon_looseId(info.reader, "Muon_looseId")
 {
     configure(opt);
 
@@ -34,8 +36,8 @@ void muons::configure(const util::options &opt)
     const YAML::Node node = opt.config["muons"];
     util::set_value_safe(node, _pt_cut, "pt", "muon pt cut", [](double val) { return val >= 0; });
     util::set_value_safe(node, _eta_cut, "eta", "muon eta cut", [](double val) { return val > 0; });
-    util::set_value_safe(
-        node, _iso_cut, "isolation", "muon isolation cut", [](double val) { return val >= 0; });
+//    util::set_value_safe(
+//        node, _iso_cut, "isolation", "muon isolation cut", [](double val) { return val >= 0; });
     util::set_value_safe(node, _id_sf_enabled, "use id scale factors", "id scale factors toggle");
     util::set_value_safe(
         node, _iso_sf_enabled, "use isolation scale factors", "isolation scale factors toggle");
@@ -60,10 +62,22 @@ void muons::configure(const util::options &opt)
             _id_cut = muons::id::medium;
         } else if (id == "tight") {
             _id_cut = muons::id::tight;
-        } else if (id == "custom") {
-            _id_cut = muons::id::custom;
         } else {
             throw std::invalid_argument("Unknown muon id: \"" + id + "\"");
+        }
+    }
+    if (node["iso"]) {
+        std::string iso = node["iso"].as<std::string>();
+        if (iso == "loose") {
+            _iso_cut = muons::iso::loose;
+        } else if (iso == "medium") {
+            _iso_cut = muons::iso::medium;
+        } else if (iso == "tight") {
+            _iso_cut = muons::iso::tight;
+        } else if (iso == "veryloose") {
+            _iso_cut = muons::iso::veryloose;
+        } else {
+            throw std::invalid_argument("Unknown muon Isoid: \"" + iso + "\"");
         }
     }
 }
@@ -75,37 +89,53 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
     std::vector<lepton> muons;
     for (unsigned i = 0; i < Muon_pt.GetSize(); ++i) {
        lepton l;
-        if (std::abs(Muon_eta[i]) > _eta_cut || Muon_pfRelIso04_all[i] > _iso_cut) {
+        if (std::abs(Muon_eta[i]) > _eta_cut) {
             continue;
         }
-        l.v.SetPtEtaPhiE(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
+        l.v.SetPtEtaPhiM(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
         l.raw_v = l.v;
         l.charge = Muon_charge[i];
-        l.iso = Muon_pfRelIso04_all[i];
-        l.id = Muon_pfIsoId[i];
+        l.iso = Muon_pfIsoId[i];
+        l.id = Muon_looseId[i];
         l.pdgid = 13;
+        
 #ifdef DEBUG_PRINTOUT
         l.tkLayerCnt = Muon_nTrackerLayers[i];
 #endif // DEBUG_PRINTOUT
 
         switch (_id_cut) {
         case id::loose:
-            l.passes_id = (Muon_pfIsoId[i] & 2);
+            l.passes_id = Muon_looseId[i];
             break;
         case id::medium:
-            l.passes_id = (Muon_pfIsoId[i] & 3);
+            l.passes_id = Muon_mediumId[i];
             break;
         case id::tight:
-            l.passes_id = (Muon_tightId[i] & 4);
-            break;
-        case id::custom:
-            l.passes_id = (Muon_pfIsoId[i] & 6);
+            l.passes_id = Muon_tightId[i];
             break;
         }
         if (!l.passes_id) {
             continue;
         }
 
+        switch (_iso_cut) {
+        case iso::veryloose:
+            l.passes_iso = (Muon_pfIsoId[i] & 1);
+            break;
+        case iso::loose:
+            l.passes_iso = (Muon_pfIsoId[i] & 2);
+            break;
+        case iso::medium:
+            l.passes_iso = (Muon_pfIsoId[i] & 3);
+            break;
+        case iso::tight:
+            l.passes_iso = (Muon_pfIsoId[i] & 4);
+            break;
+        }
+        if (!l.passes_iso) {
+            continue;
+        }
+        
         if (_roccor_enabled) {
             if (isdata) {
                 l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);

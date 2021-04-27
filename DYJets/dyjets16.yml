@@ -223,11 +223,11 @@ samples:
         #  ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
          # HLT_IsoMu24,
           #HLT_IsoTkMu24
-    #- name: DYJets
-     # type: MC
-     # jobs: 40
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-     # catalog: Bonzais-DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets
+      type: MC
+      jobs: 40
+      nano dir: .
+      catalog: Catalog2016_MC.txt
     #- name: DYJets-10to50
      # type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs

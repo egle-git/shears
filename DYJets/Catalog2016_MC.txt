@@ -1,0 +1,26 @@
+# primary dataset: /DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/RunIISummer20UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM
+# (incomplete)
+* data type: mc
+* primary events: 1 
+* primary files: 1
+* lumi: -1
+* sample xsec: 
+
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/207F3D31-EA67-724F-9BB0-DAD3209545C4.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/3106E755-4881-B44C-AA66-1F2EDC528B04.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/34836B21-1AF0-F047-9EE7-372F3A10DCA6.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/A90B7C74-9EC0-E245-9F26-F83AC8BA4377.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/D8F9619C-2491-4345-90F4-79406CF61778.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/D9D72A57-3FC3-4B41-8115-192E9AFE0E8B.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/F433A3D3-1734-A54D-996A-EE5087C2A8FB.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/03702DD7-4827-FC44-86E4-881397B9550F.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/126137B4-3405-8D4A-85B7-B17BCCD4AE19.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/310D1B85-B9C3-4B46-8644-F9A486EAFFF0.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/75CE6C43-6F60-E24C-BFA9-E5B2B17B0F32.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/7E749FF1-8C61-4247-A7E6-70B2732BB213.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/97CA09C1-D5D1-3542-8CFE-991E87D4DDCF.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/10000/EA25558C-88CA-D54A-94AA-F35530AB2CBB.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/20000/491E8DBF-45C0-2445-B3FB-92996FF0E14A.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/20000/642F0B23-3891-404D-A0D2-09FAF6B7DCE0.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/20000/D2E8D557-BC6C-4647-AD90-FF04056A6F41.root
+root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/20000/D796C3BA-6DC4-194D-94EA-BFDD208014C7.root

@@ -1,6 +1,7 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -50,6 +51,30 @@ class job
         data::sample sample;
         util::chains chains;
         TTreeReader reader;
+
+        /**
+         * \brief Initalizes a TTreeReaderValue if the branch is present, 
+         *        returns nullopt otherwise
+         *
+         * This function can be used to initialize a variable of type 
+         * @c std::optional<TTreeReaderValue<...>>. It is used as follows in
+         * constructors:
+         *
+         *     genWeight(info.init_optional_branch<decltype(genWeight)>("genWeight")),
+         *
+         * The same function can be used with @c TTreeReaderArray.
+         */
+        template<typename T>
+        auto init_optional_branch(const char *name)
+        {
+            // We test whether the branch is present. If it is, we create the 
+            // reader (using std::move because TTreeReaderX classes aren't 
+            // copyable). If not, we return an empty optional.
+            return reader.GetTree()->GetBranch(name) != nullptr
+                ? std::move(
+                    std::make_optional<typename T::value_type>(reader, name))
+                : std::nullopt;
+        }
     };
 
   private:

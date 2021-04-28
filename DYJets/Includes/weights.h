@@ -8,6 +8,8 @@
 #include <TTreeReader.h>
 #include <TTreeReaderArray.h>
 
+#include <optional>
+
 namespace physics
 {
 
@@ -19,7 +21,7 @@ namespace physics
  */
 class weights
 {
-    //TTreeReaderArray<double> genWeight;
+    std::optional<TTreeReaderArray<float>> genWeight;
 
     bool _ismc;
 
@@ -45,10 +47,10 @@ class weights
     void write(util::histo_set *histos);
 
     /// \brief Returns the size of the current weight vector.
-    std::size_t weights_count() { return 1; }
+    std::size_t weights_count() { return genWeight ? genWeight->GetSize() : 0; }
 
     /// \brief Returns the contents of the current weight vector at index \c i (checked).
-    double weight_at(std::size_t i) { return 1; }
+    double weight_at(std::size_t i) { return genWeight->At(i); }
 
     /// \brief Returns the gen-level weight of the event.
     double gen_weight() const { return _gen_weight; }

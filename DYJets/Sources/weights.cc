@@ -6,7 +6,8 @@ namespace physics
 {
 
 weights::weights(util::job::info &info)
-    : //genWeight(info.reader, "genWeight"), //I: from tuppel: EvtWeights_->push_back(genEventInfoProd->weight()); EvtWeights_->push_back(lheEvent->weights()[iw].wgt)
+    : genWeight(info.init_optional_branch<decltype(genWeight)>("genWeight")),
+//I: from tuppel: EvtWeights_->push_back(genEventInfoProd->weight()); EvtWeights_->push_back(lheEvent->weights()[iw].wgt)
 //available in nano: genWeight, LHEPdfWeight, LHEReweightingWeight, LHEScaleWeight, LHEWeight, PSWeight (w_var / w_nominal), )
       _ismc(info.catalog.ismc()),
       
@@ -14,8 +15,8 @@ weights::weights(util::job::info &info)
       _xsec(info.catalog.xsec()),
       _lumi(info.catalog.lumi())
 {
-
-} 
+}
+ 
 void weights::process_event()
 {
     if (weights_count() > 0) {

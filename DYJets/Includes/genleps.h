@@ -25,7 +25,7 @@ class genleps
   public:
 
   private:
-std::optional<TTreeReaderArray<float>> genWeight;
+
 
     std::optional<TTreeReaderArray<float>> GenDressedLepton_pt;
     std::optional<TTreeReaderArray<float>> GenDressedLepton_eta;

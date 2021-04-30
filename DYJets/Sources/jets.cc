@@ -19,11 +19,11 @@ jets::jets(util::job::info &info, const util::options &opt)
       Jet_btagCSVV2(info.reader, "Jet_btagCSVV2"),
       //Jet_hadronFlavour(info.reader, "Jet_hadronFlavour"),
       //EvtFastJetRho(info.reader, "EvtFastJetRho"),
-      fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll") //Iti:check
-      //GenJet_pt(info.reader, "GenJet_pt"),
-      //GenJet_eta(info.reader, "GenJet_eta"),
-      //GenJet_phi(info.reader, "GenJet_phi"),
-      //GenJet_mass(info.reader, "GenJet_mass")
+      fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll"), //Iti:check
+      GenJet_pt(info.init_optional_branch<decltype(GenJet_pt)>("GenJet_pt")),
+      GenJet_eta(info.init_optional_branch<decltype(GenJet_eta)>("GenJet_eta")),
+      GenJet_phi(info.init_optional_branch<decltype(GenJet_eta)>("GenJet_phi")),
+      GenJet_mass(info.init_optional_branch<decltype(GenJet_eta)>("GenJet_mass"))
 {
     configure(opt);
     m_JetResolution =
@@ -71,17 +71,17 @@ std::vector<jet> jets::getGen()
 std::vector<jet> jets::getGen(double ptmin, double rapmax)
 {
     std::vector<jet> Gjets;
-//    for (unsigned i = 0; i < GenJet_pt.GetSize(); ++i) {
-//        jet j;
-//        if (GenJet_pt[i] < ptmin) {
-//            continue;
-//        }
-//        j.v.SetPtEtaPhiM(GenJet_pt[i], GenJet_eta[i], GenJet_phi[i], GenJet_mass[i]);
-//        if (std::abs(j.v.Rapidity()) > rapmax) {
-//            continue;
-//        }
-//        Gjets.push_back(j);
-//    }
+    for (unsigned i = 0; i < GenJet_pt->GetSize(); ++i) {
+        jet j;
+        if (GenJet_pt->At(i) < ptmin) {
+            continue;
+        }
+        j.v.SetPtEtaPhiM(GenJet_pt->At(i), GenJet_eta->At(i), GenJet_phi->At(i), GenJet_mass->At(i));
+        if (std::abs(j.v.Rapidity()) > rapmax) {
+            continue;
+        }
+        Gjets.push_back(j);
+    }
     return Gjets;
 }
 

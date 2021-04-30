@@ -42,10 +42,10 @@ class jets
     //TTreeReaderArray<float> Jet_hadronFlavour;
     TTreeReaderValue<float> fixedGridRhoFastjetAll;
 
-    //TTreeReaderArray<float> GenJet_pt;
-    //TTreeReaderArray<float> GenJet_eta;
-    //TTreeReaderArray<float> GenJet_phi;
-    //TTreeReaderArray<float> GenJet_mass;
+    std::optional<TTreeReaderArray<float>> GenJet_pt;
+    std::optional<TTreeReaderArray<float>> GenJet_eta;
+    std::optional<TTreeReaderArray<float>> GenJet_phi;
+    std::optional<TTreeReaderArray<float>> GenJet_mass;
 
     JME::JetResolution *m_JetResolution;
     JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;

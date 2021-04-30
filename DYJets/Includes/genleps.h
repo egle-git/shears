@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <TTreeReaderArray.h>
-
+#include <optional>
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
@@ -25,14 +25,16 @@ class genleps
   public:
 
   private:
-//    TTreeReaderArray<float> GenDressedLepton_pt;
-//    TTreeReaderArray<float> GenDressedLepton_eta;
-//    TTreeReaderArray<float> GenDressedLepton_phi;
-//    TTreeReaderArray<float> GenDressedLepton_mass;
-//    TTreeReaderArray<int> GenPart_status;
-//    TTreeReaderArray<int> GenDressedLepton_pdgId;
-//    TTreeReaderArray<int> GenPart_statusFlags;
-//    TTreeReaderValue<std::vector<bool>> GenDressedLepton_hasTauAnc;
+std::optional<TTreeReaderArray<float>> genWeight;
+
+    std::optional<TTreeReaderArray<float>> GenDressedLepton_pt;
+    std::optional<TTreeReaderArray<float>> GenDressedLepton_eta;
+    std::optional<TTreeReaderArray<float>> GenDressedLepton_phi;
+    std::optional<TTreeReaderArray<float>> GenDressedLepton_mass;
+    std::optional<TTreeReaderArray<int>> GenPart_status;
+    std::optional<TTreeReaderArray<int>> GenDressedLepton_pdgId;
+    std::optional<TTreeReaderArray<int>> GenPart_statusFlags;
+    std::optional<TTreeReaderArray<bool>> GenDressedLepton_hasTauAnc;
     //TTreeReaderArray<int> LHEZChild1Id;
     //TTreeReaderArray<int> LHEZChild2Id;
     //TTreeReaderArray<float> LHEZChild1Px;
@@ -70,6 +72,7 @@ class genleps
 
     /// \brief Writes histograms to the current directory.
     void write();
+
 };
 } // namespace physics
 

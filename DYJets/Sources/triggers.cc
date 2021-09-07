@@ -183,12 +183,8 @@ bool trigger_mask::accept(TTreeReader &tr, const std::vector<std::string> &names
 
 bool trigger_mask::veto(const std::string &name)
 {
-    for (auto &trig : _triggers) {
-        if (trig->veto(name)) {
-            return true;
-        }
-    }
-    return false;
+    return true;
+    //FIXME please
 }
 
 bool trigger_mask::veto(const std::vector<std::string> &names)

@@ -32,7 +32,7 @@ trigger_mask::trigger_mask(util::job::info &info, const std::string &definition,
         }
 
         if (token[0] == '^') { // Trigger is a veto
-            if (!veto(token.substr(1))) {
+            if (!veto(info.reader, token.substr(1))) {
                 std::string msg = "Could not find trigger ";
                 msg += token.substr(1);
                 throw std::invalid_argument(msg);
@@ -67,17 +67,17 @@ bool trigger_mask::accept(TTreeReader &tr, const std::vector<std::string> &names
     return ok;
 }
 
-bool trigger_mask::veto(const std::string &name)
+bool trigger_mask::veto(TTreeReader &tr, const std::string &name)
 {
+    _vetoed_triggers.push_back (TTreeReaderValue<bool> (tr, name.data()));
     return true;
-    //FIXME please
 }
 
-bool trigger_mask::veto(const std::vector<std::string> &names)
+bool trigger_mask::veto(TTreeReader &tr, const std::vector<std::string> &names)
 {
     bool ok = true;
     for (auto &name : names) {
-        ok &= veto(name);
+        ok &= veto(tr, name);
     }
     return ok;
 }

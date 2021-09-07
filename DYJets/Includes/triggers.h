@@ -82,7 +82,7 @@ class trigger_mask
      * \brief Sets the given trigger path to cause \ref passes to return \c false.
      * \returns \c true if the path was found.
      */
-    bool veto(const std::string &name);
+    bool veto(TTreeReader &tr, const std::string &name);
 
     /**
      * \brief Sets all of the given trigger paths cause \ref passes to return \c false.
@@ -92,7 +92,7 @@ class trigger_mask
      *
      * \returns \c true if all paths were found.
      */
-    bool veto(const std::vector<std::string> &name);
+    bool veto(TTreeReader &tr, const std::vector<std::string> &name);
 
     /**
      * \brief Checks whether the event passes the trigger requirements.

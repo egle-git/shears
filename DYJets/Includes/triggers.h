@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 
 #include "options.h"
@@ -106,8 +107,8 @@ class trigger_values
 class trigger_mask
 {
     bool _accepts_any_trigger;
-    std::array<std::shared_ptr<trigger>, trigger::count> _triggers;
-
+    std::vector<TTreeReaderValue<bool>> _accepted_triggers;
+    std::vector<TTreeReaderValue<bool>> _vetoed_triggers;
   public:
     /**
      * \brief Constructor.
@@ -140,7 +141,7 @@ class trigger_mask
      * \brief Sets the given trigger path to be accepted by \ref passes.
      * \returns \c true if the path was found.
      */
-    bool accept(const std::string &name);
+    bool accept(TTreeReader &tr, const std::string &name);
 
     /**
      * \brief Sets all of the given trigger paths to be accepted by \ref passes.
@@ -150,7 +151,7 @@ class trigger_mask
      *
      * \returns \c true if all paths were found.
      */
-    bool accept(const std::vector<std::string> &name);
+    bool accept(TTreeReader &tr, const std::vector<std::string> &name);
 
     /// \brief Sets whether all triggers should be accepted.
     void set_accepts_any_trigger(bool enable) { _accepts_any_trigger = enable; }
@@ -181,7 +182,7 @@ class trigger_mask
      * An event passes the trigger requirement if no veto'ed trigger fired, and at least one
      * accepted trigger fired (or \c accepts_any_trigger was set).
      */
-    bool passes(const trigger_values &values) const;
+    bool passes(const trigger_values &values);
 };
 } // namespace physics
 

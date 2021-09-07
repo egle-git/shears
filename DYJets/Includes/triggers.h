@@ -17,87 +17,6 @@ namespace physics
 {
 
 /**
- * \brief Prints a list of all available triggers.
- */
-void print_available_triggers(util::chains &chains);
-
-/**
- * \brief Represents a category of related triggers.
- *
- * This class is used internally by \ref trigger_mask.
- */
-class trigger
-{
-  public:
-    /// \brief The number of trigger categories supported by the implemenation.
-    static const unsigned count = 5;
-
-  private:
-    unsigned long long _mask, _veto;
-    std::vector<std::string> _names;
-
-  public:
-    /// \brief Constructor.
-    explicit trigger(const std::vector<std::string> &names);
-
-    /// \brief Destructor.
-    virtual ~trigger();
-
-    /// \brief Sets the given trigger path to be accepted.
-    bool accept(const std::string &name);
-
-    /// \brief Sets the given trigger path to be used as a veto.
-    bool veto(const std::string &name);
-
-    /// \brief Retrieves whether the trigger is used.
-    bool used() const { return _mask != 0 || _veto != 0; }
-
-    /// \brief Retrieves the mask of accepted triggers paths.
-    unsigned long long mask() const { return _mask; }
-
-    /// \brief Retrieves the mask of vetoed triggers paths.
-    unsigned long long veto_mask() const { return _veto; }
-
-    /// \brief Returns \c true if the given \c trigger is accepted.
-    bool accepted(unsigned long long trigger) const { return (_mask & trigger) != 0; }
-
-    /// \brief Returns \c true if the given \c trigger triggers a veto.
-    bool is_veto(unsigned long long trigger) const { return (_veto & trigger) != 0; }
-};
-
-/**
- * \brief Holds values of the triggers for an event.
- *
- * This class does all the dirty job of setting up branches.
- */
-class trigger_values
-{
-  private:
-//    mutable std::array<TTreeReaderValue<unsigned long long>, trigger::count> _values;
-
-  public:
-    /**
-     * \brief Constructor.
-     * \note  Don't try to read trigger branches by yourself or you'll break
-     *        this class.
-     */
-    explicit trigger_values(util::job::info &info);
-
-    /**
-     * \brief Retrieves the value of the `i`th trigger branch without bound
-     *        checking.
-     */
-    unsigned long long operator[](std::size_t i) const { return 0 /**(_values[i])*/; }
-
-    /**
-     * \brief Retrieves the value of the `i`th trigger branch with bound
-     *        checking.
-     * \throws std::out_of_range if \c i is out of bounds.
-     */
-    unsigned long long at(std::size_t i) const { return 0 /**(_values.at(i))*/; }
-};
-
-/**
  * \brief Holds the list of triggers used in an analysis.
  *
  * This class can be used when one needs to accept events that pass any of a
@@ -176,13 +95,12 @@ class trigger_mask
     bool veto(const std::vector<std::string> &name);
 
     /**
-     * \brief Checks whether the event coorsponding to the given \c values passes the trigger
-     *        requirements.
+     * \brief Checks whether the event passes the trigger requirements.
      *
      * An event passes the trigger requirement if no veto'ed trigger fired, and at least one
      * accepted trigger fired (or \c accepts_any_trigger was set).
      */
-    bool passes(const trigger_values &values);
+    bool passes();
 };
 } // namespace physics
 

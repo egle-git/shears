@@ -46,7 +46,6 @@ private:
     util::tables _tables_eraBF;
     util::tables _tables_eraGH;
 
-    trigger_values _triggers;
     trigger_mask _mask_eraBG;
     trigger_mask _mask_eraH;
 

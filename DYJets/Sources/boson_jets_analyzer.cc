@@ -50,7 +50,6 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     L1PreFiringWeight_Nom(info.reader, "L1PreFiringWeight_Nom"), //Iti: check
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
-    _triggers(info),
     _mask_eraBG(info, get_triggers(info, opt, 0)),
     _mask_eraH(info, get_triggers(info, opt, 1)),
     _muons(info, opt, histo_set),
@@ -361,9 +360,9 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
 bool boson_jets_analyzer::passes_trigger()
 {
     if (_weights.ismc()) {
-        return _mask_eraH.passes(_triggers);
+        return _mask_eraH.passes();
     }
-    return era_select(_mask_eraBG, _mask_eraH).passes(_triggers);
+    return era_select(_mask_eraBG, _mask_eraH).passes();
 }
 
 void boson_jets_analyzer::write()

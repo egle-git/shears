@@ -3,7 +3,6 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "logging.h"
-#include "RoccoR.h"
 
 namespace physics
 {

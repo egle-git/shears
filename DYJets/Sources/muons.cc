@@ -4,6 +4,7 @@
 
 #include "logging.h"
 #include "RoccoR.h"
+#include "TRandom.h"
 
 namespace physics
 {

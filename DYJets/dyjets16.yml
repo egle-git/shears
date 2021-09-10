@@ -143,6 +143,7 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
+    rochester correction path: RoccoR2016bUL.txt
      #rochester correction path: rcdata.2016.v3
      #rochester correction path: RoccoR2017.txt.
      #rochester correction path: rcdata.2016.v3

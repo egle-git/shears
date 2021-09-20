@@ -1,0 +1,10 @@
+# primary dataset: /DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/RunIISummer20UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM
+# (incomplete) complete
+* data type: mc
+* primary events: 1 
+* primary files: 1
+* lumi: -1
+* sample xsec: 1976
+# post VFP
+ 
+/pnfs/iihe/cms/store/user/vandenbe/bonzai/mc-207F3D31-EA67-724F-9BB0-DAD3209545C4_Skim.root

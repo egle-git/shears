@@ -201,7 +201,8 @@ samples:
       type: data
       jobs: 32
       nano dir: "./"
-      catalog: Catalog2016_data.txt
+      #catalog: Catalog2016_data.txt
+      catalog: Catalog2016_bonzai_data.txt
       #triggers B-F: |
        #   HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
         #  HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
@@ -228,7 +229,8 @@ samples:
       type: MC
       jobs: 18
       nano dir: .
-      catalog: Catalog2016_MC.txt
+      #catalog: Catalog2016_MC.txt
+      catalog: Catalog2016_bonzai_MC.txt
     #- name: DYJets-10to50
      # type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs

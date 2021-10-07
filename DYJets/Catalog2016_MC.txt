@@ -5,6 +5,8 @@
 * primary files: 1
 * lumi: -1
 * sample xsec: 1976
+
+# 2016 post VFP old nano files not skimmed
  
 root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/207F3D31-EA67-724F-9BB0-DAD3209545C4.root
 root://cms-xrd-global.cern.ch//store/mc/RunIISummer20UL16NanoAODv2/DYJetsToMuMu_M-50_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/00000/3106E755-4881-B44C-AA66-1F2EDC528B04.root

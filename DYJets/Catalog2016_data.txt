@@ -1,8 +1,10 @@
-# primary dataset: DoubleMuon
+# primary dataset: DoubleMuon (outdated)
 * data type: data
 * primary events: 278336734
 * primary files: 209
 * lumi: 36321.899 
+
+#this Catalog contains some old nano files, not skimmed
 
 root://cms-xrd-global.cern.ch//store/data/Run2016B/DoubleMuon/NANOAOD/02Apr2020_ver2-v1/20000/061252C1-F27E-3A4F-8FF6-CFD0D04B54D3.root
 root://cms-xrd-global.cern.ch//store/data/Run2016B/DoubleMuon/NANOAOD/02Apr2020_ver2-v1/20000/0A5F4F7D-E1A1-1144-A40C-8D5C10DBEB30.root

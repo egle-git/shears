@@ -248,7 +248,7 @@ void data_comparison_entry::create_histo(const std::string &name, double lumi)
     _file->GetObject(name.c_str(), histo);
     if (histo != nullptr) {
         _histo.reset(dynamic_cast<TH1 *>(histo->Clone()));
-        if (_lumi != 0) { // Data
+        if (_lumi > 0) { // Data
             _histo->Scale(lumi / _lumi / _frac);
         } else { // MC
             _histo->Scale(lumi * _xsec / _wsum);

@@ -32,10 +32,10 @@ void weights::process_event()
             _is_weights_sum_divided = true;
         }*/
 
-//now disabling normalization. will need to revisit once we have exclusive samples.
-        _gen_weight = weight_at(0); // std::abs(weight_at(0));
-        _global_weight = weight_at(0); // std::abs(weight_at(0));
-        _processed_weights_sum += weight_at(0);
+// normalizing the sum weights. will need to revisit once we have exclusive samples.
+        _gen_weight = weight_at(0)/ std::abs(weight_at(0));
+        _global_weight = weight_at(0)/ std::abs(weight_at(0));
+        _processed_weights_sum += weight_at(0)/std::abs(weight_at(0));
     } else {
         _gen_weight = 1;
         _global_weight = 1;

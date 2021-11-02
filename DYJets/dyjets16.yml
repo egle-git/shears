@@ -147,6 +147,7 @@ muons:
      #rochester correction path: rcdata.2016.v3
      #rochester correction path: RoccoR2017.txt.
      #rochester correction path: rcdata.2016.v3
+
 # Good Z boson settings
 Z:
     # Low mass bound [GeV]
@@ -185,23 +186,18 @@ mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
 # of physics::trigger_mask for more details.
 triggers B-F: |
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
-    HLT_IsoMu24,
-    HLT_IsoTkMu24
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
 
 triggers G-H: |
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
-    HLT_IsoMu24,
-    HLT_IsoTkMu24
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
 
 # List of available data/MC samples
 samples:
     - name: data
       type: data
       jobs: 32
-      nano dir: "./"
-      #catalog: Catalog2016_data.txt
+      nano dir: Catalogs/2016preAPV 
       catalog: Catalog2016_bonzai_data.txt
       #triggers B-F: |
        #   HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
@@ -227,9 +223,8 @@ samples:
           #HLT_IsoTkMu24
     - name: DYJets
       type: MC
-      jobs: 18
-      nano dir: .
-      #catalog: Catalog2016_MC.txt
+      jobs: 20
+      nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_MC.txt
     #- name: DYJets-10to50
      # type: MC
@@ -281,44 +276,49 @@ samples:
       #type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
       #catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: ST-s-channel
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-ST_s-channel_4f_leptonDecays_13TeV-amcatnlo-pythia8_TuneCUETP8M1-all-VJetPruner-DMu.txt
-    #- name: ST-t-channel
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-ST_t-channel_antitop_4f_inclusiveDecays_TuneCUETP8M2T4_13TeV-powhegV2-madspin-all-VJetPruner-DMu.txt
-    #- name: STbar-tW
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
-    #- name: ST-tW
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M2T4-all-VJetPruner-DMu.txt
-    #- name: WToLNu
-     # type: background
-      #jobs: 8
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      #catalog: Bonzais-WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-all-VJetPruner-DMu.txt
-    #- name: WWTo2L2Nu
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-WWTo2L2Nu_13TeV-powheg-all-VJetPruner-DMu.txt
-    #- name: WZ
-     # type: background
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      #catalog: Bonzais-WZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
-    #- name: ZZ
-     # type: background
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-      #catalog: Bonzais-ZZ_TuneCUETP8M1_13TeV-pythia8-all-VJetPruner-DMu.txt
-    #- name: TT
-     # type: background
-     # jobs: 10
-     # bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v12.0/Catalogs/
-     # catalog: Bonzais-TT_TuneCUETP8M2T4_13TeV-powheg-pythia8-all-VJetPruner-DMu.txt
+    - name: ST-s-channel
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-s-channel.txt
+    - name: ST-t-channel
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-t-channel.txt
+    - name: STbar-tW
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_STbar-tW.txt
+    - name: ST-tW
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-tW.txt
+    - name: WToLNu
+      type: background
+      jobs: 8
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_WToLNu.txt
+    - name: WWTo2L2Nu
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_WWTo2L2Nu.txt
+    - name: WZ
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_WZ.txt
+    - name: ZZ
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_ZZ.txt
+    - name: TT
+      type: background
+      jobs: 10
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_ttbar.txt
+    - name: TauTau
+      type: background
+      jobs: 10
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_DY_TauTau.txt
 
 # Scale factors
 tables B-F:
@@ -380,10 +380,10 @@ tables G-H:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma* #rightarrow ll"
+    - legend: "Z/#gamma* #rightarrow #mu#mu"
       required: yes
-      #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
-      #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
+    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
+    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
       samples: [ DYJets ]
       color: 408 # kGreen - 8
       scale factor: 1.0
@@ -400,6 +400,10 @@ MC grouping:
     - legend: W
       samples: [ WToLNu ]
       color: 800 # kOrange
+    - legend: DY TauTau
+      samples: [ TauTau ]
+      color: 700 # ???
+
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

@@ -1,7 +1,0 @@
-# primary dataset: DoubleMuon
-* data type: data
-* primary events: 278336734
-* primary files: 1
-* lumi: 36321.899 
-
-/pnfs/iihe/cms/store/user/vandenbe/bonzai/data-0A5F4F7D-E1A1-1144-A40C-8D5C10DBEB30_Skim.root

@@ -62,7 +62,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: yes
+    use: no
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -122,7 +122,7 @@ muons:
     # Id
     # Possible values: loose, medium, tight
     # Default value: tight
-    id: tight
+    id: medium
 
     # Whether to use the identification scale factors
     # Default value: yes
@@ -130,11 +130,11 @@ muons:
 
     # Whether to use the isolation scale factors
     # Default value: yes
-    use isolation scale factors: no
+    use isolation scale factors: yes
 
     # Whether to use the tracking scale factors
     # Default value: yes
-    use tracking scale factors: yes
+    use tracking scale factors: no
 
     # Whether to use Rochester correction
     # Default value: yes
@@ -324,9 +324,11 @@ samples:
 tables B-F:
     electron id:    scalefactors_Medium_Electron_period1.txt
     electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
-    muon id:        scalefactors_Medium_Muon_period1_July.txt
+    #muon id:        scalefactors_Medium_Muon_period1_July.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
-    muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
+    muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
+    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
+    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
     emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_MediumID_RunBF.txt
     diel trigger leg1: Electron_trigger_seoul_leg1.txt
@@ -344,7 +346,9 @@ tables B-F:
 tables G-H:
     electron id:    scalefactors_Medium_Electron_period2.txt
     electron reco:  SMP_17_010_GH_MediumID_electrons.txt
-    muon id:        scalefactors_Medium_Muon_period2_July.txt
+    #muon id:        scalefactors_Medium_Muon_period2_July.txt
+    muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
+    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
     muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
     emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
@@ -391,6 +395,7 @@ MC grouping:
     - legend: "t#bar{t}"
       samples: [ TT ]
       color: 600 # kBlue
+      scale factor: 0.11
     - legend: VV
       samples: [ ZZ, WWTo2L2Nu, WZ ]
       color: 633 # kRed + 1
@@ -402,7 +407,7 @@ MC grouping:
       color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
-      color: 700 # ???
+      color: 900 # kPink
 
 
 # The file below defines the binnings for histograms relevant to the analysis.

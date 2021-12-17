@@ -23,6 +23,7 @@ class electrons
     /// \brief Represents electron IDs
     enum class id
     {
+        veto,   ///< \brief veto ID
         loose,  ///< \brief Loose ID
         medium, ///< \brief Medium ID
         tight,  ///< \brief Tight ID

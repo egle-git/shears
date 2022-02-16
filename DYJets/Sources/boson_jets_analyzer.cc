@@ -125,21 +125,25 @@ void boson_jets_analyzer::operator()()
 
     // Event
     util::matched<event_contents> evt;
+    std::vector<lepton> genleps = {};
 
-    std::vector<lepton> genleps = _genleps.get();
-    std::vector<lepton> genleptons = find_gen_boson(genleps);
+    // fill the generator level histograms only when the sample is MC
+    if( !weights().isdata() ) {
+        genleps = _genleps.get();
+        std::vector<lepton> genleptons = find_gen_boson(genleps);
 
-    if (!genleptons.empty()) {
-        // Gen boson found
-        evt.gen = event_contents();
-        evt.gen->leptons = genleptons;
-        evt.gen->boson_p = std::accumulate(
-            genleptons.begin(),
-            genleptons.end(),
-            TLorentzVector(),
-            [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
+        if (!genleptons.empty()) {
+            // Gen boson found
+            evt.gen = event_contents();
+            evt.gen->leptons = genleptons;
+            evt.gen->boson_p = std::accumulate(
+                genleptons.begin(),
+                genleptons.end(),
+                TLorentzVector(),
+                [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
 
-        _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
+            _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
+        }
     }
 
     /*

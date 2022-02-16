@@ -33,9 +33,9 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
 
     const double pi = boost::math::constants::pi<double>();
 
-    h.declare("genLepPt", "Muon pt;Muon p_{T} [GeV]", 50, 0, 200);
-    h.declare("genLepEta", "Muon eta;Muon #eta", 24, -2.4, 2.4);
-    h.declare("genLepPhi", "Muon phi;Muon #phi", 24, -pi, pi);
+    h.declare("genLepPt", "Gen lepton pt;Gen lepton p_{T} [GeV]", 50, 0, 200);
+    h.declare("genLepEta", "Gen lepton eta;Gen lepton #eta", 24, -2.4, 2.4);
+    h.declare("genLepPhi", "Gen lepton phi;Gen lepton #phi", 24, -pi, pi);
 }
 
 void genleps::configure(const util::options &opt)
@@ -50,18 +50,18 @@ std::vector<lepton> genleps::get()
 {
 //    std::cout<<"________"<<std::endl;
     std::vector<lepton> genleps;
-    return genleps;
+
+    cout << "_eta_cut = " << _eta_cut << endl;
+
     for (unsigned i = 0; i < GenDressedLepton_pt->GetSize(); ++i) {
         lepton l;
-////if( std::abs(GenLepEta[i]- 1.74) < 0.1 && std::abs(GenLepPt[i]-61.388) <0.1&& std::abs(GenLepPhi[i]-2.907)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<std::endl;
-////if( std::abs(GenLepEta[i]- 1.8009) < 0.1 && std::abs(GenLepPt[i]-37.348) <0.1&& std::abs(GenLepPhi[i]+0.37286)<0.1 )std::cout<<"IAMHEREEEEEEEEE "<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<std::endl;
+        cout << "i = " << i << ", (pt, eta, phi) = (" << GenDressedLepton_pt->At(i) << ", " << GenDressedLepton_eta->At(i) << ", " << GenDressedLepton_phi->At(i) << ")" << endl;
 
-////std::cout<<"EBENINAMIAQ"<<GenLepEta[i]<< " "<<GenLepPt[i]<<" "<<GenLepPhi[i]<<" "<<GenLepPrompt->at(i)<<" "<<GenLepTauProd->at(i)<<" "<<GenLepSt[i]<<" "<<std::endl;
-////if(LHEZChild1Id.GetSize()>0 &&LHEZChild2Id.GetSize()>0)std::cout<<LHEZChild1Id[0]<<" "<<LHEZChild2Id[0]<<" "<<   LHEZChild1Px[0]<<" "<<LHEZChild1Py[0]<<" "<<   LHEZChild2Px[0]<<" "<<LHEZChild2Py[0]<< std::endl;
-
-        if (std::abs(GenDressedLepton_eta->At(i)) > _eta_cut /*|| !GenPart_statusFlags[i] & isPrompt*/|| GenDressedLepton_hasTauAnc->At(i) ||GenPart_status->At(i)!=1 /*|| GenLepTauProd->at(i)*/) {
+        if (std::abs(GenDressedLepton_eta->At(i)) > _eta_cut || GenDressedLepton_hasTauAnc->At(i) ) {
             continue;
         }
+        cout << " ---> pass " << endl;
+
         l.v.SetPtEtaPhiM(GenDressedLepton_pt->At(i), GenDressedLepton_eta->At(i), GenDressedLepton_phi->At(i), GenDressedLepton_mass->At(i));
         l.raw_v = l.v;
         l.charge = GenDressedLepton_pdgId->At(i)/std::abs(GenDressedLepton_pdgId->At(i));
@@ -77,6 +77,8 @@ std::vector<lepton> genleps::get()
             return lhs.v.Pt() > rhs.v.Pt();
         }
     );
+    cout << "genleps.size() = " << genleps.size() << endl;
+
     return genleps;
 }
 void genleps::fill(util::histo_set &h,

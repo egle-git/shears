@@ -51,16 +51,12 @@ std::vector<lepton> genleps::get()
 //    std::cout<<"________"<<std::endl;
     std::vector<lepton> genleps;
 
-    cout << "_eta_cut = " << _eta_cut << endl;
-
     for (unsigned i = 0; i < GenDressedLepton_pt->GetSize(); ++i) {
         lepton l;
-        cout << "i = " << i << ", (pt, eta, phi) = (" << GenDressedLepton_pt->At(i) << ", " << GenDressedLepton_eta->At(i) << ", " << GenDressedLepton_phi->At(i) << ")" << endl;
 
         if (std::abs(GenDressedLepton_eta->At(i)) > _eta_cut || GenDressedLepton_hasTauAnc->At(i) ) {
             continue;
         }
-        cout << " ---> pass " << endl;
 
         l.v.SetPtEtaPhiM(GenDressedLepton_pt->At(i), GenDressedLepton_eta->At(i), GenDressedLepton_phi->At(i), GenDressedLepton_mass->At(i));
         l.raw_v = l.v;
@@ -77,7 +73,6 @@ std::vector<lepton> genleps::get()
             return lhs.v.Pt() > rhs.v.Pt();
         }
     );
-    cout << "genleps.size() = " << genleps.size() << endl;
 
     return genleps;
 }

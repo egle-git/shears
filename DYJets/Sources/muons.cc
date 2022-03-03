@@ -121,16 +121,16 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
 
         switch (_iso_cut) {
         case iso::veryloose:
-            l.passes_iso = (Muon_pfIsoId[i] & 1);
+            l.passes_iso = (Muon_pfIsoId[i] >= 1);
             break;
         case iso::loose:
-            l.passes_iso = (Muon_pfIsoId[i] & 2);
+            l.passes_iso = (Muon_pfIsoId[i] >= 2);
             break;
         case iso::medium:
-            l.passes_iso = (Muon_pfIsoId[i] & 3);
+            l.passes_iso = (Muon_pfIsoId[i] >= 3);
             break;
         case iso::tight:
-            l.passes_iso = (Muon_pfIsoId[i] & 4);
+            l.passes_iso = (Muon_pfIsoId[i] >= 4);
             break;
         }
         if (!l.passes_iso) {

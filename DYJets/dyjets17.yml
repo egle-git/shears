@@ -127,6 +127,10 @@ muons:
 
 # Good Z boson settings
 Z:
+    # leading "lepton" pT cut [GeV]
+    # Default value: 25
+    leading lepton pt: 25
+    
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 71

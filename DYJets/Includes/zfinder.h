@@ -74,6 +74,7 @@ class zfinder
     double _mass_high = std::numeric_limits<double>::max();
     charge_mode _charge_mode = charge_mode::neutral;
     flavor_mode _flavor_mode = flavor_mode::same;
+    double _leadingLepPt = 25; // default value: 25 GeV
 
   public:
     /**

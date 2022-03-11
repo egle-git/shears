@@ -308,18 +308,10 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
 //                      << leptons[1].v.Eta()
 //                      << "\n";
 
-    if (_zfinder.get_flavor_mode() != zfinder::flavor_mode::emu && leptons[0].v.Pt() < 25) {
-        return {};
-    } else if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::emu) {
-        // Since we use an SMu trigger, always cut on the muon
-        auto mu = leptons[0].pdgid == 13 ? leptons[0] : leptons[1];
-        if (mu.v.Pt() < 25) {
-            return {};
-        }
-    }
-
     counter.count("With two good leptons", weights().global_weight());
 
+    // currently, only two leptons with the highest pT is used to produce DY candidates
+    // it would be improved: check all possible pairs and select the best pair using their property (e.g. the pair with the smallest vertex chi2)
     std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
     if (candidates.size() == 0) {
         return {};
@@ -343,10 +335,6 @@ dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
         counter.count("With two good gen muons", weights().global_weight());
     } else {
         counter.count("With two good gen electrons", weights().global_weight());
-    }
-
-    if (genleps[0].v.Pt() < 25) {
-        return {};
     }
 
     std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});

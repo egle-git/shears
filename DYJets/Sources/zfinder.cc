@@ -75,6 +75,7 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
 
     util::set_value_safe(node, _mass_low, "low mass", "low mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _mass_high, "high mass", "high mass for Z finder \"" + name + "\"");
+    util::set_value_safe(node, _leadingLepPt, "leading lepton pt", "leading lepton pT for Z finder \"" + name + "\"");
 }
 
 std::vector<dilepton> zfinder::find(const std::vector<lepton> &inputs) const
@@ -116,6 +117,10 @@ bool zfinder::valid(const dilepton &candidate) const
                (std::abs(candidate.a.pdgid) != 11 || std::abs(candidate.b.pdgid) != 13)) {
         return false;
     }
+
+    // Check leading lepton pT
+    // Always "a" is a leading lepton in pT as the leptons are given after sorting in pT
+    if( candidate.a.v.Pt() < _leadingLepPt ) return false;
 
     // Check mass
     double mass = candidate.v.M();

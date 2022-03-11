@@ -150,6 +150,10 @@ muons:
 
 # Good Z boson settings
 Z:
+    # leading "lepton" pT cut [GeV]
+    # Default value: 25
+    leading lepton pt: 25
+
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 10
@@ -175,6 +179,8 @@ Z:
     #   - emu: One electron and one muon
     # Default value: same
     flavor mode: mumu
+
+
 
 # How the measurement is binned in mass
 # Default value: empty

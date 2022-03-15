@@ -282,25 +282,29 @@ samples:
       #type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
       #catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    - name: ST-s-channel
+    - name: ST_s-channel
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-s-channel.txt
-    - name: ST-t-channel
+      catalog: Catalog2016_bonzai_ST_s-channel.txt
+    - name: ST_t-channel_antitop
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-t-channel.txt
-    - name: STbar-tW
+      catalog: Catalog2016_bonzai_ST_t-channel_antitop.txt
+    - name: ST_t-channel_top
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_STbar-tW.txt
-    - name: ST-tW
+      catalog: Catalog2016_bonzai_ST_t-channel_top.txt
+    - name: ST_tW_antitop
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-tW.txt
+      catalog: Catalog2016_bonzai_ST_tW_antitop.txt
+    - name: ST_tW_top
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST_tW_top.txt
     - name: WToLNu
       type: background
-      jobs: 8
+      jobs: 4
       nano dir: Catalogs/2016preAPV/
       catalog: Catalog2016_bonzai_WToLNu.txt
     - name: WWTo2L2Nu
@@ -313,6 +317,7 @@ samples:
       catalog: Catalog2016_bonzai_WZ.txt
     - name: ZZ
       type: background
+      jobs: 5
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_ZZ.txt
     - name: TT
@@ -322,9 +327,9 @@ samples:
       catalog: Catalog2016_bonzai_ttbar.txt
     - name: TauTau
       type: background
-      jobs: 10
+      jobs: 3
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_DY_TauTau.txt
+      catalog: Catalog2016_bonzai_TauTau.txt
 
 # Scale factors
 tables B-F:
@@ -396,7 +401,6 @@ MC grouping:
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
       samples: [ DYJets ]
       color: 408 # kGreen - 8
-      scale factor: 1.0
       is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]
@@ -405,14 +409,14 @@ MC grouping:
       samples: [ ZZ, WWTo2L2Nu, WZ ]
       color: 633 # kRed + 1
     - legend: Single top
-      samples: [ ST-s-channel, ST-t-channel, STbar-tW, ST-tW ]
+      samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
     - legend: W
       samples: [ WToLNu ]
       color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
-      color: 900 # kPink
+      color: 434 # kCyan + 2
 
 
 # The file below defines the binnings for histograms relevant to the analysis.

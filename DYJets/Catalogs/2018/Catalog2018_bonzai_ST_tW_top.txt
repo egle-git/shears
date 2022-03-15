@@ -3,7 +3,7 @@
 * primary events: 7956000
 * primary files: 1
 * lumi: -1
-* sample xsec: 35.6
+* sample xsec: 35.85
 
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/background/NanoBonzai08dec_bg_ST_tW_top_2018UL/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/NanoTestPost/211208_094214/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/background/NanoBonzai08dec_bg_ST_tW_top_2018UL/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/NanoTestPost/211208_094214/0000/tree_2.root

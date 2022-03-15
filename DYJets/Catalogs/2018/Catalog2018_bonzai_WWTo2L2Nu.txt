@@ -1,9 +1,9 @@
 #primary dataset: /WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM
 * datatype: background
 * primary events: 9994000
-* primary files: 37
+* primary files: 29
 * lumi: -1
-* sample xsec: 12.21
+* sample xsec: 11.09
 
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/background/NanoBonzai06dec_bg_WW_2018UL/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NanoTestPost/211206_111546/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/background/NanoBonzai06dec_bg_WW_2018UL/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NanoTestPost/211206_111546/0000/tree_2.root

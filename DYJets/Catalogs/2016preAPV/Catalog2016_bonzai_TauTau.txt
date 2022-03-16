@@ -5,7 +5,6 @@
 * primary files: 22
 * lumi: -1
 * sample xsec: 1976 #xsdb
-# 1848 in this theory paper https://arxiv.org/pdf/1801.03535.pdf
 
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/background/NanoBonzai26oct_bg_TauTau_preVFP/DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NanoTestPost/211026_151655/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/background/NanoBonzai26oct_bg_TauTau_preVFP/DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/NanoTestPost/211026_151655/0000/tree_2.root

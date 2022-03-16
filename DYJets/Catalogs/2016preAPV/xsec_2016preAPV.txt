@@ -1,7 +1,7 @@
 # This is just a note with all the xsec used for the different Catalogs.
 # If you want to change some xsec, you have to change it in the corresponding Catalog (and here to keep it organized).
 
-# Global tag : RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic*
+# Global tag : 106X_mcRun2_asymptotic*
 
 # Sample                                                                                              xsec (pb) 
 

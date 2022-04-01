@@ -6,19 +6,25 @@
 * sample xsec: 6077.22
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/StandardModelCrossSectionsat13TeV
 
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_1.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_2.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_3.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_4.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_5.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_6.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_7.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_8.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_9.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_10.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_11.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_12.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_13.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_14.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_15.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai14fev_DYJetsToLL_2016PreL/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220214_105435/0000/tree_16.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_11.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_12.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_13.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_14.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_15.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_16.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_17.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_18.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_19.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_20.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_21.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preLegacy/mc/NanoBonzai15mars_DYJetsToLL_2016PreL_wMET/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NanoTestPost/220315_095405/0000/tree_22.root

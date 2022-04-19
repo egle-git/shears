@@ -231,7 +231,7 @@ samples:
       type: MC
       jobs: 20
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_MC.txt
+      catalog: Catalog2016_bonzai_DYJetsToMuMu.txt
     #- name: DYJets-10to50
      # type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs
@@ -302,11 +302,11 @@ samples:
       type: background
       nano dir: Catalogs/2016preAPV/
       catalog: Catalog2016_bonzai_ST_tW_top.txt
-    - name: WToLNu
+    - name: WJetsToLNu
       type: background
       jobs: 4
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_WToLNu.txt
+      catalog: Catalog2016_bonzai_WJetsToLNu.txt
     - name: WWTo2L2Nu
       type: background
       nano dir: Catalogs/2016preAPV
@@ -324,7 +324,7 @@ samples:
       type: background
       jobs: 10
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_ttbar.txt
+      catalog: Catalog2016_bonzai_TTTo2L2Nu.txt
     - name: TauTau
       type: background
       jobs: 3
@@ -412,7 +412,7 @@ MC grouping:
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
     - legend: W
-      samples: [ WToLNu ]
+      samples: [ WJetsToLNu ]
       color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]

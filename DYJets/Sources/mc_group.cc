@@ -28,7 +28,12 @@ std::unique_ptr<TH1> mc_group::get(const std::string &name)
             continue;
         }
 
+        // Pre-resetting because sometimes the previous histogram does not get cleared otherwise
+        // (Somebody fix this if you know how to implement it better)
+        sd.centry->reset_drawing_state();
+
         std::unique_ptr<TH1> histo = sd.centry->get(name, 1);
+
         if (histo == nullptr) {
             continue;
         }

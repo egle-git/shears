@@ -56,7 +56,7 @@ jets:
 
 prefiring weights:
     # Whether to apply prefiring weights
-    use: yes
+    use: no
 
 # Options of the b jet veto
 b jet veto:
@@ -95,7 +95,7 @@ electrons:
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: yes
+    use id scale factors: no
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
@@ -122,7 +122,7 @@ muons:
     # Id
     # Possible values: loose, medium, tight
     # Default value: tight
-    id: medium
+    id: tight
 
     # Whether to use the identification scale factors
     # Default value: yes
@@ -191,20 +191,20 @@ mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
 triggers B-F: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
+     HLT_IsoTkMu24,
+     HLT_IsoMu24
 
 triggers G-H: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
+    HLT_IsoTkMu24,
+    HLT_IsoMu24
 
 # List of available data/MC samples
 samples:
     - name: data
       type: data
       jobs: 32
-      nano dir: Catalogs/2016preAPV 
-      catalog: Catalog2016_bonzai_data.txt
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_data_SMu.txt
       #triggers B-F: |
        #   HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
         #  HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL

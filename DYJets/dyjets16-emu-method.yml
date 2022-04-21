@@ -1,0 +1,174 @@
+# This is the configuration file for the Higgs analysis, year 2016.
+# Please keep it organized, and don't delete comments.
+
+# Options related to output and logs
+log:
+    # Whether to use colors in the terminal.
+    #Possible values: yes|no|auto (default: auto)
+    color: auto
+
+    # Controls what's printed to the screen.
+    # Possible values: debug|info|warn|error|fatal (default: info)
+    log level: info
+
+    # Pipe logs to the given log file, comment out for no log.
+    log file: log16-emu-method.txt
+
+    # Controls what's written in the log file.
+    # Possible values: debug|info|warn|error|fatal (default: debug)
+    log file level: debug
+
+    # Whether to override ROOT's default log handler.
+    # Default value: yes
+    #override root handler: yes
+
+# Dilepton file location
+ll location: MuMu_2022-01-27_17h11/results/
+
+# emu file location
+emu location: EMu_2022-01-27_17h13/results/
+
+# same-sign emu file location
+emu same sign location: EMu_SameSign-2022-01-28_11h56/results/
+
+# Whether results are preliminary (for plots)
+preliminary: yes
+
+# List of available data/MC samples
+samples:
+    - name: data
+      type: data
+      jobs: 32
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_data_SMu.txt     
+    - name: DYJets
+      type: MC
+      jobs: 20
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_MC.txt   
+    - name: ST-s-channel
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-s-channel.txt
+    - name: ST-t-channel
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-t-channel.txt
+    - name: STbar-tW
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_STbar-tW.txt
+    - name: ST-tW
+      type: background
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_ST-tW.txt
+    - name: WToLNu
+      type: background
+      jobs: 8
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_WToLNu.txt
+    - name: WWTo2L2Nu
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_WWTo2L2Nu.txt
+    - name: WZ
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_WZ.txt
+    - name: ZZ
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_ZZ.txt
+    - name: TT
+      type: background
+      jobs: 10
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_ttbar.txt
+    - name: TauTau
+      type: background
+      jobs: 10
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_DY_TauTau.txt
+
+MC grouping:
+    - legend: "Z/#gamma* #rightarrow #mu#mu"
+      required: yes
+      samples: [ DYJets ]
+      color: 408 # kGreen - 8
+      scale factor: 1.0
+      is signal: yes
+    - legend: "t#bar{t}"
+      samples: [ TT ]
+      color: 600 # kBlue
+      scale factor: 0.11
+    - legend: VV
+      samples: [ ZZ, WWTo2L2Nu, WZ ]
+      color: 633 # kRed + 1
+    - legend: Single top
+      samples: [ ST-s-channel, ST-t-channel, STbar-tW, ST-tW ]
+      color: 616 # kMagenta
+    - legend: W
+      samples: [ WToLNu ]
+      color: 800 # kOrange
+    - legend: DY TauTau
+      samples: [ TauTau ]
+      color: 900 # kPink
+
+plots:
+    # Excluded plots
+    - selector: '^_.*'
+      produce: no
+    - selector: '.*-gen$'
+      produce: no
+    - selector: '.*-matrix$'
+      produce: no
+    - selector: '.*[12]jet.*'
+      produce: no
+    - selector: 'el.*'
+      produce: no
+    - selector: 'mu.*'
+      produce: no
+    - selector: 'genLep.*'
+      produce: no
+    - selector: 'bjet.*'
+      produce: no
+    - selector: '^decay.*'
+      produce: no
+    - selector: '^nvtx.*'
+      produce: no
+    - selector: '^jet.*'
+      produce: no
+    - selector: '.*exc.*'
+      produce: no
+    - selector: 'mass.*mass.*'
+      produce: no
+    - selector: 'nJets.*_inc.*'
+      produce: no
+    - selector: 'nJets.*_inc0jet.*'
+      produce: no
+    - selector: '^phistar.*'
+      produce: no
+    # Style changes
+    - selector: '.*'
+      ratio min: 0.601
+      ratio max: 1.399
+    - selector: '^pt.*'
+      log x: yes
+    - selector: '^mass_wide.*'
+      log x: yes
+    - selector: 'mass_inc0jet'
+      ratio min: 0.601
+      ratio max: 1.399
+    # Axis labels
+    - selector: '^mass.*'
+      x axis label: 'M_{ll}'
+      x axis unit: 'GeV'
+    - selector: '^pt.*'
+      x axis label: 'p_{T}^{ll}'
+      x axis unit: 'GeV'
+    - selector: '.+mass(.*)_(.*).*'
+      x axis detail: '$1 #leq M_{ll} < $2 GeV'
+    - selector: '.*inc(1|2)jet.*'
+      x axis detail: 'N_{jets} #geq $1'
+    - selector: '.*exc(1|2)jet.*'
+      x axis detail: 'N_{jets} = $1'

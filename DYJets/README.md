@@ -38,3 +38,20 @@ Usage
 
 Coming "soon", in the meantime take a look at the latest version of the
 [Doxygen documentation](http://homepage.iihe.ac.be/~lmoureau/shears/ci/).
+
+### eμ method
+Edit the `dyjets16-emu-method.yml` file to your liking. Most notably, set the
+input file locations. Two of them are needed and one is optional:
+* `ll location` - directory containing dilepton files (either ee or μμ) - **mandatory**
+* `emu location` - directory containing eμ files - **mandatory**
+* `emu same sign location` - directory containing same sign eμ files - only needed if you want to estimate QCD in the eμ channel
+If you do not have the same sign eμ files, you may just type in "none" in the `yml` file.
+
+The procedure can be run as follows:
+```
+bin/dyjets-bkg-est emu-method -c dyjets16-emu-method.yml -o output_directory
+```
+You can find more possible options by using the `-h` flag:
+```
+bin/dyjets-bkg-est emu-method -h
+```

@@ -18,15 +18,16 @@ class comparison_entry;
 /// \brief Describes a group of MC samples that will be added together.
 class mc_group
 {
+  public:
+    struct sample_data
+        {
+            data::sample sample;
+            std::shared_ptr<comparison_entry> centry = nullptr;
+        };
+
   private:
     friend struct YAML::convert<data::mc_group>;
-
-    struct sample_data
-    {
-        data::sample sample;
-        std::shared_ptr<comparison_entry> centry = nullptr;
-    };
-
+    
     bool _required = false;
     double _scale_factor = 1;
     int _color;
@@ -62,6 +63,12 @@ class mc_group
      * The histogram will be ready for drawing.
      */
     std::unique_ptr<TH1> get(const std::string &name);
+
+    /// \brief Returns the vector of samples (full sample data) in the this group
+    std::vector<sample_data> samples_data() { return _sample_data; }
+
+    /// \brief Returns the scale factor for this group
+    double scale_factor() { return _scale_factor; }
 
     /**
      * \brief Loads the list of groups from the configuration file.

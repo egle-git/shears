@@ -154,6 +154,22 @@ target_compile_definitions(DYJets-compare PUBLIC DYJETS_NEW_API)
 target_link_libraries(DYJets-compare PUBLIC DYJets-data)
 
 ###################################################################################################
+# Background estimation library
+###################################################################################################
+
+add_library(DYJets-bkg-est
+    Sources/mc_group.cc
+    Sources/comparison_entry.cc
+    Sources/emu_method_builder.cc
+)
+
+# Preprocessor macro to disable incompatible parts of the old code
+target_compile_definitions(DYJets-bkg-est PUBLIC DYJETS_NEW_API)
+
+# Dependencies
+target_link_libraries(DYJets-bkg-est PUBLIC DYJets-data)
+
+###################################################################################################
 # Higgs targets
 ###################################################################################################
 
@@ -173,6 +189,9 @@ target_link_libraries(higgs-loop PRIVATE DYJets-physics)
 
 add_executable(dyjets-compare Main/dyjets-compare.cc)
 target_link_libraries(dyjets-compare PRIVATE DYJets-compare)
+
+add_executable(dyjets-bkg-est Main/dyjets-bkg-est.cc)
+target_link_libraries(dyjets-bkg-est PRIVATE DYJets-bkg-est)
 
 add_executable(dyjets-matrix Main/dyjets-matrix.cc)
 target_link_libraries(dyjets-matrix PRIVATE DYJets-compare)

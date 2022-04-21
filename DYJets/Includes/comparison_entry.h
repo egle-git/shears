@@ -6,6 +6,7 @@
 #include <string>
 
 #include <THStack.h>
+#include <TList.h>
 
 #include "mc_group.h"
 #include "options.h"
@@ -91,6 +92,32 @@ class mc_comparison_entry : public comparison_entry
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
     virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
+
+    /// \brief Retrieves a histogram for a specified process from the group.
+    std::unique_ptr<TH1> get_single_proc(const std::string &name, const std::string &legend) {
+        std::unique_ptr<TH1> res = nullptr;
+        for (data::mc_group &group : _groups) {
+            if (legend == group.legend())
+                res = group.get(name);
+        }
+        if (res == nullptr)
+            util::logging::warn << "No histogram for " << legend << " found." << std::endl;
+        return res;
+    }
+
+    /// \brief Returns the vector of mc groups
+    std::vector<mc_group> groups() { return _groups; }
+
+    /// \brief Retrieves a list of all the histograms in the stack.
+    TList* get_all_hists(const std::string &name, double lumi) {
+        if (_stack == nullptr) {
+            create_stack(name, lumi);
+            if (_stack == nullptr) {
+                return nullptr;
+            }
+        }
+        return _stack->GetHists();
+    }
 
   private:
     void create_stack(const std::string &name, double lumi);

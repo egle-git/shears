@@ -1,6 +1,8 @@
 #include "boson_jets_analyzer.h"
 
 #include <algorithm>
+#include <boost/optional/optional_io.hpp>
+
 
 namespace physics
 {
@@ -26,7 +28,7 @@ std::string make_tag(double value, const std::vector<double> &bins)
 }
 
 /**
- * \brief Retrives the trigger list for the current @ref sample.
+ * \brief Retrieves the trigger list for the current @ref sample.
  */
 std::string get_triggers(util::job::info &info, const util::options &opt, int era)
 {
@@ -73,12 +75,12 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     util::set_value_safe(opt.config["b jet veto"], _bjet_veto, "use", "use b jet veto");
 
-   if (!opt.config["prefiring weights"]) {
+    if (!opt.config["prefiring weights"]) {
         throw std::runtime_error("Missing mandatory section in config file: \"prefiring weights\"");
     }
        util::set_value_safe(opt.config["prefiring weights"], _pref, "use", "use apply prefiring weights");
 
- if (opt.config["mass bins"]) {
+    if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
         std::sort(_mass_bins.begin(), _mass_bins.end());
     }
@@ -363,9 +365,9 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
 
 bool boson_jets_analyzer::passes_trigger()
 {
-    if (_weights.ismc()) {
-        return _mask_eraH.passes();
-    }
+    //if (_weights.ismc()) {
+    //    return _mask_eraH.passes();
+    //}
     return era_select(_mask_eraBG, _mask_eraH).passes();
 }
 

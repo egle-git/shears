@@ -126,7 +126,7 @@ class job
     template <class Analyzer, class... Args> inline void run(Args &... args);
 
     /**
-     * \brief Sets whether the even loop should exit gracefully on \c SIGINT (ie \c Ctrl+C).
+     * \brief Sets whether the event loop should exit gracefully on \c SIGINT (ie \c Ctrl+C).
      *
      * This setting defaults to \c true if \c stdin, \c stdout or \c stderr is a terminal, and to
      * \c false otherwise.

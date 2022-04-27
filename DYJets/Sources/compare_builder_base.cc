@@ -91,7 +91,7 @@ void compare_builder_base::build()
         cms.SetNDC();
         cms.SetText(0.1,
                     0.9,
-                    _preliminary ? "#bf{CMS} #it{Preliminary}" : "#bf{CMS}");
+                    _preliminary ? "#bf{CMS} #it{In Progress}" : "#bf{CMS}");
         cms.Draw();
 
         // Lumi label

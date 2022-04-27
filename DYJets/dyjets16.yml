@@ -143,9 +143,7 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: RoccoR2016bUL.txt
-     #rochester correction path: rcdata.2016.v3
-     #rochester correction path: RoccoR2017.txt.
+    rochester correction path: 2016preAPV/RoccoR2016aUL.txt
      #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
@@ -156,7 +154,7 @@ Z:
 
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 10
+    low mass: 50
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -184,7 +182,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
+mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 
 # Triggers
 #

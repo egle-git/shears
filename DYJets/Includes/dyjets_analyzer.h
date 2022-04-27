@@ -21,6 +21,7 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     physics::zfinder _zfinder;
     TTreeReaderValue<unsigned long long> event;
     TTreeReaderValue<unsigned> run;
+    TTreeReaderValue<unsigned> luminosityBlock;
 
   public:
     /// \brief Constructor.

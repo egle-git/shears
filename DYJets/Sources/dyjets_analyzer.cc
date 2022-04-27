@@ -13,9 +13,11 @@
 #include "cmake_config.h" // DEBUG_PRINTOUT
 #include "functions.h"
 #include "lepton.h"
+#include <boost/optional/optional_io.hpp>
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), event(info.reader, "event"),run(info.reader, "run")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), event(info.reader, "event"), run(info.reader, "run"), luminosityBlock(info.reader, "luminosityBlock")
+
 {
     counter.declare("With two good leptons");
     counter.declare("With two good electrons");
@@ -112,6 +114,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     boson_jets_analyzer::fill(tags, evt);
 
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
+    auto pt = evt.apply(&event_contents::get_boson_p).apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
+    auto rapidity = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::Rapidity);
 
 #ifdef DEBUG_PRINTOUT
     if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
@@ -198,10 +202,8 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
 
     fill_unfolded("mass", tags, mass);
     fill_unfolded("mass_wide_range", tags, mass);
-
-    auto pt = evt.apply(&event_contents::get_boson_p)
-                 .apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
     fill_unfolded("pt", tags, pt);
+    fill_unfolded("rapidity", tags, rapidity);
 
     if (!tags.rec || !evt.rec) {
         return;
@@ -262,7 +264,6 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
 
     if (muons.size() >= 2) {
         counter.count("With two good muons", weights().global_weight());
-        
     }
     //cout << "mu size" <<muons.size() << endl;
     if (electrons.size() >= 2) {
@@ -294,7 +295,7 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
     if (leptons.size() < 2) {
         return {};
     }
-    
+
 //    std::cout << "Event no, Mu pt, Mu eta "
 //                      << setprecision(5)
 //                      << *event

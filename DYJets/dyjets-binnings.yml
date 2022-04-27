@@ -99,3 +99,14 @@
   binning min: -1
   binning max: 1
   bin count: 20
+
+################################################################################
+# rapidity
+################################################################################
+
+# All
+- selector: 'rapidity.*'
+  binning: uniform
+  binning min: -2.5
+  binning max: 2.5
+  bin count: 50

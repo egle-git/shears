@@ -1,0 +1,75 @@
+# primary dataset: /MuonEG/Run2016*-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD
+* data type: data
+* primary events: 1
+* primary files: 1
+* lumi: 19520.0
+# JSON : /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt
+
+# ROOTFILES
+
+
+#RunB-ver1
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120239/0000/tree_1.root
+
+#RunB-ver2
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016B-ver2_HIPM_v1_MET_TrigObj/MuonEG/Nano/220425_120339/0000/tree_8.root
+
+#RunC
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016C-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120439/0000/tree_9.root
+
+#RunD
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016D-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120538/0000/tree_10.root
+
+#RunE
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016E-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120641/0000/tree_9.root
+
+#RunF
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai25april_MuonEG_Run2016F-HIPM_UL2016_v1_MET_TrigObj/MuonEG/Nano/220425_120742/0000/tree_11.root

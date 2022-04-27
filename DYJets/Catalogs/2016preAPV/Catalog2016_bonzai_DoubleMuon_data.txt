@@ -8,7 +8,7 @@
 # ROOTFILES
 
 #RunB-ver1
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100212/0000/tree_1.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100212/0000/tree_1.root
 #RunB-ver2
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_2.root

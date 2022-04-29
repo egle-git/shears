@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <TString.h>
 
 class TH1D;
 
@@ -18,12 +19,15 @@ class TH1D;
    \author Salvatore Rappoccio, modified by Mike Hildreth
 
 */
+
+// 2022.04.28 (Kyeongpil): get "type" as one of the arguments to use various types of weights
+
 class standalone_LumiReWeighting
 {
   public:
-    standalone_LumiReWeighting(int year = 2016,
+    standalone_LumiReWeighting(TString type = "2016_preAPV",
                                int mode = 0,
-                               int nBin = 75); // 0: central, -1: down, +1: up
+                               int nBin = 99); // 0: central, -1: down, +1: up
     virtual ~standalone_LumiReWeighting();
     double weight(int npv);
 

@@ -49,7 +49,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
                                          const util::options &opt) :
     run(info.reader, "run"),
     event(info.reader, "event"),
-    L1PreFiringWeight_Nom(info.reader, "L1PreFiringWeight_Nom"), //Iti: check
+    L1PreFiringWeight_Nom(info.reader, "L1PreFiringWeight_Nom"),
+    L1PreFiringWeight_Up(info.reader, "L1PreFiringWeight_Up"),
+    L1PreFiringWeight_Dn(info.reader, "L1PreFiringWeight_Dn"),
     _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
     _mask_eraBG(info, get_triggers(info, opt, 0)),
@@ -78,7 +80,10 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     if (!opt.config["prefiring weights"]) {
         throw std::runtime_error("Missing mandatory section in config file: \"prefiring weights\"");
     }
-       util::set_value_safe(opt.config["prefiring weights"], _pref, "use", "use apply prefiring weights");
+    util::set_value_safe(opt.config["prefiring weights"], _applyPref_, "use", "use apply prefiring weights");
+    util::set_value_safe(opt.config["prefiring weights"], _mode_pref, "mode", "mode for L1 prefiring weights (0: nominal, 1: up variation, -1: down variation");
+    if( !(_mode_pref == 0 || _mode_pref == -1 || _mode_pref == 1) )
+        throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
 
     if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
@@ -129,6 +134,10 @@ void boson_jets_analyzer::operator()()
     util::matched<event_contents> evt;
     std::vector<lepton> genleps = {};
 
+    // -- distribution for all events in MC: get the true PU distribution
+    if( !weights().isdata() )
+        _pileup.fill(histo_set, "inc0jet_fullEvent", weights());
+
     // fill the generator level histograms only when the sample is MC
     if( !weights().isdata() ) {
         genleps = _genleps.get();
@@ -162,9 +171,23 @@ void boson_jets_analyzer::operator()()
     /*
      * Pre-firing weight
      */
-    //if (EvtPrefiringweight.GetSize() > 0 && _pref) {
-      //  _weights.use_weight(EvtPrefiringweight[0]);
-    //}
+    if( _weights.ismc() && _applyPref_ ) {
+        switch (_mode_pref) {
+        case 0:
+            _weights.use_weight(*L1PreFiringWeight_Nom);
+            // cout << "l1 prefiring weight: " << *L1PreFiringWeight_Nom << endl;
+            break;
+        case 1:
+           _weights.use_weight(*L1PreFiringWeight_Up);
+            break;
+        case -1:
+            _weights.use_weight(*L1PreFiringWeight_Dn);
+            break;
+        default:
+            throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
+            break;
+        }
+    }
 
     /*
      * Read leptons and find the boson

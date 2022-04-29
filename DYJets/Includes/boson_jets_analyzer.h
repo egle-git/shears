@@ -31,7 +31,9 @@ class boson_jets_analyzer
 {
     TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned long long> event;
-    TTreeReaderArray<float> L1PreFiringWeight_Nom; //check: Iti
+    TTreeReaderValue<float> L1PreFiringWeight_Nom;
+    TTreeReaderValue<float> L1PreFiringWeight_Up;
+    TTreeReaderValue<float> L1PreFiringWeight_Dn;
 protected:
     util::event_counter counter;
     util::histo_set histo_set;
@@ -57,7 +59,8 @@ private:
     btagger _btagger;
 
     bool _bjet_veto = true;
-    bool _pref =false;
+    bool _applyPref_ = false;
+    int _mode_pref = 0; // 0: nominal, 1: up variation, -1: down variation
     std::vector<double> _mass_bins;
 
     physics::reweighing _reweighing;

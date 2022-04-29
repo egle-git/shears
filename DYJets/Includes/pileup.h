@@ -19,8 +19,8 @@ class weights;
 
 /// \brief Handles pileup
 class pileup
-{
-    //TTreeReaderValue<int> Pileup_nTrueInt;
+{    
+    std::optional<TTreeReaderValue<float>> Pileup_nTrueInt;
     TTreeReaderValue<int> PV_npvsGood;
 
     bool _reweighing_enabled = true;

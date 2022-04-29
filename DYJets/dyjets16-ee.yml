@@ -26,8 +26,13 @@ log:
 # Default value: true
 use pileup reweighing: true
 
-# Year (used for pileup)
-year: 2016
+# specify the type for the pileup
+# options:
+# - 2016_PreAPV, 2016_PostAPV
+# - 2016_PreAPV_emu, 2016_PostAPV_emu (for the data collected with the emu trigger)
+# - 2017
+# - 2018
+pileup type: 2016_PreAPV
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -57,6 +62,9 @@ jets:
 prefiring weights:
     # Whether to apply prefiring weights
     use: yes
+    # syst. variation mode
+    # 0 = nominal / 1 = up variation / -1 = down variation
+    mode: 0
 
 # Options of the b jet veto
 b jet veto:

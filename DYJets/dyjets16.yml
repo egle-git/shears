@@ -208,6 +208,26 @@ triggers G-H: |
     HLT_IsoMu24,
     HLT_IsoTkMu24
 
+# reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
+# but with pT(leading) < 24 GeV muons (muons in turn-on curve or below)
+# these events are not used due to the large SF
+# this feature is only needed for the dimuon analysis
+reject low quality muon events:
+  # reject or not (default: false)
+  use: true
+
+  # single muon triggers used
+  single muon triggers: |
+    HLT_IsoMu24, 
+    HLT_IsoTkMu24
+
+  # double muon triggers
+  double muon triggers: |
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, 
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
+
+
+
 # List of available data/MC samples
 samples:
     - name: data

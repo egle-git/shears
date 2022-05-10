@@ -51,6 +51,10 @@ private:
     trigger_mask _mask_eraBG;
     trigger_mask _mask_eraH;
 
+    // for the rejection of the low quality dimuon events
+    trigger_mask _mask_sMu;
+    trigger_mask _mask_dMu;
+
     genleps _genleps;
     muons _muons;
     electrons _electrons;
@@ -59,8 +63,11 @@ private:
     btagger _btagger;
 
     bool _bjet_veto = true;
+    bool _reject_lowQMu = false;
+
     bool _applyPref_ = false;
     int _mode_pref = 0; // 0: nominal, 1: up variation, -1: down variation
+
     std::vector<double> _mass_bins;
 
     physics::reweighing _reweighing;
@@ -151,6 +158,8 @@ protected:
 
     /// \brief Retrieves the weight information for the current event.
     const physics::weights &weights() const { return _weights; }
+
+    bool check_lowQualityMuon(const std::vector<lepton> muons);
 };
 
 } // namespace physics

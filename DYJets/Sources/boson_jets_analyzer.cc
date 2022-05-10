@@ -56,6 +56,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _genleps(info, opt, histo_set),
     _mask_eraBG(info, get_triggers(info, opt, 0)),
     _mask_eraH(info, get_triggers(info, opt, 1)),
+    _mask_sMu(info),
+    _mask_dMu(info),
     _muons(info, opt, histo_set),
     _electrons(info, opt, histo_set),
     _jets(info, opt),
@@ -84,6 +86,14 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     util::set_value_safe(opt.config["prefiring weights"], _mode_pref, "mode", "mode for L1 prefiring weights (0: nominal, 1: up variation, -1: down variation");
     if( !(_mode_pref == 0 || _mode_pref == -1 || _mode_pref == 1) )
         throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
+
+    util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 24 GeV)");
+    if( _reject_lowQMu ) {
+        YAML::Node node_lowQ = opt.config["reject low quality muon events"];
+
+        _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
+        _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
+    }
 
     if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
@@ -232,6 +242,11 @@ void boson_jets_analyzer::operator()()
                      evt.rec->leptons.end(),
                      std::back_inserter(chosen_electrons),
                      [](const lepton &lep) { return lep.pdgid == 11; });
+
+        if( _reject_lowQMu ) {
+            Bool_t isLowQMuEvent = check_lowQualityMuon(chosen_muons);
+            if( isLowQMuEvent ) return; // -- reject the event with low quality muons
+        }
 
         // Apply lepton scale factors
         _muons.apply_sf(_weights, chosen_muons, tables());
@@ -401,6 +416,20 @@ void boson_jets_analyzer::write()
     histo_set.write();
     histo_set2D.write();
 
+}
+
+bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) {
+    bool flag = false;
+
+    if( muons.size() < 2 ) // it is not a dimuon event: return false
+        return flag; 
+    else { // dimuon event
+        // first muon is always the leading muon (muon collection is sorted in decreasing pT after selection)
+        if( muons[0].v.Pt() < 24 && _mask_sMu.passes() && !_mask_dMu.passes() )
+            flag = true;
+    }
+
+    return flag;
 }
 
 } // namespace physics

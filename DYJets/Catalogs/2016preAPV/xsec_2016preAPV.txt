@@ -11,7 +11,7 @@ ZZ_TuneCP5_13TeV-pythia8										                                      12.17
 WZ_TuneCP5_13TeV-pythia8                                                                              27.59
 WW_TuneCP5_13TeV-pythia8                                                                              75.8
 WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                11.09
-DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos                    1976
+DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos                    1146.53
 WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8								                          67350.0
 ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8						                      10.32
 ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8				          69.09

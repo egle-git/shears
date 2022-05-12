@@ -124,21 +124,22 @@ void boson_jets_analyzer::operator()()
 
     std::uniform_real_distribution<> uniform(0.0, 1.0);
 
-    if (weights().isdata()) {
-        // Run number based era selection
-        if (*run < run_threshold) {
-            _era = 0;
-        } else {
-            _era = 1;
-        }
-    } else {
-        // Monte-Carlo based era selection
-        if (uniform(rng()) < run_lumi_fraction) {
-            _era = 0;
-        } else {
-            _era = 1;
-        }
-    }
+    _era = 0;
+    //if (weights().isdata()) {
+    //    // Run number based era selection
+    //    if (*run < run_threshold) {
+    //        _era = 0;
+    //    } else {
+    //        _era = 1;
+    //    }
+    //} else {
+    //    // Monte-Carlo based era selection
+    //    if (uniform(rng()) < run_lumi_fraction) {
+    //        _era = 0;
+    //    } else {
+    //        _era = 1;
+    //    }
+    //}
 
     // Event
     util::matched<event_contents> evt;

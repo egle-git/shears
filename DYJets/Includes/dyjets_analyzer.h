@@ -32,7 +32,8 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
 
     // Overridden from base class
     void apply_trigger_sf(physics::weights &weights,
-                          const std::vector<physics::lepton> &leptons) override;
+                          const std::vector<physics::lepton> &leptons,
+                          bool use_smu_triggerSF) override;
     /// \brief Fills histograms
     void fill(const util::matched<std::string> &tags,
               const util::matched<event_contents> &evt) override;

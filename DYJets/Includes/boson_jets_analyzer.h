@@ -108,7 +108,8 @@ public:
 protected:
     /// \brief Applies trigger scale factors
     virtual void apply_trigger_sf(class weights &weights,
-                                  const std::vector<physics::lepton> &leptons) = 0;
+                                  const std::vector<physics::lepton> &leptons,
+                                  bool use_smu_triggerSF) = 0;
 
     /**
      * \brief Returns the current era (0 for eraBG, 1 for eraGH).
@@ -160,6 +161,8 @@ protected:
     const physics::weights &weights() const { return _weights; }
 
     bool check_lowQualityMuon(const std::vector<lepton> muons);
+    bool check_whichTriggerSF(const std::vector<lepton> muons);
+    bool use_smu_triggerSF = false;
 };
 
 } // namespace physics

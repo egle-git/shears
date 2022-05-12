@@ -28,7 +28,8 @@ class higgs_analyzer : public physics::boson_jets_analyzer
 
     // Overridden from base class
     void apply_trigger_sf(physics::weights &weights,
-                          const std::vector<physics::lepton> &leptons) override;
+                          const std::vector<physics::lepton> &leptons, bool use_smu_triggerSF) override;
+    // have to add this bool for consistency because apply_trigger_sf is an inherited from boson_jet_analyzer
 
     /// \brief Fills histograms
     void fill(const util::matched<std::string> &tags,

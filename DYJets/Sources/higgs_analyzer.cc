@@ -57,7 +57,8 @@ void higgs_analyzer::fill(const util::matched<std::string> &tags,
 }
 
 void higgs_analyzer::apply_trigger_sf(
-    physics::weights &weights, const std::vector<physics::lepton> &leptons)
+    physics::weights &weights, const std::vector<physics::lepton> &leptons, bool use_smu_triggerSF)
+// have to add this bool for consistency because apply_trigger_sf is an inherited from boson_jet_analyzer
 {
     // FIXME
 }

@@ -255,6 +255,9 @@ void boson_jets_analyzer::operator()()
         // Fill lepton control plots
         _muons.fill(histo_set, "inc0jet_noweight", chosen_muons, weights());
         _electrons.fill(histo_set, "inc0jet_noweight", chosen_electrons, weights());
+
+        // Check the pt of the leading muon to know which SF we will use
+        use_smu_triggerSF = check_whichTriggerSF(chosen_muons);
     }
 
     /*
@@ -292,8 +295,9 @@ void boson_jets_analyzer::operator()()
     /*
      * Apply lepton trigger scale factors
      */
+    //to be commented for 2018 for now
     if (evt.rec) {
-        apply_trigger_sf(_weights, evt.rec->leptons);
+        apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
     }
 
     /*
@@ -430,6 +434,20 @@ bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) 
     }
 
     return flag;
+}
+
+bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) {
+    // returns true == uses SMu trigger SF ; false == uses DiMu trigger SF
+    // FIXME : For the moment, this function would apply DiMu trigger SF on the lowQuality events if they are not removed
+    // FIXME : The trigger masks this function uses also depend on the switch for lowQuality events in yml file
+    bool smu_triggered = false;
+    if ( muons[0].v.Pt() > 24 && _mask_sMu.passes()) smu_triggered = true;
+    // this function will only be used for triggered events
+    // if pt > 24 and _mask_sMu doesn't pass then DiMu trigger SF is applied
+    // if pt < 24 then DiMu trigger SF is applied
+    // note that if the lowQuality events are not removed this may cause a problem
+
+    return smu_triggered;
 }
 
 } // namespace physics

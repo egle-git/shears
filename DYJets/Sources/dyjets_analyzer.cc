@@ -56,6 +56,24 @@ void apply_dimu_trigger_sf(physics::weights &w,
     }
 }
 
+void apply_smu_trigger_sf(physics::weights &w,
+                           const physics::lepton &mu1,
+                           const physics::lepton &mu2,
+                           const util::tables &tab)
+{
+    if (w.ismc()) {
+        double ef_data_1, ef_data_2, ef_data_tot, ef_mc_1, ef_mc_2, ef_mc_tot, smu_trigger_sf;
+        ef_data_1 = tab.at("smu trigger data").getEfficiency(mu1.raw_v.Pt(), std::abs(mu1.raw_v.Eta()));
+        ef_data_2 = tab.at("smu trigger data").getEfficiency(mu2.raw_v.Pt(), std::abs(mu2.raw_v.Eta()));
+        ef_data_tot = 1 - (1 - ef_data_1)*(1 - ef_data_2);
+        ef_mc_1 = tab.at("smu trigger mc").getEfficiency(mu1.raw_v.Pt(), std::abs(mu1.raw_v.Eta()));
+        ef_mc_2 = tab.at("smu trigger mc").getEfficiency(mu2.raw_v.Pt(), std::abs(mu2.raw_v.Eta()));
+        ef_mc_tot = 1 - (1 - ef_mc_1)*(1 - ef_mc_2);
+        smu_trigger_sf = (1. * ef_data_tot) / ef_mc_tot;
+        w.use_weight(smu_trigger_sf);
+    }
+}
+
 void apply_diel_trigger_sf(physics::weights &w,
                            const physics::lepton &e1,
                            const physics::lepton &e2,
@@ -83,13 +101,19 @@ void apply_emu_trigger_sf(physics::weights &w,
 } // namespace anonymous
 
 void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
-                                       const std::vector<physics::lepton> &leptons)
+                                       const std::vector<physics::lepton> &leptons,
+                                       bool use_smu_triggerSF)
 {
     using physics::zfinder;
 
     switch (_zfinder.get_flavor_mode()) {
     case zfinder::flavor_mode::mumu:
-        apply_dimu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        if (use_smu_triggerSF) {
+            apply_smu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        }
+        else {
+            apply_dimu_trigger_sf(weights, leptons[0], leptons[1], tables());
+        }
         break;
     case zfinder::flavor_mode::ee:
         apply_diel_trigger_sf(weights, leptons[0], leptons[1], tables());

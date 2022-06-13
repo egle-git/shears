@@ -36,7 +36,6 @@ class electrons
     TTreeReaderArray<float> Electron_mass;
     TTreeReaderArray<int> Electron_charge;
     TTreeReaderArray<float> Electron_deltaEtaSC;
-    TTreeReaderArray<float> Electron_miniPFRelIso_all;
     TTreeReaderArray<int> Electron_cutBased;
 
     double _pt_cut = 20;

@@ -101,6 +101,37 @@
   bin count: 20
 
 ################################################################################
+# Delta phi
+################################################################################
+  
+- selector: 'deltaphi.*'
+  binning: uniform
+  binning min: 2.62
+  binning max: 3.14
+  bin count: 20
+
+- selector: 'deltaphi_hg_ptcut.*'
+  binning: uniform
+  binning min: 2.62
+  binning max: 3.14
+  bin count: 20
+
+- selector: 'PtvsDeltaPhi.*'
+  binning: uniform
+  binning min: 0
+  binning max: 10
+  bin count: 10
+
+- selector: 'pt_cut.*'
+  #binning: custom
+  #bin edges: [
+  #  0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
+  binning: uniform
+  binning min: 0
+  binning max: 10
+  bin count: 10
+
+################################################################################
 # rapidity
 ################################################################################
 

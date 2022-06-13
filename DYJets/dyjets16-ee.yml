@@ -86,7 +86,7 @@ b jet veto:
 electrons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 20
+    pt: 15
 
     # Eta cut
     # Default value: 2.4
@@ -164,7 +164,7 @@ Z:
     
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 10
+    low mass: 50
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -190,7 +190,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
+mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 
 # Triggers
 #
@@ -206,13 +206,11 @@ samples:
       type: data
       jobs: 32
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_data_DEG.txt
-      #triggers B-F: |
-       #   HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
-        #  HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
-      #triggers G-H: |
-       #   HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-        #  HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
+      catalog: Catalog2016_bonzai_DoubleEG_data.txt
+      triggers B-F: |
+          HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+      triggers G-H: |
+          HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
     # Note: This sample has to be hadd-ed with 'data'.
     #- name: data-smu
       #type: data
@@ -233,7 +231,7 @@ samples:
       type: MC
       jobs: 20
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_MC.txt
+      catalog: Catalog2016_bonzai_DYJetsToEE.txt
     #- name: DYJets-10to50
      # type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs
@@ -284,27 +282,31 @@ samples:
       #type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
       #catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    - name: ST-s-channel
+    - name: ST_s-channel
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-s-channel.txt
-    - name: ST-t-channel
+      catalog: Catalog2016_bonzai_ST_s-channel.txt
+    - name: ST_t-channel_antitop
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-t-channel.txt
-    - name: STbar-tW
+      catalog: Catalog2016_bonzai_ST_t-channel_antitop.txt
+    - name: ST_t-channel_top
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_STbar-tW.txt
-    - name: ST-tW
+      catalog: Catalog2016_bonzai_ST_t-channel_top.txt
+    - name: ST_tW_antitop
       type: background
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_ST-tW.txt
-    - name: WToLNu
+      catalog: Catalog2016_bonzai_ST_tW_antitop.txt
+    - name: ST_tW_top
       type: background
-      jobs: 8
       nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_WToLNu.txt
+      catalog: Catalog2016_bonzai_ST_tW_top.txt
+    - name: WJetsToLNu
+      type: background
+      jobs: 4
+      nano dir: Catalogs/2016preAPV/
+      catalog: Catalog2016_bonzai_WJetsToLNu.txt
     - name: WWTo2L2Nu
       type: background
       nano dir: Catalogs/2016preAPV
@@ -315,23 +317,25 @@ samples:
       catalog: Catalog2016_bonzai_WZ.txt
     - name: ZZ
       type: background
+      jobs: 5
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_ZZ.txt
     - name: TT
       type: background
       jobs: 10
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_ttbar.txt
+      catalog: Catalog2016_bonzai_TTTo2L2Nu.txt
     - name: TauTau
       type: background
-      jobs: 10
+      jobs: 3
       nano dir: Catalogs/2016preAPV
-      catalog: Catalog2016_bonzai_DY_TauTau.txt
+      catalog: Catalog2016_bonzai_TauTau.txt
+
 
 # Scale factors
 tables B-F:
-    electron id:    scalefactors_Medium_Electron_period1.txt
-    electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
+    electron id:    2016preAPVee/egamma_Medium.txt
+    electron reco:  2016preAPVee/egamma_reco_all_SF.txt
     #muon id:        scalefactors_Medium_Muon_period1_July.txt
     #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
     muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
@@ -352,8 +356,8 @@ tables B-F:
     udsgjet tight eff:    btag-tight-udsg.txt
 
 tables G-H:
-    electron id:    scalefactors_Medium_Electron_period2.txt
-    electron reco:  SMP_17_010_GH_MediumID_electrons.txt
+    electron id:    2016preAPVee/egamma_Medium.txt
+    electron reco:  2016preAPVee/egamma_reco_all_SF.txt
     #muon id:        scalefactors_Medium_Muon_period2_July.txt
     muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
     muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
@@ -398,25 +402,22 @@ MC grouping:
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
       samples: [ DYJets ]
       color: 408 # kGreen - 8
-      scale factor: 1.0
       is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]
       color: 600 # kBlue
-      scale factor: 0.11
     - legend: VV
       samples: [ ZZ, WWTo2L2Nu, WZ ]
       color: 633 # kRed + 1
     - legend: Single top
-      samples: [ ST-s-channel, ST-t-channel, STbar-tW, ST-tW ]
+      samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
     - legend: W
-      samples: [ WToLNu ]
+      samples: [ WJetsToLNu ]
       color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
-      color: 900 # kPink
-
+      color: 434 # kCyan + 2
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
@@ -445,7 +446,7 @@ binning file: dyjets-binnings.yml
 plots:
     # Excluded plots
     - selector: '^_.*'
-      produce: no
+      produce: yes
     - selector: '.*-gen$'
       produce: no
     - selector: '.*-matrix$'
@@ -453,7 +454,7 @@ plots:
     - selector: '.*[12]jet.*'
       produce: no
     - selector: 'el.*'
-      produce: no
+      produce: yes
     - selector: 'mu.*'
       produce: no
     - selector: 'genLep.*'

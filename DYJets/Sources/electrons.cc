@@ -15,7 +15,6 @@ electrons::electrons(util::job::info &info, const util::options &opt, util::hist
       Electron_charge(info.reader, "Electron_charge"),
       Electron_deltaEtaSC(info.reader, "Electron_deltaEtaSC"), //Iti: check
       //ElPfIsoRho(info.reader, "ElPfIsoRho"),
-      Electron_miniPFRelIso_all(info.reader, "Electron_miniPFRelIso_all"),//Iti: check
       Electron_cutBased(info.reader, "Electron_cutBased")
 {
     configure(opt);
@@ -59,9 +58,9 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
     nVetoElecs=0;
     std::vector<lepton> electrons;
     for (unsigned i = 0; i < Electron_pt.GetSize(); ++i) {
-        if(Electron_pt[i] >= 10&&(Electron_cutBased[i] & (1 << 4))&&Electron_miniPFRelIso_all[i] < 0.25)nVetoElecs++;
+        //if(Electron_pt[i] >= 10&&(Electron_cutBased[i] & (1 << 4))&&Electron_miniPFRelIso_all[i] < 0.25)nVetoElecs++;
         lepton l;
-        if (std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) > _eta_cut || Electron_miniPFRelIso_all[i] > _iso_cut) {
+        if (std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) > _eta_cut) {
             continue;
         } else if (std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) > 1.4442 && std::abs((Electron_deltaEtaSC[i]+Electron_eta[i])) < 1.566) {
             // Veto endcap-barrel transition
@@ -70,7 +69,6 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
         l.v.SetPtEtaPhiM(Electron_pt[i], Electron_eta[i], Electron_phi[i], Electron_mass[i]);
         l.raw_v.SetPtEtaPhiM(Electron_pt[i], (Electron_deltaEtaSC[i]+Electron_eta[i]), Electron_phi[i], Electron_mass[i]);
         l.charge = Electron_charge[i];
-        l.iso = Electron_miniPFRelIso_all[i];
         l.id = Electron_cutBased[i];
         l.pdgid = 11;
 

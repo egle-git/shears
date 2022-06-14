@@ -87,12 +87,17 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     if( !(_mode_pref == 0 || _mode_pref == -1 || _mode_pref == 1) )
         throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
 
-    util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 24 GeV)");
-    if( _reject_lowQMu ) {
-        YAML::Node node_lowQ = opt.config["reject low quality muon events"];
+    if( opt.config["reject low quality muon events"] ) {
+        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 24 GeV)");
+        if( _reject_lowQMu ) {
+            YAML::Node node_lowQ = opt.config["reject low quality muon events"];
 
-        _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
-        _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
+            _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
+            _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
+        }
+    }
+    else {
+        _reject_lowQMu = false;
     }
 
     if (opt.config["mass bins"]) {
@@ -298,7 +303,7 @@ void boson_jets_analyzer::operator()()
      */
     //to be commented for 2018 for now
     if (evt.rec) {
-        apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
+        // apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
     }
 
     /*
@@ -441,6 +446,10 @@ bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) 
     // returns true == uses SMu trigger SF ; false == uses DiMu trigger SF
     // FIXME : For the moment, this function would apply DiMu trigger SF on the lowQuality events if they are not removed
     // FIXME : The trigger masks this function uses also depend on the switch for lowQuality events in yml file
+
+    // -- not used if it is not a dimuon analysis
+    if( muons.size() < 2 ) return false;
+
     bool smu_triggered = false;
     if ( muons[0].v.Pt() > 24 && _mask_sMu.passes()) smu_triggered = true;
     // this function will only be used for triggered events

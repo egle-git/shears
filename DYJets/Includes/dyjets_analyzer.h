@@ -45,6 +45,7 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
 
     std::vector<physics::lepton> find_gen_boson(
     const std::vector<physics::lepton> &genleps) override;
+
     /// \brief Returns the list of options supported by the analyzer.
     static po::options_description options();
 };

@@ -303,7 +303,7 @@ void boson_jets_analyzer::operator()()
      */
     //to be commented for 2018 for now
     if (evt.rec) {
-        // apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
+        apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
     }
 
     /*

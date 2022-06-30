@@ -3,17 +3,18 @@
 
 # Global tag : 106X_upgrade2018_realistic_v*
 
-# Sample                                                                                              xsec (pb) 
+# Sample                                                                                              xsec (pb)
 
 DYJetsToMuMu_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos                                     1976
-TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                       88.29
-ZZTo4L_TuneCP5_13TeV_powheg_pythia8                                                                           1.325
-WZ_TuneCP5_13TeV-pythia8                                                                                     27.59
-WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                       11.09
-DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos              1976
-WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8                       					  53870.0
-ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8						     10.32
-ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5CR1_13TeV-powheg-madspin-pythia8				     69.09
-ST_t-channel_top_4f_InclusiveDecays_TuneCP5CR1_13TeV-powheg-madspin-pythia8				    115.3
-ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8                                                35.85
-ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8						     35.85
+TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                     88.29
+ZZTo4L_TuneCP5_13TeV_powheg_pythia8                                                                        1.325
+WZ_TuneCP5_13TeV-pythia8                                                                                   27.59
+WW_TuneCP5_13TeV-pythia8                                                                                   75.8
+WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                     11.09
+DYJetsToTauTau_M-50_AtLeastOneEorMuDecay_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos              1146.53
+WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8                       					                       53870.0
+ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8						                           10.32
+ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5CR1_13TeV-powheg-madspin-pythia8				               69.09
+ST_t-channel_top_4f_InclusiveDecays_TuneCP5CR1_13TeV-powheg-madspin-pythia8				                   115.3
+ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8                                              35.85
+ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8						                           35.85

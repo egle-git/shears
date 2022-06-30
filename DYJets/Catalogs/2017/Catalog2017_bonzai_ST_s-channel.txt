@@ -1,0 +1,15 @@
+# primary dataset: /ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM
+* datatype: background
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 10.32
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01june_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220601_084244/0000/tree_7.root

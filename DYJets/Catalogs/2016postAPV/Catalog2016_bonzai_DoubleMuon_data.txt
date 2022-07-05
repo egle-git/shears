@@ -1,0 +1,44 @@
+# primary dataset: /DoubleMuon/Run2016[F,G,H]-UL2016_MiniAODv2_NanoAODv9-v*/NANOAOD
+* data type: data
+* primary events: 1
+* primary files: 1
+* lumi: 16810.0
+# JSON : /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Legacy_2016/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt
+
+# ROOTFILES
+
+
+#RunF
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016F-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_124941/0000/tree_1.root
+
+#RunG
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_11.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_12.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_13.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_14.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016G-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125537/0000/tree_15.root
+
+#RunH
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/data/NanoBonzai24may__DoubleMuon_Run2016H-UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220524_125633/0000/tree_10.root

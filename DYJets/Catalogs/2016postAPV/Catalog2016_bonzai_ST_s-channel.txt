@@ -1,0 +1,12 @@
+#primary dataset: /ST_s-channel_4f_leptonDecays_TuneCP5_erdON_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM
+* datatype: background
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 10.32
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/mc/NanoBonzai24may__ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_erdON_13TeV-amcatnlo-pythia8/Nano/220524_163730/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/mc/NanoBonzai24may__ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_erdON_13TeV-amcatnlo-pythia8/Nano/220524_163730/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016postAPV/mc/NanoBonzai24may__ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_erdON_13TeV-amcatnlo-pythia8/Nano/220524_163730/0000/tree_3.root

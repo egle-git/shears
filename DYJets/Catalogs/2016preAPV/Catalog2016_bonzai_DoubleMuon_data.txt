@@ -7,8 +7,9 @@
 
 # ROOTFILES
 
-#RunB-ver1
+#RunB-ver1 Empty due to JSON
 #/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100212/0000/tree_1.root
+
 #RunB-ver2
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_2.root
@@ -25,7 +26,9 @@
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_13.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_14.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016B-ver2_HIPM_v1_MET_TrigObj/DoubleMuon/Nano/220406_100313/0000/tree_15.root
+
 #RunC
+
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_2.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_3.root
@@ -33,7 +36,9 @@
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_5.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_6.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016C-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100412/0000/tree_7.root
+
 #RunD
+
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_2.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_3.root
@@ -45,7 +50,9 @@
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_9.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_10.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016D-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100510/0000/tree_11.root
+
 #RunE
+
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_2.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_3.root
@@ -54,7 +61,9 @@
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_6.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_7.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016E-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100605/0000/tree_8.root
+
 #RunF
+
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016F-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100701/0000/tree_1.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016F-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100701/0000/tree_2.root
 /pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleMuon_Run2016F-HIPM_UL2016_v1_MET_TrigObj/DoubleMuon/Nano/220406_100701/0000/tree_3.root

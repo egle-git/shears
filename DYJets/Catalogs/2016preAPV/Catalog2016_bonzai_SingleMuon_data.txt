@@ -8,10 +8,10 @@
 # ROOTFILES
 
 
-#RunB-ver1
+#RunB-ver1 Empty due to JSON
 
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_SingleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/SingleMuon/Nano/220406_101646/0000/tree_1.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_SingleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/SingleMuon/Nano/220406_101646/0000/tree_2.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_SingleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/SingleMuon/Nano/220406_101646/0000/tree_1.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_SingleMuon_Run2016B-ver1_HIPM_v1_MET_TrigObj/SingleMuon/Nano/220406_101646/0000/tree_2.root
 
 #RunB-ver2
 

@@ -7,15 +7,15 @@
 
 # ROOTFILES
 
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_1.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_2.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_3.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_4.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_5.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_6.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_7.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_8.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_9.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_10.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_11.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai09june_18_ST_s-channel_4f_leptonDecays_TuneCP5_v1_MET_TrigObj/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220609_124604/0000/tree_12.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_11.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai14july_ST_s-channel_4f_leptonDecays_TuneCP5_v2_Ele_triggers/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/Nano/220714_143512/0000/tree_12.root

@@ -88,10 +88,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
         throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
 
     if( opt.config["reject low quality muon events"] ) {
-        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 24 GeV)");
+        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 26 GeV)");
         if( _reject_lowQMu ) {
             YAML::Node node_lowQ = opt.config["reject low quality muon events"];
-
             _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
             _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
         }
@@ -435,7 +434,7 @@ bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) 
         return flag; 
     else { // dimuon event
         // first muon is always the leading muon (muon collection is sorted in decreasing pT after selection)
-        if( muons[0].v.Pt() < 24 && _mask_sMu.passes() && !_mask_dMu.passes() )
+        if( muons[0].v.Pt() < 26 && _mask_sMu.passes() && !_mask_dMu.passes() )
             flag = true;
     }
 
@@ -451,10 +450,10 @@ bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) 
     if( muons.size() < 2 ) return false;
 
     bool smu_triggered = false;
-    if ( muons[0].v.Pt() > 24 && _mask_sMu.passes()) smu_triggered = true;
+    if ( muons[0].v.Pt() > 26 && _mask_sMu.passes()) smu_triggered = true;
     // this function will only be used for triggered events
-    // if pt > 24 and _mask_sMu doesn't pass then DiMu trigger SF is applied
-    // if pt < 24 then DiMu trigger SF is applied
+    // if pt > 26 and _mask_sMu doesn't pass then DiMu trigger SF is applied
+    // if pt < 26 then DiMu trigger SF is applied
     // note that if the lowQuality events are not removed this may cause a problem
 
     return smu_triggered;

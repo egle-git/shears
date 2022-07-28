@@ -1,4 +1,4 @@
-# This is the configuration file for the Higgs analysis, year 2017.
+# This is the configuration file for the Higgs analysis, year 2016.
 # Please keep it organized, and don't delete comments.
 
 # Options related to output and logs
@@ -12,7 +12,7 @@ log:
     log level: info
 
     # Pipe logs to the given log file, comment out for no log.
-    log file: log17.txt
+    log file: log18.txt
 
     # Controls what's written in the log file.
     # Possible values: debug|info|warn|error|fatal (default: debug)
@@ -32,7 +32,7 @@ use pileup reweighing: true
 # - 2016_PreAPV_emu, 2016_PostAPV_emu (for the data collected with the emu trigger)
 # - 2017
 # - 2018
-pileup type: 2017
+pileup type: 2018
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -86,7 +86,7 @@ b jet veto:
 electrons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 25
+    pt: 20
 
     # Eta cut
     # Default value: 2.4
@@ -94,21 +94,26 @@ electrons:
 
     # Relative isolation cut
     # Default value: 0.25
-    isolation: 0.15
+    isolation: 999999999.
+
+    # Id
+    # Possible values: loose, medium, tight
+    # Default value: tight
+    id: medium
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: yes
+    use id scale factors: no
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
-    use reconstruction scale factors: yes
+    use reconstruction scale factors: no
 
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 25
+    pt: 15
 
     # Eta cut
     # Default value: 2.4
@@ -146,15 +151,15 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: 2017/RoccoR2017UL.txt
+    rochester correction path: 2018/RoccoR2018UL.txt
     # rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
-    leading lepton pt: 25
-    
+    leading lepton pt: 20
+
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 50
@@ -192,12 +197,13 @@ mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
 triggers B-F: |
-    HLT_IsoMu27,
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+    HLT_IsoMu24,
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
 triggers G-H: |
-    HLT_IsoMu27,
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+    HLT_IsoMu24,
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
+
 
 # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
 # but with pT(leading) < 24 GeV muons (muons in turn-on curve or below)
@@ -209,41 +215,41 @@ reject low quality muon events:
 
   # single muon triggers used
   single muon triggers: |
-    HLT_IsoMu27
+    HLT_IsoMu24
 
   # double muon triggers
   double muon triggers: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
 # List of available data/MC samples
 samples:
     - name: data
       type: data
-      jobs: 32
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_DoubleMuon_data.txt
+      jobs: 40
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_DoubleMuon_data.txt
       triggers B-F: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
       triggers G-H: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
     # note: This sample has to be hadd-ed with 'data'.
     - name: data-smu
     #- name: data
       type: data
       jobs: 32
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_SingleMuon_data.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_SingleMuon_data.txt
       triggers B-F: |
-          HLT_IsoMu27
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+          HLT_IsoMu24,
+          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
       triggers G-H: |
-          HLT_IsoMu27
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
+          HLT_IsoMu24,
+          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
     - name: DYJets
       type: MC
       jobs: 32
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_DYJetsToMuMu.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_DYJetsToMuMu.txt
     #- name: DYJets-10to50
      # type: MC
       #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs
@@ -296,74 +302,122 @@ samples:
       #catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
     - name: ST_s-channel
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ST_s-channel.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ST_s-channel.txt
     - name: ST_t-channel_antitop
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ST_t-channel_antitop.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ST_t-channel_top.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ST_tW_antitop.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ST_tW_antitop.txt
     - name: ST_tW_top
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ST_tW_top.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ST_tW_top.txt
     #- name: WJetsToLNu
     #  type: background
     #  jobs: 4
-    #  nano dir: Catalogs/2017
-    #  catalog: Catalog2017_bonzai_WJetsToLNu.txt
+    #  nano dir: Catalogs/2018
+    #  catalog: Catalog2018_bonzai_WJetsToLNu.txt
     - name: WWTo2L2Nu
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_WWTo2L2Nu.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_WWTo2L2Nu.txt
     - name: WZ
       type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_WZ.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_WZ.txt
     - name: ZZ
       type: background
       jobs: 5
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_ZZ.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_ZZ.txt
     - name: TT
       type: background
       jobs: 10
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_TTTo2L2Nu.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_TTTo2L2Nu.txt
     - name: TauTau
       type: background
       jobs: 3
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_TauTau.txt
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_TauTau.txt
 
 # Scale factors
 tables B-F:
-    muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
-    muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
-    dimu trigger:   2017/ScaleFactor_DoubleMuonTriggers_UL2017_Tight.txt
-    smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
+    #electron id:    scalefactors_Medium_Electron_period1.txt
+    #electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
+    muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt
+    muon isolation:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
+    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
+    #emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
+    dimu trigger:     2018/ScaleFactor_DoubleMuonTriggers_UL2018_Tight.txt
+    smu trigger data: 2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_Data.txt
+    smu trigger mc:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_MC.txt
+    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
+    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
+    #bjet loose eff:       btag-loose-b.txt
+    #cjet loose eff:       btag-loose-c.txt
+    #udsgjet loose eff:    btag-loose-udsg.txt
+    #bjet medium eff:       btag-medium-b.txt
+    #cjet medium eff:       btag-medium-c.txt
+    #udsgjet medium eff:    btag-medium-udsg.txt
+    #bjet tight eff:       btag-tight-b.txt
+    #cjet tight eff:       btag-tight-c.txt
+    #udsgjet tight eff:    btag-tight-udsg.txt
 
 tables G-H:
-    muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
-    muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
-    dimu trigger:   2017/ScaleFactor_DoubleMuonTriggers_UL2017_Tight.txt
-    smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
+    #electron id:    scalefactors_Medium_Electron_period2.txt
+    #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
+    muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt
+    muon isolation:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
+    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
+    #emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
+    dimu trigger:     2018/ScaleFactor_DoubleMuonTriggers_UL2018_Tight.txt
+    smu trigger data: 2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_Data.txt
+    smu trigger mc:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_MC.txt
+    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
+    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
+    #bjet loose eff:       btag-loose-b.txt
+    #cjet loose eff:       btag-loose-c.txt
+    #udsgjet loose eff:    btag-loose-udsg.txt
+    #bjet medium eff:       btag-medium-b.txt
+    #cjet medium eff:       btag-medium-c.txt
+    #udsgjet medium eff:    btag-medium-udsg.txt
+    #bjet tight eff:       btag-tight-b.txt
+    #cjet tight eff:       btag-tight-c.txt
+    #udsgjet tight eff:    btag-tight-udsg.txt
+
+# Reweighing (eg for merged samples)
+#
+# For each possible reweighing, the syntax is:
+#
+#   sample name: table.txt
+#
+# The table should contain the numbers needed for reweighing. In order to be
+# useful, several samples will often share the same table.
+#
+# The tables can be derived by tweaking Main/dyjets-sample-weights.cc.
+#reweighing:
+#    # Based on the number of partons npNLO
+#    npNLO:
+#        DYJets:     merging-DYJets-npNLO.txt
+#        DYJets-0J:  merging-DYJets-npNLO.txt
+#        DYJets-1J:  merging-DYJets-npNLO.txt
+#        DYJets-2J:  merging-DYJets-npNLO.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma^{*} #rightarrow ll"
+    - legend: "Z/#gamma* #rightarrow #mu#mu"
       required: yes
+    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
+    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
       samples: [ DYJets ]
       color: 408 # kGreen - 8
       is signal: yes
@@ -447,12 +501,34 @@ plots:
     - selector: 'nJets.*_inc0jet.*'
       produce: no
     # Style changes
+    - selector: '.*'
+      ratio min: 0.901
+      ratio max: 1.099
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-    - selector: 'mass_Zinc0jet'
-      ratio min: 0.641
-      ratio max: 1.419
+    - selector: 'dyjets_events.*inc0jet'
+      ratio min: 0.951
+      ratio max: 1.049
+    # Axis labels
+    - selector: '^mass.*'
+      x axis label: 'M_{#mu#mu}'
+      x axis unit: 'GeV'
+    - selector: '^nJets.*'
+      x axis label: 'Exclusive number of jets'
+    - selector: '^nJetsIncl.*'
+      x axis label: 'Inclusive number of jets'
+    - selector: '^phistar.*'
+      x axis label: '#phi*'
+    - selector: '^pt.*'
+      x axis label: 'p_{T}^{#mu#mu}'
+      x axis unit: 'GeV'
+    - selector: '.+mass(.*)_(.*).*'
+      x axis detail: '$1 #leq M_{#mu#mu} < $2 GeV'
+    - selector: '.*inc(1|2)jet.*'
+      x axis detail: 'N_{jets} #geq $1'
+    - selector: '.*exc(1|2)jet.*'
+      x axis detail: 'N_{jets} = $1'

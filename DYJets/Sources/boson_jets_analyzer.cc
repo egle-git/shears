@@ -315,12 +315,12 @@ void boson_jets_analyzer::operator()()
     if (mass_tags.rec && mass_tags.rec->empty()) {
         mass_tags.rec = boost::none;
     } else if (mass_tags.rec) {
-        mass_tags.rec = "_mass" + *mass_tags.rec;
+        mass_tags.rec = "mass" + *mass_tags.rec;
     }
     if (mass_tags.gen && mass_tags.gen->empty()) {
         mass_tags.gen = boost::none;
     } else if (mass_tags.gen) {
-        mass_tags.gen = "_mass" + *mass_tags.gen;
+        mass_tags.gen = "mass" + *mass_tags.gen;
     }
 
     auto njets = evt.apply(&event_contents::get_jets)
@@ -404,10 +404,38 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
     }
     // Fill response matrix
     if (tags.rec && tags.gen && value.rec && value.gen && tags.rec == tags.gen) {
+        // both gen and reco exist and have the same tag
+        // First fill both gen and reco with the global_weight
         histo_set2D.fill(name,
                          *tags.rec + "-matrix",
                          *value.rec,
                          *value.gen, weights().global_weight());
+        // Now fill again subtracting the global weight from gen weight
+        // And placing the event in the reco underflow bin 
+        // as explained in the TUnfold manual
+        // https://www.desy.de/~sschmitt/TUnfold/tunfold_manual_v17.9.pdf, page 10
+        histo_set2D.fill(name,
+                         *tags.rec + "-matrix",
+                         -1.0,// underflow bin: need to make this more general
+                         *value.gen, weights().gen_weight()-weights().global_weight());
+    }
+    else{
+        if(tags.rec && value.rec){
+            // there is no gen corresponding to the reco event
+            // reco event gets global_weight
+            histo_set2D.fill(name,
+                             *tags.rec + "-matrix",
+                             *value.rec,
+                             -1.0, weights().global_weight());
+        }
+        if(tags.gen && value.gen){
+            // there is no reco event
+            // gen event gets gen_weight
+            histo_set2D.fill(name,
+                             *tags.gen + "-matrix",
+                             -1.0,
+                             *value.gen, weights().gen_weight());
+        }
     }
 }
 

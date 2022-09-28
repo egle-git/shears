@@ -113,7 +113,7 @@ electrons:
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 20
+    pt: 15 
 
     # Eta cut
     # Default value: 2.4
@@ -158,7 +158,7 @@ muons:
 Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
-    leading lepton pt: 25
+    leading lepton pt: 20
 
     # Low mass bound [GeV]
     # Default value: 0
@@ -456,6 +456,7 @@ MC grouping:
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
+#binning file: dyjets-binnings.yml
 binning file: dyjets-binnings.yml
 
 # Plot properties
@@ -483,9 +484,9 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: no
+      produce: yes 
     - selector: '.*-matrix$'
-      produce: no
+      produce: yes
     - selector: '.*[12]jet.*'
       produce: no
     - selector: 'el.*'
@@ -507,7 +508,7 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
-      produce: no
+      produce: yes
     - selector: 'nJets.*_inc.*'
       produce: no
     - selector: 'nJets.*_inc0jet.*'

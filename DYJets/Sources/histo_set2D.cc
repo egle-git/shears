@@ -67,10 +67,11 @@ auto histo_set2D::create_from_style(const std::string &name, const std::string &
                 fullname.c_str(), fullname.c_str(), bin_count, binning_min, binning_max, bin_count, binning_min, binning_max));
         return res.first;
     } else if (method == "custom") {
-        auto bins = _style.get<std::vector<double>>("bin edges", fullname);
+        auto binsX = _style.get<std::vector<double>>("binX edges", fullname);
+        auto binsY = _style.get<std::vector<double>>("binY edges", fullname);
         auto res = _histograms.emplace(
             std::make_pair(name, tag),
-            histogram_type(fullname.c_str(), fullname.c_str(), bins.size() - 1, bins.data(), bins.size() - 1, bins.data()));
+            histogram_type(fullname.c_str(), fullname.c_str(), binsX.size() - 1, binsX.data(), binsY.size() - 1, binsY.data()));
         return res.first;
     } else {
         throw std::runtime_error("Undefined binning method '" + method +

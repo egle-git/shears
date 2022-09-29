@@ -1,27 +1,29 @@
 #include "../include/Utilities.h"
 
-void HistOptions(TH1D*hist,int kColor);
+// Functions
 void PlotProjections(TH1D*hProjX,TH1D*hProjY,TString saveName);
 void MakeMCvsData(bool logplot);
 void MakeMigrationMatrixPlot();
-
+void SetHistOptions();
 TCanvas*MakeCanvas(TString cName);
+
+// Global TStrings
 TString mc_name     = "histograms/fromShears/dyjets-DYJets.root";
 TString data_name   = "histograms/fromShears/dyjets-data.root";
-
 TString save_loc    = "plots/";
-
 TString reco_hist   = "mass_wide_range_inc0jet";
 TString gen_hist    = "mass_wide_range_inc0jet-gen";
 TString matrix_hist = reco_hist + "-matrix";
 
+// Global files
 TFile*mc_file = new TFile(mc_name);
 TFile*data_file = new TFile(data_name);
-double mcScale = 1.0;
 
+// Global histograms
 TH1D*_hGen;
 TH1D*_hRec;
 TH1D*_hDat;
+TH2D*_hMat;
 
 void makePlots()
 {
@@ -31,25 +33,64 @@ void makePlots()
 
     // Get histograms 
     _hGen = (TH1D*)mc_file->Get(gen_hist);
-    HistOptions(_hGen,kRed);
     _hRec = (TH1D*)mc_file->Get(reco_hist);
-    HistOptions(_hRec,kBlue);
     _hDat = (TH1D*)data_file->Get(reco_hist);
+    _hMat = (TH2D*)mc_file->Get(matrix_hist);
+    SetHistOptions();
 
-    MakeMCvsData(true);
+    bool logPlot = true;
+    MakeMCvsData(logPlot);
     MakeMigrationMatrixPlot();
 } 
 
-void PlotProjections(TH1D*hProjXTmp,TH1D*hProjY,TString saveName)
+void SetHistOptions()
 {
-    TH1D*_hRecRebinTmp = (TH1D*)_hRec->Clone();
-    TH1D*_hRecRebin = Utilities::RebinTH1(_hRecRebin,"_hRecRebin",_hGen);
-    TH1D*hProjX = Utilities::RebinTH1(hProjXTmp,"x-projection",_hGen);
+    _hGen->SetTitle("gen dimuon mass");
+    _hGen->GetXaxis()->SetTitle("m_{gen} [GeV]");
+    _hGen->GetXaxis()->SetNoExponent();
+    _hGen->GetXaxis()->SetMoreLogLabels();
+    _hGen->GetYaxis()->SetNoExponent();
+    _hGen->GetYaxis()->SetMoreLogLabels();
 
-    int nBins = _hRecRebin->GetNbinsX();
-    double x1 = _hRecRebin->GetBinLowEdge(1);
-    double x2 = _hRecRebin->GetBinLowEdge(nBins);
-    x2 += _hRecRebin->GetBinWidth(nBins);
+    _hRec->SetTitle("reco dimuon mass");
+    _hRec->GetXaxis()->SetTitle("m_{reco} [GeV]");
+    _hRec->GetXaxis()->SetNoExponent();
+    _hRec->GetXaxis()->SetMoreLogLabels();
+    _hRec->GetYaxis()->SetNoExponent();
+    _hRec->GetYaxis()->SetMoreLogLabels();
+
+    _hDat->SetTitle("data dimuon mass");
+    _hDat->GetXaxis()->SetTitle("m_{data} [GeV]");
+    _hDat->GetXaxis()->SetNoExponent();
+    _hDat->GetXaxis()->SetMoreLogLabels();
+    _hDat->GetYaxis()->SetNoExponent();
+    _hDat->GetYaxis()->SetMoreLogLabels();
+
+    _hMat->SetTitle("dimuon mass migration matrix");
+    _hMat->GetXaxis()->SetTitle("m_{reco} [GeV]");
+    _hMat->GetYaxis()->SetTitle("m_{gen} [GeV]");
+    _hMat->GetXaxis()->SetNoExponent();
+    _hMat->GetXaxis()->SetMoreLogLabels();
+    _hMat->GetYaxis()->SetNoExponent();
+    _hMat->GetYaxis()->SetMoreLogLabels();
+}
+
+void PlotProjections(TH1D*hProjX,TH1D*hProjY,TString saveName)
+{
+    TH1D*hGen = (TH1D*)_hGen->Clone();
+    TH1D*hRec = (TH1D*)_hRec->Clone();
+
+    hGen->SetLineColor(kRed);
+    hGen->SetMarkerColor(kRed);
+    hGen->SetMarkerStyle(20);
+    hRec->SetLineColor(kBlue);
+    hRec->SetMarkerColor(kBlue);
+    hRec->SetMarkerStyle(20);
+    int nBins = hRec->GetNbinsX();
+    double x1 = hRec->GetBinLowEdge(1);
+    double x2 = hRec->GetBinLowEdge(nBins);
+    x2 += hRec->GetBinWidth(nBins);
+
     TLegend*legend = new TLegend(0.65,0.9,0.9,0.75);
     legend->SetTextSize(0.02);
     legend->AddEntry(hGen,"gen");
@@ -57,24 +98,19 @@ void PlotProjections(TH1D*hProjXTmp,TH1D*hProjY,TString saveName)
     legend->AddEntry(hProjX,"x-projection");
     legend->AddEntry(hProjY,"y-projection");
 
-    int nBins = hRec->GetNbinsX();
-    double x1 = hRec->GetBinLowEdge(1);
-    double x2 = hRec->GetBinLowEdge(nBins);
-    x2 += hRec->GetBinWidth(nBins);
     TLine*line = new TLine(x1,1,x2,1);
     line->SetLineColor(kBlack);
 
     double ratioRange = 0.2;
     double upperBound = 1.0-ratioRange;
     double lowerBound = 1.0+ratioRange;
-    TH1F*hRatioTrue = (TH1F*)_hGen->Clone("trueRatio");
+    TH1F*hRatioTrue = (TH1F*)hGen->Clone("trueRatio");
     hRatioTrue->Divide(hProjY);
     hRatioTrue->SetMarkerStyle(20);
     hRatioTrue->SetMarkerColor(kRed);
     hRatioTrue->SetMinimum(1.0-ratioRange);
     hRatioTrue->SetMaximum(1.0+ratioRange);
 
-    TH1F*hRatioReco = (TH1F*)_hRecRebin->Clone("recoRatio");
     TH1F*hRatioReco = (TH1F*)hRec->Clone("recoRatio");
     hRatioReco->Divide(hProjX);
     hRatioReco->SetMarkerStyle(20);
@@ -101,8 +137,6 @@ void PlotProjections(TH1D*hProjXTmp,TH1D*hProjY,TString saveName)
     hProjX->GetXaxis()->SetMoreLogLabels();
     hProjX->Draw("hist");
     hProjY->Draw("hist,same");
-    _hGen->Draw("pe,same");
-    _hRecRebin->Draw("pe,same");
     hGen->Draw("pe,same");
     hRec->Draw("pe,same");
     legend->Draw("same");
@@ -151,18 +185,6 @@ void PlotProjections(TH1D*hProjXTmp,TH1D*hProjY,TString saveName)
     saveProj += saveName;
     canvas->SaveAs(saveProj);
 }
-void HistOptions(TH1D*hist,int kColor)
-{
-    if(!hist){
-        cout << "ERROR in HistOptions(TH1D*hist,int kColor)" << endl;
-        cout << "This histogram does not exist: " << endl;
-    }
-    hist->SetTitle("dimuon invariant mass");
-
-    hist->SetLineColor(kColor);
-    hist->SetMarkerColor(kColor);
-    hist->SetMarkerStyle(20);
-}
 
 TCanvas*MakeCanvas(TString cName)
 {
@@ -175,9 +197,11 @@ TCanvas*MakeCanvas(TString cName)
     return canvas;
 }
 
-
 void MakeMCvsData(bool logplot)
 {
+    TH1D*hDat = (TH1D*)_hDat->Clone();
+    TH1D*hRec = (TH1D*)_hRec->Clone();
+
     double wsum, lumi, xsec;
     TH1*job_info;
     TVectorD*job_info_average = nullptr;
@@ -186,20 +210,18 @@ void MakeMCvsData(bool logplot)
 
     TString prefix = "histograms/fromShears/dyjets-";
     TString suffix = ".root";
-    TH1D*hDataRebin = Utilities::RebinTH1(_hDat,"dataRebin",_hGen);
-    TH1D*hRecoRebin = Utilities::RebinTH1(_hRec,"dataRebin",_hGen);
 
-    hDataRebin->SetMarkerStyle(20);
-    hDataRebin->SetMarkerColor(kBlack);
-    hDataRebin->SetLineColor(kBlack);
-    hRecoRebin->SetFillColor(kOrange-1);
-    hRecoRebin->SetLineColor(kOrange-1);
-    hRecoRebin->SetMarkerColor(kOrange-1);
-    hData->SetMarkerStyle(20);
-    hData->SetMarkerColor(kBlack);
-    hData->SetLineColor(kBlack);
-    hReco->SetFillColor(kOrange-1);
-//    hReco->SetLineColor(kOrange-1);
+    hDat->SetMarkerStyle(20);
+    hDat->SetMarkerColor(kBlack);
+    hDat->SetLineColor(kBlack);
+    hRec->SetFillColor(kOrange-1);
+    hRec->SetLineColor(kOrange-1);
+    hRec->SetMarkerColor(kOrange-1);
+    hDat->SetMarkerStyle(20);
+    hDat->SetMarkerColor(kBlack);
+    hDat->SetLineColor(kBlack);
+    hRec->SetFillColor(kOrange-1);
+    hRec->SetLineColor(kOrange-1);
 
     job_info = (TH1*)mc_file->Get("_job_info");
     mc_file->GetObject("_job_info_average", job_info_average);
@@ -208,7 +230,7 @@ void MakeMCvsData(bool logplot)
     xsec = (*job_info_average)[1];
     samplescale = lumi*xsec/wsum;
 
-    hReco->Scale(samplescale);
+    hRec->Scale(samplescale);
 
     vector<TString> back_file_name = {
         "WJetsToLNu",
@@ -239,19 +261,18 @@ void MakeMCvsData(bool logplot)
 
     int nBackFiles = back_file_name.size();
     vector<TFile*> back_file;
-    vector<TH1D*> back_histTmp;
     vector<TH1D*> back_hist;
     THStack*hStack = new THStack("stack plot","");
     TLegend*legend = new TLegend(0.65,0.9,0.9,0.60);
     legend->SetTextSize(0.02);
-    legend->AddEntry(hData,"Data");
-    legend->AddEntry(hReco,"DY#rightarrow#mu#mu");
-    TH1F*hMC = (TH1F*)hReco->Clone();
+    legend->AddEntry(hDat,"Data");
+    legend->AddEntry(hRec,"DY#rightarrow#mu#mu");
+    TH1F*hMC = (TH1F*)hRec->Clone();
 
-    int nBins = hReco->GetNbinsX();
-    double x1 = hReco->GetBinLowEdge(1);
-    double x2 = hReco->GetBinLowEdge(nBins);
-    x2 += hReco->GetBinWidth(nBins);
+    int nBins = hRec->GetNbinsX();
+    double x1 = hRec->GetBinLowEdge(1);
+    double x2 = hRec->GetBinLowEdge(nBins);
+    x2 += hRec->GetBinWidth(nBins);
 
     for(int i=0;i<nBackFiles;i++){
         TString load_name = prefix;
@@ -260,8 +281,7 @@ void MakeMCvsData(bool logplot)
         load_name += back_file_name.at(i);
         load_name += suffix;
         back_file.push_back(new TFile(load_name));
-        back_histTmp.push_back((TH1D*)back_file.at(i)->Get(reco_hist));
-        back_hist.push_back(Utilities::RebinTH1(back_histTmp.at(i),back_name,_hGen));
+        back_hist.push_back((TH1D*)back_file.at(i)->Get(reco_hist));
         job_info = (TH1*)back_file.at(i)->Get("_job_info");
         back_file.at(i)->GetObject("_job_info_average", job_info_average);
 
@@ -277,7 +297,7 @@ void MakeMCvsData(bool logplot)
         legend->AddEntry(back_hist.at(i),back_file_name.at(i));
         hMC->Add(back_hist.at(i));
     }
-    hStack->Add(hReco);
+    hStack->Add(hRec);
 
     TLine*line = new TLine(x1,1,x2,1);
     line->SetLineColor(kRed);
@@ -286,7 +306,7 @@ void MakeMCvsData(bool logplot)
     double upperBound = 1.0+ratioRange;
     double lowerBound = 1.0-ratioRange;
 
-    TH1F*hRatio = (TH1F*)hData->Clone("ratio");
+    TH1F*hRatio = (TH1F*)hDat->Clone("ratio");
     hRatio->Divide(hMC);
     hRatio->SetMarkerStyle(20);
     hRatio->SetMarkerColor(kBlack);
@@ -311,7 +331,7 @@ void MakeMCvsData(bool logplot)
     hStack->SetMinimum(yAxisMinimum);
     hStack->GetXaxis()->SetLabelSize(0);
     hStack->GetXaxis()->SetTitleSize(0);
-    hData->Draw("pe,same");
+    hDat->Draw("pe,same");
     legend->Draw("same");
 
     canvas->cd();
@@ -345,6 +365,10 @@ void MakeMCvsData(bool logplot)
 
 void MakeMigrationMatrixPlot()
 {
+    TH2D*hMatrix = (TH2D*)_hMat->Clone();
+    TH1D*hGen = (TH1D*)_hGen->Clone();
+    TH1D*hRec = (TH1D*)_hRec->Clone();
+
     double wsum, lumi, xsec;
     TH1*job_info;
     TVectorD*job_info_average = nullptr;
@@ -356,23 +380,10 @@ void MakeMigrationMatrixPlot()
     wsum = job_info->GetBinContent(2);
     xsec = (*job_info_average)[1];
     samplescale = lumi*xsec/wsum;
-    _hGen->Scale(samplescale);
-    _hRec->Scale(samplescale);
+    hGen->Scale(samplescale);
+    hRec->Scale(samplescale);
 
-    // Get migration matrix plot
-    TH2D*hMatTmp = (TH2D*)mc_file->Get(matrix_hist);
-    TH2D*hMatrix = Utilities::RebinTH2(hMatTmp,"hMatrix",_hGen,true);;
-    TH2D*hMatrix = (TH2D*)mc_file->Get(matrix_hist);
-    hMatrix->Scale(mcScale);
-    hMatrix->GetXaxis()->SetTitle("m_{reco} [GeV]");
-    hMatrix->GetYaxis()->SetTitle("m_{gen} [GeV]");
-    hMatrix->SetTitle("muon migration matrix");
-    hMatrix->GetXaxis()->SetNoExponent();
-    hMatrix->GetXaxis()->SetMoreLogLabels();
-    hMatrix->GetYaxis()->SetNoExponent();
-    hMatrix->GetYaxis()->SetMoreLogLabels();
 
-    hMatrix->Scale(samplescale);
     // Draw migration matrix
     TCanvas*c2 = MakeCanvas("c2");
     c2->SetRightMargin(0.15);

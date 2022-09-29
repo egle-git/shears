@@ -156,13 +156,13 @@ void GetMatrix()
     }
     _hMat->SetName("matrix");
 
-    TCanvas*cMatrix = new TCanvas("cMatrix","",0,0,1000,1000);
-    cMatrix->SetGrid();
-    cMatrix->SetLogx();
-    cMatrix->SetLogy();
-    cMatrix->SetLogz();
-    _hMat->Draw("colz");
-    cMatrix->SaveAs("plots/testMatrix.png");
+//    TCanvas*cMatrix = new TCanvas("cMatrix","",0,0,1000,1000);
+//    cMatrix->SetGrid();
+//    cMatrix->SetLogx();
+//    cMatrix->SetLogy();
+//    cMatrix->SetLogz();
+//    _hMat->Draw("colz");
+//    cMatrix->SaveAs("plots/testMatrix.png");
 }
 
 void SaveAll()

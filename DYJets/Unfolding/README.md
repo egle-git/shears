@@ -68,4 +68,4 @@ Now we can unfold the distributions. This script carries out the unfolding and o
 ```
 root macros/unfold.C
 ```
-I also just added a new bash script called HitIt.sh, which will carry out all steps listed here to combine root files, retrieve histograms for unfolding, carry out unfolding, and make plots.
+I also just added a new bash script called HitIt.sh, which will carry out all steps listed here to combine root files, retrieve histograms for unfolding, carry out unfolding, and make plots. HitIt.sh requires one arument, the name of the directory located in the DYJets directory, which contains the root files output from running the analysis via Condor.

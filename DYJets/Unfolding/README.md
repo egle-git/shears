@@ -68,4 +68,4 @@ Now we can unfold the distributions. This script carries out the unfolding and o
 ```
 root macros/unfold.C
 ```
-
+I also just added a new bash script called HitIt.sh, which will carry out all steps listed here to combine root files, retrieve histograms for unfolding, carry out unfolding, and make plots.

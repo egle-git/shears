@@ -9,9 +9,9 @@ Unfold::Unfold()
 Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
 {
     // calclate global parameters
-    _hReco = hReco; // reconstructed distribution
-    _hTrue = hTrue; // true distribution
-    _hMatrix = hMatrix;// matrix of migrations
+    _hReco = (TH1F*)hReco->Clone(); // reconstructed distribution
+    _hTrue = (TH1F*)hTrue->Clone(); // true distribution
+    _hMatrix = (TH2F*)hMatrix->Clone();// matrix of migrations
     _nBinsReco = _hReco->GetNbinsX(); // number of reco bins
     _nBinsTrue = _hTrue->GetNbinsX(); // number of true bins
 
@@ -73,6 +73,15 @@ void Unfold::unfoldTUnfold()
     TH1F*hReco = _hReco;
     TH1F*hTrue = _hTrue;
     TH2F*hMatrix = _hMatrix;
+
+    // Notes:
+    // Regularization Modes should be irrelevant to this analysis
+    // since we weill likely not need regularization
+    // Constraint type is chosen arbitrarily for now
+    // It can be set to constrain the area
+    // Density Mode is chosen arbitrarily
+    // I do not yet know which one we should use
+    // Horizontal vs vertical output is determined automatically
 
     ////////////////////////////
     //  Regularization Modes  //

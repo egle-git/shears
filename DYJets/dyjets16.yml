@@ -218,15 +218,13 @@ reject low quality muon events:
 
   # single muon triggers used
   single muon triggers: |
-    HLT_IsoMu24, 
+    HLT_IsoMu24,
     HLT_IsoTkMu24
 
   # double muon triggers
   double muon triggers: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ, 
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
-
-
+    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
+    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
 
 # List of available data/MC samples
 samples:
@@ -332,11 +330,11 @@ samples:
       type: background
       nano dir: Catalogs/2016preAPV/
       catalog: Catalog2016_bonzai_ST_tW_top.txt
-    - name: WJetsToLNu
-      type: background
-      jobs: 4
-      nano dir: Catalogs/2016preAPV/
-      catalog: Catalog2016_bonzai_WJetsToLNu.txt
+    #- name: WJetsToLNu
+    #  type: background
+    #  jobs: 4
+    #  nano dir: Catalogs/2016preAPV/
+    #  catalog: Catalog2016_bonzai_WJetsToLNu.txt
     - name: WWTo2L2Nu
       type: background
       nano dir: Catalogs/2016preAPV
@@ -370,13 +368,13 @@ tables B-F:
     #muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
     #muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
     muon id:        2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_TightID.txt
-    muon isolation: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_TightIDandIPCut.txt
+    muon isolation: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
     #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
     #emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
     #dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_MediumID_RunBF.txt
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
-    smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_data.txt
-    smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_mc.txt
+    smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
+    smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
     #diel trigger leg1: Electron_trigger_seoul_leg1.txt
     #diel trigger leg2: Electron_trigger_seoul_leg2.txt
     #bjet loose eff:       btag-loose-b.txt
@@ -394,7 +392,7 @@ tables G-H:
     #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
     #muon id:        scalefactors_Medium_Muon_period2_July.txt
     muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
-    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
+    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_NUM_TightRelIso_DEN_MediumID.txt
     #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
     #emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
@@ -446,9 +444,9 @@ MC grouping:
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-    - legend: W
-      samples: [ WJetsToLNu ]
-      color: 800 # kOrange
+    #- legend: W
+    #  samples: [ WJetsToLNu ]
+    #  color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
@@ -492,6 +490,10 @@ plots:
     - selector: 'el.*'
       produce: no
     - selector: 'mu.*'
+      produce: yes
+    - selector: 'mu.*subleading.*'
+      produce: yes
+    - selector: 'muIso.*'
       produce: no
     - selector: 'genLep.*'
       produce: no

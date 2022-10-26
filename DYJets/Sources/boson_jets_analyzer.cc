@@ -415,7 +415,7 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
         // https://www.desy.de/~sschmitt/TUnfold/tunfold_manual_v17.9.pdf, page 10
         histo_set2D.fill(name,
                          *tags.rec + "-matrix",
-                         -1.0,// underflow bin: need to make this more general
+                         -10000.0,// underflow bin
                          *value.gen, weights().gen_weight()-weights().global_weight());
     }
     else{
@@ -425,14 +425,14 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
             histo_set2D.fill(name,
                              *tags.rec + "-matrix",
                              *value.rec,
-                             -1.0, weights().global_weight());
+                             -10000.0, weights().global_weight());
         }
         if(tags.gen && value.gen){
             // there is no reco event
             // gen event gets gen_weight
             histo_set2D.fill(name,
                              *tags.gen + "-matrix",
-                             -1.0,
+                             -10000.0,
                              *value.gen, weights().gen_weight());
         }
     }

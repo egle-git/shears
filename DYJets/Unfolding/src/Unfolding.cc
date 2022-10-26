@@ -17,7 +17,6 @@ Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
 
     // Determine if true distribution is on the vertical or horizontal axis
     // This is found by which axis has more bins
-    // For TUnfold, the reco distribution must have more bins
     // By default, _trueVert = false as set in the header file
     int nBinsY = _hMatrix->GetNbinsY();
     if(nBinsY == _nBinsTrue) _trueVert = true;
@@ -326,20 +325,25 @@ void Unfold::makeResponseMatrix(TH2F*hist)
     double binContent;
     double scaledContent;
 
+    // first and last bins for the matrix
+    int firstBin = 0; // 0 includes underflow
+    int lastBinX = nBinsX+1; // nBinsX+1 includes overflow
+    int lastBinY = nBinsY+1; // nBinsY+1 includes overflow
+
     // true distribution on y-axis
     // reco distribution on x-axis
     if(_trueVert){
         //Loop over all true bins (the y-axis)
-        for(int j=1;j<=nBinsY;j++){
+        for(int j=firstBin;j<=lastBinY;j++){
             nEntriesX = 0.0;
             //for each true bin, sum up the number of events across all reco bins
-            for(int i=1;i<=nBinsX;i++){
+            for(int i=firstBin;i<=lastBinX;i++){
                 binContent = hist->GetBinContent(i,j);
                 nEntriesX += binContent;
             }//end first loop over reco bins
             //For each true bin scale the bin content by the number of entries in all
             //reco bins, then place this content into the new matrix
-            for(int i=1;i<=nBinsX;i++){
+            for(int i=firstBin;i<=lastBinX;i++){
                 scaledContent = hist->GetBinContent(i,j)/nEntriesX;
                 hResponse->SetBinContent(i,j,scaledContent);
             }//end second loop over reco bins
@@ -350,16 +354,16 @@ void Unfold::makeResponseMatrix(TH2F*hist)
     // reco distribution on y-axis
     else{
         //Loop over all true bins (the x-axis)
-        for(int i=1;i<=nBinsX;i++){
+        for(int i=firstBin;i<=lastBinX;i++){
             nEntriesY = 0.0;
             //for each true bin, sum up the number of events across all reco bins
-            for(int j=1;j<=nBinsY;j++){
+            for(int j=firstBin;j<=lastBinY;j++){
                 binContent = hist->GetBinContent(i,j);
                 nEntriesY += binContent;
             }//end first loop over reco bins
             //For each true bin scale the bin content by the number of entries in all
             //reco bins, then place this content into the new matrix
-            for(int j=1;j<=nBinsY;j++){
+            for(int j=firstBin;j<=lastBinY;j++){
                 scaledContent = hist->GetBinContent(i,j)/nEntriesY;
                 hResponse->SetBinContent(i,j,scaledContent);
             }//end second loop over reco bins

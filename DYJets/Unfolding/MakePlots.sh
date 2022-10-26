@@ -6,5 +6,5 @@ export LD_PRELOAD=/usr/lib64/libopenblas.so.0
 
 root -l << EOF
 .L macros/makePlots.C 
-makeTestPlots()
+makePlots()
 EOF

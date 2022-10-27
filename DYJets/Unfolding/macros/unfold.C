@@ -10,10 +10,6 @@ void unfold()
     gStyle->SetPalette(1);
     gStyle->SetOptStat(0);
 
-    // this scale factor is a temporary check to see if data matches MC well
-    // If it is scaled to match it
-    double dataScale = 2.36575;
-    double mcScale = 0.422698;
     TString savePrefix = "plots/testUnfold";
     TString saveSuffix = ".png";
 
@@ -66,7 +62,7 @@ void unfold()
     TString responseSave = savePrefix;
     responseSave += "_ResponseMatrix";
     responseSave += saveSuffix;
-    unfClosure->plotMatrix(hResponse,responseSave,true);
+    unfData->plotMatrix(hResponse,responseSave,true);
 
     // Save the histograms
     TString save_loc = "histograms/unfolding/unfolding_output.root";

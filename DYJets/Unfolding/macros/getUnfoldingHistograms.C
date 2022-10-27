@@ -148,7 +148,6 @@ void GetMatrix()
 {
     TFile*mc_file   = new TFile(mc_name);
     TH2D*hMatTmp = (TH2D*)mc_file->Get(matrix_hist);
-    _hMat = Utilities::RebinTH2(hMatTmp,"hMatrix",_hGen,false);
     _hMat = (TH2D*)mc_file->Get(matrix_hist);
     
     if(!_hMat){

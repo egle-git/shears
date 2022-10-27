@@ -16,7 +16,6 @@ Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
     _nBinsTrue = _hTrue->GetNbinsX(); // number of true bins
 
     // Determine if true distribution is on the vertical or horizontal axis
-    // This is found by which axis has more bins
     // By default, _trueVert = false as set in the header file
     int nBinsY = _hMatrix->GetNbinsY();
     if(nBinsY == _nBinsTrue) _trueVert = true;

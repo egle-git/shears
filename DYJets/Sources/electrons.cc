@@ -26,7 +26,7 @@ electrons::electrons(util::job::info &info, const util::options &opt, util::hist
     const double pi = boost::math::constants::pi<double>();
 
     h.declare("elPt", "Electron pt;Electron p_{T} [GeV]", 50, 0, 200);
-    h.declare("elEta", "Electron eta;Electron #eta", 24, -2.25, 2.25);
+    h.declare("elEta", "Electron eta;Electron #eta", 24, -2.5, 2.5);
     h.declare("elPhi", "Electron phi;Electron #phi", 24, -pi, pi);
 }
 

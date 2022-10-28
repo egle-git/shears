@@ -27,6 +27,8 @@ class electrons
         loose,  ///< \brief Loose ID
         medium, ///< \brief Medium ID
         tight,  ///< \brief Tight ID
+        mva_wp80,
+        mva_wp90,
     };
 
   private:
@@ -37,15 +39,19 @@ class electrons
     TTreeReaderArray<int> Electron_charge;
     TTreeReaderArray<float> Electron_deltaEtaSC;
     TTreeReaderArray<int> Electron_cutBased;
+    TTreeReaderArray<float>Electron_mvaFall17V2Iso;
+    TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WP80;
+    TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WP90;
+    TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WPL;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
-    id _id_cut = id::tight;
+    id _id_cut = id::mva_wp90;
 
     bool _id_sf_enabled = true;
     bool _reco_sf_enabled = true;
-
+    
   public:
     /// \brief Constructor.
     explicit electrons(util::job::info &info, const util::options &opt, util::histo_set &h);

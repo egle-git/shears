@@ -52,7 +52,8 @@ void muons::configure(const util::options &opt)
             roccor_dir = node["rochester correction path"].as<std::string>();
         }
         roccor_dir = "EfficiencyTables/" + roccor_dir;
-        _roccor = std::make_shared<RoccoR>(roccor_dir);//hardcoded now, since there is a problem with yml
+        _roccor = std::make_shared<RoccoR>(roccor_dir);
+        std::cout << "roccor_dir = " << roccor_dir << std::endl;
     }
 
     if (node["id"]) {
@@ -88,9 +89,9 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
     std::uniform_real_distribution<> uniform(0.0, 1.0);
     nVetoMuons =0 ;
     std::vector<lepton> muons;
-    for (unsigned i = 0; i < Muon_pt.GetSize(); ++i) {
+    for(unsigned i=0; i<Muon_pt.GetSize(); ++i) {
        lepton l;
-        if (std::abs(Muon_eta[i]) > _eta_cut) {
+        if(std::abs(Muon_eta[i]) > _eta_cut) {
             continue;
         }
         l.v.SetPtEtaPhiM(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
@@ -99,10 +100,6 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
         l.iso = Muon_pfIsoId[i];
         l.id = Muon_looseId[i];
         l.pdgid = 13;
-        
-#ifdef DEBUG_PRINTOUT
-        l.tkLayerCnt = Muon_nTrackerLayers[i];
-#endif // DEBUG_PRINTOUT
 
         switch (_id_cut) {
         case id::loose:
@@ -115,7 +112,7 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
             l.passes_id = Muon_tightId[i];
             break;
         }
-        if (!l.passes_id) {
+        if(!l.passes_id) {
             continue;
         }
 
@@ -133,67 +130,41 @@ std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepto
             l.passes_iso = (Muon_pfIsoId[i] >= 4);
             break;
         }
-        if (!l.passes_iso) {
+        if(!l.passes_iso) {
             continue;
         }
         
-        if (_roccor_enabled) {
-            if (isdata) {
-                l.v *= _roccor->kScaleDT(l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
-#ifdef DEBUG_PRINTOUT
-                l.fnUsed = 2;
-                l.gllPt = 0;
-#endif // DEBUG_PRINTOUT
-            } else {
-                lepton gll;double drmin=99.;bool match =false;
-                for (auto &v : gl) {
-                if(fabs(v.pdgid)==13 &&v.v.DeltaR(l.v)<0.1 && v.v.DeltaR(l.v)<drmin){
-                gll=v;match=true;
-                drmin=v.v.DeltaR(l.v);
-                }}
-                if(match){
-                l.v *= _roccor->kScaleFromGenMC(l.charge,
-                                                 l.v.Pt(),
-                                                 l.v.Eta(),
-                                                 l.v.Phi(),
-                                                 Muon_nTrackerLayers[i],
-                                                 gll.v.Pt(),
-//                                                 uniform(rng),
-						gRandom->Rndm(),
-  //0.75,
-                                                 0,
-                                                 0);
-#ifdef DEBUG_PRINTOUT
-                l.fnUsed = 0;
-                l.gllPt = gll.v.Pt();
-#endif // DEBUG_PRINTOUT
-                }
-                else{
-                l.v *= _roccor->kScaleAndSmearMC(l.charge,
-                                                 l.v.Pt(),
-                                                 l.v.Eta(),
-                                                 l.v.Phi(),
-                                                 Muon_nTrackerLayers[i],
-//  0.75,                                          
-//  0.75,                                          
+        // details: https://gitlab.cern.ch/akhukhun/roccor
+        if(_roccor_enabled) {
+            Double_t corr = -1;
 
-//                                                 uniform(rng),
-//                                                 uniform(rng),
-						gRandom->Rndm(),
-						gRandom->Rndm(),
-                                                 0,
-                                                 0);
-#ifdef DEBUG_PRINTOUT
-                l.fnUsed = 1;
-#endif // DEBUG_PRINTOUT
-		}
+            if(isdata) {
+                corr = _roccor->kScaleDT((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
+            } else { // MC
+                // look for a matched gen-level muon
+                lepton gll; double drmin=99.; bool match =false;
+                for (auto &v : gl) {
+                    if(fabs(v.pdgid)==13 && v.v.DeltaR(l.v)<0.1 && v.v.DeltaR(l.v)<drmin){
+                    gll=v; match=true;
+                    drmin=v.v.DeltaR(l.v);
+                    }
+                }
+                // correction is different depending on the existence of matched gen-muon
+                if( match ) corr = _roccor->kSpreadMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), gll.v.Pt());
+                else        corr = _roccor->kSmearMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), Muon_nTrackerLayers[i], gRandom->Rndm());
             }
+
+            TVector3 vecP3_old = l.v.Vect();
+            l.v.SetVectM(vecP3_old*corr, Muon_mass[i]); // -- scale the 3-momentum only
         }
+
         if (l.v.Pt() < _pt_cut) {
             continue;
         }
+
         muons.push_back(l);
     }
+
     if (_roccor_enabled) {
         std::sort(muons.begin(), muons.end(), [](const lepton &lhs, const lepton &rhs)
             {

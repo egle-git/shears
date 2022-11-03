@@ -68,6 +68,13 @@ private:
     bool _applyPref_ = false;
     int _mode_pref = 0; // 0: nominal, 1: up variation, -1: down variation
 
+    bool _selectDYLL = false;
+    int  _selectDYLL_flavor = -1;
+
+    bool _apply_ptReweight = false;
+    std::string _fileName_ptReweight;
+    TH1D* _h_ptReweight;
+
     std::vector<double> _mass_bins;
 
     physics::reweighing _reweighing;

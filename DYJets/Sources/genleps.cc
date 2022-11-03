@@ -12,22 +12,16 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
     : GenDressedLepton_pt(info.init_optional_branch<decltype(GenDressedLepton_pt)>("GenDressedLepton_pt")),
       GenDressedLepton_eta(info.init_optional_branch<decltype(GenDressedLepton_eta)>("GenDressedLepton_eta")),
       GenDressedLepton_phi(info.init_optional_branch<decltype(GenDressedLepton_phi)>("GenDressedLepton_phi")),
-      //GenLepE(info.reader, "GLepDr01E"),
       GenDressedLepton_mass(info.init_optional_branch<decltype(GenDressedLepton_mass)>("GenDressedLepton_mass")),
       GenDressedLepton_pdgId(info.init_optional_branch<decltype(GenDressedLepton_pdgId)>("GenDressedLepton_pdgId")),
-      //GenLepPrompt(info.reader,"GenLepPrompt"),
-      GenPart_statusFlags(info.init_optional_branch<decltype(GenPart_statusFlags)>("GenPart_statusFlags")), //Iti: check
       GenDressedLepton_hasTauAnc(info.init_optional_branch<decltype(GenDressedLepton_hasTauAnc)>("GenDressedLepton_hasTauAnc")),
-      //GenLepSt(info.reader, "GLepDr01St"),
-      GenPart_status(info.init_optional_branch<decltype(GenPart_status)>("GenPart_status")) //Iti: check
-      //LHEZChild1Id(info.reader, "LHEZChild1id"),
-      //LHEZChild2Id(info.reader, "LHEZChild2id"),
-      //LHEZChild1Px(info.reader, "LHEChild1Px"),
-      //LHEZChild2Px(info.reader, "LHEChild2Px"),
-      //LHEZChild1Py(info.reader, "LHEChild1Py"),
-      //LHEZChild2Py(info.reader, "LHEChild2Py")
-
-
+      GenPart_status(info.init_optional_branch<decltype(GenPart_status)>("GenPart_status")),
+      GenPart_statusFlags(info.init_optional_branch<decltype(GenPart_statusFlags)>("GenPart_statusFlags")),
+      GenPart_pt(info.init_optional_branch<decltype(GenPart_pt)>("GenPart_pt")),
+      GenPart_eta(info.init_optional_branch<decltype(GenPart_eta)>("GenPart_eta")),
+      GenPart_phi(info.init_optional_branch<decltype(GenPart_phi)>("GenPart_phi")),
+      GenPart_mass(info.init_optional_branch<decltype(GenPart_mass)>("GenPart_mass")),
+      GenPart_pdgId(info.init_optional_branch<decltype(GenPart_pdgId)>("GenPart_pdgId"))
 {
     configure(opt);
 
@@ -76,6 +70,55 @@ std::vector<lepton> genleps::get()
 
     return genleps;
 }
+
+// return true if the event has "fromHardProcessFinalSate" two leptons with the given flavor
+// useful for DY->ll sample to separate DY->ee, DY->mm and DY->tautau
+bool genleps::IsGivenFlavorDileptonEvent(int pdgID) {
+  int countLep_fromHardProcessFinalState = 0;
+
+  for(unsigned i_par=0; i_par < GenPart_pdgId->GetSize(); ++i_par) {
+    int i_pdgID = GenPart_pdgId->At(i_par);
+
+    if( abs(i_pdgID) == pdgID ) {
+      if( GenPart_statusFlags->At(i_par) & 256 && // -- fromHardProcess
+          GenPart_status->At(i_par) == 1 ) // -- final state
+        countLep_fromHardProcessFinalState++;
+    }
+  }
+
+  return (countLep_fromHardProcessFinalState == 2);
+}
+
+// used for Rochester correction to find matched gen-muon in the final state (i.e. stable) to a given reco-muon. Dressed lepton should not be used here.
+// it should be called in MC case: it will make seg. fault when it is called with data (at GenPart_pt->GetSize())
+std::vector<lepton> genleps::get_leptons_finalState() {
+  std::vector<lepton> genleps_finalState;
+
+  for(unsigned i=0; i<GenPart_pt->GetSize(); ++i) {
+    lepton l;
+
+    int pdgID = GenPart_pdgId->At(i);
+
+    // stable & (electron or muon)
+    if( GenPart_status->At(i) == 1 && (std::abs(pdgID) == 11 || std::abs(pdgID) == 13) ) {
+      l.v.SetPtEtaPhiM(GenPart_pt->At(i), GenPart_eta->At(i), GenPart_phi->At(i), GenPart_mass->At(i));
+      l.raw_v = l.v;
+      l.charge = pdgID/std::abs(pdgID);
+      l.pdgid = pdgID;
+
+      genleps_finalState.push_back(l);
+    }
+  }
+
+  std::sort(genleps_finalState.begin(), genleps_finalState.end(), 
+            [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); } 
+  );
+
+  return genleps_finalState;
+
+}
+
+
 void genleps::fill(util::histo_set &h,
                  const std::string &tag,
                  const std::vector<lepton> &genleps,

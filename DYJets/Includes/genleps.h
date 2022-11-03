@@ -31,16 +31,15 @@ class genleps
     std::optional<TTreeReaderArray<float>> GenDressedLepton_eta;
     std::optional<TTreeReaderArray<float>> GenDressedLepton_phi;
     std::optional<TTreeReaderArray<float>> GenDressedLepton_mass;
-    std::optional<TTreeReaderArray<int>> GenPart_status;
     std::optional<TTreeReaderArray<int>> GenDressedLepton_pdgId;
-    std::optional<TTreeReaderArray<int>> GenPart_statusFlags;
     std::optional<TTreeReaderArray<bool>> GenDressedLepton_hasTauAnc;
-    //TTreeReaderArray<int> LHEZChild1Id;
-    //TTreeReaderArray<int> LHEZChild2Id;
-    //TTreeReaderArray<float> LHEZChild1Px;
-    //TTreeReaderArray<float> LHEZChild2Px;
-    //TTreeReaderArray<float> LHEZChild1Py;
-    //TTreeReaderArray<float> LHEZChild2Py;
+    std::optional<TTreeReaderArray<int>> GenPart_status;
+    std::optional<TTreeReaderArray<int>> GenPart_statusFlags;
+    std::optional<TTreeReaderArray<float>> GenPart_pt;
+    std::optional<TTreeReaderArray<float>> GenPart_eta;
+    std::optional<TTreeReaderArray<float>> GenPart_phi;
+    std::optional<TTreeReaderArray<float>> GenPart_mass;
+    std::optional<TTreeReaderArray<int>> GenPart_pdgId;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
@@ -59,6 +58,10 @@ class genleps
      * The list is already filtered according to config file options.
      */
     std::vector<lepton> get();
+
+    bool IsGivenFlavorDileptonEvent(int pdgID);
+
+    std::vector<lepton> get_leptons_finalState();
 
     /**
      * \brief Fills gen control plots.

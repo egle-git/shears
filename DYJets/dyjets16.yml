@@ -22,6 +22,23 @@ log:
     # Default value: yes
     #override root handler: yes
 
+
+# when you want to separate a specific flavor from DY->ll events (e.g. Madgraph)
+# it will check the dilepton flavor at the generator level, and skip the events if the flavor is not same with the given flavor
+# WARNING: It should be used for *DY MC only*. Background MC with this option will give meaningless results.
+# default: false
+Select specific flavor in DYLL:
+  use: false
+  flavor: -1 # pdgID. DY->ee: 11 / DY->mm: 13 / DY->tautau: 15
+
+# dilepton pt reweighting option
+# the reweighting factor is derived from (data-bkg) vs. DY MC comparison of dilepton pT @ reco-level
+# WARNING: it should be applied to *DY MC only* (i.e not use for backgrounds)
+# default: false
+dilepton pt reweighting:
+  use: false
+  reweighting factor path: "." # -- under EfficiencyTables/ (e.g. 2016preAPV/ROOTFile_DimuonPt_Weight_Madgraph.root)
+
 # Whether to use pileup reweighing
 # Default value: true
 use pileup reweighing: true
@@ -392,7 +409,7 @@ tables G-H:
     #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
     #muon id:        scalefactors_Medium_Muon_period2_July.txt
     muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
-    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_NUM_TightRelIso_DEN_MediumID.txt
+    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
     #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
     #emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt

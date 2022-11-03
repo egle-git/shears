@@ -41,6 +41,8 @@ std::string get_triggers(util::job::info &info, const util::options &opt, int er
     if (opt.config[name]) {
         return opt.config[name].as<std::string>();
     }
+
+    return "";
 }
 
 } // anonymous namespace
@@ -104,6 +106,36 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
         std::sort(_mass_bins.begin(), _mass_bins.end());
     }
 
+    if( opt.config["Select specific flavor in DYLL"] ) {
+        YAML::Node node = opt.config["Select specific flavor in DYLL"];
+
+        _selectDYLL = node["use"].as<bool>();
+        _selectDYLL_flavor = node["flavor"].as<int>();
+
+        if( _selectDYLL ) {
+            std::cout << "Select dilepton events with specific flavor(pdgID = " << _selectDYLL_flavor << ") from DY->ll smaple" << std::endl;
+            std::cout << "Turn off this option if you are not running on data or non-DY samples" << std::endl;
+        }
+    }
+
+    if( opt.config["dilepton pt reweighting"] ) {
+        YAML::Node node = opt.config["dilepton pt reweighting"];
+
+        _apply_ptReweight = node["use"].as<bool>();
+        _fileName_ptReweight = node["reweighting factor path"].as<std::string>();
+
+        if( _apply_ptReweight ) {
+            TString fullPath = "./EfficiencyTables/" + _fileName_ptReweight;
+            std::cout << "dilepton pt reweighting is ON (should be used for DY MC only!)" << std::endl;
+            std::cout << "--> it will use the reweighting factor in " << fullPath << std::endl;
+
+            TH1::AddDirectory(kFALSE); // -- histogram can be used even after closing the originated TFile
+            TFile* f = TFile::Open(fullPath);
+            _h_ptReweight = (TH1D*)f->Get("h_weight_dimuonPt")->Clone();
+            f->Close();
+        }
+    }
+
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
@@ -116,6 +148,11 @@ boson_jets_analyzer::~boson_jets_analyzer()
 
 void boson_jets_analyzer::operator()()
 {
+    // -- check before counting this event
+    if( _selectDYLL ) {
+        if( !_genleps.IsGivenFlavorDileptonEvent(_selectDYLL_flavor) ) return;
+    }
+
     _weights.process_event();
     _reweighing.reweigh(_weights);
     counter.count("Total", weights().global_weight());
@@ -211,7 +248,12 @@ void boson_jets_analyzer::operator()()
         int nVetoMuons=0;
         int nVetoElecs=0;
 
-        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps,nVetoMuons);
+        // final state (post-FSR) gen-muons used for the Rochester correction
+        std::vector<lepton> genleps_finalState;
+        if( _weights.ismc() ) genleps_finalState = _genleps.get_leptons_finalState();
+        else                  genleps_finalState.clear(); // data: no gen-leptons
+
+        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps_finalState, nVetoMuons);
         std::vector<lepton> electrons = _electrons.get(nVetoElecs);
         std::vector<lepton> leptons = find_boson(muons, electrons);
         if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
@@ -251,6 +293,19 @@ void boson_jets_analyzer::operator()()
         if( _reject_lowQMu ) {
             Bool_t isLowQMuEvent = check_lowQualityMuon(chosen_muons);
             if( isLowQMuEvent ) return; // -- reject the event with low quality muons
+        }
+
+        if( _apply_ptReweight && _weights.ismc() &&
+            (chosen_muons.size() >= 2 || chosen_electrons.size() >= 2) ) { 
+
+            auto pt = evt.apply(&event_contents::get_boson_p).apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
+            Int_t theBin = _h_ptReweight->GetXaxis()->FindBin(*pt.rec);
+
+            Double_t weight = 1.0;
+            if( theBin == 0 || theBin == _h_ptReweight->GetNbinsX()+1 ) weight = 1.0; // -- under or overflow: do not apply the weight
+            else                                                        weight = _h_ptReweight->GetBinContent( theBin );
+
+            _weights.use_weight(weight);
         }
 
         // Apply lepton scale factors

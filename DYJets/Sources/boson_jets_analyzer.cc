@@ -114,7 +114,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
         if( _selectDYLL ) {
             std::cout << "Select dilepton events with specific flavor(pdgID = " << _selectDYLL_flavor << ") from DY->ll smaple" << std::endl;
-            std::cout << "Turn off this option if you are not running on data or non-DY samples" << std::endl;
+            std::cout << "Turn off this option if you are running on data or non-DY samples" << std::endl;
         }
     }
 

@@ -22,7 +22,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 ###################################################################################################
-# RooUnfold
+# RooUnfold: commented out (move to TUnfold)
 ###################################################################################################
 
 # Generate dictionary
@@ -34,11 +34,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #    LINKDEF "RooUnfold/src/RooUnfold_LinkDef.h"
 #)
 
-file(GLOB RooUnfold_src "RooUnfold/src/*.cxx")
-add_library(RooUnfold ${RooUnfold_src})  #"${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict.cxx")
+#file(GLOB RooUnfold_src "RooUnfold/src/*.cxx")
+#add_library(RooUnfold ${RooUnfold_src})  #"${CMAKE_BINARY_DIR}/CMakeFiles/RooUnfoldDict.cxx")
 
-target_include_directories(RooUnfold PUBLIC "RooUnfold/src")
-target_include_directories(RooUnfold SYSTEM PUBLIC ROOT::Hist ROOT::Unfold)
+#target_include_directories(RooUnfold PUBLIC "RooUnfold/src")
+#target_include_directories(RooUnfold SYSTEM PUBLIC ROOT::Hist ROOT::Unfold)
 
 ###################################################################################################
 # Python tools

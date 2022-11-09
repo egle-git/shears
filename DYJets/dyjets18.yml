@@ -196,17 +196,13 @@ mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers B-F: |
-    HLT_IsoMu24,
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
-
-triggers G-H: |
+triggers: |
     HLT_IsoMu24,
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
 
 # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
-# but with pT(leading) < 24 GeV muons (muons in turn-on curve or below)
+# but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
 # these events are not used due to the large SF
 # this feature is only needed for the dimuon analysis
 reject low quality muon events:
@@ -221,6 +217,10 @@ reject low quality muon events:
   double muon triggers: |
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
+  # pt criteria for which trigger is used
+  # pt < pt criteria: use DMu / pt > pt critera: use SMu
+  pt criteria: 26
+
 # List of available data/MC samples
 samples:
     - name: data
@@ -228,9 +228,7 @@ samples:
       jobs: 40
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_DoubleMuon_data.txt
-      triggers B-F: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
-      triggers G-H: |
+      triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
     # note: This sample has to be hadd-ed with 'data'.
     - name: data-smu
@@ -239,10 +237,7 @@ samples:
       jobs: 32
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_SingleMuon_data.txt
-      triggers B-F: |
-          HLT_IsoMu24,
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
-      triggers G-H: |
+      triggers: |
           HLT_IsoMu24,
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
     - name: DYJets
@@ -350,29 +345,7 @@ samples:
       catalog: Catalog2018_bonzai_TauTau.txt
 
 # Scale factors
-tables B-F:
-    #electron id:    scalefactors_Medium_Electron_period1.txt
-    #electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
-    muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt
-    muon isolation:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
-    #emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
-    dimu trigger:     2018/ScaleFactor_DoubleMuonTriggers_UL2018_Tight.txt
-    smu trigger data: 2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_MC.txt
-    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
-    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
-    #bjet loose eff:       btag-loose-b.txt
-    #cjet loose eff:       btag-loose-c.txt
-    #udsgjet loose eff:    btag-loose-udsg.txt
-    #bjet medium eff:       btag-medium-b.txt
-    #cjet medium eff:       btag-medium-c.txt
-    #udsgjet medium eff:    btag-medium-udsg.txt
-    #bjet tight eff:       btag-tight-b.txt
-    #cjet tight eff:       btag-tight-c.txt
-    #udsgjet tight eff:    btag-tight-udsg.txt
-
-tables G-H:
+tables:
     #electron id:    scalefactors_Medium_Electron_period2.txt
     #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
     muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt

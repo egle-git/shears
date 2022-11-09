@@ -97,14 +97,9 @@ template <> struct convert<data::sample>
             sample._flags = node["flags"].as<std::vector<std::string>>();
         }
 
-        if (node["triggers B-F"]) {
-            sample._has_triggers.first = true;
-            sample._triggers.first = node["triggers B-F"].as<std::string>();
-        }
-
-        if (node["triggers G-H"]) {
-            sample._has_triggers.second = true;
-            sample._triggers.second = node["triggers G-H"].as<std::string>();
+        if (node["triggers"]) {
+            sample._has_triggers = true;
+            sample._triggers = node["triggers"].as<std::string>();
         }
 
         if (node["xsec"]) {

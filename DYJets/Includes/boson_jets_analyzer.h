@@ -42,18 +42,14 @@ protected:
 private:
     std::string _short_name, _long_name;
 
-    std::mt19937 _rng;
-    int _era;
+    util::tables _tables;
 
-    util::tables _tables_eraBF;
-    util::tables _tables_eraGH;
-
-    trigger_mask _mask_eraBG;
-    trigger_mask _mask_eraH;
+    trigger_mask _mask;
 
     // for the rejection of the low quality dimuon events
     trigger_mask _mask_sMu;
     trigger_mask _mask_dMu;
+    double _pt_criteria_SMuDMu;
 
     genleps _genleps;
     muons _muons;
@@ -118,25 +114,6 @@ protected:
                                   const std::vector<physics::lepton> &leptons,
                                   bool use_smu_triggerSF) = 0;
 
-    /**
-     * \brief Returns the current era (0 for eraBG, 1 for eraGH).
-     *
-     * For MC events, the era is chosen randomly.
-     */
-    int era() const { return _era; }
-
-    /**
-     * \brief Returns a reference to the random number generator used by the
-     *        analyzer.
-     */
-    std::mt19937 &rng() { return _rng; }
-
-    /// \brief Selects one of two values based on the current era.
-    template <class T> T &era_select(T &eraBG, T &eraGH) const
-    {
-        return era() == 0 ? eraBG : eraGH;
-    }
-
     /// \brief Fills histograms
     virtual void fill(const util::matched<std::string> &tags,
                       const util::matched<event_contents> &evt);
@@ -159,10 +136,7 @@ protected:
                        const util::matched<std::string> &tags,
                        const util::matched<double> &value);
 
-    util::tables tables() const
-    {
-        return era_select(_tables_eraBF, _tables_eraGH);
-    }
+    util::tables tables() const { return _tables; }
 
     /// \brief Retrieves the weight information for the current event.
     const physics::weights &weights() const { return _weights; }

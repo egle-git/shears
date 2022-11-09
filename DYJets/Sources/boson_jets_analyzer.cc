@@ -30,19 +30,17 @@ std::string make_tag(double value, const std::vector<double> &bins)
 /**
  * \brief Retrieves the trigger list for the current @ref sample.
  */
-std::string get_triggers(util::job::info &info, const util::options &opt, int era)
+std::string get_triggers(util::job::info &info, const util::options &opt)
 {
-    if (era == 0 && info.sample.has_triggers().first) {
-        return info.sample.triggers().first;
-    } else if (era == 1 && info.sample.has_triggers().second) {
-        return info.sample.triggers().second;
-    }
-    std::string name = (era == 0) ? "triggers B-F" : "triggers G-H";
-    if (opt.config[name]) {
-        return opt.config[name].as<std::string>();
-    }
+    std::string trigger_list = "";
 
-    return "";
+    // look for trigger list specified for this sample
+    if( info.sample.has_triggers() )
+        trigger_list = info.sample.triggers();
+    else if( opt.config["triggers"] ) // if not, use the general trigger list in .yml file
+        trigger_list = opt.config["triggers"].as<std::string>();
+
+    return trigger_list;
 }
 
 } // anonymous namespace
@@ -54,10 +52,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     L1PreFiringWeight_Nom(info.reader, "L1PreFiringWeight_Nom"),
     L1PreFiringWeight_Up(info.reader, "L1PreFiringWeight_Up"),
     L1PreFiringWeight_Dn(info.reader, "L1PreFiringWeight_Dn"),
-    _rng(0 /*std::random_device()()*/),
     _genleps(info, opt, histo_set),
-    _mask_eraBG(info, get_triggers(info, opt, 0)),
-    _mask_eraH(info, get_triggers(info, opt, 1)),
+    _mask(info, get_triggers(info, opt)),
     _mask_sMu(info),
     _mask_dMu(info),
     _muons(info, opt, histo_set),
@@ -68,12 +64,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _reweighing(info, opt),
     _weights(info)
 {
-    if (opt.config["tables B-F"]) {
-        _tables_eraBF = opt.config["tables B-F"].as<util::tables>();
-    }
-    if (opt.config["tables G-H"]) {
-        _tables_eraGH = opt.config["tables G-H"].as<util::tables>();
-    }
+    if (opt.config["tables"])
+        _tables = opt.config["tables"].as<util::tables>();
 
     if (!opt.config["b jet veto"]) {
         throw std::runtime_error("Missing mandatory section in config file: \"b jet veto\"");
@@ -95,6 +87,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
             YAML::Node node_lowQ = opt.config["reject low quality muon events"];
             _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
             _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
+            _pt_criteria_SMuDMu = node_lowQ["pt criteria"].as<double>();
         }
     }
     else {
@@ -156,31 +149,6 @@ void boson_jets_analyzer::operator()()
     _weights.process_event();
     _reweighing.reweigh(_weights);
     counter.count("Total", weights().global_weight());
-
-    /*
-     * Choose the right era for this event
-     */
-    const unsigned run_threshold = 278820u; // start of Run G
-    const double run_lumi_fraction = 0.5493217216546642; // lumi fraction before run G
-
-    std::uniform_real_distribution<> uniform(0.0, 1.0);
-
-    _era = 0;
-    //if (weights().isdata()) {
-    //    // Run number based era selection
-    //    if (*run < run_threshold) {
-    //        _era = 0;
-    //    } else {
-    //        _era = 1;
-    //    }
-    //} else {
-    //    // Monte-Carlo based era selection
-    //    if (uniform(rng()) < run_lumi_fraction) {
-    //        _era = 0;
-    //    } else {
-    //        _era = 1;
-    //    }
-    //}
 
     // Event
     util::matched<event_contents> evt;
@@ -253,7 +221,7 @@ void boson_jets_analyzer::operator()()
         if( _weights.ismc() ) genleps_finalState = _genleps.get_leptons_finalState();
         else                  genleps_finalState.clear(); // data: no gen-leptons
 
-        std::vector<lepton> muons = _muons.get(weights().isdata(), rng(), genleps_finalState, nVetoMuons);
+        std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, nVetoMuons);
         std::vector<lepton> electrons = _electrons.get(nVetoElecs);
         std::vector<lepton> leptons = find_boson(muons, electrons);
         if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
@@ -495,10 +463,7 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
 
 bool boson_jets_analyzer::passes_trigger()
 {
-    //if (_weights.ismc()) {
-    //    return _mask_eraH.passes();
-    //}
-    return era_select(_mask_eraBG, _mask_eraH).passes();
+    return _mask.passes();
 }
 
 void boson_jets_analyzer::write()
@@ -517,7 +482,7 @@ bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) 
         return flag; 
     else { // dimuon event
         // first muon is always the leading muon (muon collection is sorted in decreasing pT after selection)
-        if( muons[0].v.Pt() < 26 && _mask_sMu.passes() && !_mask_dMu.passes() )
+        if( muons[0].v.Pt() < _pt_criteria_SMuDMu && _mask_sMu.passes() && !_mask_dMu.passes() )
             flag = true;
     }
 
@@ -533,10 +498,10 @@ bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) 
     if( muons.size() < 2 ) return false;
 
     bool smu_triggered = false;
-    if ( muons[0].v.Pt() > 26 && _mask_sMu.passes()) smu_triggered = true;
+    if ( muons[0].v.Pt() > _pt_criteria_SMuDMu && _mask_sMu.passes()) smu_triggered = true;
     // this function will only be used for triggered events
-    // if pt > 26 and _mask_sMu doesn't pass then DiMu trigger SF is applied
-    // if pt < 26 then DiMu trigger SF is applied
+    // if pt > _pt_criteria_SMuDMu and _mask_sMu doesn't pass then DiMu trigger SF is applied
+    // if pt < _pt_criteria_SMuDMu then DiMu trigger SF is applied
     // note that if the lowQuality events are not removed this may cause a problem
 
     return smu_triggered;

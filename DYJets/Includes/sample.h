@@ -39,8 +39,8 @@ class sample
     unsigned _jobs = 1;
     double _xsec = -1;
 
-    std::pair<bool, bool> _has_triggers;
-    std::pair<std::string, std::string> _triggers;
+    bool _has_triggers;
+    std::string _triggers;
 
     std::vector<std::string> _flags;
 
@@ -75,10 +75,10 @@ class sample
     double xsec() const { return _xsec; }
 
     /// \brief Returns the list of triggers to be used in this sample
-    std::pair<std::string, std::string> triggers() const { return _triggers; }
+    std::string triggers() const { return _triggers; }
 
     /// \brief Returns the list of triggers to be used in this sample
-    std::pair<bool, bool> has_triggers() const { return _has_triggers; }
+    bool has_triggers() const { return _has_triggers; }
 
     /// \brief Retrieves the \ref type of the sample.
     enum type type() const { return _type; }

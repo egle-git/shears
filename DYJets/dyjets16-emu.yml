@@ -196,13 +196,9 @@ mass bins: [ 10, 50, 76, 106, 170, 350, 1000 ]
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers B-F: |
+triggers: |
      HLT_IsoTkMu24,
      HLT_IsoMu24
-
-triggers G-H: |
-    HLT_IsoTkMu24,
-    HLT_IsoMu24
 
 # List of available data/MC samples
 samples:
@@ -333,7 +329,7 @@ samples:
       catalog: Catalog2016_bonzai_DY_TauTau.txt
 
 # Scale factors
-tables B-F:
+tables:
     electron id:    scalefactors_Medium_Electron_period1.txt
     electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
     #muon id:        scalefactors_Medium_Muon_period1_July.txt
@@ -355,26 +351,26 @@ tables B-F:
     cjet tight eff:       btag-tight-c.txt
     udsgjet tight eff:    btag-tight-udsg.txt
 
-tables G-H:
-    electron id:    scalefactors_Medium_Electron_period2.txt
-    electron reco:  SMP_17_010_GH_MediumID_electrons.txt
-    #muon id:        scalefactors_Medium_Muon_period2_July.txt
-    muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
-    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
-    muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
-    emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
-    diel trigger leg1: Electron_trigger_seoul_leg1.txt
-    diel trigger leg2: Electron_trigger_seoul_leg2.txt
-    bjet loose eff:       btag-loose-b.txt
-    cjet loose eff:       btag-loose-c.txt
-    udsgjet loose eff:    btag-loose-udsg.txt
-    bjet medium eff:       btag-medium-b.txt
-    cjet medium eff:       btag-medium-c.txt
-    udsgjet medium eff:    btag-medium-udsg.txt
-    bjet tight eff:       btag-tight-b.txt
-    cjet tight eff:       btag-tight-c.txt
-    udsgjet tight eff:    btag-tight-udsg.txt
+# tables G-H:
+#     electron id:    scalefactors_Medium_Electron_period2.txt
+#     electron reco:  SMP_17_010_GH_MediumID_electrons.txt
+#     #muon id:        scalefactors_Medium_Muon_period2_July.txt
+#     muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
+#     muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
+#     muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
+#     emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
+#     dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
+#     diel trigger leg1: Electron_trigger_seoul_leg1.txt
+#     diel trigger leg2: Electron_trigger_seoul_leg2.txt
+#     bjet loose eff:       btag-loose-b.txt
+#     cjet loose eff:       btag-loose-c.txt
+#     udsgjet loose eff:    btag-loose-udsg.txt
+#     bjet medium eff:       btag-medium-b.txt
+#     cjet medium eff:       btag-medium-c.txt
+#     udsgjet medium eff:    btag-medium-udsg.txt
+#     bjet tight eff:       btag-tight-b.txt
+#     cjet tight eff:       btag-tight-c.txt
+#     udsgjet tight eff:    btag-tight-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

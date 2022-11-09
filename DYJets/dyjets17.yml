@@ -108,7 +108,7 @@ electrons:
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 25
+    pt: 15
 
     # Eta cut
     # Default value: 2.4
@@ -153,7 +153,7 @@ muons:
 Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
-    leading lepton pt: 25
+    leading lepton pt: 20
     
     # Low mass bound [GeV]
     # Default value: 0
@@ -191,16 +191,12 @@ mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers B-F: |
-    HLT_IsoMu27,
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
-
-triggers G-H: |
+triggers: |
     HLT_IsoMu27,
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
 
 # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
-# but with pT(leading) < 24 GeV muons (muons in turn-on curve or below)
+# but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
 # these events are not used due to the large SF
 # this feature is only needed for the dimuon analysis
 reject low quality muon events:
@@ -215,6 +211,10 @@ reject low quality muon events:
   double muon triggers: |
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
 
+  # pt criteria for which trigger is used
+  # pt < pt criteria: use DMu / pt > pt critera: use SMu
+  pt criteria: 29
+
 # List of available data/MC samples
 samples:
     - name: data
@@ -222,9 +222,7 @@ samples:
       jobs: 32
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_DoubleMuon_data.txt
-      triggers B-F: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
-      triggers G-H: |
+      triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
     # note: This sample has to be hadd-ed with 'data'.
     - name: data-smu
@@ -233,10 +231,7 @@ samples:
       jobs: 32
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_SingleMuon_data.txt
-      triggers B-F: |
-          HLT_IsoMu27
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
-      triggers G-H: |
+      triggers: |
           HLT_IsoMu27
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
     - name: DYJets
@@ -344,15 +339,7 @@ samples:
       catalog: Catalog2017_bonzai_TauTau.txt
 
 # Scale factors
-tables B-F:
-    muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
-    muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  Eff_SF_Tracking_BF_08_07_2017.txt
-    dimu trigger:   2017/ScaleFactor_DoubleMuonTriggers_UL2017_Tight.txt
-    smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
-
-tables G-H:
+tables:
     muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
     muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
     #muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt

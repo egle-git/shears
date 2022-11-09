@@ -84,7 +84,7 @@ void muons::configure(const util::options &opt)
     }
 }
 
-std::vector<lepton> muons::get(bool isdata, std::mt19937 &rng, std::vector<lepton> gl, int &nVetoMuons)
+std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMuons)
 {
     std::uniform_real_distribution<> uniform(0.0, 1.0);
     nVetoMuons =0 ;

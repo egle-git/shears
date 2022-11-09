@@ -10,10 +10,10 @@
 
 #RunB
 
-####/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_1.root
-####/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_2.root
-####/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_3.root
-####/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/data/NanoBonzai30may_DoubleMuon_Run2017B-UL2017_v1_MET_TrigObj/DoubleMuon/Nano/220530_143538/0000/tree_4.root
 
 #RunC
 

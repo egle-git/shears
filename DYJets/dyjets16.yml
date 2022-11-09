@@ -213,20 +213,14 @@ mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers B-F: |
+triggers: |
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
     HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
     HLT_IsoMu24,
     HLT_IsoTkMu24
 
-triggers G-H: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
-    HLT_IsoMu24,
-    HLT_IsoTkMu24
-
 # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
-# but with pT(leading) < 24 GeV muons (muons in turn-on curve or below)
+# but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
 # these events are not used due to the large SF
 # this feature is only needed for the dimuon analysis
 reject low quality muon events:
@@ -243,6 +237,10 @@ reject low quality muon events:
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
     HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
 
+  # pt criteria for which trigger is used
+  # pt < pt criteria: use DMu / pt > pt critera: use SMu
+  pt criteria: 26
+
 # List of available data/MC samples
 samples:
     - name: data
@@ -250,26 +248,18 @@ samples:
       jobs: 32
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_DoubleMuon_data.txt
-      triggers B-F: |
+      triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
           HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
-      triggers G-H: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-          HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
     # Note: This sample has to be hadd-ed with 'data'.
     - name: data-smu
       type: data
       jobs: 16
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_SingleMuon_data.txt
-      triggers B-F: |
+      triggers: |
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
           ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
-          HLT_IsoMu24,
-          HLT_IsoTkMu24
-      triggers G-H: |
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-          ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
           HLT_IsoMu24,
           HLT_IsoTkMu24
     - name: DYJets
@@ -377,7 +367,7 @@ samples:
       catalog: Catalog2016_bonzai_TauTau.txt
 
 # Scale factors
-tables B-F:
+tables:
     #electron id:    scalefactors_Medium_Electron_period1.txt
     #electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
     #muon id:        scalefactors_Medium_Muon_period1_July.txt
@@ -392,27 +382,6 @@ tables B-F:
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
     smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
     smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
-    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
-    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
-    #bjet loose eff:       btag-loose-b.txt
-    #cjet loose eff:       btag-loose-c.txt
-    #udsgjet loose eff:    btag-loose-udsg.txt
-    #bjet medium eff:       btag-medium-b.txt
-    #cjet medium eff:       btag-medium-c.txt
-    #udsgjet medium eff:    btag-medium-udsg.txt
-    #bjet tight eff:       btag-tight-b.txt
-    #cjet tight eff:       btag-tight-c.txt
-    #udsgjet tight eff:    btag-tight-udsg.txt
-
-tables G-H:
-    #electron id:    scalefactors_Medium_Electron_period2.txt
-    #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
-    #muon id:        scalefactors_Medium_Muon_period2_July.txt
-    muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
-    muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
-    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
-    #emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
-    dimu trigger:   ScaleFactors_TriggerMu17Mu8DZMu24_MediumID_RunGH.txt
     #diel trigger leg1: Electron_trigger_seoul_leg1.txt
     #diel trigger leg2: Electron_trigger_seoul_leg2.txt
     #bjet loose eff:       btag-loose-b.txt

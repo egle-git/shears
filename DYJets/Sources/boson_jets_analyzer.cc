@@ -82,7 +82,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
         throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
 
     if( opt.config["reject low quality muon events"] ) {
-        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < 26 GeV)");
+        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < (pt criteria) GeV)");
         if( _reject_lowQMu ) {
             YAML::Node node_lowQ = opt.config["reject low quality muon events"];
             _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());

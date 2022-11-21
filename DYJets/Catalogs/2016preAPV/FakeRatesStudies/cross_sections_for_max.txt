@@ -1,0 +1,28 @@
+#Dataset xsec
+/QCD_Pt-15To20_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*      :2797000.0
+/QCD_Pt-20To30_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	    :2518000.0
+/QCD_Pt-30To50_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	    :1361000.0
+/QCD_Pt-50To80_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	    :377800.0
+/QCD_Pt-80To120_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	    :88620.0
+/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:21070.0
+/QCD_Pt-170To300_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:7019.0
+/QCD_Pt-300To470_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:622.4
+/QCD_Pt-470To600_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:58.86
+/QCD_Pt-600To800_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:18.22
+/QCD_Pt-800To1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*	:3.25
+/QCD_Pt-1000_MuEnrichedPt5_TuneCP5_13TeV-pythia8/*/*		:1.078
+#
+/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/*/*		    :1324000.0
+/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/*/*		    :4896000.0
+/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/*/*		    :6447000.0
+/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/*/*		    :1988000.0
+/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/*/*		:367500.0
+/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/*/*		:66590.0
+/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/*/*		:16620.0
+/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/*/*		:1104.0
+#
+/GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8/*/*	    :18540.0
+/GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/*/*	:8644.0
+/GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/*/*	:2183.0
+/GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/*/*	:260.2
+/GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/*/*	:86.58

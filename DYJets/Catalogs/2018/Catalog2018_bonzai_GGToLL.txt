@@ -1,0 +1,18 @@
+# primary dataset: /GGToLL_TuneCP5_13TeV-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 14.9
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai07nov2022_GGToLL_TuneCP5_v2_Ele_triggers/GGToLL_TuneCP5_13TeV-pythia8/Nano/221107_173159/0000/tree_9.root

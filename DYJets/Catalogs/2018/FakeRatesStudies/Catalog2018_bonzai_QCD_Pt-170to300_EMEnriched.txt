@@ -1,0 +1,13 @@
+# primary dataset: /QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM:16620.0
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec:
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/FakeRateMarijus/NanoBonzai04nov2022_QCD_Pt-170to300_EMEnriched_TuneCP5_v2_Ele_triggers/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Nano/221104_175352/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/FakeRateMarijus/NanoBonzai04nov2022_QCD_Pt-170to300_EMEnriched_TuneCP5_v2_Ele_triggers/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Nano/221104_175352/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/FakeRateMarijus/NanoBonzai04nov2022_QCD_Pt-170to300_EMEnriched_TuneCP5_v2_Ele_triggers/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Nano/221104_175352/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/FakeRateMarijus/NanoBonzai04nov2022_QCD_Pt-170to300_EMEnriched_TuneCP5_v2_Ele_triggers/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/Nano/221104_175352/0000/tree_4.root

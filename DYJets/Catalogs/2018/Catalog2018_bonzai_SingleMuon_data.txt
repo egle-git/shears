@@ -1,4 +1,4 @@
-# primary dataset: /DoubleMuon/Run2018*-UL2018_MiniAODv2_NanoAODv9-v*/NANOAOD
+# primary dataset: /SingleMuon/Run2018*-UL2018_MiniAODv2_NanoAODv9_GT36-v1/NANOAOD
 * data type: data
 * primary events: 1
 * primary files: 1

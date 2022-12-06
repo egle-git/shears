@@ -40,6 +40,8 @@ class table
      */
     explicit table(const std::string &filename);
 
+    double getEfficiencyBase(double pt, double eta, int mode) const;
+
     /// \brief Returns the efficiency in the given (\c pt, \c eta) bin.
     double getEfficiency(double pt, double eta) const;
 
@@ -48,6 +50,9 @@ class table
 
     /// \brief Returns the upper bound for the efficiency in the given (\c pt, \c eta) bin.
     double getEfficiencyHigh(double pt, double eta) const;
+private:
+    double _ptBinEdge_lowest = 0.0;
+    double _ptBinEdge_highest = 0.0;
 };
 
 /// \brief A set of tables identified by their name.

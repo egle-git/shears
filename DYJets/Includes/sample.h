@@ -39,7 +39,7 @@ class sample
     unsigned _jobs = 1;
     double _xsec = -1;
 
-    bool _has_triggers;
+    bool _has_triggers = false;
     std::string _triggers;
 
     std::vector<std::string> _flags;

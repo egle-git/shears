@@ -36,41 +36,60 @@ table::table(const std::string &filename)
         }
         _recd.push_back(record{data[2], data[3], data[0], data[1], data[4], data[5], data[6]});
     }
+
+    double pt_lowest = 1e10;
+    double pt_highest = -1e10;
+    for( auto record : _recd ) {
+        if( record.ptLow < pt_lowest ) pt_lowest = record.ptLow;
+        if( record.ptHi > pt_highest ) pt_highest = record.ptHi;
+    }
+
+    _ptBinEdge_lowest = pt_lowest; // -- lowest pT bin edge
+    _ptBinEdge_highest = pt_highest; // -- highest pT bin edge
+
+    util::logging::debug << "[Table] (ptMin, ptMax) = (" << _ptBinEdge_lowest << ", " << _ptBinEdge_highest << ")" << std::endl;
 }
 
-double table::getEfficiency(double pt, double eta) const
+// mode = 0: nominal
+// mode = 1: up
+// mode = -1: down
+double table::getEfficiencyBase(double pt, double eta, int mode) const
 {
-    double hiPtBin = 0;
+    double eff = 1.0;
+    bool isFound = false;
+
+    if( pt < _ptBinEdge_lowest )  pt = _ptBinEdge_lowest + 0.001; // underflow: assign the first bin
+    if( pt > _ptBinEdge_highest ) pt = _ptBinEdge_highest - 0.001; // overflow: assign the last bin
+
     for (unsigned int i = 0; i != _recd.size(); i++) {
-        // if finds the proper bin, then return the efficiency
-        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi;
-        // else store the average pt of the current bin efficency but do not return and try the next
-        // bin
-        if ((_recd[i]).belongTo(0.5 * (_recd[i].ptHi + _recd[i].ptLow), eta))
-            hiPtBin = _recd[i].effi;
+        if( (_recd[i]).belongTo(pt, eta) ) {
+            if( mode == 0 )       eff = _recd[i].effi;
+            else if( mode == 1 )  eff = _recd[i].effi + _recd[i].effiErrorHigh;
+            else if( mode == -1 ) eff = _recd[i].effi - _recd[i].effiErrorLow;
+
+            isFound = true;
+            break;
+        }
     }
-    return hiPtBin;
+
+    if( !isFound ) // it should not happen: for sanity check ...
+        util::logging::warn << "no corresponding SF bin is found for (pt, eta) = (" << pt << ", " << eta << ") ... return 1.0" << std::endl;
+
+    return eff;
 }
 
-double table::getEfficiencyLow(double pt, double eta) const
-{
-    double hiPtBin = 0;
-    for (unsigned int i = 0; i != _recd.size(); i++) {
-        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi - _recd[i].effiErrorLow;
-        if ((_recd[i]).belongTo(350, eta)) hiPtBin = _recd[i].effi;
-    }
-    return hiPtBin;
+double table::getEfficiency(double pt, double eta) const {
+    return table::getEfficiencyBase(pt, eta, 0);
 }
 
-double table::getEfficiencyHigh(double pt, double eta) const
-{
-    double hiPtBin = 0;
-    for (unsigned int i = 0; i != _recd.size(); i++) {
-        if ((_recd[i]).belongTo(pt, eta)) return _recd[i].effi + _recd[i].effiErrorHigh;
-        if ((_recd[i]).belongTo(350, eta)) hiPtBin = _recd[i].effi;
-    }
-    return hiPtBin;
+double table::getEfficiencyLow(double pt, double eta) const {
+    return table::getEfficiencyBase(pt, eta, -1);
 }
+
+double table::getEfficiencyHigh(double pt, double eta) const {
+    return table::getEfficiencyBase(pt, eta, 1);
+}
+
 } // namespace util
 
 #ifdef DYJETS_NEW_API

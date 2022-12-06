@@ -482,7 +482,7 @@ bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) 
         return flag; 
     else { // dimuon event
         // first muon is always the leading muon (muon collection is sorted in decreasing pT after selection)
-        if( muons[0].v.Pt() < _pt_criteria_SMuDMu && _mask_sMu.passes() && !_mask_dMu.passes() )
+        if( muons[0].raw_v.Pt() < _pt_criteria_SMuDMu && _mask_sMu.passes() && !_mask_dMu.passes() )
             flag = true;
     }
 
@@ -498,7 +498,7 @@ bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) 
     if( muons.size() < 2 ) return false;
 
     bool smu_triggered = false;
-    if ( muons[0].v.Pt() > _pt_criteria_SMuDMu && _mask_sMu.passes()) smu_triggered = true;
+    if ( muons[0].raw_v.Pt() > _pt_criteria_SMuDMu && _mask_sMu.passes()) smu_triggered = true;
     // this function will only be used for triggered events
     // if pt > _pt_criteria_SMuDMu and _mask_sMu doesn't pass then DiMu trigger SF is applied
     // if pt < _pt_criteria_SMuDMu then DiMu trigger SF is applied

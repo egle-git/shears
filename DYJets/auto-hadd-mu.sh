@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 echo $1
-if [[ $(grep -L "Done writing output" $2/logs/log-???.txt | wc -l) -ne "0" ]]; then
+if [[ $(grep -L "Done writing output" $1/logs/log-???.txt | wc -l) -ne "0" ]]; then
     echo "OUTPUT MISSING, look at the following files :"
     echo "$(grep -L "Done writing output" $1/logs/log-???.txt)"
     exit 1

@@ -88,7 +88,7 @@ higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
     bool found = false;
     std::pair<dilepton, dilepton> chosen_pair;
 
-    std::vector<dilepton> good = _zfinder_good.find(leptons);
+    std::vector<dilepton> good = _zfinder_good.find(leptons, false);
     for (const dilepton &z1 : good) {
         // Build a lepton list without the ones used to build the good Z candidate
         std::vector<lepton> vetoed_leptons = leptons;
@@ -98,7 +98,7 @@ higgs_analyzer::find_boson(const std::vector<physics::lepton> &muons,
             std::find(vetoed_leptons.begin(), vetoed_leptons.end(), z1.b));
 
         // Loop on all bad Z candidates
-        std::vector<dilepton> bad = _zfinder_bad.find(vetoed_leptons);
+        std::vector<dilepton> bad = _zfinder_bad.find(vetoed_leptons, false);
         for (const dilepton &z2 : bad) {
             if (!dilepton::zmass_ordering(z1, z2)) {
                 continue;

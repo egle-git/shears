@@ -34,10 +34,9 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
 
 void genleps::configure(const util::options &opt)
 {
-    const YAML::Node node = opt.config["muons"];
-    util::set_value_safe(node, _pt_cut, "pt", "muon pt cut", [](double val) { return val >= 0; });
-    util::set_value_safe(node, _eta_cut, "eta", "muon eta cut", [](double val) { return val > 0; });
-    
+    const YAML::Node node = opt.config["generator level"];
+    util::set_value_safe(node, _pt_cut, "lepton pt", "gen lepton pt cut", [](double val) { return val >= 0; });
+    util::set_value_safe(node, _eta_cut, "lepton eta", "gen lepton eta cut", [](double val) { return val > 0; });    
 }
 
 std::vector<lepton> genleps::get()

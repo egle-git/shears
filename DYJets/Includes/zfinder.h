@@ -74,7 +74,8 @@ class zfinder
     double _mass_high = std::numeric_limits<double>::max();
     charge_mode _charge_mode = charge_mode::neutral;
     flavor_mode _flavor_mode = flavor_mode::same;
-    double _leadingLepPt = 25; // default value: 25 GeV
+    double _leadingLepPt = 25.0; // default value: 25 GeV
+    double _leadingGenLepPt = 25.0; // default value: 25 GeV
 
   public:
     /**
@@ -93,12 +94,12 @@ class zfinder
      *
      * Criteria from the configuration are applied. The output can be empty.
      */
-    std::vector<dilepton> find(const std::vector<lepton> &inputs) const;
+    std::vector<dilepton> find(const std::vector<lepton> &inputs, bool isGEN) const;
 
     /**
      * \brief Checks if a dilepton candidate meets this finder's criteria.
      */
-    bool valid(const dilepton &candidate) const;
+    bool valid(const dilepton &candidate, bool isGEN) const;
 
     /**
      * \brief Returns the flavor mode for this finder.

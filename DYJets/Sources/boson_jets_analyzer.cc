@@ -97,6 +97,21 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
         std::sort(_mass_bins.begin(), _mass_bins.end());
+
+        // check whether DY mass cut is consistent with the mass bin edges
+        const YAML::Node node_Z = opt.config["Z"];
+        double minM = node_Z["low mass"].as<double>();
+        double maxM = node_Z["high mass"].as<double>();
+
+        if( _mass_bins[0] != minM ) {
+            std::cout << "lowest mass bin edge (" << _mass_bins[0] << ") != minimum DY mass cut (" << minM << ") ... need to be fixed" << std::endl;
+            throw std::runtime_error("mass bin edge and mass cut are inconsistent");
+        }
+
+        if( _mass_bins.back() != maxM ) {
+            std::cout << "highest mass bin edge (" << _mass_bins.back() << ") != maximum DY mass cut (" << maxM << ") ... need to be fixed" << std::endl;
+            throw std::runtime_error("mass bin edge and mass cut are inconsistent");
+        }
     }
 
     if( opt.config["Select specific flavor in DYLL"] ) {

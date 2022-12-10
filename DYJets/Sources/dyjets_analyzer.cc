@@ -337,7 +337,7 @@ dyjets_analyzer::find_boson(const std::vector<physics::lepton> &muons,
 
     // currently, only two leptons with the highest pT is used to produce DY candidates
     // it would be improved: check all possible pairs and select the best pair using their property (e.g. the pair with the smallest vertex chi2)
-    std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]});
+    std::vector<dilepton> candidates = _zfinder.find({leptons[0], leptons[1]}, false);
     if (candidates.size() == 0) {
         return {};
     }
@@ -362,7 +362,7 @@ dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
         counter.count("With two good gen electrons", weights().global_weight());
     }
 
-    std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]});
+    std::vector<physics::dilepton> candidates = _zfinder.find({genleps[0], genleps[1]}, true);
     if (candidates.size() == 0) {
         return {};
     }

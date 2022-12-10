@@ -37,6 +37,20 @@ pileup type: 2018
 # Whether results are preliminary (for plots)
 preliminary: yes
 
+# definition of the phase space to be unfolded
+generator level:
+  # minimum pt on gen leptons [GeV]
+  # default: 20 GeV
+  lepton pt: 20
+
+  # minimum pt on gen leptons [GeV]
+  # default: 25 GeV
+  leading lepton pt: 25
+
+  # maximum lepton |eta| cut
+  # default: 2.4
+  lepton eta: 2.4
+
 # Options related to the selection of jets
 jets:
     # Pt cut [GeV]

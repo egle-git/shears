@@ -43,7 +43,6 @@ class genleps
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
-    double _iso_cut = 0.25;
 
   public:
     /// \brief Constructor.

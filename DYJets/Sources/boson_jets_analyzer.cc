@@ -81,18 +81,22 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     if( !(_mode_pref == 0 || _mode_pref == -1 || _mode_pref == 1) )
         throw std::runtime_error("mode for L1 prefiring weights should be 0, 1 or -1");
 
-    if( opt.config["reject low quality muon events"] ) {
-        util::set_value_safe(opt.config["reject low quality muon events"], _reject_lowQMu, "use", "reject low quality muon events (pass single muon trigger but have pT_lead < (pt criteria) GeV)");
-        if( _reject_lowQMu ) {
-            YAML::Node node_lowQ = opt.config["reject low quality muon events"];
-            _mask_sMu = physics::trigger_mask(info, node_lowQ["single muon triggers"].as<std::string>());
-            _mask_dMu = physics::trigger_mask(info, node_lowQ["double muon triggers"].as<std::string>());
-            _pt_criteria_SMuDMu = node_lowQ["pt criteria"].as<double>();
+
+    if( opt.config["select the best muon trigger SF"] ) {
+        const YAML::Node node = opt.config["select the best muon trigger SF"];
+
+        util::set_value_safe(node, _select_bestMuonTrigSF, "use", "select the best muon trigger SF depending on leading muon pt and fired trigger");
+        if( _select_bestMuonTrigSF ) {
+            _mask_sMu = physics::trigger_mask(info, node["single muon triggers"].as<std::string>());
+            _mask_dMu = physics::trigger_mask(info, node["double muon triggers"].as<std::string>());
+            _pt_criteria_SMuDMu = node["pt criteria"].as<double>();
+
+            _reject_lowQMu = node["reject low quality muon events"].as<bool>();
         }
     }
-    else {
-        _reject_lowQMu = false;
-    }
+    else
+        _select_bestMuonTrigSF = false;
+
 
     if (opt.config["mass bins"]) {
         _mass_bins = opt.config["mass bins"].as<std::vector<double>>();
@@ -143,6 +147,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
             f->Close();
         }
     }
+
+    _apply_triggerSF = opt.config["use trigger scale factors"].as<bool>();
 
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
@@ -273,7 +279,7 @@ void boson_jets_analyzer::operator()()
                      std::back_inserter(chosen_electrons),
                      [](const lepton &lep) { return lep.pdgid == 11; });
 
-        if( _reject_lowQMu ) {
+        if( _select_bestMuonTrigSF && _reject_lowQMu ) {
             Bool_t isLowQMuEvent = check_lowQualityMuon(chosen_muons);
             if( isLowQMuEvent ) return; // -- reject the event with low quality muons
         }
@@ -300,7 +306,10 @@ void boson_jets_analyzer::operator()()
         _electrons.fill(histo_set, "inc0jet_noweight", chosen_electrons, weights());
 
         // Check the pt of the leading muon to know which SF we will use
-        use_smu_triggerSF = check_whichTriggerSF(chosen_muons);
+        if( _select_bestMuonTrigSF )
+            _use_smu_triggerSF = check_whichTriggerSF(chosen_muons);
+        else
+            _use_smu_triggerSF = true; // always use single muon trigger SF
     }
 
     /*
@@ -338,9 +347,8 @@ void boson_jets_analyzer::operator()()
     /*
      * Apply lepton trigger scale factors
      */
-    //to be commented for 2018 for now
-    if (evt.rec) {
-        apply_trigger_sf(_weights, evt.rec->leptons, use_smu_triggerSF);
+    if (evt.rec && _apply_triggerSF) {
+        apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
     }
 
     /*

@@ -214,13 +214,13 @@ triggers: |
     HLT_IsoMu24,
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
+use trigger scale factors: yes
 
-# reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
-# but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
-# these events are not used due to the large SF
+# select the best trigger SF depending on leading muon pt & fired trigger
 # this feature is only needed for the dimuon analysis
-reject low quality muon events:
-  # reject or not (default: false)
+select the best muon trigger SF:
+  # default: true
+  # if it is false, shears will always select single muon trigger SF (can be ueed for test jobs)
   use: true
 
   # single muon triggers used
@@ -232,8 +232,14 @@ reject low quality muon events:
     HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
 
   # pt criteria for which trigger is used
-  # pt < pt criteria: use DMu / pt > pt critera: use SMu
+  # leading pt < pt criteria: use DMu / leading pt > pt criteria: use SMu
   pt criteria: 26
+
+  # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
+  # but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
+  # these events are not used due to the large SF
+  # reject or not (default: false)
+  reject low quality muon events: true
 
 # List of available data/MC samples
 samples:

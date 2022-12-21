@@ -212,6 +212,8 @@ mass bins: [ 50, 76, 106, 170, 350, 1000 ]
 # of physics::trigger_mask for more details.
 triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
 
+use trigger scale factors: yes
+
 # List of available data/MC samples
 samples:
     - name: data

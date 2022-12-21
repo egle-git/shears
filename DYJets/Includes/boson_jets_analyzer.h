@@ -47,6 +47,7 @@ private:
     trigger_mask _mask;
 
     // for the rejection of the low quality dimuon events
+    bool _select_bestMuonTrigSF = true;
     trigger_mask _mask_sMu;
     trigger_mask _mask_dMu;
     double _pt_criteria_SMuDMu;
@@ -72,6 +73,8 @@ private:
     TH1D* _h_ptReweight;
 
     std::vector<double> _mass_bins;
+
+    bool _apply_triggerSF = true;
 
     physics::reweighing _reweighing;
     physics::weights _weights;

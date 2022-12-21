@@ -146,7 +146,7 @@ protected:
 
     bool check_lowQualityMuon(const std::vector<lepton> muons);
     bool check_whichTriggerSF(const std::vector<lepton> muons);
-    bool use_smu_triggerSF = false;
+    bool _use_smu_triggerSF = false;
 };
 
 } // namespace physics

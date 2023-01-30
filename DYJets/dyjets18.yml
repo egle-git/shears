@@ -245,7 +245,7 @@ select the best muon trigger SF:
 samples:
     - name: data
       type: data
-      jobs: 40
+      jobs: 48
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_DoubleMuon_data.txt
       triggers: |
@@ -254,7 +254,7 @@ samples:
     - name: data-smu
     #- name: data
       type: data
-      jobs: 32
+      jobs: 16
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_SingleMuon_data.txt
       triggers: |
@@ -325,6 +325,7 @@ samples:
       catalog: Catalog2018_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
+      jobs: 3
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
@@ -363,29 +364,18 @@ samples:
       jobs: 3
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_TauTau.txt
+    - name: GammaGamma
+      type: background
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_GGToLL.txt
 
 # Scale factors
 tables:
-    #electron id:    scalefactors_Medium_Electron_period2.txt
-    #electron reco:  SMP_17_010_GH_MediumID_electrons.txt
     muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt
     muon isolation:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period2.txt
-    #emu trigger:    Eff_SF_SingleMuTrigger_GH_6_16_2017.txt
     dimu trigger:     2018/ScaleFactor_DoubleMuonTriggers_UL2018_Tight.txt
     smu trigger data: 2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_Data.txt
     smu trigger mc:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_MC.txt
-    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
-    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
-    #bjet loose eff:       btag-loose-b.txt
-    #cjet loose eff:       btag-loose-c.txt
-    #udsgjet loose eff:    btag-loose-udsg.txt
-    #bjet medium eff:       btag-medium-b.txt
-    #cjet medium eff:       btag-medium-c.txt
-    #udsgjet medium eff:    btag-medium-udsg.txt
-    #bjet tight eff:       btag-tight-b.txt
-    #cjet tight eff:       btag-tight-c.txt
-    #udsgjet tight eff:    btag-tight-udsg.txt
 
 # Reweighing (eg for merged samples)
 #
@@ -407,7 +397,7 @@ tables:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma* #rightarrow #mu#mu"
+    - legend: "Z/#gamma^{*} #rightarrow #mu#mu"
       required: yes
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
@@ -423,12 +413,12 @@ MC grouping:
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-    #- legend: W
-    #  samples: [ WJetsToLNu ]
-    #  color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
+    - legend: GamGam
+      samples: [ GammaGamma ]
+      color: 800 # kOrange
 
 
 # The file below defines the binnings for histograms relevant to the analysis.
@@ -460,7 +450,7 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: no
+      produce: yes
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'

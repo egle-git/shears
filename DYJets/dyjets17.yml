@@ -108,15 +108,20 @@ electrons:
 
     # Relative isolation cut
     # Default value: 0.25
-    isolation: 0.15
+    isolation: 999999999.
+
+    # Id
+    # Possible values: loose, medium, tight
+    # Default value: tight
+    id: medium
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: yes
+    use id scale factors: no
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
-    use reconstruction scale factors: yes
+    use reconstruction scale factors: no
 
 # Options related to the selection of muons
 muons:
@@ -168,7 +173,7 @@ Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
     leading lepton pt: 20
-    
+
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 50
@@ -240,7 +245,7 @@ select the best muon trigger SF:
 samples:
     - name: data
       type: data
-      jobs: 32
+      jobs: 48
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_DoubleMuon_data.txt
       triggers: |
@@ -249,7 +254,7 @@ samples:
     - name: data-smu
     #- name: data
       type: data
-      jobs: 32
+      jobs: 16
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_SingleMuon_data.txt
       triggers: |
@@ -358,19 +363,22 @@ samples:
       jobs: 3
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_TauTau.txt
+    - name: GammaGamma
+      type: background
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_GGToLL.txt
 
 # Scale factors
 tables:
     muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
     muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  Eff_SF_Tracking_GH_08_07_2017.txt
     dimu trigger:   2017/ScaleFactor_DoubleMuonTriggers_UL2017_Tight.txt
     smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
     smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma^{*} #rightarrow ll"
+    - legend: "Z/#gamma^{*} #rightarrow #mu#mu"
       required: yes
       samples: [ DYJets ]
       color: 408 # kGreen - 8
@@ -384,12 +392,12 @@ MC grouping:
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-    #- legend: W
-    #  samples: [ WJetsToLNu ]
-    #  color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
+    - legend: GamGam
+      samples: [ GammaGamma ]
+      color: 800 # kOrange
 
 
 # The file below defines the binnings for histograms relevant to the analysis.
@@ -421,7 +429,7 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: no
+      produce: yes
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
@@ -455,12 +463,34 @@ plots:
     - selector: 'nJets.*_inc0jet.*'
       produce: no
     # Style changes
+    - selector: '.*'
+      ratio min: 0.901
+      ratio max: 1.099
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-    - selector: 'mass_Zinc0jet'
-      ratio min: 0.641
-      ratio max: 1.419
+    - selector: 'dyjets_events.*inc0jet'
+      ratio min: 0.951
+      ratio max: 1.049
+    # Axis labels
+    - selector: '^mass.*'
+      x axis label: 'M_{#mu#mu}'
+      x axis unit: 'GeV'
+    - selector: '^nJets.*'
+      x axis label: 'Exclusive number of jets'
+    - selector: '^nJetsIncl.*'
+      x axis label: 'Inclusive number of jets'
+    - selector: '^phistar.*'
+      x axis label: '#phi*'
+    - selector: '^pt.*'
+      x axis label: 'p_{T}^{#mu#mu}'
+      x axis unit: 'GeV'
+    - selector: '.+mass(.*)_(.*).*'
+      x axis detail: '$1 #leq M_{#mu#mu} < $2 GeV'
+    - selector: '.*inc(1|2)jet.*'
+      x axis detail: 'N_{jets} #geq $1'
+    - selector: '.*exc(1|2)jet.*'
+      x axis detail: 'N_{jets} = $1'

@@ -144,7 +144,7 @@ electrons:
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 15 
+    pt: 15
 
     # Eta cut
     # Default value: 2.4
@@ -266,13 +266,14 @@ select the best muon trigger SF:
 samples:
     - name: data
       type: data
-      jobs: 32
+      jobs: 45
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_DoubleMuon_data.txt
       triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
           HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL
     # Note: This sample has to be hadd-ed with 'data'.
+    #- name: data
     - name: data-smu
       type: data
       jobs: 16
@@ -348,6 +349,7 @@ samples:
       catalog: Catalog2016_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
+      jobs: 3
       nano dir: Catalogs/2016preAPV/
       catalog: Catalog2016_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
@@ -386,34 +388,18 @@ samples:
       jobs: 3
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_TauTau.txt
+    - name: GammaGamma
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_GGToLL.txt
 
 # Scale factors
 tables:
-    #electron id:    scalefactors_Medium_Electron_period1.txt
-    #electron reco:  SMP_17_010_BCDEF_MediumID_electrons.txt
-    #muon id:        scalefactors_Medium_Muon_period1_July.txt
-    #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
-    #muon id:        Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_MediumID.txt
-    #muon isolation: Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_MediumID.txt
     muon id:        2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_TightID.txt
     muon isolation: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    #muon tracking:  scalefactors_Tracking_Muon_SMP_17_010_period1.txt
-    #emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
-    #dimu trigger:   ScaleFactors_TriggerMu17Mu8Mu24_MediumID_RunBF.txt
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
     smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
     smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
-    #diel trigger leg1: Electron_trigger_seoul_leg1.txt
-    #diel trigger leg2: Electron_trigger_seoul_leg2.txt
-    #bjet loose eff:       btag-loose-b.txt
-    #cjet loose eff:       btag-loose-c.txt
-    #udsgjet loose eff:    btag-loose-udsg.txt
-    #bjet medium eff:       btag-medium-b.txt
-    #cjet medium eff:       btag-medium-c.txt
-    #udsgjet medium eff:    btag-medium-udsg.txt
-    #bjet tight eff:       btag-tight-b.txt
-    #cjet tight eff:       btag-tight-c.txt
-    #udsgjet tight eff:    btag-tight-udsg.txt
 
 # Reweighing (eg for merged samples)
 #
@@ -435,7 +421,7 @@ tables:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma* #rightarrow #mu#mu"
+    - legend: "Z/#gamma^{*} #rightarrow #mu#mu"
       required: yes
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
     #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
@@ -451,12 +437,12 @@ MC grouping:
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-    #- legend: W
-    #  samples: [ WJetsToLNu ]
-    #  color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
+    - legend: GamGam
+      samples: [ GammaGamma ]
+      color: 800 # kOrange
 
 
 # The file below defines the binnings for histograms relevant to the analysis.
@@ -489,9 +475,9 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: yes 
+      produce: no
     - selector: '.*-matrix$'
-      produce: yes
+      produce: no
     - selector: '.*[12]jet.*'
       produce: no
     - selector: 'el.*'
@@ -518,23 +504,25 @@ plots:
       produce: no
     - selector: 'mass.*mass.*'
       produce: yes
+    - selector: '.*exc.*'
+      produce: no
     - selector: 'nJets.*_inc.*'
       produce: no
     - selector: 'nJets.*_inc0jet.*'
-      produce: yes
+      produce: no
     # Style changes
     - selector: '.*'
-      ratio min: 0.601
-      ratio max: 1.399
+      ratio min: 0.901
+      ratio max: 1.099
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-    - selector: 'mass_inc0jet'
-      ratio min: 0.601
-      ratio max: 1.399
+    - selector: 'dyjets_events.*inc0jet'
+      ratio min: 0.951
+      ratio max: 1.049
     # Axis labels
     - selector: '^mass.*'
       x axis label: 'M_{#mu#mu}'

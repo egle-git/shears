@@ -94,7 +94,7 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
     std::vector<jet> jets;
     for (unsigned i = 0; i < Jet_pt.GetSize(); ++i) {
         jet j;
-        if (Jet_puIdDisc[i] < _pumva_cut || Jet_jetId[i] <= 0) {
+        if (Jet_puIdDisc[i] < _pumva_cut || Jet_jetId[i] < 6) { // Tight ID + LepVeto
             continue;
         }
         j.v.SetPtEtaPhiM(Jet_pt[i], Jet_eta[i], Jet_phi[i], Jet_mass[i]);

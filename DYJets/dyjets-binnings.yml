@@ -201,3 +201,22 @@
   binning min: -2.5
   binning max: 2.5
   bin count: 50
+
+################################################################################
+## Number of events
+#################################################################################
+
+# On-shell
+- selector: 'dyjets_events_peak.*'
+  binning: uniform
+  binning min: 71
+  binning max: 111
+  bin count: 1
+# Wide range
+- selector: 'dyjets_events_wide_range.*'
+  binning: uniform
+  binning min: 50
+  binning max: 1000
+  bin count: 1
+
+                

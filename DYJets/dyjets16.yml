@@ -239,7 +239,7 @@ use trigger scale factors: yes
 # this feature is only needed for the dimuon analysis
 select the best muon trigger SF:
   # default: true
-  # if it is false, shears will always select single muon trigger SF (can be ueed for test jobs)
+  # if it is false, shears will always select single muon trigger SF (can be used for test jobs)
   use: true
 
   # single muon triggers used

@@ -183,7 +183,7 @@ muons:
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
     rochester correction path: 2016preAPV/RoccoR2016aUL.txt
-     #rochester correction path: rcdata.2016.v3
+    #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
@@ -447,7 +447,6 @@ MC grouping:
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
-#binning file: dyjets-binnings.yml
 binning file: dyjets-binnings.yml
 
 # Plot properties
@@ -503,7 +502,7 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
-      produce: yes
+      produce: no
     - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'

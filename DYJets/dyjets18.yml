@@ -166,7 +166,7 @@ muons:
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
     rochester correction path: 2018/RoccoR2018UL.txt
-    # rochester correction path: rcdata.2016.v3
+    #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
@@ -250,9 +250,9 @@ samples:
       catalog: Catalog2018_bonzai_DoubleMuon_data.txt
       triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
-    # note: This sample has to be hadd-ed with 'data'.
-    - name: data-smu
+    # Note: This sample has to be hadd-ed with 'data'.
     #- name: data
+    - name: data-smu
       type: data
       jobs: 16
       nano dir: Catalogs/2018
@@ -450,7 +450,7 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: yes
+      produce: no
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
@@ -478,6 +478,8 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
+      produce: no
+    - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'
       produce: no

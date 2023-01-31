@@ -135,7 +135,7 @@ muons:
 
     # Relative isolation cut
     # Default value: 0.25
-    # isolation: 0.15
+    #isolation: 0.15
 
     #Iso
     # Possible values: veryloose, loose, medium, tight
@@ -166,7 +166,7 @@ muons:
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
     rochester correction path: 2016postAPV/RoccoR2016bUL.txt
-     #rochester correction path: rcdata.2016.v3
+    #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
@@ -255,7 +255,7 @@ samples:
       triggers: |
           HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
           HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
-   #  Note: This sample has to be hadd-ed with 'data'.
+    # Note: This sample has to be hadd-ed with 'data'.
     #- name: data
     - name: data-smu
       type: data
@@ -485,6 +485,8 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
+      produce: no
+    - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'
       produce: no

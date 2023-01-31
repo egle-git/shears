@@ -100,7 +100,7 @@ b jet veto:
 electrons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 25
+    pt: 20
 
     # Eta cut
     # Default value: 2.4
@@ -166,7 +166,7 @@ muons:
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
     rochester correction path: 2017/RoccoR2017UL.txt
-    # rochester correction path: rcdata.2016.v3
+    #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
@@ -258,7 +258,7 @@ samples:
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_SingleMuon_data.txt
       triggers: |
-          HLT_IsoMu27
+          HLT_IsoMu27,
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
     - name: DYJets
       type: MC
@@ -325,6 +325,7 @@ samples:
       catalog: Catalog2017_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
+      jobs: 3
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
@@ -429,7 +430,7 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: yes
+      produce: no
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
@@ -457,6 +458,8 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass.*mass.*'
+      produce: no
+    - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'
       produce: no

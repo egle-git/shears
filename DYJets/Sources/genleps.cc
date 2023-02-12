@@ -53,7 +53,7 @@ std::vector<lepton> genleps::get()
 
         l.v.SetPtEtaPhiM(GenDressedLepton_pt->At(i), GenDressedLepton_eta->At(i), GenDressedLepton_phi->At(i), GenDressedLepton_mass->At(i));
         l.raw_v = l.v;
-        l.charge = GenDressedLepton_pdgId->At(i)/std::abs(GenDressedLepton_pdgId->At(i));
+        l.charge = (-1)*GenDressedLepton_pdgId->At(i)/std::abs(GenDressedLepton_pdgId->At(i)); // true for leptons; may not for the other particles
         l.pdgid = GenDressedLepton_pdgId->At(i);
 
         if (l.v.Pt() < _pt_cut) {

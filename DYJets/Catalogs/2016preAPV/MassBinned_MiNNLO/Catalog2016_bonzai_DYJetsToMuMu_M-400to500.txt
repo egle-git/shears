@@ -1,0 +1,10 @@
+# primary dataset: /DYJetsToMuMu_M-400to500_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 0.15
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai27feb2023_2016preAPV_DYJetsToMuMu_M-400to500_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToMuMu_M-400to500_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230227_132115/0000/tree_1.root

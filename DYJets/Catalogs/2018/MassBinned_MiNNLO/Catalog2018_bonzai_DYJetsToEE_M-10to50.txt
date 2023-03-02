@@ -1,0 +1,30 @@
+# primary dataset: /DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 7012.53
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_11.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_12.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_13.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_14.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_15.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_16.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_ext1_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_102749/0000/tree_17.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_101341/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_101341/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_101341/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/NanoBonzai24feb2023_2018DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToEE_M-10to50_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230224_101341/0000/tree_4.root

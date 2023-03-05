@@ -3,7 +3,7 @@
 * primary events: 1
 * primary files: 1
 * lumi: -1
-* sample xsec: 2006.6464565763577 # from MiNNLO in [pb]
+* sample xsec: 1925.65144658 # = 2006.6464565763577 - 77.95 - 2.78 - 0.15 - 0.084 - 0.013 - 0.011 - 0.0060 - 0.00081 - 0.00020 in [pb]
 
 # ROOTFILES
 

@@ -325,9 +325,9 @@ void Unfold::makeResponseMatrix(TH2F*hist)
     double scaledContent;
 
     // first and last bins for the matrix
-    int firstBin = 0; // 0 includes underflow
-    int lastBinX = nBinsX+1; // nBinsX+1 includes overflow
-    int lastBinY = nBinsY+1; // nBinsY+1 includes overflow
+    int firstBin = 1; // 0 includes underflow
+    int lastBinX = nBinsX; // nBinsX+1 includes overflow
+    int lastBinY = nBinsY; // nBinsY+1 includes overflow
 
     // true distribution on y-axis
     // reco distribution on x-axis

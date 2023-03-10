@@ -1,19 +1,18 @@
 #include "../include/Unfolding.hh"
 
-TString reco_hist = "reco_mass_wide_range_exc0jet";
-TString matrix_hist = reco_hist+"-matrix";
-TString gen_hist = "gen_mass_wide_range_exc0jet-gen";
-
-void unfold()
+void unfold(TString directory,TString channel)
 {
     gROOT->SetBatch(true);
     gStyle->SetPalette(1);
     gStyle->SetOptStat(0);
 
-    TString savePrefix = "plots/testUnfold";
+    TString savePrefix = "plots/unfold";
     TString saveSuffix = ".png";
 
-    TString file_name = "histograms/unfolding/unfolding_histograms.root";
+    TString file_name = directory;
+    file_name += "/";
+    file_name += channel;
+    file_name += "/unfolding_histograms.root";
     TFile*loadFile = new TFile(file_name);
 
     TH1F*hReco   = (TH1F*)loadFile->Get("reco_mass");
@@ -65,7 +64,10 @@ void unfold()
     unfData->plotMatrix(hResponse,responseSave,true);
 
     // Save the histograms
-    TString save_loc = "histograms/unfolding/unfolding_output.root";
+    TString save_loc = directory;
+    save_loc += "/";
+    save_loc += channel;
+    save_loc += "/unfolding_output.root";
     TFile*save_file = new TFile(save_loc,"recreate");
     hOutCov->SetName("unfolding covariance");
     hReco->SetName("reconstructed");

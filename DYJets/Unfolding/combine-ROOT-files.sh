@@ -5,12 +5,21 @@
 
 loadDirectory=$1
 saveDirectory=$2
+channel=$3
 
-# categories which have many jobs and need to be combined
+# categori es which have many jobs and need to be combined
 file_stem=(
     dyjets-data
     dyjets-DYJets_M-10to50
     dyjets-DYJets_M-50to100
+    dyjets-TauTau
+    dyjets-ST_t-channel_top
+    dyjets-TT
+    dyjets-ZZ
+)
+
+# Categories with single files that only need to be moved
+single_files=(
     dyjets-DYJets_M-100to200
     dyjets-DYJets_M-200to400
     dyjets-DYJets_M-400to500
@@ -20,23 +29,15 @@ file_stem=(
     dyjets-DYJets_M-1000to1500
     dyjets-DYJets_M-1500to2000
     dyjets-DYJets_M-2000toInf
-    dyjets-TauTau
-    dyjets-TT
-    dyjets-WJetsToLNu
-    dyjets-ZZ
-)
-
-# Categories with single files that only need to be moved
-single_files=(
     dyjets-ST_tW_antitop
     dyjets-ST_tW_top
     dyjets-ST_s-channel
-    dyjets-ST_t-channel_top
     dyjets-ST_t-channel_antitop
     dyjets-WWTo2L2Nu
     dyjets-WZ
+    dyjets-GammaGamma
 )
-saveLocation=histograms/$saveDirectory
+saveLocation=histograms/$saveDirectory/$channel
 
 cd $saveLocation
 rm *.root

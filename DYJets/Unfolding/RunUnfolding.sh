@@ -6,10 +6,11 @@ export LD_PRELOAD=/usr/lib64/libopenblas.so.0
 
 directory=$1
 era=$2
+channel=$3
 
 root -l << EOF
-TString dir = "$1"
-TString channel = "$2"
+TString dir = "$directory"
+TString channel = "$channel"
 .L macros/unfold.C 
 unfold(dir,channel) 
 EOF

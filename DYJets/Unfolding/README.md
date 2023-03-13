@@ -1,7 +1,7 @@
 How to use this unfolding package
 =================================
 
-This package is designed to carry out unfolding using the [TUnfold unfolding algorithm](https://www.desy.de/~sschmitt/tunfold.html). It was designed so that unfolding can be carried out with the user only needing to specify the required distributions. All other parameters are either hard-coded for this analysis or are calculated from the distributions. There is still some functionality to be added. For example: being able to specifiy a correlation matrix for the inputs. 
+This package is designed to carry out unfolding using the [TUnfold unfolding algorithm](https://www.desy.de/~sschmitt/tunfold.html). It was designed so that unfolding can be carried out with the user only needing to specify the required distributions. All other parameters are either hard-coded for this analysis or are calculated from the distributions. 
 
 When you create an 'Unfolding' object, you specify the following distributions:
 
@@ -42,30 +42,26 @@ TCanvas*canvas = unf->plotUnfolded("canvas","Unfold Test",logplot);
 
 You can also use the macros I have put together to get the histograms output by Shears, plot them, and carry out unfolding on them.
 
-First, create the following directories in the Unfolding directory:
-histograms/fromShears
-histograms/unfolding
+First, create this directory in the Unfolding directory to hold plots:
 plots
 
 From the Unfolding directory, execute the following commands:
 
-This script will take all the histograms that were output by shears and will combine them using hadd into one script per sample type. These are saved in Unfolding/histograms/fromShears.
 ```
-./combine-ROOT-files.sh ${directory_with_shears_output}
+./combine-ROOT-files.sh ${directory_with_shears_output} ${directory_to_save_to} ${decay_channel}
+```
+combine-ROOT-files.sh doesn't create directories, so create the directory where you want to save the histograms before running it.
+
+Next, you can run all steps from one script
+```
+DoAll_GetHists_RunUnfolding_MakePlots.sh ${directory_of_histograms} ${analysis_era} ${decay_channel}
 ```
 
-This script will take the invariant mass histograms used for unfolding from the files created in the last step. 
-```
-root macros/getUnfoldingHistograms.C
-```    
+You can also run any of the individual steps alone using the same three arguments as above for GetHists.sh, RunUnfolding.sh, or MakePlots.sh.
 
-This script will make the following plots: data vs. monte carlo, migration matrix, and a comparison between the migration matrix projections and the reco and true distributions.
-```
-root macros/makePlots.C
-```
+Here's a brief description of each of these scripts:
+GetHists.sh opens the root files that were output by Shears and combined using combine-ROOT-files.sh and then extracts the histograms needed for unfolding. 
 
-Now we can unfold the distributions. This script carries out the unfolding and outputs the following plots: unfolding closure, unfolding data, response matrix. The histograms will be saved in histograms/unfolding/unfolding_output.root
-```
-root macros/unfold.C
-```
-I also just added a new bash script called HitIt.sh, which will carry out all steps listed here to combine root files, retrieve histograms for unfolding, carry out unfolding, and make plots. HitIt.sh requires one arument, the name of the directory located in the DYJets directory, which contains the root files output from running the analysis via Condor.
+RunUnfolding.sh loads the histograms saved using GetHists.sh and uses them to carry out a closure test and unfolding on data with background subtraction.
+
+MakePlots.sh then makes a variety of plots. At the moment, only the data vs. monte carlo plot is constructed.

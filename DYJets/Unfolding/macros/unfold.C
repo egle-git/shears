@@ -1,13 +1,18 @@
 #include "../include/Unfolding.hh"
 
-void unfold(TString directory,TString channel)
+void unfold(TString directory,TString era,TString channel)
 {
     gROOT->SetBatch(true);
     gStyle->SetPalette(1);
     gStyle->SetOptStat(0);
 
     TString savePrefix = "plots/unfold";
-    TString saveSuffix = ".png";
+    
+    TString saveSuffix = "_";
+    saveSuffix += era;
+    saveSuffix += "_";
+    saveSuffix += channel;
+    saveSuffix += ".png";
 
     TString file_name = directory;
     file_name += "/";

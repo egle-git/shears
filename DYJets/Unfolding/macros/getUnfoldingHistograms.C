@@ -9,6 +9,8 @@ TCanvas*MakeCanvas(TString cName);
 TString _directory;
 TString _getData;
 TString _channel;
+TString _era;
+
 vector<TString> mc_name = {
     "dyjets-DYJets_M-10to50.root",
     "dyjets-DYJets_M-50to100.root",
@@ -29,7 +31,13 @@ TString gen_hist    = "mass_wide_range_inc0jet-gen";
 TString matrix_hist = reco_hist + "-matrix";
 
 // data luminosity
-double lumi = 19520.0;
+double _lumi;
+vector<double> _lumiV = {
+    19520.0, // 2016preAPV
+    16810.0, // 2016postAPV
+    41480.0, // 2017
+    59830.0, // 2018
+};
 vector<double> sample_xsec_mm = {
     7012.53,        // 10to50
     1925.65144658,  // 50to100
@@ -54,18 +62,30 @@ vector<TH1D*> _back_hist;
 vector<TH1D*> _gen_hist;
 vector<TH1D*> _rec_hist;
 
-void getUnfoldingHistograms(TString directory,TString channel)
+void getUnfoldingHistograms(TString directory,TString era,TString channel)
 {
     gStyle->SetOptStat(0);
     gStyle->SetPalette(1);
     gROOT->SetBatch(true);
 
+    _era = era;
     cout << "******************************" << endl;
     cout << "Getting unfolding histograms from directory: " << endl;
     cout << directory << endl;
     cout << "For channel " << channel << endl;
     cout << "******************************" << endl;
     
+    if(_era == "2016preAPV") _lumi = _lumiV.at(0);
+    else if(_era == "2016postAPV") _lumi = _lumiV.at(1);
+    else if (_era == "2017") _lumi = _lumiV.at(2);
+    else if (_era == "2018") _lumi = _lumiV.at(3);
+    else {
+        cout << "ERROR in getUnfoldingHistograms()!!!!!!!!!!!!!!!!!" << endl;
+        cout << "Era not properly set!!!!!!!!!!!!!!!!!" << endl;
+        cout << "Era must be 2016preAPV, 2016postAPV, 2017, or 2018" << endl;
+        return;
+    }
+
     _directory = directory;
     _channel = channel;
 
@@ -112,11 +132,11 @@ void GetSignal()
         wsum = job_info->GetBinContent(2);
         xsec = (*job_info_average)[1];
         //xsec = sample_xsec_mm.at(i);
-        samplescale = lumi*xsec/wsum;
-        //samplescale = lumi*xsec;
+        samplescale = _lumi*xsec/wsum;
 
         _gen_hist.at(i)->Scale(samplescale);
         _rec_hist.at(i)->Scale(samplescale);
+
         if(i==0){
             _hGen = (TH1D*)_gen_hist.at(i)->Clone();
             _hRec = (TH1D*)_rec_hist.at(i)->Clone();
@@ -198,14 +218,14 @@ void GetBackgrounds()
 
         wsum = job_info->GetBinContent(2);
         xsec = (*job_info_average)[1];
-        samplescale = lumi*xsec/wsum;
+        samplescale = _lumi*xsec/wsum;
 
         _back_hist.at(i)->Scale(samplescale);
 /*
         cout << "******************************" << endl;
         cout << "Sample: " << load_name << endl;
         cout << "wsum: " << wsum << endl;
-        cout << "lumi: " << lumi << endl;
+        cout << "lumi: " << _lumi << endl;
         cout << "xsec: " << xsec << endl;
         cout << "samplescale: " << samplescale << endl;
         cout << "******************************" << endl;

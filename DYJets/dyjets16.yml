@@ -193,7 +193,7 @@ Z:
 
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 10 
+    low mass: 50 
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -221,7 +221,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 2000, 3000 ]
+mass bins: [ 50, 76, 106, 170, 350, 1000, 2000, 3000 ]
 
 # Triggers
 #

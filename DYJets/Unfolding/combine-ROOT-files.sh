@@ -37,7 +37,7 @@ single_files=(
     dyjets-WZ
     dyjets-GammaGamma
 )
-saveLocation=histograms/$saveDirectory/$channel
+saveLocation=$saveDirectory/$channel
 
 cd $saveLocation
 rm *.root

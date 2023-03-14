@@ -6,7 +6,10 @@ void unfold(TString directory,TString era,TString channel)
     gStyle->SetPalette(1);
     gStyle->SetOptStat(0);
 
-    TString savePrefix = "plots/unfold";
+    TString savePrefix = directory;
+    savePrefix += "/";
+    savePrefix += channel;
+    savePrefix += "/plots/unfold";
     
     TString saveSuffix = "_";
     saveSuffix += era;

@@ -7,6 +7,9 @@ export LD_PRELOAD=/usr/lib64/libopenblas.so.0
 directory=$1
 era=$2
 chan=$3
+
+mkdir -p plots
+
 root -l << EOF
 TString dir = "$directory"
 TString era = "$era"

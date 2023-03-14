@@ -14,6 +14,7 @@ directory=$1
 era=$2
 chan=$3
 
+mkdir -p plots
 echo " "
 echo "************************************"
 echo "Processing directory $directory, era $era, and channel $chan"

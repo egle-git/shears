@@ -218,7 +218,8 @@ void OpenFiles()
 
 void SaveAll()
 {
-    TString plotSaveLocation = "plots/";
+    TString plotSaveLocation = _directory;
+    plotSaveLocation += "/plots/";
     int nPlots = _canvas.size();
     for(int i=0;i<nPlots;i++){
         _canvas.at(i)->SaveAs(plotSaveLocation+_plot_save.at(i));

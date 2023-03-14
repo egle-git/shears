@@ -7,6 +7,9 @@ loadDirectory=$1
 saveDirectory=$2
 channel=$3
 
+echo "Combining output histograms from Shears from directory $loadDirectory"
+echo "Saving the combined files to $saveDirectory"
+
 # categori es which have many jobs and need to be combined
 file_stem=(
     dyjets-data
@@ -38,6 +41,8 @@ single_files=(
     dyjets-GammaGamma
 )
 saveLocation=$saveDirectory/$channel
+
+mkdir -p $saveLocation/plots
 
 cd $saveLocation
 rm *.root

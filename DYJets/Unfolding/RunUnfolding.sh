@@ -8,6 +8,8 @@ directory=$1
 era=$2
 channel=$3
 
+mkdir -p plots
+
 root -l << EOF
 TString dir = "$directory"
 TString channel = "$channel"

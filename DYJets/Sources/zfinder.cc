@@ -30,6 +30,16 @@ double dilepton::phistar() const
     return std::tan(phi_acop / 2.) * sinthetastar;
 }
 
+double dilepton::DeltaPhi() const
+ {
+     const double pi = boost::math::constants::pi<double>();
+ 
+     double dphi = deltaPhi(a.v, b.v);
+     
+     return dphi;
+ }
+
+
 zfinder::zfinder(const util::options &opt, const std::string &name)
 {
     if (!opt.config[name] || !opt.config[name].IsMap()) {
@@ -76,6 +86,8 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
     util::set_value_safe(node, _mass_low, "low mass", "low mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _mass_high, "high mass", "high mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _leadingLepPt, "leading lepton pt", "leading lepton pT for Z finder \"" + name + "\"");
+    util::set_value_safe(node, _newcut, "mll/subleading lepton pT", "mll/subleading lepton pT \"" + name + "\"");
+    
 
     const YAML::Node node_gen = opt.config["generator level"];
     util::set_value_safe(node_gen, _leadingGenLepPt, "leading lepton pt", "gen leading lepton pt cut", [](double val) { return val >= 0; });
@@ -129,6 +141,7 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
     else {
       if( candidate.a.v.Pt() < _leadingLepPt ) return false;
     }
+    if(candidate.v.M()/candidate.b.v.Pt() > _newcut ) return false;
 
 
     // Check mass

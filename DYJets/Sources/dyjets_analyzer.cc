@@ -237,8 +237,22 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     const auto jets = evt.rec->jets;
 
     physics::dilepton Z(boson[0], boson[1]);
+    double Eta1 = evt.rec->leptons[0].v.Eta();
+    double Eta2 = evt.rec->leptons[1].v.Eta();
+    double DeltaEta = Eta1 - Eta2;
+    double Pt2 = evt.rec->leptons[1].v.Pt();
+    double cut = Z.v.M()/Pt2;
 
     histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
+    //New Cut
+    histo_set.fill("cut", *tags.rec, cut, weights().global_weight());
+    histo_set2D.fill("cut_2D_wide_range", *tags.rec, cut, Z.v.M(), weights().global_weight());
+    //DeltaPhi
+//     histo_set.fill("deltaphi", *tags.rec,Z.DeltaPhi(), weights().global_weight());
+    //DeltaEta
+//    histo_set.fill("deltaeta", *tags.rec, DeltaEta, weights().global_weight());
+//     
+
 
     /*
      * Variables in Z rest frame

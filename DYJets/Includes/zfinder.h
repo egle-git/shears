@@ -38,6 +38,10 @@ class dilepton
      * \brief Returns the \f$ \phi^* \f$ variable
      */
     double phistar() const;
+    
+    //DeltaPhi
+    double DeltaPhi() const;
+
 
     /**
      * \brief Returns \c true if \c a is closer to the Z mass than \c b.
@@ -76,6 +80,7 @@ class zfinder
     flavor_mode _flavor_mode = flavor_mode::same;
     double _leadingLepPt = 25.0; // default value: 25 GeV
     double _leadingGenLepPt = 25.0; // default value: 25 GeV
+    double _newcut = 10;
 
   public:
     /**

@@ -145,8 +145,12 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
 
 
     // Check mass
-    double mass = candidate.v.M();
-    return _mass_low < mass && mass < _mass_high;
+    // double mass = candidate.v.M();
+    // return _mass_low < mass && mass < _mass_high;
+
+    // does not check the mass here
+    // to avoid rejecting under/overflow events for response matrices
+    return true;
 }
 
 } // namespace physics

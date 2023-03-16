@@ -19,10 +19,12 @@ namespace /* anonymous */
 std::string make_tag(double value, const std::vector<double> &bins)
 {
     auto high = std::lower_bound(bins.begin(), bins.end(), value);
-    if (high == bins.begin() || high == bins.end()) {
-        // Out of bounds
-        return "";
-    }
+    // if (high == bins.begin() || high == bins.end()) {
+    //     // Out of bounds
+    //     return "";
+    // }
+    if( high == bins.begin() ) return "UF"; // underflow
+    if( high == bins.end() ) return "OF"; // overflow
     auto low = std::prev(high);
     return std::to_string(int(*low)) + "_" + std::to_string(int(*high));
 }
@@ -357,16 +359,26 @@ void boson_jets_analyzer::operator()()
     auto mass_tags = evt.apply(&event_contents::get_boson_p)
                         .apply(&TLorentzVector::M)
                         .apply(make_tag, _mass_bins);
+    
+    util::matched<std::string> mass_tags_fullRange;
+    std::string str_fullRange = std::to_string(int(_mass_bins.front())) + "_" + std::to_string(int(_mass_bins.back())); // 50to1000
+
     if (mass_tags.rec && mass_tags.rec->empty()) {
-        mass_tags.rec = boost::none;
+        mass_tags.rec           = boost::none;
+        mass_tags_fullRange.rec = boost::none;
     } else if (mass_tags.rec) {
         mass_tags.rec = "mass" + *mass_tags.rec;
+        if( *mass_tags.rec != "UF" && *mass_tags.rec != "OF" )
+            mass_tags_fullRange.rec = "mass" + str_fullRange;
     }
     if (mass_tags.gen && mass_tags.gen->empty()) {
-        mass_tags.gen = boost::none;
+        mass_tags.gen           = boost::none;
+        mass_tags_fullRange.gen = boost::none;
     } else if (mass_tags.gen) {
         mass_tags.gen = "mass" + *mass_tags.gen;
-    }
+        if( *mass_tags.gen != "UF" && *mass_tags.gen != "OF" )
+            mass_tags_fullRange.gen = "mass" + str_fullRange;
+    }        
 
     auto njets = evt.apply(&event_contents::get_jets)
                     .apply(&std::vector<jet>::size);
@@ -375,19 +387,23 @@ void boson_jets_analyzer::operator()()
         // Exclusive
         util::matched<std::string> tags; // eg "exc1jet"
         util::matched<std::string> tags_mass; // eg "exc1jet_mass50_71"
+        util::matched<std::string> tags_mass_fullRange; // eg "exc1jet_mass50_1000"
 
         if (njets.rec && *njets.rec < 3) {
             tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
-            tags_mass.rec = *tags.rec + *mass_tags.rec;
+            tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
+            tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
         }
         if (njets.gen && *njets.gen < 3) {
             tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
-            tags_mass.gen = *tags.gen + *mass_tags.gen;
+            tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
+            tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
         }
 
         if (tags.gen || tags.rec) {
             fill(tags, evt);
             fill(tags_mass, evt);
+            fill(tags_mass_fullRange, evt);
         }
     }
 
@@ -396,19 +412,23 @@ void boson_jets_analyzer::operator()()
         // Exclusive
         util::matched<std::string> tags; // eg "inc1jet"
         util::matched<std::string> tags_mass; // eg "inc1jet_mass50_71"
+        util::matched<std::string> tags_mass_fullRange; // eg "inc1jet_mass50_1000"
 
         if (njets.rec && *njets.rec >= nj) {
             tags.rec = "inc" + std::to_string(nj) + "jet";
-            tags_mass.rec = *tags.rec + *mass_tags.rec;
+            tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
+            tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
         }
         if (njets.gen && *njets.gen >= nj) {
             tags.gen = "inc" + std::to_string(nj) + "jet";
-            tags_mass.gen = *tags.gen + *mass_tags.gen;
+            tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
+            tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
         }
 
         if (tags.gen || tags.rec) {
             fill(tags, evt);
             fill(tags_mass, evt);
+            fill(tags_mass_fullRange, evt);
         }
     }
 }

@@ -102,7 +102,7 @@ std::vector<lepton> genleps::get_leptons_finalState() {
     if( GenPart_status->At(i) == 1 && (std::abs(pdgID) == 11 || std::abs(pdgID) == 13) ) {
       l.v.SetPtEtaPhiM(GenPart_pt->At(i), GenPart_eta->At(i), GenPart_phi->At(i), GenPart_mass->At(i));
       l.raw_v = l.v;
-      l.charge = pdgID/std::abs(pdgID);
+      l.charge = (-1)*pdgID/std::abs(pdgID);
       l.pdgid = pdgID;
 
       genleps_finalState.push_back(l);

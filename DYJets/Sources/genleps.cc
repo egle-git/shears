@@ -21,7 +21,12 @@ genleps::genleps(util::job::info &info, const util::options &opt, util::histo_se
       GenPart_eta(info.init_optional_branch<decltype(GenPart_eta)>("GenPart_eta")),
       GenPart_phi(info.init_optional_branch<decltype(GenPart_phi)>("GenPart_phi")),
       GenPart_mass(info.init_optional_branch<decltype(GenPart_mass)>("GenPart_mass")),
-      GenPart_pdgId(info.init_optional_branch<decltype(GenPart_pdgId)>("GenPart_pdgId"))
+      GenPart_pdgId(info.init_optional_branch<decltype(GenPart_pdgId)>("GenPart_pdgId")),
+      LHEPart_pt(info.init_optional_branch<decltype(LHEPart_pt)>("LHEPart_pt")),
+      LHEPart_eta(info.init_optional_branch<decltype(LHEPart_eta)>("LHEPart_eta")),
+      LHEPart_phi(info.init_optional_branch<decltype(LHEPart_phi)>("LHEPart_phi")),
+      LHEPart_mass(info.init_optional_branch<decltype(LHEPart_mass)>("LHEPart_mass")),
+      LHEPart_pdgId(info.init_optional_branch<decltype(LHEPart_pdgId)>("LHEPart_pdgId"))
 {
     configure(opt);
 
@@ -88,6 +93,40 @@ bool genleps::IsGivenFlavorDileptonEvent(int pdgID) {
   return (countLep_fromHardProcessFinalState == 2);
 }
 
+std::vector<lepton> genleps::get_leptons_isLHE() {
+    std::vector<lepton> genleps_isLHE;
+
+    for(unsigned i=0; i < LHEPart_pt->GetSize(); ++i) {
+        lepton l;
+        int pdgID = LHEPart_pdgId->At(i);
+        // (electron or muon)
+        if(std::abs(pdgID) == 11 || std::abs(pdgID) == 13){
+            l.v.SetPtEtaPhiM(LHEPart_pt->At(i), LHEPart_eta->At(i), LHEPart_phi->At(i), LHEPart_mass->At(i));
+            l.raw_v = l.v;
+            l.charge = (-1)*pdgID/std::abs(pdgID);
+            l.pdgid = pdgID;
+
+            genleps_isLHE.push_back(l);
+        }
+    }
+
+    std::sort(genleps_isLHE.begin(), genleps_isLHE.end(),
+            [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); } );
+
+    return genleps_isLHE;
+
+}
+
+/*float genleps::get_zzmas_isLHE() {
+    float zzmas = 1.;
+    for(unsigned i=0; i < LHEPart_pdgId->GetSize(); ++i) {
+        int pdgID = LHEPart_pdgId->At(i);
+        if(pdgID == 23) zzmas = LHEPart_pt->At(i);
+    }
+
+    return zzmas;
+}*/
+
 // used for Rochester correction to find matched gen-muon in the final state (i.e. stable) to a given reco-muon. Dressed lepton should not be used here.
 // it should be called in MC case: it will make seg. fault when it is called with data (at GenPart_pt->GetSize())
 std::vector<lepton> genleps::get_leptons_finalState() {
@@ -109,8 +148,8 @@ std::vector<lepton> genleps::get_leptons_finalState() {
     }
   }
 
-  std::sort(genleps_finalState.begin(), genleps_finalState.end(), 
-            [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); } 
+  std::sort(genleps_finalState.begin(), genleps_finalState.end(),
+            [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); }
   );
 
   return genleps_finalState;

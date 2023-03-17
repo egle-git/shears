@@ -134,7 +134,7 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
         if(!l.passes_iso) {
             continue;
         }
-        
+
         // details: https://gitlab.cern.ch/akhukhun/roccor
         // use "set5" variation as the central value (s-dependent Z width): better description for DY MiNNLO
         if(_roccor_enabled) {

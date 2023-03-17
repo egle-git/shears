@@ -140,6 +140,9 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     auto mass = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
     auto pt = evt.apply(&event_contents::get_boson_p).apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
     auto rapidity = evt.apply(&event_contents::get_boson_p).apply(&TLorentzVector::Rapidity);
+    //std::vector<physics::lepton> chosen_muons;
+    //std::copy_if(evt.rec->leptons.begin(), evt.rec->leptons.end(), std::back_inserter(chosen_muons),
+    //            [](const physics::lepton &lep) { return lep.pdgid == 13; });
 
 #ifdef DEBUG_PRINTOUT
     if (mass.rec && tags.rec && *tags.rec == "inc0jet_mass76_106") {
@@ -224,10 +227,21 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     }
 #endif // DEBUG_PRINTOUT
 
+        // New histo
+    //histo_set2D.fill("mass_sub_pt",
+    //                 tags.rec + "-matrix",
+    //                 mass.rec,
+    //                 'mass.rec/(chosen_muons[1].v.Pt())', weights().global_weight());
+
     fill_unfolded("mass", tags, mass);
     fill_unfolded("mass_wide_range", tags, mass);
     fill_unfolded("pt", tags, pt);
     fill_unfolded("rapidity", tags, rapidity);
+    fill_unfolded("dyjets_events_peak", tags, mass);
+    fill_unfolded("dyjets_events_wide_range", tags, mass);
+    //histo_set.fill("mass_wide_range_1GeV-gen", tags.gen, mass.gen, weights().gen_weight());
+    //histo_set.fill("mass_LHE_1GeV", "geninc0jet_noweight", mass.gen, weights().gen_weight());
+    //histo_set.fill("mass_LHE_5GeV", "geninc0jet_noweight", mass.gen, weights().gen_weight());
 
     if (!tags.rec || !evt.rec) {
         return;
@@ -241,17 +255,11 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     double Eta2 = evt.rec->leptons[1].v.Eta();
     double DeltaEta = Eta1 - Eta2;
     double Pt2 = evt.rec->leptons[1].v.Pt();
-    double cut = Z.v.M()/Pt2;
 
     histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
-    //New Cut
+    double cut = Z.v.M()/Pt2;
     histo_set.fill("cut", *tags.rec, cut, weights().global_weight());
     histo_set2D.fill("cut_2D_wide_range", *tags.rec, cut, Z.v.M(), weights().global_weight());
-    //DeltaPhi
-//     histo_set.fill("deltaphi", *tags.rec,Z.DeltaPhi(), weights().global_weight());
-    //DeltaEta
-//    histo_set.fill("deltaeta", *tags.rec, DeltaEta, weights().global_weight());
-//     
 
 
     /*

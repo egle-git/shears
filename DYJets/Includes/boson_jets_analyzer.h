@@ -76,6 +76,9 @@ private:
 
     bool _apply_triggerSF = true;
 
+    bool _apply_M100Cut = false;
+    std::string _sample_name;
+
     physics::reweighing _reweighing;
     physics::weights _weights;
 

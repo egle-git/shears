@@ -31,6 +31,9 @@ Select specific flavor in DYLL:
   use: false
   flavor: -1 # pdgID. DY->ee: 11 / DY->mm: 13 / DY->tautau: 15
 
+# Cut on the inclusive DYJets sample
+use exclusive DYJets samples: yes
+
 # dilepton pt reweighting option
 # the reweighting factor is derived from (data-bkg) vs. DY MC comparison of dilepton pT @ reco-level
 # WARNING: it should be applied to *DY MC only* (i.e not use for backgrounds)
@@ -58,11 +61,11 @@ preliminary: yes
 generator level:
   # minimum pt on gen leptons [GeV]
   # default: 20 GeV
-  lepton pt: 15
+  lepton pt: 0
 
   # minimum pt on gen leptons [GeV]
   # default: 25 GeV
-  leading lepton pt: 20
+  leading lepton pt: 0
 
   # maximum lepton |eta| cut
   # default: 2.4
@@ -193,7 +196,7 @@ Z:
 
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 50 
+    low mass: 10
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -221,7 +224,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 76, 106, 170, 350, 1000, 2000, 3000 ]
+mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 3000 ]
 
 # Triggers
 #
@@ -285,22 +288,22 @@ samples:
           ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
           HLT_IsoMu24,
           HLT_IsoTkMu24
-    ### MC
-    #- name: DYJets
+    ### MC ### Inclusive DY M-50toInf commented out
+    - name: DYJets
+      type: MC
+      jobs: 20
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_DYJetsToMuMu.txt
+    #- name: DYJets_M-10to50
     #  type: MC
-    #  jobs: 20
-    #  nano dir: Catalogs/2016preAPV
-    #  catalog: Catalog2016_bonzai_DYJetsToMuMu.txt
-    - name: DYJets_M-10to50
-      type: MC
-      jobs: 10
-      nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
-    - name: DYJets_M-50to100
-      type: MC
-      jobs: 15
-      nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
+    #  jobs: 5
+    #  nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
+    #  catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
+    #- name: DYJets_M-50to100
+    #  type: MC
+    #  jobs: 15
+    #  nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
+    #  catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
     - name: DYJets_M-100to200
       type: MC
       nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
@@ -474,7 +477,7 @@ plots:
     - selector: '^_.*'
       produce: no
     - selector: '.*-gen$'
-      produce: no
+      produce: yes
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
@@ -520,8 +523,8 @@ plots:
     - selector: '^mass_wide.*'
       log x: yes
     - selector: 'dyjets_events.*inc0jet'
-      ratio min: 0.951
-      ratio max: 1.049
+      ratio min: 0.901
+      ratio max: 1.099
     # Axis labels
     - selector: '^mass.*'
       x axis label: 'M_{#mu#mu}'

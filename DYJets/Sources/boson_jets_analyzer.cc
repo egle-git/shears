@@ -151,6 +151,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     }
 
     _apply_triggerSF = opt.config["use trigger scale factors"].as<bool>();
+    _sample_name = info.sample.name();
+
+    _apply_M100Cut = opt.config["use exclusive DYJets samples"].as<bool>();
 
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
@@ -183,7 +186,7 @@ void boson_jets_analyzer::operator()()
 
     // fill the generator level histograms only when the sample is MC
     if( !weights().isdata() ) {
-        genleps = _genleps.get();
+        /*genleps = _genleps.get();
         std::vector<lepton> genleptons = find_gen_boson(genleps);
 
         if (!genleptons.empty()) {
@@ -197,7 +200,39 @@ void boson_jets_analyzer::operator()()
                 [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
 
             _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
+        }*/
+
+        std::vector<lepton> genleps_isLHE = _genleps.get_leptons_isLHE();
+        std::vector<lepton> genleptons_isLHE = find_gen_boson(genleps_isLHE);
+        //float myzzmas = _genleps.get_zzmas_isLHE();
+        //std::cout<<myzzmas<<std::endl;
+
+        if (_apply_M100Cut && !genleptons_isLHE.empty()) {
+            // Gen boson found
+            evt.gen = event_contents();
+            evt.gen->leptons = genleptons_isLHE;
+            //int size = genleptons_isLHE.size();
+            //if (size != 2) std::cout<<genleptons_isLHE.size()<<std::endl;
+            evt.gen->boson_p = std::accumulate(
+                genleptons_isLHE.begin(),
+                genleptons_isLHE.end(),
+                TLorentzVector(),
+                [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
+            auto mass = evt.gen->boson_p.M();
+            //if (mass > 50) std::cout << mass <<"; "<< genleptons_isLHE[0].v.Pt() <<"; "<< genleptons_isLHE[1].v.Pt() <<"; "<<std::endl;
+            if (mass > 100){
+                if (_sample_name == "DYJets_M-50to100" || _sample_name == "DYJets_M-10to50" ) return;
+                else {
+                histo_set.fill("LHE_10GeV", "geninc0jet_noweight", mass, weights().gen_weight());
+                histo_set.fill("LHE_100GeV", "geninc0jet_noweight", mass, weights().gen_weight());
+                }
+            }
+            _genleps.fill(histo_set, "geninc0jet_noweight", genleptons_isLHE, weights());
+            histo_set.fill("LHE_1GeV", "geninc0jet_noweight", mass, weights().gen_weight());
+            histo_set.fill("LHE_5GeV", "geninc0jet_noweight", mass, weights().gen_weight());
+            //histo_set.fill("zzmas_1GeV", "geninc0jet_noweight", myzzmas, weights().gen_weight());
         }
+
     }
 
     /*
@@ -287,7 +322,7 @@ void boson_jets_analyzer::operator()()
         }
 
         if( _apply_ptReweight && _weights.ismc() &&
-            (chosen_muons.size() >= 2 || chosen_electrons.size() >= 2) ) { 
+            (chosen_muons.size() >= 2 || chosen_electrons.size() >= 2) ) {
 
             auto pt = evt.apply(&event_contents::get_boson_p).apply((double (TLorentzVector::*)() const) &TLorentzVector::Pt);
             Int_t theBin = _h_ptReweight->GetXaxis()->FindBin(*pt.rec);
@@ -476,7 +511,7 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                          *value.rec,
                          *value.gen, weights().global_weight());
         // Now fill again subtracting the global weight from gen weight
-        // And placing the event in the reco underflow bin 
+        // And placing the event in the reco underflow bin
         // as explained in the TUnfold manual
         // https://www.desy.de/~sschmitt/TUnfold/tunfold_manual_v17.9.pdf, page 10
         histo_set2D.fill(name,
@@ -522,7 +557,7 @@ bool boson_jets_analyzer::check_lowQualityMuon(const std::vector<lepton> muons) 
     bool flag = false;
 
     if( muons.size() < 2 ) // it is not a dimuon event: return false
-        return flag; 
+        return flag;
     else { // dimuon event
         // first muon is always the leading muon (muon collection is sorted in decreasing pT after selection)
         if( muons[0].raw_v.Pt() < _pt_criteria_SMuDMu && _mask_sMu.passes() && !_mask_dMu.passes() )

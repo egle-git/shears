@@ -116,7 +116,7 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
         return false;
     }
     //cout <<"Zfinder, charge prod: " <<candidate.charge_product << ", mass: " << candidate.v.M() <<endl;
-    
+
     // Check flavor
     if (_flavor_mode == flavor_mode::same &&
         std::abs(candidate.a.pdgid) != std::abs(candidate.b.pdgid)) {
@@ -143,6 +143,10 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
     }
     if(candidate.v.M()/candidate.b.v.Pt() > _newcut ) return false;
 
+    // Check if affected by the 2016 EMTF bug
+    //if (std::abs(candidate.a.v.Eta()) > 1.2 && std::abs(candidate.b.v.Eta()) > 1.2
+    //    && candidate.a.v.Eta() * candidate.b.v.Eta() > 0.
+    //    && deltaPhi(candidate.a.v.Phi(), candidate.b.v.Phi()) < 1.396) return false; // 80 deg * pi/180deg = 1.396 rad
 
     // Check mass
     // double mass = candidate.v.M();

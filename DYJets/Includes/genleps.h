@@ -40,6 +40,11 @@ class genleps
     std::optional<TTreeReaderArray<float>> GenPart_phi;
     std::optional<TTreeReaderArray<float>> GenPart_mass;
     std::optional<TTreeReaderArray<int>> GenPart_pdgId;
+    std::optional<TTreeReaderArray<float>> LHEPart_pt;
+    std::optional<TTreeReaderArray<float>> LHEPart_eta;
+    std::optional<TTreeReaderArray<float>> LHEPart_phi;
+    std::optional<TTreeReaderArray<float>> LHEPart_mass;
+    std::optional<TTreeReaderArray<int>> LHEPart_pdgId;
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
@@ -60,6 +65,8 @@ class genleps
 
     bool IsGivenFlavorDileptonEvent(int pdgID);
 
+    std::vector<lepton> get_leptons_isLHE();
+    //float get_zzmas_isLHE();
     std::vector<lepton> get_leptons_finalState();
 
     /**

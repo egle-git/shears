@@ -2,7 +2,6 @@
 
 void GetSignal();
 void GetBackgrounds();
-void GetMatrix();
 void SaveAll();
 
 TCanvas*MakeCanvas(TString cName);
@@ -61,6 +60,7 @@ TH2D*_hMat  = nullptr;
 vector<TH1D*> _back_hist;
 vector<TH1D*> _gen_hist;
 vector<TH1D*> _rec_hist;
+vector<TH2D*> _mat_hist;
 
 void getUnfoldingHistograms(TString directory,TString era,TString channel)
 {
@@ -98,7 +98,6 @@ void getUnfoldingHistograms(TString directory,TString era,TString channel)
     // Get histograms 
     GetSignal();
     GetBackgrounds();
-    GetMatrix();
 
     SaveAll();
 } 
@@ -126,6 +125,8 @@ void GetSignal()
         _gen_hist.at(i)->SetName("gen_mass");
         _rec_hist.push_back((TH1D*)mc_file->Get(reco_hist));
         _rec_hist.at(i)->SetName("reco_mass");
+        _mat_hist.push_back((TH2D*)mc_file->Get(matrix_hist));
+        _mat_hist.at(i)->SetName("matrix");
 
         job_info = (TH1*)mc_file->Get("_job_info");
         mc_file->GetObject("_job_info_average", job_info_average);
@@ -136,14 +137,17 @@ void GetSignal()
 
         _gen_hist.at(i)->Scale(samplescale);
         _rec_hist.at(i)->Scale(samplescale);
+        _mat_hist.at(i)->Scale(samplescale);
 
         if(i==0){
             _hGen = (TH1D*)_gen_hist.at(i)->Clone();
             _hRec = (TH1D*)_rec_hist.at(i)->Clone();
+            _hMat = (TH2D*)_mat_hist.at(i)->Clone();
         }
         else{
             _hGen->Add(_gen_hist.at(i));
             _hRec->Add(_rec_hist.at(i));
+            _hMat->Add(_mat_hist.at(i));
         }
 
         cout << "******************************" << endl;
@@ -156,11 +160,13 @@ void GetSignal()
     _hDat = (TH1D*)data_file->Get(reco_hist);
     _hDat->SetName("data");
 
-
-    
+    _hDat->Rebin(2);
+    _hRec->Rebin(2);
+    _hMat->RebinX(2); 
 
     if(!_hGen) cout << "ERROR: _hGen could not be loaded from file" << endl;
     if(!_hRec) cout << "ERROR: _hRec could not be loaded from file" << endl;
+    if(!_hMat) cout << "ERROR: _hMat could not be loaded from file" << endl;
     if(!_hDat) cout << "ERROR: _hDat could not be loaded from file" << endl;
 }
 
@@ -221,6 +227,7 @@ void GetBackgrounds()
         samplescale = _lumi*xsec/wsum;
 
         _back_hist.at(i)->Scale(samplescale);
+        _back_hist.at(i)->Rebin(2);
 /*
         cout << "******************************" << endl;
         cout << "Sample: " << load_name << endl;
@@ -228,36 +235,12 @@ void GetBackgrounds()
         cout << "lumi: " << _lumi << endl;
         cout << "xsec: " << xsec << endl;
         cout << "samplescale: " << samplescale << endl;
-        cout << "******************************" << endl;
+        cout << "*****************************" << endl;
 */
         if(i==0) _hBack = (TH1D*)_back_hist.at(0)->Clone("Backgrounds");
         else _hBack->Add(_back_hist.at(i));
     }// end loop over background files
     _hBack->SetName("backgrounds");
-}
-
-void GetMatrix()
-{
-    TFile*mc_file;
-    int nDYSamples = mc_name.size();
-    for(int i=0;i<nDYSamples;i++){
-        TString mcFileName = _directory;
-        mcFileName += "/";
-        mcFileName += _channel;
-        mcFileName += "/";
-        mcFileName += mc_name.at(i);
-        mc_file   = new TFile(mcFileName);
-        if(i==0){
-            _hMat = (TH2D*)mc_file->Get(matrix_hist);
-        }
-        else{
-            _hMat->Add((TH2D*)mc_file->Get(matrix_hist));
-        }
-    }
-    if(!_hMat){
-        cout << "ERROR: _hMat not properly loaded from file" << endl;
-    }
-    _hMat->SetName("matrix");
 }
 
 void SaveAll()

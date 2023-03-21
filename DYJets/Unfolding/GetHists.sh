@@ -4,17 +4,16 @@
 source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_100 x86_64-centos7-gcc10-opt
 export LD_PRELOAD=/usr/lib64/libopenblas.so.0
 
-dir=$1
+directory=$1
 era=$2
 chan=$3
 
 mkdir -p plots
 
-
 root -l << EOF
-TString directory = "$dir"
+TString dir = "$directory"
 TString era = "$era"
 TString channel = "$chan"
-.L macros/makePlots.C 
-makePlots(directory,era,channel)
+.L macros/getUnfoldingHistograms.C 
+getUnfoldingHistograms(dir,era,channel)
 EOF

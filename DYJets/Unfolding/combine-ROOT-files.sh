@@ -3,37 +3,51 @@
 # This script combines all root files output from shears for use in unfolding
 # The argument should be the name of the directory where all root files are saved
 
-# categories which have many jobs and need to be combined
+loadDirectory=$1
+saveDirectory=$2
+channel=$3
+
+echo "Combining output histograms from Shears from directory $loadDirectory"
+echo "Saving the combined files to $saveDirectory"
+
+# categori es which have many jobs and need to be combined
 file_stem=(
     dyjets-data
-    dyjets-DYJets
+    dyjets-DYJets_M-10to50
+    dyjets-DYJets_M-50to100
     dyjets-TauTau
+    dyjets-ST_t-channel_top
     dyjets-TT
-    dyjets-WJetsToLNu
     dyjets-ZZ
 )
 
 # Categories with single files that only need to be moved
 single_files=(
+    dyjets-DYJets_M-100to200
+    dyjets-DYJets_M-200to400
+    dyjets-DYJets_M-400to500
+    dyjets-DYJets_M-500to700
+    dyjets-DYJets_M-700to800
+    dyjets-DYJets_M-800to1000
+    dyjets-DYJets_M-1000to1500
+    dyjets-DYJets_M-1500to2000
+    dyjets-DYJets_M-2000toInf
     dyjets-ST_tW_antitop
     dyjets-ST_tW_top
     dyjets-ST_s-channel
-    dyjets-ST_t-channel_top
     dyjets-ST_t-channel_antitop
     dyjets-WWTo2L2Nu
     dyjets-WZ
+    dyjets-GammaGamma
 )
+saveLocation=$saveDirectory/$channel
 
-cd plots
-rm *.png
-cd -
-
-saveLocation=histograms/fromShears
+mkdir -p $saveLocation/plots
 
 cd $saveLocation
 rm *.root
 cd -
-cd ../$1/results
+cd ../$loadDirectory/results
 
 # Loop over each file that needs to be combined and combine with hadd
 for index in ${!file_stem[*]}; do

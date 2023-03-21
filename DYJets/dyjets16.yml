@@ -193,11 +193,11 @@ Z:
 
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 50
+    low mass: 50 
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 1000
+    high mass: 3000
 
     # Charge check mode
     # Possible values:
@@ -221,7 +221,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 76, 106, 170, 350, 1000 ]
+mass bins: [ 50, 76, 106, 170, 350, 1000, 2000, 3000 ]
 
 # Triggers
 #

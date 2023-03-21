@@ -18,25 +18,8 @@
 #            with 100 or 'bin count' bins.
 #
 #   custom: Bin edges are taken form the 'bin edges' array.
+#
 
-
-################################################################################
-# Number of events
-################################################################################
-
-# On-shell
-- selector: 'dyjets_events_peak.*'
-  binning: uniform
-  binning min: 71
-  binning max: 111
-  bin count: 1
-# Wide range
-- selector: 'dyjets_events_wide_range.*'
-  binning: uniform
-  binning min: 50
-  binning max: 1000
-  bin count: 1
-  
 ################################################################################
 # Mass
 ################################################################################
@@ -85,16 +68,6 @@
   # gen binning
   binY edges: [50,55,60,64,68,72,76,81,86,91,96,101,106,110,115,120,126,
               133,141,150,160,171,185,200,220,243,273,320,380,440,510,600,700,830,1000]
-- selector: 'cut_2D_wide_range.*'
-  binning: custom
-  binX edges: [0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,
-              11,11.5,12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5,18,18.5,19,19.5,20,20.5,
-              21,21.5,22,22.5,23]
-  binY edges: [50,52.5,55,57.5,60,62,64,66,68,70,72,74,76,78.5,81,83.5,86,88.5,91,93.5,96,
-              98.5,101,103.5,106,108,110,112.5,115,117.5,120,123,126,129.5,133,137,141,
-              145.5,150,155,160,165.5,171,178,185,192.5,200,210,220,231.5,243,258,273,296.5,
-              320,350,380,410,440,475,510,555,600,650,700,765,830,915,1000]
-
 ################################################################################
 # p_T
 ################################################################################
@@ -121,6 +94,16 @@
   binning: custom
   binX edges: [ 0, 4, 8, 12, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
   binY edges: [ 0, 4, 8, 12, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
+
+# Highest mass range, 0 jet
+#- selector: 'pt_(inc|exc)0jet_mass250_320.*'
+  #binning: custom
+  #bin edges: [ 0, 2.5, 5, 7.5, 10, 13, 18, 22, 28, 40, 90, 200, 1000 ]
+
+# Highest mass range, 1 and 2 jets
+#- selector: 'pt_(inc|exc)[12]jet_mass250_320.*'
+  #binning: custom
+  #bin edges: [ 0,  8,  18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
 
 # On-shell, 0, 1 and 2 jets
 - selector: 'pt_(inc|exc)[012]jet_mass71_111.*'
@@ -166,7 +149,6 @@
     0.051, 0.057, 0.064, 0.072, 0.081, 0.091, 0.102, 0.114, 0.128, 0.145, 0.165,
     0.189, 0.219, 0.258, 0.312, 0.391, 0.524, 0.695, 0.918, 1.153, 1.496, 1.947,
     2.522, 3.277 ]
-
 ################################################################################
 # Decay cos(theta)
 ################################################################################
@@ -182,70 +164,32 @@
 # Delta phi
 ################################################################################
   
-#- selector: 'deltaphi.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
+- selector: 'deltaphi.*'
+  binning: uniform
+  binning min: 2.62
+  binning max: 3.14
+  bin count: 20
 
-#- selector: 'deltaphi_hg_ptcut05.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
-#  
-#- selector: 'deltaphi_hg_ptcut510.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
-#  
-#- selector: 'deltaphi_hg_ptcut1015.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
-#  
-#- selector: 'deltaphi_hg_ptcut1520.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
-#  
-#- selector: 'deltaphi_hg_ptcut2030.*'
-#  binning: uniform
-#  binning min: 2.62
-#  binning max: 3.14
-#  bin count: 20
+- selector: 'deltaphi_hg_ptcut.*'
+  binning: uniform
+  binning min: 2.62
+  binning max: 3.14
+  bin count: 20
 
-#- selector: 'PtvsDeltaPhi.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 10
-#  bin count: 10
+- selector: 'PtvsDeltaPhi.*'
+  binning: uniform
+  binning min: 0
+  binning max: 10
+  bin count: 10
 
-#- selector: 'pt_phicut29.*'
-#  binning: custom
-#  bin edges: [
-#    0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
-#    
-#- selector: 'pt_phicut305.*'
-#  binning: custom
-#  bin edges: [
-#    0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
-#    
-#- selector: 'pt_phicut31.*'
-#  binning: custom
-#  bin edges: [
-#    0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
-################################################################################
-# Delta eta
-################################################################################
-#- selector: 'deltaeta.*'
-#  binning: uniform
-#  binning min: -5
-#  binning max: 5
-#  bin count: 100
+- selector: 'pt_cut.*'
+  #binning: custom
+  #bin edges: [
+  #  0, 2, 4, 6, 8, 10, 12, 14, 18, 22, 28, 37, 52, 85, 160, 240, 1000 ]
+  binning: uniform
+  binning min: 0
+  binning max: 10
+  bin count: 10
 
 ################################################################################
 # rapidity
@@ -257,30 +201,22 @@
   binning min: -2.5
   binning max: 2.5
   bin count: 50
-  
-- selector: 'cut.*'
+
+################################################################################
+## Number of events
+#################################################################################
+
+# On-shell
+- selector: 'dyjets_events_peak.*'
   binning: uniform
-  binning min: 0
-  binning max: 23
-  bin count: 46
-  
-#- selector: 'cut_inc0jet_mass76_106.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 400
-#  bin count: 200
-#- selector: 'cut_inc0jet_mass106_170.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 100
-#  bin count: 50
-#- selector: 'cut_inc0jet_mass170_350.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 100
-#  bin count: 50
-#- selector: 'cut_inc0jet_mass350_1000.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 100
-#  bin count: 50
+  binning min: 71
+  binning max: 111
+  bin count: 1
+# Wide range
+- selector: 'dyjets_events_wide_range.*'
+  binning: uniform
+  binning min: 50
+  binning max: 1000
+  bin count: 1
+
+                

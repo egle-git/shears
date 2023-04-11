@@ -41,15 +41,15 @@ preliminary: yes
 generator level:
   # minimum pt on gen leptons [GeV]
   # default: 20 GeV
-  lepton pt: 20
+  lepton pt: 15
 
   # minimum pt on gen leptons [GeV]
   # default: 25 GeV
-  leading lepton pt: 28
+  leading lepton pt: 20
 
   # maximum lepton |eta| cut
   # default: 2.4
-  lepton eta: 2.5
+  lepton eta: 2.4
 
 # Options related to the selection of jets
 jets:

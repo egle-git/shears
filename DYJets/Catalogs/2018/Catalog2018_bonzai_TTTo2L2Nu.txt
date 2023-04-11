@@ -3,7 +3,7 @@
 * primary events: 1
 * primary files: 1
 * lumi: -1
-* sample xsec: 88.29
+* sample xsec: 88.51
 # https://cms-gen-dev.cern.ch/xsdb/?columns=67108863&currentPage=0&pageSize=10&searchQuery=DAS%3DTTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8
 
 # ROOTFILES

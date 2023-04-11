@@ -3,7 +3,7 @@
 * primary events: 1
 * primary files: 1
 * lumi: -1
-* sample xsec: 69.09
+* sample xsec: 80.0
 
 # ROOTFILES
 

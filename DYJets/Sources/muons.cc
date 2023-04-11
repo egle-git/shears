@@ -136,11 +136,12 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
         }
         
         // details: https://gitlab.cern.ch/akhukhun/roccor
+        // use "set5" variation as the central value (s-dependent Z width): better description for DY MiNNLO
         if(_roccor_enabled) {
             Double_t corr = -1;
 
             if(isdata) {
-                corr = _roccor->kScaleDT((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 0, 0);
+                corr = _roccor->kScaleDT((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), 5, 0);
             } else { // MC
                 // look for a matched gen-level muon
                 lepton gll; double drmin=99.; bool match =false;
@@ -151,8 +152,8 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
                     }
                 }
                 // correction is different depending on the existence of matched gen-muon
-                if( match ) corr = _roccor->kSpreadMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), gll.v.Pt());
-                else        corr = _roccor->kSmearMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), Muon_nTrackerLayers[i], gRandom->Rndm());
+                if( match ) corr = _roccor->kSpreadMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), gll.v.Pt(), 5);
+                else        corr = _roccor->kSmearMC((int)l.charge, l.v.Pt(), l.v.Eta(), l.v.Phi(), Muon_nTrackerLayers[i], gRandom->Rndm(), 5);
             }
 
             TVector3 vecP3_old = l.v.Vect();

@@ -22,6 +22,9 @@ log:
     # Default value: yes
     #override root handler: yes
 
+# Cut on the inclusive DYJets sample
+use exclusive mass binned DYJets samples: yes
+
 # Whether to use pileup reweighing
 # Default value: true
 use pileup reweighing: true
@@ -31,7 +34,7 @@ use pileup reweighing: true
 # - 2016_PreAPV, 2016_PostAPV
 # - 2016_PreAPV_emu, 2016_PostAPV_emu (for the data collected with the emu trigger)
 # - 2017
-# - 2017
+# - 2018
 pileup type: 2017
 
 # Whether results are preliminary (for plots)
@@ -41,11 +44,11 @@ preliminary: yes
 generator level:
   # minimum pt on gen leptons [GeV]
   # default: 20 GeV
-  lepton pt: 15
+  lepton pt: 0
 
   # minimum pt on gen leptons [GeV]
   # default: 25 GeV
-  leading lepton pt: 20
+  leading lepton pt: 0
 
   # maximum lepton |eta| cut
   # default: 2.4
@@ -127,7 +130,7 @@ electrons:
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 20
+    pt: 15
 
     # Eta cut
     # Default value: 2.4
@@ -166,26 +169,24 @@ muons:
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
     rochester correction path: RoccoR2016bUL.txt
-     #rochester correction path: rcdata.2016.v3
-     #rochester correction path: RoccoR2017.txt.
-     #rochester correction path: rcdata.2016.v3
+    #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
 Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
     leading lepton pt: 28
-    
+
     #mass/elpt(II)
     mll/subleading lepton pT: 8
-    
+
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 50
+    low mass: 10
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 1000
+    high mass: 3000
 
     # Charge check mode
     # Possible values:
@@ -207,7 +208,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 50, 76, 106, 170, 350, 1000 ]
+mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 3000 ]
 
 # Triggers
 #
@@ -219,6 +220,7 @@ use trigger scale factors: yes
 
 # List of available data/MC samples
 samples:
+    ### DATA
     - name: data
       type: data
       jobs: 32
@@ -226,78 +228,59 @@ samples:
       catalog: Catalog2017_bonzai_DoubleEG_data.txt
       triggers: |
           HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
-    # Note: This sample has to be hadd-ed with 'data'.
-    #- name: data-smu
-      #type: data
-      #jobs: 16
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016/Data/v12.0/Catalogs/
-      #catalog: Bonzais-SingleMuon-all-VJetPruner-DMu.txt
-      #triggers B-F: |
-       #   ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL,
-        #  ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
-         # HLT_IsoMu24,
-          #HLT_IsoTkMu24
-      #triggers G-H: |
-       #   ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-        #  ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
-         # HLT_IsoMu24,
-          #HLT_IsoTkMu24
+    ### MC
     - name: DYJets
       type: MC
       jobs: 20
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_DYJetsToEE.txt
-      
-    #- name: DYJets-10to50
-     # type: MC
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs
-      #catalog: Bonzais-DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-      #jobs: 10
-
-      #bonzai dir: /user/bbilin/public/ 
-      #catalog: fakecatalog_mm_all.txt 
- #   - name: DYJets-0J
- #     type: MC
- #     jobs: 24
- #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
- #     catalog: Bonzais-DYToLL_0J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
- #   - name: DYJets-1J
- #     type: MC
- #     jobs: 24
- #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
- #     catalog: Bonzais-DYToLL_1J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
- #   - name: DYJets-2J
- #     type: MC
- #     jobs: 24
- #     bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
- #     catalog: Bonzais-DYToLL_2J_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt0-50
-      #type: MC
-      #jobs: 27
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Zpt-0To50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt50-100
-      #type: MC
-      #jobs: 18
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Pt-50To100_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt100-250
-      #type: MC
-      #jobs: 2
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Pt-100To250_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt250-400
-      #type: MC
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Pt-250To400_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt400-650
-      #type: MC
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Pt-400To650_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
-    #- name: DYJets-pt650-inf
-      #type: MC
-      #bonzai dir: /store/group/phys_smp/AnalysisFramework/Bonzai/13TeV_2016_MC/MC/v13.0/Catalogs/
-      #catalog: Bonzais-DYJetsToLL_Pt-650ToInf_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8-all-VJetPruner-DMuUnf.txt
+    - name: DYJets_M-10to50
+      type: MC
+      jobs: 5
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-10to50.txt
+    - name: DYJets_M-50to100
+      type: MC
+      jobs: 15
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-50to100.txt
+    - name: DYJets_M-100to200
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-100to200.txt
+    - name: DYJets_M-200to400
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-200to400.txt
+    - name: DYJets_M-400to500
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-400to500.txt
+    - name: DYJets_M-500to700
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-500to700.txt
+    - name: DYJets_M-700to800
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-700to800.txt
+    - name: DYJets_M-800to1000
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-800to1000.txt
+    - name: DYJets_M-1000to1500
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-1000to1500.txt
+    - name: DYJets_M-1500to2000
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-1500to2000.txt
+    - name: DYJets_M-2000toInf
+      type: MC
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_DYJetsToEE_M-2000toInf.txt
+    ### BACKGROUND
     - name: ST_s-channel
       type: background
       nano dir: Catalogs/2017/
@@ -351,36 +334,17 @@ samples:
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_GGToLL.txt
 
-
-
 # Scale factors
 tables:
     electron id:    2017ULee/egamma_Medium_UL17.txt
     #2017ULee/egamma_Medium_UL18.txt
     electron reco:  2017ULee/egamma_reco_all_SF_UL2017.txt
-    #muon id:        scalefactors_Medium_Muon_period1_July.txt
-    #muon isolation: Eff_SF_ISO_BF_6_16_2017.txt
-    #muon id:        2017ULee/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ID_TightID.txt
-    #muon isolation: 2017ULee/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_ISO_TightRelIso_DEN_TightIDandIPCut.txt
-    #emu trigger:    Eff_SF_SingleMuTrigger_BF_6_16_2017.txt
-    #dimu trigger:   2017ULee/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
-    #smu trigger data: 2017ULee/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_data.txt
-    #smu trigger mc: 2017ULee/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_mc.txt
     diel trigger leg1: Trigger_sf/2017_Ele23Leg1_MediumID.txt
     #Trigger_sf/2017_Ele23Leg1_MediumID.txt
     #sel trigger: Egamma_single.txt
     diel trigger leg2: Trigger_sf/2017_Ele12Leg2_MediumID.txt
     #Trigger_sf/2017_Ele23Leg1_MediumID.txt
-#    bjet loose eff:       btag-loose-b.txt
-#    cjet loose eff:       btag-loose-c.txt
-#    udsgjet loose eff:    btag-loose-udsg.txt
-#    bjet medium eff:       btag-medium-b.txt
-#    cjet medium eff:       btag-medium-c.txt
-#    udsgjet medium eff:    btag-medium-udsg.txt
-#    bjet tight eff:       btag-tight-b.txt
-#    cjet tight eff:       btag-tight-c.txt
-#    udsgjet tight eff:    btag-tight-udsg.txt
-    
+
 # Reweighing (eg for merged samples)
 #
 # For each possible reweighing, the syntax is:
@@ -403,9 +367,10 @@ tables:
 MC grouping:
     - legend: "Z/#gamma* #rightarrow ee"
       required: yes
-    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650 ,DYJets-pt650-inf ]
-    #  #samples: [ DYJets-pt0-50, DYJets-pt50-100, DYJets-pt100-250, DYJets-pt250-400, DYJets-pt400-650]
-      samples: [ DYJets ]
+      #samples: [ DYJets ]
+      samples: [ DYJets_M-10to50, DYJets_M-50to100, DYJets_M-100to200, DYJets_M-200to400 ]
+      samples: [ DYJets_M-400to500, DYJets_M-500to700, DYJets_M-700to800, DYJets_M-800to1000 ]
+      samples: [ DYJets_M-1000to1500, DYJets_M-1500to2000, DYJets_M-2000toInf ]
       color: 408 # kGreen - 8
       is signal: yes
     - legend: "t#bar{t}"
@@ -417,9 +382,6 @@ MC grouping:
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-#    - legend: W
-#      samples: [ WJetsToLNu ]
-#      color: 800 # kOrange
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
@@ -454,9 +416,9 @@ binning file: dyjets-binnings.yml
 plots:
     # Excluded plots
     - selector: '^_.*'
-      produce: yes
-    - selector: '.*-gen$'
       produce: no
+    - selector: '.*-gen$'
+      produce: yes
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
@@ -504,7 +466,7 @@ plots:
       ratio max: 1.099
     # Axis labels
     - selector: '^mass.*'
-      x axis label: 'M_{ll}'
+      x axis label: 'M_{ee}'
       x axis unit: 'GeV'
     - selector: '^nJets.*'
       x axis label: 'Exclusive number of jets'
@@ -513,17 +475,17 @@ plots:
     - selector: '^phistar.*'
       x axis label: '#phi*'
     - selector: '^pt.*'
-      x axis label: 'p_{T}^{ll}'
+      x axis label: 'p_{T}^{ee}'
       x axis unit: 'GeV'
     - selector: '.+mass(.*)_(.*).*'
-      x axis detail: '$1 #leq M_{ll} < $2 GeV'
+      x axis detail: '$1 #leq M_{ee} < $2 GeV'
     - selector: '.*inc(1|2)jet.*'
       x axis detail: 'N_{jets} #geq $1'
     - selector: '.*exc(1|2)jet.*'
       x axis detail: 'N_{jets} = $1'
     - selector: '^mass_cut.*'
-      x axis label: 'M_{ll}'
+      x axis label: 'M_{ee}'
       x axis unit: 'GeV'
     - selector: '^pt_cut.*'
-      x axis label: 'p_{T}^{ll}'
+      x axis label: 'p_{T}^{ee}'
       x axis unit: 'GeV'

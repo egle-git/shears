@@ -32,7 +32,7 @@ Select specific flavor in DYLL:
   flavor: -1 # pdgID. DY->ee: 11 / DY->mm: 13 / DY->tautau: 15
 
 # Cut on the inclusive DYJets sample
-use exclusive DYJets samples: yes
+use exclusive mass binned DYJets samples: yes
 
 # dilepton pt reweighting option
 # the reweighting factor is derived from (data-bkg) vs. DY MC comparison of dilepton pT @ reco-level
@@ -220,8 +220,6 @@ Z:
     # Default value: same
     flavor mode: mumu
 
-
-
 # How the measurement is binned in mass
 # Default value: empty
 mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 3000 ]
@@ -288,22 +286,22 @@ samples:
           ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL,
           HLT_IsoMu24,
           HLT_IsoTkMu24
-    ### MC ### Inclusive DY M-50toInf commented out
+    ### MC
     - name: DYJets
       type: MC
       jobs: 20
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_DYJetsToMuMu.txt
-    #- name: DYJets_M-10to50
-    #  type: MC
-    #  jobs: 5
-    #  nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
-    #  catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
-    #- name: DYJets_M-50to100
-    #  type: MC
-    #  jobs: 15
-    #  nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
-    #  catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
+    - name: DYJets_M-10to50
+      type: MC
+      jobs: 2
+      nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
+      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
+    - name: DYJets_M-50to100
+      type: MC
+      jobs: 15
+      nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
+      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
     - name: DYJets_M-100to200
       type: MC
       nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
@@ -443,10 +441,9 @@ MC grouping:
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
-    - legend: GamGam
+    - legend: "#gamma#gamma"
       samples: [ GammaGamma ]
       color: 800 # kOrange
-
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

@@ -23,7 +23,7 @@ log:
     #override root handler: yes
 
 # Cut on the inclusive DYJets sample
-use exclusive DYJets samples: yes
+use exclusive mass binned DYJets samples: yes
 
 # Whether to use pileup reweighing
 # Default value: true
@@ -203,8 +203,6 @@ Z:
     # Default value: same
     flavor mode: mumu
 
-
-
 # How the measurement is binned in mass
 # Default value: empty
 mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 3000 ]
@@ -264,7 +262,7 @@ samples:
       triggers: |
           HLT_IsoMu24,
           ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8
-    ### MC ### Inclusive DY M-50toInf commented out
+    ### MC
     - name: DYJets
       type: MC
       jobs: 32
@@ -419,7 +417,7 @@ MC grouping:
     - legend: DY TauTau
       samples: [ TauTau ]
       color: 434 # kCyan + 2
-    - legend: GamGam
+    - legend: "#gamma#gamma"
       samples: [ GammaGamma ]
       color: 800 # kOrange
 
@@ -499,8 +497,8 @@ plots:
     - selector: '^mass_wide.*'
       log x: yes
     - selector: 'dyjets_events.*inc0jet'
-      ratio min: 0.951
-      ratio max: 1.049
+      ratio min: 0.901
+      ratio max: 1.099
     # Axis labels
     - selector: '^mass.*'
       x axis label: 'M_{#mu#mu}'

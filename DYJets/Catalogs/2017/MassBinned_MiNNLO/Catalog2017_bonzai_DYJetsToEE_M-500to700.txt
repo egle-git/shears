@@ -7,3 +7,4 @@
 
 # ROOTFILES
 
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai01mar2023_2017_DYJetsToEE_M-500to700_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToEE_M-500to700_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230301_190732/0000/tree_1.root

@@ -89,6 +89,7 @@ public:
       public:
         std::vector<lepton> leptons; ///< \brief Leptons making up the boson
         TLorentzVector boson_p;      ///< \brief Reconstructed boson 4-momentum
+        TLorentzVector boson_p_LHE;      ///< \brief Reconstructed boson 4-momentum at LHE
         std::vector<jet> jets;       ///< \brief Jets in the event
         std::vector<jet> jets20;     ///< \brief Jets with 20 GeV cut
 

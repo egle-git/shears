@@ -36,7 +36,7 @@
   binning: uniform
   binning min: 71
   binning max: 111
-  bin count: 240
+  bin count: 120
 
 # Wide range
 # reco mass
@@ -71,13 +71,6 @@
   binning min: 100
   binning max: 3000
   bin count: 29
-
-# gen mass 1 Gev bins with Z at LHE mass
-#- selector: 'zzmas_1GeV.*'
-#  binning: uniform
-#  binning min: 0
-#  binning max: 3000
-#  bin count: 3000
 
 # gen mass
 - selector: 'mass_wide_range.*-gen'
@@ -228,12 +221,6 @@
   binning min: -2.5
   binning max: 2.5
   bin count: 50
-
-- selector: 'cut.*'
-  binning: uniform
-  binning min: 0
-  binning max: 25
-  bin count: 100
 
 ################################################################################
 ## Number of events

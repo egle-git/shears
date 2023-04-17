@@ -117,15 +117,6 @@ std::vector<lepton> genleps::get_leptons_isLHE() {
 
 }
 
-/*float genleps::get_zzmas_isLHE() {
-    float zzmas = 1.;
-    for(unsigned i=0; i < LHEPart_pdgId->GetSize(); ++i) {
-        int pdgID = LHEPart_pdgId->At(i);
-        if(pdgID == 23) zzmas = LHEPart_pt->At(i);
-    }
-
-    return zzmas;
-}*/
 
 // used for Rochester correction to find matched gen-muon in the final state (i.e. stable) to a given reco-muon. Dressed lepton should not be used here.
 // it should be called in MC case: it will make seg. fault when it is called with data (at GenPart_pt->GetSize())

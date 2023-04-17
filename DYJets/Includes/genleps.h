@@ -66,7 +66,6 @@ class genleps
     bool IsGivenFlavorDileptonEvent(int pdgID);
 
     std::vector<lepton> get_leptons_isLHE();
-    //float get_zzmas_isLHE();
     std::vector<lepton> get_leptons_finalState();
 
     /**

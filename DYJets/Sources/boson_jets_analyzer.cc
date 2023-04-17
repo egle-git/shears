@@ -208,26 +208,15 @@ void boson_jets_analyzer::operator()()
         if (_apply_M100Cut && !genleptons_isLHE.empty()) {
             // Gen boson found
             evt.gen = event_contents();
-            //int size = genleptons_isLHE.size();
-            //if (size != 2) std::cout<<genleptons_isLHE.size()<<std::endl;
             evt.gen->boson_p_LHE = std::accumulate(
                 genleptons_isLHE.begin(),
                 genleptons_isLHE.end(),
                 TLorentzVector(),
                 [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
             auto mass = evt.gen->boson_p_LHE.M();
-            if (mass > 100){
-                if (_sample_name == "DYJets_M-50to100" || _sample_name == "DYJets_M-10to50" ) return;
-                else {
-                histo_set.fill("LHE_10GeV", "geninc0jet_noweight", mass, weights().gen_weight());
-                histo_set.fill("LHE_100GeV", "geninc0jet_noweight", mass, weights().gen_weight());
-                }
-            }
+            if (mass > 100 && _sample_name == "DYJets_M-50to100") return;
             _genleps.fill(histo_set, "geninc0jet_noweight_LHE", genleptons_isLHE, weights());
-            histo_set.fill("LHE_1GeV", "geninc0jet_noweight", mass, weights().gen_weight());
-            histo_set.fill("LHE_5GeV", "geninc0jet_noweight", mass, weights().gen_weight());
         }
-
     }
 
     /*

@@ -44,34 +44,6 @@
   binning: custom
   bin edges: [50,52.5,55,57.5,60,62,64,66,68,70,72,74,76,78.5,81,83.5,86,88.5,91,93.5,96,98.5,101,103.5,106,108,110,112.5,115,117.5,120,123,126,129.5,133,137,141,145.5,150,155,160,165.5,171,178,185,192.5,200,210,220,231.5,243,258,273,296.5,320,350,380,410,440,475,510,555,600,650,700,765,830,915,1000,1250,1500,1750,2000,2500,3000]
 
-# gen mass 5 GeV bins
-- selector: 'LHE_5GeV.*'
-  binning: uniform
-  binning min: 0
-  binning max: 3000
-  bin count: 600
-
-# gen mass 1 Gev bins
-- selector: 'LHE_1GeV.*'
-  binning: uniform
-  binning min: 0
-  binning max: 3000
-  bin count: 3000
-
-# gen mass 10 Gev bins
-- selector: 'LHE_10GeV.*'
-  binning: uniform
-  binning min: 100
-  binning max: 3000
-  bin count: 290
-
-# gen mass 100 Gev bins
-- selector: 'LHE_100GeV.*'
-  binning: uniform
-  binning min: 100
-  binning max: 3000
-  bin count: 29
-
 # gen mass
 - selector: 'mass_wide_range.*-gen'
   binning: custom

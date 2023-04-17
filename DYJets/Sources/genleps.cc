@@ -117,7 +117,6 @@ std::vector<lepton> genleps::get_leptons_isLHE() {
 
 }
 
-
 // used for Rochester correction to find matched gen-muon in the final state (i.e. stable) to a given reco-muon. Dressed lepton should not be used here.
 // it should be called in MC case: it will make seg. fault when it is called with data (at GenPart_pt->GetSize())
 std::vector<lepton> genleps::get_leptons_finalState() {

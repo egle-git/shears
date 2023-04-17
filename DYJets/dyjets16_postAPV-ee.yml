@@ -43,11 +43,11 @@ preliminary: yes
 generator level:
   # minimum pt on gen leptons [GeV]
   # default: 20 GeV
-  lepton pt: 0
+  lepton pt: 15
 
   # minimum pt on gen leptons [GeV]
   # default: 25 GeV
-  leading lepton pt: 0
+  leading lepton pt: 20
 
   # maximum lepton |eta| cut
   # default: 2.4
@@ -181,7 +181,7 @@ Z:
 
     # Low mass bound [GeV]
     # Default value: 0
-    low mass: 10
+    low mass: 40
 
     # High mass bound [GeV]
     # Default value: infinity
@@ -207,7 +207,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 10, 50, 76, 106, 170, 350, 1000, 3000 ]
+mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 3000 ]
 
 # Triggers
 #
@@ -228,11 +228,11 @@ samples:
       triggers: |
           HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
     ### MC
-    - name: DYJets
-      type: MC
-      jobs: 20
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_DYJetsToEE.txt
+    #- name: DYJets
+    #  type: MC
+    #  jobs: 20
+    #  nano dir: Catalogs/2016postAPV
+    #  catalog: Catalog2016_bonzai_DYJetsToEE.txt
     - name: DYJets_M-10to50
       type: MC
       jobs: 5

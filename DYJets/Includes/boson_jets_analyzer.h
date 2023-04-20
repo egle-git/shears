@@ -77,7 +77,7 @@ private:
     bool _apply_triggerSF = true;
 
     bool _apply_M100Cut = false;
-    std::string _sample_name;
+    std::string _sample_name = "";
 
     physics::reweighing _reweighing;
     physics::weights _weights;
@@ -151,6 +151,8 @@ protected:
     bool check_lowQualityMuon(const std::vector<lepton> muons);
     bool check_whichTriggerSF(const std::vector<lepton> muons);
     bool _use_smu_triggerSF = false;
+
+    double DileptonMass_LHE();
 };
 
 } // namespace physics

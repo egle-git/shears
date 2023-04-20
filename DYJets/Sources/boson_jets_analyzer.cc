@@ -151,9 +151,9 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     }
 
     _apply_triggerSF = opt.config["use trigger scale factors"].as<bool>();
-    _sample_name = info.sample.name();
 
     _apply_M100Cut = opt.config["use exclusive mass binned DYJets samples"].as<bool>();
+    _sample_name = info.sample.name();
 
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
@@ -167,9 +167,14 @@ boson_jets_analyzer::~boson_jets_analyzer()
 
 void boson_jets_analyzer::operator()()
 {
-    // -- check before counting this event
+    // check before counting this event
     if( _selectDYLL ) {
         if( !_genleps.IsGivenFlavorDileptonEvent(_selectDYLL_flavor) ) return;
+    }
+
+    // check before counting this event
+    if( _apply_M100Cut && _sample_name == "DYJets_M-50to100" ) {
+        if( DileptonMass_LHE() > 100 ) return;
     }
 
     _weights.process_event();
@@ -200,22 +205,6 @@ void boson_jets_analyzer::operator()()
                 [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
 
             _genleps.fill(histo_set, "geninc0jet_noweight", genleptons, weights());
-        }
-
-        std::vector<lepton> genleps_isLHE = _genleps.get_leptons_isLHE();
-        std::vector<lepton> genleptons_isLHE = find_gen_boson(genleps_isLHE);
-
-        if (_apply_M100Cut && !genleptons_isLHE.empty()) {
-            // Gen boson found
-            evt.gen = event_contents();
-            evt.gen->boson_p_LHE = std::accumulate(
-                genleptons_isLHE.begin(),
-                genleptons_isLHE.end(),
-                TLorentzVector(),
-                [](const TLorentzVector &p, const lepton &lep) { return p + lep.v; });
-            auto mass = evt.gen->boson_p_LHE.M();
-            if (mass > 100 && _sample_name == "DYJets_M-50to100") return;
-            _genleps.fill(histo_set, "geninc0jet_noweight_LHE", genleptons_isLHE, weights());
         }
     }
 
@@ -498,6 +487,7 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
     if (tags.gen && value.gen) {
         histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
     }
+
     // Fill response matrix
     if (tags.rec && tags.gen && value.rec && value.gen && tags.rec == tags.gen) {
         // both gen and reco exist and have the same tag
@@ -579,6 +569,27 @@ bool boson_jets_analyzer::check_whichTriggerSF(const std::vector<lepton> muons) 
     // note that if the lowQuality events are not removed this may cause a problem
 
     return smu_triggered;
+}
+
+double boson_jets_analyzer::DileptonMass_LHE() {
+    double mass = -1.0;
+
+    std::vector<lepton> genleps_isLHE = _genleps.get_leptons_isLHE();
+
+    // does not check the lepton flavor
+    // there should be only 2 leptons at LHE level if it is a DY sample
+    if( genleps_isLHE.size() != 2 ) {
+        throw std::runtime_error("# LHE leptons are not 2!");
+        std::cout << "genleps_isLHE.size() = " << genleps_isLHE.size() << std::endl;
+        return -1.0;
+    }
+    else {
+        TLorentzVector vecP_dilepton = genleps_isLHE[0].v + genleps_isLHE[1].v;
+        mass = vecP_dilepton.M();
+        // std::cout << "[boson_jets_analyzer::DileptonMass_LHE] mass = " << mass << std::endl;
+    }
+
+    return mass;
 }
 
 } // namespace physics

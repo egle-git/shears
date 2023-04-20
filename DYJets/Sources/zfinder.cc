@@ -141,7 +141,10 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
     else {
       if( candidate.a.v.Pt() < _leadingLepPt ) return false;
     }
-    if(candidate.v.M()/candidate.b.v.Pt() > _newcut ) return false;
+    
+    if( !isGEN) {
+        if(candidate.v.M()/candidate.b.v.Pt() > _newcut ) return false;
+    }
 
     // Check if affected by the 2016 EMTF bug
     //if (std::abs(candidate.a.v.Eta()) > 1.2 && std::abs(candidate.b.v.Eta()) > 1.2

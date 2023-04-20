@@ -76,7 +76,7 @@ template <> struct convert<data::sample>
         sample._catalog = node["catalog"].as<std::string>();
 
         util::set_value_safe(node, sample._jobs, "jobs", "number of jobs", [](unsigned val) {
-            return val > 1 && val < 50;
+            return val > 1 && val < 1000;
         });
 
         if (!node["type"]) {

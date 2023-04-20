@@ -386,17 +386,17 @@ void boson_jets_analyzer::operator()()
         mass_tags.rec           = boost::none;
         mass_tags_fullRange.rec = boost::none;
     } else if (mass_tags.rec) {
-        mass_tags.rec = "mass" + *mass_tags.rec;
         if( *mass_tags.rec != "UF" && *mass_tags.rec != "OF" )
             mass_tags_fullRange.rec = "mass" + str_fullRange;
+        mass_tags.rec = "mass" + *mass_tags.rec;
     }
     if (mass_tags.gen && mass_tags.gen->empty()) {
         mass_tags.gen           = boost::none;
         mass_tags_fullRange.gen = boost::none;
     } else if (mass_tags.gen) {
-        mass_tags.gen = "mass" + *mass_tags.gen;
         if( *mass_tags.gen != "UF" && *mass_tags.gen != "OF" )
             mass_tags_fullRange.gen = "mass" + str_fullRange;
+        mass_tags.gen = "mass" + *mass_tags.gen;
     }        
 
     auto njets = evt.apply(&event_contents::get_jets)
@@ -410,19 +410,25 @@ void boson_jets_analyzer::operator()()
 
         if (njets.rec && *njets.rec < 3) {
             tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
-            tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
-            tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
+            if (mass_tags.rec)
+                tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
+            if (mass_tags_fullRange.rec)
+                tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
         }
         if (njets.gen && *njets.gen < 3) {
             tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
-            tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
-            tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
+            if (mass_tags.gen)
+                tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
+            if (mass_tags_fullRange.gen)
+                tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
         }
 
         if (tags.gen || tags.rec) {
             fill(tags, evt);
-            fill(tags_mass, evt);
-            fill(tags_mass_fullRange, evt);
+            if (tags_mass.gen || tags_mass.rec)
+                fill(tags_mass, evt);
+            if (tags_mass_fullRange.gen || tags_mass_fullRange.rec)
+                fill(tags_mass_fullRange, evt);
         }
     }
 
@@ -435,19 +441,25 @@ void boson_jets_analyzer::operator()()
 
         if (njets.rec && *njets.rec >= nj) {
             tags.rec = "inc" + std::to_string(nj) + "jet";
-            tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
-            tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
+            if (mass_tags.rec)
+                tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
+            if (mass_tags_fullRange.rec)
+                tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
         }
         if (njets.gen && *njets.gen >= nj) {
             tags.gen = "inc" + std::to_string(nj) + "jet";
-            tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
-            tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
+            if (mass_tags.gen)
+                tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
+            if (mass_tags_fullRange.gen)
+                tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
         }
 
         if (tags.gen || tags.rec) {
             fill(tags, evt);
-            fill(tags_mass, evt);
-            fill(tags_mass_fullRange, evt);
+            if (tags_mass.gen || tags_mass.rec)
+                fill(tags_mass, evt);
+            if (tags_mass_fullRange.gen || tags_mass_fullRange.rec)
+                fill(tags_mass_fullRange, evt);
         }
     }
 }

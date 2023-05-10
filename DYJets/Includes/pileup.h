@@ -25,6 +25,8 @@ class pileup
 
     bool _reweighing_enabled = true;
     standalone_LumiReWeighting _standalone_lrw;
+    standalone_LumiReWeighting _standalone_lrw_dn; // down (for syst.)
+    standalone_LumiReWeighting _standalone_lrw_up; // up (for syst.)
 
   public:
     /// \brief Constructor
@@ -35,6 +37,9 @@ class pileup
 
     /// \brief Reweights \c weights to take PU into account
     void reweight(weights &w);
+
+    /// \brief return weight
+    double weight(int mode);
 
     /// \brief Declares PU control histograms
     void declare_histograms(util::histo_set &h) const;

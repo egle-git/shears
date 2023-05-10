@@ -22,6 +22,7 @@
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
+#include "simpleShiftUncEstimator.h"
 
 namespace physics
 {
@@ -81,6 +82,7 @@ private:
 
     physics::reweighing _reweighing;
     physics::weights _weights;
+    physics::simpleShiftUncEstimator _ssUncEstimator;
 
 public:
     /// \brief Groups together the contents of a boson-jets event
@@ -147,6 +149,8 @@ protected:
 
     /// \brief Retrieves the weight information for the current event.
     const physics::weights &weights() const { return _weights; }
+
+    physics::simpleShiftUncEstimator &ssUncEstimator() { return _ssUncEstimator; }
 
     bool check_lowQualityMuon(const std::vector<lepton> muons);
     bool check_whichTriggerSF(const std::vector<lepton> muons);

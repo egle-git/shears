@@ -64,7 +64,8 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _pileup(info, opt),
     _btagger(opt,histo_set2D),
     _reweighing(info, opt),
-    _weights(info)
+    _weights(info),
+    _ssUncEstimator(_weights, histo_set, histo_set2D)
 {
     if (opt.config["tables"])
         _tables = opt.config["tables"].as<util::tables>();
@@ -158,6 +159,12 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
+    // register the histogram names for systematic variation
+    // multiple histogram names can be added
+    _ssUncEstimator.add_systHistName("mass_wide_range_inc0jet");
+    // _ssUncEstimator.add_systHistName("pt_inc0jet");
+    // _ssUncEstimator.add_systHistName("rapidity_inc0jet");
+
     counter.declare("Total");
     counter.declare("Passing the trigger");
 }
@@ -185,7 +192,7 @@ void boson_jets_analyzer::operator()()
     util::matched<event_contents> evt;
     std::vector<lepton> genleps = {};
 
-    // -- distribution for all events in MC: get the true PU distribution
+    // distribution for all events in MC: get the true PU distribution
     if( !weights().isdata() )
         _pileup.fill(histo_set, "inc0jet_fullEvent", weights());
 
@@ -361,6 +368,12 @@ void boson_jets_analyzer::operator()()
         apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
     }
 
+    // systematic variation information
+    if( _weights.ismc() ) {
+        _ssUncEstimator.add_systInfo("L1Pref", *L1PreFiringWeight_Nom, *L1PreFiringWeight_Up, *L1PreFiringWeight_Dn);
+        _ssUncEstimator.add_systInfo("pileup", _pileup.weight(0), _pileup.weight(1), _pileup.weight(-1));
+    }
+
     /*
      * Fill histograms w.r.t. N_jets and invariant mass
      */
@@ -451,6 +464,10 @@ void boson_jets_analyzer::operator()()
                 fill(tags_mass_fullRange, evt);
         }
     }
+
+    // clear systInfo of this event at the end of the event process so that systInfo of the next event can be filled
+    if( _weights.ismc() )
+        _ssUncEstimator.clear_systInfo();
 }
 
 void boson_jets_analyzer::fill(const util::matched<std::string> &tags,

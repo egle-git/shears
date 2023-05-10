@@ -126,7 +126,7 @@ add_library(DYJets-physics
     Sources/reweighing.cc
     Sources/weights.cc
     Sources/zfinder.cc
-
+    Sources/simpleShiftUncEstimator.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

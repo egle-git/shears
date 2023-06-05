@@ -9,6 +9,8 @@
 #include "matched.h"
 #include "weights.h"
 
+#include "TUnfoldBinning.h"
+
 namespace physics
 {
 
@@ -25,6 +27,12 @@ class simpleShiftUncEstimator {
 public:
 
   simpleShiftUncEstimator(physics::weights &weights, util::histo_set &histo_set, util::histo_set2D &histo_set2D);
+
+  // register TUnfoldBinning object (used in "fill_systHist")
+  void set_TUnfoldBinning(TUnfoldBinning* trueBinning, TUnfoldBinning* recoBinning);
+
+  // save era information
+  void set_era(int era);
 
   // register histogram name to calculate the systematic variation
   // e.g. mass_wide_range_inc0jet
@@ -50,6 +58,11 @@ private:
   util::histo_set2D& _histo_set2D;
   
   vector<std::string> _vec_systHistName;
+
+  TUnfoldBinning* _trueBinning;
+  TUnfoldBinning* _recoBinning;
+
+  int _era;
 
   struct SystInfo {
     std::string type;

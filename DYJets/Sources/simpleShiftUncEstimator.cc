@@ -3,6 +3,13 @@
 namespace physics
 {
 
+void simpleShiftUncEstimator::set_TUnfoldBinning(TUnfoldBinning* trueBinning, TUnfoldBinning* recoBinning) {
+  _trueBinning = trueBinning;
+  _recoBinning = recoBinning;
+}
+
+void simpleShiftUncEstimator::set_era(int era) { _era = era; }
+
 void simpleShiftUncEstimator::add_systHistName(std::string sysHistName) {
   _vec_systHistName.push_back( sysHistName );
 }
@@ -78,12 +85,30 @@ void simpleShiftUncEstimator::fill_systHist( const SystInfo systInfo,
     return;
   }
 
+  bool isMass = (name == "mass_wide_range");
+  Int_t binNum_true = -1;
+  Int_t binNum_reco = -1;
+
   // Fill 1D distributions
-  if( tags.rec && value.rec )
+  if( tags.rec && value.rec ) {
     _histo_set.fill(name, *tags.rec + tag_syst, *value.rec, weight_global);
+
+    if( isMass ) {
+        binNum_reco = _recoBinning->GetGlobalBinNumber(*value.rec, _era);
+        _histo_set.fill("TUnfold1DReco", *tags.rec + tag_syst, binNum_reco, weight_global);
+        _histo_set.fill("mass_wide_range_fineBin", *tags.rec + tag_syst, *value.rec, weight_global);
+    }
+  }
   
-  if( tags.gen && value.gen )
+  if( tags.gen && value.gen ) {
     _histo_set.fill(name, *tags.gen + tag_syst + "-gen", *value.gen, _weights.gen_weight());
+
+    if( isMass ) {
+        binNum_true = _trueBinning->GetGlobalBinNumber(*value.gen);
+        _histo_set.fill("TUnfold1DTrue", *tags.gen + tag_syst, binNum_true, _weights.gen_weight());
+        _histo_set.fill("mass_wide_range_fineBin", *tags.gen + tag_syst + "-gen", *value.gen, _weights.gen_weight());
+    }
+  }
 
   // Fill response matrix
   if( tags.rec && tags.gen && value.rec && value.gen && tags.rec == tags.gen ) {
@@ -101,6 +126,11 @@ void simpleShiftUncEstimator::fill_systHist( const SystInfo systInfo,
                      *tags.rec + tag_syst + "-matrix",
                      -10000.0,// underflow bin
                      *value.gen, _weights.gen_weight()-weight_global);
+
+    if( isMass ) {
+        _histo_set2D.fill("TUnfold2DMig", *tags.rec + tag_syst, binNum_reco, binNum_true, weight_global);
+        _histo_set2D.fill("TUnfold2DMig", *tags.rec + tag_syst, 0,           binNum_true, _weights.gen_weight()-weight_global);
+    }
   }
   else{
       if( tags.rec && value.rec ) {
@@ -110,6 +140,16 @@ void simpleShiftUncEstimator::fill_systHist( const SystInfo systInfo,
                            *tags.rec + tag_syst + "-matrix",
                            *value.rec,
                            -10000.0, weight_global);
+
+          _histo_set2D.fill(name,
+                           *tags.rec + tag_syst + "-matrix",
+                           -10000.0,
+                           -10000.0, _weights.gen_weight()-weight_global);
+
+          if( isMass ) {
+              _histo_set2D.fill("TUnfold2DMig", *tags.rec + tag_syst, binNum_reco, 0, _weights.global_weight());
+              _histo_set2D.fill("TUnfold2DMig", *tags.rec + tag_syst, 0,           0, _weights.gen_weight()-weight_global);
+          }
       }
       if( tags.gen && value.gen ) {
           // there is no reco event
@@ -118,6 +158,10 @@ void simpleShiftUncEstimator::fill_systHist( const SystInfo systInfo,
                            *tags.gen + tag_syst + "-matrix",
                            -10000.0,
                            *value.gen, _weights.gen_weight());
+
+          if( isMass ) {
+              _histo_set2D.fill("TUnfold2DMig", *tags.gen + tag_syst, 0, binNum_true, _weights.gen_weight());
+          }
     }
   }
 }

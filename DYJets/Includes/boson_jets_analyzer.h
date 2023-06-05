@@ -24,6 +24,9 @@
 #include "weights.h"
 #include "simpleShiftUncEstimator.h"
 
+// #include "TUnfold.h"
+#include "TUnfoldBinning.h"
+
 namespace physics
 {
 
@@ -83,6 +86,13 @@ private:
     physics::reweighing _reweighing;
     physics::weights _weights;
     physics::simpleShiftUncEstimator _ssUncEstimator;
+
+    // objects for TUnfold
+    int _era; // _era = (1, 2, 3, 4) = (16pre, 16post, 17, 18)
+    TUnfoldBinning* _trueBinningBase;
+    TUnfoldBinning* _recoBinningBase;
+    TUnfoldBinning* _trueBinning;
+    TUnfoldBinning* _recoBinning;
 
 public:
     /// \brief Groups together the contents of a boson-jets event
@@ -157,6 +167,15 @@ protected:
     bool _use_smu_triggerSF = false;
 
     double DileptonMass_LHE();
+
+    // setup histograms using TUnfoldBinning
+    void setup_TUnfoldBinning(const util::options &opt);
+
+    // return the vector with the bin edges from provided .yml file (e.g. dyjets-binnings.yml)
+    vector<double> get_inputBin(const util::options &opt, std::string histName);
+
+    // determine _era using "pileup type" in .yml file
+    void get_era(const util::options &opt);
 };
 
 } // namespace physics

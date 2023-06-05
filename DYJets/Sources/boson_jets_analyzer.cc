@@ -45,6 +45,14 @@ std::string get_triggers(util::job::info &info, const util::options &opt)
     return trigger_list;
 }
 
+// save bin edges of the given axis as array
+void get_binEdgeArray(TAxis* axis, Int_t nBin, Double_t* arr_binEdge) {
+    for(int i=0; i<nBin+1; ++i) {
+        int i_bin = i+1;
+        arr_binEdge[i] = axis->GetBinLowEdge(i_bin);
+    }
+}
+
 } // anonymous namespace
 
 boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
@@ -159,11 +167,18 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _jets.declare_histograms(histo_set);
     _pileup.declare_histograms(histo_set);
 
+    setup_TUnfoldBinning(opt);
+    get_era(opt);
+
+    _ssUncEstimator.set_TUnfoldBinning(_trueBinning, _recoBinning);
+    _ssUncEstimator.set_era(_era);
+
     // register the histogram names for systematic variation
     // multiple histogram names can be added
     _ssUncEstimator.add_systHistName("mass_wide_range_inc0jet");
     // _ssUncEstimator.add_systHistName("pt_inc0jet");
     // _ssUncEstimator.add_systHistName("rapidity_inc0jet");
+
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
@@ -180,8 +195,16 @@ void boson_jets_analyzer::operator()()
     }
 
     // check before counting this event
-    if( _apply_M100Cut && _sample_name == "DYJets_M-50to100" ) {
-        if( DileptonMass_LHE() > 100 ) return;
+    // if( _apply_M100Cut && _sample_name == "DYJets_M-50to100" ) {
+    //     if( DileptonMass_LHE() > 100 ) return;
+    // }
+
+    if( _apply_M100Cut ) {
+        if( _sample_name == "DYJets_M-50to100" && 
+            DileptonMass_LHE() > 100 ) return;
+
+        if( _sample_name == "DYJets_M-50to200" && 
+            DileptonMass_LHE() > 200 ) return;
     }
 
     _weights.process_event();
@@ -278,6 +301,11 @@ void boson_jets_analyzer::operator()()
         // End early if nothing to do
         return;
     }
+
+    // remove events with m(reco) < 10 GeV in both data and MC
+    // because we only have the DY MC down to m=10 GeV, but data can go down below GeV
+    // without this cut, the # underflow events in the response matrix could be significant different between data and MC
+    if( evt.rec && evt.rec->boson_p.M() < 10 ) return;
 
     /*
      * At this point at least one boson was found, either gen or rec.
@@ -404,38 +432,40 @@ void boson_jets_analyzer::operator()()
     auto njets = evt.apply(&event_contents::get_jets)
                     .apply(&std::vector<jet>::size);
 
-    {
-        // Exclusive
-        util::matched<std::string> tags; // eg "exc1jet"
-        util::matched<std::string> tags_mass; // eg "exc1jet_mass50_71"
-        util::matched<std::string> tags_mass_fullRange; // eg "exc1jet_mass50_1000"
+    // comment out filling histograms for exclusive jet cases: turn it on below lines if needed later
+    // {
+    //     // Exclusive
+    //     util::matched<std::string> tags; // eg "exc1jet"
+    //     util::matched<std::string> tags_mass; // eg "exc1jet_mass50_71"
+    //     util::matched<std::string> tags_mass_fullRange; // eg "exc1jet_mass50_1000"
 
-        if (njets.rec && *njets.rec < 3) {
-            tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
-            if (mass_tags.rec)
-                tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
-            if (mass_tags_fullRange.rec)
-                tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
-        }
-        if (njets.gen && *njets.gen < 3) {
-            tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
-            if (mass_tags.gen)
-                tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
-            if (mass_tags_fullRange.gen)
-                tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
-        }
+    //     if (njets.rec && *njets.rec < 3) {
+    //         tags.rec = "exc" + std::to_string(*njets.rec) + "jet";
+    //         if (mass_tags.rec)
+    //             tags_mass.rec           = *tags.rec + "_" + *mass_tags.rec;
+    //         if (mass_tags_fullRange.rec)
+    //             tags_mass_fullRange.rec = *tags.rec + "_" + *mass_tags_fullRange.rec;
+    //     }
+    //     if (njets.gen && *njets.gen < 3) {
+    //         tags.gen = "exc" + std::to_string(*njets.gen) + "jet";
+    //         if (mass_tags.gen)
+    //             tags_mass.gen           = *tags.gen + "_" + *mass_tags.gen;
+    //         if (mass_tags_fullRange.gen)
+    //             tags_mass_fullRange.gen = *tags.gen + "_" + *mass_tags_fullRange.gen;
+    //     }
 
-        if (tags.gen || tags.rec) {
-            fill(tags, evt);
-            if (tags_mass.gen || tags_mass.rec)
-                fill(tags_mass, evt);
-            if (tags_mass_fullRange.gen || tags_mass_fullRange.rec)
-                fill(tags_mass_fullRange, evt);
-        }
-    }
+    //     if (tags.gen || tags.rec) {
+    //         fill(tags, evt);
+    //         if (tags_mass.gen || tags_mass.rec)
+    //             fill(tags_mass, evt);
+    //         if (tags_mass_fullRange.gen || tags_mass_fullRange.rec)
+    //             fill(tags_mass_fullRange, evt);
+    //     }
+    // }
 
     // Inclusive
-    for (std::size_t nj = 0; nj < 3; ++nj) {
+    // nj < 3 --> nj < 1 (only save inc0jet case): increase it if needed later
+    for (std::size_t nj = 0; nj < 1; ++nj) {
         // Exclusive
         util::matched<std::string> tags; // eg "inc1jet"
         util::matched<std::string> tags_mass; // eg "inc1jet_mass50_71"
@@ -497,12 +527,32 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                                         const util::matched<std::string> &tags,
                                         const util::matched<double> &value)
 {
+
+    // to fill TUnfold histograms
+    // for now, it only works for mass binned histograms
+    // need to be generalized later to fill pt & rapidity histograms as well
+    bool isMass = (name == "mass_wide_range");
+    Int_t binNum_true = -1;
+    Int_t binNum_reco = -1;
+
     // Fill 1D distributions
     if (tags.rec && value.rec) {
         histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
+
+        if( isMass ) {
+            binNum_reco = _recoBinning->GetGlobalBinNumber(*value.rec, _era);
+            histo_set.fill("TUnfold1DReco", *tags.rec, binNum_reco, weights().global_weight());
+            histo_set.fill("mass_wide_range_fineBin", *tags.rec, *value.rec, weights().global_weight());
+        }
     }
     if (tags.gen && value.gen) {
         histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
+
+        if( isMass ) {
+            binNum_true = _trueBinning->GetGlobalBinNumber(*value.gen);
+            histo_set.fill("TUnfold1DTrue", *tags.gen, binNum_true, weights().gen_weight());
+            histo_set.fill("mass_wide_range_fineBin", *tags.gen + "-gen", *value.gen, weights().gen_weight());
+        }
     }
 
     // Fill response matrix
@@ -521,6 +571,11 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                          *tags.rec + "-matrix",
                          -10000.0,// underflow bin
                          *value.gen, weights().gen_weight()-weights().global_weight());
+
+        if( isMass ) {
+            histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, binNum_true, weights().global_weight());
+            histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           binNum_true, weights().gen_weight()-weights().global_weight());
+        }
     }
     else{
         if(tags.rec && value.rec){
@@ -530,6 +585,17 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                              *tags.rec + "-matrix",
                              *value.rec,
                              -10000.0, weights().global_weight());
+
+            // fill the reco underflow bin with the (gen_weight - global_weight) according to the manual above
+            histo_set2D.fill(name,
+                             *tags.rec + "-matrix",
+                             -10000.0,
+                             -10000.0, weights().gen_weight()-weights().global_weight());
+
+            if( isMass ) {
+                histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, 0, weights().global_weight());
+                histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           0, weights().gen_weight()-weights().global_weight());
+            }
         }
         if(tags.gen && value.gen){
             // there is no reco event
@@ -538,6 +604,10 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
                              *tags.gen + "-matrix",
                              -10000.0,
                              *value.gen, weights().gen_weight());
+
+            if( isMass ) {
+                histo_set2D.fill("TUnfold2DMig", *tags.gen, 0, binNum_true, weights().gen_weight());
+            }
         }
     }
 }
@@ -607,6 +677,126 @@ double boson_jets_analyzer::DileptonMass_LHE() {
     }
 
     return mass;
+}
+
+void boson_jets_analyzer::setup_TUnfoldBinning(const util::options &opt) {
+
+    // get the dilepton mass binning defined in .yml file
+    vector<double> vec_binEdge = get_inputBin(opt, "mass_wide_range_inc0jet");
+
+    // convert from vector to array
+    int nBin = (int)vec_binEdge.size()-1;
+    double* arr_binEdge = new double[nBin+1];
+    std::copy(vec_binEdge.begin(), vec_binEdge.end(), arr_binEdge);
+
+    // binning for era (reco only)
+    //// era = 0: 2016, preAPV
+    //// era = 1: 2016, postAPV
+    //// era = 2: 2017
+    //// era = 3: 2018
+    const Int_t nEra = 4;
+    Double_t arr_eraBin[nEra+1] = {-0.5, 0.5, 1.5, 2.5, 3.5};
+
+    // printf("arr_binEdge\n");
+    // for(Int_t i=0; i<nBin+1; i++)
+    //     printf("%.1lf ", arr_binEdge[i]);
+    // printf("\n");
+
+    // define TUnfoldBinning
+    // reco: two axes (mass, era)
+    _recoBinningBase = new TUnfoldBinning("recoBinningBase");
+    _recoBinning = _recoBinningBase->AddBinning("recoBinning");
+    _recoBinning->AddAxis("mass", nBin, arr_binEdge,
+                          true, // underflow bin
+                          true // overflow bin
+                          );
+
+    _recoBinning->AddAxis("era", nEra, arr_eraBin,
+                          false, // no underflow bin
+                          false // no overflow bin
+                          );
+
+    // true: 1 axis (mass)
+    _trueBinningBase = new TUnfoldBinning("trueBinningBase");
+    _trueBinning = _trueBinningBase->AddBinning("trueBinning");
+    _trueBinning->AddAxis("mass", nBin, arr_binEdge,
+                          true, // underflow bin
+                          true // overflow bin
+                          );
+
+    // create the histograms from TUnfoldBinning (1D)
+    TH1D* h_reco = (TH1D*)_recoBinningBase->CreateHistogram("h_reco");
+    TH1D* h_true = (TH1D*)_trueBinningBase->CreateHistogram("h_true");
+
+    Int_t nBin_reco = h_reco->GetNbinsX();
+    double* arr_binEdge_reco = new double[nBin_reco+1];
+    get_binEdgeArray(h_reco->GetXaxis(), nBin_reco, arr_binEdge_reco);
+
+    Int_t nBin_true = h_true->GetNbinsX();
+    double* arr_binEdge_true = new double[nBin_true+1];
+    get_binEdgeArray(h_true->GetXaxis(), nBin_true, arr_binEdge_true);
+
+    histo_set.declare("TUnfold1DReco", "Reco dilepton mass;Reco mass bin number", nBin_reco, arr_binEdge_reco);
+    histo_set.declare("TUnfold1DTrue", "True dilepton mass;True mass bin number", nBin_true, arr_binEdge_true);
+
+    // also create 2D histogram from TUnfoldBinning
+    // x-axis: reco
+    // y-axis; true
+    TH2D* h_respM = (TH2D*)TUnfoldBinning::CreateHistogramOfMigrations(_recoBinningBase, _trueBinningBase, "h_respM");
+
+    Int_t nBinX = h_respM->GetNbinsX();
+    double* arr_binEdgeX = new double[nBinX+1];
+    get_binEdgeArray(h_respM->GetXaxis(), nBinX, arr_binEdgeX);
+
+    Int_t nBinY = h_respM->GetNbinsY();
+    double* arr_binEdgeY = new double[nBinY+1];
+    get_binEdgeArray(h_respM->GetYaxis(), nBinY, arr_binEdgeY);
+
+    histo_set2D.declare("TUnfold2DMig", "TUnfold2DMig", "Migration matrix", nBinX, arr_binEdgeX, nBinY, arr_binEdgeY);
+}
+
+// technical details: from histo_set::create_from_style
+vector<double> boson_jets_analyzer::get_inputBin(const util::options &opt, std::string histName) {
+    vector<double> vec_binEdge;
+
+    std::string binning_file = "dyjets-binnings.yml";
+    if (opt.config["binning file"]) {
+        binning_file = opt.config["binning file"].as<std::string>();
+    }
+
+    YAML::Node config_bin = YAML::LoadFile(binning_file);
+    util::style_list style(config_bin);
+    std::string method = style.get<std::string>("binning", histName, "ignored");
+
+    if( method == "uniform" ) {
+        vec_binEdge.clear();
+        int bin_count = style.get<int>("bin count", histName, 100);
+        double binning_min = style.get<double>("binning min", histName);
+        double binning_max = style.get<double>("binning max", histName);
+        double binWidth = (binning_max - binning_min) / (double)bin_count;
+
+        for(int i=0; i<bin_count+1; i++)
+            vec_binEdge.push_back(binning_min + i*binWidth);
+    }
+    else if( method == "custom" ) {
+        vec_binEdge = style.get<std::vector<double>>("bin edges", histName);
+    }
+    else {
+        throw std::runtime_error("Undefined binning method '" + method +
+                                 "' matched by histogram '" + histName + "'");
+
+        return {0};
+    }
+
+    return vec_binEdge;
+}
+
+void boson_jets_analyzer::get_era(const util::options &opt) {
+    std::string pileup_type = opt.config["pileup type"].as<std::string>();
+    if( pileup_type == "2016_PreAPV" )       _era = 0;
+    else if( pileup_type == "2016_PostAPV" ) _era = 1;
+    else if( pileup_type == "2017" )         _era = 2;
+    else if( pileup_type == "2018" )         _era = 3;
 }
 
 } // namespace physics

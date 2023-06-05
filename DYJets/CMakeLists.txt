@@ -82,6 +82,7 @@ target_link_libraries(DYJets-util PUBLIC Boost::program_options)
 target_link_libraries(DYJets-util PUBLIC Boost::system)
 target_link_libraries(DYJets-util PUBLIC ROOT::Physics)
 target_link_libraries(DYJets-util PUBLIC ROOT::TreePlayer)
+target_link_libraries(DYJets-util PUBLIC ROOT::Unfold)
 target_link_libraries(DYJets-util PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(DYJets-util PUBLIC yaml-cpp)
 

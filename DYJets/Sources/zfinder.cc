@@ -86,7 +86,7 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
     util::set_value_safe(node, _mass_low, "low mass", "low mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _mass_high, "high mass", "high mass for Z finder \"" + name + "\"");
     util::set_value_safe(node, _leadingLepPt, "leading lepton pt", "leading lepton pT for Z finder \"" + name + "\"");
-    util::set_value_safe(node, _newcut, "mll/subleading lepton pT", "mll/subleading lepton pT \"" + name + "\"");
+    util::set_value_safe(node, _newcut, "mll/subleading lepton pt", "mll/subleading lepton pt \"" + name + "\"");
     
 
     const YAML::Node node_gen = opt.config["generator level"];

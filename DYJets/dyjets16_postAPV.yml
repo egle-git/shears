@@ -177,6 +177,9 @@ Z:
     # Default value: 25
     leading lepton pt: 20
 
+    # m(ll)/pt(lep, sub) < X cut: reduce QCD in high mass region
+    mll/subleading lepton pt: 10
+
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 40
@@ -282,7 +285,7 @@ samples:
       catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
     - name: DYJets_M-50to100
       type: MC
-      jobs: 15
+      jobs: 31
       nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
       catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
     - name: DYJets_M-100to200

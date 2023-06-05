@@ -8,13 +8,13 @@
 # ROOTFILES
 
 
-#RunB-ver1
+#RunB-ver1: no events in golden JSON
 
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_1.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_2.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_3.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_4.root
-/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_5.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_1.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_2.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_3.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_4.root
+#/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/data/NanoBonzai6april_DoubleEG_Run2016B-ver1_HIPM_v1_MET_TrigObj/DoubleEG/Nano/220406_102234/0000/tree_5.root
 
 #RunB-ver2
 

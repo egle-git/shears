@@ -73,10 +73,10 @@ void PlotDataVsMC()
         hMC->Add(_back_hists.at(i));
     }
 
-    int nBins = hRec->GetNbinsX();
+    int nBinsX = hRec->GetNbinsX();
     double x1 = hRec->GetBinLowEdge(1);
-    double x2 = hRec->GetBinLowEdge(nBins);
-    x2 += hRec->GetBinWidth(nBins);
+    double x2 = hRec->GetBinLowEdge(nBinsX);
+    x2 += hRec->GetBinWidth(nBinsX);
 
     TLine*line = new TLine(x1,1,x2,1);
     line->SetLineColor(kRed);

@@ -237,7 +237,7 @@ class Unfold
 		int _nBinsReco      = -1000;
 		int _nBinsTrue      = -1000;
 
-        bool _trueVert = false;
+        bool _trueVert = true;
         bool _backgroundSubtraction = false;
         RegType _regType = NO_REG;
 

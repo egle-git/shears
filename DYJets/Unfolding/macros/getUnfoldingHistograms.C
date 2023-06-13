@@ -25,9 +25,9 @@ vector<TString> mc_name = {
 };
 TString data_name   = "dyjets-data.root";
 TString save_name   = "unfolding_histograms.root";
-TString reco_hist   = "mass_wide_range_inc0jet";
-TString gen_hist    = "mass_wide_range_inc0jet-gen";
-TString matrix_hist = reco_hist + "-matrix";
+TString reco_hist   = "TUnfold1DReco_inc0jet";
+TString gen_hist    = "TUnfold1DTrue_inc0jet";
+TString matrix_hist = "TUnfold2DMig_inc0jet";
 
 // data luminosity
 double _lumi;

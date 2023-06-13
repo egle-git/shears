@@ -15,11 +15,7 @@ Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
     _nBinsReco = _hReco->GetNbinsX(); // number of reco bins
     _nBinsTrue = _hTrue->GetNbinsX(); // number of true bins
 
-    // Determine if true distribution is on the vertical or horizontal axis
-    // By default, _trueVert = false as set in the header file
-    int nBinsY = _hMatrix->GetNbinsY();
-    if(nBinsY == _nBinsTrue) _trueVert = true;
-
+    // _trueVert is by default set to true in the header file here: include/Unfolding.hh 
     if(_trueVert){
         std::cout << "true distribution is on the y-axis" << endl;
         std::cout << "reco distribution is on the x-axis" << endl;
@@ -201,12 +197,9 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     //set histogram drawing options
     _hTrue->SetFillColor(kRed+2);
     _hTrue->SetLineColor(kRed+2);
-    _hReco->SetMarkerStyle(20);
-    _hReco->SetMarkerColor(kBlack);
-    _hReco->SetLineColor(kBlack);
-    _hUnfolded->SetMarkerStyle(25);
-    _hUnfolded->SetMarkerColor(kBlue+2);
-    _hUnfolded->SetLineColor(kBlue+2);
+    _hUnfolded->SetMarkerStyle(20);
+    _hUnfolded->SetMarkerColor(kBlack);
+    _hUnfolded->SetLineColor(kBlack);
     _hUnfolded->SetFillColor(kWhite);
 
     //define the ratio plot
@@ -218,7 +211,6 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     TLegend*legend = new TLegend(0.65,0.9,0.9,0.75);
     legend->SetTextSize(0.02);
     legend->AddEntry(_hTrue,"True Distribution");
-    legend->AddEntry(_hReco,"Observed Distribution");
     legend->AddEntry(_hUnfolded,"Unfolded Distribution");
 
     //Create a label that shows the chi^2 value to print on graph
@@ -264,7 +256,6 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     _hTrue->SetMaximum(yAxisMaximum);
     _hTrue->SetTitle(titleName);
     _hTrue->Draw("hist");
-    _hReco->Draw("pe,same");
     _hUnfolded->Draw("pe,same");	
     legend->Draw("same");
     chiLabel->Draw("same");

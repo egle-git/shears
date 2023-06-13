@@ -278,7 +278,7 @@ samples:
       catalog: Catalog2018_bonzai_DYJetsToMuMu_M-10to50.txt
     - name: DYJets_M-50to100
       type: MC
-      jobs: 87
+      jobs: 88
       nano dir: Catalogs/2018/MassBinned_MiNNLO
       catalog: Catalog2018_bonzai_DYJetsToMuMu_M-50to100.txt
     - name: DYJets_M-100to200

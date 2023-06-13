@@ -30,13 +30,6 @@ Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
 
     SetConditionNumber(); // condition number
     _regType = regType; // regularization type
-
-    // Make sure reco and true don't have same number of bins
-    if(_nBinsReco==_nBinsTrue){
-        cout << "For TUnfold, the observed histogram must have more bins than the true histogram" << endl;
-        cout << "Input bins: " << _nBinsReco << endl;
-        cout << "Output bins: " << _nBinsTrue << endl;
-    }
 }
 
 void Unfold::EngageUnfolding(UnfoldType unfoldType)

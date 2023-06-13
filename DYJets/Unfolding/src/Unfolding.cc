@@ -61,15 +61,6 @@ void Unfold::unfoldTUnfold()
     TH1F*hTrue = _hTrue;
     TH2F*hMatrix = _hMatrix;
 
-    // Notes:
-    // Regularization Modes should be irrelevant to this analysis
-    // since we weill likely not need regularization
-    // Constraint type is chosen arbitrarily for now
-    // It can be set to constrain the area
-    // Density Mode is chosen arbitrarily
-    // I do not yet know which one we should use
-    // Horizontal vs vertical output is determined automatically
-
     ////////////////////////////
     //  Regularization Modes  //
     ////////////////////////////

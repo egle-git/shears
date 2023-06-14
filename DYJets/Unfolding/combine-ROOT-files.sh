@@ -5,7 +5,6 @@
 
 loadDirectory=$1
 saveDirectory=$2
-channel=$3
 
 echo "Combining output histograms from Shears from directory $loadDirectory"
 echo "Saving the combined files to $saveDirectory"
@@ -40,9 +39,9 @@ single_files=(
     dyjets-WZ
     dyjets-GammaGamma
 )
-saveLocation=$saveDirectory/$channel
+saveLocation=$saveDirectory
 
-mkdir -p $saveLocation/plots
+mkdir -p $saveLocation
 
 cd $saveLocation
 rm *.root

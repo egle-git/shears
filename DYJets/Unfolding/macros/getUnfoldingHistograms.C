@@ -3,12 +3,21 @@
 void GetSignal();
 void GetBackgrounds();
 void SaveAll();
+TH1D*GetDataHist();
+TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name);
+TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name);
 
 TCanvas*MakeCanvas(TString cName);
 TString _directory;
-TString _getData;
 TString _channel;
-TString _era;
+
+vector<TString> _era = {
+    "2016preAPV",
+    "2016postAPV",
+    "2017",
+    "2018",
+};
+int nEras = _era.size();
 
 vector<TString> mc_name = {
     "dyjets-DYJets_M-10to50.root",
@@ -23,6 +32,19 @@ vector<TString> mc_name = {
     "dyjets-DYJets_M-1500to2000.root",
     "dyjets-DYJets_M-2000toInf.root",
 };
+vector<TString> mc_name17 = {
+    "dyjets-DYJets_M-10to50.root",
+    "dyjets-DYJets_M-50to100.root",
+    "dyjets-DYJets_M-200to400.root",
+    "dyjets-DYJets_M-400to500.root",
+    "dyjets-DYJets_M-500to700.root",
+    "dyjets-DYJets_M-700to800.root",
+    "dyjets-DYJets_M-800to1000.root",
+    "dyjets-DYJets_M-1000to1500.root",
+    "dyjets-DYJets_M-1500to2000.root",
+    "dyjets-DYJets_M-2000toInf.root",
+};
+
 TString data_name   = "dyjets-data.root";
 TString save_name   = "unfolding_histograms.root";
 TString reco_hist   = "TUnfold1DReco_inc0jet";
@@ -30,8 +52,7 @@ TString gen_hist    = "TUnfold1DTrue_inc0jet";
 TString matrix_hist = "TUnfold2DMig_inc0jet";
 
 // data luminosity
-double _lumi;
-vector<double> _lumiV = {
+vector<double> _lumi = {
     19520.0, // 2016preAPV
     16810.0, // 2016postAPV
     41480.0, // 2017
@@ -57,43 +78,27 @@ TH1D*_hDat  = nullptr;
 TH1D*_hBack = nullptr;
 TH2D*_hMat  = nullptr;
 
-vector<TH1D*> _back_hist;
 vector<TH1D*> _gen_hist;
 vector<TH1D*> _rec_hist;
 vector<TH2D*> _mat_hist;
+vector<TH1D*> _back_hist;
 
-void getUnfoldingHistograms(TString directory,TString era,TString channel)
+void getUnfoldingHistograms(TString directory,TString channel)
 {
+    TH1::SetDefaultSumw2();
+    TH2::SetDefaultSumw2();
     gStyle->SetOptStat(0);
     gStyle->SetPalette(1);
     gROOT->SetBatch(true);
 
-    _era = era;
     cout << "******************************" << endl;
     cout << "Getting unfolding histograms from directory: " << endl;
     cout << directory << endl;
     cout << "For channel " << channel << endl;
     cout << "******************************" << endl;
     
-    if(_era == "2016preAPV") _lumi = _lumiV.at(0);
-    else if(_era == "2016postAPV") _lumi = _lumiV.at(1);
-    else if (_era == "2017") _lumi = _lumiV.at(2);
-    else if (_era == "2018") _lumi = _lumiV.at(3);
-    else {
-        cout << "ERROR in getUnfoldingHistograms()!!!!!!!!!!!!!!!!!" << endl;
-        cout << "Era not properly set!!!!!!!!!!!!!!!!!" << endl;
-        cout << "Era must be 2016preAPV, 2016postAPV, 2017, or 2018" << endl;
-        return;
-    }
-
     _directory = directory;
     _channel = channel;
-
-    _getData = _directory;
-    _getData += "/";
-    _getData += _channel;
-    _getData += "/";
-    _getData += data_name;
 
     // Get histograms 
     GetSignal();
@@ -104,74 +109,42 @@ void getUnfoldingHistograms(TString directory,TString era,TString channel)
 
 void GetSignal()
 {
-    TFile*mc_file;
-    TFile*data_file = new TFile(_getData);
+    _hDat = GetDataHist();
 
-    double wsum, xsec;
+    TH1D*hGen16pre = GetHistogram1D("2016preAPV",gen_hist,"gen_mass_16pre");
+    TH1D*hGen16post = GetHistogram1D("2016postAPV",gen_hist,"gen_mass_16post");
+    TH1D*hGen17 = GetHistogram1D("2017",gen_hist,"gen_mass_17");
+    TH1D*hGen18 = GetHistogram1D("2018",gen_hist,"gen_mass_18");
 
-    TH1*job_info = nullptr;
-    TVectorD*job_info_average = nullptr;
-    double samplescale;
+    TH1D*hRec16pre = GetHistogram1D("2016preAPV",reco_hist,"reco_mass_16pre");
+    TH1D*hRec16post = GetHistogram1D("2016postAPV",reco_hist,"reco_mass_16post");
+    TH1D*hRec17 = GetHistogram1D("2017",reco_hist,"reco_mass_17");
+    TH1D*hRec18 = GetHistogram1D("2018",reco_hist,"reco_mass_18");
 
-    int nDYSamples = mc_name.size();
-    for(int i=0;i<nDYSamples;i++){
-        TString mcFileName = _directory;
-        mcFileName += "/";
-        mcFileName += _channel;
-        mcFileName += "/";
-        mcFileName += mc_name.at(i);
-        mc_file   = new TFile(mcFileName);
-        _gen_hist.push_back((TH1D*)mc_file->Get(gen_hist));
-        _gen_hist.at(i)->SetName("gen_mass");
-        _rec_hist.push_back((TH1D*)mc_file->Get(reco_hist));
-        _rec_hist.at(i)->SetName("reco_mass");
-        _mat_hist.push_back((TH2D*)mc_file->Get(matrix_hist));
-        _mat_hist.at(i)->SetName("matrix");
+    TH2D*hMat16pre = GetHistogram2D("2016preAPV",matrix_hist,"matrix16pre");
+    TH2D*hMat16post = GetHistogram2D("2016postAPV",matrix_hist,"matrix16post");
+    TH2D*hMat17 = GetHistogram2D("2017",matrix_hist,"matrix17");
+    TH2D*hMat18 = GetHistogram2D("2018",matrix_hist,"matrix18");
 
-        job_info = (TH1*)mc_file->Get("_job_info");
-        mc_file->GetObject("_job_info_average", job_info_average);
-        wsum = job_info->GetBinContent(2);
-        xsec = (*job_info_average)[1];
-        //xsec = sample_xsec_mm.at(i);
-        samplescale = _lumi*xsec/wsum;
+    _hGen = (TH1D*)hGen16pre->Clone("gen_mass");
+    _hGen->Add(hGen16post);
+    _hGen->Add(hGen17);
+    _hGen->Add(hGen18);
 
-        _gen_hist.at(i)->Scale(samplescale);
-        _rec_hist.at(i)->Scale(samplescale);
-        _mat_hist.at(i)->Scale(samplescale);
+    _hRec = (TH1D*)hRec16pre->Clone("reco_mass");
+    _hRec->Add(hRec16post);
+    _hRec->Add(hRec17);
+    _hRec->Add(hRec18);
 
-        if(i==0){
-            _hGen = (TH1D*)_gen_hist.at(i)->Clone();
-            _hRec = (TH1D*)_rec_hist.at(i)->Clone();
-            _hMat = (TH2D*)_mat_hist.at(i)->Clone();
-        }
-        else{
-            _hGen->Add(_gen_hist.at(i));
-            _hRec->Add(_rec_hist.at(i));
-            _hMat->Add(_mat_hist.at(i));
-        }
-
-        cout << "******************************" << endl;
-        cout << "Sample: " << mc_name.at(i) << endl;
-        cout << "wsum: " << wsum << endl;
-        cout << "xsec: " << xsec << endl;
-        cout << "samplescale: " << samplescale << endl;
-        cout << "******************************" << endl;
-    }// end loop over mass binned samples
-    _hDat = (TH1D*)data_file->Get(reco_hist);
-    _hDat->SetName("data");
-
-    _hDat->Rebin(2);
-    _hRec->Rebin(2);
-    _hMat->RebinX(2); 
-
-    if(!_hGen) cout << "ERROR: _hGen could not be loaded from file" << endl;
-    if(!_hRec) cout << "ERROR: _hRec could not be loaded from file" << endl;
-    if(!_hMat) cout << "ERROR: _hMat could not be loaded from file" << endl;
-    if(!_hDat) cout << "ERROR: _hDat could not be loaded from file" << endl;
+    _hMat = (TH2D*)hMat16pre->Clone("matrix");
+    _hMat->Add(hMat16post);
+    _hMat->Add(hMat17);
+    _hMat->Add(hMat18);
 }
 
 void GetBackgrounds()
 {
+    TH1D*hBack;
     vector<TString> back_file_name = {
         "TauTau",
         "ST_s-channel",
@@ -200,46 +173,54 @@ void GetBackgrounds()
     };
     int nBackFiles = back_file_name.size();
     vector<TFile*> back_file;
+    vector<TH1D*> back_hist;
     double wsum, xsec;
+    for(int j=0;j<nEras;j++){
+        for(int i=0;i<nBackFiles;i++){
+            TString prefix = _directory;
+            prefix += "/";
+            prefix += _channel;
+            prefix += "/";
+            prefix += _era.at(j);
+            prefix += "/";
+            prefix += "/dyjets-";
+            TString suffix = ".root";
+            TH1*job_info;
+            TVectorD*job_info_average = nullptr;
+            double samplescale;
 
-    for(int i=0;i<nBackFiles;i++){
-        TString prefix = _directory;
-        prefix += "/";
-        prefix += _channel;
-        prefix += "/dyjets-";
-        TString suffix = ".root";
-        TH1*job_info;
-        TVectorD*job_info_average = nullptr;
-        double samplescale;
+            TString load_name = prefix;
+            load_name += back_file_name.at(i);
+            load_name += suffix;
+            back_file.push_back(new TFile(load_name));
+            back_hist.push_back((TH1D*)back_file.at(i)->Get(reco_hist));
+            back_hist.at(i)->SetName(back_file_name.at(i));
 
-        TString load_name = prefix;
-        load_name += back_file_name.at(i);
-        load_name += suffix;
-        back_file.push_back(new TFile(load_name));
-        _back_hist.push_back((TH1D*)back_file.at(i)->Get(reco_hist));
-        _back_hist.at(i)->SetName(back_file_name.at(i));
+            job_info = (TH1*)back_file.at(i)->Get("_job_info");
+            back_file.at(i)->GetObject("_job_info_average", job_info_average);
 
-        job_info = (TH1*)back_file.at(i)->Get("_job_info");
-        back_file.at(i)->GetObject("_job_info_average", job_info_average);
+            wsum = job_info->GetBinContent(2);
+            xsec = (*job_info_average)[1];
+            samplescale = _lumi.at(j)*xsec/wsum;
 
-        wsum = job_info->GetBinContent(2);
-        xsec = (*job_info_average)[1];
-        samplescale = _lumi*xsec/wsum;
+            back_hist.at(i)->Scale(samplescale);
 
-        _back_hist.at(i)->Scale(samplescale);
-        _back_hist.at(i)->Rebin(2);
-/*
-        cout << "******************************" << endl;
-        cout << "Sample: " << load_name << endl;
-        cout << "wsum: " << wsum << endl;
-        cout << "lumi: " << _lumi << endl;
-        cout << "xsec: " << xsec << endl;
-        cout << "samplescale: " << samplescale << endl;
-        cout << "*****************************" << endl;
-*/
-        if(i==0) _hBack = (TH1D*)_back_hist.at(0)->Clone("Backgrounds");
-        else _hBack->Add(_back_hist.at(i));
-    }// end loop over background files
+            if(i==0) hBack = (TH1D*)back_hist.at(0)->Clone("Backgrounds");
+            else hBack->Add(back_hist.at(i));
+        }// end loop over background files
+        if(j==0){
+            _hBack = (TH1D*)hBack->Clone("Backgrounds");
+            for(int i=0;i<nBackFiles;i++){
+                _back_hist.push_back((TH1D*)back_hist.at(i)->Clone(back_file_name.at(i)));
+            }
+        }
+        else{
+            _hBack->Add(hBack);
+            for(int i=0;i<nBackFiles;i++){
+                _back_hist.at(i)->Add(back_hist.at(i));
+            }
+        }
+    }// end loop over eras
     _hBack->SetName("backgrounds");
 }
 
@@ -263,4 +244,138 @@ void SaveAll()
     }
 
     save_file->Close();
+}
+
+TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name)
+{
+    TH1D*hist;
+    vector<TH1D*> histV;
+    double wsum, xsec, lumi;
+    TFile*mc_file;
+    vector<TString> mcName = mc_name;
+    if(era=="2016preAPV") lumi = _lumi.at(0);
+    else if(era=="2016postAPV") lumi = _lumi.at(1);
+    else if(era=="2017") lumi = _lumi.at(2);
+    else if(era=="2018") lumi = _lumi.at(3);
+
+    TH1*job_info = nullptr;
+    TVectorD*job_info_average = nullptr;
+    double samplescale;
+    if(era=="2017")mcName = mc_name17; 
+    int nDYSamples = mcName.size();
+    for(int i=0;i<nDYSamples;i++){
+//        if(era=="2017" && i==2) continue;
+        TString mcFileName = _directory;
+        mcFileName += "/";
+        mcFileName += _channel;
+        mcFileName += "/";
+        mcFileName += era;
+        mcFileName += "/";
+        mcFileName += mcName.at(i);
+        cout << "Loading file: " << mcFileName << endl;
+
+        mc_file   = new TFile(mcFileName);
+        histV.push_back((TH1D*)mc_file->Get(hist_load));
+        histV.at(i)->SetName(hist_name);
+
+        job_info = (TH1*)mc_file->Get("_job_info");
+        mc_file->GetObject("_job_info_average", job_info_average);
+        wsum = job_info->GetBinContent(2);
+        xsec = (*job_info_average)[1];
+
+        samplescale = lumi*xsec/wsum;
+
+        histV.at(i)->Scale(samplescale);
+
+        if(i==0){
+            hist = (TH1D*)histV.at(i)->Clone();
+        }
+        else{
+            hist->Add(histV.at(i));
+        }
+    }// end loop over mass binned samples
+
+    return hist;
+}
+
+TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name)
+{
+    TH2D*hist;
+    vector<TH2D*> histV;
+    double wsum, xsec, lumi;
+    TFile*mc_file;
+    
+    vector<TString> mcName = mc_name;
+    if(era=="2016preAPV") lumi = _lumi.at(0);
+    else if(era=="2016postAPV") lumi = _lumi.at(1);
+    else if(era=="2017") lumi = _lumi.at(2);
+    else if(era=="2018") lumi = _lumi.at(3);
+
+    TH1*job_info = nullptr;
+    TVectorD*job_info_average = nullptr;
+    double samplescale;
+    if(era=="2017")mcName = mc_name17; 
+
+    int nDYSamples = mcName.size();
+    for(int i=0;i<nDYSamples;i++){
+//        if(era=="2017" && i ==2) continue;
+        TString mcFileName = _directory;
+        mcFileName += "/";
+        mcFileName += _channel;
+        mcFileName += "/";
+        mcFileName += era;
+        mcFileName += "/";
+        mcFileName += mcName.at(i);
+        cout << "Loading file: " << mcFileName << endl;
+
+        mc_file   = new TFile(mcFileName);
+        histV.push_back((TH2D*)mc_file->Get(hist_load));
+        histV.at(i)->SetName(hist_name);
+
+        job_info = (TH1*)mc_file->Get("_job_info");
+        mc_file->GetObject("_job_info_average", job_info_average);
+        wsum = job_info->GetBinContent(2);
+        xsec = (*job_info_average)[1];
+
+        samplescale = lumi*xsec/wsum;
+
+        histV.at(i)->Scale(samplescale);
+
+        if(i==0){
+            hist = (TH2D*)histV.at(i)->Clone();
+        }
+        else{
+            hist->Add(histV.at(i));
+        }
+    }// end loop over mass binned samples
+
+    return hist;
+}
+
+TH1D*GetDataHist()
+{
+    TH1D*hist;
+    TH1D*hDat;
+    TString getData;
+    for(int j=0;j<nEras;j++){
+        getData = _directory;
+        getData += "/";
+        getData += _channel;
+        getData += "/";
+        getData += _era.at(j);
+        getData += "/";
+        getData += data_name;
+
+        TFile*data_file = new TFile(getData);
+
+        hDat = (TH1D*)data_file->Get(reco_hist);
+        hDat->SetName("data");
+        if(j==0){
+            hist = (TH1D*)hDat->Clone();
+        }
+        else{
+            hist->Add(hDat);
+        }
+    }// end loop over eras
+    return hist;
 }

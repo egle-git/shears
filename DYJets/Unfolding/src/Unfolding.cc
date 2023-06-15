@@ -222,10 +222,10 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     TCanvas*canvas = new TCanvas(canvasName,"",0,0,1000,1000);
     const float padmargins = 0.03;
     const float yAxisMinimum = 0.1;
-    const float yAxisMaximum = 2e7;
+    const float yAxisMaximum = 2e8;
     TPad*pad1 = new TPad("","",0,0.3,1.0,1.0);
     if(logPlot){
-        pad1->SetLogx();
+       // pad1->SetLogx();
         pad1->SetLogy();
     }
 
@@ -246,7 +246,7 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
 
     canvas->cd();
     TPad*pad2 = new TPad("","",0,0.05,1,0.3);
-    if(logPlot) pad2->SetLogx();
+    //if(logPlot) pad2->SetLogx();
     pad2->SetTopMargin(padmargins);
     pad2->SetBottomMargin(0.2);
     pad2->SetGrid();
@@ -277,7 +277,7 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
 
 void Unfold::SetConditionNumber()
 {
-	TMatrixD matrix = makeMatrixFromHist(_hResponseSquare);
+	TMatrixD matrix = makeMatrixFromHist(_hResponse);
 
 	TDecompSVD decomp(matrix);
 	_condition = decomp.Condition();
@@ -483,8 +483,9 @@ void Unfold::plotMatrix(TH2F*hMatrix,TString saveName,bool printCondition)
 	TLatex*conditionLabel;
 	TCanvas*canvas = new TCanvas("canvas","",0,0,1000,1000);
 	canvas->SetGrid();
-	canvas->SetLogy();
-	canvas->SetLogx();
+	//canvas->SetLogy();
+	//canvas->SetLogx();
+	canvas->SetLogz();
 	canvas->SetRightMargin(0.15);
 	canvas->SetLeftMargin(0.15);
 	hMatrix->Draw("colz");

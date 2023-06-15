@@ -5,8 +5,7 @@ source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_100 x86_64-centos7-gcc10-o
 export LD_PRELOAD=/usr/lib64/libopenblas.so.0
 
 directory=$1
-era=$2
-channel=$3
+channel=$2
 
 mkdir -p plots
 

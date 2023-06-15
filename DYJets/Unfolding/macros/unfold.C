@@ -1,7 +1,9 @@
 #include "../include/Unfolding.hh"
 
-void unfold(TString directory,TString era,TString channel)
+void unfold(TString directory,TString channel)
 {
+    TH1::SetDefaultSumw2();
+    TH2::SetDefaultSumw2();
     gROOT->SetBatch(true);
     gStyle->SetPalette(1);
     gStyle->SetOptStat(0);
@@ -12,8 +14,6 @@ void unfold(TString directory,TString era,TString channel)
     savePrefix += "/plots/unfold";
     
     TString saveSuffix = "_";
-    saveSuffix += era;
-    saveSuffix += "_";
     saveSuffix += channel;
     saveSuffix += ".png";
 
@@ -58,14 +58,12 @@ void unfold(TString directory,TString era,TString channel)
     covSave += "_OutputCovariance";
     covSave += saveSuffix;
     TCanvas*cCov = new TCanvas("cCov","",0,0,1000,1000);
-    cCov->SetLogx();
-    cCov->SetLogy();
     cCov->SetLogz();
     hOutCov->Draw("colz");
     cCov->SaveAs(covSave);
 
     // plot response matrix
-    TH2F*hResponse = unfClosure->ReturnSquareResponseMatrix();
+    TH2F*hResponse = unfClosure->ReturnResponseMatrix();
     TString responseSave = savePrefix;
     responseSave += "_ResponseMatrix";
     responseSave += saveSuffix;

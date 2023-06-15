@@ -6,7 +6,6 @@ TString reco_name = "reco_mass";
 TString data_name = "data";
 TString _directory;
 TString _channel;
-TString _era;
 vector<TString> _back_file_name = {
     "TauTau",
     "ST_s-channel",
@@ -39,7 +38,7 @@ void MakeStackPlot();
 void MakeLegend();
 void SaveAll();
 
-void makePlots(TString directory,TString era,TString channel)
+void makePlots(TString directory,TString channel)
 {
     gROOT->SetBatch(true);
     gStyle->SetPalette(1);
@@ -48,7 +47,6 @@ void makePlots(TString directory,TString era,TString channel)
     _directory += "/";
     _directory += channel;
     _channel = channel;    
-    _era = era;
 
     OpenFiles();
     GetBackgrounds();
@@ -81,7 +79,7 @@ void PlotDataVsMC()
     TLine*line = new TLine(x1,1,x2,1);
     line->SetLineColor(kRed);
 
-    double ratioRange = 0.2;
+    double ratioRange = 0.3;
     double upperBound = 1.0+ratioRange;
     double lowerBound = 1.0-ratioRange;
 
@@ -92,13 +90,12 @@ void PlotDataVsMC()
     hRatio->SetMinimum(lowerBound);
     hRatio->SetMaximum(upperBound);
 
-    TCanvas*c1 = new TCanvas("c1","",0,0,1000,1000);
+    TCanvas*c1 = new TCanvas("c1","",0,0,1400,1000);
     const float padmargins = 0.03;
     const float yAxisMinimum = 1;
     const float yAxisMaximum = 1e7;
     double ratioSplit = 0.20;
     TPad*pad1 = new TPad("","",0,ratioSplit,1.0,1.0);
-    pad1->SetLogx();
     pad1->SetLogy();
     pad1->SetBottomMargin(padmargins);
     pad1->SetGrid();
@@ -110,12 +107,12 @@ void PlotDataVsMC()
     _hStack->SetMinimum(yAxisMinimum);
     _hStack->GetXaxis()->SetLabelSize(0);
     _hStack->GetXaxis()->SetTitleSize(0);
+    _hStack->GetYaxis()->SetTitle("number of events");
     hDat->Draw("pe,same");
     _legend->Draw("same");
 
     c1->cd();
     TPad*pad2 = new TPad("","",0,0.05,1,ratioSplit);
-    pad2->SetLogx();
     pad2->SetTopMargin(padmargins);
     pad2->SetBottomMargin(0.2);
     pad2->SetGrid();
@@ -130,15 +127,13 @@ void PlotDataVsMC()
     hRatio->GetXaxis()->SetLabelSize(0.1);
     hRatio->GetXaxis()->SetTitleSize(0.11);
     hRatio->GetXaxis()->SetTitleOffset(0.8);
-    hRatio->GetXaxis()->SetTitle("m_{#mu#mu} [GeV]");
+    hRatio->GetXaxis()->SetTitle("reco mass bin number");
     hRatio->GetXaxis()->SetNoExponent();
     hRatio->GetXaxis()->SetMoreLogLabels();
     hRatio->Draw("pe");
     line->Draw("same");
 
     TString saveName = "dataVsMC_";
-    saveName += _era;
-    saveName += "_";
     saveName += _channel;
     saveName += ".png";
     _canvas.push_back(c1);
@@ -147,8 +142,8 @@ void PlotDataVsMC()
 
 void MakeLegend()
 {
-    _legend = new TLegend(0.65,0.9,0.9,0.60);
-    _legend->SetTextSize(0.02);
+    _legend = new TLegend(0.8,0.9,0.9,0.7);
+    _legend->SetTextSize(0.015);
     _legend->AddEntry(_hData,"Data");
     _legend->AddEntry(_hReco,"DY#rightarrow#mu#mu");
     for(int i=0;i<_nBackgrounds;i++){
@@ -178,9 +173,7 @@ void SetHistProperties()
 void GetSignal()
 {
     _hReco = (TH1D*)load_file->Get(reco_name);
-    _hReco->Rebin(2);
     _hData = (TH1D*)load_file->Get(data_name);
-    _hData->Rebin(2);
 }
 
 void GetBackgrounds()
@@ -204,7 +197,6 @@ void GetBackgrounds()
         _back_hists.push_back((TH1D*)load_file->Get(_back_file_name.at(i)));
         _back_hists.at(i)->SetFillColor(hist_color.at(i));
         _back_hists.at(i)->SetLineColor(hist_color.at(i));
-        _back_hists.at(i)->Rebin(2);
     }
 }
 

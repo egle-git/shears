@@ -2,6 +2,7 @@
 
 void GetSignal();
 void GetBackgrounds();
+vector<TH1D*> GetBackgroundHists(TString era);
 void SaveAll();
 TH1D*GetDataHist();
 TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name);
@@ -17,7 +18,8 @@ vector<TString> _era = {
     "2017",
     "2018",
 };
-int nEras = _era.size();
+int _nEras = _era.size();
+int _nBackFiles;
 
 vector<TString> mc_name = {
     "dyjets-DYJets_M-10to50.root",
@@ -144,7 +146,32 @@ void GetSignal()
 
 void GetBackgrounds()
 {
-    TH1D*hBack;
+    // Get vectors of all backgrounds for each era
+    vector<TH1D*> h2016preAPV = GetBackgroundHists("2016preAPV");
+    vector<TH1D*> h2016postAPV = GetBackgroundHists("2016postAPV");
+    vector<TH1D*> h2017 = GetBackgroundHists("2017");
+    vector<TH1D*> h2018 = GetBackgroundHists("2018");
+
+    // Combine eras
+    for(int i=0;i<_nBackFiles;i++){ 
+        _back_hist.push_back(h2016preAPV.at(i));
+        _back_hist.at(i)->Add(h2016postAPV.at(i));
+        _back_hist.at(i)->Add(h2017.at(i));
+        _back_hist.at(i)->Add(h2018.at(i));
+
+        if(i==0) _hBack = (TH1D*)_back_hist.at(i)->Clone("backgrounds");
+        else _hBack->Add(_back_hist.at(i));
+    }
+}
+
+vector<TH1D*> GetBackgroundHists(TString era)
+{
+    double lumi = -1;
+    if(era=="2016preAPV") lumi = _lumi.at(0);
+    else if(era=="2016postAPV") lumi = _lumi.at(1);
+    else if(era=="2017") lumi = _lumi.at(2);
+    else if(era=="2018") lumi = _lumi.at(3);
+    if(lumi<0) cout << "era not properly defined for GetBackgroundHists()" << endl;
     vector<TString> back_file_name = {
         "TauTau",
         "ST_s-channel",
@@ -171,57 +198,42 @@ void GetBackgrounds()
         kAzure,     // tt
         kRed+1,     // GammaGamma
     };
-    int nBackFiles = back_file_name.size();
-    vector<TFile*> back_file;
+    _nBackFiles = back_file_name.size();
+    TFile*load_file;
     vector<TH1D*> back_hist;
     double wsum, xsec;
-    for(int j=0;j<nEras;j++){
-        for(int i=0;i<nBackFiles;i++){
-            TString prefix = _directory;
-            prefix += "/";
-            prefix += _channel;
-            prefix += "/";
-            prefix += _era.at(j);
-            prefix += "/";
-            prefix += "/dyjets-";
-            TString suffix = ".root";
-            TH1*job_info;
-            TVectorD*job_info_average = nullptr;
-            double samplescale;
 
-            TString load_name = prefix;
-            load_name += back_file_name.at(i);
-            load_name += suffix;
-            back_file.push_back(new TFile(load_name));
-            back_hist.push_back((TH1D*)back_file.at(i)->Get(reco_hist));
-            back_hist.at(i)->SetName(back_file_name.at(i));
+    for(int i=0;i<_nBackFiles;i++){
+        TString prefix = _directory;
+        prefix += "/";
+        prefix += _channel;
+        prefix += "/";
+        prefix += era;
+        prefix += "/";
+        prefix += "/dyjets-";
+        TString suffix = ".root";
+        TH1*job_info;
+        TVectorD*job_info_average = nullptr;
+        double samplescale;
 
-            job_info = (TH1*)back_file.at(i)->Get("_job_info");
-            back_file.at(i)->GetObject("_job_info_average", job_info_average);
+        TString load_name = prefix;
+        load_name += back_file_name.at(i);
+        load_name += suffix;
+        load_file = new TFile(load_name);
+        back_hist.push_back((TH1D*)load_file->Get(reco_hist));
+        back_hist.at(i)->SetName(back_file_name.at(i));
 
-            wsum = job_info->GetBinContent(2);
-            xsec = (*job_info_average)[1];
-            samplescale = _lumi.at(j)*xsec/wsum;
+        job_info = (TH1*)load_file->Get("_job_info");
+        load_file->GetObject("_job_info_average", job_info_average);
 
-            back_hist.at(i)->Scale(samplescale);
+        wsum = job_info->GetBinContent(2);
+        xsec = (*job_info_average)[1];
+        samplescale = lumi*xsec/wsum;
 
-            if(i==0) hBack = (TH1D*)back_hist.at(0)->Clone("Backgrounds");
-            else hBack->Add(back_hist.at(i));
-        }// end loop over background files
-        if(j==0){
-            _hBack = (TH1D*)hBack->Clone("Backgrounds");
-            for(int i=0;i<nBackFiles;i++){
-                _back_hist.push_back((TH1D*)back_hist.at(i)->Clone(back_file_name.at(i)));
-            }
-        }
-        else{
-            _hBack->Add(hBack);
-            for(int i=0;i<nBackFiles;i++){
-                _back_hist.at(i)->Add(back_hist.at(i));
-            }
-        }
-    }// end loop over eras
-    _hBack->SetName("backgrounds");
+        back_hist.at(i)->Scale(samplescale);
+
+    }// end loop over background files
+    return back_hist;
 }
 
 void SaveAll()
@@ -357,7 +369,7 @@ TH1D*GetDataHist()
     TH1D*hist;
     TH1D*hDat;
     TString getData;
-    for(int j=0;j<nEras;j++){
+    for(int j=0;j<_nEras;j++){
         getData = _directory;
         getData += "/";
         getData += _channel;

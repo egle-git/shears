@@ -7,3 +7,5 @@
 
 # ROOTFILES
 
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai12june2023_2017_DYJetsToMuMu_M-100to200_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToMuMu_M-100to200_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230612_202850/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2017/mc/NanoBonzai12june2023_2017_DYJetsToMuMu_M-100to200_H2ErratumFix_TuneCP5_v3_GenVtx/DYJetsToMuMu_M-100to200_H2ErratumFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos/Nano/230612_202850/0000/tree_2.root

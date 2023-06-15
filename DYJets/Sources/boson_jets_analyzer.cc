@@ -202,9 +202,6 @@ void boson_jets_analyzer::operator()()
     if( _apply_M100Cut ) {
         if( _sample_name == "DYJets_M-50to100" && 
             DileptonMass_LHE() > 100 ) return;
-
-        if( _sample_name == "DYJets_M-50to200" && 
-            DileptonMass_LHE() > 200 ) return;
     }
 
     _weights.process_event();

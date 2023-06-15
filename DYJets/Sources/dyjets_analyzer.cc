@@ -247,13 +247,13 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     double Eta1 = evt.rec->leptons[0].v.Eta();
     double Eta2 = evt.rec->leptons[1].v.Eta();
     double DeltaEta = Eta1 - Eta2;
-    double Pt2 = evt.rec->leptons[1].v.Pt();
-    double cut = Z.v.M()/Pt2;
+    double ptsub = evt.rec->leptons[1].v.Pt();
+    double mll_over_ptsub = Z.v.M()/ptsub;
 
     histo_set.fill("phistar", *tags.rec, Z.phistar(), weights().global_weight());
-    //New Cut
-    histo_set.fill("cut", *tags.rec, cut, weights().global_weight());
-    histo_set2D.fill("cut_2D_wide_range", *tags.rec, cut, Z.v.M(), weights().global_weight());
+    //New mll_over_ptsub variable
+    histo_set.fill("mll_over_ptsub", *tags.rec, mll_over_ptsub, weights().global_weight());
+    histo_set2D.fill("mll_over_ptsub_2D_wide_range", *tags.rec, mll_over_ptsub, Z.v.M(), weights().global_weight());
     //DeltaPhi
     //  histo_set.fill("deltaphi", *tags.rec,Z.DeltaPhi(), weights().global_weight());
     //DeltaEta

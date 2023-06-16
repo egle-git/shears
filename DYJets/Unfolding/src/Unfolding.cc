@@ -6,7 +6,7 @@ Unfold::Unfold()
 
 }
 
-Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
+Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,TString channel,RegType regType=NO_REG)
 {
     // calclate global parameters
     _hReco = (TH1F*)hReco->Clone(); // reconstructed distribution
@@ -14,6 +14,7 @@ Unfold::Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType=NO_REG)
     _hMatrix = (TH2F*)hMatrix->Clone();// matrix of migrations
     _nBinsReco = _hReco->GetNbinsX(); // number of reco bins
     _nBinsTrue = _hTrue->GetNbinsX(); // number of true bins
+    _lepType = channel;
 
     // _trueVert is by default set to true in the header file here: include/Unfolding.hh 
     if(_trueVert){
@@ -187,15 +188,21 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     _hUnfolded->SetFillColor(kWhite);
 
     //define the ratio plot
-    TH1F*ratio = (TH1F*)_hUnfolded->Clone("ratio");
-    ratio->Divide(_hTrue);
+    TH1F*ratio = (TH1F*)_hTrue->Clone("ratio");
+    ratio->Divide(_hUnfolded);
     ratio->SetTitle("");
 
     //define the legend
     TLegend*legend = new TLegend(0.65,0.9,0.9,0.75);
     legend->SetTextSize(0.02);
-    legend->AddEntry(_hTrue,"True Distribution");
-    legend->AddEntry(_hUnfolded,"Unfolded Distribution");
+    TString trueLabel = "Z/#gamma^{*}#rightarrow ";
+    TString lepton;
+    if(_lepType=="ee") lepton=_lepType;
+    else if(_lepType=="mm") lepton="#mu#mu";
+    trueLabel += lepton;
+    trueLabel += " MC (dressed level)";
+    legend->AddEntry(_hTrue,trueLabel);
+    legend->AddEntry(_hUnfolded,"Data (unfolded)");
 
     //Create a label that shows the chi^2 value to print on graph
     float xMax = _hTrue->GetXaxis()->GetXmax();
@@ -242,7 +249,7 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     _hTrue->Draw("hist");
     _hUnfolded->Draw("pe,same");	
     legend->Draw("same");
-    chiLabel->Draw("same");
+    //chiLabel->Draw("same");
 
     canvas->cd();
     TPad*pad2 = new TPad("","",0,0.05,1,0.3);
@@ -253,17 +260,18 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     pad2->SetTicks(1,1);
     pad2->Draw();
     pad2->cd();
-    ratio->SetMinimum(0.8);
-    ratio->SetMaximum(1.2);
+    ratio->SetMinimum(0.7);
+    ratio->SetMaximum(1.3);
     ratio->GetYaxis()->SetLabelSize(0.06);
     ratio->GetYaxis()->SetTitleSize(0.08);
     ratio->GetYaxis()->SetTitleOffset(0.3);
-    ratio->GetYaxis()->SetTitle("Unfolded/Truth");
+    ratio->GetYaxis()->SetTitle("MC/Data");
     ratio->GetXaxis()->SetLabelSize(0.1);
     ratio->GetXaxis()->SetTitleSize(0.1);
     ratio->GetXaxis()->SetNoExponent();
     ratio->GetXaxis()->SetMoreLogLabels();
-    ratio->GetXaxis()->SetTitle("mass [GeV]");
+//    ratio->GetXaxis()->SetTitle("mass [GeV]");
+    ratio->GetXaxis()->SetTitle("mass bin");
     ratio->SetMarkerStyle(20);
     ratio->SetMarkerColor(kBlack);
     ratio->SetLineColor(kBlack);

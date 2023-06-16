@@ -61,7 +61,7 @@ class Unfold
         * hMatrix is matrix of migrations
         * regType is the regularization type to be used
         * */
-		Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,RegType regType);
+		Unfold(TH1F*hReco,TH1F*hTrue,TH2F*hMatrix,TString channel,RegType regType = NO_REG);
 
         /**
         * \brief Carries out the unfolding
@@ -236,6 +236,7 @@ class Unfold
         double _determinant = -1000;
 		int _nBinsReco      = -1000;
 		int _nBinsTrue      = -1000;
+        TString _lepType;
 
         bool _trueVert = true;
         bool _backgroundSubtraction = false;

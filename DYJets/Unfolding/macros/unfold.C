@@ -30,7 +30,7 @@ void unfold(TString directory,TString channel)
     TH2F*hMatrix = (TH2F*)loadFile->Get("matrix");
 
     // Closure test
-    Unfold*unfClosure = new Unfold(hReco,hTrue,hMatrix);
+    Unfold*unfClosure = new Unfold(hReco,hTrue,hMatrix,channel);
 
     Unfold::UnfoldType unfTUnfold = Unfold::TUNFOLD;
     unfClosure->EngageUnfolding(unfTUnfold);
@@ -42,7 +42,7 @@ void unfold(TString directory,TString channel)
     c2->SaveAs(closureSave);
 
     // Unfold data
-    Unfold*unfData = new Unfold(hData,hTrue,hMatrix);
+    Unfold*unfData = new Unfold(hData,hTrue,hMatrix,channel);
     unfData->SetBackground(hBack);
     unfData->EngageUnfolding(unfTUnfold);
     TH1F*hUnfData = unfData->ReturnUnfolded();

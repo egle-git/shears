@@ -41,7 +41,7 @@ single_files=(
 )
 saveLocation=$saveDirectory
 
-mkdir -p $saveLocation
+mkdir -p $saveLocation/plots
 
 cd $saveLocation
 rm *.root

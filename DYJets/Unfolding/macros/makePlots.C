@@ -9,7 +9,7 @@ TString _channel;
 vector<TString> _back_file_name = {
     "TauTau",
     "ST_s-channel",
-    "ST_t-channel_top",
+//    "ST_t-channel_top",
     "ST_t-channel_antitop",
     "ST_tW_top",
     "ST_tW_antitop",
@@ -83,8 +83,8 @@ void PlotDataVsMC()
     double upperBound = 1.0+ratioRange;
     double lowerBound = 1.0-ratioRange;
 
-    TH1F*hRatio = (TH1F*)hDat->Clone("ratio");
-    hRatio->Divide(hMC);
+    TH1F*hRatio = (TH1F*)hMC->Clone("ratio");
+    hRatio->Divide(hDat);
     hRatio->SetMarkerStyle(20);
     hRatio->SetMarkerColor(kBlack);
     hRatio->SetMinimum(lowerBound);
@@ -121,13 +121,13 @@ void PlotDataVsMC()
     pad2->cd();
     hRatio->SetTitle("");
     hRatio->GetYaxis()->SetLabelSize(0.06);
-    hRatio->GetYaxis()->SetTitleSize(0.08);
+    hRatio->GetYaxis()->SetTitleSize(0.09);
     hRatio->GetYaxis()->SetTitleOffset(0.3);
-    hRatio->GetYaxis()->SetTitle("data/mc");
+    hRatio->GetYaxis()->SetTitle("mc/data");
     hRatio->GetXaxis()->SetLabelSize(0.1);
     hRatio->GetXaxis()->SetTitleSize(0.11);
     hRatio->GetXaxis()->SetTitleOffset(0.8);
-    hRatio->GetXaxis()->SetTitle("reco mass bin number");
+    hRatio->GetXaxis()->SetTitle("mass bin number");
     hRatio->GetXaxis()->SetNoExponent();
     hRatio->GetXaxis()->SetMoreLogLabels();
     hRatio->Draw("pe");
@@ -181,7 +181,7 @@ void GetBackgrounds()
     vector<int> hist_color = {
         kGreen+3,   // tautau
         kBlue+2,    // ST-s-channel
-        kBlue+3,    // ST-t-channel_top
+//        kBlue+3,    // ST-t-channel_top
         kBlue+4,    // ST-t-channel_antitop
         kAzure+4,   // ST-tW
         kAzure+7,   // STbar-tW

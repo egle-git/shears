@@ -15,7 +15,6 @@ file_stem=(
     dyjets-DYJets_M-10to50
     dyjets-DYJets_M-50to100
     dyjets-TauTau
-    dyjets-ST_t-channel_top
     dyjets-TT
     dyjets-ZZ
 )
@@ -35,13 +34,14 @@ single_files=(
     dyjets-ST_tW_top
     dyjets-ST_s-channel
     dyjets-ST_t-channel_antitop
+    dyjets-ST_t-channel_top
     dyjets-WWTo2L2Nu
     dyjets-WZ
     dyjets-GammaGamma
 )
 saveLocation=$saveDirectory
 
-mkdir -p $saveLocation/plots
+mkdir -p $saveLocation
 
 cd $saveLocation
 rm *.root
@@ -51,7 +51,7 @@ cd ../$loadDirectory/results
 # Loop over each file that needs to be combined and combine with hadd
 for index in ${!file_stem[*]}; do
     echo "Combining ${file_stem[$index]}"
-    hadd -f ${file_stem[$index]}.root ${file_stem[$index]}*
+    hadd ${file_stem[$index]}.root ${file_stem[$index]}*
     mv ${file_stem[$index]}.root ../../Unfolding/${saveLocation}/
 done
 

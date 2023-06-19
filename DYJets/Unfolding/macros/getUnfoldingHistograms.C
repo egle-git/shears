@@ -175,7 +175,7 @@ vector<TH1D*> GetBackgroundHists(TString era)
     vector<TString> back_file_name = {
         "TauTau",
         "ST_s-channel",
-//        "ST_t-channel_top",
+        "ST_t-channel_top",
         "ST_t-channel_antitop",
         "ST_tW_top",
         "ST_tW_antitop",
@@ -188,7 +188,7 @@ vector<TH1D*> GetBackgroundHists(TString era)
     vector<int> hist_color = {
         kGreen+3,   // tautau
         kBlue+2,    // ST-s-channel
-//        kBlue+3,    // ST-t-channel_top
+        kBlue+3,    // ST-t-channel_top
         kBlue+4,    // ST-t-channel_antitop
         kAzure+4,   // ST-tW
         kAzure+7,   // STbar-tW
@@ -276,7 +276,6 @@ TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name)
     if(era=="2017" && _channel=="mm")mcName = mc_name17; 
     int nDYSamples = mcName.size();
     for(int i=0;i<nDYSamples;i++){
-//        if(era=="2017" && i==2) continue;
         TString mcFileName = _directory;
         mcFileName += "/";
         mcFileName += _channel;
@@ -330,7 +329,6 @@ TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name)
 
     int nDYSamples = mcName.size();
     for(int i=0;i<nDYSamples;i++){
-//        if(era=="2017" && i ==2) continue;
         TString mcFileName = _directory;
         mcFileName += "/";
         mcFileName += _channel;

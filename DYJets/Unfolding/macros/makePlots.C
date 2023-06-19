@@ -4,6 +4,7 @@ TString load_file_name = "unfolding_histograms.root";
 TString load_unf_name = "unfolding_output.root";
 TString reco_name = "reco_mass";
 TString data_name = "data";
+TString matrix_name = "matrix";
 TString _directory;
 TString _channel;
 vector<TString> _back_file_name = {
@@ -24,6 +25,7 @@ TH1D*_hReco;
 TH1D*_hData;
 vector<TH1D*> _back_hists;
 THStack*_hStack;
+TH2D*_hMatrix;
 TLegend*_legend;
 vector<TCanvas*> _canvas;
 vector<TString> _plot_save;
@@ -33,10 +35,12 @@ void OpenFiles();
 void GetBackgrounds();
 void GetSignal();
 void SetHistProperties();
-void PlotDataVsMC();
 void MakeStackPlot();
 void MakeLegend();
 void SaveAll();
+
+void PlotDataVsMC();
+void PlotMigrationMatrix();
 
 void makePlots(TString directory,TString channel)
 {
@@ -54,8 +58,27 @@ void makePlots(TString directory,TString channel)
     
     SetHistProperties();
     PlotDataVsMC();
+    PlotMigrationMatrix();
 
     SaveAll();
+}
+
+void PlotMigrationMatrix()
+{
+    TCanvas*c2 = new TCanvas("c2","",0,0,1400,1000);
+    c2->SetLogz();
+    c2->SetGrid();
+    c2->SetRightMargin(0.15);
+    c2->SetLeftMargin(0.15);
+    _hMatrix->GetXaxis()->SetTitle("reco mass bins");
+    _hMatrix->GetYaxis()->SetTitle("true mass bins");
+    _hMatrix->Draw("colz");
+
+    TString saveName = "migrationMatrix_";
+    saveName += _channel;
+    saveName += ".png";
+    _canvas.push_back(c2);
+    _plot_save.push_back(saveName);
 }
 
 void PlotDataVsMC()
@@ -174,6 +197,7 @@ void GetSignal()
 {
     _hReco = (TH1D*)load_file->Get(reco_name);
     _hData = (TH1D*)load_file->Get(data_name);
+    _hMatrix = (TH2D*)load_file->Get(matrix_name);
 }
 
 void GetBackgrounds()
@@ -181,7 +205,7 @@ void GetBackgrounds()
     vector<int> hist_color = {
         kGreen+3,   // tautau
         kBlue+2,    // ST-s-channel
-//        kBlue+3,    // ST-t-channel_top
+        kBlue+3,    // ST-t-channel_top
         kBlue+4,    // ST-t-channel_antitop
         kAzure+4,   // ST-tW
         kAzure+7,   // STbar-tW

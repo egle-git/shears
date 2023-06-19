@@ -489,13 +489,15 @@ void Unfold::plotMatrix(TH2F*hMatrix,TString saveName,bool printCondition)
 	gStyle->SetPalette(1);
 	double xPosition,yPosition;
 	TLatex*conditionLabel;
-	TCanvas*canvas = new TCanvas("canvas","",0,0,1000,1000);
+	TCanvas*canvas = new TCanvas("canvas","",0,0,1400,1000);
 	canvas->SetGrid();
 	//canvas->SetLogy();
 	//canvas->SetLogx();
 	canvas->SetLogz();
 	canvas->SetRightMargin(0.15);
 	canvas->SetLeftMargin(0.15);
+    hMatrix->GetXaxis()->SetTitle("reco mass bins");
+    hMatrix->GetYaxis()->SetTitle("true mass bins");
 	hMatrix->Draw("colz");
 	
 	if(printCondition){ 

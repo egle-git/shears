@@ -44,9 +44,7 @@ saveLocation=$saveDirectory
 mkdir -p $saveLocation
 
 cd $saveLocation
-cd ..
-mkdir -p plots
-cd $saveLocation
+mkdir -p ../plots
 rm *.root
 cd -
 cd ../$loadDirectory/results

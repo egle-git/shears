@@ -221,16 +221,16 @@
   bin count: 1
 
 ################################################################################
-## New cut
+## New mll_over_ptsub variable
 ################################################################################
 
-- selector: 'cut.*'
+- selector: 'mll_over_ptsub.*'
   binning: uniform
   binning min: 0
   binning max: 23
   bin count: 46
 
-- selector: 'cut_2D_wide_range.*'
+- selector: 'mll_over_ptsub_2D_wide_range.*'
   binning: custom
   binX edges: [
     0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,

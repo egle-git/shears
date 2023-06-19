@@ -42,25 +42,29 @@ TCanvas*canvas = unf->plotUnfolded("canvas","Unfold Test",logplot);
 
 You can also use the macros I have put together to get the histograms output by Shears, plot them, and carry out unfolding on them.
 
-First, create this directory in the Unfolding directory to hold plots:
-plots
-
 From the Unfolding directory, execute the following commands:
 
 ```
-./combine-ROOT-files.sh ${directory_with_shears_output} ${directory_to_save_to} ${decay_channel}
+./combine-ROOT-files.sh ${directory_with_shears_output} ${directory_to_save_to}
 ```
-combine-ROOT-files.sh doesn't create directories, so create the directory where you want to save the histograms before running it.
+Make sure to save each era to a directory named for the era like this:
+```
+${decay_channel}/2016preAPV
+${decay_channel}/2016postAPV
+${decay_channel}/2017
+${decay_channel}/i2018
+```
+Where decay_channel is either "ee" or "mm". If you save them this way, then the rest of the macros are already set up to combine the histograms from these directories. You'll just have to tell them what directory these are located in. 
 
 Next, you can run all steps from one script
 ```
-DoAll_GetHists_RunUnfolding_MakePlots.sh ${directory_of_histograms} ${analysis_era} ${decay_channel}
+DoAll_GetHists_RunUnfolding_MakePlots.sh ${directory_of_histograms} ${decay_channel}
 ```
 
-You can also run any of the individual steps alone using the same three arguments as above for GetHists.sh, RunUnfolding.sh, or MakePlots.sh.
+You can also run any of the individual steps alone using the same two arguments as above for GetHists.sh, RunUnfolding.sh, or MakePlots.sh.
 
 Here's a brief description of each of these scripts:
-GetHists.sh opens the root files that were output by Shears and combined using combine-ROOT-files.sh and then extracts the histograms needed for unfolding. 
+GetHists.sh opens the root files that were output by Shears and combined using combine-ROOT-files.sh and then extracts the histograms needed for unfolding. It will combine all of the eras together for the given decay channel. 
 
 RunUnfolding.sh loads the histograms saved using GetHists.sh and uses them to carry out a closure test and unfolding on data with background subtraction.
 

@@ -34,18 +34,6 @@ vector<TString> mc_name = {
     "dyjets-DYJets_M-1500to2000.root",
     "dyjets-DYJets_M-2000toInf.root",
 };
-vector<TString> mc_name17 = {
-    "dyjets-DYJets_M-10to50.root",
-    "dyjets-DYJets_M-50to100.root",
-    "dyjets-DYJets_M-200to400.root",
-    "dyjets-DYJets_M-400to500.root",
-    "dyjets-DYJets_M-500to700.root",
-    "dyjets-DYJets_M-700to800.root",
-    "dyjets-DYJets_M-800to1000.root",
-    "dyjets-DYJets_M-1000to1500.root",
-    "dyjets-DYJets_M-1500to2000.root",
-    "dyjets-DYJets_M-2000toInf.root",
-};
 
 TString data_name   = "dyjets-data.root";
 TString save_name   = "unfolding_histograms.root";
@@ -264,7 +252,6 @@ TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name)
     vector<TH1D*> histV;
     double wsum, xsec, lumi;
     TFile*mc_file;
-    vector<TString> mcName = mc_name;
     if(era=="2016preAPV") lumi = _lumi.at(0);
     else if(era=="2016postAPV") lumi = _lumi.at(1);
     else if(era=="2017") lumi = _lumi.at(2);
@@ -273,8 +260,7 @@ TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name)
     TH1*job_info = nullptr;
     TVectorD*job_info_average = nullptr;
     double samplescale;
-    if(era=="2017" && _channel=="mm")mcName = mc_name17; 
-    int nDYSamples = mcName.size();
+    int nDYSamples = mc_name.size();
     for(int i=0;i<nDYSamples;i++){
         TString mcFileName = _directory;
         mcFileName += "/";
@@ -282,7 +268,7 @@ TH1D*GetHistogram1D(TString era,TString hist_load,TString hist_name)
         mcFileName += "/";
         mcFileName += era;
         mcFileName += "/";
-        mcFileName += mcName.at(i);
+        mcFileName += mc_name.at(i);
         cout << "Loading file: " << mcFileName << endl;
 
         mc_file   = new TFile(mcFileName);
@@ -316,7 +302,6 @@ TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name)
     double wsum, xsec, lumi;
     TFile*mc_file;
     
-    vector<TString> mcName = mc_name;
     if(era=="2016preAPV") lumi = _lumi.at(0);
     else if(era=="2016postAPV") lumi = _lumi.at(1);
     else if(era=="2017") lumi = _lumi.at(2);
@@ -325,9 +310,8 @@ TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name)
     TH1*job_info = nullptr;
     TVectorD*job_info_average = nullptr;
     double samplescale;
-    if(era=="2017" && _channel=="mm")mcName = mc_name17; 
 
-    int nDYSamples = mcName.size();
+    int nDYSamples = mc_name.size();
     for(int i=0;i<nDYSamples;i++){
         TString mcFileName = _directory;
         mcFileName += "/";
@@ -335,7 +319,7 @@ TH2D*GetHistogram2D(TString era,TString hist_load,TString hist_name)
         mcFileName += "/";
         mcFileName += era;
         mcFileName += "/";
-        mcFileName += mcName.at(i);
+        mcFileName += mc_name.at(i);
         cout << "Loading file: " << mcFileName << endl;
 
         mc_file   = new TFile(mcFileName);

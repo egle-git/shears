@@ -166,30 +166,51 @@ void Unfold::unfoldTUnfold()
 TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
 {
     gStyle->SetOptStat(0);
+    // May be a temporary solution, would be better to import binning from yaml files
+    double mass_binning[] = {40,45,50,55,60,64,68,72,76,81,86,91,96,101,106,110,115,120,126,133,141,150,160,171,185,200,220,243,273,320,380,440,510,600,700,830,1000,1500,2000,3000};
+    int nBins = 39;
+
+    // Define new histograms with mass bins
+    TH1D*hTrue = new TH1D("hTrue","",nBins,mass_binning);
+    TH1D*hUnfolded = new TH1D("hUnfolded","",nBins,mass_binning);
+    // Loop over bins and place entries and errors in new histograms
+    double contentTrue,contentUnf;
+    double errTrue,errUnf;
+    for(int i=0;i<_nBinsTrue;i++){
+        contentTrue = _hTrue->GetBinContent(i+1);
+        errTrue     = _hTrue->GetBinError(i+1);
+        contentUnf  = _hUnfolded->GetBinContent(i+1);
+        errUnf      = _hUnfolded->GetBinError(i+1);
+
+        hTrue->SetBinContent(i,contentTrue);
+        hTrue->SetBinError(i,errTrue);
+        hUnfolded->SetBinContent(i,contentUnf);
+        hUnfolded->SetBinError(i,errUnf);
+    }
 
     //Get parameters for histograms
     //These are used to define the canvases and pads
     //as well as the locations of drawn objects
-    int binLow = _hTrue->GetBinLowEdge(1);
-    int binHigh = _hTrue->GetBinLowEdge(_nBinsTrue)+_hTrue->GetBinWidth(_nBinsTrue);
+    int binLow = hTrue->GetBinLowEdge(1);
+    int binHigh = hTrue->GetBinLowEdge(nBins)+hTrue->GetBinWidth(nBins);
     float peakMax = 0;	
     float binContent;
     for(int i=1;i<=_nBinsTrue;i++){
-        binContent = _hTrue->GetBinContent(i);
+        binContent = hTrue->GetBinContent(i);
         if(binContent > peakMax) peakMax = binContent;
     }
 
     //set histogram drawing options
-    _hTrue->SetFillColor(kRed+2);
-    _hTrue->SetLineColor(kRed+2);
-    _hUnfolded->SetMarkerStyle(20);
-    _hUnfolded->SetMarkerColor(kBlack);
-    _hUnfolded->SetLineColor(kBlack);
-    _hUnfolded->SetFillColor(kWhite);
+    hTrue->SetFillColor(kRed+2);
+    hTrue->SetLineColor(kRed+2);
+    hUnfolded->SetMarkerStyle(20);
+    hUnfolded->SetMarkerColor(kBlack);
+    hUnfolded->SetLineColor(kBlack);
+    hUnfolded->SetFillColor(kWhite);
 
     //define the ratio plot
-    TH1F*ratio = (TH1F*)_hTrue->Clone("ratio");
-    ratio->Divide(_hUnfolded);
+    TH1F*ratio = (TH1F*)hTrue->Clone("ratio");
+    ratio->Divide(hUnfolded);
     ratio->SetTitle("");
 
     //define the legend
@@ -201,12 +222,12 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     else if(_lepType=="mm") lepton="#mu#mu";
     trueLabel += lepton;
     trueLabel += " MC (dressed level)";
-    legend->AddEntry(_hTrue,trueLabel);
-    legend->AddEntry(_hUnfolded,"Data (unfolded)");
+    legend->AddEntry(hTrue,trueLabel);
+    legend->AddEntry(hUnfolded,"Data (unfolded)");
 
     //Create a label that shows the chi^2 value to print on graph
-    float xMax = _hTrue->GetXaxis()->GetXmax();
-    float xMin = _hTrue->GetXaxis()->GetXmin();
+    float xMax = hTrue->GetXaxis()->GetXmax();
+    float xMin = hTrue->GetXaxis()->GetXmin();
     float xRange = xMax-xMin;
     float yMax = 1.1*peakMax;
     double xChiLabel;
@@ -221,8 +242,8 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
         yChiLabel = yMax*0.7;
     }
     double x[_nBinsTrue],res[_nBinsTrue];
-    double chi = _hUnfolded->Chi2Test(_hTrue,"CHI2/NDF",res);//chi2/ndf to print on plot
-    double pValues = _hUnfolded->Chi2Test(_hTrue,"P",res);//outputs chi2,prob,ndf,igood
+    double chi = hUnfolded->Chi2Test(hTrue,"CHI2/NDF",res);//chi2/ndf to print on plot
+    double pValues = hUnfolded->Chi2Test(hTrue,"P",res);//outputs chi2,prob,ndf,igood
     TLatex*chiLabel = new TLatex(xChiLabel,yChiLabel,Form("#chi^{2}/ndf = %lg", chi));
 
     //Draw canvas and pads to make plot
@@ -232,7 +253,7 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     const float yAxisMaximum = 2e8;
     TPad*pad1 = new TPad("","",0,0.3,1.0,1.0);
     if(logPlot){
-       // pad1->SetLogx();
+        pad1->SetLogx();
         pad1->SetLogy();
     }
 
@@ -241,19 +262,19 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     pad1->SetTicks(1,1);
     pad1->Draw();
     pad1->cd();
-    _hTrue->SetLabelSize(0);
-    _hTrue->SetTitleSize(0);
-    _hTrue->SetMinimum(yAxisMinimum);
-    _hTrue->SetMaximum(yAxisMaximum);
-    _hTrue->SetTitle(titleName);
-    _hTrue->Draw("hist");
-    _hUnfolded->Draw("pe,same");	
+    hTrue->SetLabelSize(0);
+    hTrue->SetTitleSize(0);
+    hTrue->SetMinimum(yAxisMinimum);
+    hTrue->SetMaximum(yAxisMaximum);
+    hTrue->SetTitle(titleName);
+    hTrue->Draw("hist");
+    hUnfolded->Draw("pe,same");	
     legend->Draw("same");
     //chiLabel->Draw("same");
 
     canvas->cd();
     TPad*pad2 = new TPad("","",0,0.05,1,0.3);
-    //if(logPlot) pad2->SetLogx();
+    if(logPlot) pad2->SetLogx();
     pad2->SetTopMargin(padmargins);
     pad2->SetBottomMargin(0.2);
     pad2->SetGrid();
@@ -270,8 +291,8 @@ TCanvas*Unfold::plotUnfolded(TString canvasName,TString titleName,bool logPlot)
     ratio->GetXaxis()->SetTitleSize(0.1);
     ratio->GetXaxis()->SetNoExponent();
     ratio->GetXaxis()->SetMoreLogLabels();
-//    ratio->GetXaxis()->SetTitle("mass [GeV]");
-    ratio->GetXaxis()->SetTitle("mass bin");
+    ratio->GetXaxis()->SetTitle("mass [GeV]");
+//    ratio->GetXaxis()->SetTitle("mass bin");
     ratio->SetMarkerStyle(20);
     ratio->SetMarkerColor(kBlack);
     ratio->SetLineColor(kBlack);
@@ -505,7 +526,7 @@ void Unfold::plotMatrix(TH2F*hMatrix,TString saveName,bool printCondition)
 		yPosition = 0.9;
 		conditionLabel = new TLatex(xPosition,yPosition,
                                     Form("condition number = %lg",_condition));
-		conditionLabel->Draw("same");
+	//	conditionLabel->Draw("same");
 	}
 
 	canvas->SaveAs(saveName);	

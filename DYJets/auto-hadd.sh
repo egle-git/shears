@@ -37,6 +37,7 @@ sample_single=(
     dyjets-WWTo2L2Nu
     dyjets-WZ
     dyjets-GammaGamma
+    dyjets-GammaGamma_M-5to50
 )
 
 # merging samples in sample_multiple

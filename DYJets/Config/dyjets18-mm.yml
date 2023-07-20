@@ -22,6 +22,15 @@ log:
     # Default value: yes
     #override root handler: yes
 
+
+# when you want to separate a specific flavor from DY->ll events (e.g. Madgraph)
+# it will check the dilepton flavor at the generator level, and skip the events if the flavor is not same with the given flavor
+# WARNING: It should be used for *DY MC only*. Background MC with this option will give meaningless results.
+# default: false
+Select specific flavor in DYLL:
+  use: false
+  flavor: -1 # pdgID. DY->ee: 11 / DY->mm: 13 / DY->tautau: 15
+
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes
 
@@ -367,10 +376,19 @@ samples:
       jobs: 3
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_TauTau.txt
+    #- name: TauTau_M-10to50
+    #  type: background
+    #  jobs: 3
+    #  nano dir: Catalogs/2018
+    #  catalog: Catalog2018_bonzai_DYJetsToTauTau_M-10to50.txt
     - name: GammaGamma
       type: background
       nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_GGToLL.txt
+    - name: GammaGamma_M-5to50
+      type: background
+      nano dir: Catalogs/2018/MassBinned_MiNNLO
+      catalog: Catalog2018_bonzai_GGToLL_M-5to50.txt
 
 # Scale factors
 tables:
@@ -421,9 +439,8 @@ MC grouping:
       samples: [ TauTau ]
       color: 434 # kCyan + 2
     - legend: "#gamma#gamma"
-      samples: [ GammaGamma ]
+      samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
-
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

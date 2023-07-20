@@ -371,6 +371,10 @@ samples:
       type: background
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_GGToLL.txt
+    - name: GammaGamma_M-5to50
+      type: background
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
 
 # Scale factors
 tables:
@@ -404,7 +408,7 @@ MC grouping:
       samples: [ TauTau ]
       color: 434 # kCyan + 2
     - legend: "#gamma#gamma"
-      samples: [ GammaGamma ]
+      samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
 
 # The file below defines the binnings for histograms relevant to the analysis.

@@ -66,10 +66,30 @@ void apply_smu_trigger_sf(physics::weights &w,
         ef_data_1 = tab.at("smu trigger data").getEfficiency(mu1.raw_v.Pt(), std::abs(mu1.raw_v.Eta()));
         ef_data_2 = tab.at("smu trigger data").getEfficiency(mu2.raw_v.Pt(), std::abs(mu2.raw_v.Eta()));
         ef_data_tot = 1 - (1 - ef_data_1)*(1 - ef_data_2);
+
+        // ef_data_tot (numerator) = 0: intentionally kill the event (weight = 0)
+        // e.g. the case when v.Pt() > 26 GeV but raw_v.Pt() < 26 GeV
+        if( ef_data_tot == 0 ) {
+            w.use_weight(0.0);
+            return;
+        }
+
         ef_mc_1 = tab.at("smu trigger mc").getEfficiency(mu1.raw_v.Pt(), std::abs(mu1.raw_v.Eta()));
         ef_mc_2 = tab.at("smu trigger mc").getEfficiency(mu2.raw_v.Pt(), std::abs(mu2.raw_v.Eta()));
         ef_mc_tot = 1 - (1 - ef_mc_1)*(1 - ef_mc_2);
+
+        // ef_data_tot!=0 but ef_mc_tot==0: it should not happen - for sanity check
+        if( ef_mc_tot == 0 ) { 
+            util::logging::warn << "event (s-mu) trigger efficiency for MC is 0! ... (pt1, eta1, pt2, eta2) = (" 
+                                << mu1.raw_v.Pt() << ", " << std::abs(mu1.raw_v.Eta()) << ", " 
+                                << mu2.raw_v.Pt() << ", " << std::abs(mu2.raw_v.Eta()) << "). "
+                                << "smu_trigger_sf is set to 0" << std::endl;
+            w.use_weight(0.0);
+            return;
+        }
+            
         smu_trigger_sf = (1. * ef_data_tot) / ef_mc_tot;
+
         w.use_weight(smu_trigger_sf);
     }
 }

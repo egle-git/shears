@@ -104,7 +104,7 @@ class Unfold
          * This is used when doing unfolding via the inversion method
          * This is also used for calculating the condition number
          */
-		TMatrixD makeMatrixFromHist(TH2F*hist);
+		TMatrixD makeMatrixFromHist(TH2*hist);
 
         /**
          * \brief Make a vector from a given 1D histogram
@@ -118,10 +118,16 @@ class Unfold
          * Takes a TVectorD object and returns a histogram
          * TVectorD vec is the vector to be made into a histogram
          * TH1F*hist is used to get the desired binning correct
-         * This is used when doing unfolding via inversion
-         * It turns the vector back into a histogram for plotting 
          */
 		TH1F*makeHistFromVector(TVectorD vec,TH1F*hist);
+
+        /**
+         * \brief Makes a 2D histogram from a matrix
+         * Takes a TMatrixD object and returns a histogram
+         * TMatrixD vec is the vector to be made into a histogram
+         * TH2F*hist is used to get the desired binning correct
+         */
+		TH2F*makeHistFromMatrix(TMatrixD mat,TH2*hist);
 
         /**
          * \brief Makes plot of a 2D histogram
@@ -226,6 +232,10 @@ class Unfold
          */ 
         TH2*ReturnOutputCovariance();
 
+        /*
+         * \brief Returns matrix of correlations 
+         */ 
+        TH2*ReturnCorrelationMatrix();
         /*
          * \brief tells if true distribution is on the y-axis
          */ 

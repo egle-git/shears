@@ -394,7 +394,7 @@ void Unfold::SetMatrixPlotAttributes(TH2F*hist)
     hist->GetYaxis()->SetMoreLogLabels();
 }
 
-TMatrixD Unfold::makeMatrixFromHist(TH2F*hist)
+TMatrixD Unfold::makeMatrixFromHist(TH2*hist)
 {
 	int nBinsX = hist->GetNbinsX();
 	int nBinsY = hist->GetNbinsY();
@@ -426,10 +426,23 @@ TVectorD Unfold::makeVectorFromHist(TH1F*hist)
 
 TH1F*Unfold::makeHistFromVector(TVectorD vec,TH1F*hist)
 {
-	TH1F*hReturn = (TH1F*)hist->Clone("hUnfolded");
+	TH1F*hReturn = (TH1F*)hist->Clone();
 	int nBins = vec.GetNrows();
-	for(int i=0;i<nBins+1;i++){
-		hReturn->SetBinContent(i,vec(i));
+	for(int i=0;i<nBins;i++){
+		hReturn->SetBinContent(i+1,vec(i));
+	}
+	return hReturn;
+}//end makeHistFromVector
+
+TH2F*Unfold::makeHistFromMatrix(TMatrixD mat,TH2*hist)
+{
+	TH2F*hReturn = (TH2F*)hist->Clone();
+	int nRows = mat.GetNrows();
+	int nCols = mat.GetNcols();
+	for(int i=0;i<nRows;i++){
+        for(int j=0;j<nRows;j++){
+            hReturn->SetBinContent(i+1,j+1,mat(i,j));
+        }
 	}
 	return hReturn;
 }//end makeHistFromVector
@@ -647,4 +660,23 @@ TH2*Unfold::ReturnOutputCovariance()
     if(_hOutputCovariance==NULL) std::cout << "ERROR: Output covariance is not defined. It will only be set after unfolding has been carried out" << std::endl;
     return _hOutputCovariance;
 
+}
+
+TH2*Unfold::ReturnCorrelationMatrix()
+{
+    if(_hOutputCovariance==NULL) std::cout << "ERROR: Output covariance is not defined. It will only be set after unfolding has been carried out" << std::endl;
+    TMatrixD mCov = makeMatrixFromHist(_hOutputCovariance);
+    int nCols = mCov.GetNcols();
+    int nRows = mCov.GetNrows();
+    TMatrixD mCorr(nCols,nRows);    
+    TMatrixD mDiag(nCols,nRows);    
+    
+    for(int i=0;i<nCols;i++){
+        mDiag(i,i)=TMath::Sqrt(mCov(i,i));
+    } 
+    mDiag.Invert();   
+    mCorr = mDiag*mCov;
+    mCorr*=mDiag;
+    TH2F*hist = makeHistFromMatrix(mCorr,_hOutputCovariance);
+    return hist; 
 }

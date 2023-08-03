@@ -58,16 +58,34 @@ void unfold(TString directory,TString channel)
     covSave += "_OutputCovariance";
     covSave += saveSuffix;
     TCanvas*cCov = new TCanvas("cCov","",0,0,1000,1000);
+    cCov->SetRightMargin(0.15);
+    cCov->SetLeftMargin(0.15);
     cCov->SetLogz();
     hOutCov->Draw("colz");
     cCov->SaveAs(covSave);
+
+    //Get Output covariance matrix
+    TH2*hOutCorr = unfData->ReturnCorrelationMatrix();
+    TString corrSave = savePrefix;
+    corrSave += "_Correlations";
+    corrSave += saveSuffix;
+    TCanvas*cCorr = new TCanvas("cCorr","",0,0,1000,1000);
+    cCorr->SetRightMargin(0.15);
+    cCorr->SetLeftMargin(0.15);
+    hOutCorr->Draw("colz");
+    cCorr->SaveAs(corrSave);
 
     // plot response matrix
     TH2F*hResponse = unfClosure->ReturnResponseMatrix();
     TString responseSave = savePrefix;
     responseSave += "_ResponseMatrix";
     responseSave += saveSuffix;
-    unfData->plotMatrix(hResponse,responseSave,true);
+//    unfData->plotMatrix(hResponse,responseSave,true);
+    TCanvas*cResp = new TCanvas("cResp","",0,0,1400,1000);
+    cResp->SetRightMargin(0.15);
+    cResp->SetLeftMargin(0.15);
+    hResponse->Draw("colz");
+    cResp->SaveAs(responseSave);
 
     // Save the histograms
     TString save_loc = directory;

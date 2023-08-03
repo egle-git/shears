@@ -664,19 +664,38 @@ TH2*Unfold::ReturnOutputCovariance()
 
 TH2*Unfold::ReturnCorrelationMatrix()
 {
-    if(_hOutputCovariance==NULL) std::cout << "ERROR: Output covariance is not defined. It will only be set after unfolding has been carried out" << std::endl;
+
+    // This uses the definition of correlation matrix:
+    // diagonal matrix D = sqrt(diagonal(M_cov))
+    // M_corr = D^(-1) M_cov D^(-1) (one D is transposed, but it is diagonal)
+    // I took this from: https://math.stackexchange.com/questions/186959/correlation-matrix-from-covariance-matrix
+    if(_hOutputCovariance==NULL) std::cout << "ERROR: Output covariance is not defined and is needed to calculate correlations. It will only be set after unfolding has been carried out" << std::endl;
+
+    // define covariance matrix from covariance histogram output by TUnfold
     TMatrixD mCov = makeMatrixFromHist(_hOutputCovariance);
     int nCols = mCov.GetNcols();
     int nRows = mCov.GetNrows();
+
+    // initialize correlation matrix and a diagonal matrix
     TMatrixD mCorr(nCols,nRows);    
     TMatrixD mDiag(nCols,nRows);    
     
+    // The diagonal matrix holds only the errors from unfolding, the square roots of the diagonals of the covariance matrix
     for(int i=0;i<nCols;i++){
         mDiag(i,i)=TMath::Sqrt(mCov(i,i));
     } 
+
+    // invert diagonal matrix
     mDiag.Invert();   
+
+    // multiply inverse of diagonal matrix by the covariance matrix
     mCorr = mDiag*mCov;
+
+    // multiply the inverse of the diagonal matrix by the result of the previous matrix multiplication
     mCorr*=mDiag;
+    
+    // Now fill a 2D histogram with the results from this procedure which is now the matrix of correlations
     TH2F*hist = makeHistFromMatrix(mCorr,_hOutputCovariance);
+
     return hist; 
 }

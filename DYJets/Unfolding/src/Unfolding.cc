@@ -696,6 +696,7 @@ TH2*Unfold::ReturnCorrelationMatrix()
     
     // Now fill a 2D histogram with the results from this procedure which is now the matrix of correlations
     TH2F*hist = makeHistFromMatrix(mCorr,_hOutputCovariance);
+    hist->GetZaxis()->SetRangeUser(-0.5,1.0);
 
     return hist; 
 }

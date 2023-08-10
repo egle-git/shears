@@ -64,7 +64,7 @@ void unfold(TString directory,TString channel)
     hOutCov->Draw("colz");
     cCov->SaveAs(covSave);
 
-    //Get Output covariance matrix
+    //Get Output correlation matrix
     TH2*hOutCorr = unfData->ReturnCorrelationMatrix();
     TString corrSave = savePrefix;
     corrSave += "_Correlations";

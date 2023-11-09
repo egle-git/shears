@@ -245,6 +245,12 @@ select the best muon trigger SF:
   # reject or not (default: false)
   reject low quality muon events: true
 
+# Reweighting for top backgrounds (emu method)
+emu method reweighting:
+  use: yes
+  offset: 1.3261
+  slope: -0.157662
+
 # List of available data/MC samples
 samples:
     ### DATA

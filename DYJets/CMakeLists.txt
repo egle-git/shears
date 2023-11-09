@@ -114,12 +114,14 @@ add_library(DYJets-physics
     Sources/BTagCalibrationStandalone.cc
     Sources/boson_jets_analyzer.cc
     Sources/btagger.cc
+    Sources/charge_misid.cc
     Sources/electrons.cc
     Sources/genleps.cc
     Sources/jets.cc
     Sources/JetResolution.cc
     Sources/JetResolutionObject.cc
     Sources/muons.cc
+    Sources/met.cc
     Sources/pileup.cc
     Sources/RoccoR.cc
     Sources/standalone_LumiReWeighting.cc
@@ -162,6 +164,7 @@ add_library(DYJets-bkg-est
     Sources/mc_group.cc
     Sources/comparison_entry.cc
     Sources/emu_method_builder.cc
+    Sources/top_reweight_emu_builder.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

@@ -1,4 +1,4 @@
-#include "emu_method_builder.h"
+#include "top_reweight_emu_builder.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -15,13 +15,14 @@
 #include <TFile.h>
 #include <TVectorD.h>
 #include <TF1.h>
+#include <TFitResult.h>
 
 #include "mc_group.h"
 
 namespace util
 {
 
-emu_method_builder::emu_method_builder(const std::string &analyzer_name) :
+top_reweight_emu_builder::top_reweight_emu_builder(const std::string &analyzer_name) :
     _analyzer_name(analyzer_name),
     _default_config_file(analyzer_name + ".yml"),
     _preliminary(true),
@@ -29,7 +30,7 @@ emu_method_builder::emu_method_builder(const std::string &analyzer_name) :
 {
 }
 
-void emu_method_builder::parse_options(int argc, char **argv)
+void top_reweight_emu_builder::parse_options(int argc, char **argv)
 {
     auto options = this->options();
 
@@ -49,7 +50,7 @@ void emu_method_builder::parse_options(int argc, char **argv)
     }
 }
 
-void emu_method_builder::build()
+void top_reweight_emu_builder::build()
 {
     load();
     create_output_dir();
@@ -57,8 +58,8 @@ void emu_method_builder::build()
 
     bool log = (_opt.map.count("lin") == 0);
 
-    util::logging::debug << "Creating output file: " << _output_dir_name + "/dyjets-PromptBkg.root" << std::endl;
-    std::unique_ptr<TFile> fout = std::unique_ptr<TFile>(new TFile((_output_dir_name + "/dyjets-PromptBkg.root").c_str(), "RECREATE"));
+    util::logging::debug << "Creating output file: " << _output_dir_name + "/dyjets-TopBkgs.root" << std::endl;
+    std::unique_ptr<TFile> fout = std::unique_ptr<TFile>(new TFile((_output_dir_name + "/dyjets-TopBkgs.root").c_str(), "RECREATE"));
     // Creating a job info histogram to allow the data-driven backgrounds be used in reco comparison code
     std::unique_ptr<TH1D> job_info = std::unique_ptr<TH1D>(new TH1D("_job_info", "_job_info", 4 ,0, 4));
     job_info->SetBinContent(1, 1);
@@ -78,53 +79,21 @@ void emu_method_builder::build()
         _logx = _style.get<bool>("log x", name, false);
 
         // EMU METHOD
-        // Estimate all backgrounds at once
-        util::logging::debug << "Performing emu method on all backgrounds at once" << std::endl;
-        std::unique_ptr<TH1> all_bkg_mc = _ll_mc_entry->get(name, _lumi);
-        if (!all_bkg_mc)
-        {
-            util::logging::warn << "The current dilepton MC histogram was not found!" << std::endl;
-            continue;
-        }
-        util::logging::debug << "ll mc events: " << all_bkg_mc->Integral() << std::endl;
-        _bkg_estimation = emu_method(all_bkg_mc.get());
+        // Estimate all top backgrounds at once
+        util::logging::debug << "Performing emu method on top backgrounds only" << std::endl;
+        _bkg_estimation = emu_method();
         if (!_bkg_estimation)
         {
             util::logging::warn << "The current dilepton MC histogram was not found!" << std::endl;
             continue;
         }
-        util::logging::debug << "Estimated background events using emu method: " << _bkg_estimation->Integral() << std::endl;
+        util::logging::debug << "Estimated top background events using emu method: " << _bkg_estimation->Integral() << std::endl;
 
         // Save the historgrams
         fout->cd();
-        util::logging::debug << "Saving the estimated background histogram" << std::endl;
+        util::logging::debug << "Saving the estimated top background histogram" << std::endl;
         _bkg_estimation->Write(name.c_str());
         _bkg_estimation->SetDirectory(0);
-
-        // Estimate backgrounds one by one (may be desired for histograms)
-        util::logging::debug << "Performing emu method on all backgrounds one by one" << std::endl;
-        for (data::mc_group &group : _ll_mc_entry->groups()) {
-            for (data::mc_group::sample_data &sd : group.samples_data()) {
-                if (sd.sample.name().find("DYJets") != std::string::npos ||
-                    sd.sample.name().find("WZ") != std::string::npos ||
-                    sd.sample.name().find("ZZ") != std::string::npos ||
-                    sd.sample.name().find("WJetsToLNu") != std::string::npos ||
-                    sd.sample.name().find("GammaGamma") != std::string::npos ||
-                    sd.sample.name().find("Fakes") != std::string::npos)
-                    continue;
-                util::logging::debug << "  Processing " << sd.sample.name() << std::endl;
-                std::unique_ptr<TH1> single_bkg_mc = sd.centry->get(name, _lumi*group.scale_factor());
-                std::unique_ptr<TH1> single_bkg_est = emu_method(single_bkg_mc.get());
-                if (!single_bkg_est) continue;
-
-                // Save the histogram
-                util::logging::debug << "    Saving into a file " + _output_dir_name + "/dyjets-"+sd.sample.name()+".root" << std::endl;
-                std::unique_ptr<TFile> fout_single = std::unique_ptr<TFile>(new TFile((_output_dir_name + "/dyjets-"+sd.sample.name()+".root").c_str(), "UPDATE"));
-                fout_single->cd();
-                single_bkg_est->Write(name.c_str());
-                fout_single->Close();
-            }
-        }
 
         // Draw comparison between MC and emu method
         util::logging::debug << "Drawing the comparison between MC and emu method" << std::endl;
@@ -151,7 +120,7 @@ void emu_method_builder::build()
         cms.SetNDC();
         cms.SetText(0.1,
                     0.9,
-                    _preliminary ? "#bf{CMS} #it{Preliminary}" : "#bf{CMS}");
+                    _preliminary ? "#bf{CMS} #it{in progress}" : "#bf{CMS}");
         cms.Draw();
 
         // Lumi label
@@ -212,9 +181,9 @@ void emu_method_builder::build()
         reset_drawing_state();
 
     }// for (const std::string &name : _histogram_names)
-}// void emu_method_builder::build()
+}// void top_reweight_emu_builder::build()
 
-std::unique_ptr<data::data_comparison_entry> emu_method_builder::load_data(
+std::unique_ptr<data::data_comparison_entry> top_reweight_emu_builder::load_data(
         const std::string &input_dir)
 {
     util::logging::debug << " Loading data from" + input_dir << std::endl;
@@ -231,7 +200,7 @@ std::unique_ptr<data::data_comparison_entry> emu_method_builder::load_data(
     return ptr;
 }
 
-std::unique_ptr<data::mc_comparison_entry> emu_method_builder::load_mc(
+std::unique_ptr<data::mc_comparison_entry> top_reweight_emu_builder::load_mc(
         const std::string &input_dir,
         bool keep_signal,
         bool keep_background,
@@ -293,14 +262,14 @@ namespace /* anonymous */ {
     }
 } // namespace anonymous
 
-void emu_method_builder::format_upper_x_axis(TAxis &axis) const
+void top_reweight_emu_builder::format_upper_x_axis(TAxis &axis) const
 {
     if (_logx) {
         prepare_axis_for_log(axis);
     }
 }
 
-void emu_method_builder::format_upper_y_axis(TAxis &axis, const std::string &title) const
+void top_reweight_emu_builder::format_upper_y_axis(TAxis &axis, const std::string &title) const
 {
     axis.SetLabelSize(0.04);
     axis.SetLabelOffset(0.002);
@@ -309,7 +278,7 @@ void emu_method_builder::format_upper_y_axis(TAxis &axis, const std::string &tit
     axis.SetTitleOffset(1.32);
 }
 
-void emu_method_builder::format_lower_x_axis(TAxis &axis) const
+void top_reweight_emu_builder::format_lower_x_axis(TAxis &axis) const
 {
     axis.SetTickLength(0.03);
     axis.SetTitleSize(0.1);
@@ -337,7 +306,7 @@ void emu_method_builder::format_lower_x_axis(TAxis &axis) const
     }
 }
 
-void emu_method_builder::format_lower_y_axis(TAxis &axis, const std::string &title) const
+void top_reweight_emu_builder::format_lower_y_axis(TAxis &axis, const std::string &title) const
 {
     axis.SetNdivisions(5, 5, 0);
     axis.SetTitle(title.c_str());
@@ -347,7 +316,7 @@ void emu_method_builder::format_lower_y_axis(TAxis &axis, const std::string &tit
     axis.SetLabelSize(0.08);
 }
 
-po::options_description emu_method_builder::options() const
+po::options_description top_reweight_emu_builder::options() const
 {
     po::options_description options = po::options_description("EMu comparison options"); 
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
@@ -362,7 +331,7 @@ po::options_description emu_method_builder::options() const
     return options;
 }
 
-void emu_method_builder::load()
+void top_reweight_emu_builder::load()
 {
     util::logging::debug << "Loading all samples" << std::endl;
     std::string ll_input_dir = _opt.config["ll location"].as<std::string>();
@@ -377,9 +346,13 @@ void emu_method_builder::load()
     _reversed = (parsed_options().map.count("reversed") > 0);
 
     _ll_data_entry = load_data(ll_input_dir);
-    _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DYJets WZ ZZ W+Jets #gamma#gamma #gamma+Jets QCD Fakes");
+    _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
+    // _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau Single top VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
     _emu_data_entry = load_data(emu_input_dir);
-    _emu_mc_entry = load_mc(emu_input_dir, 0, 1, "W+Jets #gamma+Jets QCD");
+    _emu_mc_entry = load_mc(emu_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
+    // _emu_mc_entry = load_mc(emu_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau Single top VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
+    _emu_mc_subtract_entry = load_mc(emu_input_dir, 0, 1, "t#bar{t} TT Single top W+Jets #gamma+Jets QCD");
+    // _emu_mc_subtract_entry = load_mc(emu_input_dir, 0, 1, "t#bar{t} W+Jets #gamma+Jets QCD");
 
     _lumi = _ll_data_entry->lumi();
     util::logging::info << "Normalizing MC to " << (_lumi / 1000) << " fb^-1" << std::endl;
@@ -387,7 +360,7 @@ void emu_method_builder::load()
         util::logging::error << "Integrated luminosity does not match between different files!" << std::endl;
 }
 
-void emu_method_builder::fill_upper_panel(const std::string &name)
+void top_reweight_emu_builder::fill_upper_panel(const std::string &name)
 {
     util::logging::debug << "Filling upper pannel" << std::endl;
     _ll_mc_entry->draw(name, _lumi);
@@ -404,14 +377,14 @@ void emu_method_builder::fill_upper_panel(const std::string &name)
     }
 }
 
-void emu_method_builder::fill_legend(TLegend &legend, const std::string &name)
+void top_reweight_emu_builder::fill_legend(TLegend &legend, const std::string &name)
 {
     util::logging::debug << "Filling legend" << std::endl;
     legend.AddEntry(_bkg_estimation.get(), "e#mu method", "lp");
     _ll_mc_entry->add_to_legend(legend, name, _lumi);
 }
 
-bool emu_method_builder::fill_lower_panel(const std::string &name)
+bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
 {
     util::logging::debug << "Filling lower pannel" << std::endl;
     std::unique_ptr<TH1> num = nullptr;
@@ -451,8 +424,11 @@ bool emu_method_builder::fill_lower_panel(const std::string &name)
     {
         std::unique_ptr<TF1> fit(new TF1("fit", "[0]+[1]*log10(x)"));
         fit->SetParameters(1.0, 1.0/1000.0);
-        _ratio->Fit(fit.get());
+        auto fit_result = _ratio->Fit(fit.get(), "S");
+        fit_result->Print("V");
+        auto cov_matrix = fit_result->GetCovarianceMatrix();
 
+        // Producing a text file with content to copy into the yml file for reweighting
         std::ofstream fitFile(_output_dir_name + "/fitParams.txt");
 
         if (fitFile.is_open()) {
@@ -468,7 +444,8 @@ bool emu_method_builder::fill_lower_panel(const std::string &name)
             //     }
             //     fitFile << std::endl;
             // }
-            
+
+            fitFile.close();
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;
         } else {
             std::cerr << "Unable to open the file for fit parameters." << std::endl;
@@ -478,17 +455,18 @@ bool emu_method_builder::fill_lower_panel(const std::string &name)
     return true;
 }
 
-void emu_method_builder::reset_drawing_state()
+void top_reweight_emu_builder::reset_drawing_state()
 {
     util::logging::debug << "Resetting drawing state" << std::endl;
     _ll_mc_entry->reset_drawing_state();
     _ll_data_entry->reset_drawing_state();
     _emu_mc_entry->reset_drawing_state();
+    _emu_mc_subtract_entry->reset_drawing_state();
     _emu_data_entry->reset_drawing_state();
     _ratio.reset();
 }
 
-void emu_method_builder::create_output_dir() const
+void top_reweight_emu_builder::create_output_dir() const
 {
     using namespace boost::filesystem;
 
@@ -505,7 +483,7 @@ void emu_method_builder::create_output_dir() const
     }
 }
 
-void emu_method_builder::filter_histogram_names()
+void top_reweight_emu_builder::filter_histogram_names()
 {
     util::logging::debug << "Filtering histogram names" << std::endl;
     if (_opt.map.count("histogram-name") > 0) {
@@ -548,9 +526,9 @@ void emu_method_builder::filter_histogram_names()
         util::logging::info << removed << " histograms skipped due to style rules."
                             << std::endl;
     }
-}// emu_method_builder::filter_histogram_names()
+}// top_reweight_emu_builder::filter_histogram_names()
 
-void emu_method_builder::remove_negative_bins(std::unique_ptr<TH1> &hist)
+void top_reweight_emu_builder::remove_negative_bins(std::unique_ptr<TH1> &hist)
 {
     util::logging::debug << "Removing negative bins from " << hist->GetTitle() << std::endl;
     for (int i=0; i<=hist->GetNbinsX()+1; ++i) {
@@ -559,28 +537,36 @@ void emu_method_builder::remove_negative_bins(std::unique_ptr<TH1> &hist)
     }
 }
 
-std::unique_ptr<TH1> emu_method_builder::emu_method(const TH1* ll_mc_input)
+std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
 {
-    util::logging::debug << "Getting emu data and MC for emu method" << std::endl;
+    std::unique_ptr<TH1> ll_mc_input = _ll_mc_entry->get(_current_histo_name, _lumi);
     if (!ll_mc_input) {
         util::logging::warn << "The current dilepton MC histogram was not found!" << std::endl;
         return nullptr;
     }
+    util::logging::debug << "ll mc events: " << ll_mc_input->Integral() << std::endl;
 
     std::unique_ptr<TH1> num = _emu_data_entry->get(_current_histo_name, _lumi);
     std::unique_ptr<TH1> den = _emu_mc_entry->get(_current_histo_name, _lumi);
-
+    std::unique_ptr<TH1> sub = _emu_mc_subtract_entry->get(_current_histo_name, _lumi);
     if (!num) {
         util::logging::warn << "The current EMu data histogram was not found!" << std::endl;
         return nullptr;
     }
+    if (!sub) {
+        util::logging::warn << "The current non-top EMu MC histogram was not found!" << std::endl;
+        return nullptr;
+    }
     if (!den) {
-        util::logging::warn << "The current EMu MC histogram was not found!" << std::endl;
+        util::logging::warn << "The current top EMu MC histogram was not found!" << std::endl;
         return nullptr;
     }
 
-    util::logging::debug << "emu data events: " << num->Integral() << std::endl;
-    util::logging::debug << "emu mc events: " << den->Integral() << std::endl;
+    util::logging::debug << "emu data events before MC subtraction: " << num->Integral() << std::endl;
+    util::logging::debug << "non-top emu mc events to be subtracted from data: " << sub->Integral() << std::endl;
+    num->Add(sub.get(), -1);
+    util::logging::debug << "emu data events after MC subtraction: " << num->Integral() << std::endl;
+    util::logging::debug << "top emu mc events: " << den->Integral() << std::endl;
 
     std::unique_ptr<TH1> bkg_est = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone()));
     

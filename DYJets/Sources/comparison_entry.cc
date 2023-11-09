@@ -20,7 +20,8 @@ mc_comparison_entry::mc_comparison_entry(const util::options &opt,
                                          const std::string &analyzer_name,
                                          const std::string &input_dir,
                                          bool keep_signal,
-                                         bool keep_background)
+                                         bool keep_background,
+                                         const std::string &excluded_groups)
 {
     std::vector<data::sample> samples = data::sample::load(opt);
     _groups = data::mc_group::load(opt, analyzer_name, input_dir, samples);
@@ -33,10 +34,15 @@ mc_comparison_entry::mc_comparison_entry(const util::options &opt,
     if (!keep_background) {
         _groups.erase(std::remove_if(_groups.begin(),
                                      _groups.end(),
-                                     [](const mc_group &g) {
-                                         return !g.is_signal(); }),
+                                     [](const mc_group &g) { return !g.is_signal(); }),
                       _groups.end());
     }
+    _groups.erase(std::remove_if(_groups.begin(),
+                                 _groups.end(),
+                                 [excluded_groups](const mc_group &g) {
+                                     return (excluded_groups.find(g.legend()) != std::string::npos);
+                                 }),
+                  _groups.end());
 }
 
 void mc_comparison_entry::add_histograms(std::set<std::string> &histos)
@@ -46,7 +52,10 @@ void mc_comparison_entry::add_histograms(std::set<std::string> &histos)
     }
 }
 
-void mc_comparison_entry::add_to_legend(TLegend &legend, const std::string &plotname, double lumi)
+void mc_comparison_entry::add_to_legend(TLegend &legend,
+                                        const std::string &plotname,
+                                        double lumi,
+                                        std::string option)
 {
     if (_stack == nullptr) {
         create_stack(plotname, lumi);
@@ -62,7 +71,7 @@ void mc_comparison_entry::add_to_legend(TLegend &legend, const std::string &plot
         throw std::logic_error("Inconsistent sizes in mc_comparison_entry::add_to_legend");
     }
     for (int i = _legend.size() - 1; i >= 0; --i) {
-        legend.AddEntry(dynamic_cast<TH1 *>(histograms->At(i)), _legend[i].c_str());
+        legend.AddEntry(dynamic_cast<TH1 *>(histograms->At(i)), _legend[i].c_str(), option.c_str());
     }
 }
 
@@ -99,6 +108,11 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
     return res;
 }
 
+double mc_comparison_entry::Integral(const std::string &name, double lumi)
+{
+    return get(name, lumi)->Integral();
+}
+
 TAxis *mc_comparison_entry::get_x_axis(const std::string &name, double lumi)
 {
     if (_stack == nullptr) {
@@ -111,6 +125,20 @@ TAxis *mc_comparison_entry::get_x_axis(const std::string &name, double lumi)
         return nullptr;
     }
     return _stack->GetXaxis();
+}
+
+TAxis *mc_comparison_entry::get_y_axis(const std::string &name, double lumi)
+{
+    if (_stack == nullptr) {
+        create_stack(name, lumi);
+        if (_stack == nullptr) {
+            return nullptr;
+        }
+    }
+    if (_stack->GetNhists() == 0) {
+        return nullptr;
+    }
+    return _stack->GetYaxis();
 }
 
 void mc_comparison_entry::reset_drawing_state()
@@ -188,7 +216,10 @@ void data_comparison_entry::add_histograms(std::set<std::string> &histos)
     }
 }
 
-void data_comparison_entry::add_to_legend(TLegend &legend, const std::string &plotname, double lumi)
+void data_comparison_entry::add_to_legend(TLegend &legend,
+                                          const std::string &plotname,
+                                          double lumi,
+                                          std::string option)
 {
     if (_histo == nullptr) {
         create_histo(plotname, lumi);
@@ -196,7 +227,7 @@ void data_comparison_entry::add_to_legend(TLegend &legend, const std::string &pl
             return;
         }
     }
-    legend.AddEntry(_histo.get(), "Data");
+    legend.AddEntry(_histo.get(), "Data", option.c_str());
 }
 
 void data_comparison_entry::draw(const std::string &name, double lumi, bool same)
@@ -225,6 +256,11 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
     return res;
 }
 
+double data_comparison_entry::Integral(const std::string &name, double lumi)
+{
+    return get(name, lumi)->Integral();
+}
+
 TAxis *data_comparison_entry::get_x_axis(const std::string &name, double lumi)
 {
     if (_histo == nullptr) {
@@ -234,6 +270,17 @@ TAxis *data_comparison_entry::get_x_axis(const std::string &name, double lumi)
         }
     }
     return _histo->GetXaxis();
+}
+
+TAxis *data_comparison_entry::get_y_axis(const std::string &name, double lumi)
+{
+    if (_histo == nullptr) {
+        create_histo(name, lumi);
+        if (_histo == nullptr) {
+            return nullptr;
+        }
+    }
+    return _histo->GetYaxis();
 }
 
 void data_comparison_entry::reset_drawing_state()

@@ -35,6 +35,42 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
     util::logging::info << "Taking binnings from file " << binning_file << std::endl;
     histo_set.set_style(util::style_list(YAML::LoadFile(binning_file)));
     histo_set2D.set_style(util::style_list(YAML::LoadFile(binning_file)));
+
+    if (opt.config["emu method reweighting"])
+    {
+        const YAML::Node node = opt.config["emu method reweighting"];
+        _reweight_emu_method = node["use"].as<bool>();
+        if (_reweight_emu_method) {
+            _offset_emu_method = node["offset"].as<double>();
+            _slope_emu_method = node["slope"].as<double>();
+            util::logging::debug
+                << "Background will be reweighted according to their log(mass) with slope="
+                << _slope_emu_method << " and offset=" << _offset_emu_method << std::endl;
+        }
+    }
+
+    if (opt.config["same sign method reweighting"])
+    {
+        const YAML::Node node = opt.config["same sign method reweighting"];
+        _reweight_same_sign_method = node["use"].as<bool>();
+        if (_reweight_same_sign_method) {
+            if (node["MET offset"]) _met_offset_ss_method = node["MET offset"].as<double>();
+            if (node["MET slope"]) _met_slope_ss_method = node["MET slope"].as<double>();
+            if (node["MET exp offset"]) _met_exp_offset_ss_method = node["MET exp offset"].as<double>();
+            if (node["MET exp slope"]) _met_exp_slope_ss_method = node["MET exp slope"].as<double>();
+            util::logging::debug
+                << "Events will be reweighted according to their MET with linear slope="
+                << _met_slope_ss_method << ", offset=" << _met_offset_ss_method
+                << ", and exponent with slope=" << _met_exp_slope_ss_method
+                << " and offset=" << _met_exp_offset_ss_method << std::endl;
+
+            if (node["mass offset"]) _mass_offset_ss_method = node["mass offset"].as<double>();
+            if (node["mass slope"])  _mass_slope_ss_method  = node["mass slope"].as<double>();
+            util::logging::debug
+                << "Events will be reweighted according to their dilepton mass with linear slope="
+                << _mass_slope_ss_method << " and offset=" << _mass_offset_ss_method << std::endl;
+        }
+    }
 }
 
 namespace /* anonymous */
@@ -113,9 +149,16 @@ void apply_emu_trigger_sf(physics::weights &w,
                           const util::tables &tab)
 {
     if (w.ismc()) {
-        auto mu = l1.pdgid == 13 ? l1 : l2;
-        w.use_weight(tab.at("emu trigger")
-                        .getEfficiency(l1.v.Pt(), std::abs(l1.raw_v.Eta())));
+        auto mu = std::abs(l1.pdgid) == 13 ? l1 : l2;
+        double ef_data, ef_mc, smu_trigger_sf;
+        ef_data = tab.at("smu trigger data").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta()));
+        ef_mc = tab.at("smu trigger mc").getEfficiency(mu.raw_v.Pt(), std::abs(mu.raw_v.Eta()));
+        if (!ef_data || !ef_mc) {
+            w.use_weight(0);
+            return;
+        }
+        smu_trigger_sf = (1. * ef_data) / ef_mc;
+        w.use_weight(smu_trigger_sf);
     }
 }
 } // namespace anonymous
@@ -416,4 +459,24 @@ dyjets_analyzer::find_gen_boson(const std::vector<physics::lepton> &genleps)
 po::options_description dyjets_analyzer::options()
 {
     return po::options_description("Physics options");
+}
+
+void dyjets_analyzer::reweight_backgrounds(physics::weights &weights,
+                                           const std::string &sample_name,
+                                           const TLorentzVector &boson,
+                                           const TLorentzVector &met)
+{
+    // EMu method reweighting
+    if (_reweight_emu_method && (sample_name == "TT" || sample_name.find("ST") != std::string::npos)) {
+        double weight = _offset_emu_method + _slope_emu_method * std::log10(boson.M());
+        weights.use_weight(weight);
+    }
+    // Same-sign method reweighting
+    if (_reweight_same_sign_method) {
+        double weight = 1.0;
+        weight = ( _met_offset_ss_method - _met_slope_ss_method * met.Pt() *
+                std::exp(_met_exp_offset_ss_method - _met_exp_slope_ss_method * met.Pt()) ) *
+            ( _mass_offset_ss_method + _mass_slope_ss_method * std::log10(boson.M()) );
+        weights.use_weight(weight);
+    }
 }

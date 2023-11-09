@@ -12,7 +12,7 @@ log:
     log level: info
 
     # Pipe logs to the given log file, comment out for no log.
-    log file: log16.txt
+    log file: log17_emu.txt
 
     # Controls what's written in the log file.
     # Possible values: debug|info|warn|error|fatal (default: debug)
@@ -23,7 +23,7 @@ log:
     #override root handler: yes
 
 # Cut on the inclusive DYJets sample
-use exclusive mass binned DYJets samples: yes
+use exclusive mass binned DYJets samples: no
 
 # Whether to use pileup reweighing
 # Default value: true
@@ -35,7 +35,7 @@ use pileup reweighing: true
 # - 2016_PreAPV_emu, 2016_PostAPV_emu (for the data collected with the emu trigger)
 # - 2017
 # - 2018
-pileup type: 2016_PostAPV
+pileup type: 2017
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -52,7 +52,7 @@ generator level:
 
   # maximum lepton |eta| cut
   # default: 2.4
-  lepton eta: 2.4
+  lepton eta: 2.5
 
 # Options related to the selection of jets
 jets:
@@ -107,7 +107,7 @@ electrons:
 
     # Eta cut
     # Default value: 2.4
-    eta: 2.4
+    eta: 2.5
 
     # Relative isolation cut
     # Default value: 0.25
@@ -120,17 +120,23 @@ electrons:
 
     # Whether to use the identification scale factors
     # Default value: yes
-    use id scale factors: no
+    use id scale factors: yes
 
     # Whether to use the reconstruction scale factors
     # Default value: yes
-    use reconstruction scale factors: no
+    use reconstruction scale factors: yes
+
+    # Charge misidentification efficiency correction for electrons
+    use charge misid sf: yes
+    charge misid sf location: ChargeMisid/CFRate2017.root
+    # Choose mode: 0 -- nominal correction values, 1 -- up variation by 1 sigma, -1 -- down variation
+    charge misid sf mode: 0
 
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]
     # Default value: 20
-    pt: 15
+    pt: 30
 
     # Eta cut
     # Default value: 2.4
@@ -168,25 +174,25 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: 2016postAPV/RoccoR2016bUL.txt
-    #rochester correction path: rcdata.2016.v3
+    rochester correction path: 2017/RoccoR2017UL.txt
 
 # Good Z boson settings
 Z:
     # leading "lepton" pT cut [GeV]
     # Default value: 25
-    leading lepton pt: 20
+    leading lepton pt: 30
 
-    # m(ll)/pt(lep, sub) < X cut: reduce QCD in high mass region
-    mll/subleading lepton pt: 10
-
+    #mass/elpt(II)
+    mll/subleading lepton pT: 10
+    invert cut: no
+    
     # Low mass bound [GeV]
     # Default value: 0
     low mass: 40
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 3000
+    high mass: 4000
 
     # Charge check mode
     # Possible values:
@@ -204,198 +210,101 @@ Z:
     #   - mumu: Two muons
     #   - emu: One electron and one muon
     # Default value: same
-    flavor mode: mumu
+    flavor mode: emu
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 3000 ]
+mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 4000 ]
 
 # Triggers
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
 triggers: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
-    HLT_IsoMu24,
-    HLT_IsoTkMu24
+     HLT_IsoMu27
 
 use trigger scale factors: yes
 
-# select the best trigger SF depending on leading muon pt & fired trigger
-# this feature is only needed for the dimuon analysis
-select the best muon trigger SF:
-  # default: true
-  # if it is false, shears will always select single muon trigger SF (can be used for test jobs)
-  use: true
-
-  # single muon triggers used
-  single muon triggers: |
-    HLT_IsoMu24,
-    HLT_IsoTkMu24
-
-  # double muon triggers
-  double muon triggers: |
-    HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-    HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
-
-  # pt criteria for which trigger is used
-  # leading pt < pt criteria: use DMu / leading pt > pt criteria: use SMu
-  pt criteria: 26
-
-  # reject the events that fires single muon triggers "only" (i.e not pass dimuon triggers)
-  # but with pT(leading) < (pt_criteria) GeV muons (muons in turn-on curve or below)
-  # these events are not used due to the large SF
-  # reject or not (default: false)
-  reject low quality muon events: true
-
-# Reweighting for top backgrounds (emu method)
 emu method reweighting:
-  use: yes
-  offset: 1.34289
-  slope: -0.166371
+  use: no
+  offset: 1.32593
+  slope: -0.157588
 
 # List of available data/MC samples
 samples:
     ### DATA
     - name: data
       type: data
-      jobs: 26
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_DoubleMuon_data.txt
-      triggers: |
-          HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-          HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ
-    # Note: This sample has to be hadd-ed with 'data'.
-    #- name: data
-    - name: data-smu
-      type: data
-      jobs: 32
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_SingleMuon_data.txt
-      triggers: |
-          ^HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ,
-          ^HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,
-          HLT_IsoMu24,
-          HLT_IsoTkMu24
-    ### MC
-    #- name: DYJets
-    #  type: MC
-    #  jobs: 20
-    #  nano dir: Catalogs/2016postAPV
-    #  catalog: Catalog2016_bonzai_DYJetsToMuMu.txt
-    - name: DYJets_M-10to50
-      type: MC
-      jobs: 10
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-10to50.txt
-    - name: DYJets_M-50to100
-      type: MC
-      jobs: 31
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-50to100.txt
-    - name: DYJets_M-100to200
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-100to200.txt
-    - name: DYJets_M-200to400
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-200to400.txt
-    - name: DYJets_M-400to500
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-400to500.txt
-    - name: DYJets_M-500to700
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-500to700.txt
-    - name: DYJets_M-700to800
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-700to800.txt
-    - name: DYJets_M-800to1000
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-800to1000.txt
-    - name: DYJets_M-1000to1500
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-1000to1500.txt
-    - name: DYJets_M-1500to2000
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-1500to2000.txt
-    - name: DYJets_M-2000toInf
-      type: MC
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_DYJetsToMuMu_M-2000toInf.txt
+      jobs: 16
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_SingleMuon_data.txt
     ### BACKGROUND
     - name: ST_s-channel
       type: background
-      nano dir: Catalogs/2016postAPV/
-      catalog: Catalog2016_bonzai_ST_s-channel.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ST_s-channel.txt
     - name: ST_t-channel_antitop
       type: background
-      nano dir: Catalogs/2016postAPV/
-      catalog: Catalog2016_bonzai_ST_t-channel_antitop.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
       jobs: 3
-      nano dir: Catalogs/2016postAPV/
-      catalog: Catalog2016_bonzai_ST_t-channel_top.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
       type: background
-      nano dir: Catalogs/2016postAPV/
-      catalog: Catalog2016_bonzai_ST_tW_antitop.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ST_tW_antitop.txt
     - name: ST_tW_top
       type: background
-      nano dir: Catalogs/2016postAPV/
-      catalog: Catalog2016_bonzai_ST_tW_top.txt
-    #- name: WJetsToLNu
-    #  type: background
-    #  jobs: 4
-    #  nano dir: Catalogs/2016postAPV/
-    #  catalog: Catalog2016_bonzai_WJetsToLNu.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ST_tW_top.txt
+    - name: WJetsToLNu
+      type: background
+      jobs: 4
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_WJetsToLNu.txt
     - name: WWTo2L2Nu
       type: background
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_WWTo2L2Nu.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_WWTo2L2Nu.txt
     - name: WZ
       type: background
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_WZ.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_WZ.txt
     - name: ZZ
       type: background
       jobs: 5
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_ZZ.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_ZZ.txt
     - name: TT
       type: background
       jobs: 10
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_TTTo2L2Nu.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_TTTo2L2Nu.txt
     - name: TauTau
       type: background
       jobs: 3
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_TauTau.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_TauTau.txt
     - name: GammaGamma
       type: background
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_GGToLL.txt
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_GGToLL.txt
     - name: GammaGamma_M-5to50
       type: background
-      nano dir: Catalogs/2016postAPV/MassBinned_MiNNLO
-      catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
 
 # Scale factors
 tables:
-    muon id:        2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_ID_TightID.txt
-    muon isolation: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    dimu trigger:   2016postAPV/ScaleFactor_DoubleMuonTriggers_UL2016_Tight.txt
-    smu trigger data: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_SingleMuonTriggers_MC.txt
+    muon id:        2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ID_TightID.txt
+    muon isolation: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
+    electron id:    2017ULee/egamma_Medium_UL17.txt
+    electron reco:  2017ULee/egamma_reco_all_SF_UL2017.txt
+    smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
+    smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
 
 # Reweighing (eg for merged samples)
 #
@@ -417,29 +326,22 @@ tables:
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:
-    - legend: "Z/#gamma^{*} #rightarrow #mu#mu"
-      required: yes
-      #samples: [ DYJets ]
-      samples: [ DYJets_M-10to50, DYJets_M-50to100, DYJets_M-100to200, DYJets_M-200to400, 
-                 DYJets_M-400to500, DYJets_M-500to700, DYJets_M-700to800, DYJets_M-800to1000, 
-                 DYJets_M-1000to1500, DYJets_M-1500to2000, DYJets_M-2000toInf ]
-      color: 408 # kGreen - 8
-      is signal: yes
     - legend: "t#bar{t}"
       samples: [ TT ]
       color: 600 # kBlue
+    - legend: "DY#rightarrow#tau#tau"
+      samples: [ TauTau ]
+      color: 434 # kCyan + 2
     - legend: VV
       samples: [ ZZ, WWTo2L2Nu, WZ ]
       color: 633 # kRed + 1
     - legend: Single top
       samples: [ ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
       color: 616 # kMagenta
-    - legend: DY TauTau
-      samples: [ TauTau ]
-      color: 434 # kCyan + 2
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
@@ -466,61 +368,64 @@ binning file: dyjets-binnings.yml
 #                  the main label. Captures from the selector can be used to
 #                  provide dynamic labels.
 plots:
-    # Excluded plots
-    - selector: '^_.*'
+    - selector: '^.*'
       produce: no
-    - selector: '.*-gen$'
+    - selector: 'el.*_inc0jet'
       produce: yes
-    - selector: '.*-matrix$'
-      produce: no
-    - selector: '.*[12]jet.*'
-      produce: no
-    - selector: 'el.*'
-      produce: no
-    - selector: 'mu.*'
+    - selector: 'el.*leading.*_inc0jet'
       produce: yes
-    - selector: 'mu.*subleading.*'
+    - selector: 'mu.*_inc0jet'
       produce: yes
-    - selector: 'muIso.*'
+    - selector: 'mu.*leading.*_inc0jet'
+      produce: yes
+    - selector: 'mass_wide_range_inc0jet'
+      produce: yes
+    - selector: 'mass_inc0jet'
+      produce: yes
+    - selector: 'nvtx_inc0jet'
+      produce: yes
+    - selector: 'phistar_inc0jet'
+      produce: yes
+    - selector: 'pt_inc0jet.*'
+      produce: yes
+    - selector: 'rapidity_inc0jet.*'
+      produce: yes
+    - selector: 'mll_over_ptsub_inc0jet'
+      produce: yes
+    - selector: 'MET_pt_inc0jet'
+      produce: yes
+    - selector: 'MT_inc0jet'
+      produce: yes
+    - selector: '.*gen.*'
       produce: no
-    - selector: 'genLep.*'
+    - selector: '.*matrix.*'
       produce: no
-    - selector: 'bjet.*'
+    - selector: '.*UF.*'
       produce: no
-    - selector: 'jet.*leading.*'
+    - selector: '.*OF.*'
       produce: no
-    - selector: 'jet.*subleading.*'
-      produce: no
-    - selector: 'jet.*third.*'
-      produce: no
-    - selector: 'jet.*fourth.*'
-      produce: no
-    - selector: '.*exc.*'
-      produce: no
-    - selector: 'mass.*mass.*'
-      produce: no
-    - selector: '.*exc.*'
-      produce: no
-    - selector: 'nJets.*_inc.*'
-      produce: no
-    - selector: 'nJets.*_inc0jet.*'
+    - selector: '.*zoom.*'
       produce: no
     # Style changes
     - selector: '.*'
+#      ratio min: 0.601
+#      ratio max: 1.399
       ratio min: 0.901
       ratio max: 1.099
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
       log x: yes
+    - selector: '^pt_cut.*'
+      log x: yes
     - selector: '^mass_wide.*'
       log x: yes
-    - selector: 'dyjets_events.*inc0jet'
+    - selector: 'mass_inc0jet'
       ratio min: 0.901
       ratio max: 1.099
     # Axis labels
     - selector: '^mass.*'
-      x axis label: 'M_{#mu#mu}'
+      x axis label: 'M_{e#mu}'
       x axis unit: 'GeV'
     - selector: '^nJets.*'
       x axis label: 'Exclusive number of jets'
@@ -529,11 +434,17 @@ plots:
     - selector: '^phistar.*'
       x axis label: '#phi*'
     - selector: '^pt.*'
-      x axis label: 'p_{T}^{#mu#mu}'
+      x axis label: 'p_{T}^{e#mu}'
       x axis unit: 'GeV'
     - selector: '.+mass(.*)_(.*).*'
-      x axis detail: '$1 #leq M_{#mu#mu} < $2 GeV'
+      x axis detail: '$1 #leq M_{e#mu} < $2 GeV'
     - selector: '.*inc(1|2)jet.*'
       x axis detail: 'N_{jets} #geq $1'
     - selector: '.*exc(1|2)jet.*'
       x axis detail: 'N_{jets} = $1'
+    - selector: '^mass_cut.*'
+      x axis label: 'M_{e#mu}'
+      x axis unit: 'GeV'
+    - selector: '^pt_cut.*'
+      x axis label: 'p_{T}^{e#mu}'
+      x axis unit: 'GeV'

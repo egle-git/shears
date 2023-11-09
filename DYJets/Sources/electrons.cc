@@ -57,7 +57,13 @@ void electrons::configure(const util::options &opt)
             throw std::invalid_argument("Unknown electron id: \"" + id + "\"");
         }
     }
-    
+
+    if (node["use charge misid sf"]) {
+        _charge_misid_sf_enabled = node["use charge misid sf"].as<bool>();
+        if (_charge_misid_sf_enabled) {
+            _charge_misid = physics::charge_misid(node);
+        }
+    } 
 }
 
 std::vector<lepton> electrons::get(int & nVetoElecs)
@@ -140,6 +146,73 @@ void electrons::apply_sf(weights &w,
         }
     }
 }
+
+void electrons::apply_charge_misid_sf(physics::weights &weights,
+                                      const std::vector<physics::lepton> &_electrons,
+                                      const std::vector<physics::lepton> &_genleps)
+{
+    if (_charge_misid_sf_enabled && weights.ismc()) {
+        if (_electrons.size() && _genleps.size()) {
+            auto electrons = _electrons;
+            auto genleps = _genleps;
+            std::sort(electrons.begin(),
+                      electrons.end(),
+                      [](const physics::lepton &a, const physics::lepton &b) {
+                          return a.v.Pt() > b.v.Pt(); // Sort in descending order
+                      });
+
+            std::sort(genleps.begin(),
+                      genleps.end(),
+                      [](const physics::lepton &a, const physics::lepton &b) {
+                          return a.v.Pt() > b.v.Pt(); // Sort in descending order
+                      });
+
+            std::vector<int> matches(electrons.size(), -1);
+            std::vector<double> drmins(electrons.size(), 99999.9);
+
+            for (unsigned iel = 0; iel < electrons.size(); iel++) {
+                if (matches[iel] >= 0 && drmins[iel] < 99999) continue; // We already found a match
+
+                for (unsigned igen = 0; igen < genleps.size(); igen++) {
+                    if (std::abs(genleps[igen].pdgid) != 11) continue;
+
+                    double dr = electrons[iel].raw_v.DeltaR(genleps[igen].v);
+
+                    if (dr < drmins[iel]) {
+                        auto it = std::find(matches.begin(), matches.end(), igen);
+                        if (it == matches.end()) {
+                            drmins[iel] = dr;
+                            matches[iel] = igen;
+                        } else {
+                            int index = std::distance(matches.begin(), it);
+                            if (dr < drmins[index]) {
+                                // We have found a better match for one of the previous gen leptons
+                                // Rerun matching for a previous reco lepton
+                                drmins[iel] = dr;
+                                matches[iel] = igen;
+                                drmins[index] = 99999.9;
+                                matches[index] = -1;
+                                if (index > 0) iel = index - 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }// for (electrons)
+
+            if (std::find(matches.begin(), matches.end(), -1) != matches.end())
+                util::logging::warn << "Not all gen leptons found for charge_misid!" << std::endl;
+
+            for (unsigned iel = 0; iel < electrons.size(); iel++) {
+                if (matches[iel] >= 0) {
+                    if (electrons[iel].charge != genleps[matches[iel]].charge) {
+                        weights.use_weight(_charge_misid.get_sf(electrons[iel]));
+                    }
+                }
+            }
+        } // if(electrons.size())
+    } // if (ismc)
+} // apply_charge_misid_sf()
 
 void electrons::fill(util::histo_set &h,
                      const std::string &tag,

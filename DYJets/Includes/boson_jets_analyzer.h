@@ -17,6 +17,7 @@
 #include "lepton.h"
 #include "matched.h"
 #include "muons.h"
+#include "met.h"
 #include "pileup.h"
 #include "reweighing.h"
 #include "tables.h"
@@ -60,6 +61,7 @@ private:
     muons _muons;
     electrons _electrons;
     jets _jets;
+    met _met;
     pileup _pileup;
     btagger _btagger;
 
@@ -176,6 +178,12 @@ protected:
 
     // determine _era using "pileup type" in .yml file
     void get_era(const util::options &opt);
+
+    /// \brief Reweights the events depending on event properties (for emu method and same-sign method)
+    virtual void reweight_backgrounds(class weights &weights,
+                                      const std::string &sample_name,
+                                      const TLorentzVector &boson,
+                                      const TLorentzVector &met) = 0;
 };
 
 } // namespace physics

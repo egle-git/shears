@@ -32,7 +32,10 @@ class comparison_entry
     virtual void add_histograms(std::set<std::string> &histos) = 0;
 
     /// \brief Adds the current entry to the given legend.
-    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) = 0;
+    virtual void add_to_legend(TLegend &legend,
+                               const std::string &plotname,
+                               double lumi,
+                               std::string option) = 0;
 
     /**
      * \brief Draws the histogram with the given \c name on the current canvas.
@@ -49,6 +52,9 @@ class comparison_entry
      */
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) = 0;
 
+    /// \brief Returns the integral of the histogram
+    virtual double Integral(const std::string &name, double lumi) = 0;
+
     /**
      * \brief Returns a pointer to the \c TAxis corresponding to the horizontal
      *        axis.
@@ -57,6 +63,9 @@ class comparison_entry
      * pointer may not be invalidated until \ref reset_drawing_state is called.
      */
     virtual TAxis *get_x_axis(const std::string &/* name */, double /* lumi */)
+    { return nullptr; }
+
+    virtual TAxis *get_y_axis(const std::string &/* name */, double /* lumi */)
     { return nullptr; }
 
     /// \brief Discards any internal state bound to the last histogram.
@@ -81,16 +90,19 @@ class mc_comparison_entry : public comparison_entry
                                  const std::string &analyzer_name,
                                  const std::string &input_dir,
                                  bool keep_signal = true,
-                                 bool keep_background = true);
+                                 bool keep_background = true,
+                                 const std::string &excluded_groups = "");
 
     /// \brief Destructor.
     virtual ~mc_comparison_entry() = default;
 
     virtual void add_histograms(std::set<std::string> &histos) override;
-    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
+    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi, std::string option="f") override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
+    virtual double Integral(const std::string &name, double lumi) override;
     virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
+    virtual TAxis *get_y_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
     /// \brief Retrieves a histogram for a specified process from the group.
@@ -107,6 +119,9 @@ class mc_comparison_entry : public comparison_entry
 
     /// \brief Returns the vector of mc groups
     std::vector<mc_group> groups() { return _groups; }
+
+    /// \brief Returns the legend of mc group
+    std::vector<std::string> legend() { return _legend; }
 
     /// \brief Retrieves a list of all the histograms in the stack.
     TList* get_all_hists(const std::string &name, double lumi) {
@@ -146,10 +161,12 @@ class data_comparison_entry : public comparison_entry
     virtual ~data_comparison_entry() = default;
 
     virtual void add_histograms(std::set<std::string> &histos) override;
-    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi) override;
+    virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi, std::string option="lp") override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
+    virtual double Integral(const std::string &name, double lumi) override;
     virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
+    virtual TAxis *get_y_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
 
     /// \brief Returns the sum of event weights (for MC)

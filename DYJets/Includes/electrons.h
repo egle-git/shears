@@ -6,6 +6,7 @@
 
 #include <TTreeReaderArray.h>
 
+#include "charge_misid.h"
 #include "histo_set.h"
 #include "job.h"
 #include "lepton.h"
@@ -51,6 +52,9 @@ class electrons
 
     bool _id_sf_enabled = true;
     bool _reco_sf_enabled = true;
+    bool _charge_misid_sf_enabled = false;
+
+    physics::charge_misid _charge_misid;
     
   public:
     /// \brief Constructor.
@@ -84,6 +88,15 @@ class electrons
      * \throws std::out_of_range if a table is enabled and not present.
      */
     void apply_sf(weights &w, const std::vector<lepton> &electrons, const util::tables &tab) const;
+
+    /** \brief Applies the electron charge misID correction SF to a MC event
+     * \param weights Weights to be reweighed
+     * \param electrons List of electrons to take into account
+     * \param genleps List of generator level leptons to be used for gen-matching
+     */
+    virtual void apply_charge_misid_sf(physics::weights &weights,
+                                       const std::vector<physics::lepton> &_electrons,
+                                       const std::vector<physics::lepton> &_genleps);
 
     /**
      * \brief Fills muon control plots.

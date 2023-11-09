@@ -1,5 +1,5 @@
-#ifndef EMU_METHOD_BUILDER_H
-#define EMU_METHOD_BUILDER_H
+#ifndef TOP_REWEIGHT_EMU_BUILDER_H
+#define TOP_REWEIGHT_EMU_BUILDER_H
 
 #include <memory>
 #include <set>
@@ -18,7 +18,7 @@ class TFile;
 namespace util
 {
 
-class emu_method_builder
+class top_reweight_emu_builder
 {
     std::string _analyzer_name;
     std::string _default_config_file;
@@ -30,6 +30,7 @@ class emu_method_builder
     std::unique_ptr<data::mc_comparison_entry> _ll_mc_entry;
     std::unique_ptr<data::data_comparison_entry> _emu_data_entry;
     std::unique_ptr<data::mc_comparison_entry> _emu_mc_entry;
+    std::unique_ptr<data::mc_comparison_entry> _emu_mc_subtract_entry;
     std::unique_ptr<TH1> _bkg_estimation;
     std::unique_ptr<TH1> _ratio;
 
@@ -44,10 +45,10 @@ class emu_method_builder
 
   public:
     /// \brief Constructor
-    explicit emu_method_builder(const std::string &analyzer_name);
+    explicit top_reweight_emu_builder(const std::string &analyzer_name);
 
     /// \brief Destructor
-    virtual ~emu_method_builder() = default;
+    virtual ~top_reweight_emu_builder() = default;
 
     /// \brief Parses options passed to the program
     void parse_options(int argc, char **argv);
@@ -129,9 +130,9 @@ class emu_method_builder
     void remove_negative_bins(std::unique_ptr<TH1> &hist);
 
     /// \brief EMu method calculation
-    std::unique_ptr<TH1> emu_method(const TH1* ll_mc_input);
+    std::unique_ptr<TH1> emu_method();
 };
 
 } // namespace util
 
-#endif // EMU_METHOD_BUILDER_H
+#endif // top_reweight_emu_builder_H

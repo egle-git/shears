@@ -46,6 +46,14 @@ class higgs_analyzer : public physics::boson_jets_analyzer
 
     /// \brief Returns the list of options supported by the analyzer.
     static po::options_description options();
+
+    /// \brief Reweights the events depending on event properties (only for DY analysis)
+    void reweight_backgrounds(physics::weights &weights,
+                              const std::string &sample_name,
+                              const TLorentzVector &boson,
+                              const TLorentzVector &met) override
+    {
+    }
 };
 
 #endif // HIGGS_ANALYZER_H

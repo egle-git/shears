@@ -218,6 +218,12 @@ triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
 
 use trigger scale factors: yes
 
+# Reweighting for top backgrounds (emu method)
+emu method reweighting:
+  use: yes
+  offset: 1.25958
+  slope: -0.141949
+
 # List of available data/MC samples
 samples:
     - name: data

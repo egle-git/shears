@@ -69,6 +69,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _muons(info, opt, histo_set),
     _electrons(info, opt, histo_set),
     _jets(info, opt),
+    _met(info, opt, histo_set),
     _pileup(info, opt),
     _btagger(opt,histo_set2D),
     _reweighing(info, opt),
@@ -178,7 +179,6 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _ssUncEstimator.add_systHistName("mass_wide_range_inc0jet");
     // _ssUncEstimator.add_systHistName("pt_inc0jet");
     // _ssUncEstimator.add_systHistName("rapidity_inc0jet");
-
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
@@ -343,9 +343,15 @@ void boson_jets_analyzer::operator()()
         _muons.apply_sf(_weights, chosen_muons, tables());
         _electrons.apply_sf(_weights, chosen_electrons, tables());
 
+        // Apply weights for background estimation
+        if (_weights.ismc())
+            _electrons.apply_charge_misid_sf(_weights, chosen_electrons, _genleps.get_leptons_finalState());
+        reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
+
         // Fill lepton control plots
         _muons.fill(histo_set, "inc0jet_noweight", chosen_muons, weights());
         _electrons.fill(histo_set, "inc0jet_noweight", chosen_electrons, weights());
+        _met.fill(histo_set, "inc0jet_noweight", evt.rec->leptons[0], weights());
 
         // Check the pt of the leading muon to know which SF we will use
         if( _select_bestMuonTrigSF )
@@ -514,6 +520,9 @@ void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
         // Fill lepton control plots
         _muons.fill(histo_set, *tags.rec, chosen_muons, weights());
         _electrons.fill(histo_set, *tags.rec, chosen_electrons, weights());
+
+        // Fill MET control plots
+        _met.fill(histo_set, *tags.rec, evt.rec->leptons[0], weights());
     }
     if (tags.gen && evt.gen) {
         _genleps.fill(histo_set, *tags.gen, evt.gen->leptons, weights());

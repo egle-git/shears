@@ -1,4 +1,4 @@
-# This is the configuration file for the Higgs analysis, year 2016.
+# This is the configuration file for the DY analysis, year 2017.
 # Please keep it organized, and don't delete comments.
 
 # Options related to output and logs
@@ -52,7 +52,7 @@ generator level:
 
   # maximum lepton |eta| cut
   # default: 2.4
-  lepton eta: 2.5
+  lepton eta: 2.4
 
 # Options related to the selection of jets
 jets:
@@ -192,7 +192,7 @@ Z:
 
     # High mass bound [GeV]
     # Default value: infinity
-    high mass: 4000
+    high mass: 3000
 
     # Charge check mode
     # Possible values:
@@ -214,7 +214,7 @@ Z:
 
 # How the measurement is binned in mass
 # Default value: empty
-mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 4000 ]
+mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 3000 ]
 
 # Triggers
 #
@@ -224,11 +224,6 @@ triggers: |
      HLT_IsoMu27
 
 use trigger scale factors: yes
-
-emu method reweighting:
-  use: no
-  offset: 1.32593
-  slope: -0.157588
 
 # List of available data/MC samples
 samples:

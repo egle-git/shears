@@ -37,7 +37,6 @@ class top_reweight_emu_builder
     util::options _opt;
     util::style_list _style;
     bool _preliminary;
-    bool _reversed;
     double _lumi;
     bool _logx;
 

@@ -25,8 +25,7 @@ namespace util
 top_reweight_emu_builder::top_reweight_emu_builder(const std::string &analyzer_name) :
     _analyzer_name(analyzer_name),
     _default_config_file(analyzer_name + ".yml"),
-    _preliminary(true),
-    _reversed(true)
+    _preliminary(true)
 {
 }
 
@@ -327,7 +326,6 @@ po::options_description top_reweight_emu_builder::options() const
                           po::value<std::vector<std::string>>(),
                           "Produce the given histogram (can be used several times)");
     options.add_options()("lin", "Use a linear scale for the y axis (the default is a log scale)");
-    options.add_options()("reversed,r", "Plot Data/MC instead of MC/Data");
     return options;
 }
 
@@ -342,8 +340,6 @@ void top_reweight_emu_builder::load()
         throw std::runtime_error("ll location directory not specified!");
     if (emu_input_dir == "" || emu_input_dir == "-" || boost::to_upper_copy<std::string>(emu_input_dir) == "NONE")
         throw std::runtime_error("emu location directory not specified!");
-
-    _reversed = (parsed_options().map.count("reversed") > 0);
 
     _ll_data_entry = load_data(ll_input_dir);
     _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
@@ -389,15 +385,11 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
     util::logging::debug << "Filling lower pannel" << std::endl;
     std::unique_ptr<TH1> num = nullptr;
     std::unique_ptr<TH1> den = nullptr;
-    num = _ll_mc_entry->get(name, _lumi);
-    den = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation.get()->Clone()));
+    den = _ll_mc_entry->get(name, _lumi);
+    num = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation.get()->Clone()));
 
     if (num == nullptr || den == nullptr) {
         return false;
-    }
-
-    if (_reversed) {
-        std::swap(num, den);
     }
 
     _ratio = std::move(num);
@@ -406,8 +398,7 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
     _ratio->Divide(den.get());
 
     format_lower_x_axis(*_ratio->GetXaxis());
-    format_lower_y_axis(*_ratio->GetYaxis(),
-                        _reversed ? "e#mu method/MC" : "MC/e#mu method");
+    format_lower_y_axis(*_ratio->GetYaxis(), "e#mu method/MC");
 
     double ratio_min = style().get<double>("ratio min", name, 0.601);
     double ratio_max = style().get<double>("ratio max", name, 1.399);
@@ -433,17 +424,9 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
 
         if (fitFile.is_open()) {
             fitFile << "emu method reweighting:\n  use: yes\n  offset: " <<
-                fit->GetParameter(0) << "\n  slope: " << fit->GetParError(0) << std::endl;
+                fit->GetParameter(0) << "\n  slope: " << fit->GetParameter(1) << std::endl;
             // fitFile << "offset: " << fit->GetParameter(0) << " +- " << fit->GetParError(0) << std::endl;
             // fitFile << "slope: " << fit->GetParameter(1) << " +- " << fit->GetParError(1) << std::endl << std::endl;
-            // fitFile << "covMatrix:" << std::endl;
-
-            // for (int i = 0; i < cov_matrix.GetNrows(); ++i) {
-            //     for (int j = 0; j < cov_matrix.GetNcols(); ++j) {
-            //         fitFile << cov_matrix(i, j) << "\t";
-            //     }
-            //     fitFile << std::endl;
-            // }
 
             fitFile.close();
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;

@@ -4,6 +4,10 @@
 
 #include "logging.h"
 
+#include "Aepcor.h"
+
+#include "TRandom.h"
+
 namespace physics
 {
 
@@ -19,7 +23,9 @@ electrons::electrons(util::job::info &info, const util::options &opt, util::hist
       Electron_mvaFall17V2Iso(info.reader, "Electron_mvaFall17V2Iso"),
       Electron_mvaFall17V2Iso_WP80(info.reader, "Electron_mvaFall17V2Iso_WP80"),
       Electron_mvaFall17V2Iso_WP90(info.reader, "Electron_mvaFall17V2Iso_WP90"),
-      Electron_mvaFall17V2Iso_WPL(info.reader, "Electron_mvaFall17V2Iso_WPL")
+      Electron_mvaFall17V2Iso_WPL(info.reader, "Electron_mvaFall17V2Iso_WPL"),
+      Electron_eCorr(info.reader, "Electron_eCorr"),
+      Electron_r9(info.reader, "Electron_r9")
 {
     configure(opt);
 
@@ -63,10 +69,25 @@ void electrons::configure(const util::options &opt)
         if (_charge_misid_sf_enabled) {
             _charge_misid = physics::charge_misid(node);
         }
-    } 
+    }
+
+    if( node["use rochester electron energy correction"] ) {
+        _eRoccor_enabled = node["use rochester electron energy correction"].as<bool>();
+        if( _eRoccor_enabled ) {
+            _eRoccor = std::make_shared<Aepcor>();
+            std::string eRoccor_dir = node["rochester energy correction path"].as<std::string>();
+            util::logging::info << "rochester energy correction path: " + eRoccor_dir << std::endl;
+            _eRoccor->init(eRoccor_dir, Aepres::CB);
+        }
+    }
+
+    
 }
 
-std::vector<lepton> electrons::get(int & nVetoElecs)
+std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
+                                   const vector<lepton>& vec_dressedGenLep,
+                                   const vector<lepton>& vec_postFSRGenLep,
+                                   int & nVetoElecs)
 {
     nVetoElecs=0;
     std::vector<lepton> electrons;
@@ -78,8 +99,14 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
             // Veto endcap-barrel transition
             continue;
         }
+
+        // printf("Electron_mass[i] = %lf\n", Electron_mass[i]);
+        // printf("Electron_eCorr[i] = %lf --> 1.0/Electron_eCorr[i] = %lf\n", Electron_eCorr[i], (1.0/Electron_eCorr[i]));
+        // printf("(pT_POGCorr, pT_raw) = (%.3lf, %.3lf)\n", Electron_pt[i], Electron_pt[i]/Electron_eCorr[i]);
+
         l.v.SetPtEtaPhiM(Electron_pt[i], Electron_eta[i], Electron_phi[i], Electron_mass[i]);
         l.raw_v.SetPtEtaPhiM(Electron_pt[i], (Electron_deltaEtaSC[i]+Electron_eta[i]), Electron_phi[i], Electron_mass[i]);
+
         l.charge = Electron_charge[i];
         //l.id = Electron_cutBased[i];
                 
@@ -115,6 +142,16 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
             continue;
         }
 
+        if( _eRoccor_enabled ) {
+          apply_energyCorr_smp22010(l, isData, 1.0/Electron_eCorr[i],
+                                    runNum, Electron_r9[i],
+                                    vec_dressedGenLep, vec_postFSRGenLep);
+        }
+
+        // printf("[After corr.] (pt, eta, phi, mass) = (%.2lf, %.3lf, %.3lf, %lf)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), l.v.M());
+        // printf("\n");
+
+        // -- pt cut after the correction
         if (l.v.Pt() < _pt_cut) {
             continue;
         }
@@ -126,6 +163,90 @@ std::vector<lepton> electrons::get(int & nVetoElecs)
         }
     );
     return electrons;
+}
+
+void electrons::apply_energyCorr_smp22010(lepton& l, 
+                                          const bool isData, const double factorToRawE,
+                                          const unsigned int runNum, const double r9, 
+                                          const vector<lepton>& vec_dressedGenLep,
+                                          const vector<lepton>& vec_postFSRGenLep) {
+    TVector3 vecP3_POGCorr = l.v.Vect();
+    TLorentzVector vecP_raw;
+    vecP_raw.SetVectM(vecP3_POGCorr*factorToRawE, l.v.M()); // -- scale the 3-momentum only
+
+    // printf("--> POG corr: (pt, eta, phi, mass) = (%.2lf, %.3lf, %.3lf, %.3lf)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), l.v.M());
+    // printf("--> no corr:  (pt, eta, phi, mass) = (%.2lf, %.3lf, %.3lf, %.3lf)\n", vecP_raw.Pt(), vecP_raw.Eta(), vecP_raw.Phi(), vecP_raw.M());
+    // printf("----> r9 = %.3f\n", r9);
+
+    double pt = vecP_raw.Pt(); // -- pt "before" POG correction
+    double eta = vecP_raw.Eta(); // -- eta, not etaSC
+    double phi = vecP_raw.Phi();
+
+    double eCorr = 1.0;
+    if( isData )
+        eCorr = _eRoccor->kScaleDT(pt, eta, phi, r9, runNum);
+    else { // -- MC
+        lepton genLep_matched = matchedGenLepton(l, vec_dressedGenLep);
+        double pt_gen = genLep_matched.v.Pt();
+        if( pt_gen == 0 )  { // -- i.e. no matched dressed lepton is found: try with postFSR
+            lepton genLep_postFSR_matched = matchedGenLepton(l, vec_postFSRGenLep);
+            pt_gen = genLep_postFSR_matched.v.Pt();
+            // -- if no maching is found even with post-FSR leptons
+            // -- it can happen if the reco-electron is not from the true electron
+            // -- anyway, most of these electrons will not be used in the analysis (fail to pass pt cut or dilepton selections)
+            // if( pt_gen == 0 )
+            //     util::logging::warn << "[electrons::apply_energyCorr_smp22010] no matched gen-lepton (dressed and post-FSR) is found for the electron ... correction factor is set to 1.0" << endl;
+        }
+
+        if( pt_gen == 0 ) eCorr = 1.0;
+        else {
+            double urnd = gRandom->Rndm(); // uniform between 0 and 1
+            eCorr = _eRoccor->kSpreadMC(pt, eta, phi, r9, urnd, pt_gen);
+        }
+
+        // printf("(pt, pt_gen) = (%lf, %lf) --> corr = %lf\n", pt, pt_gen, eCorr);
+    }
+
+    // printf("-->corr = %lf\n", eCorr);
+
+    double pt_corr = pt*eCorr;
+    double mass = l.v.M();
+    // -- pt: corrected pT
+    // -- eta: default eta, not etaSC (same with before)
+    l.v.SetPtEtaPhiM(pt_corr, eta, phi, mass);
+}
+
+lepton electrons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep) {
+    int nGenLep = (int)vec_genLep.size();
+    int i_matched = -1;
+    double dR_min = 1e10;
+    double dRCut = 0.1;
+    // -- find the gen-lepton with the smallest dR
+    // -- (but the dR shoudl be at least less than 0.1)
+    for(int i=0; i<nGenLep; ++i) {
+        const lepton& genLep = vec_genLep[i];
+        double dR_ith = l.v.DeltaR(genLep.v);
+        if( dR_ith < dRCut && dR_ith < dR_min ) {
+            i_matched = i;
+            dR_min = dR_ith;
+        }
+    }
+
+    if( i_matched < 0 ) {
+        // util::logging::warn << "[electrons::matchedGenLepton] no matched gen-lepton is found" << std::endl;
+        // printf("  [Given reco-lepton] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", l.v.Pt(), l.v.Eta(), l.v.Phi());
+        // for(const auto& genLep : vec_genLep ) {
+        //     double dR = l.v.DeltaR( genLep.v );
+        //     printf("----> [gen-lepton] (pt, eta, phi, dR) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", 
+        //                                                      genLep.v.Pt(), genLep.v.Eta(), genLep.v.Phi(), dR);
+        // }
+        lepton l_null = l;
+        l_null.v.SetPtEtaPhiM(0,0,0,0);
+        l_null.raw_v.SetPtEtaPhiM(0,0,0,0);
+        return l_null;
+    }
+
+    return vec_genLep[i_matched];
 }
 
 void electrons::apply_sf(weights &w,

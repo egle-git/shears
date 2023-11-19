@@ -130,6 +130,8 @@ add_library(DYJets-physics
     Sources/weights.cc
     Sources/zfinder.cc
     Sources/simpleShiftUncEstimator.cc
+    Sources/Aepcor.cc
+
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

@@ -146,6 +146,31 @@ std::vector<lepton> genleps::get_leptons_finalState() {
 
 }
 
+// -- for the electron energy correction
+// -- all dresssed lepton should exists to find a matched lepton: no cut should be applied
+std::vector<lepton> genleps::get_leptons_dressed_noCut() {
+//    std::cout<<"________"<<std::endl;
+    std::vector<lepton> genleps;
+
+    for (unsigned i = 0; i < GenDressedLepton_pt->GetSize(); ++i) {
+        lepton l;
+
+        l.v.SetPtEtaPhiM(GenDressedLepton_pt->At(i), GenDressedLepton_eta->At(i), GenDressedLepton_phi->At(i), GenDressedLepton_mass->At(i));
+        l.raw_v = l.v;
+        l.charge = (-1)*GenDressedLepton_pdgId->At(i)/std::abs(GenDressedLepton_pdgId->At(i)); // true for leptons; may not for the other particles
+        l.pdgid = GenDressedLepton_pdgId->At(i);
+
+        genleps.push_back(l);
+    }
+    std::sort(genleps.begin(), genleps.end(), [](const lepton &lhs, const lepton &rhs)
+        {
+            return lhs.v.Pt() > rhs.v.Pt();
+        }
+    );
+
+    return genleps;
+}
+
 
 void genleps::fill(util::histo_set &h,
                  const std::string &tag,

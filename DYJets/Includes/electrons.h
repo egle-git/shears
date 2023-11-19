@@ -6,6 +6,7 @@
 
 #include <TTreeReaderArray.h>
 
+
 #include "charge_misid.h"
 #include "histo_set.h"
 #include "job.h"
@@ -13,6 +14,8 @@
 #include "options.h"
 #include "tables.h"
 #include "weights.h"
+
+class Aepcor;
 
 namespace physics
 {
@@ -44,6 +47,9 @@ class electrons
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WP80;
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WP90;
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WPL;
+    TTreeReaderArray<float>Electron_eCorr;
+    TTreeReaderArray<float>Electron_r9;
+    
 
     double _pt_cut = 20;
     double _eta_cut = 2.4;
@@ -56,6 +62,10 @@ class electrons
 
     physics::charge_misid _charge_misid;
     
+    // -- "Rochester" correction of the electron version
+    // -- unique_ptr gives error...
+    std::shared_ptr<Aepcor> _eRoccor = nullptr;
+
   public:
     /// \brief Constructor.
     explicit electrons(util::job::info &info, const util::options &opt, util::histo_set &h);
@@ -68,7 +78,11 @@ class electrons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get( int & nVetoElecs);
+    // std::vector<lepton> get( bool isData, int & nVetoElecs);
+    std::vector<lepton> get(bool isData, const unsigned int runNum,
+                            const vector<lepton>& vec_dressedGenLep,
+                            const vector<lepton>& vec_postFSRGenLep,
+                            int & nVetoElecs);    
 
     /**
      * \brief Reweighs an event to take scale factors into account.
@@ -110,6 +124,15 @@ class electrons
 
     /// \brief Writes histograms to the current directory.
     void write();
+
+    bool _eRoccor_enabled = false;
+    void apply_energyCorr_smp22010(lepton& l, 
+                                   const bool isData, const double factorToRawE,
+                                   const unsigned int runNum, const double r9, 
+                                   const vector<lepton>& vec_dressedGenLep,
+                                   const vector<lepton>& vec_postFSRGenLep);
+
+    lepton matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep);
 };
 } // namespace physics
 

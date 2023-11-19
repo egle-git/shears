@@ -274,13 +274,20 @@ void boson_jets_analyzer::operator()()
         int nVetoMuons=0;
         int nVetoElecs=0;
 
-        // final state (post-FSR) gen-muons used for the Rochester correction
+        // final state (post-FSR) gen-muons/electrons used for the Rochester correction
         std::vector<lepton> genleps_finalState;
         if( _weights.ismc() ) genleps_finalState = _genleps.get_leptons_finalState();
         else                  genleps_finalState.clear(); // data: no gen-leptons
 
+        // -- dressed leptons, without any pt or eta cut (for the electron energy correction)
+        std::vector<lepton> genleps_dressed_noCut;
+        if( _weights.ismc() ) genleps_dressed_noCut = _genleps.get_leptons_dressed_noCut();
+        else                  genleps_dressed_noCut.clear(); // data: no gen-leptons
+
         std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, nVetoMuons);
-        std::vector<lepton> electrons = _electrons.get(nVetoElecs);
+        std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
+                                                       genleps_dressed_noCut, genleps_finalState, nVetoElecs);
+
         std::vector<lepton> leptons = find_boson(muons, electrons);
         if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
             // Rec boson found

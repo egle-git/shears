@@ -67,6 +67,7 @@ class genleps
 
     std::vector<lepton> get_leptons_isLHE();
     std::vector<lepton> get_leptons_finalState();
+    std::vector<lepton> get_leptons_dressed_noCut();
 
     /**
      * \brief Fills gen control plots.

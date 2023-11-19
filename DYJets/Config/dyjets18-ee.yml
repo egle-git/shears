@@ -126,6 +126,10 @@ electrons:
     # Default value: yes
     use reconstruction scale factors: yes
 
+    # Whether to use the Rochester electron energy correction (instead of POG correction)
+    use rochester electron energy correction: yes
+    rochester energy correction path: EleEnergyCorr/e_18UL_1.txt
+
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]

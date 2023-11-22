@@ -1,22 +1,22 @@
-stages:
-  - build
+# stages:
+#   - build
 
 #pruner:
 #  stage: build
 #  tags: [ cvmfs, docker ]
 #  script: .gitlab-ci/compile.sh Bonzais
 
-DYJets:
-  stage: build
-  tags: [ cvmfs ]
-  script:
-    - source DYJets/lcg-env.sh
-    - cd DYJets
-    - cmake .
-    - make -j$(nproc)
-  artifacts:
-    when: on_failure
-    paths:
-      - DYJets/CMakeFiles
-      - DYJets/CMakeCache.txt
+# DYJets:
+#   stage: build
+#   tags: [ cvmfs ]
+#   script:
+#     - source DYJets/lcg-env.sh
+#     - cd DYJets
+#     - cmake .
+#     - make -j$(nproc)
+#   artifacts:
+#     when: on_failure
+#     paths:
+#       - DYJets/CMakeFiles
+#       - DYJets/CMakeCache.txt
 

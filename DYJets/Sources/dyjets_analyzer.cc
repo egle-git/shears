@@ -294,11 +294,6 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     fill_unfolded("dyjets_events_peak", tags, mass);
     fill_unfolded("dyjets_events_wide_range", tags, mass);
 
-    // systematic variation: usually done only for MC
-    if( weights().ismc() ) {
-        ssUncEstimator().fill_allSystHist("mass_wide_range", tags, mass);
-    }
-
     if (!tags.rec || !evt.rec) {
         return;
     }

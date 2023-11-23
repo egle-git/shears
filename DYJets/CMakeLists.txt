@@ -130,7 +130,6 @@ add_library(DYJets-physics
     Sources/reweighing.cc
     Sources/weights.cc
     Sources/zfinder.cc
-    Sources/simpleShiftUncEstimator.cc
     Sources/Aepcor.cc
 
 )

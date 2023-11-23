@@ -48,10 +48,46 @@ input file locations. Two of them are needed and one is optional:
 If you do not have the same sign eμ files, you may just type in "none" in the `yml` file.
 
 The procedure can be run as follows:
-```
+```bash
 bin/dyjets-bkg-est emu-method -c dyjets16-emu-method.yml -o output_directory
 ```
 You can find more possible options by using the `-h` flag:
-```
+```bash
 bin/dyjets-bkg-est emu-method -h
 ```
+
+### Systematic uncertainty estimation
+
+To estimate the systematic uncertainty, the central value should be reproduced multiple times with different conditions. To reproduce in an efficient way, a dedicated analyzer is made (`Includes/dyjets-analyzer-syst.h` and `Sources/dyjets-analyzer-syst.cc`), by inheriting `dyjets-analyzer.h & cc`.
+
+But at the user level, the syntax is quite similar to submit the job for the systematic variation.
+To run interactively,
+
+```bash
+bin/dyjets-loop-syst --max-files 1 --max-events 10000 -c Config/dyjets18-ee.yml -s data
+bin/dyjets-loop-syst --max-files 1 --max-events 10000 -c Config/dyjets18-ee.yml -s DYJets_M-50to100
+```
+
+You can use `dyjets-loop-syst` instead of `dyjets-loop`. 
+It uses the same .yml file used for the central value. At the end of each .yml file, you can turn on or off the systematic variations for each uncertianty source. 
+e.g. for the electron channel,
+
+```yaml
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  # Muon Rochester correction: true
+  Electron energy correction: true
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+```
+
+To submit the jobs to condor,
+
+```bash
+bin/dyjets-job-list --unc -c Config/dyjets18-ee.yml | bin/send-to-cluster ee_18
+bin/dyjets-job-list --unc -c Config/dyjets18-mm.yml | bin/send-to-cluster mm_18
+```
+
+For the output, you can use `auto-hadd.h` as usual jobs.

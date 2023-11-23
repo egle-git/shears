@@ -19,8 +19,8 @@ namespace po = boost::program_options;
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
 
-    TTreeReaderValue<unsigned long long> event;
-    TTreeReaderValue<unsigned> run;
+    // TTreeReaderValue<unsigned long long> event;
+    // TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned> luminosityBlock;
 
     // Used for background reweighting, check reweight_backgrounds()

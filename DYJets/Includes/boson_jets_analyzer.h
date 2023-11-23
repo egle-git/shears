@@ -34,9 +34,9 @@ namespace physics
 /// \brief Base class for boson-jets analyzers
 class boson_jets_analyzer
 {
+protected:
     TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned long long> event;
-protected:
     TTreeReaderValue<float> L1PreFiringWeight_Nom;
     TTreeReaderValue<float> L1PreFiringWeight_Up;
     TTreeReaderValue<float> L1PreFiringWeight_Dn;

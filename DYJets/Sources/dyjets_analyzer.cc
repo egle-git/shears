@@ -16,7 +16,7 @@
 #include <boost/optional/optional_io.hpp>
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), event(info.reader, "event"), run(info.reader, "run"), luminosityBlock(info.reader, "luminosityBlock")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), luminosityBlock(info.reader, "luminosityBlock")
 
 {
     counter.declare("With two good leptons");

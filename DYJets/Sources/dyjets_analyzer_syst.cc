@@ -96,6 +96,7 @@ void dyjets_analyzer_syst::operator()() {
   double rndm_forRoccor;
   std::vector<physics::lepton> genleps_finalState;
   std::vector<physics::lepton> genleps_dressed_noCut;
+
   bool isLowQMuEvent = false;
   if( triggered ) { // -- if triggered: proceed to the event selection
     counter.count("Passing the trigger", weights().global_weight());
@@ -117,8 +118,8 @@ void dyjets_analyzer_syst::operator()() {
     if( _select_bestMuonTrigSF && _reject_lowQMu ) 
       isLowQMuEvent = check_lowQualityMuon(muons);
 
-    std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                   genleps_dressed_noCut, genleps_finalState, nVetoElecs);
+    std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
+                                                            genleps_dressed_noCut, genleps_finalState, nVetoElecs);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
     if( !leptons.empty() && (nVetoMuons+nVetoElecs)<=2 && !isLowQMuEvent ) {
@@ -278,7 +279,7 @@ void dyjets_analyzer_syst::fill_systHist_elE_eachSystVar(const util::matched<eve
   // -- trigger
   bool triggered = passes_trigger();
   if( !evt_systVar.gen && !triggered ) return; // -- early termination
-  
+
   if( triggered ) { // -- if triggered: proceed to the event selection
     // -- not used; dummy
     int nVetoMuons=0;
@@ -289,7 +290,8 @@ void dyjets_analyzer_syst::fill_systHist_elE_eachSystVar(const util::matched<eve
     // -- POG correction variation: the first 4 parameters are not used
     // ---- (isData, runNum, dressedLeptons, postFSRLeptons)
     vector<physics::lepton> vec_empty;
-    std::vector<lepton> electrons = _electrons.get(0, 0, vec_empty, vec_empty, nVetoElecs, systMode);
+    std::vector<physics::lepton> electrons = _electrons.get(0, 0, vec_empty, vec_empty, nVetoElecs, systMode);
+
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
     if( !leptons.empty() ) {
       double mass = (leptons[0].v + leptons[1].v).M();

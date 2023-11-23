@@ -87,6 +87,7 @@ class electrons
      *
      * The list is already filtered according to config file options.
      */
+
     // std::vector<lepton> get( bool isData, int & nVetoElecs);
     std::vector<lepton> get(bool isData, const unsigned int runNum,
                             const vector<lepton>& vec_dressedGenLep,

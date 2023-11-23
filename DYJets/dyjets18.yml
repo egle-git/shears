@@ -521,3 +521,13 @@ plots:
       x axis detail: 'N_{jets} #geq $1'
     - selector: '.*exc(1|2)jet.*'
       x axis detail: 'N_{jets} = $1'
+
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  Muon Rochester correction: true
+  # Electron energy correction: true
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  

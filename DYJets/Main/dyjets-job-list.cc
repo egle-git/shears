@@ -25,7 +25,10 @@ int main(int argc, char **argv)
             }
 
             for (unsigned job = 0; job < sample.jobs(); ++job) {
-                std::cout << "bin/dyjets-loop -v -s " << sample.name() << " -o {results}";
+                std::string executable = "dyjets-loop";
+                if( opt.map.count("unc") > 0 ) executable = "dyjets-loop-syst";
+
+                std::cout << "bin/" << executable << " -v -s " << sample.name() << " -o {results}";
                 if (opt.map.count("config") > 0) {
                     std::cout << " -c " << opt.config_file();
                 }
@@ -50,5 +53,6 @@ po::options_description options()
     options.add_options()("disable-data", "Don't include jobs for data");
     options.add_options()("disable-mc", "Don't include jobs for MC");
     options.add_options()("disable-background", "Don't include jobs for background");
+    options.add_options()("unc", "Run dyjets-loop-syst for systematic uncertainty estimation");
     return options;
 }

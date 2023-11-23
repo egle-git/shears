@@ -51,6 +51,15 @@ class electrons
     TTreeReaderArray<float>Electron_r9;
     
 
+    // -- systematic variation
+    // ---- scale variation (only for data)
+    TTreeReaderArray<float> Electron_dEscaleUp;
+    TTreeReaderArray<float> Electron_dEscaleDown;
+    // ---- smearing variation (only for mc)
+    TTreeReaderArray<float> Electron_dEsigmaUp;
+    TTreeReaderArray<float> Electron_dEsigmaDown;
+
+
     double _pt_cut = 20;
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
@@ -82,7 +91,7 @@ class electrons
     std::vector<lepton> get(bool isData, const unsigned int runNum,
                             const vector<lepton>& vec_dressedGenLep,
                             const vector<lepton>& vec_postFSRGenLep,
-                            int & nVetoElecs);    
+                            int & nVetoElecs, TString systMode = "default");
 
     /**
      * \brief Reweighs an event to take scale factors into account.

@@ -1,0 +1,105 @@
+# -- print commands to merge & download the shears outputs
+# -- to make the script understand the shears output,
+# -- the output directory name in shears should contain the string "%s_%s" % (channel, era)
+# -- e.g. "ee_16pre", "mm_18"
+
+class ShearsOutput:
+  def __init__(self):
+    self.channel = ""
+    self.era = ""
+    self.shearsPath = ""
+    self.dirName = ""
+
+def SanityCheck(stdout, channel, era):
+  if len(stdout) == 0:
+    print("No directory is found matching to (channel, era) = (%s, %s)" % (channel, era))
+    print("Check the input shears path or whether the directories follow the rule: includes the string (channel_era)")
+    sys.exit()
+
+  if len(stdout) > 1:
+    print("More than 1 shears output directory for (channel, era) = (%s, %s)" % (channel, era))
+    for line in stdout:
+        print(line.strip('\n'))
+    sys.exit()
+
+
+def printCMD_hadd(shearsOutput):
+  print("./auto-hadd.sh %s" % shearsOutput.dirName)
+
+def printCMD_download(shearsOutput, outputDir):
+  cmd = "scp '%s@mshort.iihe.ac.be:%s/%s/*.root' %s/%s/%s" % (args.user, shearsOutput.shearsPath, shearsOutput.dirName, outputDir, shearsOutput.channel, shearsOutput.era)
+  print(cmd)
+  
+import argparse
+import paramiko
+import os, sys
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-u', '--user', default="kplee")
+parser.add_argument('-s', '--shears', default="/user/kplee/Analysis/shears/231117_update_latestSetup")
+parser.add_argument('-o', '--outputDir', default="./shearsOutput")
+# parser.add_argument('-v', '--verboseErrors', action='store_true', default=False)
+args = parser.parse_args()
+
+if "DYJets" not in args.shears:
+  args.shears = args.shears + "/DYJets"
+
+client = paramiko.SSHClient()
+host_keys = client.load_system_host_keys()
+client.connect('mshort.iihe.ac.be', username=args.user, password='')
+
+
+list_channel = ["ee", "mm"]
+list_era = ["16pre", "16post", "17", "18"]
+list_shearsOutput = []
+
+print("# -- find the shears output directory names in T2_BE_IIHE server...")
+for channel in list_channel:
+  for era in list_era:
+    cmd_find = "find '%s' -maxdepth 1 -type d -name *%s_%s*" % (args.shears, channel, era)
+    # print(cmd_find)
+    stdin, stdout, stderr = client.exec_command(cmd_find)
+
+    list_line = []
+    for line in stdout:
+      list_line.append( line.strip('\n') )
+
+    SanityCheck(list_line, channel, era)
+
+    output = ShearsOutput()
+    output.channel = channel
+    output.era = era
+    output.shearsPath = args.shears
+    output.dirName = list_line[0].strip('\n').split("/")[-1]
+
+    print("(channel, era) = (%s, %s) --> dirName = %s" % (output.channel, output.era, output.dirName))
+    list_shearsOutput.append(output)
+
+    # for line in stdout:
+    #     print(line.strip('\n'))
+
+print("\n# -- run at shears working directory:")
+print("# -- cd %s" % args.shears)
+for shearsOutput in list_shearsOutput:
+  printCMD_hadd(shearsOutput)
+
+for channel in list_channel:
+  for era in list_era:
+    dirPath = "%s/%s/%s" % (args.outputDir, channel, era)
+    # -- does not exist: make it (recursively)
+    if not os.path.exists(dirPath):
+      os.makedirs(dirPath)
+
+    list_dir = os.listdir(dirPath)
+    # -- if it is not empty: give an error
+    if len(list_dir) > 0:
+      print("%s is not empty ... please check" % dirPath)
+      sys.exit()
+
+print("\n# -- run at local machine")
+for shearsOutput in list_shearsOutput:
+  printCMD_download(shearsOutput, args.outputDir)
+
+client.close()
+
+# find '/user/kplee/Analysis/shears/231117_update_latestSetup/DYJets' -maxdepth 1 -type d -name *ee_16pre* 

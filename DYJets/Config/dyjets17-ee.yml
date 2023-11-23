@@ -218,7 +218,7 @@ mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 3000 ]
 #
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
-triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
 
 use trigger scale factors: yes
 
@@ -237,7 +237,7 @@ samples:
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_DoubleEG_data.txt
       triggers: |
-          HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
+          HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
     ### MC
     #- name: DYJets
     #  type: MC
@@ -345,7 +345,7 @@ samples:
       catalog: Catalog2017_bonzai_GGToLL.txt
     - name: GammaGamma_M-5to50
       type: background
-      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
 
 # Scale factors

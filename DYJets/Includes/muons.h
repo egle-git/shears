@@ -77,7 +77,8 @@ class muons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get(bool isdata, std::vector<lepton> gl,int &nVetoMuons);
+    std::vector<lepton> get(const bool isdata, const std::vector<lepton>& genLeptons, 
+                            const double rndm_forRoccor, const int s=5, const int m=0);
 
     /**
      * \brief Reweighs an event to take scale factors into account.

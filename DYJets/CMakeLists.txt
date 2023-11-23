@@ -113,6 +113,7 @@ target_link_libraries(DYJets-data PUBLIC ROOT::Hist)
 add_library(DYJets-physics
     Sources/BTagCalibrationStandalone.cc
     Sources/boson_jets_analyzer.cc
+    Sources/dyjets_analyzer.cc
     Sources/btagger.cc
     Sources/electrons.cc
     Sources/genleps.cc
@@ -203,6 +204,10 @@ target_link_libraries(dyjets-job-list PRIVATE DYJets-data)
 add_executable(dyjets-loop Main/dyjets-loop.cc Sources/dyjets_analyzer.cc)
 target_link_libraries(dyjets-loop PRIVATE DYJets-data)
 target_link_libraries(dyjets-loop PRIVATE DYJets-physics)
+
+add_executable(dyjets-loop-syst Main/dyjets-loop-syst.cc Sources/dyjets_analyzer_syst.cc)
+target_link_libraries(dyjets-loop-syst PRIVATE DYJets-data)
+target_link_libraries(dyjets-loop-syst PRIVATE DYJets-physics)
 
 #add_executable(dyjets-sample-weights Main/dyjets-sample-weights.cc)
 #target_link_libraries(dyjets-sample-weights PRIVATE DYJets-data)

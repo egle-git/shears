@@ -44,6 +44,15 @@ class electrons
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WP90;
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WPL;
 
+    // -- systematic variation
+    // ---- scale variation (only for data)
+    TTreeReaderArray<float> Electron_dEscaleUp;
+    TTreeReaderArray<float> Electron_dEscaleDown;
+    // ---- smearing variation (only for mc)
+    TTreeReaderArray<float> Electron_dEsigmaUp;
+    TTreeReaderArray<float> Electron_dEsigmaDown;
+
+
     double _pt_cut = 20;
     double _eta_cut = 2.4;
     double _iso_cut = 0.25;
@@ -64,7 +73,7 @@ class electrons
      *
      * The list is already filtered according to config file options.
      */
-    std::vector<lepton> get( int & nVetoElecs);
+    std::vector<lepton> get(int & nVetoElecs, TString systMode = "default");
 
     /**
      * \brief Reweighs an event to take scale factors into account.

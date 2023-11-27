@@ -60,6 +60,8 @@ private:
     result_->Produce();
 
     plotDirPath_ = "./basicPlot/"+channel_;
+    if( !useFake_ ) plotDirPath_ += "/noFake";
+
     bool recursive = kTRUE;
     if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
       throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
@@ -325,7 +327,10 @@ private:
   }
 
   void Save() {
-    TFile *f_output = TFile::Open("./basicPlot/DYRun2Result_CentralValue_"+channel_+".root", "RECREATE");
+    TString fileName = "DYRun2Result_CentralValue_"+channel_+".root";
+    if( !useFake_ )
+      fileName.ReplaceAll(".root", "_noFake.root");
+    TFile *f_output = TFile::Open(fileName, "RECREATE");
     f_output->cd();
     result_->Save(f_output);
     f_output->Close();
@@ -335,10 +340,12 @@ private:
 void produce_centralValue() {
   CentralValueProducer producer_ee("ee");
   CentralValueProducer producer_mm("mm");
+  producer_ee.Produce();
+  producer_mm.Produce();
 
-  // producer_ee.Use_Fake(kFALSE);
-  // producer_mm.Use_Fake(kFALSE);
-
+  // -- results w/o fake lepton backgrounds
+  producer_ee.Use_Fake(kFALSE);
+  producer_mm.Use_Fake(kFALSE);
   producer_ee.Produce();
   producer_mm.Produce();
 }

@@ -170,6 +170,14 @@ void dyjets_analyzer_syst::operator()() {
 
     _muons.apply_sf(_weights, chosen_muons, tables());
     _electrons.apply_sf(_weights, chosen_electrons, tables());
+
+    // -- apply charge mis-ID weights for background estimation
+    if (_weights.ismc())
+        _electrons.apply_charge_misid_sf(_weights, chosen_electrons, genleps_finalState);
+
+    // -- reweight top-quark backgrounds using the factor from the emu method
+    reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
+
     if( _apply_triggerSF )
       apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
   }

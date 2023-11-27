@@ -276,7 +276,8 @@ void boson_jets_analyzer::operator()()
 
         std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, gRandom->Rndm());
         std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                       genleps_dressed_noCut, genleps_finalState, nVetoElecs);
+                                                       genleps_dressed_noCut, genleps_finalState, 
+                                                       gRandom->Rndm(), nVetoElecs);
 
         std::vector<lepton> leptons = find_boson(muons, electrons);
         if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {

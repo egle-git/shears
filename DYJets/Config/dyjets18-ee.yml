@@ -508,6 +508,6 @@ uncertainties:
   pileup: false
   L1 prefiring: false
   # Muon Rochester correction: false
-  Electron energy correction: true
+  Electron energy correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root

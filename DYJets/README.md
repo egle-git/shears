@@ -69,7 +69,7 @@ bin/dyjets-loop-syst --max-files 1 --max-events 10000 -c Config/dyjets18-ee.yml 
 ```
 
 You can use `dyjets-loop-syst` instead of `dyjets-loop`. 
-It uses the same .yml file used for the central value. At the end of each .yml file, you can turn on or off the systematic variations for each uncertianty source. 
+It uses the same .yml file used for the central value. At the end of each .yml file, you can turn on or off the systematic variations for each uncertainty source. 
 e.g. for the electron channel,
 
 ```yaml

@@ -146,7 +146,7 @@ void dyjets_analyzer_syst::operator()() {
   // remove events with m(reco) < 10 GeV in both data and MC
   // because we only have the DY MC down to m=10 GeV, but data can go down below GeV
   // without this cut, the # underflow events in the response matrix could be significant different between data and MC
-  if( evt.rec && evt.rec->boson_p.M() < 10 ) return;
+  if( evt.rec && evt.rec->boson_p.M() < 10.0 ) return;
 
   // -- now, at least one boson is found in either gen or rec.
   // -- apply corrections
@@ -187,6 +187,11 @@ void dyjets_analyzer_syst::operator()() {
 
     if( _apply_triggerSF )
       apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
+
+    // double mass = (chosen_electrons[0].v + chosen_electrons[1].v).M();
+    // printf("operator()                                 --> mass = %lf\n", mass);
+    // printf("--> electron 1: (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", chosen_electrons[0].v.Pt(), chosen_electrons[0].v.Eta(), chosen_electrons[0].v.Phi());
+    // printf("--> electron 2: (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", chosen_electrons[1].v.Pt(), chosen_electrons[1].v.Eta(), chosen_electrons[1].v.Phi());
   }
 
   // -- fill histograms
@@ -289,6 +294,8 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr(const util::matched<event_c
   fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 4, 0);
   fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 5, 0);
   fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 6, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 7, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 8, 0);
 }
 
 void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::matched<event_contents>& evt_default,
@@ -298,6 +305,16 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::mat
                                                                  int s, int m) {
   // -- re-do the event selection
   // -- because the event itself can be rejected by the pT cut due to the electron energy variation
+  // double mass_default = 9999;
+  // if( s == 0 ) {
+  //   vector<physics::lepton> vec_lep_default = evt_default.rec->leptons;
+  //   mass_default = (vec_lep_default[0].v + vec_lep_default[1].v).M();
+  //   if( mass_default < 40.0 ) {
+  //     printf("[mass] default = %lf\n", mass_default);
+  //     printf("  [lepton 1] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", vec_lep_default[0].v.Pt(), vec_lep_default[0].v.Eta(), vec_lep_default[0].v.Phi());
+  //     printf("  [lepton 2] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", vec_lep_default[1].v.Pt(), vec_lep_default[1].v.Eta(), vec_lep_default[1].v.Phi());
+  //   }
+  // }
 
   // -- event for this systematic variation
   util::matched<event_contents> evt_systVar;
@@ -338,11 +355,30 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::mat
             leptons.end(),
             TLorentzVector(),
             [](const TLorentzVector &p, const physics::lepton &lep) { return p + lep.v; });
+
+        // if( s == 0 ) {
+        //   vector<physics::lepton> vec_lep_default = evt_systVar.rec->leptons;
+        //   double mass_default = (vec_lep_default[0].v + vec_lep_default[1].v).M();
+        //   double mass_systVar = (leptons[0].v + leptons[1].v).M();
+        //   if( mass_systVar != mass_default ) {
+        //     printf("[mass] (default, systVar) = (%lf, %lf): not same!\n", mass_default, mass_systVar);
+        //   }
+        // }
+
       } // -- if( mass > 10.0 )
     } // -- if( !leptons.empty() )
   } // -- if( triggered )
 
   if( !evt_systVar.gen && !evt_systVar.rec ) return; // -- early termination
+
+  // if( s == 0 && mass_default < 40.0) {
+  //   vector<physics::lepton> vec_lep = evt_systVar.rec->leptons;
+  //   double mass = (vec_lep[0].v + vec_lep[1].v).M();
+  //   printf("[mass] set0 case = %lf\n", mass);
+  //   printf("  [lepton 1] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", vec_lep[0].v.Pt(), vec_lep[0].v.Eta(), vec_lep[0].v.Phi());
+  //   printf("  [lepton 2] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", vec_lep[1].v.Pt(), vec_lep[1].v.Eta(), vec_lep[1].v.Phi());
+  //   printf("\n");
+  // }
 
   auto mass_systVar = evt_systVar.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
 

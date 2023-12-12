@@ -76,7 +76,7 @@ void electrons::configure(const util::options &opt) {
   }    
 }
 
-std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
+std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
                                    const vector<lepton>& vec_dressedGenLep,
                                    const vector<lepton>& vec_postFSRGenLep,
                                    const double& rndm, int & nVetoElecs, 
@@ -130,15 +130,27 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
     if( systMode != "default" && !_eRoccor_enabled )
       SystVar_ElectronEnergy_POGCorr(l, i, systMode);
 
-    if( _eRoccor_enabled )
-      apply_energyCorr_smp22010(l, isData, 1.0/Electron_eCorr[i],
+    if( _eRoccor_enabled ) {
+      double factorToRawE = 1.0;
+      if( Electron_eCorr[i] == 0 ) {
+        if( l.v.Pt() == 0 ) continue; // -- pt=0 electron: skip it (such electrons *exists* in some events...)
+        else // -- pt != 0 but Electron_eCorr[i] == 0: something is wrong
+          throw std::runtime_error("[electrons::get] electron pT != 0 but Electron_eCorr[i] == 0!\n");
+      }
+      else
+        factorToRawE = 1.0/Electron_eCorr[i];
+
+      apply_energyCorr_smp22010(l, isData, factorToRawE,
                                 runNum, Electron_r9[i],
                                 vec_dressedGenLep, vec_postFSRGenLep, rndm, s, m);
+    }
 
 
+    // printf("  [electrons::get] (before pt cut) (pt, eta, phi, pt_cut, pt>pt_cut?, pt<pt_cut?) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %d)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), _pt_cut, l.v.Pt() > _pt_cut, l.v.Pt() < _pt_cut);
 
     if( l.v.Pt() < _pt_cut ) continue; // -- pt cut after applying all energy corrections
 
+    // printf("  [electrons::get] (after pt cut) (pt, eta, phi, pt_cut, pt>pt_cut?, pt<pt_cut?) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %d)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), _pt_cut, l.v.Pt() > _pt_cut, l.v.Pt() < _pt_cut);
     electrons.push_back(l);
   }
   std::sort(electrons.begin(), electrons.end(), 
@@ -166,7 +178,7 @@ void electrons::SystVar_ElectronEnergy_POGCorr(lepton& l, const int& index, cons
 
 void electrons::apply_energyCorr_smp22010(lepton& l, 
                                           const bool isData, const double factorToRawE,
-                                          const unsigned int runNum, const double r9, 
+                                          const unsigned int& runNum, const double r9, 
                                           const vector<lepton>& vec_dressedGenLep,
                                           const vector<lepton>& vec_postFSRGenLep,
                                           const double& rndm, const int& s, const int& m) {
@@ -192,11 +204,19 @@ void electrons::apply_energyCorr_smp22010(lepton& l,
       else              eCorr = _eRoccor->kSpreadMC(pt, eta, phi, r9, rndm, pt_gen, s, m);
     }
 
+    // printf("[RocCorr] (pt_raw, eta_raw, phi_raw, factorToRawE, runNum, r9, rndm) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %.3lf, %.3lf) --> eCorr = %lf\n",
+    //                    pt, eta, phi, factorToRawE, runNum, r9, rndm, eCorr);
+
     double pt_corr = pt*eCorr;
     double mass = l.v.M();
     // -- pt: corrected pT
     // -- eta: default eta, not etaSC (same with before)
     l.v.SetPtEtaPhiM(pt_corr, eta, phi, mass);
+
+    // if( s == 0 ) {
+    //   printf("  (pt, eta, phi) = (%.3lf, %.3lf, %.3lf) w/ rndm = %lf --> (eCorr, pt_corr) = (%.6lf, %.3lf)\n", 
+    //           pt, eta, phi, rndm, eCorr, pt_corr);
+    // }
 }
 
 double electrons::Find_MatchedGenPt(lepton l, 

@@ -89,7 +89,7 @@ class electrons
      */
 
     // std::vector<lepton> get( bool isData, int & nVetoElecs);
-    std::vector<lepton> get(bool isData, const unsigned int runNum,
+    std::vector<lepton> get(bool isData, const unsigned int& runNum,
                             const vector<lepton>& vec_dressedGenLep,
                             const vector<lepton>& vec_postFSRGenLep,
                             const double& rndm, int & nVetoElecs, 
@@ -142,7 +142,7 @@ class electrons
     bool _eRoccor_enabled = false;
     void apply_energyCorr_smp22010(lepton& l, 
                                    const bool isData, const double factorToRawE,
-                                   const unsigned int runNum, const double r9, 
+                                   const unsigned int& runNum, const double r9, 
                                    const vector<lepton>& vec_dressedGenLep,
                                    const vector<lepton>& vec_postFSRGenLep,
                                    const double& rndm, const int& s, const int& m);

@@ -1,6 +1,7 @@
 #include "Common/ShearsComparator.h"
 #include "Common/DYUncertainty.h"
 #include "Common/DYPath.h"
+#include "Common/DYTool.h"
 
 class UncEstimator_Theory {
 public:
@@ -8,7 +9,16 @@ public:
 
   }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
+  void FullPhaseSpace(Bool_t flag = kTRUE) { isFPS_ = flag; }
+
   void EstimateAndSave() {
+    if( isFPS_ ) {
+      fileName_unfolded_.ReplaceAll(".root", "_FPS.root");
+      fileName_unc_.ReplaceAll(".root", "_FPS.root");
+    }
+
     if( gSystem->AccessPathName(fileName_unfolded_) ) {
       cout << fileName_unfolded_ << " does not exist: make it ..." << endl;
       Init();
@@ -27,6 +37,9 @@ public:
   }
 private:
   TString channel_ = "";
+  Bool_t useFake_ = kTRUE;
+
+  Bool_t isFPS_ = kFALSE; // -- true if the uncertainty is esimated for the full-phase space results
 
   TString inputPath_ = DYTool::path_systVar_theory;
 
@@ -55,6 +68,8 @@ private:
 
     // -- central value
     result_cv_ = new DYRun2Result(output_);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_cv_);
+    if( isFPS_ )   DYTool::Set_Acc(result_cv_, "cv");
     result_cv_->Produce();
 
     // -- systematics
@@ -72,8 +87,10 @@ private:
 
     for(auto& pair : map_result_syst_ ) {
       TString tag = pair.first;
+      if( useFake_ ) DYTool::Set_Fake(channel_, pair.second);
       // -- change the hist. names for all era at once (i.e. correlation between all eras)
       Update_HistName(pair.second, tag, "all");
+      if( isFPS_ ) DYTool::Set_Acc(pair.second, tag); // -- change the acceptance accordingly
       pair.second->Produce();
     }
 
@@ -81,8 +98,10 @@ private:
     for(Int_t i_var=1; i_var<=nPDFHessian_; ++i_var) { // -- from 1 to 100
       TString tag = TString::Format("PDFVar_%03d", i_var);
       DYRun2Result* result_PDFHessian = new DYRun2Result(output_);
+      if( useFake_ ) DYTool::Set_Fake(channel_, result_PDFHessian);
       // -- change the hist. names for all era at once (i.e. correlation between all eras)
       Update_HistName(result_PDFHessian, tag, "all");
+      if( isFPS_ ) DYTool::Set_Acc(result_PDFHessian, tag); // -- change the acceptance accordingly
       result_PDFHessian->Produce();
 
       vec_result_PDFHessian_.push_back( result_PDFHessian );
@@ -108,14 +127,20 @@ private:
   void ProducePlots_Validation() {
     Run2Output* output_default = new Run2Output(DYTool::path_default+"/"+channel_);
     DYRun2Result* result_default = new DYRun2Result(output_default);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_default);
+    if( isFPS_ ) DYTool::Set_Acc(result_default, "cv");
     result_default->Produce();
 
     DYRun2Result* result_syst_PDF000 = new DYRun2Result(output_);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_syst_PDF000);
     Update_HistName(result_syst_PDF000, "PDFVar_000", "all");
+    if( isFPS_ ) DYTool::Set_Acc(result_syst_PDF000, "PDFVar_000");
     result_syst_PDF000->Produce();
 
     DYRun2Result* result_syst_scaleVar004 = new DYRun2Result(output_);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_syst_scaleVar004);
     Update_HistName(result_syst_scaleVar004, "scaleVar_004", "all");
+    if( isFPS_ ) DYTool::Set_Acc(result_syst_scaleVar004, "scaleVar_004");
     result_syst_scaleVar004->Produce();
 
     ResultComparator comparator(channel_);
@@ -125,7 +150,10 @@ private:
     comparator.Set_Case(result_syst_PDF000,      "from dyjets-loop-syst (systVar, PDF-000)");
     comparator.Set_Case(result_syst_scaleVar004, "from dyjets-loop-syst (systVar, (1.0*#mu_{R}, 1.0*#mu_{F}))");
     comparator.Expect_PerfectAgreement();
-    comparator.Compare("DYRun2Result/validation/"+channel_);
+
+    TString plotPath = "DYRun2Result/validation/"+channel_;
+    if( isFPS_ ) plotPath.ReplaceAll("DYRun2Result", "DYRun2Result_FPS");
+    comparator.Compare(plotPath);
   }
 
   void ProducePlots_DYRun2Result_Syst() {
@@ -135,7 +163,10 @@ private:
     comparator_alphaS.Set_Case(result_cv_, "Central value (#alpha_{s}=0.118)");
     comparator_alphaS.Set_Case(map_result_syst_["PDFVar_101"], "PDF with #alpha_{s}=0.116");
     comparator_alphaS.Set_Case(map_result_syst_["PDFVar_102"], "PDF with #alpha_{s}=0.120");
-    comparator_alphaS.Compare("DYRun2Result/syst/alphaS/"+channel_);
+
+    TString plotPath_alphaS = "DYRun2Result/syst/alphaS/"+channel_;
+    if( isFPS_ ) plotPath_alphaS.ReplaceAll("DYRun2Result", "DYRun2Result_FPS");
+    comparator_alphaS.Compare(plotPath_alphaS);
 
     // -- central value vs. scale variation
     ResultComparator comparator_scale(channel_);
@@ -147,7 +178,10 @@ private:
     comparator_scale.Set_Case(map_result_syst_["scaleVar_005"], "(1.0*#mu_{R}, 2.0*#mu_{F})");
     comparator_scale.Set_Case(map_result_syst_["scaleVar_007"], "(2.0*#mu_{R}, 1.0*#mu_{F})");
     comparator_scale.Set_Case(map_result_syst_["scaleVar_008"], "(2.0*#mu_{R}, 2.0*#mu_{F})");
-    comparator_scale.Compare("DYRun2Result/syst/scale/"+channel_);
+
+    TString plotPath_scale = "DYRun2Result/syst/scale/"+channel_;
+    if( isFPS_ ) plotPath_scale.ReplaceAll("DYRun2Result", "DYRun2Result_FPS");
+    comparator_scale.Compare(plotPath_scale);
   }
 
   void ProducePlots_DYRun2Result_PDFHessian() {
@@ -158,7 +192,10 @@ private:
     comparator.Set_Case(vec_result_PDFHessian_[1], "PDF Hessian set 2");
     comparator.Set_Case(vec_result_PDFHessian_[2], "PDF Hessian set 3");
     comparator.Set_Case(vec_result_PDFHessian_[3], "PDF Hessian set 4");
-    comparator.Compare("DYRun2Result/PDFHessian/"+channel_);
+
+    TString plotPath = "DYRun2Result/PDFHessian/"+channel_;
+    if( isFPS_ ) plotPath.ReplaceAll("DYRun2Result", "DYRun2Result_FPS");
+    comparator.Compare(plotPath);
   }
 
   void Save_UnfoldedResults() {
@@ -182,6 +219,9 @@ private:
 
   void Estimate_Unc_PDFHessian() {
     TString histName_base = "h_allEra_unfolded_data";
+    if( isFPS_ )
+      histName_base = "h_allEra_unfoldedFPS_data";
+
     TH1D* h_cv = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_cv");
 
     // vector<TH1D*> vec_altHist;
@@ -206,6 +246,9 @@ private:
 
   void Estimate_Unc_Syst() {
     TString histName_base = "h_allEra_unfolded_data";
+    if( isFPS_ )
+      histName_base = "h_allEra_unfoldedFPS_data";
+
     TH1D* h_cv = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_cv");
 
     // -- alphaS
@@ -268,10 +311,22 @@ private:
   }
 };
 
+void estimate_unc_cov_theory_FPS() {
+  UncEstimator_Theory estimator_ee("ee");
+  estimator_ee.FullPhaseSpace();
+  estimator_ee.EstimateAndSave();
+
+  UncEstimator_Theory estimator_mm("mm");
+  estimator_mm.FullPhaseSpace();
+  estimator_mm.EstimateAndSave();
+}
+
 void estimate_unc_cov_theory() {
   UncEstimator_Theory estimator_ee("ee");
   estimator_ee.EstimateAndSave();
 
   UncEstimator_Theory estimator_mm("mm");
   estimator_mm.EstimateAndSave();
+
+  estimate_unc_cov_theory_FPS();
 }

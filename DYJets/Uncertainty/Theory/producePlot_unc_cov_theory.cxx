@@ -3,12 +3,22 @@
 class PlotProducer {
 public:
   PlotProducer(TString channel, TString fileName): 
-  channel_(channel), fileName_(fileName) {}
+  channel_(channel), fileName_(fileName) {
+    if( fileName.Contains("_FPS") )
+      isFPS_ = kTRUE;
+  }
 
   void Produce() {
     TH1::AddDirectory(kFALSE);
 
     ProducePlot_Unc();
+    if( isFPS_ ) {
+      Compare_Fiducial_FullPhaseSpace("PDFHessian");
+      Compare_Fiducial_FullPhaseSpace("syst_alphaS");
+      Compare_Fiducial_FullPhaseSpace("syst_scale");
+      Compare_Fiducial_FullPhaseSpace("syst_tot");
+      Compare_Fiducial_FullPhaseSpace("tot");
+    }
 
     ProducePlot_2D("corrM", "PDFHessian");
     ProducePlot_2D("corrM", "syst_alphaS");
@@ -22,37 +32,47 @@ private:
   TString fileName_ = "";
   TString plotDirPath_ = "./plot";
 
-  void ProducePlot_Unc_Syst() {
-    TString canvasName = "c_unc_syst";
-    PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
-    canvas->SetTitle("mass bin number", "Rel. uncertainty");
+  Bool_t isFPS_ = kFALSE; // -- is full phase space result?
 
-    TH1D* h_relUnc_set2 = PlotTool::Get_Hist(fileName_, "h_relUnc_muP_syst_set2");
-    TH1D* h_relUnc_set3 = PlotTool::Get_Hist(fileName_, "h_relUnc_muP_syst_set3");
-    TH1D* h_relUnc_set4 = PlotTool::Get_Hist(fileName_, "h_relUnc_muP_syst_set4");
-    TH1D* h_relUnc_totSyst = PlotTool::Get_Hist(fileName_, "h_relUnc_muP_syst_tot");
+  void Compare_Fiducial_FullPhaseSpace(TString tag) {
+    TString canvasName = "c_comp_relUnc_fid_FPS_"+tag+"_"+channel_;
+    PlotTool::HistCanvaswRatio* canvas = new PlotTool::HistCanvaswRatio(canvasName, 0, 0);
+    canvas->SetTitle("mass bin number", "Rel. uncertainty", "FPS/fid.");
 
-    canvas->Register(h_relUnc_set2, "Syst. (set2, w/o Z p_{T} reweighting)", kBlack);
-    canvas->Register(h_relUnc_set3, "Syst. (set3, w/o ad-hoc EWK weights)", kBlue);
-    canvas->Register(h_relUnc_set4, "Syst. (set4, alt. profile #DeltaM mass window)", kGreen+2);
-    canvas->Register(h_relUnc_totSyst, "Syst. (quad. sum)", kRed);
+    TString fileName_fiducial = fileName_;
+    fileName_fiducial.ReplaceAll("_FPS", "");
+    TH1D* h_fiducial = PlotTool::Get_Hist(fileName_fiducial, "h_relUnc_theory_"+tag);
+    TH1D* h_FPS      = PlotTool::Get_Hist(fileName_,         "h_relUnc_theory_"+tag);
 
-    canvas->SetLegendPosition(0.40, 0.68, 0.94, 0.90);
+    canvas->Register(h_fiducial, "Unc. on fiducial result", kBlack);
+    canvas->Register(h_FPS, "Unc. on full phase space result", kBlue);
 
-    // canvas->SetRangeY(0, 0.03);
+    canvas->SetLegendPosition(0.50, 0.74, 0.94, 0.90);
+
+    // canvas->SetRangeY(0, 0.275);
     canvas->SetAutoRangeY();
+    canvas->SetAutoRangeRatio();
 
     canvas->Latex_CMSInternal();
-    TString uncInfo = "Uncertainty from the muon momentum correction (syst.)";
+    TString uncInfo = "Uncertainty from the theoretical inputs (tag = "+tag+")";
     canvas->RegisterLatex(0.16, 0.91, 42, 0.6, uncInfo);
+    TString channelInfo = (channel_ == "mm") ? "Muon channel" : "Electron channel";
+    canvas->RegisterLatex(0.16, 0.87, 42, 0.6, channelInfo);
 
     canvas->SetSavePath(plotDirPath_);
 
     canvas->Draw("HISTLP");
+
+    // canvas->SetCanvasName(canvasName+"_zoomIn");
+    // canvas->SetRangeY(0, 0.2);
+    // canvas->Draw("HISTLP");
   }
 
   void ProducePlot_Unc() {
     TString canvasName = "c_unc_tot_"+channel_;
+    if( isFPS_ )
+      canvasName.ReplaceAll("c_unc", "c_unc_FPS");
+
     PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
     canvas->SetTitle("mass bin number", "Rel. uncertainty");
 
@@ -81,10 +101,16 @@ private:
     canvas->SetSavePath(plotDirPath_);
 
     canvas->Draw("HISTLP");
+
+    canvas->SetCanvasName(canvasName+"_zoomIn");
+    canvas->SetRangeY(0, 0.2);
+    canvas->Draw("HISTLP");
   }
 
   void ProducePlot_2D(TString matrixType, TString uncType) {
     TString canvasName = "c2D_"+matrixType+"_"+uncType+"_"+channel_;
+    if( isFPS_ )
+      canvasName.ReplaceAll("c2D_", "c2D_FPS_");
 
     PlotTool::Hist2DCanvas* canvas = new PlotTool::Hist2DCanvas(canvasName, 0, 0, 0);
     canvas->SetTitle("mass bin number", "mass bin number");
@@ -117,7 +143,16 @@ void producePlot_unc_cov_theory(TString channel) {
   producer.Produce();
 }
 
+// -- FPS = full phase space
+void producePlot_unc_cov_theory_FPS(TString channel) {
+  PlotProducer producer(channel, "UncAndCov_Theory_"+channel+"_FPS.root");
+  producer.Produce();
+}
+
 void producePlot_unc_cov_theory() {
   producePlot_unc_cov_theory("ee");
   producePlot_unc_cov_theory("mm");
+
+  producePlot_unc_cov_theory_FPS("ee");
+  producePlot_unc_cov_theory_FPS("mm");
 }

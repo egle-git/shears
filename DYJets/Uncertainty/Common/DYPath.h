@@ -1,5 +1,6 @@
 #pragma once
 #include <TString.h>
+#include <TSystem.h>
 
 namespace DYTool {
 
@@ -25,18 +26,19 @@ namespace DYTool {
 // -- paths can be modified for your test, investigation, etc
 
 TString path_SE = "/pnfs/iihe/cms/store/user/kplee";
+TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_231212/input_postProcess";
+// TString path_base = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/input_postProcess";
+
+// -- path to your "Uncertainty" Directory
+// TString path_uncDir = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/shears/DYJets/Uncertainty";
+TString path_uncDir = gSystem->Getenv("DYUNCPATH");
 
 //////////////////////////////////////////////////
 // -- the path to the default shears output  -- //
 // -- (i.e. result from dyjets-loop)         -- //
 // -- used in the validation                 -- //
 //////////////////////////////////////////////////
-// TString path_default = "/Users/kplee/Research/Analysis/Logbook/230608_unc_effSF/input/default";
-TString path_default = "/Users/kplee/Research/Analysis/Logbook/231117_update_latestSetup/shearsOutput";
-
-// -- default fake histograms
-// TString path_default_fake_ee = "";
-// TString path_default_fake_mm = "";
+TString path_default = path_base+"/shears/default";
 
 // -- simple struct that holds histogram path
 struct DYHistInfo {
@@ -46,57 +48,54 @@ struct DYHistInfo {
   TString histName;
 };
 
+TString path_default_fake = path_base+"/shears/fromMarijus/FakeBkg";
 
-TString path_default_fake = "/Users/kplee/Research/Analysis/Logbook/231106_DileptonMassPlot_ForSMPV/shearsOutput_fromMarijus/fake_syncBin";
 vector<DYTool::DYHistInfo> vec_fakeLepBkgInfo = {
-  DYTool::DYHistInfo{"ee", "16pre",  DYTool::path_default_fake+"/dyjets-fake_ee_16pre.root",  "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "16post", DYTool::path_default_fake+"/dyjets-fake_ee_16post.root", "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "17",     DYTool::path_default_fake+"/dyjets-fake_ee_17.root",     "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "18",     DYTool::path_default_fake+"/dyjets-fake_ee_18.root",     "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "16pre",  DYTool::path_default_fake+"/EE/2016preAPV/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "16post", DYTool::path_default_fake+"/EE/2016postAPV/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "17",     DYTool::path_default_fake+"/EE/2017/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "18",     DYTool::path_default_fake+"/EE/2018/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
 
-  DYTool::DYHistInfo{"mm", "16pre",  DYTool::path_default_fake+"/dyjets-fake_mm_16pre.root",  "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "16post", DYTool::path_default_fake+"/dyjets-fake_mm_16post.root", "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "17",     DYTool::path_default_fake+"/dyjets-fake_mm_17.root",     "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "18",     DYTool::path_default_fake+"/dyjets-fake_mm_18.root",     "mass_wide_range_inc0jet"}
+  DYTool::DYHistInfo{"mm", "16pre",  DYTool::path_default_fake+"/MuMu/2016preAPV/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "16post", DYTool::path_default_fake+"/MuMu/2016postAPV/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "17",     DYTool::path_default_fake+"/MuMu/2017/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "18",     DYTool::path_default_fake+"/MuMu/2018/dyjets-Fakes.root",        "mass_wide_range_inc0jet"}
 };
-
 
 ///////////////////////////////////////////////////////////////
 // -- path_systVar_*: shears output from dyjets-loop-syst -- //
 // -- for each uncertainty source                         -- //
 ///////////////////////////////////////////////////////////////
-TString path_systVar_effSF = "/Users/kplee/Research/Analysis/Logbook/230608_unc_effSF/input";
+TString path_systVar_theory_pu_l1pref_muP_elE = path_base+"/shears/theory_pu_l1pref_muP_elE";
 
-TString path_systVar_pileup = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_pileup_L1Pref";
+TString path_systVar_pileup = path_systVar_theory_pu_l1pref_muP_elE;
 
-TString path_systVar_L1Pref = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_pileup_L1Pref";
+TString path_systVar_L1Pref = path_systVar_theory_pu_l1pref_muP_elE;
 
-// TString path_systVar_muP = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_theory_muP/mm";
-TString path_systVar_muP = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_muP/mm";
+TString path_systVar_muP = path_systVar_theory_pu_l1pref_muP_elE;
 
-TString path_systVar_theory = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_theory_muP";
+TString path_systVar_theory = path_systVar_theory_pu_l1pref_muP_elE;
 
-TString path_systVar_elE = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty/input_elE/ee";
+TString path_systVar_elE = path_systVar_theory_pu_l1pref_muP_elE;
+
+TString path_systVar_effSF = path_base+"/shears/effSF";
 
 ////////////////////////////////////////////////////////
 // -- path for the additional/intermediate results -- //
 ////////////////////////////////////////////////////////
 
-// -- path to the efficiency map for the central value + their uncertainties (e.g. values from POGs)
+// -- path to the efficiency (pt-eta) map for the central value + their uncertainties (e.g. values from POGs)
 TString path_centralEffMap = path_SE+"/Shears/Uncertainty/EffSF/v230730/input";
 
 // -- path to the efficiency map w/ systematic variation
 // -- (output of Uncertainty/EffSF/EffMap/generate_systEffMap.cxx)
 TString path_systEffMap = path_SE+"/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root";
 
-// -- path to the DYRun2Result output from eff. SF variation
-// -- (output of Uncertainty/EffSF/estimate_unc_cov.cxx)
-TString path_DYResult_effSF_ee = path_SE+"/Shears/Uncertainty/EffSF/v230730/Unfolded_SystVar_EffSF_ee.root";
-TString path_DYResult_effSF_mm = path_SE+"/Shears/Uncertainty/EffSF/v230730/Unfolded_SystVar_EffSF_mm.root";
+// -- input for the acceptance results (output from miniAOD)
+TString path_inputForAcc = path_base+"/miniAOD/acc";
 
-// -- path to the Uncertainty output from eff. SF variation
-// -- (output of Uncertainty/EffSF/estimate_unc_cov.cxx)
-TString path_unc_effSF_ee = path_SE+"/Shears/Uncertainty/EffSF/v230730/Uncertainty_EffSF_ee.root";
-TString path_unc_effSF_mm = path_SE+"/Shears/Uncertainty/EffSF/v230730/Uncertainty_EffSF_mm.root";
-
+// -- acceptance values
+TString path_acc = path_uncDir+"/Acceptance/DYAcceptance.root";
+TString path_theoryPred      = path_uncDir+"/Acceptance/TheoryPrediction_VariousPDF.root";
+TString path_theoryPred_m200 = path_uncDir+"/Acceptance/TheoryPrediction_VariousPDF_aboveM200.root"; // -- theory predictions (m > 200 only)
 };

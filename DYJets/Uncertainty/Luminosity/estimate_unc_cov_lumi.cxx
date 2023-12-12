@@ -38,6 +38,8 @@ public:
   SubUncEstimator_Lumi(TString channel, TString tag, const std::map<TString, Double_t>& map_relUnc) :
   channel_(channel), tag_(tag), map_relUnc_(map_relUnc) { }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
   void ProduceAndSave(TString shearsPath, DYRun2Result* result_cv, TFile *f_output) {
     TH1::AddDirectory(kFALSE);
 
@@ -88,6 +90,8 @@ private:
   TString tag_;
   const std::map<TString, Double_t>& map_relUnc_;
 
+  Bool_t useFake_ = kTRUE; // -- default: true
+
   // -- output should be different between two cases:
   // -- as each output has different lumi.
   Run2Output* output_plus_;
@@ -111,6 +115,11 @@ private:
 
     result_plus_  = new DYRun2Result(output_plus_);
     result_minus_ = new DYRun2Result(output_minus_);
+
+    if( useFake_ ) { 
+      DYTool::Set_Fake(channel_, result_plus_);
+      DYTool::Set_Fake(channel_, result_minus_);
+    }
 
     Update_Lumi( result_plus_,  "plus" );
     Update_Lumi( result_minus_, "minus" );
@@ -271,6 +280,8 @@ class UncEstimator_Lumi {
 public:
   UncEstimator_Lumi(TString channel): channel_(channel) { }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
   void ProduceAndSave() {
     TH1::AddDirectory(kFALSE);
 
@@ -280,6 +291,7 @@ public:
     shearsPath_ = DYTool::path_default+"/"+channel_;
     Run2Output* output = new Run2Output(shearsPath_);
     DYRun2Result* result_cv = new DYRun2Result(output);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_cv);
     result_cv->Produce();
 
     f_output->cd();
@@ -303,6 +315,7 @@ public:
     vector<Uncertainty> vec_unc;
     for( const auto& pair : map_case ) {
       SubUncEstimator_Lumi estimator(channel_, pair.first, pair.second);
+      estimator.Use_Fake( useFake_ );
       estimator.ProduceAndSave(shearsPath_, result_cv, f_output);
       // vec_estimator.push_back( estimator );
       vec_unc.push_back( estimator.Unc() );
@@ -326,6 +339,8 @@ private:
   TString channel_ = "";
   TString shearsPath_ = "";
   TString fileName_output_;
+
+  Bool_t useFake_ = kTRUE; // -- default: true
 
   // -- https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2#Combination_and_correlations
   std::map<TString, Double_t> map_relUnc_uncorr_16_ = {

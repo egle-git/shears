@@ -1,11 +1,14 @@
 #include "Common/ShearsComparator.h"
 #include "Common/DYUncertainty.h"
 #include "Common/DYPath.h"
+#include "Common/DYTool.h"
 
 class UncEstimator_Pileup {
 public:
   UncEstimator_Pileup(TString channel, TString systType = "pileup"): 
   channel_(channel), systType_(systType) {}
+
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
 
   void ProduceAndSave() {
     Init();
@@ -27,6 +30,8 @@ protected:
   TString systType_ = "";
 
   TString plotDirPath_ = "";
+
+  Bool_t useFake_ = kTRUE; // -- default: turn on
 
   Run2Output* output_;
   DYRun2Result* result_cv_;
@@ -82,6 +87,12 @@ protected:
     result_minus_->Update_HistName("all", "reco_DY",    "TUnfold1DReco_inc0jet_"+tag_minus);
     result_minus_->Update_HistName("all", "reco_bkgMC", "TUnfold1DReco_inc0jet_"+tag_minus);
     result_minus_->Update_HistName("all", "migM",       "TUnfold2DMig_inc0jet_"+tag_minus);
+
+    if( useFake_ ) {
+      DYTool::Set_Fake(channel_, result_cv_);
+      DYTool::Set_Fake(channel_, result_plus_);
+      DYTool::Set_Fake(channel_, result_minus_);
+    }
 
     result_cv_->Produce();
     result_plus_->Produce();

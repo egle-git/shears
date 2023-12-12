@@ -1,5 +1,6 @@
 #include "Common/DYPath.h"
 #include "Common/DYOutput.h"
+#include "Common/DYTool.h"
 
 class UncSet {
 public:
@@ -148,6 +149,8 @@ class UncEstimator_Stat {
 public:
   UncEstimator_Stat(TString channel): channel_(channel) { }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
   void EstimateAndSave() {
     shearsPath_ = DYTool::path_default+"/"+channel_;
     fileName_output_ = "Uncertainty_and_Covariance_Stat_"+channel_+".root";
@@ -157,7 +160,7 @@ public:
 
     TH2D* h_covM_stat_data = (TH2D*)unfold_->GetEmatrixInput("h_covM_stat_data");
     TH2D* h_covM_stat_DYMC = (TH2D*)unfold_->GetEmatrixSysUncorr("h_covM_stat_DYMC");
-    TH2D* h_covM_stat_bkgMC = (TH2D*)unfold_->GetEmatrixSysBackgroundUncorr("background", "h_covM_stat_bkgMC");
+    TH2D* h_covM_stat_bkgMC = (TH2D*)unfold_->GetEmatrixSysBackgroundUncorr("bkgMC", "h_covM_stat_bkgMC");
     TH2D* h_covM_stat_bkgDYFake = (TH2D*)unfold_->GetEmatrixSysBackgroundUncorr("DYFake", "h_covM_stat_bkgDYFake");
     TH2D* h_covM_stat_tot_TUnfold = (TH2D*)unfold_->GetEmatrixTotal("h_covM_stat_tot_TUnfold");
 
@@ -171,12 +174,20 @@ public:
     uncSet_stat_totMC_ = new UncSet("stat_totMC", h_cv_, vec_uncSet_stat_MC);
 
     vector<UncSet> vec_uncSet_stat_tot = {*uncSet_stat_totMC_, *uncSet_stat_data_};
+
+    if( useFake_) {
+      TH2D* h_covM_stat_bkgFakeLep = (TH2D*)unfold_->GetEmatrixSysBackgroundUncorr("bkgFakeLep", "h_covM_stat_bkgFakeLep");
+      uncSet_stat_bkgFakeLep_      = new UncSet("stat_bkgFakeLep", h_cv_, h_covM_stat_bkgFakeLep);
+      vec_uncSet_stat_tot.push_back( *uncSet_stat_bkgFakeLep_ );
+    }
+
     uncSet_stat_tot_ = new UncSet("stat_tot", h_cv_, vec_uncSet_stat_tot);
 
     uncSet_stat_data_->Save(f_output);
     uncSet_stat_DYMC_->Save(f_output);
     uncSet_stat_bkgMC_->Save(f_output);
     uncSet_stat_bkgDYFake_->Save(f_output);
+    if( useFake_ ) uncSet_stat_bkgFakeLep_->Save(f_output);
     uncSet_stat_totMC_->Save(f_output);
     uncSet_stat_tot_->Save(f_output);
 
@@ -190,6 +201,8 @@ private:
   TString shearsPath_;
   TString fileName_output_;
 
+  Bool_t useFake_ = kTRUE; // -- default: true
+
   TH1D* h_cv_;
 
   TUnfoldDensity* unfold_;
@@ -198,20 +211,22 @@ private:
   UncSet* uncSet_stat_DYMC_;
   UncSet* uncSet_stat_bkgMC_;
   UncSet* uncSet_stat_bkgDYFake_;
+  UncSet* uncSet_stat_bkgFakeLep_; // -- fake lepton bkg.
   UncSet* uncSet_stat_totMC_; // -- DY MC + bkg MC
-  UncSet* uncSet_stat_tot_; // -- DY MC + bkg MC + data
+  UncSet* uncSet_stat_tot_; // -- DY MC + bkg MC + data (+ fake lepton bkg.)
 
   UncSet* uncSet_stat_tot_TUnfold_; // -- total output from TUnfold (for validation)
 
   void Construct_TUnfold() {
     Run2Output *output = new Run2Output(shearsPath_);
     DYRun2Result* result_cv = new DYRun2Result(output);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_cv);
     result_cv->Produce();
     h_cv_ = result_cv->Get_AllEra("unfolded", "data");
 
     TH2D* h_allEra_migM  = result_cv->Get_AllEra_MigM();
 
-    TH1D* h_allEra_bkgMC  = result_cv->Get_AllEra("reco", "bkgMC");
+    TH1D* h_allEra_bkgMC      = result_cv->Get_AllEra("reco", "bkgMC");
     TH1D* h_allEra_DYFake = result_cv->Get_AllEra("reco", "DYFake");
     TH1D* h_allEra_data   = result_cv->Get_AllEra("reco", "data");
 
@@ -227,11 +242,11 @@ private:
     double err_bkgNorm = 0.0; // -- scale error for background: we do not use it
 
     unfold_->SubtractBackground(h_allEra_DYFake, "DYFake", bkgNorm, err_bkgNorm);
-
-    // TH1D* h_allEra_bkg = hasFake_fullRun2_ ? 
-    //                      map_allEraHist_["reco_bkgAll"] : map_allEraHist_["reco_bkgMC"];
-    TH1D* h_allEra_bkg = h_allEra_bkgMC;
-    unfold_->SubtractBackground(h_allEra_bkg, "background", bkgNorm, err_bkgNorm);
+    unfold_->SubtractBackground(h_allEra_bkgMC, "bkgMC", bkgNorm, err_bkgNorm);
+    if( useFake_ ) {
+      TH1D* h_allEra_bkgFakeLep = result_cv->Get_AllEra("reco", "fake"); // -- fake lepton bkg.
+      unfold_->SubtractBackground(h_allEra_bkgFakeLep, "bkgFakeLep", bkgNorm, err_bkgNorm);
+    }
 
     // -- do unfolding    
     unfold_->DoUnfold(tau, h_allEra_data);
@@ -239,11 +254,13 @@ private:
 
   void Print_Summary() {
     cout << "============ [summary] ============" << endl;
-    cout << "*** CAVEAT: fake histograms are not considered yet ***" << endl;
+    if( !useFake_) 
+      cout << "*** CAVEAT: fake histograms are not considered yet ***" << endl;
     cout << "[input]" << endl;
     cout << "  shears result: " << shearsPath_ << endl;
     cout << "[output]" << endl;
     cout << "  uncertainties and covariance matrices: " << fileName_output_ << endl;
+    cout << "[Warn (231130)] The fake lepton background histogram should have stat. uncertainty only on its error!: " << endl;
     cout << "===================================" << endl;
   }
 

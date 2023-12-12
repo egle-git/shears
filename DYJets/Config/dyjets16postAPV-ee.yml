@@ -224,8 +224,8 @@ use trigger scale factors: yes
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: yes
-  offset: 1.34289
-  slope: -0.166371
+  offset: 1.37488
+  slope: -0.180619
 
 # List of available data/MC samples
 samples:
@@ -503,7 +503,7 @@ uncertainties:
   PDF and scale: false
   pileup: false
   L1 prefiring: false
-  # Muon Rochester correction: true
-  Electron energy correction: true
-  efficiency SF: false
+  # Muon Rochester correction: false
+  Electron energy correction: false
+  efficiency SF: true
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root

@@ -17,12 +17,14 @@ public:
     delete h_dsigdm_theory_;
   }
 
+  void FullPhaseSpace(Bool_t flag = kTRUE) { isFPS_ = flag; }
+
   void AssignTotalUnc(Bool_t flag = kTRUE) { assignTotalUnc_ = kTRUE; }
 
   void Produce() {
     Init();
 
-    ProducePlot_Comparison_with_Theory("unfolded");
+    if( !isFPS_ ) ProducePlot_Comparison_with_Theory("unfolded");
     ProducePlot_Comparison_with_Theory("dsigdm");
   }
 
@@ -40,6 +42,8 @@ private:
 
   Bool_t assignTotalUnc_ = kFALSE;
 
+  Bool_t isFPS_ = kFALSE; // -- is full phase space result?
+
   void Init() {
     TH1::AddDirectory(kFALSE);
 
@@ -55,22 +59,28 @@ private:
     // h_theory_          = result->Get_AllEra("gen", "DY");
 
     fileName_unc_ = "UncAndCov_All_"+channel_+".root";
+    if( isFPS_ )
+      fileName_unc_.ReplaceAll(".root", "_FPS.root");
+
     cout << "X-sec & Uncertainty is from the file: " << fileName_unc_ << " ... update it first if it is not the latest one!" << endl;
 
-    h_unfolded_data_ = PlotTool::Get_Hist(fileName_unc_, "h_unfolded_data");
-    h_theory_        = PlotTool::Get_Hist(fileName_unc_, "h_gen_DY");
+    h_unfolded_data_ = (isFPS_) ? PlotTool::Get_Hist(fileName_unc_, "h_allEra_unfoldedFPS_data") :
+                                  PlotTool::Get_Hist(fileName_unc_, "h_allEra_unfolded_data");
+    
+    h_theory_        = (isFPS_) ? PlotTool::Get_Hist(DYTool::path_theoryPred, "h_nEvent_ufof_FPS_PDFVar_000") :
+                                  PlotTool::Get_Hist(DYTool::path_theoryPred, "h_nEvent_ufof_fid_PDFVar_000");
+    h_theory_ = Convert_Theory_to_MassBinNumberAxis(h_theory_, h_unfolded_data_);
 
-    Double_t lumi = LUMI_16pre + LUMI_16post + LUMI_17 + LUMI_18;
+    Double_t lumi = DYTool::GetLumi("all");
 
-    h_dsigdm_data_   = DYTool::Convert_TUnfoldOutput_DSigmaDM(h_unfolded_data_, lumi);
+    h_dsigdm_data_   = PlotTool::Get_Hist(fileName_unc_, "h_dsigdm_data");
     h_dsigdm_theory_ = DYTool::Convert_TUnfoldOutput_DSigmaDM(h_theory_, lumi);
 
     if( assignTotalUnc_ ) Assign_TotalUnc(h_dsigdm_data_);
   }
 
   void Assign_TotalUnc(TH1D* h_data) {
-    TH1D* h_relUnc_tot = PlotTool::Get_Hist(fileName_unc_, "h_relUnc_tot");
-    h_relUnc_tot = DYTool::Convert_TUnfoldOutput_MassAxis(h_relUnc_tot);
+    TH1D* h_relUnc_tot = PlotTool::Get_Hist(fileName_unc_, "h_relUnc_tot_mAxis");
     
     if( h_relUnc_tot->GetNbinsX() != h_data->GetNbinsX() )
       throw std::invalid_argument("[Assign_TotalUnc] # bins are not consistent between dsigma/dm vs. uncertainty plots");
@@ -89,6 +99,8 @@ private:
 
   void ProducePlot_Comparison_with_Theory(TString type) {
     TString canvasName = "c_"+type+"_"+channel_;
+    if( isFPS_ ) canvasName.ReplaceAll("c_", "c_FPS_");
+
     TString titleX = "";
     if( type == "unfolded" ) titleX = "mass bin number";
     if( type == "dsigdm" )   titleX = "m(#mu#mu) [GeV]";
@@ -116,7 +128,7 @@ private:
     canvas->SetLegendPosition(0.50, 0.70, 0.94, 0.87);
 
     if( type == "unfolded" ) canvas->SetRangeY(0.5, 5e9);
-    if( type == "dsigdm" ) canvas->SetRangeY(5e-9, 2e3);
+    if( type == "dsigdm" )   canvas->SetRangeY(5e-9, 2e3);
 
     canvas->SetRangeRatio(0.7, 1.3);
 
@@ -130,17 +142,21 @@ private:
 
     canvas->RegisterLatex(0.16, 0.91, 42, 0.7, channelInfo);
     if( type == "dsigdm" ) {
-      canvas->RegisterLatex(0.18, 0.46, 62, 0.6, "Fiducial phase space (dressed level)");    
-      canvas->RegisterLatex(0.18, 0.42, 42, 0.6, "p_{T}^{lead}(l) > 20 GeV, p_{T}^{sub}(l) > 15 GeV");
-      canvas->RegisterLatex(0.18, 0.38, 42, 0.6, "|#eta(l)| < 2.4");
+      if( isFPS_ ) {
+        canvas->RegisterLatex(0.18, 0.38, 62, 0.6, "Full phase space (dressed level)");
+        Put_UncInfo(canvas, 0.34);
+      }
+      else {
+        canvas->RegisterLatex(0.18, 0.46, 62, 0.6, "Fiducial phase space (dressed level)");    
+        canvas->RegisterLatex(0.18, 0.42, 42, 0.6, "p_{T}^{lead}(l) > 20 GeV, p_{T}^{sub}(l) > 15 GeV");
+        canvas->RegisterLatex(0.18, 0.38, 42, 0.6, "|#eta(l)| < 2.4");
+        Put_UncInfo(canvas, 0.34);
+      }
     }
-    if( type == "unfolded" )
-      canvas->RegisterLatex(0.18, 0.87, 42, 0.6, "Unfolded distribution");
-
-    if( assignTotalUnc_ )
-      canvas->RegisterLatex(0.18, 0.34, 42, 0.6, "Stat.+Syst. uncertainty");
-    else
-      canvas->RegisterLatex(0.18, 0.34, 42, 0.6, "Stat. uncertainty only");
+    if( type == "unfolded" ) {
+      canvas->RegisterLatex(0.16, 0.87, 42, 0.6, "Unfolded distribution");
+      Put_UncInfo(canvas, 0.34);
+    }
 
     canvas->SetSavePath("./plot");
 
@@ -151,7 +167,48 @@ private:
     canvas->SetCanvasName( baseName + "_ratioZoomOut" );
     canvas->Draw();
   }
+
+  void Put_UncInfo(PlotTool::HistCanvaswRatio* canvas, Double_t y) {
+    if( assignTotalUnc_ )
+      canvas->RegisterLatex(0.18, y, 42, 0.6, "Stat.+Syst. uncertainty");
+    else
+      canvas->RegisterLatex(0.18, y, 42, 0.6, "Stat. uncertainty only");
+  }
+
+  TH1D* Convert_Theory_to_MassBinNumberAxis(TH1D* h_theory, TH1D* h_binNumAxis) {
+    Int_t nBin_theory = h_theory->GetNbinsX();
+    Int_t nBin_binNumAxis = h_binNumAxis->GetNbinsX();
+    if( nBin_theory != nBin_binNumAxis ) {
+      printf("[Convert_Theory_to_MassBinNumberAxis] (nBin_theory, nBin_binNumAxis) = (%d, %d)\n", nBin_theory, nBin_binNumAxis);
+      throw std::runtime_error("[Convert_Theory_to_MassBinNumberAxis] Inconsistent bin numbers");
+    }
+
+    TH1D* h_return = (TH1D*)h_binNumAxis->Clone();
+    for(Int_t i=0; i<nBin_theory; ++i) {
+      Int_t i_bin = i+1;
+
+      Double_t value = h_theory->GetBinContent(i_bin);
+      Double_t error = h_theory->GetBinError(i_bin);
+
+      h_return->SetBinContent(i_bin, value);
+      h_return->SetBinError(i_bin, error);
+    }
+
+    return h_return;
+  }
 };
+
+void producePlot_xSec_FPS() {
+  PlotProducer producer_ee("ee");
+  producer_ee.FullPhaseSpace();
+  producer_ee.AssignTotalUnc();
+  producer_ee.Produce();
+
+  PlotProducer producer_mm("mm");
+  producer_mm.FullPhaseSpace();
+  producer_mm.AssignTotalUnc();
+  producer_mm.Produce();
+}
 
 void producePlot_xSec() {
   PlotProducer producer_ee("ee");
@@ -161,4 +218,6 @@ void producePlot_xSec() {
   PlotProducer producer_mm("mm");
   producer_mm.AssignTotalUnc();
   producer_mm.Produce();
+
+  producePlot_xSec_FPS();
 }

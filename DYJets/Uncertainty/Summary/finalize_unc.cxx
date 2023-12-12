@@ -35,12 +35,19 @@ class UncFinalizer {
 public:
   UncFinalizer(TString channel) : channel_(channel) {};
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+  void FullPhaseSpace(Bool_t flag = kTRUE) { isFPS_ = flag; }
+
   void Finalize() {
     TH1::AddDirectory(kFALSE);
     Init();
 
     if( !gSystem->AccessPathName(fileName_output_) )
       throw std::runtime_error(fileName_output_+" already exists: remove or rename it");
+
+    plotDirPath_= "./plot/"+channel_;
+    if( isFPS_ ) plotDirPath_.ReplaceAll("plot", "plot_FPS");
+    DYTool::Make_Dir(plotDirPath_);
 
     Calc_TotalUnc();
     Calc_TotalCov();
@@ -50,6 +57,8 @@ public:
     ProducePlot_Unc(kTRUE);
     ProducePlot_2D("covM");
     ProducePlot_2D("corrM");
+    ProducePlot_2D("covM", kTRUE);
+    ProducePlot_2D("corrM", kTRUE);
 
     Save();
   }
@@ -57,19 +66,33 @@ public:
 private:
   TString channel_ = "";
   TString fileName_output_ = "";
+  TString plotDirPath_ = "";
 
   vector<UncInfo> vec_uncInfo_;
   // vector<TString> vec_uncType_;
+
+  // -- for save
+  vector<TH1D*> vec_hist_relUnc_;
+  vector<TH2D*> vec_hist_covM_;
+  vector<TH2D*> vec_hist_corrM_;
 
   TH1D* h_absUnc_tot_;
   TH1D* h_relUnc_tot_;
   TH2D* h_covM_tot_;
   TH2D* h_corrM_tot_;
 
+  Bool_t useFake_ = kTRUE; // -- default: true
+  Bool_t isFPS_ = kFALSE; // -- is full phase space result?
+
+  DYRun2Result* result_cv_ = nullptr;
+  TH1D* h_nEvent_cv_ = nullptr; // -- for converting "relUnc -> absUnc" & "corrM -> covM"
+
   void Init() {
     fileName_output_ = "UncAndCov_All_"+channel_+".root";
+    if( isFPS_ )
+      fileName_output_.ReplaceAll(".root", "_FPS.root");
 
-    TString path_default = "/Users/kplee/Research/Analysis/Logbook/231025_update_subtractDYFake";
+    TString path_default = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/shears/DYJets/Uncertainty";
     Insert_UncInfo("statData", "Data statistics", kBlack,
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_ee.root",
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_mm.root",
@@ -100,10 +123,18 @@ private:
                    path_default+"/Pileup/Unfolded_And_Uncertainty_pileup_mm.root",
                    "pileup");
 
+
+    TString fileName_theory_ee = "UncAndCov_Theory_ee.root";
+    TString fileName_theory_mm = "UncAndCov_Theory_mm.root";
+    if( isFPS_ ) {
+      fileName_theory_ee.ReplaceAll(".root", "_FPS.root");
+      fileName_theory_mm.ReplaceAll(".root", "_FPS.root");
+    }
     Insert_UncInfo("theory", "Theoretical inputs", kCyan,
-                   path_default+"/Theory/UncAndCov_Theory_ee.root",
-                   path_default+"/Theory/UncAndCov_Theory_mm.root",
+                   path_default+"/Theory/"+fileName_theory_ee,
+                   path_default+"/Theory/"+fileName_theory_mm,
                    "theory_tot");
+
 
     Insert_UncInfo("muP", "Muon momentum correction", kRed+2,
                    "",
@@ -115,12 +146,18 @@ private:
                    "",
                    "elE_tot");
 
-    // for(const auto& uncInfo : vec_uncInfo_ ) {
-    //   TString uncType = uncInfo.Type();
-    //   if( channel_ == "ee" && uncType == "muP" ) continue;
-    //   if( channel_ == "mm" && uncType == "elE" ) continue;
-    //   vec_uncType_.push_back( uncType );
-    // }
+    Insert_UncInfo("unfold_model", "Model uncertainty (Unfolding)", kBlue-6,
+                   path_default+"/Unfolding/UncAndCov_Unfolding_ee.root",
+                   path_default+"/Unfolding/UncAndCov_Unfolding_mm.root",
+                   "unfold_model");
+
+    result_cv_ = new DYRun2Result(DYTool::path_default+"/"+channel_);
+    if( useFake_ ) DYTool::Set_Fake(channel_, result_cv_);
+    if( isFPS_ )   DYTool::Set_Acc(result_cv_, "cv");
+    result_cv_->Produce();
+
+    h_nEvent_cv_ = (isFPS_) ? result_cv_->Get_AllEra("unfoldedFPS", "data") :
+                              result_cv_->Get_AllEra("unfolded", "data");
   }
 
   void Insert_UncInfo(TString type, TString legend, Int_t color,
@@ -133,39 +170,75 @@ private:
   }
 
   void Calc_TotalUnc() {
-    vector<TH1D*> vec_absUnc;
-    vector<TH1D*> vec_relUnc;
+    // -- to be safe, only the relative uncertainty is quad. sum
+    // -- and, total relative uncertainty is converted to the absolute uncertainty
     for(const auto& uncInfo : vec_uncInfo_) {
       TString fileName = uncInfo.FileName(channel_);
       if( fileName == "" ) continue;
       // cout << "uncType = " << uncInfo.Type() << ": fileName = " << fileName << endl;
 
-      TString histName_absUnc = "h_absUnc_"+uncInfo.HistTag();
-      TH1D* h_absUnc = PlotTool::Get_Hist(fileName, histName_absUnc);
-      vec_absUnc.push_back( h_absUnc );
-
       TString histName_relUnc = "h_relUnc_"+uncInfo.HistTag();
       TH1D* h_relUnc = PlotTool::Get_Hist(fileName, histName_relUnc);
-      vec_relUnc.push_back( h_relUnc );
+      vec_hist_relUnc_.push_back( h_relUnc );
+    }
+    h_relUnc_tot_ = PlotTool::QuadSum_Hist(vec_hist_relUnc_);
+    h_absUnc_tot_ = PlotTool::HistOperation("h_absUnc_tot", h_nEvent_cv_, h_relUnc_tot_, "*");
+  }
+
+  TH2D* Convert_Corr_To_Cov(TH2D* h_corrM, TH1D* h_relUnc) {
+    TH2D* h_covM = (TH2D*)h_corrM->Clone();
+    h_covM->Reset("ICES");
+
+    TString histName = h_corrM->GetName();
+    histName.ReplaceAll("corr", "cov");
+    h_covM->SetName(histName);
+
+    Int_t nBin = h_relUnc->GetNbinsX();
+    for(Int_t i_x=0; i_x<nBin; ++i_x) {
+      Int_t i_binX = i_x+1;
+
+      Double_t relUnc_x = h_relUnc->GetBinContent(i_binX);
+      Double_t absUnc_x = h_nEvent_cv_->GetBinContent(i_binX) * relUnc_x;
+
+      for(Int_t i_y=0; i_y<nBin; ++i_y) {
+        Int_t i_binY = i_y+1;
+
+        Double_t relUnc_y = h_relUnc->GetBinContent(i_binY);
+        Double_t absUnc_y = h_nEvent_cv_->GetBinContent(i_binY) * relUnc_y;
+
+        Double_t corr_xy = h_corrM->GetBinContent(i_binX, i_binY);
+        Double_t cov_xy = corr_xy * absUnc_x * absUnc_y;
+        h_covM->SetBinContent(i_binX, i_binY, cov_xy);
+        h_covM->SetBinError(i_binX, i_binY, 0);
+      }
     }
 
-    h_absUnc_tot_ = PlotTool::QuadSum_Hist(vec_absUnc);
-    h_relUnc_tot_ = PlotTool::QuadSum_Hist(vec_relUnc);
+    return h_covM;
   }
 
   void Calc_TotalCov() {
-    vector<TH2D*> vec_covM;
+    // -- to be safe, individual covariance matrices are constructed from
+    // -- corresponding correlation matrix
+    // -- and then summed up
+    // -- (to avoid the different central value used for the cov. matrix)
     for(const auto& uncInfo : vec_uncInfo_) {
       TString fileName = uncInfo.FileName(channel_);
       if( fileName == "" ) continue;
 
-      TString histName_covM = "h_covM_"+uncInfo.HistTag();
-      TH2D* h_covM = PlotTool::Get_Hist2D(fileName, histName_covM);
-      vec_covM.push_back( h_covM );
+      TString histName_corrM = "h_corrM_"+uncInfo.HistTag();
+      TH2D* h_corrM = PlotTool::Get_Hist2D(fileName, histName_corrM);
+      vec_hist_corrM_.push_back(h_corrM);
+
+      TString histName_relUnc = "h_relUnc_"+uncInfo.HistTag();
+      TH1D* h_relUnc = PlotTool::Get_Hist(fileName, histName_relUnc);
+
+      TH2D* h_covM = Convert_Corr_To_Cov(h_corrM, h_relUnc);
+
+      vec_hist_covM_.push_back( h_covM );
     }
 
-    // -- construct: covariance matrix
-    h_covM_tot_ = (TH2D*)vec_covM[0]->Clone();
+    // -- construct: total covariance matrix
+    h_covM_tot_ = (TH2D*)vec_hist_covM_[0]->Clone();
     h_covM_tot_->Reset("ICES");
 
     Int_t nBinX = h_covM_tot_->GetNbinsX();
@@ -177,7 +250,7 @@ private:
         Int_t i_binY = i_y+1;
 
         Double_t cov_tot = 0;
-        for(const auto& h_covM : vec_covM )
+        for(const auto& h_covM : vec_hist_covM_ )
           cov_tot += h_covM->GetBinContent(i_binX, i_binY);
 
         h_covM_tot_->SetBinContent(i_binX, i_binY, cov_tot);
@@ -185,7 +258,7 @@ private:
       }
     }
 
-    // -- construct: correlation matrix
+    // -- construct: total correlation matrix
     h_corrM_tot_ = (TH2D*)h_covM_tot_->Clone();
     h_corrM_tot_->Reset("ICES");
 
@@ -240,41 +313,74 @@ private:
     PlotTool::IsRatio1(h_absUnc_tot_, h_diag);
   }
 
+  // -- should contain all information necessary for the combination
+  // -- two versions: mass-bin-number axis & mass axis (with "mAxis" tag)
+  // ---- central value
+  // ---- total unc. and cov.
+  // ---- individual unc. and cov.
   void Save() {
     TFile *f_output = TFile::Open(fileName_output_, "RECREATE");
     f_output->cd();
 
     // -- save the central value
-    for(const auto& uncInfo : vec_uncInfo_ ) {
-      if( uncInfo.Type() == "pileup" ) {
-        TString fileName = uncInfo.FileName(channel_);
-        TH1D* h_unfolded_data = PlotTool::Get_Hist(fileName, "h_allEra_unfolded_data_cv");
-        h_unfolded_data->SetName("h_unfolded_data");
+    result_cv_->Save(f_output);
 
-        TH1D* h_gen_DY = PlotTool::Get_Hist(fileName, "h_allEra_gen_DY_cv");
-        h_gen_DY->SetName("h_gen_DY");
+    f_output->cd();
+    Save_UncAndCov(f_output, kFALSE);
 
-        f_output->cd();
-        h_unfolded_data->Write();
-        h_gen_DY->Write();
-
-        break;
-      }
-    }
-
-    h_absUnc_tot_->SetName("h_absUnc_tot");
-    h_absUnc_tot_->Write();
-
-    h_relUnc_tot_->SetName("h_relUnc_tot");
-    h_relUnc_tot_->Write();
-
-    h_covM_tot_->SetName("h_covM_tot");
-    h_covM_tot_->Write();
-
-    h_corrM_tot_->SetName("h_corrM_tot");
-    h_corrM_tot_->Write();
+    // -- mass axis version
+    DYTool::Save_DYRun2Result_MassAxis(f_output, result_cv_, isFPS_);    
+    Save_UncAndCov(f_output, kTRUE);
 
     f_output->Close();
+  }
+
+  void Save_UncAndCov(TFile* f_output, Bool_t useMassAxis) {
+    Save1D(f_output, h_absUnc_tot_, "h_absUnc_tot", useMassAxis);
+    Save1D(f_output, h_relUnc_tot_, "h_relUnc_tot", useMassAxis);
+
+    Save2D(f_output, h_covM_tot_,  "h_covM_tot",  useMassAxis);
+    Save2D(f_output, h_corrM_tot_, "h_corrM_tot", useMassAxis);
+
+    for(const auto& h : vec_hist_relUnc_ ) Save1D(f_output, h, h->GetName(), useMassAxis);
+    for(const auto& h : vec_hist_covM_ )   Save2D(f_output, h, h->GetName(), useMassAxis);
+    for(const auto& h : vec_hist_corrM_ )  Save2D(f_output, h, h->GetName(), useMassAxis);
+  }
+
+  void Save1D(TFile *f_output, TH1D* h, TString histName_base, Bool_t useMassAxis, TString newTag = "mAxis") {
+    TH1D* h_forSave = (TH1D*)h->Clone();
+    if( !useMassAxis ) {
+      h_forSave->SetName(histName_base);
+
+      f_output->cd();
+      h_forSave->Write();
+    }
+    else {
+      h_forSave = DYTool::Convert_TUnfoldOutput_MassAxis(h_forSave);
+      TString histName = histName_base + "_" + newTag;
+      h_forSave->SetName(histName);
+
+      f_output->cd();
+      h_forSave->Write();
+    }
+  }
+
+  void Save2D(TFile *f_output, TH2D* h2D, TString histName_base, Bool_t useMassAxis, TString newTag = "mAxis") {
+    TH2D* h2D_forSave = (TH2D*)h2D->Clone();
+    if( !useMassAxis ) {
+      h2D_forSave->SetName(histName_base);
+
+      f_output->cd();
+      h2D_forSave->Write();
+    }
+    else {
+      h2D_forSave = DYTool::Convert2D_TUnfoldOutput_MassAxis(h2D_forSave);
+      TString histName = histName_base + "_" + newTag;
+      h2D_forSave->SetName(histName);
+
+      f_output->cd();
+      h2D_forSave->Write();
+    }
   }
 
   void ProducePlot_Unc(Bool_t useMassAxis = kFALSE) {
@@ -311,7 +417,7 @@ private:
 
     canvas->SetLegendPosition(0.40, 0.60, 0.94, 0.90);
 
-    canvas->SetRangeY(0, 0.4);
+    canvas->SetRangeY(0, 1.01);
     // canvas->SetAutoRangeY();
 
     canvas->Latex_CMSInternal();
@@ -323,7 +429,7 @@ private:
 
     // canvas->RegisterLatex(0.16, 0.87, 42, 0.6, channelInfo);
 
-    canvas->SetSavePath("./plot");
+    canvas->SetSavePath(plotDirPath_);
 
     canvas->Draw("HISTLP");
 
@@ -332,20 +438,30 @@ private:
     canvas->Draw("HISTLP");
   }
 
-  void ProducePlot_2D(TString matrixType) {
+  void ProducePlot_2D(TString matrixType, Bool_t useMassAxis = kFALSE) {
+    TH2D* h2D = nullptr;
+    if( matrixType == "covM" )  h2D = (TH2D*)h_covM_tot_->Clone();
+    if( matrixType == "corrM" ) h2D = (TH2D*)h_corrM_tot_->Clone();
+
+    if( useMassAxis ) h2D = DYTool::Convert2D_TUnfoldOutput_MassAxis(h2D);
 
     TString canvasName = "c2D_"+matrixType+"_"+channel_;
+    if( useMassAxis ) canvasName += "_massAxis";
 
-    PlotTool::Hist2DCanvas* canvas = new PlotTool::Hist2DCanvas(canvasName, 0, 0, 0);
-    canvas->SetTitle("mass bin number", "mass bin number");
+    Bool_t isLogX = (useMassAxis) ? kTRUE : kFALSE;
+    Bool_t isLogY = (useMassAxis) ? kTRUE : kFALSE;
 
-    if( matrixType == "covM" )  canvas->Register(h_covM_tot_);
-    if( matrixType == "corrM" ) canvas->Register(h_corrM_tot_);
-    
+    TString axisTitle = (useMassAxis) ? "m [GeV]" : "mass bin number";
+
+    PlotTool::Hist2DCanvas* canvas = new PlotTool::Hist2DCanvas(canvasName, isLogX, isLogY, 0);
+    canvas->SetTitle(axisTitle, axisTitle);
+
+    canvas->Register(h2D);
+
     // canvas->SetRangeX(minX, maxX);
     // canvas->SetRangeY(minY, maxY);
     // canvas->SetRangeZ(minZ, maxZ);
-    if( matrixType == "corrM" ) canvas->SetRangeZ(-1.01, 1.01);
+    if( matrixType == "corrM" ) canvas->SetRangeZ(-1.001, 1.001);
     else                        canvas->SetAutoRangeZ();
 
     canvas->Latex_CMSInternal();
@@ -355,130 +471,29 @@ private:
     TString channelInfo = (channel_ == "mm") ? "Muon channel" : "Electron channel";
     canvas->RegisterLatex(0.16, 0.87, 42, 0.5, channelInfo);
 
-    canvas->SetSavePath("./plot");
+    canvas->SetSavePath(plotDirPath_);
 
     canvas->Draw();
   }
 };
 
-
-// -- update: make a class to hold the relevant info for each uncType
-// namespace {
-//   TString path_default = "/Users/kplee/Research/Analysis/Logbook/230729_update_Syst/Uncertainty";
-
-//   std::map<TString, TString> map_path_mm = {
-//     { "effSF",  path_default+"/EffSF/Uncertainty_EffSF_mm.root" },
-//     { "L1Pref", path_default+"/L1Prefiring/Unfolded_And_Uncertainty_L1Pref_mm.root" },
-//     { "pileup", path_default+"/Pileup/Unfolded_And_Uncertainty_pileup_mm.root" },
-//     { "muP",    path_default+"/muP/UncAndCov_muP.root" },
-//     { "theory", path_default+"/Theory/UncAndCov_Theory_mm.root" }
-//   };
-
-//   std::map<TString, TString> map_path_ee = {
-//     { "effSF",  path_default+"/EffSF/Uncertainty_EffSF_ee.root" },
-//     { "L1Pref", path_default+"/L1Prefiring/Unfolded_And_Uncertainty_L1Pref_ee.root" },
-//     { "pileup", path_default+"/Pileup/Unfolded_And_Uncertainty_pileup_ee.root" },
-//     { "theory", path_default+"/Theory/UncAndCov_Theory_ee.root" }
-//   };
-
-//   std::map<TString, TString> map_histTag = {
-//     { "effSF", "effSF_total" },
-//     { "L1Pref", "L1Pref" },
-//     { "pileup", "pileup" },
-//     { "muP",    "muP_tot" },
-//     { "theory", "theory_tot" }
-//   };
-
-//   std::map<TString, TString> map_legend = {
-//     { "effSF",  "Efficiency SF" },
-//     { "L1Pref", "L1 pre-firing correction" },
-//     { "pileup", "Pileup reweighting" },
-//     { "muP",    "Muon momentum correction" },
-//     { "theory", "Theoretical inputs" }
-//   };
-
-//   vector<Int_t> vec_color = {
-//     kBlack, kBlue, kGreen+2, kViolet, kCyan, kRed+2, kGray
-//   };
-// }
-
-// void producePlot_unc(TString channel) {
-//   TH1::AddDirectory(kFALSE);
-
-//   vector<TString> vec_uncType = {"effSF", "L1Pref", "pileup", "theory"};
-//   if( channel == "mm" ) 
-//     vec_uncType.push_back("muP");
-
-//   TString canvasName = "c_unc_"+channel;
-//   PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
-//   canvas->SetTitle("mass bin number", "Rel. uncertainty");
-
-//   vector<TH1D*> vec_relUnc;
-//   Int_t i_case = 0;
-//   for(const auto& uncType : vec_uncType) {
-//     TString fileName = (channel == "mm") ? map_path_mm[uncType] : map_path_ee[uncType];
-//     TString histName = "h_relUnc_"+map_histTag[uncType];
-
-//     TH1D* h_relUnc = PlotTool::Get_Hist(fileName, histName);
-//     canvas->Register(h_relUnc, map_legend[uncType], vec_color[i_case] );
-//     i_case++;
-
-//     vec_relUnc.push_back( h_relUnc );
-//   }
-//   TH1D* h_relUnc_tot = PlotTool::QuadSum_Hist(vec_relUnc);
-
-//   canvas->Register(h_relUnc_tot, "Total (quad. sum)", kRed);
-
-//   canvas->SetLegendPosition(0.50, 0.67, 0.94, 0.90);
-
-//   canvas->SetRangeY(0, 0.45);
-//   // canvas->SetAutoRangeY();
-
-//   canvas->Latex_CMSInternal();
-//   TString channelInfo = (channel == "mm") ? "Muon channel" : "Electron channel";
-//   TString uncInfo = "Systematic uncertainty ("+channelInfo+")";
-//   canvas->RegisterLatex(0.16, 0.91, 42, 0.6, uncInfo);
-
-//   // canvas->RegisterLatex(0.16, 0.87, 42, 0.6, channelInfo);
-
-//   // canvas->SetSavePath("./plot");
-
-//   canvas->Draw("HISTLP");
-// }
-
-// void producePlot_2D(TString matrixType, TString channel) {
-
-//   TString canvasName = "c2D_"+matrixType+"_"+uncType+"_"+channel_;
-
-//   PlotTool::Hist2DCanvas* canvas = new PlotTool::Hist2DCanvas(canvasName, 0, 0, 0);
-//   canvas->SetTitle("mass bin number", "mass bin number");
-
-//   TString histName = "h_"+matrixType+"_theory_"+uncType;
-//   TH2D* h2D = PlotTool::Get_Hist2D(fileName_, histName);
-//   canvas->Register(h2D);
-
-//   // canvas->SetRangeX(minX, maxX);
-//   // canvas->SetRangeY(minY, maxY);
-//   // canvas->SetRangeZ(minZ, maxZ);
-//   if( matrixType == "corrM" ) canvas->SetRangeZ(-1.01, 1.01);
-//   else                        canvas->SetAutoRangeZ();
-
-//   canvas->Latex_CMSInternal();
-//   TString info = "Covariance matrix ("+uncType+")";
-//   if( matrixType == "corrM" ) info.ReplaceAll("Covariance", "Correlation");
-//   canvas->RegisterLatex(0.16, 0.91, 42, 0.5, info);
-//   TString channelInfo = (channel_ == "mm") ? "Muon channel" : "Electron channel";
-//   canvas->RegisterLatex(0.16, 0.87, 42, 0.5, channelInfo);
-
-//   canvas->SetSavePath(plotDirPath_);
-
-//   canvas->Draw();
-// }
-
-void producePlot_unc() {
+void finalize_unc_FPS() {
   UncFinalizer finalizer_ee("ee");
+  finalizer_ee.FullPhaseSpace();
+  finalizer_ee.Finalize();
+
+  UncFinalizer finalizer_mm("mm");
+  finalizer_mm.FullPhaseSpace();
+  finalizer_mm.Finalize();
+}
+
+void finalize_unc() {
+  UncFinalizer finalizer_ee("ee");
+  // finalizer_ee.Use_Fake(kFALSE);
   finalizer_ee.Finalize();
 
   UncFinalizer finalizer_mm("mm");
   finalizer_mm.Finalize();
+
+  finalize_unc_FPS();
 }

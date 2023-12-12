@@ -333,6 +333,8 @@ public:
     return iter->second.Get2D(map_histName);
   }
 
+  TString Path() const { return basePath_; }
+
 private:
   TString era_;
   TString basePath_;
@@ -618,6 +620,8 @@ public:
 
   DYRun2Result(Run2Output* output): output_(output) { }
 
+  DYRun2Result(TString path) { output_ = new Run2Output(path); }
+
   void Set_Fake(TString era, TString fileName, TString histName) {
     if( era == "all" ) {
       for(auto& pair : map_hNameC_ )
@@ -631,6 +635,11 @@ public:
       throw std::invalid_argument("[Set_Fake] era = " + era + " is not supported");
 
     iter->second.Set_Fake(fileName, histName);
+  }
+
+  void Set_Acc(TString fileName, TString histName) {
+    hasAcc_ = kTRUE;
+    h_acc_ = PlotTool::Get_Hist(fileName, histName);
   }
 
   // -- when all histogram names are same for a given histType
@@ -722,6 +731,11 @@ public:
 
     Insert_AllEraHist_Unfolded("DY");
     Insert_AllEraHist_Unfolded("data");
+
+    if( hasAcc_ ) {
+      Insert_AllEraHist_Unfolded_FPS("DY");
+      Insert_AllEraHist_Unfolded_FPS("data");
+    }
   }
 
   TH1D* Get_AllEra(TString level, TString process) const {
@@ -738,6 +752,8 @@ public:
   TH2D* Get_AllEra_RespM() const { return h_allEra_respM_; }
 
   Run2Output* Get_Run2Output() const { return output_; }
+
+  Bool_t HasFPS() const { return hasAcc_; };
 
   void Save(TFile* f_output, TString tag = "") {
     f_output->cd();
@@ -761,7 +777,10 @@ public:
     if( tag == "" ) h_allEra_respM_->SetName("h_allEra_respM");
     else            h_allEra_respM_->SetName("h_allEra_respM_"+tag);
     h_allEra_respM_->Write();
-  }
+  } 
+
+  std::unordered_map<std::string, TH1D*> Get_Map_AllEraHist() const { return map_allEraHist_; }
+
 
 protected:
   // -- declare as a reference: problem when it was not initialized -> decide to change to a pointer
@@ -782,6 +801,10 @@ protected:
 
   TH2D* h_allEra_migM_ = nullptr; 
   TH2D* h_allEra_respM_ = nullptr; // -- normalized
+
+  // -- has acceptance? (if it has, it will also produce the full phase space results)
+  Bool_t hasAcc_ = kFALSE;
+  TH1D* h_acc_ = nullptr;
 
   void Insert_AllEraHist(TString level, TString process) {
     TString histType = level+"_"+process;
@@ -1006,6 +1029,49 @@ protected:
     map_allEraHist_.insert( std::make_pair(histType_unfolded.Data(), h_unfolded) );
   }
 
+  void Insert_AllEraHist_Unfolded_FPS(TString process) {
+    TString histType = "unfolded_"+process;
+    TH1D* h_unfolded = map_allEraHist_[histType.Data()];
+    TH1D* h_unfolded_FPS = Apply_Acceptance(h_unfolded);
+
+    TString histType_FPS = "unfoldedFPS_"+process;
+    map_allEraHist_.insert( std::make_pair(histType_FPS.Data(), h_unfolded_FPS) );
+  }
+
+  TH1D* Apply_Acceptance(TH1D* h_fiducial) {
+    TH1D* h_FPS = (TH1D*)h_fiducial->Clone();
+    h_FPS->Reset("ICES");
+
+    Int_t nBin_acc = h_acc_->GetNbinsX();
+    Int_t nBin_fiducial = h_fiducial->GetNbinsX();
+
+    if( nBin_acc != nBin_fiducial ) {
+      printf("(nBin_acc, nBin_fiducial) = (%d, %d)\n", nBin_acc, nBin_fiducial);
+      throw std::invalid_argument("[DYRun2Result::Apply_Acceptance] inconsistent number of bins");
+    }
+
+    for(Int_t i=0; i<nBin_acc; ++i) {
+      Int_t i_bin = i+1;
+
+      Double_t acc = h_acc_->GetBinContent(i_bin);
+      if( acc == 0 ) {
+        printf("[DYRun2Result::Apply_Acceptance] %2d bin's acceptance = 0\n", i_bin);
+        throw std::invalid_argument("Acceptance is 0");
+      }
+ 
+      Double_t nEvent_fiducial = h_fiducial->GetBinContent(i_bin);
+      Double_t error_fiducial = h_fiducial->GetBinError(i_bin);
+
+      Double_t nEvent_FPS = nEvent_fiducial / acc;
+      Double_t error_FPS  = error_fiducial / acc;
+
+      h_FPS->SetBinContent(i_bin, nEvent_FPS);
+      h_FPS->SetBinError(i_bin, error_FPS);
+    }
+
+    return h_FPS;
+  }
+
   void AssignTotalError_Unfolding(TH1D* h_unfolded, TUnfoldDensity& unfold) {
     TH2* h_covM = unfold.GetEmatrixTotal("h_covM");
 
@@ -1064,6 +1130,7 @@ protected:
 
     TH1D* h_allEra = MergeHist( {h_allEra_16pre, h_allEra_16post, h_allEra_17, h_allEra_18} );
     map_allEraHist_.insert( std::make_pair("reco_fake", h_allEra) );
+    cout << "[DYRun2Result::Insert_AllEraHist_Fake] fake lepton backgrounds are inserted" << endl;
   }
 
   TH1D* Convert_To_AllEraFormat( TH1D* h, TString era ) {

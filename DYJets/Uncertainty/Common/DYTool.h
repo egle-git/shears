@@ -142,6 +142,18 @@ void Set_Fake(TString channel, DYRun2Result* result) {
   }
 }
 
+
+// -- custom DYHistInfo (for systematic variation)
+void Set_Fake(TString channel, DYRun2Result* result, const vector<DYTool::DYHistInfo>& vec_info) {
+  if( channel != "ee" && channel != "mm" )
+    throw std::invalid_argument("[DYTool::Set_Fake] channel = "+channel+" is not supported!");
+
+  for(const auto& info : vec_info) {
+    if( info.channel != channel ) continue;
+    result->Set_Fake(info.era, info.fileName, info.histName);
+  }
+}
+
 void Set_Acc(DYRun2Result* result, TString tag) {
   result->Set_Acc(DYTool::path_acc, "h_acc_"+tag);
 }
@@ -153,12 +165,24 @@ void Make_Dir(TString dirPath) {
 }
 
 void Remove_NegativeBin(TH1D* h) {
-  for(Int_t i=0; i<h->GetNbinsX(); ++i) {
+  Int_t nBin = h->GetNbinsX();
+  for(Int_t i=-1; i<nBin+1; ++i) {
     Int_t i_bin = i+1;
     Double_t value = h->GetBinContent(i_bin);
     if( value < 0 ) {
-      printf("  [%03d bin] (%.3lf, %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
-             i_bin, h->GetBinLowEdge(i_bin), h->GetBinLowEdge(i_bin+1), value);
+
+      if( i_bin == 0 )
+        printf("  [%03d bin] (Underflow < %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+               i_bin, h->GetBinLowEdge(i_bin+1), value);
+      
+      else if( i_bin == nBin+1)
+        printf("  [%03d bin] (Overflow > %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+             i_bin, h->GetBinLowEdge(i_bin), value);
+      
+      else
+        printf("  [%03d bin] (%.3lf, %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+               i_bin, h->GetBinLowEdge(i_bin), h->GetBinLowEdge(i_bin+1), value);
+
       h->SetBinContent(i_bin, 0);
       h->SetBinError(i_bin, 0);
     }
@@ -231,6 +255,51 @@ void Assign_RelUnc(TH1D* h_cv, TH1D* h_relUnc) {
 
     h_cv->SetBinError(i_bin, absUnc);
   }
+}
+
+TH1D* MergeHist( vector<TH1D*> vec_hist ) {
+  TH1D* h_merged = nullptr;
+
+  for(const auto& h : vec_hist ) {
+    if( h_merged == nullptr ) h_merged = (TH1D*)h->Clone();
+    else                      h_merged->Add( h );
+  }
+  return h_merged;
+}
+
+TH2D* MergeHist2D( vector<TH2D*> vec_hist ) {
+  TH2D* h_merged = nullptr;
+
+  for(const auto& h : vec_hist ) {
+    if( h_merged == nullptr ) h_merged = (TH2D*)h->Clone();
+    else                      h_merged->Add( h );
+  }
+  return h_merged;
+}
+
+TH1D* Get_UncHist(TH1D* h_cv, TString uncType) {
+  if( uncType != "absUnc" && uncType != "relUnc" )
+    throw std::invalid_argument("[DYTool::Get_UncHist] uncType = " + uncType + " is not supported");
+
+  TH1D* h_unc = (TH1D*)h_cv->Clone();
+  h_unc->Reset("ICES");
+
+  Int_t nBin = h_cv->GetNbinsX();
+  for(Int_t i=0; i<nBin; ++i) {
+    Int_t i_bin = i+1;
+
+    Double_t value = h_cv->GetBinContent(i_bin);
+    Double_t error = h_cv->GetBinError(i_bin);
+    if( uncType == "absUnc" ) 
+      h_unc->SetBinContent(i_bin, error);
+    if( uncType == "relUnc" ) {
+      Double_t relUnc = (value == 0) ? 0.0 : error/value;
+      h_unc->SetBinContent(i_bin, relUnc);
+    }
+    h_unc->SetBinError(i_bin, 0);
+  }
+
+  return h_unc;
 }
 
 }; // -- end of namespace DYTool

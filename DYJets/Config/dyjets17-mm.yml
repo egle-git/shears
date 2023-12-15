@@ -248,8 +248,8 @@ select the best muon trigger SF:
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: yes
-  offset: 1.3261
-  slope: -0.157662
+  offset: 1.36444
+  slope: -0.175188
 
 # List of available data/MC samples
 samples:
@@ -381,6 +381,11 @@ samples:
       type: background
       nano dir: Catalogs/2017/MassBinned_MiNNLO
       catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    - name: Fakes
+      type: background
+      nano dir: Catalogs/2017
+      catalog: Catalog2017_bonzai_SingleMuon_data.txt
 
 # Scale factors
 tables:
@@ -416,6 +421,10 @@ MC grouping:
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    - legend: "Fakes"
+      samples: [ Fakes ]
+      color: 803 # kOrange + 3
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
@@ -443,43 +452,39 @@ binning file: dyjets-binnings.yml
 #                  provide dynamic labels.
 plots:
     # Excluded plots
-    - selector: '^_.*'
+    - selector: '.*'
       produce: no
-    - selector: '.*-gen$'
+    - selector: 'mu.*inc0jet'
       produce: yes
-    - selector: '.*-matrix$'
+    - selector: '.*leading.*'
       produce: no
-    - selector: '.*[12]jet.*'
-      produce: no
-    - selector: 'el.*'
-      produce: no
-    - selector: 'mu.*'
+    - selector: 'muPt_leading_inc0jet.*'
       produce: yes
-    - selector: 'mu.*subleading.*'
+    - selector: 'muPt_subleading_inc0jet.*'
       produce: yes
-    - selector: 'muIso.*'
-      produce: no
-    - selector: 'genLep.*'
-      produce: no
-    - selector: 'bjet.*'
-      produce: no
-    - selector: 'jet.*leading.*'
-      produce: no
-    - selector: 'jet.*subleading.*'
-      produce: no
-    - selector: 'jet.*third.*'
-      produce: no
-    - selector: 'jet.*fourth.*'
-      produce: no
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass.*mass.*'
+    - selector: 'mass_wide_range_inc0jet'
+      produce: yes
+    - selector: 'pt_inc0jet'
+      produce: yes
+    - selector: 'rapidity_inc0jet'
+      produce: yes
+    - selector: 'phistar_inc0jet'
+      produce: yes
+    - selector: 'MET_pt_inc0jet.*'
+      produce: yes
+    - selector: 'MET_vs_mass_inc0jet'
+      produce: yes
+    - selector: 'mll_over_ptsub_inc0jet.*'
+      produce: yes
+    - selector: '.*OF'
       produce: no
-    - selector: '.*exc.*'
+    - selector: '.*UF'
       produce: no
-    - selector: 'nJets.*_inc.*'
+    - selector: '.*gen.*'
       produce: no
-    - selector: 'nJets.*_inc0jet.*'
+    - selector: '.*matrix.*'
       produce: no
     # Style changes
     - selector: '.*'

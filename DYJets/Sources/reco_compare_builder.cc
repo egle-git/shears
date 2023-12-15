@@ -1,4 +1,5 @@
 #include "reco_compare_builder.h"
+#include "TFile.h"
 
 namespace util
 {
@@ -35,8 +36,15 @@ void reco_compare_builder::load()
 
 void reco_compare_builder::fill_upper_panel(const std::string &name)
 {
-    _mc_entry->draw(name, _lumi);
-    _data_entry->draw(name, _lumi, true);
+    // Draw the bigger histogram first so that both are visible
+    if (_mc_entry->integral(name, _lumi) > _data_entry->integral(name, _lumi)) {
+        _mc_entry->draw(name, _lumi);
+        _data_entry->draw(name, _lumi, true);
+    } else {
+        _data_entry->draw(name, _lumi);
+        _mc_entry->draw(name, _lumi, true);
+        _data_entry->draw(name, _lumi, true);
+    }
 
     if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
         format_upper_x_axis(*axis);
@@ -56,6 +64,15 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
     std::unique_ptr<TH1> num = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
+
+    // TEMPORARY
+    // std::string output_dir = (parsed_options().map["input"].as<std::string>() + "/plots").c_str();
+    // if (parsed_options().map.count("output") > 0) {
+    //     output_dir = parsed_options().map["output"].as<std::string>();
+    // }
+    // TFile *f_save = new TFile((output_dir + "/dyjets-top.root").c_str(), "UPDATE");
+    // num->Write(name.c_str());
+    // f_save->Close();
 
     if (num == nullptr || den == nullptr) {
         return false;

@@ -126,6 +126,10 @@ electrons:
     # Default value: yes
     use reconstruction scale factors: yes
 
+    # Whether to use the Rochester electron energy correction (instead of POG correction)
+    use rochester electron energy correction: yes
+    rochester energy correction path: EleEnergyCorr/e_16aUL_1.txt
+
     # Charge misidentification efficiency correction for electrons
     use charge misid sf: yes
     charge misid sf location: ChargeMisid/CFRate2016a.root
@@ -292,6 +296,11 @@ samples:
       type: background
       nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    - name: Fakes
+      type: background
+      nano dir: Catalogs/2016preAPV
+      catalog: Catalog2016_bonzai_SingleMuon_data.txt
 
 # Scale factors
 tables:
@@ -337,6 +346,10 @@ MC grouping:
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    - legend: "Fakes"
+      samples: [ Fakes ]
+      color: 803 # kOrange + 3
 
 
 # The file below defines the binnings for histograms relevant to the analysis.

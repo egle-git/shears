@@ -88,6 +88,22 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
     util::set_value_safe(node, _leadingLepPt, "leading lepton pt", "leading lepton pT for Z finder \"" + name + "\"");
     util::set_value_safe(node, _newcut, "mll/subleading lepton pt", "mll/subleading lepton pt \"" + name + "\"");
     
+    if (node["invert cut"])
+        _invert_newcut = node["invert cut"].as<bool>();
+    if (_invert_newcut)
+        util::logging::info << "Using inverted mll/subleading lepton pT cut." << std::endl;
+    
+    // Possibility to remove the Z peak for fake lepton studies
+    if (node["Z peak removal range"])
+        _z_peak_remove_range = std::abs(node["Z peak removal range"].as<double>());
+    if (_z_peak_remove_range > 0.0)
+        util::logging::info << "Removing the Z peak at 91 +/- " << _z_peak_remove_range << " GeV." << std::endl;
+    
+    // Possibility to invert the electron(muon) ID(iso) cut for fake lepton studies
+    if (node["invert lepton cuts"])
+        _sideband_mode = node["invert lepton cuts"].as<unsigned>();
+    if (_sideband_mode)
+        util::logging::info << "Inverting ID(iso) cuts for " << _sideband_mode << " leptons." << std::endl;
 
     const YAML::Node node_gen = opt.config["generator level"];
     util::set_value_safe(node_gen, _leadingGenLepPt, "leading lepton pt", "gen leading lepton pt cut", [](double val) { return val >= 0; });
@@ -136,15 +152,60 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
     // Check leading lepton pT
     // Always "a" is a leading lepton in pT as the leptons are given after sorting in pT
     if( isGEN ) {
-      if( candidate.a.v.Pt() < _leadingGenLepPt ) return false;
-    }
-    else {
-      if( candidate.a.v.Pt() < _leadingLepPt ) return false;
-    }
-    
-    if( !isGEN) {
-        if(candidate.v.M()/candidate.b.v.Pt() > _newcut ) return false;
-    }
+        if (candidate.a.v.Pt() < _leadingGenLepPt) return false;
+    } else {
+        if (candidate.a.v.Pt() < _leadingLepPt) return false;
+        if (!_invert_newcut && candidate.v.M()/candidate.b.v.Pt() > _newcut) return false;
+        if (_invert_newcut && candidate.v.M()/candidate.b.v.Pt() < _newcut) return false;
+
+        // UTILS FOR FAKE BACKGROUND STUDY
+        // Removing the Z peak if so desired
+        if (_z_peak_remove_range > 0.001 && candidate.distance_to_z() < _z_peak_remove_range) return false;
+        // Inverting lepton cuts if so desired
+        // Works ONLY if leptons have their ID/iso selected to "none".
+        if (_sideband_mode) {
+            bool a_pass=false, b_pass=false;
+            if (_flavor_mode == flavor_mode::ee || _flavor_mode == flavor_mode::mumu) {
+                if (_flavor_mode == flavor_mode::ee) { // Do the electrons pass MediumID?
+                    a_pass = (candidate.a.id >= 3);
+                    b_pass = (candidate.b.id >= 3);
+                } else if (_flavor_mode == flavor_mode::mumu) { // Do the mouns pass Tight ISO?
+                    // a_pass = (candidate.a.isoid >= 4);
+                    // b_pass = (candidate.b.isoid >= 4);
+                    // TEMPORARY
+                    if (candidate.a.isoid >= 5) {
+                        a_pass = true;
+                        b_pass = (candidate.b.isoid >= 4);
+                    } else if (candidate.b.isoid >= 5) {
+                        a_pass = (candidate.a.isoid >= 4);
+                        b_pass = true;
+                    } else {
+                        a_pass = false;
+                        b_pass = false;
+                    } // TEMPORARY
+                }
+                if (_sideband_mode == 1 && ((a_pass && b_pass) || (!a_pass && !b_pass))) { // Only one lepton can pass the cuts
+                    return false;
+                } else if (_sideband_mode == 2 && (a_pass || b_pass)) { // Both leptons must fail the cuts
+                    return false;
+                }
+            }
+            else if (_flavor_mode == flavor_mode::emu) { // Does the electron (muon) pass MediumID (Tight ISO)?
+                if (std::abs(candidate.a.pdgid) == 11) {
+                    a_pass = (candidate.a.id >= 3);
+                    b_pass = (candidate.b.isoid >= 4);    
+                } else {
+                    a_pass = (candidate.b.id >= 3);
+                    b_pass = (candidate.a.isoid >= 4);  
+                }
+                if (_sideband_mode == 1 && (a_pass || !b_pass)) { // The electron must fail the cut, the muon must pass
+                    return false;
+                } else if (_sideband_mode == 2 && (a_pass || b_pass)) { // Both the electron and the muon must fail the cuts
+                    return false;
+                }
+            }          
+        } // if (_sideband_mode)
+    } // if (!isGen)
 
     // Check if affected by the 2016 EMTF bug
     //if (std::abs(candidate.a.v.Eta()) > 1.2 && std::abs(candidate.b.v.Eta()) > 1.2

@@ -61,11 +61,18 @@ void top_reweight_emu_builder::build()
     std::unique_ptr<TFile> fout = std::unique_ptr<TFile>(new TFile((_output_dir_name + "/dyjets-TopBkgs.root").c_str(), "RECREATE"));
     // Creating a job info histogram to allow the data-driven backgrounds be used in reco comparison code
     std::unique_ptr<TH1D> job_info = std::unique_ptr<TH1D>(new TH1D("_job_info", "_job_info", 4 ,0, 4));
+    job_info->GetXaxis()->SetBinLabel(1, "fraction_processed");
+    job_info->GetXaxis()->SetBinLabel(2, "weights_sum");
+    // job_info->SetBinContent(1, 1);
+    // job_info->SetBinContent(2, _lumi); // This ensures that data-driven background does not get normalised the second time in reco comparison
     job_info->SetBinContent(1, 1);
-    job_info->SetBinContent(2, _lumi); // This ensures that data-driven background does not get normalised the second time in reco comparison
+    job_info->SetBinContent(2, 0);
+
     TVectorD job_info_average(2);
-    job_info_average[0] = -1;
-    job_info_average[1] = 1;
+    // job_info_average[0] = -1;
+    // job_info_average[1] = 1;
+    job_info_average[0] = _lumi;
+    job_info_average[1] = 0;
     fout->cd();
     job_info->Write("_job_info");
     job_info_average.Write("_job_info_average");
@@ -420,15 +427,26 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
         auto cov_matrix = fit_result->GetCovarianceMatrix();
 
         // Producing a text file with content to copy into the yml file for reweighting
-        std::ofstream fitFile(_output_dir_name + "/fitParams.txt");
+        std::ofstream fit_file(_output_dir_name + "/fitParams.txt");
 
-        if (fitFile.is_open()) {
-            fitFile << "emu method reweighting:\n  use: yes\n  offset: " <<
-                fit->GetParameter(0) << "\n  slope: " << fit->GetParameter(1) << std::endl;
-            // fitFile << "offset: " << fit->GetParameter(0) << " +- " << fit->GetParError(0) << std::endl;
-            // fitFile << "slope: " << fit->GetParameter(1) << " +- " << fit->GetParError(1) << std::endl << std::endl;
-
-            fitFile.close();
+        if (fit_file.is_open()) {
+            fit_file << "============== USE THIS ==============\n" << std::endl;
+            fit_file << "emu method reweighting:" << std::endl;
+            fit_file << "  use: yes" << std::endl;
+            fit_file << "  offset: " << fit->GetParameter(0) << std::endl;
+            fit_file << "  slope: "  << fit->GetParameter(1) << std::endl;
+            fit_file << "\n============= UP VARIATION ==========\n" << std::endl;
+            fit_file << "emu method reweighting:" << std::endl;
+            fit_file << "  use: yes" << std::endl;
+            fit_file << "  offset: " << fit->GetParameter(0) + fit->GetParError(0) << std::endl;
+            fit_file << "  slope: "  << fit->GetParameter(1) - fit->GetParError(1) << std::endl;
+            fit_file << "\n============= DOWN VARIATION ==========\n" << std::endl;
+            fit_file << "emu method reweighting:" << std::endl;
+            fit_file << "  use: yes" << std::endl;
+            fit_file << "  offset: " << fit->GetParameter(0) - fit->GetParError(0) << std::endl;
+            fit_file << "  slope: "  << fit->GetParameter(1) + fit->GetParError(1) << std::endl;
+            fit_file << "\n=========================================\n" << std::endl;
+            fit_file.close();
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;
         } else {
             std::cerr << "Unable to open the file for fit parameters." << std::endl;

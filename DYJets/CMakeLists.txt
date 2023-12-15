@@ -167,6 +167,8 @@ add_library(DYJets-bkg-est
     Sources/comparison_entry.cc
     Sources/emu_method_builder.cc
     Sources/top_reweight_emu_builder.cc
+    Sources/same_sign_method_builder.cc
+    Sources/os_ss_ratio_compare_builder.cc
 )
 
 # Preprocessor macro to disable incompatible parts of the old code

@@ -322,7 +322,6 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     //DeltaEta
     //  histo_set.fill("deltaeta", *tags.rec, DeltaEta, weights().global_weight());
 
-
     /*
      * Variables in Z rest frame
      */
@@ -473,10 +472,17 @@ void dyjets_analyzer::reweight_backgrounds(physics::weights &weights,
     }
     // Same-sign method reweighting
     if (_reweight_same_sign_method) {
+        using physics::zfinder;
         double weight = 1.0;
-        weight = ( _met_offset_ss_method - _met_slope_ss_method * met.Pt() *
-                std::exp(_met_exp_offset_ss_method - _met_exp_slope_ss_method * met.Pt()) ) *
-            ( _mass_offset_ss_method + _mass_slope_ss_method * std::log10(boson.M()) );
+        if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::mumu) {
+            weight = ( _met_offset_ss_method - _met_slope_ss_method * met.Pt() *
+                    std::exp(-_met_exp_slope_ss_method * met.Pt()) ) *
+                (_mass_offset_ss_method + _mass_slope_ss_method * std::log10(boson.M()));
+        }
+        else if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::ee) {
+            weight = _met_offset_ss_method - _met_slope_ss_method * met.Pt() -
+                    std::exp(_met_exp_offset_ss_method - _met_exp_slope_ss_method * met.Pt());
+        }
         weights.use_weight(weight);
     }
 }

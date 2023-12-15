@@ -53,7 +53,7 @@ class comparison_entry
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) = 0;
 
     /// \brief Returns the integral of the histogram
-    virtual double Integral(const std::string &name, double lumi) = 0;
+    virtual double integral(const std::string &name, double lumi) = 0;
 
     /**
      * \brief Returns a pointer to the \c TAxis corresponding to the horizontal
@@ -100,7 +100,7 @@ class mc_comparison_entry : public comparison_entry
     virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi, std::string option="f") override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
-    virtual double Integral(const std::string &name, double lumi) override;
+    virtual double integral(const std::string &name, double lumi) override;
     virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
     virtual TAxis *get_y_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;
@@ -164,7 +164,7 @@ class data_comparison_entry : public comparison_entry
     virtual void add_to_legend(TLegend &legend, const std::string &plotname, double lumi, std::string option="lp") override;
     virtual void draw(const std::string &name, double lumi, bool same = false) override;
     virtual std::unique_ptr<TH1> get(const std::string &name, double lumi) override;
-    virtual double Integral(const std::string &name, double lumi) override;
+    virtual double integral(const std::string &name, double lumi) override;
     virtual TAxis *get_x_axis(const std::string &name, double lumi) override;
     virtual TAxis *get_y_axis(const std::string &name, double lumi) override;
     virtual void reset_drawing_state() override;

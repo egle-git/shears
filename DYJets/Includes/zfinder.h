@@ -81,6 +81,14 @@ class zfinder
     double _leadingLepPt = 25.0; // default value: 25 GeV
     double _leadingGenLepPt = 25.0; // default value: 25 GeV
     double _newcut = 10;
+    bool _invert_newcut = false;
+    // Possibility to remove the Z peak for fake lepton study
+    double _z_peak_remove_range = 0.0;
+    // Possibility to invert electron(muon) ID(iso) for fake lepton study
+    // 0 = regular selection
+    // 1 = one lepton's ID(iso) inverted
+    // 2 = both leptons' ID(iso) inverted
+    unsigned _sideband_mode = 0;
 
   public:
     /**
@@ -110,6 +118,11 @@ class zfinder
      * \brief Returns the flavor mode for this finder.
      */
     flavor_mode get_flavor_mode() const { return _flavor_mode; }
+
+    /**
+     * \brief Returns the charge mode for this finder.
+     */
+    charge_mode get_charge_mode() const { return _charge_mode; }
 };
 
 } // namespace physics

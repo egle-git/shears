@@ -71,7 +71,9 @@ void muons::configure(const util::options &opt)
     }
     if (node["iso"]) {
         std::string iso = node["iso"].as<std::string>();
-        if (iso == "loose") {
+        if (iso == "none") {
+            _iso_cut = muons::iso::none;
+        } else if (iso == "loose") {
             _iso_cut = muons::iso::loose;
         } else if (iso == "medium") {
             _iso_cut = muons::iso::medium;
@@ -79,6 +81,8 @@ void muons::configure(const util::options &opt)
             _iso_cut = muons::iso::tight;
         } else if (iso == "veryloose") {
             _iso_cut = muons::iso::veryloose;
+        } else if (iso == "verytight") {
+            _iso_cut = muons::iso::verytight;
         } else {
             throw std::invalid_argument("Unknown muon Isoid: \"" + iso + "\"");
         }
@@ -98,7 +102,8 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
         l.v.SetPtEtaPhiM(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
         l.raw_v = l.v;
         l.charge = Muon_charge[i];
-        l.iso = Muon_pfIsoId[i];
+        l.iso = Muon_pfRelIso04_all[i];
+        l.isoid = Muon_pfIsoId[i];
         l.id = Muon_looseId[i];
         l.pdgid = 13;
 
@@ -118,6 +123,9 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
         }
 
         switch (_iso_cut) {
+        case iso::none:
+            l.passes_iso = true;
+            break;
         case iso::veryloose:
             l.passes_iso = (Muon_pfIsoId[i] >= 1);
             break;
@@ -129,6 +137,9 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
             break;
         case iso::tight:
             l.passes_iso = (Muon_pfIsoId[i] >= 4);
+            break;
+        case iso::verytight:
+            l.passes_iso = (Muon_pfIsoId[i] >= 5);
             break;
         }
         if(!l.passes_iso) {
@@ -177,6 +188,40 @@ std::vector<lepton> muons::get(bool isdata, std::vector<lepton> gl, int &nVetoMu
     return muons;
 }
 
+lepton muons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep)
+{
+    int nGenLep = (int)vec_genLep.size();
+    int i_matched = -1;
+    double dR_min = 1e10;
+    double dRCut = 0.1;
+    // -- find the gen-lepton with the smallest dR
+    // -- (but the dR shoudl be at least less than 0.1)
+    for(int i=0; i<nGenLep; ++i) {
+        const lepton& genLep = vec_genLep[i];
+        double dR_ith = l.v.DeltaR(genLep.v);
+        if( dR_ith < dRCut && dR_ith < dR_min && std::abs(genLep.pdgid) == 13 ) {
+            i_matched = i;
+            dR_min = dR_ith;
+        }
+    }
+
+    if( i_matched < 0 ) {
+        // util::logging::warn << "[electrons::matchedGenLepton] no matched gen-lepton is found" << std::endl;
+        // printf("  [Given reco-lepton] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", l.v.Pt(), l.v.Eta(), l.v.Phi());
+        // for(const auto& genLep : vec_genLep ) {
+        //     double dR = l.v.DeltaR( genLep.v );
+        //     printf("----> [gen-lepton] (pt, eta, phi, dR) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", 
+        //                                                      genLep.v.Pt(), genLep.v.Eta(), genLep.v.Phi(), dR);
+        // }
+        lepton l_null = l;
+        l_null.v.SetPtEtaPhiM(0,0,0,0);
+        l_null.raw_v.SetPtEtaPhiM(0,0,0,0);
+        return l_null;
+    }
+
+    return vec_genLep[i_matched];
+}
+
 void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::tables &tab) const
 {
     if (w.ismc()) {
@@ -185,8 +230,11 @@ void muons::apply_sf(weights &w, const std::vector<lepton> &muons, const util::t
                 w.use_weight(tab.at("muon id").getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
             }
             if (_iso_sf_enabled) {
-                w.use_weight(tab.at("muon isolation")
-                                .getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                // If ISO cut is set to "none", SF is still applied on those muons that pass the tight cut
+                if (_iso_cut != iso::none || mu.isoid >= 4) {
+                    w.use_weight(tab.at("muon isolation")
+                                    .getEfficiency(mu.v.Pt(), std::abs(mu.v.Eta())));
+                }
             }
             if (_trk_sf_enabled) {
                 w.use_weight(

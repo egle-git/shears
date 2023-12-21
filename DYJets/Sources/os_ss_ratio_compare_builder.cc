@@ -367,10 +367,14 @@ void os_ss_ratio_compare_builder::fill_upper_panel(const std::string &name)
     _fakes_est_os->SetLineColor(1);
     _fakes_est_os->SetMarkerColor(1);
     _fakes_est_os->SetMarkerStyle(21);
+    _fakes_est_os->SetTitle("");
+    _fakes_est_os->SetStats(0);
     _fakes_est_os->Draw("PE1");
     _fakes_est_ss->SetLineColor(2);
     _fakes_est_ss->SetMarkerColor(2);
     _fakes_est_ss->SetMarkerStyle(21);
+    _fakes_est_ss->SetTitle("");
+    _fakes_est_ss->SetStats(0);
     _fakes_est_ss->Draw("same PE1");
 
     if (auto axis = _fakes_est_os->GetXaxis()) {
@@ -407,7 +411,7 @@ bool os_ss_ratio_compare_builder::fill_lower_panel(const std::string &name)
     _ratio->Divide(den.get());
 
     format_lower_x_axis(*_ratio->GetXaxis());
-    format_lower_y_axis(*_ratio->GetYaxis(), "e#mu method/MC");
+    format_lower_y_axis(*_ratio->GetYaxis(), "OS/SS");
 
     double ratio_min = style().get<double>("ratio min", name, 0.501);
     double ratio_max = style().get<double>("ratio max", name, 2.499);

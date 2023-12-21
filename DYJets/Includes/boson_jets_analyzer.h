@@ -23,7 +23,6 @@
 #include "tables.h"
 #include "triggers.h"
 #include "weights.h"
-#include "simpleShiftUncEstimator.h"
 
 // #include "TUnfold.h"
 #include "TUnfoldBinning.h"
@@ -34,17 +33,18 @@ namespace physics
 /// \brief Base class for boson-jets analyzers
 class boson_jets_analyzer
 {
+protected:
     TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned long long> event;
     TTreeReaderValue<float> L1PreFiringWeight_Nom;
     TTreeReaderValue<float> L1PreFiringWeight_Up;
     TTreeReaderValue<float> L1PreFiringWeight_Dn;
-protected:
+
     util::event_counter counter;
     util::histo_set histo_set;
     util::histo_set2D histo_set2D;
 
-private:
+// private:
     std::string _short_name, _long_name;
 
     util::tables _tables;
@@ -87,7 +87,6 @@ private:
 
     physics::reweighing _reweighing;
     physics::weights _weights;
-    physics::simpleShiftUncEstimator _ssUncEstimator;
 
     // objects for TUnfold
     int _era; // _era = (1, 2, 3, 4) = (16pre, 16post, 17, 18)
@@ -124,10 +123,13 @@ public:
     virtual ~boson_jets_analyzer();
 
     /// \brief Entry point, called for every event
-    virtual void operator()() final;
+    virtual void operator()();
 
     /// \brief Function called at the end of the processing.
     virtual void write();
+
+    int get_era() const { return _era; }
+    std::string get_sample_name() const { return _sample_name; }
 
 protected:
     /// \brief Applies trigger scale factors
@@ -157,12 +159,16 @@ protected:
                        const util::matched<std::string> &tags,
                        const util::matched<double> &value);
 
+    void fill_unfolded(const std::string &name,
+                       const util::matched<std::string> &tags,
+                       const util::matched<double> &value,
+                       double gen_weight,
+                       double global_weight);
+
     util::tables tables() const { return _tables; }
 
     /// \brief Retrieves the weight information for the current event.
     const physics::weights &weights() const { return _weights; }
-
-    physics::simpleShiftUncEstimator &ssUncEstimator() { return _ssUncEstimator; }
 
     bool check_lowQualityMuon(const std::vector<lepton> muons);
     bool check_whichTriggerSF(const std::vector<lepton> muons);

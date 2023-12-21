@@ -351,7 +351,7 @@ samples:
       catalog: Catalog2016_bonzai_GGToLL.txt
     - name: GammaGamma_M-5to50
       type: background
-      nano dir: Catalogs/2016preAPV/MassBinned_MiNNLO
+      nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - name: FakesInt
@@ -514,3 +514,13 @@ plots:
     - selector: '^pt_cut.*'
       x axis label: 'p_{T}^{ee}'
       x axis unit: 'GeV'
+
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  # Muon Rochester correction: false
+  Electron energy correction: false
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  

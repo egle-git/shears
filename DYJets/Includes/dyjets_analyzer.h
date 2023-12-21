@@ -18,9 +18,9 @@ namespace po = boost::program_options;
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer : public physics::boson_jets_analyzer
 {
-    physics::zfinder _zfinder;
-    TTreeReaderValue<unsigned long long> event;
-    TTreeReaderValue<unsigned> run;
+
+    // TTreeReaderValue<unsigned long long> event;
+    // TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned> luminosityBlock;
 
     // Used for background reweighting, check reweight_backgrounds()
@@ -37,6 +37,8 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     double _mass_slope_ss_method = 0.0;
 
   public:
+    physics::zfinder _zfinder;
+
     /// \brief Constructor.
     explicit dyjets_analyzer(util::job::info &info, const util::options &opt);
 

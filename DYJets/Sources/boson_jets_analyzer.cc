@@ -73,8 +73,7 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
     _pileup(info, opt),
     _btagger(opt,histo_set2D),
     _reweighing(info, opt),
-    _weights(info),
-    _ssUncEstimator(_weights, histo_set, histo_set2D)
+    _weights(info)
 {
     if (opt.config["tables"])
         _tables = opt.config["tables"].as<util::tables>();
@@ -170,15 +169,6 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     setup_TUnfoldBinning(opt);
     get_era(opt);
-
-    _ssUncEstimator.set_TUnfoldBinning(_trueBinning, _recoBinning);
-    _ssUncEstimator.set_era(_era);
-
-    // register the histogram names for systematic variation
-    // multiple histogram names can be added
-    _ssUncEstimator.add_systHistName("mass_wide_range_inc0jet");
-    // _ssUncEstimator.add_systHistName("pt_inc0jet");
-    // _ssUncEstimator.add_systHistName("rapidity_inc0jet");
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
@@ -284,7 +274,7 @@ void boson_jets_analyzer::operator()()
         if( _weights.ismc() ) genleps_dressed_noCut = _genleps.get_leptons_dressed_noCut();
         else                  genleps_dressed_noCut.clear(); // data: no gen-leptons
 
-        std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, nVetoMuons);
+        std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, gRandom->Rndm());
         std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
                                                        genleps_dressed_noCut, genleps_finalState, nVetoElecs);
 
@@ -407,12 +397,6 @@ void boson_jets_analyzer::operator()()
         apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
     }
 
-    // systematic variation information
-    if( _weights.ismc() ) {
-        _ssUncEstimator.add_systInfo("L1Pref", *L1PreFiringWeight_Nom, *L1PreFiringWeight_Up, *L1PreFiringWeight_Dn);
-        _ssUncEstimator.add_systInfo("pileup", _pileup.weight(0), _pileup.weight(1), _pileup.weight(-1));
-    }
-
     /*
      * Fill histograms w.r.t. N_jets and invariant mass
      */
@@ -505,10 +489,6 @@ void boson_jets_analyzer::operator()()
                 fill(tags_mass_fullRange, evt);
         }
     }
-
-    // clear systInfo of this event at the end of the event process so that systInfo of the next event can be filled
-    if( _weights.ismc() )
-        _ssUncEstimator.clear_systInfo();
 }
 
 void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
@@ -540,7 +520,15 @@ void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
 
 void boson_jets_analyzer::fill_unfolded(const std::string &name,
                                         const util::matched<std::string> &tags,
-                                        const util::matched<double> &value)
+                                        const util::matched<double> &value) {
+    fill_unfolded(name, tags, value, weights().gen_weight(), weights().global_weight());
+}
+
+void boson_jets_analyzer::fill_unfolded(const std::string &name,
+                                        const util::matched<std::string> &tags,
+                                        const util::matched<double> &value,
+                                        double gen_weight,
+                                        double global_weight)
 {
 
     // to fill TUnfold histograms
@@ -552,21 +540,21 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
 
     // Fill 1D distributions
     if (tags.rec && value.rec) {
-        histo_set.fill(name, *tags.rec, *value.rec, weights().global_weight());
+        histo_set.fill(name, *tags.rec, *value.rec, global_weight);
 
         if( isMass ) {
             binNum_reco = _recoBinning->GetGlobalBinNumber(*value.rec, _era);
-            histo_set.fill("TUnfold1DReco", *tags.rec, binNum_reco, weights().global_weight());
-            histo_set.fill("mass_wide_range_fineBin", *tags.rec, *value.rec, weights().global_weight());
+            histo_set.fill("TUnfold1DReco", *tags.rec, binNum_reco, global_weight);
+            // histo_set.fill("mass_wide_range_fineBin", *tags.rec, *value.rec, global_weight);
         }
     }
     if (tags.gen && value.gen) {
-        histo_set.fill(name, *tags.gen + "-gen", *value.gen, weights().gen_weight());
+        histo_set.fill(name, *tags.gen + "-gen", *value.gen, gen_weight);
 
         if( isMass ) {
             binNum_true = _trueBinning->GetGlobalBinNumber(*value.gen);
-            histo_set.fill("TUnfold1DTrue", *tags.gen, binNum_true, weights().gen_weight());
-            histo_set.fill("mass_wide_range_fineBin", *tags.gen + "-gen", *value.gen, weights().gen_weight());
+            histo_set.fill("TUnfold1DTrue", *tags.gen, binNum_true, gen_weight);
+            // histo_set.fill("mass_wide_range_fineBin", *tags.gen + "-gen", *value.gen, gen_weight);
         }
     }
 
@@ -577,7 +565,7 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
         histo_set2D.fill(name,
                          *tags.rec + "-matrix",
                          *value.rec,
-                         *value.gen, weights().global_weight());
+                         *value.gen, global_weight);
         // Now fill again subtracting the global weight from gen weight
         // And placing the event in the reco underflow bin
         // as explained in the TUnfold manual
@@ -585,11 +573,11 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
         histo_set2D.fill(name,
                          *tags.rec + "-matrix",
                          -10000.0,// underflow bin
-                         *value.gen, weights().gen_weight()-weights().global_weight());
+                         *value.gen, gen_weight-global_weight);
 
         if( isMass ) {
-            histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, binNum_true, weights().global_weight());
-            histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           binNum_true, weights().gen_weight()-weights().global_weight());
+            histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, binNum_true, global_weight);
+            histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           binNum_true, gen_weight-global_weight);
         }
     }
     else{
@@ -599,17 +587,17 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
             histo_set2D.fill(name,
                              *tags.rec + "-matrix",
                              *value.rec,
-                             -10000.0, weights().global_weight());
+                             -10000.0, global_weight);
 
             // fill the reco underflow bin with the (gen_weight - global_weight) according to the manual above
             histo_set2D.fill(name,
                              *tags.rec + "-matrix",
                              -10000.0,
-                             -10000.0, weights().gen_weight()-weights().global_weight());
+                             -10000.0, gen_weight-global_weight);
 
             if( isMass ) {
-                histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, 0, weights().global_weight());
-                histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           0, weights().gen_weight()-weights().global_weight());
+                histo_set2D.fill("TUnfold2DMig", *tags.rec, binNum_reco, 0, global_weight);
+                histo_set2D.fill("TUnfold2DMig", *tags.rec, 0,           0, gen_weight-global_weight);
             }
         }
         if(tags.gen && value.gen){
@@ -618,10 +606,10 @@ void boson_jets_analyzer::fill_unfolded(const std::string &name,
             histo_set2D.fill(name,
                              *tags.gen + "-matrix",
                              -10000.0,
-                             *value.gen, weights().gen_weight());
+                             *value.gen, gen_weight);
 
             if( isMass ) {
-                histo_set2D.fill("TUnfold2DMig", *tags.gen, 0, binNum_true, weights().gen_weight());
+                histo_set2D.fill("TUnfold2DMig", *tags.gen, 0, binNum_true, gen_weight);
             }
         }
     }

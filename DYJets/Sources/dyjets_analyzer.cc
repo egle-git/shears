@@ -16,7 +16,7 @@
 #include <boost/optional/optional_io.hpp>
 
 dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt)
-    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), event(info.reader, "event"), run(info.reader, "run"), luminosityBlock(info.reader, "luminosityBlock")
+    : boson_jets_analyzer(info, opt), _zfinder(opt, "Z"), luminosityBlock(info.reader, "luminosityBlock")
 
 {
     counter.declare("With two good leptons");
@@ -293,11 +293,6 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     fill_unfolded("rapidity", tags, rapidity);
     fill_unfolded("dyjets_events_peak", tags, mass);
     fill_unfolded("dyjets_events_wide_range", tags, mass);
-
-    // systematic variation: usually done only for MC
-    if( weights().ismc() ) {
-        ssUncEstimator().fill_allSystHist("mass_wide_range", tags, mass);
-    }
 
     if (!tags.rec || !evt.rec) {
         return;

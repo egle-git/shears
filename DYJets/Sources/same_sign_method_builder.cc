@@ -109,6 +109,9 @@ void same_sign_method_builder::build()
 
         util::logging::debug << "Estimating data-driven backgrounds" << std::endl;
         fakes_est->Add(_mc_entry->get(name, _lumi).get(), -1);
+        util::logging::debug << "Data events: " << _data_entry->integral(name, _lumi) << std::endl;
+        util::logging::debug << "MC events: " << _mc_entry->integral(name, _lumi) << std::endl;
+        util::logging::debug << "Estimated events: " << fakes_est->Integral() << std::endl;
 
         // Smoothing histograms if required
         if (_smooth) {
@@ -460,7 +463,6 @@ void same_sign_method_builder::remove_negative_bins(std::unique_ptr<TH1> &hist, 
                 hist->SetBinContent(i, 1e-9);
             else
                 hist->SetBinContent(i, 0);
-            hist->SetBinError(i, 0);
         }
     }
 }

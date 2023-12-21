@@ -47,6 +47,10 @@ void top_reweight_emu_builder::parse_options(int argc, char **argv)
     if (_opt.config["preliminary"]) {
         _preliminary = _opt.config["preliminary"].as<bool>();
     }
+
+    if (_opt.config["fakes variation"]) {
+        _fake_variation = _opt.config["fakes variation"].as<int>();
+    }
 }
 
 void top_reweight_emu_builder::build()
@@ -350,12 +354,10 @@ void top_reweight_emu_builder::load()
 
     _ll_data_entry = load_data(ll_input_dir);
     _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
-    // _ll_mc_entry = load_mc(ll_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau Single top VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
     _emu_data_entry = load_data(emu_input_dir);
     _emu_mc_entry = load_mc(emu_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
-    // _emu_mc_entry = load_mc(emu_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau Single top VV WW WZ ZZ #gamma#gamma W+Jets #gamma+Jets QCD Fakes");
-    _emu_mc_subtract_entry = load_mc(emu_input_dir, 0, 1, "t#bar{t} TT Single top W+Jets #gamma+Jets QCD");
-    // _emu_mc_subtract_entry = load_mc(emu_input_dir, 0, 1, "t#bar{t} W+Jets #gamma+Jets QCD");
+    _emu_mc_subtract_entry = load_mc(emu_input_dir, 0, 1, "t#bar{t} TT Single top W+Jets #gamma+Jets QCD Fakes");
+    _emu_fakes_entry = load_mc(emu_input_dir, 0, 1, "DY #rightarrow #tau#tau TauTau VV WW WZ ZZ #gamma#gamma t#bar{t} TT Single top W+Jets #gamma+Jets QCD");
 
     _lumi = _ll_data_entry->lumi();
     util::logging::info << "Normalizing MC to " << (_lumi / 1000) << " fb^-1" << std::endl;
@@ -446,6 +448,10 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
             fit_file << "  offset: " << fit->GetParameter(0) - fit->GetParError(0) << std::endl;
             fit_file << "  slope: "  << fit->GetParameter(1) + fit->GetParError(1) << std::endl;
             fit_file << "\n=========================================\n" << std::endl;
+            fit_file << "Fit parameters with errors:" << std::endl;
+            fit_file << "  offset: " << fit->GetParameter(0) << " +/- " << fit->GetParError(0) << std::endl;
+            fit_file << "  slope: "  << fit->GetParameter(1) << " +/- " << fit->GetParError(1) << std::endl;
+            fit_file << "\n=========================================\n" << std::endl;
             fit_file.close();
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;
         } else {
@@ -463,6 +469,7 @@ void top_reweight_emu_builder::reset_drawing_state()
     _ll_data_entry->reset_drawing_state();
     _emu_mc_entry->reset_drawing_state();
     _emu_mc_subtract_entry->reset_drawing_state();
+    _emu_fakes_entry->reset_drawing_state();
     _emu_data_entry->reset_drawing_state();
     _ratio.reset();
 }
@@ -538,6 +545,16 @@ void top_reweight_emu_builder::remove_negative_bins(std::unique_ptr<TH1> &hist)
     }
 }
 
+void top_reweight_emu_builder::hist_variation(std::unique_ptr<TH1> &hist, int updown)
+{
+    if (updown == 0)
+        return;
+    // Vary the histogram up/down by one sigma
+    for (int i=0; i<=hist->GetNbinsX()+1; ++i) {
+        hist->SetBinContent(i, hist->GetBinContent(i) + updown*hist->GetBinError(i));
+    }
+}
+
 std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
 {
     std::unique_ptr<TH1> ll_mc_input = _ll_mc_entry->get(_current_histo_name, _lumi);
@@ -547,15 +564,21 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     }
     util::logging::debug << "ll mc events: " << ll_mc_input->Integral() << std::endl;
 
-    std::unique_ptr<TH1> num = _emu_data_entry->get(_current_histo_name, _lumi);
-    std::unique_ptr<TH1> den = _emu_mc_entry->get(_current_histo_name, _lumi);
-    std::unique_ptr<TH1> sub = _emu_mc_subtract_entry->get(_current_histo_name, _lumi);
+    std::unique_ptr<TH1> num  = _emu_data_entry       ->get(_current_histo_name, _lumi);
+    std::unique_ptr<TH1> den  = _emu_mc_entry         ->get(_current_histo_name, _lumi);
+    std::unique_ptr<TH1> sub1 = _emu_mc_subtract_entry->get(_current_histo_name, _lumi);
+    std::unique_ptr<TH1> sub2 = _emu_fakes_entry      ->get(_current_histo_name, _lumi);
+    hist_variation(sub2, _fake_variation);
     if (!num) {
         util::logging::warn << "The current EMu data histogram was not found!" << std::endl;
         return nullptr;
     }
-    if (!sub) {
+    if (!sub1) {
         util::logging::warn << "The current non-top EMu MC histogram was not found!" << std::endl;
+        return nullptr;
+    }
+    if (!sub2) {
+        util::logging::warn << "The current fake EMu histogram was not found!" << std::endl;
         return nullptr;
     }
     if (!den) {
@@ -564,8 +587,10 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     }
 
     util::logging::debug << "emu data events before MC subtraction: " << num->Integral() << std::endl;
-    util::logging::debug << "non-top emu mc events to be subtracted from data: " << sub->Integral() << std::endl;
-    num->Add(sub.get(), -1);
+    util::logging::debug << "non-top emu mc events to be subtracted from data: " << sub1->Integral() << std::endl;
+    util::logging::debug << "fake emu events to be subtracted from data: " << sub2->Integral() << std::endl;
+    num->Add(sub1.get(), -1);
+    num->Add(sub2.get(), -1);
     util::logging::debug << "emu data events after MC subtraction: " << num->Integral() << std::endl;
     util::logging::debug << "top emu mc events: " << den->Integral() << std::endl;
 

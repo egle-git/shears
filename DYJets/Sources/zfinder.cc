@@ -170,19 +170,8 @@ bool zfinder::valid(const dilepton &candidate, bool isGEN) const
                     a_pass = (candidate.a.id >= 3);
                     b_pass = (candidate.b.id >= 3);
                 } else if (_flavor_mode == flavor_mode::mumu) { // Do the mouns pass Tight ISO?
-                    // a_pass = (candidate.a.isoid >= 4);
-                    // b_pass = (candidate.b.isoid >= 4);
-                    // TEMPORARY
-                    if (candidate.a.isoid >= 5) {
-                        a_pass = true;
-                        b_pass = (candidate.b.isoid >= 4);
-                    } else if (candidate.b.isoid >= 5) {
-                        a_pass = (candidate.a.isoid >= 4);
-                        b_pass = true;
-                    } else {
-                        a_pass = false;
-                        b_pass = false;
-                    } // TEMPORARY
+                    a_pass = (candidate.a.isoid >= 4);
+                    b_pass = (candidate.b.isoid >= 4);
                 }
                 if (_sideband_mode == 1 && ((a_pass && b_pass) || (!a_pass && !b_pass))) { // Only one lepton can pass the cuts
                     return false;

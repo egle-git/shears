@@ -182,8 +182,6 @@ boson_jets_analyzer::boson_jets_analyzer(util::job::info &info,
 
     counter.declare("Total");
     counter.declare("Passing the trigger");
-    counter.declare("With at least one fake electron"); // TEMPORARY
-    counter.declare("With at least one fake muon"); // TEMPORARY
 }
 
 boson_jets_analyzer::~boson_jets_analyzer()
@@ -354,20 +352,8 @@ void boson_jets_analyzer::operator()()
 
         // Apply weights for background estimation
         if (_weights.ismc())
-        {
-            std::vector<int> matches; // temporary
-            _electrons.apply_charge_misid_sf(_weights, chosen_electrons, _genleps.get_leptons_finalState(), matches); // temporary
-            if (matches.size() > 1) // temporary
-                if (matches[0] < 0 || matches[1] < 0) // temporary
-                    counter.count("With at least one fake electron", weights().global_weight()); // temporary
-            if (chosen_muons.size()) { // temporary
-                for (auto & mu : chosen_muons) { // temporary
-                    auto genlep = _muons.matchedGenLepton(mu, _genleps.get_leptons_finalState()); // temporary
-                    if (genlep.v.Pt() == 0 && genlep.v.Eta() == 0 && genlep.v.Phi() == 0) // temporary
-                        counter. count("With at least one fake muon", weights().global_weight()); // temporary
-                }
-            } // temporary
-        }
+            _electrons.apply_charge_misid_sf(_weights, chosen_electrons, _genleps.get_leptons_finalState());
+
         reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
 
         // Fill lepton control plots

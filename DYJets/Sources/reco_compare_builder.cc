@@ -36,15 +36,18 @@ void reco_compare_builder::load()
 
 void reco_compare_builder::fill_upper_panel(const std::string &name)
 {
-    // Draw the bigger histogram first so that both are visible
+    _data_entry->draw(name, _lumi);
+    _mc_entry->draw(name, _lumi, true);
+    _data_entry->draw(name, _lumi, true);
+    // Fix axis ranges so that both data and MC are visible
     if (_mc_entry->integral(name, _lumi) > _data_entry->integral(name, _lumi)) {
-        _mc_entry->draw(name, _lumi);
-        _data_entry->draw(name, _lumi, true);
+        double min = _data_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _data_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _mc_entry->get(name, _lumi)->GetMaximum() * 1.5);
     } else {
-        _data_entry->draw(name, _lumi);
-        _mc_entry->draw(name, _lumi, true);
-        _data_entry->draw(name, _lumi, true);
+        double min = _mc_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _mc_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _data_entry->get(name, _lumi)->GetMaximum() * 1.5);
     }
+    
 
     if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
         format_upper_x_axis(*axis);
@@ -64,15 +67,7 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
     std::unique_ptr<TH1> num = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
-
-    // TEMPORARY
-    // std::string output_dir = (parsed_options().map["input"].as<std::string>() + "/plots").c_str();
-    // if (parsed_options().map.count("output") > 0) {
-    //     output_dir = parsed_options().map["output"].as<std::string>();
-    // }
-    // TFile *f_save = new TFile((output_dir + "/dyjets-top.root").c_str(), "UPDATE");
-    // num->Write(name.c_str());
-    // f_save->Close();
+    double total_ratio = num->Integral() / den->Integral();
 
     if (num == nullptr || den == nullptr) {
         return false;

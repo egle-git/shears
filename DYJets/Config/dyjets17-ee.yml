@@ -354,10 +354,10 @@ samples:
       nano dir: Catalogs/2017/MassBinned_MiNNLO
       catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
-    - name: FakesInt
-      type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_DoubleEG_data.txt
+    # - name: FakesInt
+    #   type: background
+    #   nano dir: Catalogs/2017
+    #   catalog: Catalog2017_bonzai_DoubleEG_data.txt
 
 # Scale factors
 tables:
@@ -414,9 +414,9 @@ MC grouping:
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
-    - legend: "Fakes"
-      samples: [ FakesInt ]
-      color: 803 # kOrange + 3
+    # - legend: "Fakes"
+    #   samples: [ FakesInt ]
+    #   color: 803 # kOrange + 3
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

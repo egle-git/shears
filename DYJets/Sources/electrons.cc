@@ -279,8 +279,7 @@ void electrons::apply_sf(weights &w,
 
 void electrons::apply_charge_misid_sf(physics::weights &weights,
                                       const std::vector<physics::lepton> &_electrons,
-                                      const std::vector<physics::lepton> &_genleps,
-                                      std::vector<int> &matches) // temporary
+                                      const std::vector<physics::lepton> &_genleps)
 {
     if (_charge_misid_sf_enabled && weights.ismc()) {
         if (_electrons.size() && _genleps.size()) {
@@ -298,8 +297,7 @@ void electrons::apply_charge_misid_sf(physics::weights &weights,
                           return a.v.Pt() > b.v.Pt(); // Sort in descending order
                       });
 
-            // std::vector<int> matches(electrons.size(), -1);
-            matches = std::vector<int>(electrons.size(), -1); // temporary
+            std::vector<int> matches(electrons.size(), -1);
             std::vector<double> drmins(electrons.size(), 99999.9);
 
             for (unsigned iel = 0; iel < electrons.size(); iel++) {

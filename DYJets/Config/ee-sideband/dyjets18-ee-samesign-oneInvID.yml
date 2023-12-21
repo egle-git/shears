@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: EE_2018_oneInvID
-ss location: EE_2018_samesign_oneInvID
+os location: EE_2018_oneInvID_wMisid
+ss location: EE_2018_samesign_oneInvID_wMisid
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes
@@ -134,7 +134,7 @@ electrons:
     rochester energy correction path: EleEnergyCorr/e_18UL_1.txt
 
     # Charge misidentification efficiency correction for electrons
-    use charge misid sf: no
+    use charge misid sf: yes
     charge misid sf location: ChargeMisid/CFRate2018.root
     # Choose mode: 0 -- nominal correction values, 1 -- up variation by 1 sigma, -1 -- down variation
     charge misid sf mode: 0
@@ -451,30 +451,34 @@ plots:
       produce: yes
     - selector: '.*leading.*'
       produce: no
+    - selector: 'el.*_leading_inc0jet.*'
+      produce: yes
+    - selector: 'el.*_subleading_inc0jet.*'
+      produce: yes
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass_wide_range_inc0jet'
       produce: yes
-    - selector: 'pt_inc0jet'
+    - selector: 'pt_inc0jet.*'
       produce: yes
-    - selector: 'pt_inc0jet_mass40_3000'
+    - selector: 'rapidity_inc0jet.*'
       produce: yes
-    - selector: 'rapidity_inc0jet'
+    - selector: 'phistar_inc0jet.*'
       produce: yes
-    - selector: 'rapidity_inc0jet_mass40_3000'
-      produce: yes
-    - selector: 'phistar_inc0jet'
-      produce: yes
-    - selector: 'MET_pt_inc0jet'
-      produce: yes
-    - selector: 'MET_pt_inc0jet_mass40_3000'
+    - selector: 'MET_pt_inc0jet.*'
       produce: yes
     - selector: 'MET_vs_mass_inc0jet'
       produce: yes
-    - selector: 'MET_vs_mass_inc0jet_mass40_3000'
-      produce: yes
-    - selector: 'mll_over_ptsub_inc0jet'
-      produce: yes
+    - selector: '.*_mass1000_3000'
+      produce: no
+    - selector: '.*OF'
+      produce: no
+    - selector: '.*UF'
+      produce: no
+    - selector: '.*gen.*'
+      produce: no
+    - selector: '.*matrix.*'
+      produce: no
     # Style changes
     - selector: '.*'
       ratio min: 0.501

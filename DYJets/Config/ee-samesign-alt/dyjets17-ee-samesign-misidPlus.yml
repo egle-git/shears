@@ -134,7 +134,7 @@ electrons:
     use charge misid sf: yes
     charge misid sf location: ChargeMisid/CFRate2017.root
     # Choose mode: 0 -- nominal correction values, 1 -- up variation by 1 sigma, -1 -- down variation
-    charge misid sf mode: -1
+    charge misid sf mode: 1
 
 # Options related to the selection of muons
 muons:
@@ -228,12 +228,18 @@ triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
 
 use trigger scale factors: yes
 
+# Reweighting for top backgrounds (emu method)
+emu method reweighting:
+  use: yes
+  offset: 1.36444
+  slope: -0.175188
+  
 same sign method reweighting:
   use: yes
-  MET offset: 1.48441
-  MET slope: 0.000609267
-  MET exp offset: -1.27702
-  MET exp slope: 0.0345796
+  MET offset: 1.47981
+  MET slope: 0.000622212
+  MET exp offset: -1.19731
+  MET exp slope: 0.0343239
 
 # List of available data/MC samples
 samples:
@@ -438,25 +444,23 @@ plots:
     # Excluded plots
     - selector: '.*'
       produce: no
-    - selector: 'el.*inc0jet'
+    - selector: 'el.*inc0jet.*'
       produce: yes
-    - selector: '.*leading.*'
-      produce: no
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
+    - selector: 'mass_wide_range_inc0jet.*'
       produce: yes
     - selector: 'pt_inc0jet.*'
       produce: yes
     - selector: 'rapidity_inc0jet.*'
       produce: yes
-    - selector: 'phistar_inc0jet'
+    - selector: 'phistar_inc0jet.*'
       produce: yes
-    - selector: 'MET_pt_inc0jet'
+    - selector: 'MET_pt_inc0jet.*'
       produce: yes
-    - selector: 'MET_vs_mass_inc0jet'
+    - selector: 'MET_vs_mass_inc0jet.*'
       produce: yes
-    - selector: 'mll_over_ptsub_inc0jet'
+    - selector: 'mll_over_ptsub_inc0jet.*'
       produce: yes
     - selector: '.*-matrix'
       produce: no

@@ -228,19 +228,25 @@ triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
 
 use trigger scale factors: yes
 
+emu method reweighting:
+  use: yes
+  offset: 1.36444
+  slope: -0.175188
+  
 # same sign method reweighting:
 #   use: yes
 #   MET offset: 1.48478
 #   MET slope: 0.000823514
 #   MET exp offset: -0.701421
 #   MET exp slope: 0.0194544
+
 same sign method reweighting:
   use: yes
   MET offset: 1.47981
   MET slope: 0.000622212
   MET exp offset: -1.19731
   MET exp slope: 0.0343239
-  
+
 # List of available data/MC samples
 samples:
     ### DATA

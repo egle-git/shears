@@ -466,30 +466,34 @@ plots:
       produce: yes
     - selector: '.*leading.*'
       produce: no
+    - selector: 'muPt_leading_inc0jet.*'
+      produce: yes
+    - selector: 'muPt_subleading_inc0jet.*'
+      produce: yes
     - selector: '.*exc.*'
       produce: no
     - selector: 'mass_wide_range_inc0jet'
       produce: yes
     - selector: 'pt_inc0jet'
       produce: yes
-    - selector: 'pt_inc0jet_mass40_3000'
-      produce: yes
     - selector: 'rapidity_inc0jet'
-      produce: yes
-    - selector: 'rapidity_inc0jet_mass40_3000'
       produce: yes
     - selector: 'phistar_inc0jet'
       produce: yes
-    - selector: 'MET_pt_inc0jet'
+    - selector: 'MET_pt_inc0jet.*'
       produce: yes
-    - selector: 'MET_pt_inc0jet_mass40_3000'
+    - selector: 'MET_vs_mass_inc0jet.*'
       produce: yes
-    - selector: 'MET_vs_mass_inc0jet'
+    - selector: 'mll_over_ptsub_inc0jet.*'
       produce: yes
-    - selector: 'MET_vs_mass_inc0jet_mass40_3000'
-      produce: yes
-    - selector: 'mll_over_ptsub_inc0jet'
-      produce: yes
+    - selector: '.*OF'
+      produce: no
+    - selector: '.*UF'
+      produce: no
+    - selector: '.*gen.*'
+      produce: no
+    - selector: '.*matrix.*'
+      produce: no
     # Style changes
     - selector: '.*'
       ratio min: 0.501

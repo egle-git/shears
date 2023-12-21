@@ -444,40 +444,38 @@ binning file: dyjets-binnings.yml
 #                  provide dynamic labels.
 plots:
     # Excluded plots
-    - selector: '.*'
+    - selector: '^_.*'
       produce: no
-    - selector: 'el.*inc0jet'
+    - selector: '.*-gen$'
       produce: yes
-    - selector: '.*leading.*'
+    - selector: '.*-matrix$'
       produce: no
-    - selector: 'elPt_leading_inc0jet.*'
+    - selector: '.*[12]jet.*'
+      produce: no
+    - selector: 'el.*'
       produce: yes
-    - selector: 'elPt_subleading_inc0jet.*'
-      produce: yes
+    - selector: 'mu.*'
+      produce: no
+    - selector: 'genLep.*'
+      produce: no
+    - selector: 'bjet.*'
+      produce: no
+    - selector: 'jet.*leading.*'
+      produce: no
+    - selector: 'jet.*subleading.*'
+      produce: no
+    - selector: 'jet.*third.*'
+      produce: no
+    - selector: 'jet.*fourth.*'
+      produce: no
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
-      produce: yes
-    - selector: 'pt_inc0jet.*'
-      produce: yes
-    - selector: 'rapidity_inc0jet.*'
-      produce: yes
-    - selector: 'phistar_inc0jet'
-      produce: yes
-    - selector: 'MET_pt_inc0jet.*'
-      produce: yes
-    - selector: 'MET_vs_mass_inc0jet'
-      produce: yes
-    - selector: 'mll_over_ptsub_inc0jet.*'
-      produce: yes
-    - selector: '.*OF'
+    - selector: 'mass.*mass.*'
       produce: no
-    - selector: '.*UF'
+    - selector: 'nJets.*_inc.*'
       produce: no
-    - selector: '.*gen.*'
-      produce: no
-    - selector: '.*matrix.*'
-      produce: no
+    - selector: 'nJets.*_inc0jet.*'
+      produce: yes
     # Style changes
     - selector: '.*'
 #      ratio min: 0.601

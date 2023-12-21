@@ -228,6 +228,11 @@ triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ
 
 use trigger scale factors: yes
 
+emu method reweighting:
+  use: yes
+  offset: 1.19069
+  slope: -0.121672
+  
 same sign method reweighting:
   use: yes
   MET offset: 1.65193

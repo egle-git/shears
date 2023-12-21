@@ -228,12 +228,18 @@ triggers: HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
 
 use trigger scale factors: yes
 
+# Reweighting for top backgrounds (emu method)
+emu method reweighting:
+  use: yes
+  offset: 1.36444
+  slope: -0.175188
+  
 same sign method reweighting:
   use: yes
-  MET offset: 1.54944
-  MET slope: 0.00107887
-  MET exp offset: -0.999962
-  MET exp slope: 0.0255102
+  MET offset: 1.54555
+  MET slope: 0.00109528
+  MET exp offset: -0.938595
+  MET exp slope: 0.0259721
 
 # List of available data/MC samples
 samples:
@@ -438,25 +444,23 @@ plots:
     # Excluded plots
     - selector: '.*'
       produce: no
-    - selector: 'el.*inc0jet'
+    - selector: 'el.*inc0jet.*'
       produce: yes
-    - selector: '.*leading.*'
-      produce: no
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
+    - selector: 'mass_wide_range_inc0jet.*'
       produce: yes
-    - selector: 'pt_inc0jet'
+    - selector: 'pt_inc0jet.*'
       produce: yes
-    - selector: 'rapidity_inc0jet'
+    - selector: 'rapidity_inc0jet.*'
       produce: yes
-    - selector: 'phistar_inc0jet'
+    - selector: 'phistar_inc0jet.*'
       produce: yes
-    - selector: 'MET_pt_inc0jet'
+    - selector: 'MET_pt_inc0jet.*'
       produce: yes
-    - selector: 'MET_vs_mass_inc0jet'
+    - selector: 'MET_vs_mass_inc0jet.*'
       produce: yes
-    - selector: 'mll_over_ptsub_inc0jet'
+    - selector: 'mll_over_ptsub_inc0jet.*'
       produce: yes
     # Style changes
     - selector: '.*'

@@ -23,7 +23,7 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: MuMu_2018_NOTreweighted
+ll location: MuMu_2018
 
 # emu file location
 emu location: EMu_2018

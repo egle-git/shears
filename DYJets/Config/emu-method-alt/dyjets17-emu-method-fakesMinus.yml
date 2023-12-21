@@ -23,10 +23,10 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: MuMu_2017_NOTreweighted_isoVT
+ll location: MuMu_2017
 
 # emu file location
-emu location: EMu_2017_isoVT
+emu location: EMu_2017
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -179,6 +179,7 @@ MC grouping:
     - legend: "Fakes"
       samples: [ Fakes ]
       color: 803 # kOrange+3
+      scale factor: 0.9
 
 plots:
     - selector: '^.*'

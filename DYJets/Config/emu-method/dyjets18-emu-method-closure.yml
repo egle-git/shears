@@ -1,5 +1,11 @@
-# This is the configuration file for e-mu method for the DY analysis, year 2018.
+# This is the configuration file for e-mu method for the DY analysis, year 2016postAPV.
 # Please keep it organized, and don't delete comments.
+
+# IMPORTANT! This is NOT for running ./bin/dyjets-bkg-est
+# This is for drawing a comparison between dyjets-TopBkgs.root produced by emu method
+# and the reweighted MC top quark backgrounds.
+# dyjets-TopBkgs.root should be renamed to dyjets-data.root to use reco-level-agreement comparison
+# as is done in this settings file.
 
 # Options related to output and logs
 log:

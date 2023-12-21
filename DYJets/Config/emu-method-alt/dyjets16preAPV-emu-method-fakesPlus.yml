@@ -23,13 +23,10 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: MuMu_2016preAPV_NOTreweighted
+ll location: MuMu_2016preAPV
 
 # emu file location
 emu location: EMu_2016preAPV
-
-# fakes variation up/down by one sigma
-fakes variation: 1
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -182,6 +179,7 @@ MC grouping:
     - legend: "Fakes"
       samples: [ Fakes ]
       color: 803 # kOrange+3
+      scale factor: 1.1
     
 plots:
     - selector: '^.*'

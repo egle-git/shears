@@ -23,7 +23,7 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: MuMu_2016postAPV_NOTreweighted
+ll location: MuMu_2016postAPV
 
 # emu file location
 emu location: EMu_2016postAPV

@@ -22,7 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: EE_2018_oneInvID_wMisid
+# Fill in with your directory names
+os location: EE_2018_oneInvID
 ss location: EE_2018_samesign_oneInvID_REWEIGHTED
 
 # Cut on the inclusive DYJets sample

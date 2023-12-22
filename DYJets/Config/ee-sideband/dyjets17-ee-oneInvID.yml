@@ -369,7 +369,7 @@ samples:
       catalog: Catalog2017_bonzai_GGToLL.txt
     - name: GammaGamma_M-5to50
       type: background
-      nano dir: Catalogs/2017/MassBinned_MiNNLO
+      nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
 
 # Scale factors

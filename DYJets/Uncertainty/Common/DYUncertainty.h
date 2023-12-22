@@ -18,6 +18,22 @@ public:
     Set_CovEstMethod(covEstMethod);
   }
 
+  // -- retrieve Uncertainty object from the histograms in the file
+  Uncertainty(TString systTag, TString fileName) {
+    systTag_ = systTag;
+
+    // -- uncertainty
+    h_absUnc_ = PlotTool::Get_Hist(fileName, "h_absUnc_"+systTag_);
+    h_relUnc_ = PlotTool::Get_Hist(fileName, "h_relUnc_"+systTag_);
+
+    // -- matrices
+    h_covM_  = PlotTool::Get_Hist2D(fileName, "h_covM_"+systTag_);
+    h_corrM_ = PlotTool::Get_Hist2D(fileName, "h_corrM_"+systTag_);
+  }
+
+  // -- if you want to change the tag... (for saving with a different name)
+  void Set_Tag(TString tag) { systTag_ = tag; }
+
   void Set_CentralHist( TH1D* h_cv ) { h_cv_ = (TH1D*)h_cv->Clone(); }
   void Set_AltHist( vector<TH1D*> vec_altHist ) { vec_altHist_ = vec_altHist; }
 

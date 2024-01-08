@@ -59,7 +59,8 @@ void muons::configure(const util::options &opt) {
 
   if (node["iso"]) {
     std::string iso = node["iso"].as<std::string>();
-    if( iso == "loose" )          _iso_cut = muons::iso::loose;
+    if( iso == "none" )          _iso_cut = muons::iso::none;
+    else if( iso == "loose" )     _iso_cut = muons::iso::loose;
     else if( iso == "medium" )    _iso_cut = muons::iso::medium;
     else if( iso == "tight" )     _iso_cut = muons::iso::tight;
     else if( iso == "veryloose" ) _iso_cut = muons::iso::veryloose;
@@ -98,6 +99,9 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     if(!l.passes_id) continue;
 
     switch( _iso_cut ) {
+    case iso::none:
+      l.passes_iso = true;
+      break;
     case iso::veryloose:
       l.passes_iso = (Muon_pfIsoId[i] >= 1);
       break;

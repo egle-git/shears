@@ -49,7 +49,8 @@ void electrons::configure(const util::options &opt) {
 
   if( node["id"] ) {
     std::string id = node["id"].as<std::string>();
-    if( id == "veto" )         _id_cut = electrons::id::veto;
+    if( id == "none" )         _id_cut = electrons::id::none;
+    else if (id == "veto")     _id_cut = electrons::id::veto;
     else if (id == "loose")    _id_cut = electrons::id::loose;
     else if (id == "medium")   _id_cut = electrons::id::medium;
     else if (id == "tight")    _id_cut = electrons::id::tight;
@@ -110,6 +111,10 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
     l.pdgid = 11;
 
     switch( _id_cut ) {
+    case id::none:
+        l.id = Electron_cutBased[i];
+        l.passes_id = true;
+        break;
     case id::veto:
         l.id = Electron_cutBased[i];
         l.passes_id = (Electron_cutBased[i] >= 1);

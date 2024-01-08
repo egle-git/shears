@@ -23,10 +23,10 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: MuMu_2016postAPV
+ll location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/MuMu_2016postAPV
 
 # emu file location
-emu location: EMu_2016postAPV
+emu location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/EMu_2016postAPV
 
 # Whether results are preliminary (for plots)
 preliminary: yes

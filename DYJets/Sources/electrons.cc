@@ -77,34 +77,23 @@ void electrons::configure(const util::options &opt) {
   }    
 }
 
-std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
+std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
                                    const vector<lepton>& vec_dressedGenLep,
                                    const vector<lepton>& vec_postFSRGenLep,
-                                   int & nVetoElecs, TString systMode) {
+                                   const double& rndm, int & nVetoElecs, 
+                                   TString systMode, const int& s, const int& m) {
   nVetoElecs=0;
   std::vector<lepton> electrons;
   for(unsigned i=0; i<Electron_pt.GetSize(); ++i) {
     lepton l;
     double etaSC = Electron_deltaEtaSC[i]+Electron_eta[i]; 
     if( std::abs(etaSC) > _eta_cut ) continue;
-    if( std::abs(etaSC) > 1.4442 && std::abs(etaSC ) < 1.566 ) continue; // Veto endcap-barrel transition
+    if( std::abs(etaSC) > 1.4442 && std::abs(etaSC) < 1.566 ) continue; // Veto endcap-barrel transition
 
     l.v.SetPtEtaPhiM(Electron_pt[i], Electron_eta[i], Electron_phi[i], Electron_mass[i]); // -- default
-    if( systMode != "default" ) {
-      Double_t E_default = l.v.E();
-      Double_t E_systVar;
-      if( systMode == "scale_up" )           E_systVar = E_default - Electron_dEscaleUp[i];
-      else if( systMode == "scale_down" )    E_systVar = E_default - Electron_dEscaleDown[i];
-      else if( systMode == "smearing_up" )   E_systVar = E_default - Electron_dEsigmaUp[i];
-      else if( systMode == "smearing_down" ) E_systVar = E_default - Electron_dEsigmaDown[i];
-      else
-        throw std::invalid_argument("[electrons::get] systMode = " + systMode + " is not supported");
-
-      double corr = (E_systVar/E_default);
-
-      TVector3 vecP3_old = l.v.Vect();
-      l.v.SetVectM(vecP3_old*corr, Electron_mass[i]); // -- scale the 3-momentum only
-    }
+    // -- raw_v: used for finding the corresponding efficiency SF
+    // -- pt: POG-corrected pt;
+    // -- eta: etaSC
     l.raw_v.SetPtEtaPhiM(l.v.Pt(), etaSC, l.v.Phi(), l.v.M());
     l.charge = Electron_charge[i];
 
@@ -143,13 +132,30 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
         
     if( !l.passes_id ) continue;
 
-    if( _eRoccor_enabled )
-      apply_energyCorr_smp22010(l, isData, 1.0/Electron_eCorr[i],
+    if( systMode != "default" && !_eRoccor_enabled )
+      SystVar_ElectronEnergy_POGCorr(l, i, systMode);
+
+    if( _eRoccor_enabled ) {
+      double factorToRawE = 1.0;
+      if( Electron_eCorr[i] == 0 ) {
+        if( l.v.Pt() == 0 ) continue; // -- pt=0 electron: skip it (such electrons *exists* in some events...)
+        else // -- pt != 0 but Electron_eCorr[i] == 0: something is wrong
+          throw std::runtime_error("[electrons::get] electron pT != 0 but Electron_eCorr[i] == 0!\n");
+      }
+      else
+        factorToRawE = 1.0/Electron_eCorr[i];
+
+      apply_energyCorr_smp22010(l, isData, factorToRawE,
                                 runNum, Electron_r9[i],
-                                vec_dressedGenLep, vec_postFSRGenLep);
+                                vec_dressedGenLep, vec_postFSRGenLep, rndm, s, m);
+    }
+
+
+    // printf("  [electrons::get] (before pt cut) (pt, eta, phi, pt_cut, pt>pt_cut?, pt<pt_cut?) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %d)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), _pt_cut, l.v.Pt() > _pt_cut, l.v.Pt() < _pt_cut);
 
     if( l.v.Pt() < _pt_cut ) continue; // -- pt cut after applying all energy corrections
 
+    // printf("  [electrons::get] (after pt cut) (pt, eta, phi, pt_cut, pt>pt_cut?, pt<pt_cut?) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %d)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), _pt_cut, l.v.Pt() > _pt_cut, l.v.Pt() < _pt_cut);
     electrons.push_back(l);
   }
   std::sort(electrons.begin(), electrons.end(), 
@@ -159,11 +165,28 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int runNum,
   return electrons;
 }
 
+void electrons::SystVar_ElectronEnergy_POGCorr(lepton& l, const int& index, const TString& systMode) {
+  Double_t E_default = l.v.E();
+  Double_t E_systVar;
+  if( systMode == "scale_up" )           E_systVar = E_default - Electron_dEscaleUp[index];
+  else if( systMode == "scale_down" )    E_systVar = E_default - Electron_dEscaleDown[index];
+  else if( systMode == "smearing_up" )   E_systVar = E_default - Electron_dEsigmaUp[index];
+  else if( systMode == "smearing_down" ) E_systVar = E_default - Electron_dEsigmaDown[index];
+  else
+    throw std::invalid_argument("[electrons::get] systMode = " + systMode + " is not supported");
+
+  double corr = (E_systVar/E_default);
+
+  TVector3 vecP3_old = l.v.Vect();
+  l.v.SetVectM(vecP3_old*corr, Electron_mass[index]); // -- scale the 3-momentum only
+}
+
 void electrons::apply_energyCorr_smp22010(lepton& l, 
                                           const bool isData, const double factorToRawE,
-                                          const unsigned int runNum, const double r9, 
+                                          const unsigned int& runNum, const double r9, 
                                           const vector<lepton>& vec_dressedGenLep,
-                                          const vector<lepton>& vec_postFSRGenLep) {
+                                          const vector<lepton>& vec_postFSRGenLep,
+                                          const double& rndm, const int& s, const int& m) {
     TVector3 vecP3_POGCorr = l.v.Vect();
     TLorentzVector vecP_raw;
     vecP_raw.SetVectM(vecP3_POGCorr*factorToRawE, l.v.M()); // -- scale the 3-momentum only
@@ -178,36 +201,45 @@ void electrons::apply_energyCorr_smp22010(lepton& l,
 
     double eCorr = 1.0;
     if( isData )
-        eCorr = _eRoccor->kScaleDT(pt, eta, phi, r9, runNum);
+      eCorr = _eRoccor->kScaleDT(pt, eta, phi, r9, runNum, s, m);
     else { // -- MC
-        lepton genLep_matched = matchedGenLepton(l, vec_dressedGenLep);
-        double pt_gen = genLep_matched.v.Pt();
-        if( pt_gen == 0 )  { // -- i.e. no matched dressed lepton is found: try with postFSR
-            lepton genLep_postFSR_matched = matchedGenLepton(l, vec_postFSRGenLep);
-            pt_gen = genLep_postFSR_matched.v.Pt();
-            // -- if no maching is found even with post-FSR leptons
-            // -- it can happen if the reco-electron is not from the true electron
-            // -- anyway, most of these electrons will not be used in the analysis (fail to pass pt cut or dilepton selections)
-            // if( pt_gen == 0 )
-            //     util::logging::warn << "[electrons::apply_energyCorr_smp22010] no matched gen-lepton (dressed and post-FSR) is found for the electron ... correction factor is set to 1.0" << endl;
-        }
+      double pt_gen = Find_MatchedGenPt(l, vec_dressedGenLep, vec_postFSRGenLep);
 
-        if( pt_gen == 0 ) eCorr = 1.0;
-        else {
-            double urnd = gRandom->Rndm(); // uniform between 0 and 1
-            eCorr = _eRoccor->kSpreadMC(pt, eta, phi, r9, urnd, pt_gen);
-        }
-
-        // printf("(pt, pt_gen) = (%lf, %lf) --> corr = %lf\n", pt, pt_gen, eCorr);
+      if( pt_gen == 0 ) eCorr = 1.0;
+      else              eCorr = _eRoccor->kSpreadMC(pt, eta, phi, r9, rndm, pt_gen, s, m);
     }
 
-    // printf("-->corr = %lf\n", eCorr);
+    // printf("[RocCorr] (pt_raw, eta_raw, phi_raw, factorToRawE, runNum, r9, rndm) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %.3lf, %.3lf) --> eCorr = %lf\n",
+    //                    pt, eta, phi, factorToRawE, runNum, r9, rndm, eCorr);
 
     double pt_corr = pt*eCorr;
     double mass = l.v.M();
     // -- pt: corrected pT
     // -- eta: default eta, not etaSC (same with before)
     l.v.SetPtEtaPhiM(pt_corr, eta, phi, mass);
+
+    // if( s == 0 ) {
+    //   printf("  (pt, eta, phi) = (%.3lf, %.3lf, %.3lf) w/ rndm = %lf --> (eCorr, pt_corr) = (%.6lf, %.3lf)\n", 
+    //           pt, eta, phi, rndm, eCorr, pt_corr);
+    // }
+}
+
+double electrons::Find_MatchedGenPt(lepton l, 
+                                    const vector<lepton>& vec_dressedGenLep, 
+                                    const vector<lepton>& vec_postFSRGenLep) {
+  lepton genLep_matched = matchedGenLepton(l, vec_dressedGenLep);
+  double pt_gen = genLep_matched.v.Pt();
+  if( pt_gen == 0 )  { // -- i.e. no matched dressed lepton is found: try with postFSR
+      lepton genLep_postFSR_matched = matchedGenLepton(l, vec_postFSRGenLep);
+      pt_gen = genLep_postFSR_matched.v.Pt();
+      // -- if no maching is found even with post-FSR leptons
+      // -- it can happen if the reco-electron is not from the true electron
+      // -- anyway, most of these electrons will not be used in the analysis (fail to pass pt cut or dilepton selections)
+      // if( pt_gen == 0 )
+      //     util::logging::warn << "[electrons::apply_energyCorr_smp22010] no matched gen-lepton (dressed and post-FSR) is found for the electron ... correction factor is set to 1.0" << endl;
+  }
+
+  return pt_gen;
 }
 
 lepton electrons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep) {

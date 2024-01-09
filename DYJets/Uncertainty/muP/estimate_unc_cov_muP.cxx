@@ -1,10 +1,13 @@
 #include "Common/ShearsComparator.h"
 #include "Common/DYUncertainty.h"
 #include "Common/DYPath.h"
+#include "Common/DYTool.h"
 
 class UncEstimator_MuP {
 public:
   UncEstimator_MuP() { }
+
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
 
   void EstimateAndSave() {
     if( gSystem->AccessPathName(fileName_unfolded_) ) {
@@ -38,6 +41,8 @@ private:
   // -- (setX, DYRun2Result) pair
   std::map<TString, DYRun2Result*> map_result_syst_;
 
+  Bool_t useFake_ = kTRUE; // -- default: true
+
   const Int_t nStatVar_ = 100;
   // -- (era, vector<DYRun2Result*>) pair
   std::map<TString, vector<DYRun2Result*>> map_result_stat_;
@@ -49,8 +54,10 @@ private:
   TString fileName_unc_      = "UncAndCov_muP.root";
 
   void Init() {
-    cout << "Input shears results: " << DYTool::path_systVar_muP << endl;
-    output_ = new Run2Output(DYTool::path_systVar_muP);
+    TString shearsPath = DYTool::path_systVar_muP+"/mm";
+    cout << "Input shears results: " << shearsPath << endl;
+    output_ = new Run2Output(shearsPath);
+    
     // -- systematics
     map_result_syst_.insert( std::make_pair("set0", new DYRun2Result(output_)) );
     map_result_syst_.insert( std::make_pair("set2", new DYRun2Result(output_)) );
@@ -60,6 +67,7 @@ private:
 
     for(auto& pair : map_result_syst_ ) {
       TString tag = "muP_"+pair.first;
+      if( useFake_ ) DYTool::Set_Fake("mm", pair.second);
       // -- change the hist. names for all era at once (i.e. correlation between all eras)
       Update_HistName(pair.second, tag, "all");
       pair.second->Produce();
@@ -72,6 +80,7 @@ private:
       for(Int_t i_var=0; i_var<nStatVar_; ++i_var) {
         TString tag = TString::Format("muP_set1_%03d", i_var);
         DYRun2Result* result_stat = new DYRun2Result(output_);
+        if( useFake_ ) DYTool::Set_Fake("mm", result_stat);
         // -- change the hist. name for a given era only (i.e. no correlation between era)
         Update_HistName(result_stat, tag, era);
         result_stat->Produce();

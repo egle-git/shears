@@ -5,6 +5,8 @@ public:
   PlotProducer(TString channel, TString fileName):
   channel_(channel), fileName_(fileName) { }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
   void Produce() {
     TH1::AddDirectory(kFALSE);
 
@@ -18,6 +20,8 @@ public:
     ProducePlot_Unc();
 
     vector<TString> vec_uncType = {"stat_data", "stat_DYMC", "stat_bkgMC", "stat_bkgDYFake", "stat_totMC", "stat_tot", "stat_tot_TUnfold"};
+    if( useFake_ )
+      vec_uncType.push_back( "stat_bkgFakeLep" );
     for(const auto& uncType : vec_uncType)
       ProducePlot_2D("corrM", uncType);
   }
@@ -26,6 +30,8 @@ private:
   TString channel_;
   TString fileName_;
   TString plotDirPath_;
+
+  Bool_t useFake_ = kTRUE; // -- default: true
 
   void ProducePlot_Validation() {
     TString canvasName = "c_unc_validation_"+channel_;
@@ -81,6 +87,12 @@ private:
     canvas->Register(h_relUnc_stat_DYMC, "Stat. (DY MC)", kBlue);
     canvas->Register(h_relUnc_stat_bkgMC, "Stat. (bkg. MC)", kGreen+2);
     canvas->Register(h_relUnc_stat_bkgDYFake, "Stat. (Fake, from DY MC)", kViolet);
+
+    if( useFake_ ) {
+      TH1D* h_relUnc_stat_bkgFakeLep = PlotTool::Get_Hist(fileName_, "h_relUnc_stat_bkgFakeLep");
+      canvas->Register(h_relUnc_stat_bkgFakeLep, "Stat. (Fake lepton bkg.)", kCyan);
+    }
+
     canvas->Register(h_relUnc_stat_tot, "Total (quad. sum)", kRed);
 
     canvas->SetLegendPosition(0.55, 0.70, 0.94, 0.91);

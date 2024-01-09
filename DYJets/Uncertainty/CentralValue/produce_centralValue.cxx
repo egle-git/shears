@@ -60,6 +60,8 @@ private:
     result_->Produce();
 
     plotDirPath_ = "./basicPlot/"+channel_;
+    if( !useFake_ ) plotDirPath_ += "/noFake";
+
     bool recursive = kTRUE;
     if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
       throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
@@ -101,6 +103,7 @@ private:
     canvas->SetRangeX(40, 3000);
     canvas->SetRangeY(0.5, 5e9);
     canvas->SetRangeRatio(0.86, 1.14);
+    // canvas->SetRangeRatio(0.93, 1.07);
 
     canvas->ShowDataMCRatio();
 
@@ -177,6 +180,11 @@ private:
     canvas->SetSavePath(plotDirPath_);
 
     canvas->Draw();
+
+    TString baseName = canvas->GetCanvasName();
+    canvas->SetRangeY(0, 0.1);
+    canvas->SetCanvasName( baseName + "_ratioZoomIn" );
+    canvas->Draw("HISTLP");
   }
 
   TH1D* GetHist_RatiotoData(EraOutput& eraOutput, TString histName, TString type, TH1D* h_data) {
@@ -263,6 +271,7 @@ private:
     if( type == "dsigdm" ) canvas->SetRangeY(5e-9, 2e3);
 
     canvas->SetRangeRatio(0.7, 1.3);
+    // canvas->SetRangeRatio(0.93, 1.07);
 
     canvas->Latex_CMSInternal();
     Double_t run2Lumi = LUMI_16pre + LUMI_16post + LUMI_17 + LUMI_18;
@@ -325,7 +334,10 @@ private:
   }
 
   void Save() {
-    TFile *f_output = TFile::Open("./basicPlot/DYRun2Result_CentralValue_"+channel_+".root", "RECREATE");
+    TString fileName = "DYRun2Result_CentralValue_"+channel_+".root";
+    if( !useFake_ )
+      fileName.ReplaceAll(".root", "_noFake.root");
+    TFile *f_output = TFile::Open(fileName, "RECREATE");
     f_output->cd();
     result_->Save(f_output);
     f_output->Close();
@@ -335,10 +347,12 @@ private:
 void produce_centralValue() {
   CentralValueProducer producer_ee("ee");
   CentralValueProducer producer_mm("mm");
+  producer_ee.Produce();
+  producer_mm.Produce();
 
-  // producer_ee.Use_Fake(kFALSE);
-  // producer_mm.Use_Fake(kFALSE);
-
+  // -- results w/o fake lepton backgrounds
+  producer_ee.Use_Fake(kFALSE);
+  producer_mm.Use_Fake(kFALSE);
   producer_ee.Produce();
   producer_mm.Produce();
 }

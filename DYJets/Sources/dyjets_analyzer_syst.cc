@@ -34,6 +34,8 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_muP,    "Muon Rochester correction", "calculate systematic variations from muon Roccor. unc. (mm channel only)");
   util::set_value_safe(node, _doSyst_elE,    "Electron energy correction", "calculate systematic variations from electron energy correction unc. (ee channel only)");
   util::set_value_safe(node, _doSyst_effSF,  "efficiency SF", "calculate systematic variations from the uncertainty of the efficiency SF");
+  if( _channel == "ee" && _doSyst_elE )
+    _use_eRoccor = (opt.config["electrons"])["use rochester electron energy correction"].as<bool>();
 
   if( _doSyst_effSF )
     _fileName_effMap = node["efficiency file"].as<std::string>();
@@ -43,6 +45,10 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   if( _doSyst_L1Pref ) util::logging::info << "Systematic variation for the L1 prefiring is ON" << std::endl;
   if( _doSyst_muP )    util::logging::info << "Systematic variation for the muon Roccor. is ON (mm-only)" << std::endl;
   if( _doSyst_elE )    util::logging::info << "Systematic variation for the electron energy correction is ON (ee-only)" << std::endl;
+  if( _doSyst_elE ) {
+    if( _use_eRoccor ) util::logging::info << "--> Variation on the Rochester electron energy correction" << std::endl;
+    else               util::logging::info << "--> Variation on the E/gamma POG electron energy correction" << std::endl;
+  }
   if( _doSyst_effSF )  util::logging::info << "Systematic variation for the efficiency SF is ON" << std::endl;
 }
 
@@ -119,7 +125,8 @@ void dyjets_analyzer_syst::operator()() {
       isLowQMuEvent = check_lowQualityMuon(muons);
 
     std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                            genleps_dressed_noCut, genleps_finalState, nVetoElecs);
+                                                            genleps_dressed_noCut, genleps_finalState, 
+                                                            rndm_forRoccor, nVetoElecs);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
     if( !leptons.empty() && (nVetoMuons+nVetoElecs)<=2 && !isLowQMuEvent ) {
@@ -139,7 +146,7 @@ void dyjets_analyzer_syst::operator()() {
   // remove events with m(reco) < 10 GeV in both data and MC
   // because we only have the DY MC down to m=10 GeV, but data can go down below GeV
   // without this cut, the # underflow events in the response matrix could be significant different between data and MC
-  if( evt.rec && evt.rec->boson_p.M() < 10 ) return;
+  if( evt.rec && evt.rec->boson_p.M() < 10.0 ) return;
 
   // -- now, at least one boson is found in either gen or rec.
   // -- apply corrections
@@ -170,6 +177,14 @@ void dyjets_analyzer_syst::operator()() {
 
     _muons.apply_sf(_weights, chosen_muons, tables());
     _electrons.apply_sf(_weights, chosen_electrons, tables());
+
+    // -- apply charge mis-ID weights for background estimation
+    if (_weights.ismc())
+        _electrons.apply_charge_misid_sf(_weights, chosen_electrons, genleps_finalState);
+
+    // -- reweight top-quark backgrounds using the factor from the emu method
+    reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
+
     if( _apply_triggerSF )
       apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
   }
@@ -198,7 +213,7 @@ void dyjets_analyzer_syst::operator()() {
   if( _doSyst_muP && _channel == "mm" )
     fill_systHist_muP(evt, isLowQMuEvent, genleps_finalState, rndm_forRoccor);
   if( _doSyst_elE && _channel == "ee" )
-    fill_systHist_elE(evt);
+    fill_systHist_elE(evt, genleps_dressed_noCut, genleps_finalState, rndm_forRoccor);
 }
 
 void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_contents>& evt,
@@ -250,18 +265,39 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
   }
 }
 
-void dyjets_analyzer_syst::fill_systHist_elE(const util::matched<event_contents>& evt) {
-  if( _weights.ismc() ) {
-    fill_systHist_elE_eachSystVar(evt, "smearing_up");
-    fill_systHist_elE_eachSystVar(evt, "smearing_down");
-  }
-  else { // -- data
-    fill_systHist_elE_eachSystVar(evt, "scale_up");
-    fill_systHist_elE_eachSystVar(evt, "scale_down");
-  }
+void dyjets_analyzer_syst::fill_systHist_elE(const util::matched<event_contents>& evt_default,
+                                             const std::vector<physics::lepton>& genleps_dressed,
+                                             const std::vector<physics::lepton>& genleps_fs,
+                                             const double rndm_forRoccor) {
+  if( _use_eRoccor ) fill_systHist_elE_RocCorr(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor);
+  else               fill_systHist_elE_POGCorr(evt_default);
 }
 
-void dyjets_analyzer_syst::fill_systHist_elE_eachSystVar(const util::matched<event_contents>& evt_default, TString systMode) {
+void dyjets_analyzer_syst::fill_systHist_elE_RocCorr(const util::matched<event_contents>& evt_default,
+                                                     const std::vector<physics::lepton>& genleps_dressed,
+                                                     const std::vector<physics::lepton>& genleps_fs,
+                                                     const double rndm_forRoccor) {
+  // -- re-do event selection because electrons can be rejected due to the pT cut
+  // -- details on each variation
+  // ---- https://gitlab.cern.ch/akhukhun/aepcor
+  // ---- https://cms.cern.ch/iCMS/jsp/db_notes/noteInfo.jsp?cmsnoteid=CMS AN-2021/034
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 0, 0); // -- default
+  for(int i_mem=0; i_mem<100; ++i_mem) // -- m = 1: stat. replicas (up to 400 replicas are available; use 100 for now)
+    fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 1, i_mem);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 2, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 3, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 4, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 5, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 6, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 7, 0);
+  fill_systHist_elE_RocCorr_eachSystVar(evt_default, genleps_dressed, genleps_fs, rndm_forRoccor, 8, 0);
+}
+
+void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::matched<event_contents>& evt_default,
+                                                                 const std::vector<physics::lepton>& genleps_dressed,
+                                                                 const std::vector<physics::lepton>& genleps_fs,
+                                                                 const double rndm_forRoccor,
+                                                                 int s, int m) {
   // -- re-do the event selection
   // -- because the event itself can be rejected by the pT cut due to the electron energy variation
 
@@ -287,10 +323,83 @@ void dyjets_analyzer_syst::fill_systHist_elE_eachSystVar(const util::matched<eve
 
     std::vector<physics::lepton> muons = {}; // -- no need to collect muons (electron channel only)
 
-    // -- POG correction variation: the first 4 parameters are not used
-    // ---- (isData, runNum, dressedLeptons, postFSRLeptons)
+    std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
+                                                            genleps_dressed, genleps_fs,
+                                                            rndm_forRoccor, nVetoElecs, 
+                                                            "default", s, m);
+
+    std::vector<physics::lepton> leptons = find_boson(muons, electrons);
+    if( !leptons.empty() ) {
+      double mass = (leptons[0].v + leptons[1].v).M();
+      if( mass > 10.0 ) {
+        // Rec boson found
+        evt_systVar.rec = event_contents();
+        evt_systVar.rec->leptons = leptons;
+        evt_systVar.rec->boson_p = std::accumulate(
+            leptons.begin(),
+            leptons.end(),
+            TLorentzVector(),
+            [](const TLorentzVector &p, const physics::lepton &lep) { return p + lep.v; });
+
+      } // -- if( mass > 10.0 )
+    } // -- if( !leptons.empty() )
+  } // -- if( triggered )
+
+  if( !evt_systVar.gen && !evt_systVar.rec ) return; // -- early termination
+
+  auto mass_systVar = evt_systVar.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
+
+  std::string str_systInfo = get_str_systInfo_muP(s, m); // -- same format with muP case
+  util::matched<std::string> tags_systVar;
+  if( evt_systVar.gen ) tags_systVar.gen = "inc0jet_elE_"+str_systInfo;
+  else                  tags_systVar.gen = boost::none;
+  if( evt_systVar.rec ) tags_systVar.rec = "inc0jet_elE_"+str_systInfo;
+  else                  tags_systVar.rec = boost::none;
+
+  fill_unfolded("mass_wide_range", tags_systVar, mass_systVar); // -- weight: default value
+}
+
+void dyjets_analyzer_syst::fill_systHist_elE_POGCorr(const util::matched<event_contents>& evt_default) {
+  if( _weights.ismc() ) {
+    fill_systHist_elE_POGCorr_eachSystVar(evt_default, "smearing_up");
+    fill_systHist_elE_POGCorr_eachSystVar(evt_default, "smearing_down");
+  }
+  else { // -- data
+    fill_systHist_elE_POGCorr_eachSystVar(evt_default, "scale_up");
+    fill_systHist_elE_POGCorr_eachSystVar(evt_default, "scale_down");
+  }
+}
+
+void dyjets_analyzer_syst::fill_systHist_elE_POGCorr_eachSystVar(const util::matched<event_contents>& evt_default, TString systMode) {
+  // -- re-do the event selection
+  // -- because the event itself can be rejected by the pT cut due to the electron energy variation
+
+  // -- event for this systematic variation
+  util::matched<event_contents> evt_systVar;
+
+  // -- generator level: just copy the default value (no change with this systematic variation)
+  if( evt_default.gen ) {
+    evt_systVar.gen = event_contents();
+    evt_systVar.gen->leptons = evt_default.gen->leptons;
+    evt_systVar.gen->boson_p = evt_default.gen->boson_p;
+  }
+
+  // -- reco-level selection -- //
+  // -- trigger
+  bool triggered = passes_trigger();
+  if( !evt_systVar.gen && !triggered ) return; // -- early termination
+
+  if( triggered ) { // -- if triggered: proceed to the event selection
+    // -- not used; dummy
+    int nVetoMuons=0;
+    int nVetoElecs=0;
+
+    std::vector<physics::lepton> muons = {}; // -- no need to collect muons (electron channel only)
+
+    // -- POG correction variation: the first 5 parameters are not used
+    // ---- (isData, runNum, dressedLeptons, postFSRLeptons, randomValue)
     vector<physics::lepton> vec_empty;
-    std::vector<physics::lepton> electrons = _electrons.get(0, 0, vec_empty, vec_empty, nVetoElecs, systMode);
+    std::vector<physics::lepton> electrons = _electrons.get(0, 0, vec_empty, vec_empty, 0, nVetoElecs, systMode);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
     if( !leptons.empty() ) {

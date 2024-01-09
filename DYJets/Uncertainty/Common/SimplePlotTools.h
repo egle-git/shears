@@ -38,6 +38,7 @@ TFile* ExistenceCheck(TString functionName, TString fileName, TString objectName
 }
 
 TH1D* Get_Hist(TString fileName, TString histName, TString histName_new = "" ) {
+  TH1::AddDirectory(kFALSE);
   TFile* f_input = ExistenceCheck("Get_Hist", fileName, histName);
 
   TH1::AddDirectory(kFALSE);
@@ -131,6 +132,7 @@ void SetAxis_SinglePad( TAxis *axisX, TAxis *axisY, TString titleX, TString titl
 
   axisX->SetLabelFont(42);
   axisX->SetLabelSize(0.04);
+  // axisX->SetLabelSize(0.02);
   axisX->SetNoExponent();
   axisX->SetMoreLogLabels();
 
@@ -322,6 +324,19 @@ TH1D* Convert_GraphToHist( TGraphAsymmErrors *g ) {
 
   return h_temp;
 }
+
+// TGraphAsymmErrors* Convert_HistToGraph(TH1D* h) {
+//   Int_t nBin = h->GetNbinsX();
+
+//   for(Int_t i=0; i<nBin; ++i) {
+//     Int_t i_bin = i+1;
+
+//     Double_t value = h->GetBinContent(i_bin);
+//     Double_t error = h->GetBinError(i_bin);
+//     Double_t binCenter = h->GetBinCenter(i_bin);
+//     Double_t binWidth = h->GetBinWidth(i_bin);
+//   }
+// }
 
 void Print_Histogram( TH1D* h, Bool_t NegativeCheck = kFALSE, Bool_t skipZero = kFALSE ) {
   h->Print();

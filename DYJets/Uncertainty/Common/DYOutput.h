@@ -333,6 +333,8 @@ public:
     return iter->second.Get2D(map_histName);
   }
 
+  TString Path() const { return basePath_; }
+
 private:
   TString era_;
   TString basePath_;
@@ -584,14 +586,13 @@ private:
 
     map_histNameMap_.insert( std::make_pair("gen_DY", Init_Map_PerProcess(map_tag["DY"], "TUnfold1DTrue_inc0jet")) );
 
-    map_histNameMap_.insert( std::make_pair("reco_data",   Init_Map_PerProcess(map_tag["data"],   "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_DY",     Init_Map_PerProcess(map_tag["DY"],     "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_TT",     Init_Map_PerProcess(map_tag["TT"],     "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_VV",     Init_Map_PerProcess(map_tag["VV"],     "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_GG",     Init_Map_PerProcess(map_tag["GG"],     "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_TauTau", Init_Map_PerProcess(map_tag["TauTau"], "TUnfold1DReco_inc0jet")) );
-    map_histNameMap_.insert( std::make_pair("reco_singleTop",   
-                                            Init_Map_PerProcess(map_tag["singleTop"], "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_data",      Init_Map_PerProcess(map_tag["data"],      "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_DY",        Init_Map_PerProcess(map_tag["DY"],        "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_TT",        Init_Map_PerProcess(map_tag["TT"],        "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_VV",        Init_Map_PerProcess(map_tag["VV"],        "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_GG",        Init_Map_PerProcess(map_tag["GG"],        "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_TauTau",    Init_Map_PerProcess(map_tag["TauTau"],    "TUnfold1DReco_inc0jet")) );
+    map_histNameMap_.insert( std::make_pair("reco_singleTop", Init_Map_PerProcess(map_tag["singleTop"], "TUnfold1DReco_inc0jet")) );
 
     map_histNameMap_.insert( std::make_pair("migM", Init_Map_PerProcess(map_tag["DY"], "TUnfold2DMig_inc0jet")) );
   }
@@ -618,6 +619,8 @@ public:
 
   DYRun2Result(Run2Output* output): output_(output) { }
 
+  DYRun2Result(TString path) { output_ = new Run2Output(path); }
+
   void Set_Fake(TString era, TString fileName, TString histName) {
     if( era == "all" ) {
       for(auto& pair : map_hNameC_ )
@@ -631,6 +634,14 @@ public:
       throw std::invalid_argument("[Set_Fake] era = " + era + " is not supported");
 
     iter->second.Set_Fake(fileName, histName);
+  }
+
+  // -- remove negative bins in the fake histogram
+  void Remove_NegativeBin_Fake(Bool_t flag = kTRUE) { removeNegativeBinFakeLep_ = flag; }
+
+  void Set_Acc(TString fileName, TString histName) {
+    hasAcc_ = kTRUE;
+    h_acc_ = PlotTool::Get_Hist(fileName, histName);
   }
 
   // -- when all histogram names are same for a given histType
@@ -722,6 +733,11 @@ public:
 
     Insert_AllEraHist_Unfolded("DY");
     Insert_AllEraHist_Unfolded("data");
+
+    if( hasAcc_ ) {
+      Insert_AllEraHist_Unfolded_FPS("DY");
+      Insert_AllEraHist_Unfolded_FPS("data");
+    }
   }
 
   TH1D* Get_AllEra(TString level, TString process) const {
@@ -738,6 +754,15 @@ public:
   TH2D* Get_AllEra_RespM() const { return h_allEra_respM_; }
 
   Run2Output* Get_Run2Output() const { return output_; }
+
+  Bool_t HasFPS() const { return hasAcc_; }
+
+  Bool_t HasFake() const { 
+    if( !isSetup_ )
+      throw std::runtime_error("[DYRun2Result::HasFake] Produce() is not called yet!");
+
+    return hasFake_fullRun2_; 
+  } 
 
   void Save(TFile* f_output, TString tag = "") {
     f_output->cd();
@@ -761,7 +786,10 @@ public:
     if( tag == "" ) h_allEra_respM_->SetName("h_allEra_respM");
     else            h_allEra_respM_->SetName("h_allEra_respM_"+tag);
     h_allEra_respM_->Write();
-  }
+  } 
+
+  std::unordered_map<std::string, TH1D*> Get_Map_AllEraHist() const { return map_allEraHist_; }
+
 
 protected:
   // -- declare as a reference: problem when it was not initialized -> decide to change to a pointer
@@ -770,6 +798,8 @@ protected:
   Bool_t isSetup_ = kFALSE;
 
   Bool_t hasFake_fullRun2_ = kFALSE;
+
+  Bool_t removeNegativeBinFakeLep_ = kTRUE; // -- default: remove negative bin
 
   std::map<TString, HistNameContainer> map_hNameC_ = {
     {"16pre",  HistNameContainer()},
@@ -782,6 +812,10 @@ protected:
 
   TH2D* h_allEra_migM_ = nullptr; 
   TH2D* h_allEra_respM_ = nullptr; // -- normalized
+
+  // -- has acceptance? (if it has, it will also produce the full phase space results)
+  Bool_t hasAcc_ = kFALSE;
+  TH1D* h_acc_ = nullptr;
 
   void Insert_AllEraHist(TString level, TString process) {
     TString histType = level+"_"+process;
@@ -1006,6 +1040,49 @@ protected:
     map_allEraHist_.insert( std::make_pair(histType_unfolded.Data(), h_unfolded) );
   }
 
+  void Insert_AllEraHist_Unfolded_FPS(TString process) {
+    TString histType = "unfolded_"+process;
+    TH1D* h_unfolded = map_allEraHist_[histType.Data()];
+    TH1D* h_unfolded_FPS = Apply_Acceptance(h_unfolded);
+
+    TString histType_FPS = "unfoldedFPS_"+process;
+    map_allEraHist_.insert( std::make_pair(histType_FPS.Data(), h_unfolded_FPS) );
+  }
+
+  TH1D* Apply_Acceptance(TH1D* h_fiducial) {
+    TH1D* h_FPS = (TH1D*)h_fiducial->Clone();
+    h_FPS->Reset("ICES");
+
+    Int_t nBin_acc = h_acc_->GetNbinsX();
+    Int_t nBin_fiducial = h_fiducial->GetNbinsX();
+
+    if( nBin_acc != nBin_fiducial ) {
+      printf("(nBin_acc, nBin_fiducial) = (%d, %d)\n", nBin_acc, nBin_fiducial);
+      throw std::invalid_argument("[DYRun2Result::Apply_Acceptance] inconsistent number of bins");
+    }
+
+    for(Int_t i=0; i<nBin_acc; ++i) {
+      Int_t i_bin = i+1;
+
+      Double_t acc = h_acc_->GetBinContent(i_bin);
+      if( acc == 0 ) {
+        printf("[DYRun2Result::Apply_Acceptance] %2d bin's acceptance = 0\n", i_bin);
+        throw std::invalid_argument("Acceptance is 0");
+      }
+ 
+      Double_t nEvent_fiducial = h_fiducial->GetBinContent(i_bin);
+      Double_t error_fiducial = h_fiducial->GetBinError(i_bin);
+
+      Double_t nEvent_FPS = nEvent_fiducial / acc;
+      Double_t error_FPS  = error_fiducial / acc;
+
+      h_FPS->SetBinContent(i_bin, nEvent_FPS);
+      h_FPS->SetBinError(i_bin, error_FPS);
+    }
+
+    return h_FPS;
+  }
+
   void AssignTotalError_Unfolding(TH1D* h_unfolded, TUnfoldDensity& unfold) {
     TH2* h_covM = unfold.GetEmatrixTotal("h_covM");
 
@@ -1057,13 +1134,49 @@ protected:
     TH1D* h_17     = output_->Get_EraOutput("17").Get("dummy", "fake");
     TH1D* h_18     = output_->Get_EraOutput("18").Get("dummy", "fake");
 
+    // -- remove negative bins in individual era (before merging into "allEra" hist)
+    if( removeNegativeBinFakeLep_ ) {
+      Remove_NegativeBin(h_16pre);
+      Remove_NegativeBin(h_16post);
+      Remove_NegativeBin(h_17);
+      Remove_NegativeBin(h_18);
+    }
+
     TH1D* h_allEra_16pre  = Convert_To_AllEraFormat( h_16pre, "16pre" );
     TH1D* h_allEra_16post = Convert_To_AllEraFormat( h_16post, "16post" );
     TH1D* h_allEra_17     = Convert_To_AllEraFormat( h_17, "17" );
     TH1D* h_allEra_18     = Convert_To_AllEraFormat( h_18, "18" );
 
     TH1D* h_allEra = MergeHist( {h_allEra_16pre, h_allEra_16post, h_allEra_17, h_allEra_18} );
+
     map_allEraHist_.insert( std::make_pair("reco_fake", h_allEra) );
+    cout << "[DYRun2Result::Insert_AllEraHist_Fake] fake lepton backgrounds are inserted" << endl;
+  }
+
+  void Remove_NegativeBin(TH1D* h, Bool_t removeErrorAlso = kFALSE) {
+    Int_t nBin = h->GetNbinsX();
+    for(Int_t i=-1; i<nBin+1; ++i) {
+      Int_t i_bin = i+1;
+      Double_t value = h->GetBinContent(i_bin);
+      if( value < 0 ) {
+
+        if( i_bin == 0 )
+          printf("  [%03d bin] (Underflow < %.3lf) -> value = %lf < 0 ... set it 0\n",
+                 i_bin, h->GetBinLowEdge(i_bin+1), value);
+        
+        else if( i_bin == nBin+1)
+          printf("  [%03d bin] (Overflow > %.3lf) -> value = %lf < 0 ... set it 0\n",
+               i_bin, h->GetBinLowEdge(i_bin), value);
+        
+        else
+          printf("  [%03d bin] (%.3lf, %.3lf) -> value = %lf < 0 ... set it 0\n",
+                 i_bin, h->GetBinLowEdge(i_bin), h->GetBinLowEdge(i_bin+1), value);
+
+        h->SetBinContent(i_bin, 0);
+        if( removeErrorAlso )
+          h->SetBinError(i_bin, 0);
+      }
+    }
   }
 
   TH1D* Convert_To_AllEraFormat( TH1D* h, TString era ) {

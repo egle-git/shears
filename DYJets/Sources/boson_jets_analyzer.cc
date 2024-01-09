@@ -185,14 +185,11 @@ void boson_jets_analyzer::operator()()
     }
 
     // check before counting this event
-    // if( _apply_M100Cut && _sample_name == "DYJets_M-50to100" ) {
-    //     if( DileptonMass_LHE() > 100 ) return;
-    // }
-
-    if( _apply_M100Cut ) {
-        if( _sample_name == "DYJets_M-50to100" && 
-            DileptonMass_LHE() > 100 ) return;
+    if( _apply_M100Cut && _sample_name == "DYJets_M-50to100" ) {
+        if( DileptonMass_LHE() > 100 ) return;
     }
+
+    // printf("*** new event ***\n");
 
     _weights.process_event();
     _reweighing.reweigh(_weights);
@@ -274,12 +271,19 @@ void boson_jets_analyzer::operator()()
         if( _weights.ismc() ) genleps_dressed_noCut = _genleps.get_leptons_dressed_noCut();
         else                  genleps_dressed_noCut.clear(); // data: no gen-leptons
 
-        std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, gRandom->Rndm());
+        double rndm = gRandom->Rndm();
+        std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm);
+
+        Bool_t isLowQMuEvent = false;
+        if( _select_bestMuonTrigSF && _reject_lowQMu ) 
+          isLowQMuEvent = check_lowQualityMuon(muons);
+
         std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                       genleps_dressed_noCut, genleps_finalState, nVetoElecs);
+                                                       genleps_dressed_noCut, genleps_finalState, 
+                                                       rndm, nVetoElecs);
 
         std::vector<lepton> leptons = find_boson(muons, electrons);
-        if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2) {
+        if (!leptons.empty()&&(nVetoMuons+nVetoElecs)<=2 && !isLowQMuEvent) {
             // Rec boson found
             evt.rec = event_contents();
             evt.rec->leptons = leptons;
@@ -299,7 +303,7 @@ void boson_jets_analyzer::operator()()
     // remove events with m(reco) < 10 GeV in both data and MC
     // because we only have the DY MC down to m=10 GeV, but data can go down below GeV
     // without this cut, the # underflow events in the response matrix could be significant different between data and MC
-    if( evt.rec && evt.rec->boson_p.M() < 10 ) return;
+    if( evt.rec && evt.rec->boson_p.M() < 10.0 ) return;
 
     /*
      * At this point at least one boson was found, either gen or rec.
@@ -317,11 +321,6 @@ void boson_jets_analyzer::operator()()
                      evt.rec->leptons.end(),
                      std::back_inserter(chosen_electrons),
                      [](const lepton &lep) { return lep.pdgid == 11; });
-
-        if( _select_bestMuonTrigSF && _reject_lowQMu ) {
-            Bool_t isLowQMuEvent = check_lowQualityMuon(chosen_muons);
-            if( isLowQMuEvent ) return; // -- reject the event with low quality muons
-        }
 
         if( _apply_ptReweight && _weights.ismc() &&
             (chosen_muons.size() >= 2 || chosen_electrons.size() >= 2) ) {
@@ -403,6 +402,8 @@ void boson_jets_analyzer::operator()()
     auto mass_tags = evt.apply(&event_contents::get_boson_p)
                         .apply(&TLorentzVector::M)
                         .apply(make_tag, _mass_bins);
+
+    TString tstr_tag = mass_tags.rec ? *mass_tags.rec : "none";
     
     util::matched<std::string> mass_tags_fullRange;
     std::string str_fullRange = std::to_string(int(_mass_bins.front())) + "_" + std::to_string(int(_mass_bins.back())); // 50to1000

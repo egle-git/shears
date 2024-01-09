@@ -1,136 +1,270 @@
 #include "Common/ShearsComparator.h"
 #include "Common/DYUncertainty.h"
 #include "Common/DYPath.h"
+#include "Common/DYTool.h"
 
 class UncEstimator_ElE {
 public:
   UncEstimator_ElE() { }
 
+  void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
+
   void EstimateAndSave() {
-    TH1::AddDirectory(kFALSE);
+    if( gSystem->AccessPathName(fileName_unfolded_) ) {
+      cout << fileName_unfolded_ << " does not exist: make it ..." << endl;
+      Init();
+      ProducePlots_Validation();
 
-    Init();
+      for(const auto& era : vec_era_ )
+        ProducePlots_DYRun2Result_Stat(era);
+      ProducePlots_DYRun2Result_Syst();
+      Save_UnfoldedResults();
+    }
+    else
+      cout << "Use the existing file ("<< fileName_unfolded_ << ") ..." << endl;
 
-    Validation_ScaleUpDown();
-    Validation_SmearingUpDown();
+    if( !gSystem->AccessPathName(fileName_unc_) ) {
+      cout << fileName_unc_ << " already exists: move or remove it to re-estimate the uncertaintiy" << endl;
+      return;
+    }
 
-    EstimateUnc_Scale();
-    EstimateUnc_Smearing();
+    TH1::AddDirectory(kFALSE); // -- seg. fault without this (why? it is already used in PlotTool::Get_Hist...)
+    Estimate_Unc_Stat();
+    Estimate_Unc_Syst();
+    Save_Unc();
 
-    Save_All();
+    Print_Summary();
   }
-
 private:
   Run2Output* output_;
-  // -- (uncType, DYRun2Result) pair
-  std::map<TString, DYRun2Result*> map_result_;
+  // -- (setX, DYRun2Result) pair
+  std::map<TString, DYRun2Result*> map_result_syst_;
 
-  // -- (uncType, Uncertainty) pair
+  Bool_t useFake_ = kTRUE; // -- default: true
+
+  const Int_t nStatVar_ = 100;
+  // -- (era, vector<DYRun2Result*>) pair
+  std::map<TString, vector<DYRun2Result*>> map_result_stat_;
+
   std::map<TString, Uncertainty> map_unc_;
+  vector<TString> vec_era_ = {"16pre", "16post", "17", "18"};
+
+  TString fileName_unfolded_ = "Unfolded_SystVar_elE.root";
+  TString fileName_unc_      = "UncAndCov_elE.root";
 
   void Init() {
-    cout << "Input shears results: " << DYTool::path_systVar_elE << endl;
-    output_ = new Run2Output(DYTool::path_systVar_elE);
+    TString shearsPath = DYTool::path_systVar_elE+"/ee";
+    cout << "Input shears results: " << shearsPath << endl;
+    output_ = new Run2Output(shearsPath);
 
-    // -- central value
-    DYRun2Result* result_cv = new DYRun2Result(output_);
-    result_cv->Produce();
-    map_result_.insert( std::make_pair("cv", result_cv) );
+    // -- systematics
+    map_result_syst_.insert( std::make_pair("set0", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set2", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set3", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set4", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set5", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set6", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set7", new DYRun2Result(output_)) );
+    map_result_syst_.insert( std::make_pair("set8", new DYRun2Result(output_)) );
 
-    // -- scale up and down (data-only)
-    vector<TString> vec_tag_scale = {"elE_scale_up", "elE_scale_down"};
-    for( const auto& tag : vec_tag_scale ) {
-      DYRun2Result* result = new DYRun2Result(output_);
-      result->Update_HistName("all", "reco_data", "TUnfold1DReco_inc0jet_"+tag);
-      result->Produce();
-      map_result_.insert( std::make_pair(tag, result) );
+    for(auto& pair : map_result_syst_ ) {
+      TString tag = "elE_"+pair.first;
+      if( useFake_ ) DYTool::Set_Fake("ee", pair.second);
+      // -- change the hist. names for all era at once (i.e. correlation between all eras)
+      Update_HistName(pair.second, tag, "all");
+      pair.second->Produce();
     }
 
-    // -- smearing up and down (MC-only)
-    vector<TString> vec_tag_smearing = {"elE_smearing_up", "elE_smearing_down"};
-    for( const auto& tag : vec_tag_smearing ) {
-      DYRun2Result* result = new DYRun2Result(output_);
-      result->Update_HistName("all", "gen_DY",     "TUnfold1DTrue_inc0jet_"+tag);
-      result->Update_HistName("all", "reco_DY",    "TUnfold1DReco_inc0jet_"+tag);
-      result->Update_HistName("all", "reco_bkgMC", "TUnfold1DReco_inc0jet_"+tag);
-      result->Update_HistName("all", "migM",       "TUnfold2DMig_inc0jet_"+tag);
-      result->Produce();
-      map_result_.insert( std::make_pair(tag, result) );
-    }
+    // -- stat. replicas (set1_XXX) per era    
+    for(const auto& era : vec_era_ ) {
+      vector<DYRun2Result*> vec_result;
+
+      for(Int_t i_var=0; i_var<nStatVar_; ++i_var) {
+        TString tag = TString::Format("elE_set1_%03d", i_var);
+        DYRun2Result* result_stat = new DYRun2Result(output_);
+        if( useFake_ ) DYTool::Set_Fake("ee", result_stat);
+        // -- change the hist. name for a given era only (i.e. no correlation between era)
+        Update_HistName(result_stat, tag, era);
+        result_stat->Produce();
+
+        vec_result.push_back( result_stat );
+      } // -- end of stat. replica iteration
+
+      map_result_stat_.insert( std::make_pair(era, vec_result) );
+    }// -- end of era iteration
   }
 
-  void Validation_ScaleUpDown() {
+  void Update_HistName(DYRun2Result* result, const TString tag, const TString era = "all") {
+    // -- data is also changed with the variation
+    result->Update_HistName(era, "reco_data",  "TUnfold1DReco_inc0jet_"+tag);
+
+    result->Update_HistName(era, "gen_DY",     "TUnfold1DTrue_inc0jet_"+tag);
+    result->Update_HistName(era, "reco_DY",    "TUnfold1DReco_inc0jet_"+tag);
+    result->Update_HistName(era, "reco_bkgMC", "TUnfold1DReco_inc0jet_"+tag);
+    result->Update_HistName(era, "migM",       "TUnfold2DMig_inc0jet_"+tag);
+  }
+
+  void ProducePlots_Validation() {
+    Run2Output* output_default = new Run2Output(DYTool::path_default+"/ee");
+    DYRun2Result* result_default = new DYRun2Result(output_default);
+    if( useFake_ ) DYTool::Set_Fake("ee", result_default);
+    result_default->Produce();
+
+    DYRun2Result* result_default_syst = new DYRun2Result(output_);
+    if( useFake_ ) DYTool::Set_Fake("ee", result_default_syst);
+    result_default_syst->Produce();
+
     ResultComparator comparator("ee");
     comparator.Remove_RatioError();
-    comparator.Set_Case(map_result_["cv"],             "Central value");
-    comparator.Set_Case(map_result_["elE_scale_up"],   "Scale +1#sigma (data-only)");
-    comparator.Set_Case(map_result_["elE_scale_down"], "Scale -1#sigma (data-only)");
-    comparator.Compare("validation/scale");
+
+    comparator.Set_Case(result_default,      "from dyjets-loop");
+    comparator.Set_Case(result_default_syst, "from dyjets-loop-syst (default)");
+    comparator.Set_Case(map_result_syst_["set0"], "from dyjets-loop-syst (systVar, set0)");
+    comparator.Expect_PerfectAgreement();
+    comparator.Compare("DYRun2Result/validation");
   }
 
-  void Validation_SmearingUpDown() {
+  void ProducePlots_DYRun2Result_Syst() {
     ResultComparator comparator("ee");
     comparator.Remove_RatioError();
-    comparator.Set_Case(map_result_["cv"],                "Central value");
-    comparator.Set_Case(map_result_["elE_smearing_up"],   "Smearing +1#sigma (MC-only)");
-    comparator.Set_Case(map_result_["elE_smearing_down"], "Smearing -1#sigma (MC-only)");
-    comparator.Compare("validation/smearing");
+    comparator.Set_Case(map_result_syst_["set0"], "set0");
+    comparator.Set_Case(map_result_syst_["set2"], "set2 (Z p_{T} modeling)");
+    comparator.Set_Case(map_result_syst_["set3"], "set3 (alt. mass range)");
+    comparator.Set_Case(map_result_syst_["set4"], "set4 (nonlinearity)");
+    comparator.Set_Case(map_result_syst_["set5"], "set5 (asymmetric resolution corr.)");
+    comparator.Set_Case(map_result_syst_["set6"], "set6 (choice of scale reference point)");
+    comparator.Set_Case(map_result_syst_["set7"], "set7 (run-inclusive resolution correction)");
+    comparator.Set_Case(map_result_syst_["set8"], "set8 (background systematics)");
+    
+    comparator.Compare("DYRun2Result/syst");
   }
 
-  void EstimateUnc_Scale() {
-    TH1D* h_cv       = map_result_["cv"]->Get_AllEra("unfolded", "data");
-    TH1D* h_alt_up   = map_result_["elE_scale_up"]->Get_AllEra("unfolded", "data");
-    TH1D* h_alt_down = map_result_["elE_scale_down"]->Get_AllEra("unfolded", "data");
-    
-    Uncertainty unc("elE_scale", "oneSigmaShift", "fullyCorr");
-    unc.Set_CentralHist( h_cv );
-    unc.Set_AltHist( {h_alt_up, h_alt_down} );
-    unc.Estimate();
-    
-    map_unc_.insert( std::make_pair("elE_scale", unc) );
+  void ProducePlots_DYRun2Result_Stat(TString era) {
+    vector<DYRun2Result*>& vec_result = map_result_stat_[era];
+
+    ResultComparator comparator("ee");
+    comparator.Remove_RatioError();
+    comparator.Set_Case(map_result_syst_["set0"], "set0 (central value)");    
+    comparator.Set_Case(vec_result[0], "stat. replica 1 (era="+era+")");
+    comparator.Set_Case(vec_result[1], "stat. replica 2 (era="+era+")");
+    comparator.Set_Case(vec_result[2], "stat. replica 3 (era="+era+")");
+    comparator.Set_Case(vec_result[3], "stat. replica 4 (era="+era+")");
+    comparator.Compare("DYRun2Result/stat/"+era);
   }
 
-  void EstimateUnc_Smearing() {
-    TH1D* h_cv       = map_result_["cv"]->Get_AllEra("unfolded", "data");
-    TH1D* h_alt_up   = map_result_["elE_smearing_up"]->Get_AllEra("unfolded", "data");
-    TH1D* h_alt_down = map_result_["elE_smearing_down"]->Get_AllEra("unfolded", "data");
-    
-    Uncertainty unc("elE_smearing", "oneSigmaShift", "fullyCorr");
-    unc.Set_CentralHist( h_cv );
-    unc.Set_AltHist( {h_alt_up, h_alt_down} );
-    unc.Estimate();
-    
-    map_unc_.insert( std::make_pair("elE_smearing", unc) );
-  }
-
-  void Save_All() {
-    TString fileName_output = "UncAndCov_elE.root";
-    TFile *f_output = TFile::Open(fileName_output, "RECREATE");
-    f_output->cd();
-    // -- save results
-    for(auto& pair : map_result_ )
+  void Save_UnfoldedResults() {
+    TFile *f_output = TFile::Open(fileName_unfolded_, "RECREATE");
+    // -- syst. var
+    for(auto& pair : map_result_syst_ )
       pair.second->Save(f_output, pair.first);
 
-    // -- save uncertainties
-    vector<Uncertainty> vec_unc;
-    for(auto& pair : map_unc_ ) {
-      pair.second.Save(f_output);
+    // -- stat. var
+    for(const auto& era : vec_era_ ) {
+      vector<DYRun2Result*>& vec_result = map_result_stat_[era];
 
-      vec_unc.push_back( pair.second );
+      for(Int_t i=0; i<nStatVar_; ++i) {
+        TString tag = TString::Format("stat_%03d_%s", i, era.Data());
+        vec_result[i]->Save(f_output, tag);
+      } // -- end of stat. replica iteration
+    }// -- end of era iteration
+
+    f_output->Close();
+  }
+
+  void Estimate_Unc_Syst() {
+    TString histName_base = "h_allEra_unfolded_data";
+
+    TH1D* h_cv = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_set0");
+    // cout << "h_cv = " << h_cv << endl;
+    // cout << "h_cv->GetBinContent(1) = " << h_cv->GetBinContent(1) << endl;
+    // PlotTool::Print_Histogram(h_cv);
+
+    // -- set0: not included
+    vector<TString> vec_systTag = {"set2", "set3", "set4", "set5", "set6", "set7", "set8"};
+    vector<Uncertainty> vec_unc_syst;
+
+    for(const auto& systTag : vec_systTag ) {
+      TH1D* h_alt = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_"+systTag);  
+
+      // PlotTool::Print_Histogram(h_alt);
+      // break;
+
+      Uncertainty unc("elE_syst_"+systTag, "alternative", "fullyCorr");
+      unc.Set_CentralHist( h_cv );
+      unc.Set_AltHist( {h_alt} );
+      unc.Estimate();
+      
+      map_unc_.insert( std::make_pair(systTag, unc) );
+      vec_unc_syst.push_back( unc );
     }
 
-    // -- save total uncertainty
+    // -- total systematic sources (quad. sum)
+    Uncertainty unc_totSyst("elE_syst_tot");
+    unc_totSyst.Combine( vec_unc_syst );
+
+    map_unc_.insert( std::make_pair("syst", unc_totSyst) );
+  }
+
+  void Estimate_Unc_Stat() {
+    TString histName_base = "h_allEra_unfolded_data";
+
+    TH1D* h_cv = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_set0");
+
+    vector<Uncertainty> vec_unc_stat;
+    for(const auto& era : vec_era_ ) {
+      vector<TH1D*> vec_altHist;
+      for(Int_t i=0; i<nStatVar_; ++i) {
+        TString tag = TString::Format("stat_%03d_%s", i, era.Data());
+        TH1D* h_alt = PlotTool::Get_Hist(fileName_unfolded_, histName_base+"_"+tag);
+        vec_altHist.push_back( h_alt );
+      }
+
+      Uncertainty unc("elE_stat_"+era, "smearing", "smearing");
+      unc.Set_CentralHist( h_cv );
+      unc.Set_AltHist( vec_altHist );
+      unc.Estimate();
+
+      map_unc_.insert( std::make_pair("stat_"+era, unc) );
+      vec_unc_stat.push_back( unc );
+    }
+
+    // -- total systematic sources (quad. sum)
+    Uncertainty unc_totStat("elE_stat_tot");
+    unc_totStat.Combine( vec_unc_stat );
+
+    map_unc_.insert( std::make_pair("stat", unc_totStat) );
+  }
+
+  void Save_Unc() {
+    TFile* f_output = TFile::Open(fileName_unc_, "RECREATE");
+    for(auto& pair : map_unc_ ) {
+      pair.second.Save(f_output);
+    }
+
+    vector<Uncertainty> vec_unc = { map_unc_["stat"], map_unc_["syst"] };
+    // vector<Uncertainty> vec_unc;
+    // vec_unc.push_back( map_unc_["stat"] );
+    // vec_unc.push_back( map_unc_["syst"] );
+
     Uncertainty unc_tot("elE_tot");
     unc_tot.Combine( vec_unc );
     unc_tot.Save(f_output);
 
     f_output->Close();
-    cout << "All results are saved in " << fileName_output << endl;
   }
 
+  void Print_Summary() {
+    cout << "============ [summary] ============" << endl;
+    cout << "[input]" << endl;
+    cout << "  shears result: " << DYTool::path_systVar_muP << endl;
+    cout << "[output]" << endl;
+    cout << "  Unfolded results with syst. var.: " << fileName_unfolded_ << endl;
+    cout << "  Unc & cov. results: " << fileName_unc_ << endl;
+    cout << "===================================" << endl;
+  }
 };
 
 void estimate_unc_cov_elE() {
-  UncEstimator_ElE uncEstimator;
-  uncEstimator.EstimateAndSave();
+  UncEstimator_ElE estimator;
+  estimator.EstimateAndSave();
 }

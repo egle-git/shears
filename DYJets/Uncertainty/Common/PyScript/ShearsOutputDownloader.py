@@ -24,12 +24,17 @@ def SanityCheck(stdout, channel, era):
 
 
 def printCMD_hadd(shearsOutput):
-  print("./auto-hadd.sh %s" % shearsOutput.dirName)
+  cmd = "./auto-hadd.sh %s" % shearsOutput.dirName
+  print(cmd)
+  return cmd
 
 def printCMD_download(shearsOutput, outputDir):
   cmd = "scp '%s@mshort.iihe.ac.be:%s/%s/*.root' %s/%s/%s" % (args.user, shearsOutput.shearsPath, shearsOutput.dirName, outputDir, shearsOutput.channel, shearsOutput.era)
   print(cmd)
-  
+  return cmd
+
+
+# -- main part  
 import argparse
 import paramiko
 import os, sys
@@ -38,6 +43,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--user', default="kplee")
 parser.add_argument('-s', '--shears', default="/user/kplee/Analysis/shears/231117_update_latestSetup")
 parser.add_argument('-o', '--outputDir', default="./shearsOutput")
+parser.add_argument('-c', '--channel', default="all")
+parser.add_argument('-t', '--tag', default="")
 # parser.add_argument('-v', '--verboseErrors', action='store_true', default=False)
 args = parser.parse_args()
 
@@ -55,8 +62,15 @@ list_shearsOutput = []
 
 print("# -- find the shears output directory names in T2_BE_IIHE server...")
 for channel in list_channel:
+
+  if args.channel != "all" and channel != args.channel:
+    continue
+
   for era in list_era:
-    cmd_find = "find '%s' -maxdepth 1 -type d -name *%s_%s*" % (args.shears, channel, era)
+    tag_dir = ""
+    if args.tag == "": tag_dir = "%s_%s" % (channel, era)
+    else:              tag_dir = "%s_%s_%s" % (args.tag, channel, era)
+    cmd_find = "find '%s' -maxdepth 1 -type d -name *%s*" % (args.shears, tag_dir)
     # print(cmd_find)
     stdin, stdout, stderr = client.exec_command(cmd_find)
 
@@ -78,12 +92,19 @@ for channel in list_channel:
     # for line in stdout:
     #     print(line.strip('\n'))
 
+list_cmd = []
+
 print("\n# -- run at shears working directory:")
 print("# -- cd %s" % args.shears)
 for shearsOutput in list_shearsOutput:
-  printCMD_hadd(shearsOutput)
+  cmd = printCMD_hadd(shearsOutput)
+  list_cmd.append(cmd)
 
+# -- make output directories
 for channel in list_channel:
+  if args.channel != "all" and channel != args.channel:
+    continue
+
   for era in list_era:
     dirPath = "%s/%s/%s" % (args.outputDir, channel, era)
     # -- does not exist: make it (recursively)
@@ -98,8 +119,16 @@ for channel in list_channel:
 
 print("\n# -- run at local machine")
 for shearsOutput in list_shearsOutput:
-  printCMD_download(shearsOutput, args.outputDir)
+  cmd = printCMD_download(shearsOutput, args.outputDir)
+  list_cmd.append(cmd)
 
 client.close()
+
+# -- write an info file in the output directory
+f = open(args.outputDir+"/info.txt", "w")
+f.write("shears directory: %s\n\n"% args.shears)
+for cmd in list_cmd:
+  f.write(cmd+"\n")
+f.close()
 
 # find '/user/kplee/Analysis/shears/231117_update_latestSetup/DYJets' -maxdepth 1 -type d -name *ee_16pre* 

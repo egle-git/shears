@@ -90,10 +90,11 @@ class electrons
      */
 
     // std::vector<lepton> get( bool isData, int & nVetoElecs);
-    std::vector<lepton> get(bool isData, const unsigned int runNum,
+    std::vector<lepton> get(bool isData, const unsigned int& runNum,
                             const vector<lepton>& vec_dressedGenLep,
                             const vector<lepton>& vec_postFSRGenLep,
-                            int & nVetoElecs, TString systMode = "default");
+                            const double& rndm, int & nVetoElecs, 
+                            TString systMode = "default", const int& s=0, const int& m=0);
 
     /**
      * \brief Reweighs an event to take scale factors into account.
@@ -136,14 +137,21 @@ class electrons
     /// \brief Writes histograms to the current directory.
     void write();
 
+    // -- change the electron energy by its systematic uncertainty (E/Gamma POG correction)
+    void SystVar_ElectronEnergy_POGCorr(lepton& l, const int& index, const TString& systMode);
+
     bool _eRoccor_enabled = false;
     void apply_energyCorr_smp22010(lepton& l, 
                                    const bool isData, const double factorToRawE,
-                                   const unsigned int runNum, const double r9, 
+                                   const unsigned int& runNum, const double r9, 
                                    const vector<lepton>& vec_dressedGenLep,
-                                   const vector<lepton>& vec_postFSRGenLep);
+                                   const vector<lepton>& vec_postFSRGenLep,
+                                   const double& rndm, const int& s, const int& m);
 
     lepton matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep);
+    double Find_MatchedGenPt(lepton l, 
+                             const vector<lepton>& vec_dressedGenLep, 
+                             const vector<lepton>& vec_postFSRGenLep);
 };
 } // namespace physics
 

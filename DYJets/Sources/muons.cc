@@ -17,6 +17,8 @@ Muon_charge(info.reader, "Muon_charge"),
 Muon_pfRelIso04_all(info.reader, "Muon_pfRelIso04_all"),
 Muon_nTrackerLayers(info.reader, "Muon_nTrackerLayers"),
 Muon_pfIsoId(info.reader, "Muon_pfIsoId"),
+Muon_tkIsoId(info.reader, "Muon_tkIsoId"),
+Muon_highPtId(info.reader, "Muon_highPtId"),
 Muon_tightId(info.reader, "Muon_tightId"),
 Muon_mediumId(info.reader, "Muon_mediumId"),
 Muon_looseId(info.reader, "Muon_looseId") {
@@ -54,6 +56,7 @@ void muons::configure(const util::options &opt) {
     if( id == "loose" )       _id_cut = muons::id::loose;
     else if( id == "medium" ) _id_cut = muons::id::medium;
     else if( id == "tight" )  _id_cut = muons::id::tight;
+    else if( id == "highPt" ) _id_cut = muons::id::highPt;
     else                      throw std::invalid_argument("Unknown muon id: \"" + id + "\"");
   }
 
@@ -65,6 +68,8 @@ void muons::configure(const util::options &opt) {
     else if( iso == "tight" )     _iso_cut = muons::iso::tight;
     else if( iso == "veryloose" ) _iso_cut = muons::iso::veryloose;
     else if( iso == "verytight" ) _iso_cut = muons::iso::verytight;
+    else if( iso == "trkLoose" )  _iso_cut = muons::iso::trkLoose;
+    else if( iso == "trkTight" )  _iso_cut = muons::iso::trkTight;
     else                          throw std::invalid_argument("Unknown muon Isoid: \"" + iso + "\"");
   }
 }
@@ -95,6 +100,9 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     case id::tight:
       l.passes_id = Muon_tightId[i];
       break;
+    case id::highPt:
+      l.passes_id = (Muon_highPtId[i] >= 2); // -- Muon_highPtId[i] == 1: tracker high-pT ID
+      break;
     }
     if(!l.passes_id) continue;
 
@@ -116,6 +124,11 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
       break;
     case iso::verytight:
       l.passes_iso = (Muon_pfIsoId[i] >= 5);
+    case iso::trkLoose:
+      l.passes_iso = (Muon_tkIsoId[i] >= 1);
+      break;
+    case iso::trkTight:
+      l.passes_iso = (Muon_tkIsoId[i] >= 2);
       break;
     }
     if(!l.passes_iso) continue;

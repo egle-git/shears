@@ -130,6 +130,7 @@ private:
   bool _doSyst_effSF = false;
   bool _doSyst_muP = false; // -- Rochester correction (muon mommentum, p, correction)
   bool _doSyst_elE = false; // -- Electron energy correction
+  bool _use_eRoccor = false; // -- which electron energy correction? (true if it is the Rochester one)
   bool _doSyst_pileup = false; // -- Pileup
   bool _doSyst_L1Pref = false; // -- L1 pre-firing
   bool _doSyst_theory = false; // -- MC theory uncertainty (PDF, alpha_s, scale)
@@ -178,8 +179,24 @@ private:
   std::string get_str_systInfo_muP(const int& s, const int& m);
 
   // -- for the uncertainty from the electron energy scale & smearing correction
-  void fill_systHist_elE(const util::matched<event_contents>& evt);
-  void fill_systHist_elE_eachSystVar(const util::matched<event_contents>& evt, TString systMode);
+  void fill_systHist_elE(const util::matched<event_contents>& evt_default,
+                         const std::vector<physics::lepton>& genleps_dressed,
+                         const std::vector<physics::lepton>& genleps_fs,
+                         const double rndm_forRoccor);
+
+  void fill_systHist_elE_RocCorr(const util::matched<event_contents>& evt_default,
+                                 const std::vector<physics::lepton>& genleps_dressed,
+                                 const std::vector<physics::lepton>& genleps_fs,
+                                 const double rndm_forRoccor);
+
+  void fill_systHist_elE_RocCorr_eachSystVar(const util::matched<event_contents>& evt_default,
+                                             const std::vector<physics::lepton>& genleps_dressed,
+                                             const std::vector<physics::lepton>& genleps_fs,
+                                             const double rndm_forRoccor,
+                                             int s, int m);
+
+  void fill_systHist_elE_POGCorr(const util::matched<event_contents>& evt_default);
+  void fill_systHist_elE_POGCorr_eachSystVar(const util::matched<event_contents>& evt_default, TString systMode);
 
   // -- for the uncertainty from the pileup
   void fill_systHist_pileup(const util::matched<event_contents>& evt,

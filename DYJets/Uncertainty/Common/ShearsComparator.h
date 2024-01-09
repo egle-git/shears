@@ -50,6 +50,8 @@ public:
 
   void OnlyMC(Bool_t flag = kTRUE) { onlyMC_ = flag; }
 
+  void Remove_RatioError(Bool_t flag = kTRUE) { removeRatioErr_ = flag; }
+
   void Expect_PerfectAgreement(Bool_t flag = kTRUE) { expect_same_ = flag; }
 
   // -- if the histogram name for the comparison is same for all cases
@@ -71,7 +73,7 @@ public:
     nComp_++;
   }
 
-  void Compare() {
+  void Compare(TString plotPath = "") {
     TH1::SetDefaultSumw2(); // -- to suppress sumw2 warnings
 
     nCase_ = (Int_t)vec_eraCase_.size();
@@ -79,7 +81,7 @@ public:
     if( nCase_ > vec_colorForCase_.size() )
       throw std::runtime_error("nCase_ > vec_colorForCase_.size()");
 
-    Make_PlotDir();
+    Make_PlotDir(plotPath);
     for(Int_t i_comp=0; i_comp<nComp_; ++i_comp)
       ProducePlots(i_comp);
   }
@@ -133,6 +135,8 @@ private:
 
   // -- # cases (set when "Compare()" is executed)
   Int_t nCase_ = 0;
+
+  Bool_t removeRatioErr_ = kFALSE;
 
   void ProducePlots(Int_t i_comp) {
     TString histName_first = vec_eraCase_[0].HistName(i_comp);
@@ -215,6 +219,8 @@ private:
     canvas->RegisterLatex(0.16, 0.91, 42, 0.7, channelInfo);
 
     // canvas->RemoveRatioError(); // remove error in the ratio (useful when the error is meaningless)
+
+    if( removeRatioErr_ ) canvas->RemoveRatioError();
 
     canvas->SetSavePath(plotDirPath_);
 
@@ -376,8 +382,8 @@ private:
     return title;
   }
 
-  void Make_PlotDir() {
-    plotDirPath_ = TString::Format("./plot/%s", era_.Data());
+  void Make_PlotDir(TString basePlotPath) {
+    plotDirPath_ = TString::Format("./plot/%s/%s", basePlotPath.Data(), era_.Data());
     bool recursive = kTRUE;
     if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
       throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
@@ -626,10 +632,17 @@ public:
     ProducePlot_CompBtwCases("reco", "data");
     ProducePlot_CompBtwCases("reco", "DY");
     ProducePlot_CompBtwCases("reco", "bkgMC");
+    if( HasFake() ) {
+      ProducePlot_CompBtwCases("reco", "fake");
+      ProducePlot_CompBtwCases("reco", "bkgAll");
+    }
     ProducePlot_CompBtwCases("reco", "data_bkgSub");
 
     ProducePlot_CompBtwCases("unfolded", "DY");
     ProducePlot_CompBtwCases("unfolded", "data");
+
+    if( HasFPSResult() )
+      ProducePlot_CompBtwCases("unfoldedFPS", "data");
 
     for(const auto& resultCase : vec_resultCase_ )
       ProducePlot2D(resultCase.Result()->Get_AllEra_RespM());
@@ -667,8 +680,24 @@ private:
 
   // -- color for each case in the plots
   vector<Int_t> vec_colorForCase_ = {
-    kBlack, kBlue, kGreen+2, kViolet, kRed, kCyan, kGray
+    kBlack, kBlue, kGreen+2, kViolet, kRed, kCyan, kGray, kBlue-9
   };
+
+  Bool_t HasFPSResult() {
+    for(const auto& resultCase : vec_resultCase_ ) {
+      if( !resultCase.Result()->HasFPS() ) return kFALSE;
+    }
+
+    return kTRUE;
+  }
+
+  Bool_t HasFake() {
+    for(const auto& resultCase : vec_resultCase_ ) {
+      if( !resultCase.Result()->HasFake() ) return kFALSE;
+    }
+
+    return kTRUE;
+  }
 
   void ProducePlot_CompBtwCases(TString level, TString process) {
     TString canvasName = TString::Format("c%02d_comp_%s_%s", i_canvas, level.Data(), process.Data());
@@ -752,7 +781,9 @@ private:
     if( process == "data" )        histInfo += ", data";
     if( process == "data_bkgSub" ) histInfo += ", data (bkg. subtracted)";
     if( process == "DY" )    histInfo += ", DY MC";
+    if( process == "fake" )  histInfo += ", Fake lepton background";
     if( process == "bkgMC" ) histInfo += ", Sum of bkg. MC";
+    if( process == "bkgAll" ) histInfo += ", Sum of bkg. MC + fake leptons";
 
     return histInfo;
   }

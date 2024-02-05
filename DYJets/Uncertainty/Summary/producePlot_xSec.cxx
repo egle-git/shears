@@ -118,11 +118,11 @@ private:
 
     if( type == "unfolded" ) {
       canvas->Register(h_unfolded_data_, "Data", kBlack);
-      canvas->Register(h_theory_,        "Theory (Powheg, MiNNLO)", kGreen-8);
+      canvas->Register(h_theory_,        "Theory (Powheg, MiNNLO)", kGreen+2);
     }
     if( type == "dsigdm" ) {
       canvas->Register(h_dsigdm_data_, "Data", kBlack);
-      canvas->Register(h_dsigdm_theory_, "Theory (Powheg, MiNNLO)", kGreen-8);
+      canvas->Register(h_dsigdm_theory_, "Theory (Powheg, MiNNLO)", kGreen+2);
     }
 
     canvas->SetLegendPosition(0.50, 0.70, 0.94, 0.87);

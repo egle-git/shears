@@ -201,6 +201,28 @@ Double_t GetLumi(TString era) {
   return 0;
 }
 
+Int_t GetEraColor(TString era) {
+  if( era == "16pre" )  return kBlack;
+  if( era == "16post" ) return kBlue;
+  if( era == "17" )     return kGreen+2;
+  if( era == "18" )     return kViolet;
+
+  throw std::invalid_argument("[DYTool::GetEraColor] era = "+era+" is not supported");
+
+  return 0;
+}
+
+TString GetEraLegend(TString era) {
+  if( era == "16pre" )  return "2016-preAPV";
+  if( era == "16post" ) return "2016-postAPV";
+  if( era == "17" )     return "2017";
+  if( era == "18" )     return "2018";
+
+  throw std::invalid_argument("[DYTool::GetEraLegend] era = "+era+" is not supported");
+
+  return "undefined";
+}
+
 void Save_DYRun2Result_MassAxis(TFile *f_output, DYRun2Result* result, Bool_t isFPS = kFALSE, TString tag = "mAxis") {
   if( !tag.Contains("mAxis") )
     printf("[DYTool::Save_DYRun2Result_MassAxis] tag = %s does not have mAxis word; you may want to add it?\n", tag.Data());
@@ -300,6 +322,16 @@ TH1D* Get_UncHist(TH1D* h_cv, TString uncType) {
   }
 
   return h_unc;
+}
+
+TString GetChannelInfo(TString channel) {
+  if( channel == "ee" ) return "Electron channel";
+  if( channel == "mm" ) return "Muon channel";
+  if( channel == "ll" ) return "Combined result";
+
+  throw std::invalid_argument("[DYTool::GetChannelInfo] channel = " + channel + " is not supported");
+
+  return "undefined";
 }
 
 }; // -- end of namespace DYTool

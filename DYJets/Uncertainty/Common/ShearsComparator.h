@@ -632,6 +632,10 @@ public:
     ProducePlot_CompBtwCases("reco", "data");
     ProducePlot_CompBtwCases("reco", "DY");
     ProducePlot_CompBtwCases("reco", "bkgMC");
+    if( HasFake() ) {
+      ProducePlot_CompBtwCases("reco", "fake");
+      ProducePlot_CompBtwCases("reco", "bkgAll");
+    }
     ProducePlot_CompBtwCases("reco", "data_bkgSub");
 
     ProducePlot_CompBtwCases("unfolded", "DY");
@@ -682,6 +686,14 @@ private:
   Bool_t HasFPSResult() {
     for(const auto& resultCase : vec_resultCase_ ) {
       if( !resultCase.Result()->HasFPS() ) return kFALSE;
+    }
+
+    return kTRUE;
+  }
+
+  Bool_t HasFake() {
+    for(const auto& resultCase : vec_resultCase_ ) {
+      if( !resultCase.Result()->HasFake() ) return kFALSE;
     }
 
     return kTRUE;
@@ -769,7 +781,9 @@ private:
     if( process == "data" )        histInfo += ", data";
     if( process == "data_bkgSub" ) histInfo += ", data (bkg. subtracted)";
     if( process == "DY" )    histInfo += ", DY MC";
+    if( process == "fake" )  histInfo += ", Fake lepton background";
     if( process == "bkgMC" ) histInfo += ", Sum of bkg. MC";
+    if( process == "bkgAll" ) histInfo += ", Sum of bkg. MC + fake leptons";
 
     return histInfo;
   }

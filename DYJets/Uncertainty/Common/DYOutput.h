@@ -755,7 +755,14 @@ public:
 
   Run2Output* Get_Run2Output() const { return output_; }
 
-  Bool_t HasFPS() const { return hasAcc_; };
+  Bool_t HasFPS() const { return hasAcc_; }
+
+  Bool_t HasFake() const { 
+    if( !isSetup_ )
+      throw std::runtime_error("[DYRun2Result::HasFake] Produce() is not called yet!");
+
+    return hasFake_fullRun2_; 
+  } 
 
   void Save(TFile* f_output, TString tag = "") {
     f_output->cd();
@@ -792,7 +799,7 @@ protected:
 
   Bool_t hasFake_fullRun2_ = kFALSE;
 
-  Bool_t removeNegativeBinFakeLep_ = kFALSE;
+  Bool_t removeNegativeBinFakeLep_ = kTRUE; // -- default: remove negative bin
 
   std::map<TString, HistNameContainer> map_hNameC_ = {
     {"16pre",  HistNameContainer()},
@@ -1146,7 +1153,7 @@ protected:
     cout << "[DYRun2Result::Insert_AllEraHist_Fake] fake lepton backgrounds are inserted" << endl;
   }
 
-  void Remove_NegativeBin(TH1D* h) {
+  void Remove_NegativeBin(TH1D* h, Bool_t removeErrorAlso = kFALSE) {
     Int_t nBin = h->GetNbinsX();
     for(Int_t i=-1; i<nBin+1; ++i) {
       Int_t i_bin = i+1;
@@ -1154,19 +1161,20 @@ protected:
       if( value < 0 ) {
 
         if( i_bin == 0 )
-          printf("  [%03d bin] (Underflow < %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+          printf("  [%03d bin] (Underflow < %.3lf) -> value = %lf < 0 ... set it 0\n",
                  i_bin, h->GetBinLowEdge(i_bin+1), value);
         
         else if( i_bin == nBin+1)
-          printf("  [%03d bin] (Overflow > %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+          printf("  [%03d bin] (Overflow > %.3lf) -> value = %lf < 0 ... set it 0\n",
                i_bin, h->GetBinLowEdge(i_bin), value);
         
         else
-          printf("  [%03d bin] (%.3lf, %.3lf) -> value = %lf < 0 ... set it 0 (as well as its error)\n",
+          printf("  [%03d bin] (%.3lf, %.3lf) -> value = %lf < 0 ... set it 0\n",
                  i_bin, h->GetBinLowEdge(i_bin), h->GetBinLowEdge(i_bin+1), value);
 
         h->SetBinContent(i_bin, 0);
-        h->SetBinError(i_bin, 0);
+        if( removeErrorAlso )
+          h->SetBinError(i_bin, 0);
       }
     }
   }

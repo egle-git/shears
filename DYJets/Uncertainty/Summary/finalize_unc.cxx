@@ -92,7 +92,8 @@ private:
     if( isFPS_ )
       fileName_output_.ReplaceAll(".root", "_FPS.root");
 
-    TString path_default = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/shears/DYJets/Uncertainty";
+    TString path_default = DYTool::path_uncDir;
+
     Insert_UncInfo("statData", "Data statistics", kBlack,
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_ee.root",
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_mm.root",
@@ -102,6 +103,11 @@ private:
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_ee.root",
                    path_default+"/Stat/Uncertainty_and_Covariance_Stat_mm.root",
                    "stat_totMC");
+
+    Insert_UncInfo("bkg", "Data-driven backgrounds", kGreen-7,
+                   path_default+"/Background/Unfolded_And_Uncertainty_Bkg_ee.root",
+                   path_default+"/Background/Unfolded_And_Uncertainty_Bkg_mm.root",
+                   "bkg_tot");
 
     Insert_UncInfo("lumi", "Luminosity", kOrange-3,
                    path_default+"/Luminosity/Unfolded_And_Uncertainty_lumi_ee.root",

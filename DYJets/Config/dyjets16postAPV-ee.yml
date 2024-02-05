@@ -501,6 +501,7 @@ plots:
 
 uncertainties:
   PDF and scale: false
+  GenWeightInfo directory: SystTables/GenWeight
   pileup: false
   L1 prefiring: false
   # Muon Rochester correction: false

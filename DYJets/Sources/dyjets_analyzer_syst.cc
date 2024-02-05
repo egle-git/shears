@@ -18,7 +18,75 @@ dyjets_analyzer_syst::dyjets_analyzer_syst(util::job::info &info, const util::op
     if( _doSyst_effSF ) init_effMap();
 
     sanity_check();
+
+    if( _doSyst_theory ) {
+      // histo_set.declare("pdfWRatio", "PDF weights ratio;PDF weights ratio", 5000, 0, 5);
+      // histo_set.declare("pdfWRatio", "PDF weights ratio;PDF weights ratio", 10000, 0, 10000);
+      histo_set.declare("pdfWRatio",      "PDF weights ratio;PDF weights ratio", 8000, -3, 5);
+      histo_set.declare("pdfWRatio_wide", "PDF weights ratio;PDF weights ratio", 2000, -1000000, 1000000);
+      Init_GenWeightInfo(opt);
+    }
 }
+
+void dyjets_analyzer_syst::Init_GenWeightInfo(const util::options &opt) {
+  const YAML::Node node = opt.config["uncertainties"];
+  TString baseDir = node["GenWeightInfo directory"].as<std::string>();
+
+  TString tag_era;
+  if( get_era() == 0 ) tag_era = "16pre";
+  if( get_era() == 1 ) tag_era = "16post";
+  if( get_era() == 2 ) tag_era = "17";
+  if( get_era() == 3 ) tag_era = "18";
+  TString tstr_channel = _channel;
+  TString fileName = TString::Format("%s/WeightInfo_%s_%s.root", baseDir.Data(), tstr_channel.Data(), tag_era.Data());
+  util::logging::info << "Gen weight information is from " << fileName << std::endl;
+
+  TFile *f_input = TFile::Open(fileName);
+  
+  TString sampleName = get_sample_name();
+
+  // -- only when the information for the given sample is available
+  if( f_input->Get("h_mean_"+sampleName) == nullptr ) {
+    f_input->Close();
+    vec_PDFWeightInfo_.clear();
+    return;
+  }
+
+  TH1D* h_mean       = (TH1D*)f_input->Get("h_mean_"+sampleName)->Clone();
+  TH1D* h_sigma      = (TH1D*)f_input->Get("h_sigma_"+sampleName)->Clone();
+  TH1D* h_lowerLimit = (TH1D*)f_input->Get("h_lowerLimit_"+sampleName)->Clone();
+  TH1D* h_upperLimit = (TH1D*)f_input->Get("h_upperLimit_"+sampleName)->Clone();
+
+  Int_t nWeight = h_mean->GetNbinsX();
+  for(Int_t i=0; i<nWeight; ++i) {
+    Int_t i_bin = i+1;
+
+    TString label = h_mean->GetXaxis()->GetBinLabel(i_bin);
+
+    Double_t mean       = h_mean->GetBinContent(i_bin);
+    Double_t sigma      = h_sigma->GetBinContent(i_bin);
+    Double_t lowerLimit = h_lowerLimit->GetBinContent(i_bin);
+    Double_t upperLimit = h_upperLimit->GetBinContent(i_bin);
+
+    if( label.Contains("PDFVar_") ) {
+      GenWeightInfo info;
+      info.mean = mean;
+      info.sigma = sigma;
+      info.lowerLimit = lowerLimit;
+      info.upperLimit = upperLimit;
+
+      vec_PDFWeightInfo_.push_back(info); // -- same order with the one of histogram bins (0th element = 1st bin)
+    }
+
+    // // -- if necessary...
+    // if( label.Contains("scaleVar_") ) {
+
+    // }
+  }
+
+  f_input->Close();
+}
+
 
 void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   if( !opt.config["uncertainties"] ) {
@@ -225,6 +293,7 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
                                                 const util::matched<double> &value,
                                                 const util::matched<std::string>& tags_default) {
   
+  // -- some samples do not have these branches
   if( !LHEPdfWeight || !LHEScaleWeight ) return;
 
   double gen_weight_cv    = weights().gen_weight();
@@ -235,12 +304,30 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
   // -- i_mem = 1 to 100:    PDF replicas
   // -- i_mem = 101 and 102: alpha_s variation (0.116 and 0.120)
   for(unsigned int i_mem=0; i_mem<LHEPdfWeight->GetSize(); ++i_mem) {
+    TString tstr_PDFVarInfo = TString::Format("PDFVar_%03d", i_mem);
+
     double ratio_weight = LHEPdfWeight->At(i_mem);
+
+    // -- fill before fixing the ratio
+    // -- this is not a physical distribution; no need to use gen-weight to fill the histogram
+    histo_set.fill("pdfWRatio",      tstr_PDFVarInfo.Data(), ratio_weight, 1.0);
+    histo_set.fill("pdfWRatio_wide", tstr_PDFVarInfo.Data(), ratio_weight, 1.0);
+
+    // if( std::abs(ratio_weight) > 1000.0 ) {
+    //   //   TString massInfo = "";
+    //   //   if( !value.gen ) massInfo = "no gen-mass";
+    //   //   else             massInfo = TString::Format("mass = %lf", *value.gen);
+    //   //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
+    //   //   util::logging::info << info.Data() << std::endl;
+    //   ratio_weight = 1.0; // -- force it to be 1.0
+    // }
+
+    // -- if ratio_weight is outside of 5-sigma range w.r.t mean -> force it to be the mean value
+    // -- to remove unphysical effect due to huge weight (e.g. >10000) 
+    Adjust_PDFWeight(i_mem, ratio_weight);
 
     double gen_weight_PDFVar    = gen_weight_cv    * ratio_weight;
     double global_weight_PDFVar = global_weight_cv * ratio_weight;
-
-    TString tstr_PDFVarInfo = TString::Format("PDFVar_%03d", i_mem);
 
     util::matched<std::string> tags_PDFVar;
     if( evt.gen ) tags_PDFVar.gen = *tags_default.gen + "_" + tstr_PDFVarInfo.Data();
@@ -254,12 +341,28 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
   // -- definition of each case:
   // -- https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2016ULpreVFP/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1.html#LHEScaleWeight
   for(unsigned int i_case=0; i_case<LHEScaleWeight->GetSize(); ++i_case) {
+    TString tstr_scaleVarInfo = TString::Format("scaleVar_%03d", i_case);
+
     double ratio_weight = LHEScaleWeight->At(i_case);
+
+    // -- fill before fixing the ratio
+    // -- this is not a physical distribution; no need to use gen-weight to fill the histogram
+    histo_set.fill("pdfWRatio",      tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
+    histo_set.fill("pdfWRatio_wide", tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
+
+    if( std::abs(ratio_weight) > 1000.0 ) {
+      //   TString massInfo = "";
+      //   if( !value.gen ) massInfo = "no gen-mass";
+      //   else             massInfo = TString::Format("mass = %lf", *value.gen);
+      //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
+      //   util::logging::info << info.Data() << std::endl;
+      ratio_weight = 1.0; // -- force it to be 1.0
+    }
 
     double gen_weight_scaleVar    = gen_weight_cv    * ratio_weight;
     double global_weight_scaleVar = global_weight_cv * ratio_weight;
 
-    TString tstr_scaleVarInfo = TString::Format("scaleVar_%03d", i_case);
+    
     util::matched<std::string> tags_scaleVar;
     if( evt.gen ) tags_scaleVar.gen = *tags_default.gen + "_" + tstr_scaleVarInfo.Data();
     else          tags_scaleVar.gen = boost::none;
@@ -268,6 +371,25 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
 
     fill_unfolded("mass_wide_range", tags_scaleVar, value, gen_weight_scaleVar, global_weight_scaleVar);
   }
+}
+
+void dyjets_analyzer_syst::Adjust_PDFWeight(const int i_mem, double& ratio_weight) {
+  if( vec_PDFWeightInfo_.size() == 0 ) return; // -- no info was saved? --> no adjustment is needed
+  if( i_mem == 0 ) return; // -- central value
+  if( i_mem > 102 ) return; // -- no info above 102
+
+  int index = i_mem-1; // -- 0th element: i_mem = 1 i.e. PDFVar_001 (not 000)
+  GenWeightInfo& info = vec_PDFWeightInfo_[index];
+
+  Bool_t isNominal = (info.lowerLimit < ratio_weight && ratio_weight < info.upperLimit);
+
+  // printf("[i_mem = %d]\n", i_mem);
+  // printf("(mean, sigma, lowerLimit, upperLimit) = (%.3lf, %.3lf, %.3lf, %.3lf)\n",
+  //          info.mean, info.sigma, info.lowerLimit, info.upperLimit);
+  // printf("ratio_weight = %lf --> isNominal? = %d\n", ratio_weight, isNominal);
+
+  if( !isNominal )
+    ratio_weight = info.mean;
 }
 
 void dyjets_analyzer_syst::fill_systHist_elE(const util::matched<event_contents>& evt_default,

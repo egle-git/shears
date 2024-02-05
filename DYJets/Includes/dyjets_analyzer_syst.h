@@ -6,6 +6,14 @@
 #include "TKey.h"
 #include "TSystem.h"
 
+// -- for adjusting PDF/scale weights for systematics
+struct GenWeightInfo {
+  double mean;
+  double sigma;
+  double lowerLimit;
+  double upperLimit;
+};
+
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer_syst : public dyjets_analyzer {
 
@@ -137,12 +145,16 @@ private:
 
   std::string _fileName_effMap = ""; // -- .root file with systematic-varied efficiency maps
 
-  std::string _channel = "";
+  std::string _channel = ""; // -- ee or mm
   double _sMuTrigPtCut = 0;
 
   // -- for the uncertainty from the eff. SF
   std::vector<EffMap> _vec_effMap;
   std::map<TString, EffMap> _map_type_effMapCV;
+
+  // -- for the uncertainty from the theory
+  vector<GenWeightInfo> vec_PDFWeightInfo_;
+  // vector<GenWeightInfo> vec_scaleWeightInfo_;
 
   void fill_systHist_effSF(const util::matched<event_contents>& evt,
                            const util::matched<double> &value,
@@ -212,6 +224,8 @@ private:
   void fill_systHist_theory(const util::matched<event_contents>& evt,
                             const util::matched<double> &value,
                             const util::matched<std::string>& tags_default);
+  void Init_GenWeightInfo(const util::options &opt);
+  void Adjust_PDFWeight(const int i_mem, double& ratio_weight);
 };
 
 #endif // DYJETS_ANALYZER_SYST_H

@@ -93,8 +93,7 @@ TString path_centralEffMap = path_SE+"/Shears/Uncertainty/EffSF/v230730/input";
 TString path_systEffMap = path_SE+"/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root";
 
 // -- input for the acceptance results (output from miniAOD)
-// TString path_inputForAcc = path_base+"/miniAOD/acc";
-TString path_inputForAcc = path_uncDir+"/Acceptance/output";
+TString path_inputForAcc = path_base+"/miniAOD/acc";
 
 // -- acceptance values
 TString path_acc = path_uncDir+"/Acceptance/DYAcceptance.root";

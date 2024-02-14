@@ -122,6 +122,8 @@ private:
   TH1D* h_relUnc_scale_;
   TH1D* h_relUnc_tot_;
 
+  TString plotDirPath_ = "";
+
   void Init() {
     plotDirPath_ = "./plot";
     DYTool::Make_Dir(plotDirPath_);
@@ -356,6 +358,12 @@ private:
 
     canvas->SetSavePath(plotDirPath_);
 
+    canvas->Draw("HISTLP");
+
+    // -- zoom-in y-axis
+    canvas->SetCanvasName(canvasName+"_zoomIn");
+    canvas->SetAutoRangeY(kFALSE);
+    canvas->SetRangeY(0, 0.05);
     canvas->Draw("HISTLP");
   }
 

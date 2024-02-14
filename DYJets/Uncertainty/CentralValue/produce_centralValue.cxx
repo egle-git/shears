@@ -19,6 +19,7 @@ public:
       ProducePlot_MigM(era, kFALSE);
       ProducePlot_MigM(era, kTRUE);
     }
+    ProducePlot_DileptonMass_Reco_AllEra(); // -- x-axis: (era, mass) bin number
 
     ProducePlot_TUnfold_Reco();
     ProducePlot_TUnfold_MigM(kFALSE);
@@ -217,6 +218,7 @@ private:
 
   void ProducePlot_TUnfold_Reco() {
 
+
   }
 
   void ProducePlot_TUnfold_MigM(Bool_t doNorm) {
@@ -224,6 +226,33 @@ private:
     if( doNorm ) tag.ReplaceAll("migM", "respM");
     TString canvasName = Make_CanvasName(tag);
 
+    TH2D* h2D = nullptr;
+    if( doNorm ) h2D = result_->Get_AllEra_RespM();
+    else         h2D = result_->Get_AllEra_MigM();
+
+    PlotTool::Hist2DCanvas* canvas = new PlotTool::Hist2DCanvas(canvasName, 0, 0, 1);
+    canvas->SetTitle("(era, mass) bin number (reco.)", "mass bin number (true)");
+
+    canvas->Register(h2D);
+
+    // canvas->SetRangeX(minX, maxX);
+    // canvas->SetRangeY(minY, maxY);
+    // canvas->SetRangeZ(minZ, maxZ);
+    if( doNorm ) canvas->SetRangeZ(1e-3, 1);
+    else         canvas->SetAutoRangeZ();
+
+    canvas->Latex_CMSInternal();
+    TString channelInfo = "";
+    if( channel_ == "mm" ) channelInfo = "Muon channel";
+    if( channel_ == "ee" ) channelInfo = "Electron channel";
+    canvas->RegisterLatex(0.16, 0.91, 42, 0.6, channelInfo);
+
+    TString matrixInfo = (doNorm) ? "Response matrix" : "Migration matrix";
+    canvas->RegisterLatex(0.16, 0.87, 42, 0.6, matrixInfo);
+
+    canvas->SetSavePath(plotDirPath_);
+
+    canvas->Draw();
   }
 
   void ProducePlot_TUnfold_UnderOverflow(TString binType, TString eventType) {
@@ -233,6 +262,66 @@ private:
 
   void ProducePlot_ClosureTest() {
 
+  }
+
+  void ProducePlot_DileptonMass_Reco_AllEra() {
+
+    TString tag = TString::Format("dileptonMass_reco_allEra_%s", channel_.Data());
+    if( !useFake_ )
+      tag = tag + "_noFake";
+
+    TString canvasName = Make_CanvasName(tag);
+
+    PlotTool::HistStackCanvaswRatio* canvas = new PlotTool::HistStackCanvaswRatio(canvasName, 0, 1);
+    canvas->Ratio_Reversed();
+    canvas->SetTitle( "(era, mass) bin number", "# events", "Pred./data" );
+
+    TH1D* h_data = result_->Get_AllEra("reco", "data");
+    TH1D* h_GG   = result_->Get_AllEra("reco", "GG");
+    TH1D* h_VV   = result_->Get_AllEra("reco", "VV");
+    TH1D* h_TauTau   = result_->Get_AllEra("reco", "TauTau");
+    TH1D* h_singleTop   = result_->Get_AllEra("reco", "singleTop");
+    TH1D* h_TT   = result_->Get_AllEra("reco", "TT");
+    TH1D* h_DY   = result_->Get_AllEra("reco", "DY");
+
+    canvas->RegisterData(h_data, "Data", kBlack);
+
+    if( useFake_ ) 
+      canvas->Register(result_->Get_AllEra("reco", "fake"), Get_Legend("fake"), Get_Color("fake"));
+
+    canvas->Register(h_GG,        Get_Legend("GammaGamma"), Get_Color("GammaGamma"));
+    canvas->Register(h_VV,        Get_Legend("VV"),         Get_Color("VV"));
+    canvas->Register(h_TauTau,    Get_Legend("TauTau"),     Get_Color("TauTau"));
+    canvas->Register(h_singleTop, Get_Legend("singleTop"),  Get_Color("singleTop"));
+    canvas->Register(h_TT,        Get_Legend("TT"),         Get_Color("TT"));
+
+    canvas->Register(h_DY, Get_Legend("DY"), Get_Color("DY"));
+
+    // canvas->SetRangeX(81, 101);
+
+    // canvas->SetAutoRangeY();
+    // canvas->SetRangeX(40, 3000);
+    canvas->SetRangeY(0.5, 5e9);
+    canvas->SetRangeRatio(0.86, 1.14);
+    // canvas->SetRangeRatio(0.93, 1.07);
+
+    canvas->ShowDataMCRatio();
+
+    canvas->SetLegendColumn(2);
+    canvas->SetLegendPosition(0.45, 0.80, 0.95, 0.95);
+
+    canvas->Latex_CMSInternal();
+    Double_t lumi = LUMI_16pre + LUMI_16post + LUMI_17 + LUMI_18;
+    canvas->Latex_LumiEnergy(lumi/1000.0, 13);
+
+    TString channelInfo = "";
+    if( channel_ == "mm" ) channelInfo = "Muon channel";
+    if( channel_ == "ee" ) channelInfo = "Electron channel";
+    canvas->RegisterLatex(0.16, 0.91, 42, 0.7, channelInfo);
+
+    canvas->SetSavePath(plotDirPath_);
+
+    canvas->Draw();
   }
 
   void ProducePlot_Unfolded(TString type) {

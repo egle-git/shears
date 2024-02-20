@@ -34,11 +34,18 @@ public:
 
     for(const auto& pair : map_hist_) {
       TString histType = pair.first;
-      if( !histType.Contains("mAxis") ) continue; // -- only "mAxis" result will be saved
+      if( !histType.Contains("mAxis") && 
+          !histType.Contains("dsigdm") ) continue; // -- only "mAxis" result will be saved
 
       TString histName = "h_"+histType;
       if( tag != "" ) histName += "_"+tag;
       histName.ReplaceAll("_mAxis", ""); // -- remove "mAxis" tag (as only these results will be saved)
+
+      if( histType == "dsigdm_DY" ) 
+        histName = (tag == "") ? "h_dsigdm_DYMC" : "h_dsigdm_DYMC_"+tag;
+
+      if( histType == "dsigdm_data" ) 
+        histName = (tag == "") ? "h_dsigdm" : "h_dsigdm_"+tag;
 
       TH1D* h = (TH1D*)pair.second->Clone();
       h->SetName(histName);

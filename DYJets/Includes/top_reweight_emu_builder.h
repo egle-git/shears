@@ -33,7 +33,10 @@ class top_reweight_emu_builder
     std::unique_ptr<data::mc_comparison_entry> _emu_mc_subtract_entry;
     std::unique_ptr<data::mc_comparison_entry> _emu_fakes_entry;
     std::unique_ptr<TH1> _bkg_estimation;
-    std::unique_ptr<TH1> _ratio;
+        std::unique_ptr<TH1> _ratio;
+    // For systematic uncertainty
+    std::unique_ptr<TH1> _bkg_estimation_fakes_plus;
+    std::unique_ptr<TH1> _bkg_estimation_fakes_minus;
 
     util::options _opt;
     util::style_list _style;
@@ -129,9 +132,6 @@ class top_reweight_emu_builder
 
     /// \brief Removes negative bins from passed histogram
     void remove_negative_bins(std::unique_ptr<TH1> &hist);
-
-    /// \brief Varies the histogram up/down by one sigma
-    void hist_variation(std::unique_ptr<TH1> &hist, int updown);
 
     /// \brief EMu method calculation
     std::unique_ptr<TH1> emu_method();

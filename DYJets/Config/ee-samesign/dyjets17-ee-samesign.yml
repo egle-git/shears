@@ -230,22 +230,25 @@ use trigger scale factors: yes
 
 emu method reweighting:
   use: yes
-  offset: 1.36444
-  slope: -0.175188
+  parameters: [1.36444, -0.175188]
+  errors: [0.0258315, 0.0121342]
+  fakes plus: [1.3229, -0.160637]
+  fakes minus: [1.40597, -0.189736]
   
-# same sign method reweighting:
-#   use: yes
-#   MET offset: 1.48478
-#   MET slope: 0.000823514
-#   MET exp offset: -0.701421
-#   MET exp slope: 0.0194544
-
 same sign method reweighting:
   use: yes
-  MET offset: 1.47981
-  MET slope: 0.000622212
-  MET exp offset: -1.19731
-  MET exp slope: 0.0343239
+  parameters: [1.47981, 0.000622212, -1.19731, 0.0343239]
+  up variation 1: [1.56817, 0.00120405, -1.00483, 0.0170421]
+  up variation 2: [1.56386, 0.00123388, -0.997218, 0.019356]
+  up variation 3: [1.54555, 0.00109528, -0.938595, 0.0259721]
+  up variation 4: [1.39993, 0.000143296, -1.31033, 0.0534406]
+  down variation 1: [1.39144, 4.03755e-05, -1.38978, 0.0516056]
+  down variation 2: [1.39575, 1.05467e-05, -1.39739, 0.0492917]
+  down variation 3: [1.41407, 0.000149148, -1.45602, 0.0426756]
+  down variation 4: [1.55969, 0.00110113, -1.08428, 0.0152071]
+
+# Whether to use Z peak interpolation
+interpolate: yes
 
 # List of available data/MC samples
 samples:
@@ -460,8 +463,10 @@ plots:
       produce: yes
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
+    - selector: 'mass_wide_range_inc0jet.*'
       produce: yes
+    - selector: 'mass_wide_range_inc0jet_mass.*'
+      produce: no
     - selector: 'pt_inc0jet.*'
       produce: yes
     - selector: 'rapidity_inc0jet.*'
@@ -519,3 +524,20 @@ plots:
     - selector: '^pt_cut.*'
       x axis label: 'p_{T}^{ee}'
       x axis unit: 'GeV'
+
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  # Muon Rochester correction: false
+  Electron energy correction: false
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: false
+  emu method fake background: false
+  same-sign method fit parameter: true
+  same-sign method fit function choice: true
+  constant os/ss ratio: 1.4
+  same-sign method ewk bkg reweight: true
+  same-sign method electron charge misid: true
+  Z peak interpolation: true

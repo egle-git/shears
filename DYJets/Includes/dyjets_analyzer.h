@@ -23,12 +23,13 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     // TTreeReaderValue<unsigned> run;
     TTreeReaderValue<unsigned> luminosityBlock;
 
+  protected:
     // Used for background reweighting, check reweight_backgrounds()
     bool _reweight_emu_method = false;
-    double _offset_emu_method = 1.0;
-    double _slope_emu_method = 0.0;
+    std::vector<double> _pars_emu_method = {1.0, 0.0};
 
     bool _reweight_same_sign_method = false;
+    std::vector<double> _pars_same_sign_method = {2.0, 0.0, 0.0, 0.0, 1.0, 0.0};
     double _met_offset_ss_method = 2.0;
     double _met_slope_ss_method = 0.0;
     double _met_exp_offset_ss_method = 0.0;

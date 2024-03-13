@@ -69,6 +69,19 @@ void same_sign_method_builder::parse_options(int argc, char **argv)
             _smooth_histograms.push_back(histo);
         }
     }
+
+    if (_opt.config["interpolate"]) {
+        _interpolate = _opt.config["interpolate"].as<bool>();
+    }
+
+    if (_opt.config["uncertainties"]) {
+        const YAML::Node node = _opt.config["uncertainties"];
+        util::set_value_safe(node, _doSyst_fakeSameSignInterp, "Z peak interpolation", "calculate systematic variations from the histogram interpolation to the Z peak region");
+    }
+
+    if (_opt.config["mass bins"]) {
+        _mass_bins = _opt.config["mass bins"].as<std::vector<double>>();
+    }
 }
 
 void same_sign_method_builder::build()
@@ -113,6 +126,11 @@ void same_sign_method_builder::build()
         util::logging::debug << "MC events: " << _mc_entry->integral(name, _lumi) << std::endl;
         util::logging::debug << "Estimated events: " << fakes_est->Integral() << std::endl;
 
+        // Interpolating mass histograms if required
+        if (_interpolate && name.find("mass_wide_range") != std::string::npos) {
+            interpolate_mass_histo(fakes_est);
+        }
+
         // Smoothing histograms if required
         if (_smooth) {
             for (const std::string &histo : _smooth_histograms) {
@@ -123,7 +141,7 @@ void same_sign_method_builder::build()
             }
         }
 
-        // Renivung negative bins if required
+        // Removing negative bins if required
         if (_rem_neg_bins) remove_negative_bins(fakes_est, true);
 
         // Scaling the histograms by a constant OS/SS ratio if required
@@ -197,33 +215,49 @@ void same_sign_method_builder::build()
         canvas.Update();
         canvas.Print((_output_dir_name + "/" + "fakes_est_"+ name + "." + _output_format).c_str());
 
-        // Combined background
-        // TCanvas canvas_d(("fakes_est_"+name+"_density").c_str(), "", 700, 900);
-        // canvas_d.SetTopMargin(0.07);
-        // canvas_d.SetLeftMargin(0.15);
-        // canvas_d.SetRightMargin(0.05);
-        // canvas_d.SetTicks();
-        // fakes_est_density->Draw("BAR");
-        // fakes_est_density->Draw("SAME E");
-        // fakes_est_density->SetTitle("");
-        // fakes_est_density->SetStats(0);
-        // fakes_est_density->SetMinimum(0);
-        // fakes_est_density->SetLineColor(1);
-        // fakes_est_density->SetFillColor(805);
-        // if (auto axis = fakes_est_density->GetXaxis()) {
-        //     format_x_axis(*axis);
-        // }
-        // if (auto axis = fakes_est_density->GetYaxis()) {
-        //     format_y_axis(*axis, "Number of events / GeV");
-        // }
-        // if (_logx) {
-        //     canvas_d.SetLogx();
-        // }
-        // leg_fakes.Draw();
-        // cms.Draw();
-        // label.Draw();
-        // canvas_d.Update();
-        // canvas_d.Print((_output_dir_name + "/" + "fakes_est_" + name + "_density." + _output_format).c_str());
+        // Alternative interpolation for systematics
+        // Interpolating mass histograms if required
+        if (_interpolate && _doSyst_fakeSameSignInterp && name == "mass_wide_range_inc0jet") {
+            auto name_alt = name+"_fakeSameSignInterp";
+            std::unique_ptr<TH1> fakes_est_alt(dynamic_cast<TH1*>(fakes_est->Clone(name_alt.c_str())));
+            interpolate_mass_histo(fakes_est_alt, true);
+            outfile->cd();
+            fakes_est_alt->Write(name_alt.c_str());
+
+            // Draw the fake rates
+            util::logging::debug << "Drawing with alternative interpolation" << std::endl;
+
+            TCanvas canvas_alt(("fakes_est_"+name_alt).c_str(), "", 700, 900);
+            canvas_alt.SetTopMargin(0.07);
+            canvas_alt.SetLeftMargin(0.15);
+            canvas_alt.SetRightMargin(0.07);
+            canvas_alt.SetTicks();
+            fakes_est_alt->Draw("BAR");
+            fakes_est_alt->Draw("SAME E");
+            fakes_est_alt->SetTitle("");
+            fakes_est_alt->SetStats(0);
+            if (!_logy) fakes_est_alt->SetMinimum(0);
+            else fakes_est_alt->SetMinimum(0.01);
+            fakes_est_alt->SetLineColor(1);
+            fakes_est_alt->SetFillColor(805);
+            if (auto axis = fakes_est_alt->GetXaxis()) {
+                format_x_axis(*axis);
+            }
+            if (auto axis = fakes_est_alt->GetYaxis()) {
+                format_y_axis(*axis, "Number of events");
+            }
+            if (_logx) {
+                canvas_alt.SetLogx();
+            }
+            leg_fakes.Draw();
+            cms.Draw();
+            if (lumi > 0) {
+                label.Draw();
+            }
+            if (_logy) canvas_alt.SetLogy();
+            canvas_alt.Update();
+            canvas_alt.Print((_output_dir_name + "/" + "fakes_est_"+ name_alt + "." + _output_format).c_str());
+        }// if (_doSyst_fakeSameSignInterp)
 
         // Cleanup
         reset_drawing_state();
@@ -496,5 +530,167 @@ void same_sign_method_builder::smooth(std::unique_ptr<TH1> &hist, int smooth_amo
         hist->SetBinContent(i+1, sum);
     }
 }
+
+void same_sign_method_builder::make_density(std::unique_ptr<TH1> &hist)
+{
+    for (int i=1; i<=hist->GetNbinsX(); i++) {
+        hist->SetBinContent(i, hist->GetBinContent(i)/hist->GetBinWidth(i));
+    }
+}
+
+void same_sign_method_builder::make_normal_from_density(std::unique_ptr<TH1> &hist)
+{
+    for (int i=1; i<=hist->GetNbinsX(); i++) {
+        hist->SetBinContent(i, hist->GetBinContent(i)*hist->GetBinWidth(i));
+    }
+}
+
+// linear interpolation for the mass histogram
+double same_sign_method_builder::linear_interpolation(const double x, const double x0, const double x1, const double y0, const double y1)
+{
+    return (y0 - y1) * (x1 - x) / (x1 - x0) + y1;
+}
+
+// Needed for cubic interpolation
+double same_sign_method_builder::get_m(const double x, const double x0, const double x1, const double y, const double y0, const double y1)
+{
+    return ((y1-y)/(x1-x) + (y-y0)/(x-x0)) / 2;
+}
+
+// Cubic Hermite spline interpolation for the mass histogram
+double same_sign_method_builder::cubic_interpolation(const double x,
+                                                     const double x0,
+                                                     const double x1,
+                                                     const double y0,
+                                                     const double y1,
+                                                     const double m0,
+                                                     const double m1)
+{
+    double t = (x - x0) / (x1 - x0);
+    double t2 = t * t;
+    double t3 = t2 * t;
+    double h00 = (2 * t3 - 3 * t2 + 1);
+    double h10 = (t3 - 2 * t2 + t);
+    double h01 = (-2 * t3 + 3 * t2);
+    double h11 = (t3 - t2);
+    return h00 * y0 + h10 * (x1 - x0) * m0 + h01 * y1 + h11 * (x1 - x0) * m1;
+}
+
+// Linear interpolation of the mass hist
+void same_sign_method_builder::interpolate_mass_histo(std::unique_ptr<TH1> &hist, const bool &alt)
+{
+    util::logging::debug << "Interpolating the mass histogram " << hist->GetTitle() << std::endl;
+    if (_mass_bins.size() < 3) {
+        util::logging::error << "Not enough mass bins for interpolation!" << std::endl;
+        return;
+    }
+
+    make_density(hist);
+
+    std::vector<double> x_avg, y_avg;
+    int i_Z = -1;
+
+    // Calculating average values in certain bin ranges
+    // Effectively, we are rebinning the mass histo to use the mass bins from the 2D measurement
+    for (int i=1; i<_mass_bins.size(); ++i) {
+        if (_mass_bins[i] > 91.1876 && _mass_bins[i-1] < 91.1876) i_Z = i-1;
+        x_avg.push_back((_mass_bins[i-1]+_mass_bins[i])/2);
+
+        double y_avg_current = 0;
+        int bin_count = 0;
+        for (int i_bin=hist->FindBin(_mass_bins[i-1]+0.01); i_bin<=hist->FindBin(_mass_bins[i]-0.01); ++i_bin) {
+            y_avg_current += hist->GetBinContent(i_bin);
+            bin_count++;
+        }
+        y_avg.push_back(y_avg_current/bin_count);
+    }
+
+    // Interpolating the bin values in the Z peak region using the average values from around the Z peak
+    for (int i=hist->FindBin(_mass_bins[i_Z]+0.01); i<=hist->FindBin(_mass_bins[i_Z+1]-0.01); ++i) {
+        double x = hist->GetBinCenter(i);
+        double y = 0;
+        if (!alt) y = linear_interpolation(x, x_avg[i_Z-1], x_avg[i_Z+1], y_avg[i_Z-1], y_avg[i_Z+1]);
+        else {
+            if (i_Z-2 < 0 || i_Z+2 >= x_avg.size()) {
+                util::logging::error << "Not enough mass bins for the alternative interpolation!" << std::endl;
+                break;
+            }
+            double m_lo = get_m(x_avg[i_Z-1], x_avg[i_Z-2], x_avg[i_Z+1], y_avg[i_Z-1], y_avg[i_Z-2], y_avg[i_Z+1]);
+            double m_hi = get_m(x_avg[i_Z+1], x_avg[i_Z-1], x_avg[i_Z+2], y_avg[i_Z+1], y_avg[i_Z-1], y_avg[i_Z+2]);
+            y = cubic_interpolation(x, x_avg[i_Z-1], x_avg[i_Z+1], y_avg[i_Z-1], y_avg[i_Z+1], m_lo, m_hi);
+        }
+        hist->SetBinContent(i, y);
+        hist->SetBinError(i, y*hist->GetBinWidth(i)); // 100% error
+    }
+
+    make_normal_from_density(hist);
+}
+
+// // Linear interpolation for mass-binned plots
+// // Not used anywhere yet, to be used for other mass-binned histograms
+// std::unique_ptr<TH1> same_sign_method_builder::linear_interpolation(const double &x,
+//                                                                     const double &x0,
+//                                                                     const double &x1,
+//                                                                     const std::unique_ptr<TH1> &y0,
+//                                                                     const std::unique_ptr<TH1> &y1,
+//                                                                     const std::string &name)
+// {
+//     // y = (y0-y1)*(x1-x)/(x1-x0) + y1
+//     std::unique_ptr<TH1> y(dynamic_cast<TH1*>(y0->Clone(name.c_str()))); // y0
+//     y->Add(y1.get(), -1); // -y1
+//     y->Scale((x1 - x) / (x1 - x0)); // *(x1-x)/(x1-x0)
+//     y->Add(y1.get()); // +y1
+//     return y;
+// }
+
+// // Needed for cubic interpolation
+// // Not used anywhere yet, to be used for other mass-binned histograms
+// std::unique_ptr<TH1> same_sign_method_builder::get_m(const double &x,
+//                                                      const double &x0,
+//                                                      const double &x1,
+//                                                      const std::unique_ptr<TH1> &y,
+//                                                      const std::unique_ptr<TH1> &y0,
+//                                                      const std::unique_ptr<TH1> &y1,
+//                                                      const std::string &name)
+// {
+//     // m = ((y1-y)/(x1-x) + (y-y0)/(x-x0)) / 2
+//     std::unique_ptr<TH1> m(dynamic_cast<TH1*>(y1->Clone(name.c_str()))); // y1
+//     m->Add(y.get(), -1); // -y
+//     m->Scale(1/(x1-x)); // /(x1-x)
+//     std::unique_ptr<TH1> temp(dynamic_cast<TH1*>(y->Clone("temp"))); // y
+//     temp->Add(y0.get(), -1); // -y0
+//     temp->Scale(1/(x-x0)); // /(x-x0)
+//     m->Add(temp.get()); //  +(y-y0)/(x-x0)
+//     m->Scale(1/2); // /2
+
+//     return m;
+// }
+
+// // Cubic Hermite spline interpolation for mass-binned plots
+// // Not used anywhere yet, to be used for other mass-binned histograms
+// std::unique_ptr<TH1> same_sign_method_builder::cubic_interpolation(const double &x,
+//                                                                    const double &x0,
+//                                                                    const double &x1,
+//                                                                    const std::unique_ptr<TH1> &y0,
+//                                                                    const std::unique_ptr<TH1> &y1,
+//                                                                    const std::unique_ptr<TH1> &m0,
+//                                                                    const std::unique_ptr<TH1> &m1,
+//                                                                    const std::string &name)
+// {
+//     double t = (x - x0) / (x1 - x0);
+//     double t2 = t * t;
+//     double t3 = t2 * t;
+//     double h00 = (2 * t3 - 3 * t2 + 1);
+//     double h10 = (t3 - 2 * t2 + t);
+//     double h01 = (-2 * t3 + 3 * t2);
+//     double h11 = (t3 - t2);
+//     // y = h00*y0 + h10*(x1-x0)*m0 + h01*y1 + h11*(x1-x0)*m1
+//     std::unique_ptr<TH1> y(dynamic_cast<TH1*>(y0->Clone(name.c_str()))); // y0
+//     y->Scale(h00); // *h00
+//     y->Add(m0.get(), h10*(x1-x0)); // +h10*(x1-x0)*m0
+//     y->Add(y1.get(), h01); // + h01*y1
+//     y->Add(m1.get(), h11*(x1-x0)); // +h11*(x1-x0)*m1
+//     return y;
+// }
 
 } // namespace util

@@ -252,8 +252,10 @@ select the best muon trigger SF:
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: yes
-  offset: 1.36704
-  slope: -0.177791
+  parameters: [1.36704, -0.177791]
+  errors: [0.039661, 0.0187278]
+  fakes plus: [1.3173, -0.159832]
+  fakes minus: [1.41679, -0.195747]
 
 # List of available data/MC samples
 samples:
@@ -554,3 +556,9 @@ uncertainties:
   Muon Rochester correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: true
+  emu method fake background: true
+  same-sign method fit parameter: false
+  same-sign method fit function choice: false
+  same-sign method ewk bkg reweight: false
+  same-sign method electron charge misid: false

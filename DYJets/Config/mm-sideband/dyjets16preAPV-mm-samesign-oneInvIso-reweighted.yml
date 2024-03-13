@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: MuMu_2016preAPV_oneInvIso
-ss location: MuMu_2016preAPV_samesign_oneInvIso_REWEIGHTED
+os location: MuMu/MuMu_2016preAPV_oneInvIso
+ss location: MuMu/MuMu_2016preAPV_samesign_oneInvIso_REWEIGHTED
 
 # when you want to separate a specific flavor from DY->ll events (e.g. Madgraph)
 # it will check the dilepton flavor at the generator level, and skip the events if the flavor is not same with the given flavor

@@ -163,6 +163,7 @@ target_link_libraries(DYJets-compare PUBLIC DYJets-data)
 ###################################################################################################
 
 add_library(DYJets-bkg-est
+    Sources/zfinder.cc
     Sources/mc_group.cc
     Sources/comparison_entry.cc
     Sources/emu_method_builder.cc

@@ -229,15 +229,25 @@ use trigger scale factors: yes
 
 emu method reweighting:
   use: yes
-  offset: 1.36704
-  slope: -0.177791
+  parameters: [1.36704, -0.177791]
+  errors: [0.039661, 0.0187278]
+  fakes plus: [1.3173, -0.159832]
+  fakes minus: [1.41679, -0.195747]
   
 same sign method reweighting:
   use: yes
-  MET offset: 1.56759
-  MET slope: 0.00136285
-  MET exp offset: -0.20596
-  MET exp slope: 0.0293493
+  parameters: [1.56759, 0.00136285, -0.20596, 0.0293493]
+  up variation 1: [1.69838, 0.00215071, -0.0783508, 0.0224487]
+  up variation 2: [1.69214, 0.0021902, -0.0782915, 0.0233398]
+  up variation 3: [1.68376, 0.00209804, -0.0622889, 0.0244077]
+  up variation 4: [1.44866, 0.000707631, -0.29952, 0.0369377]
+  down variation 1: [1.4368, 0.000574987, -0.333568, 0.0362499]
+  down variation 2: [1.44305, 0.000535496, -0.333628, 0.0353589]
+  down variation 3: [1.45143, 0.00062765, -0.34963, 0.034291]
+  down variation 4: [1.68653, 0.00201806, -0.112399, 0.021761]
+
+# Whether to use Z peak interpolation
+interpolate: yes
 
 # List of available data/MC samples
 samples:
@@ -448,8 +458,10 @@ plots:
       produce: yes
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
+    - selector: 'mass_wide_range_inc0jet.*'
       produce: yes
+    - selector: 'mass_wide_range_inc0jet_mass.*'
+      produce: no
     - selector: 'pt_inc0jet.*'
       produce: yes
     - selector: 'rapidity_inc0jet.*'
@@ -507,3 +519,20 @@ plots:
     - selector: '^pt_cut.*'
       x axis label: 'p_{T}^{ee}'
       x axis unit: 'GeV'
+
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  # Muon Rochester correction: false
+  Electron energy correction: false
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: false
+  emu method fake background: false
+  same-sign method fit parameter: true
+  same-sign method fit function choice: true
+  constant os/ss ratio: 1.4
+  same-sign method ewk bkg reweight: true
+  same-sign method electron charge misid: true
+  Z peak interpolation: true

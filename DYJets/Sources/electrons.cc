@@ -296,7 +296,9 @@ void electrons::apply_sf(weights &w,
 
 void electrons::apply_charge_misid_sf(physics::weights &weights,
                                       const std::vector<physics::lepton> &_electrons,
-                                      const std::vector<physics::lepton> &_genleps)
+                                      const std::vector<physics::lepton> &_genleps,
+                                      const int var,
+                                      const bool inverse)
 {
     if (_charge_misid_sf_enabled && weights.ismc()) {
         if (_electrons.size() && _genleps.size()) {
@@ -319,6 +321,7 @@ void electrons::apply_charge_misid_sf(physics::weights &weights,
 
             for (unsigned iel = 0; iel < electrons.size(); iel++) {
                 if (matches[iel] >= 0 && drmins[iel] < 99999) continue; // We already found a match
+                if (std::abs(electrons[iel].pdgid) != 11) continue;
 
                 for (unsigned igen = 0; igen < genleps.size(); igen++) {
                     if (std::abs(genleps[igen].pdgid) != 11) continue;
@@ -353,7 +356,9 @@ void electrons::apply_charge_misid_sf(physics::weights &weights,
             for (unsigned iel = 0; iel < electrons.size(); iel++) {
                 if (matches[iel] >= 0) {
                     if (electrons[iel].charge != genleps[matches[iel]].charge) {
-                        weights.use_weight(_charge_misid.get_sf(electrons[iel]));
+                        double the_weight = _charge_misid.get_sf(electrons[iel], var);
+                        if (inverse) the_weight = 1.0 / the_weight;
+                        weights.use_weight(the_weight);
                     }
                 }
             }

@@ -23,8 +23,8 @@ log:
     #override root handler: yes
 
 # Fill in with your directory names
-os location: EE_2017_bothInvID
-ss location: EE_2017_samesign_bothInvID
+os location: EE/EE_2017_bothInvID
+ss location: EE/EE_2017_samesign_bothInvID
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes

@@ -122,7 +122,9 @@ class electrons
      */
     virtual void apply_charge_misid_sf(physics::weights &weights,
                                        const std::vector<physics::lepton> &_electrons,
-                                       const std::vector<physics::lepton> &_genleps);
+                                       const std::vector<physics::lepton> &_genleps,
+                                       const int var=-999,
+                                       const bool inverse=false);
 
     /**
      * \brief Fills muon control plots.

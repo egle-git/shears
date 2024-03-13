@@ -37,11 +37,15 @@ class same_sign_method_builder
     bool _logx;
     bool _logy = false;
 
+    bool _interpolate = false;
     bool _smooth;
     int _smooth_amount;
     std::vector<std::string> _smooth_histograms = {};
     bool _rem_neg_bins;
     double _os_ss_ratio = 1.0;
+    std::vector<double> _mass_bins = {40, 50, 76, 106, 170, 350, 1000, 3000};
+
+    bool _doSyst_fakeSameSignInterp = false; // -- Z-peak interpolation for the same-sign method
 
   public:
     /// \brief Constructor
@@ -102,6 +106,7 @@ class same_sign_method_builder
     /// \brief Sets up the historgrams
     void setup_histos();
 
+    /// \brief Draws the histograms
     void draw_histos();
 
     /// \brief Resets drawing state after a plot was made
@@ -118,6 +123,55 @@ class same_sign_method_builder
 
     /// \brief Smoothes the histogram by convolution
     void smooth(std::unique_ptr<TH1> &hist, int smooth_amount = 5);
+
+    /// \brief Turns a histogram into a density plot
+    void make_density(std::unique_ptr<TH1> &hist);
+
+    /// \brief Turns a density plot back into a normal histogram
+    void make_normal_from_density(std::unique_ptr<TH1> &hist);
+
+    /// \brief Finds the linearly interpolated value at a given x (used to interpolate the mass histogram)
+    double linear_interpolation(const double x, const double x0, const double x1, const double y0, const double y1);
+
+    /// \brief Needed for cubic interpolation
+    double get_m(const double x, const double x0, const double x1, const double y, const double y0, const double y1);
+
+    /// \brief Finds the linearly interpolated value at a given x using cubic Hermite spline interpolation (used to interpolate the mass histogram)
+    double cubic_interpolation(const double x, const double x0, const double x1, const double y0, const double y1, const double m0, const double m1);
+
+    /// \brief Linear interpolation of the mass histogram
+    void interpolate_mass_histo(std::unique_ptr<TH1> &hist, const bool &alt=false);
+
+//     /// \brief Finds the linearly interpolated histogram (linearly interpolates each bin of the histogram w.r.t. two other histograms)
+//     /// Not used anywhere yet, to be used for other mass-binned histograms 
+//     std::unique_ptr<TH1> linear_interpolation(const double &x,
+//                                               const double &x0,
+//                                               const double &x1,
+//                                               const std::unique_ptr<TH1> &y0,
+//                                               const std::unique_ptr<TH1> &y1,
+//                                               const std::string &name);
+
+//     /// \brief Needed for cubic interpolation (for interpolating the whole histogram)
+//     /// Not used anywhere yet, to be used for other mass-binned histograms
+//     std::unique_ptr<TH1> get_m(const double &x,
+//                                const double &x0,
+//                                const double &x1,
+//                                const std::unique_ptr<TH1> &y,
+//                                const std::unique_ptr<TH1> &y0,
+//                                const std::unique_ptr<TH1> &y1,
+//                                const std::string &name);
+
+//     /// \brief Finds the cubically interpolated histogram (linearly interpolates each bin of the histogram w.r.t. two other histograms)
+//     /// Not used anywhere yet, to be used for other mass-binned histograms
+//     std::unique_ptr<TH1> cubic_interpolation(const double &x,
+//                                              const double &x0,
+//                                              const double &x1,
+//                                              const std::unique_ptr<TH1> &y0,
+//                                              const std::unique_ptr<TH1> &y1,
+//                                              const std::unique_ptr<TH1> &m0,
+//                                              const std::unique_ptr<TH1> &m1,
+//                                              const std::string &name);
+
 };
 
 } // namespace util

@@ -247,16 +247,27 @@ select the best muon trigger SF:
 
 emu method reweighting:
   use: yes
-  offset: 1.36444
-  slope: -0.175188
+  parameters: [1.36444, -0.175188]
+  errors: [0.0258315, 0.0121342]
+  fakes plus: [1.3229, -0.160637]
+  fakes minus: [1.40597, -0.189736]
   
 same sign method reweighting:
   use: yes
-  mass offset: 1.27229
-  mass slope: -0.327726
-  MET offset: 2.02506
-  MET slope: -0.0670975
-  MET exp slope: 0.0272504
+  parameters: [1.27229, -0.327726, 2.02506, -0.0670975, 0.0272504]
+  up variation 1: [1.27722, -0.330154, 2.05771, -0.0648508, 0.0274858]
+  up variation 2: [1.2703, -0.321709, 1.98808, -0.0671884, 0.0273022]
+  up variation 3: [1.27575, -0.332507, 2.07159, -0.0652445, 0.0273514]
+  up variation 4: [1.27536, -0.327877, 2.04894, -0.0634876, 0.027136]
+  up variation 5: [1.27391, -0.32729, 2.03163, -0.067675, 0.0279652]
+  down variation 1: [1.26735, -0.325298, 1.9924, -0.0693442, 0.0270149]
+  down variation 2: [1.27428, -0.333743, 2.06203, -0.0670065, 0.0271985]
+  down variation 3: [1.26882, -0.322945, 1.97852, -0.0689504, 0.0271493]
+  down variation 4: [1.26922, -0.327574, 2.00117, -0.0707073, 0.0273647]
+  down variation 5: [1.27066, -0.328162, 2.01848, -0.06652, 0.0265355]
+
+# Whether to use Z peak interpolation
+interpolate: no
 
 # List of available data/MC samples
 samples:
@@ -462,8 +473,10 @@ plots:
       produce: yes
     - selector: '.*exc.*'
       produce: no
-    - selector: 'mass_wide_range_inc0jet'
+    - selector: 'mass_wide_range_inc0jet.*'
       produce: yes
+    - selector: 'mass_wide_range_inc0jet_mass.*'
+      produce: no
     - selector: 'pt_inc0jet.*'
       produce: yes
     - selector: 'rapidity_inc0jet.*'
@@ -515,3 +528,19 @@ plots:
       x axis detail: 'N_{jets} #geq $1'
     - selector: '.*exc(1|2)jet.*'
       x axis detail: 'N_{jets} = $1'
+
+uncertainties:
+  PDF and scale: false
+  pileup: false
+  L1 prefiring: false
+  Muon Rochester correction: false
+  efficiency SF: false
+  efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: false
+  emu method fake background: false
+  same-sign method fit parameter: true
+  same-sign method fit function choice: true
+  constant os/ss ratio: 1.4
+  same-sign method ewk bkg reweight: true
+  same-sign method electron charge misid: false
+  Z peak interpolation: false

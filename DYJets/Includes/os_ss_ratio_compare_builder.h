@@ -7,6 +7,7 @@
 
 #include "comparison_entry.h"
 #include "style_list.h"
+#include "zfinder.h"
 
 class TAxis;
 class TLegend;
@@ -25,6 +26,9 @@ class os_ss_ratio_compare_builder
     std::string _output_dir_name;
     std::string _output_format;
     std::set<std::string> _histogram_names;
+
+    // To check which channel we are using
+    std::unique_ptr<physics::zfinder> _zfinder;
 
     std::unique_ptr<data::data_comparison_entry> _os_data_entry;
     std::unique_ptr<data::mc_comparison_entry> _os_mc_entry;

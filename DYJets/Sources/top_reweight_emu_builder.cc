@@ -47,10 +47,6 @@ void top_reweight_emu_builder::parse_options(int argc, char **argv)
     if (_opt.config["preliminary"]) {
         _preliminary = _opt.config["preliminary"].as<bool>();
     }
-
-    if (_opt.config["fakes variation"]) {
-        _fake_variation = _opt.config["fakes variation"].as<int>();
-    }
 }
 
 void top_reweight_emu_builder::build()
@@ -396,6 +392,7 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
     std::unique_ptr<TH1> den = nullptr;
     den = _ll_mc_entry->get(name, _lumi);
     num = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation.get()->Clone()));
+    
 
     if (num == nullptr || den == nullptr) {
         return false;
@@ -403,22 +400,7 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
 
     _ratio = std::move(num);
     num = nullptr;
-
     _ratio->Divide(den.get());
-
-    format_lower_x_axis(*_ratio->GetXaxis());
-    format_lower_y_axis(*_ratio->GetYaxis(), "e#mu method/MC");
-
-    double ratio_min = style().get<double>("ratio min", name, 0.601);
-    double ratio_max = style().get<double>("ratio max", name, 1.399);
-    _ratio->GetYaxis()->SetRangeUser(ratio_min, ratio_max);
-
-    _ratio->SetMarkerStyle(20);
-    _ratio->SetMarkerColor(kBlack);
-    _ratio->SetLineColor(kBlack);
-    _ratio->SetStats(0);
-    _ratio->SetTitle("");
-    _ratio->Draw("ep");
 
     if (name == "mass_wide_range_inc0jet")
     {
@@ -428,6 +410,18 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
         fit_result->Print("V");
         auto cov_matrix = fit_result->GetCovarianceMatrix();
 
+        // For systematic uncertainty
+        std::unique_ptr<TH1> ratio_fakes_plus  = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation_fakes_plus->Clone()));
+        std::unique_ptr<TH1> ratio_fakes_minus = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation_fakes_minus->Clone()));
+        ratio_fakes_plus ->Divide(den.get());
+        ratio_fakes_minus->Divide(den.get());
+        std::unique_ptr<TF1> fit_fakes_plus(new TF1("fit_fakes_plus", "[0]+[1]*log10(x)"));
+        std::unique_ptr<TF1> fit_fakes_minus(new TF1("fit_fakes_minus", "[0]+[1]*log10(x)"));
+        fit_fakes_plus->SetParameters(1.0, 1.0/1000.0);
+        fit_fakes_minus->SetParameters(1.0, 1.0/1000.0);
+        auto fit_result_fakes_plus  = ratio_fakes_plus ->Fit(fit_fakes_plus .get(), "S");
+        auto fit_result_fakes_minus = ratio_fakes_minus->Fit(fit_fakes_minus.get(), "S");
+
         // Producing a text file with content to copy into the yml file for reweighting
         std::ofstream fit_file(_output_dir_name + "/fitParams.txt");
 
@@ -435,29 +429,28 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
             fit_file << "============== USE THIS ==============\n" << std::endl;
             fit_file << "emu method reweighting:" << std::endl;
             fit_file << "  use: yes" << std::endl;
-            fit_file << "  offset: " << fit->GetParameter(0) << std::endl;
-            fit_file << "  slope: "  << fit->GetParameter(1) << std::endl;
-            fit_file << "\n============= UP VARIATION ==========\n" << std::endl;
-            fit_file << "emu method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  offset: " << fit->GetParameter(0) + fit->GetParError(0) << std::endl;
-            fit_file << "  slope: "  << fit->GetParameter(1) - fit->GetParError(1) << std::endl;
-            fit_file << "\n============= DOWN VARIATION ==========\n" << std::endl;
-            fit_file << "emu method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  offset: " << fit->GetParameter(0) - fit->GetParError(0) << std::endl;
-            fit_file << "  slope: "  << fit->GetParameter(1) + fit->GetParError(1) << std::endl;
-            fit_file << "\n=========================================\n" << std::endl;
-            fit_file << "Fit parameters with errors:" << std::endl;
-            fit_file << "  offset: " << fit->GetParameter(0) << " +/- " << fit->GetParError(0) << std::endl;
-            fit_file << "  slope: "  << fit->GetParameter(1) << " +/- " << fit->GetParError(1) << std::endl;
-            fit_file << "\n=========================================\n" << std::endl;
+            fit_file << "  parameters: [" << fit->GetParameter(0) << ", "  << fit->GetParameter(1) << "]" << std::endl;
+            fit_file << "  errors: [" << fit->GetParError(0) << ", "  << fit->GetParError(1) << "]" << std::endl;
+            fit_file << "  fakes plus: [" << fit_fakes_plus->GetParameter(0) << ", "  << fit_fakes_plus->GetParameter(1) << "]" << std::endl;
+            fit_file << "  fakes minus: [" << fit_fakes_minus->GetParameter(0) << ", "  << fit_fakes_minus->GetParameter(1) << "]" << std::endl;
             fit_file.close();
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;
         } else {
             std::cerr << "Unable to open the file for fit parameters." << std::endl;
         }
     }
+
+    format_lower_x_axis(*_ratio->GetXaxis());
+    format_lower_y_axis(*_ratio->GetYaxis(), "e#mu method/MC");
+    double ratio_min = style().get<double>("ratio min", name, 0.601);
+    double ratio_max = style().get<double>("ratio max", name, 1.399);
+    _ratio->GetYaxis()->SetRangeUser(ratio_min, ratio_max);
+    _ratio->SetMarkerStyle(20);
+    _ratio->SetMarkerColor(kBlack);
+    _ratio->SetLineColor(kBlack);
+    _ratio->SetStats(0);
+    _ratio->SetTitle("");
+    _ratio->Draw("ep");
 
     return true;
 }
@@ -545,16 +538,6 @@ void top_reweight_emu_builder::remove_negative_bins(std::unique_ptr<TH1> &hist)
     }
 }
 
-void top_reweight_emu_builder::hist_variation(std::unique_ptr<TH1> &hist, int updown)
-{
-    if (updown == 0)
-        return;
-    // Vary the histogram up/down by one sigma
-    for (int i=0; i<=hist->GetNbinsX()+1; ++i) {
-        hist->SetBinContent(i, hist->GetBinContent(i) + updown*hist->GetBinError(i));
-    }
-}
-
 std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
 {
     std::unique_ptr<TH1> ll_mc_input = _ll_mc_entry->get(_current_histo_name, _lumi);
@@ -568,7 +551,6 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     std::unique_ptr<TH1> den  = _emu_mc_entry         ->get(_current_histo_name, _lumi);
     std::unique_ptr<TH1> sub1 = _emu_mc_subtract_entry->get(_current_histo_name, _lumi);
     std::unique_ptr<TH1> sub2 = _emu_fakes_entry      ->get(_current_histo_name, _lumi);
-    hist_variation(sub2, _fake_variation);
     if (!num) {
         util::logging::warn << "The current EMu data histogram was not found!" << std::endl;
         return nullptr;
@@ -589,15 +571,34 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     util::logging::debug << "emu data events before MC subtraction: " << num->Integral() << std::endl;
     util::logging::debug << "non-top emu mc events to be subtracted from data: " << sub1->Integral() << std::endl;
     util::logging::debug << "fake emu events to be subtracted from data: " << sub2->Integral() << std::endl;
+
     num->Add(sub1.get(), -1);
+    // For systematic uncertainty
+    std::unique_ptr<TH1> num_fakes_plus  = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(num.get()->Clone(_current_histo_name.c_str())));
+    std::unique_ptr<TH1> num_fakes_minus = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(num.get()->Clone(_current_histo_name.c_str())));
+
     num->Add(sub2.get(), -1);
+    // For systematic uncertainty
+    num_fakes_plus->Add(sub2.get(), -1.1);
+    num_fakes_minus->Add(sub2.get(), -0.9);
+
     util::logging::debug << "emu data events after MC subtraction: " << num->Integral() << std::endl;
     util::logging::debug << "top emu mc events: " << den->Integral() << std::endl;
 
-    std::unique_ptr<TH1> bkg_est = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone()));
+    std::unique_ptr<TH1> bkg_est = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
+    // For systematic uncertainty
+    _bkg_estimation_fakes_plus   = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
+    _bkg_estimation_fakes_minus  = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
     
     bkg_est->Multiply(num.get());
     bkg_est->Divide(den.get());
+
+    // For systematic uncertainty
+    _bkg_estimation_fakes_plus ->Multiply(num_fakes_plus.get());
+    _bkg_estimation_fakes_plus ->Divide(den.get());
+    _bkg_estimation_fakes_minus->Multiply(num_fakes_minus.get());
+    _bkg_estimation_fakes_minus->Divide(den.get());
+
     return bkg_est;
 }
 

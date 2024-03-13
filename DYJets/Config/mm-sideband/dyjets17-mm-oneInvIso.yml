@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: MuMu_2017_oneInvIso
-ss location: MuMu_2017_samesign_oneInvIso
+os location: MuMu/MuMu_2017_oneInvIso
+ss location: MuMu/MuMu_2017_samesign_oneInvIso
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes

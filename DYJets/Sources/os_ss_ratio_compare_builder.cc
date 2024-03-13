@@ -48,6 +48,8 @@ void os_ss_ratio_compare_builder::parse_options(int argc, char **argv)
     if (_opt.config["preliminary"]) {
         _preliminary = _opt.config["preliminary"].as<bool>();
     }
+
+    _zfinder = std::make_unique<physics::zfinder>(_opt, "Z");
 }
 
 void os_ss_ratio_compare_builder::build()
@@ -424,7 +426,8 @@ bool os_ss_ratio_compare_builder::fill_lower_panel(const std::string &name)
     _ratio->SetTitle("");
     _ratio->Draw("ep");
 
-    if (name == "MET_pt_inc0jet_mass40_3000") {
+    using physics::zfinder;
+    if (name == "MET_pt_inc0jet_mass40_3000" && _zfinder->get_flavor_mode() == zfinder::flavor_mode::ee) {
         std::unique_ptr<TF1> fit(new TF1("fit", "[0]-[1]*x-exp([2]-[3]*x)"));
         fit->SetParameters(2.13477, 4.73643e-03, -1.71259e-01, 6.51280e-02);
         auto fit_result = _ratio->Fit(fit.get(), "S");
@@ -435,70 +438,42 @@ bool os_ss_ratio_compare_builder::fill_lower_panel(const std::string &name)
         std::ofstream fit_file(_output_dir_name + "/fitParams_ee.txt");
 
         if (fit_file.is_open()) {
-            fit_file << "============== USE THIS ==============\n" << std::endl;
             fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;            
-            fit_file << "  MET offset: " << fit->GetParameter(0) << std::endl;
-            fit_file << "  MET slope: " << fit->GetParameter(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(3) << std::endl;
-            fit_file << "\n============= UP VARIATION 0 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) + correlation_matrix(0,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) + correlation_matrix(0,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) + correlation_matrix(0,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) + correlation_matrix(0,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= UP VARIATION 1 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) + correlation_matrix(1,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) + correlation_matrix(1,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) + correlation_matrix(1,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) + correlation_matrix(1,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= UP VARIATION 2 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) + correlation_matrix(2,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) + correlation_matrix(2,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) + correlation_matrix(2,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) + correlation_matrix(2,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= UP VARIATION 3 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) + correlation_matrix(3,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) + correlation_matrix(3,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) + correlation_matrix(3,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) + correlation_matrix(3,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 0 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) - correlation_matrix(0,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) - correlation_matrix(0,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) - correlation_matrix(0,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) - correlation_matrix(0,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 1 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) - correlation_matrix(1,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) - correlation_matrix(1,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) - correlation_matrix(1,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) - correlation_matrix(1,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 2 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) - correlation_matrix(2,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) - correlation_matrix(2,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) - correlation_matrix(2,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) - correlation_matrix(2,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 3 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  MET offset: "     << fit->GetParameter(0) - correlation_matrix(3,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  MET slope: "      << fit->GetParameter(1) - correlation_matrix(3,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET exp offset: " << fit->GetParameter(2) - correlation_matrix(3,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET exp slope: "  << fit->GetParameter(3) - correlation_matrix(3,3) * fit->GetParError(3) << std::endl;
-            fit_file << "\n=========================================\n" << std::endl;
+            fit_file << "  use: yes" << std::endl;          
+            fit_file << "  parameters: [" << fit->GetParameter(0) << ", " << fit->GetParameter(1)
+                     << ", " << fit->GetParameter(2) << ", " << fit->GetParameter(3) << "]" << std::endl;
+            fit_file << "  up variation 1: [" << fit->GetParameter(0) + correlation_matrix(0,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(0,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(0,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(0,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  up variation 2: [" << fit->GetParameter(0) + correlation_matrix(1,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(1,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(1,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(1,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  up variation 3: [" << fit->GetParameter(0) + correlation_matrix(2,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(2,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(2,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(2,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  up variation 4: [" << fit->GetParameter(0) + correlation_matrix(3,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(3,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(3,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(3,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  down variation 1: [" << fit->GetParameter(0) - correlation_matrix(0,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(0,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(0,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(0,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  down variation 2: [" << fit->GetParameter(0) - correlation_matrix(1,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(1,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(1,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(1,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  down variation 3: [" << fit->GetParameter(0) - correlation_matrix(2,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(2,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(2,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(2,3) * fit->GetParError(3) << "]" << std::endl;
+            fit_file << "  down variation 4: [" << fit->GetParameter(0) - correlation_matrix(3,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(3,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(3,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(3,3) * fit->GetParError(3) << "]" << std::endl;
             fit_file.close();
             util::logging::info << "Fit parameters saved to 'fitParams_ee.txt'." << std::endl;
         } else {
@@ -506,7 +481,7 @@ bool os_ss_ratio_compare_builder::fill_lower_panel(const std::string &name)
         }
     }
 
-    if (name == "MET_vs_mass_inc0jet_mass40_3000") {
+    if (name == "MET_vs_mass_inc0jet_mass40_3000" && _zfinder->get_flavor_mode() == zfinder::flavor_mode::mumu) {
         auto func = [](double *x, double *par) {
             double p1 = par[0] + par[1] * std::log10(x[1]);
             double p2 = par[2] - par[3] * x[0] * std::exp(-par[4]*x[0]);
@@ -522,95 +497,61 @@ bool os_ss_ratio_compare_builder::fill_lower_panel(const std::string &name)
         std::ofstream fit_file(_output_dir_name + "/fitParams_mm.txt");
 
         if (fit_file.is_open()) {
-            fit_file << "============== USE THIS ==============\n" << std::endl;
             fit_file << "same sign method reweighting:" << std::endl;
             fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) << std::endl;
-            fit_file << "\n============= UP VARIATION 0 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) + correlation_matrix(0,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) + correlation_matrix(0,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) + correlation_matrix(0,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) + correlation_matrix(0,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) + correlation_matrix(0,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= UP VARIATION 1 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) + correlation_matrix(1,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) + correlation_matrix(1,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) + correlation_matrix(1,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) + correlation_matrix(1,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) + correlation_matrix(1,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= UP VARIATION 2 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) + correlation_matrix(2,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) + correlation_matrix(2,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) + correlation_matrix(2,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) + correlation_matrix(2,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) + correlation_matrix(2,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= UP VARIATION 3 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) + correlation_matrix(3,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) + correlation_matrix(3,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) + correlation_matrix(3,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) + correlation_matrix(3,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) + correlation_matrix(3,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= UP VARIATION 4 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) + correlation_matrix(4,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) + correlation_matrix(4,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) + correlation_matrix(4,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) + correlation_matrix(4,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) + correlation_matrix(4,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 0 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) - correlation_matrix(0,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) - correlation_matrix(0,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) - correlation_matrix(0,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) - correlation_matrix(0,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) - correlation_matrix(0,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 1 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) - correlation_matrix(1,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) - correlation_matrix(1,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) - correlation_matrix(1,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) - correlation_matrix(1,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) - correlation_matrix(1,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 2 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) - correlation_matrix(2,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) - correlation_matrix(2,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) - correlation_matrix(2,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) - correlation_matrix(2,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) - correlation_matrix(2,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 3 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) - correlation_matrix(3,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) - correlation_matrix(3,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) - correlation_matrix(3,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) - correlation_matrix(3,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) - correlation_matrix(3,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n============= DOWN VARIATION 4 ==========\n" << std::endl;
-            fit_file << "same sign method reweighting:" << std::endl;
-            fit_file << "  use: yes" << std::endl;
-            fit_file << "  mass offset: "   << fit->GetParameter(0) - correlation_matrix(4,0) * fit->GetParError(0) << std::endl;
-            fit_file << "  mass slope: "    << fit->GetParameter(1) - correlation_matrix(4,1) * fit->GetParError(1) << std::endl;
-            fit_file << "  MET offset: "    << fit->GetParameter(2) - correlation_matrix(4,2) * fit->GetParError(2) << std::endl;
-            fit_file << "  MET slope: "     << fit->GetParameter(3) - correlation_matrix(4,3) * fit->GetParError(3) << std::endl;
-            fit_file << "  MET exp slope: " << fit->GetParameter(4) - correlation_matrix(4,4) * fit->GetParError(4) << std::endl;
-            fit_file << "\n=========================================\n" << std::endl;
+            fit_file << "  parameters: [" << fit->GetParameter(0) << ", " << fit->GetParameter(1)
+                     << ", " << fit->GetParameter(2) << ", " << fit->GetParameter(3) << ", "
+                     << fit->GetParameter(4) << "]" << std::endl;
+            fit_file << "  up variation 1: [" << fit->GetParameter(0) + correlation_matrix(0,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(0,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(0,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(0,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) + correlation_matrix(0,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  up variation 2: ["   << fit->GetParameter(0) + correlation_matrix(1,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(1,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(1,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(1,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) + correlation_matrix(1,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  up variation 3: ["   << fit->GetParameter(0) + correlation_matrix(2,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(2,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(2,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(2,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) + correlation_matrix(2,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  up variation 4: ["   << fit->GetParameter(0) + correlation_matrix(3,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(3,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(3,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(3,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) + correlation_matrix(3,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  up variation 5: ["   << fit->GetParameter(0) + correlation_matrix(4,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) + correlation_matrix(4,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) + correlation_matrix(4,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) + correlation_matrix(4,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) + correlation_matrix(4,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  down variation 1: [" << fit->GetParameter(0) - correlation_matrix(0,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(0,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(0,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(0,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) - correlation_matrix(0,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  down variation 2: [" << fit->GetParameter(0) - correlation_matrix(1,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(1,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(1,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(1,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) - correlation_matrix(1,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  down variation 3: [" << fit->GetParameter(0) - correlation_matrix(2,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(2,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(2,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(2,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) - correlation_matrix(2,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  down variation 4: [" << fit->GetParameter(0) - correlation_matrix(3,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(3,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(3,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(3,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) - correlation_matrix(3,4) * fit->GetParError(4) << "]" << std::endl;
+            fit_file << "  down variation 5: [" << fit->GetParameter(0) - correlation_matrix(4,0) * fit->GetParError(0)
+                     << ", " << fit->GetParameter(1) - correlation_matrix(4,1) * fit->GetParError(1)
+                     << ", " << fit->GetParameter(2) - correlation_matrix(4,2) * fit->GetParError(2)
+                     << ", " << fit->GetParameter(3) - correlation_matrix(4,3) * fit->GetParError(3)
+                     << ", " << fit->GetParameter(4) - correlation_matrix(4,4) * fit->GetParError(4) << "]" << std::endl;
             fit_file.close();
             util::logging::info << "Fit parameters saved to 'fitParams_mm.txt'." << std::endl;
         } else {

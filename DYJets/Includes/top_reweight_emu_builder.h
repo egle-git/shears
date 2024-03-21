@@ -31,14 +31,19 @@ class top_reweight_emu_builder
     std::unique_ptr<data::data_comparison_entry> _emu_data_entry;
     std::unique_ptr<data::mc_comparison_entry> _emu_mc_entry;
     std::unique_ptr<data::mc_comparison_entry> _emu_mc_subtract_entry;
+    std::unique_ptr<data::mc_comparison_entry> _emu_fakes_entry;
     std::unique_ptr<TH1> _bkg_estimation;
-    std::unique_ptr<TH1> _ratio;
+        std::unique_ptr<TH1> _ratio;
+    // For systematic uncertainty
+    std::unique_ptr<TH1> _bkg_estimation_fakes_plus;
+    std::unique_ptr<TH1> _bkg_estimation_fakes_minus;
 
     util::options _opt;
     util::style_list _style;
     bool _preliminary;
     double _lumi;
     bool _logx;
+    int _fake_variation = 0;
 
     std::string _current_histo_name;
 

@@ -243,7 +243,7 @@ void boson_jets_analyzer::operator()()
             // cout << "l1 prefiring weight: " << *L1PreFiringWeight_Nom << endl;
             break;
         case 1:
-           _weights.use_weight(*L1PreFiringWeight_Up);
+            _weights.use_weight(*L1PreFiringWeight_Up);
             break;
         case -1:
             _weights.use_weight(*L1PreFiringWeight_Dn);
@@ -342,6 +342,7 @@ void boson_jets_analyzer::operator()()
         // Apply weights for background estimation
         if (_weights.ismc())
             _electrons.apply_charge_misid_sf(_weights, chosen_electrons, _genleps.get_leptons_finalState());
+
         reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
 
         // Fill lepton control plots
@@ -360,7 +361,7 @@ void boson_jets_analyzer::operator()()
      * Handle jets and pileup
      */
     if (evt.rec) {
-       std::vector<lepton> l ;
+        std::vector<lepton> l ;
         if (evt.gen) l = evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
         evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto
@@ -511,6 +512,7 @@ void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
 
         // Fill MET control plots
         _met.fill(histo_set, *tags.rec, evt.rec->leptons[0], weights());
+        histo_set2D.fill("MET_vs_mass", *tags.rec, _met.v().Pt(), evt.rec->get_boson_p().M(), weights().global_weight());
     }
     if (tags.gen && evt.gen) {
         _genleps.fill(histo_set, *tags.gen, evt.gen->leptons, weights());

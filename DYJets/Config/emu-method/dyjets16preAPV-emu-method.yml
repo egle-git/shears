@@ -1,4 +1,4 @@
-                                                                                                                                                    # This is the configuration file for e-mu method for the DY analysis, year 2016.
+# This is the configuration file for e-mu method for the DY analysis, year 2016.
 # Please keep it organized, and don't delete comments.
 
 # Options related to output and logs
@@ -23,10 +23,10 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/MuMu_2016preAPV/
+ll location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/MuMu_2016preAPV
 
 # emu file location
-emu location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/EMu_2016preAPV/
+emu location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/EMu_2016preAPV
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -183,9 +183,11 @@ MC grouping:
 plots:
     - selector: '^.*'
       produce: no
+    - selector: 'el.*_inc0jet'
+      produce: yes
     - selector: 'mu.*_inc0jet'
       produce: yes
-    - selector: 'mu.*leading.*_inc0jet'
+    - selector: '.*leading.*'
       produce: no
     - selector: 'mass_wide_range_inc0jet'
       produce: yes
@@ -219,8 +221,8 @@ plots:
     - selector: '.*'
 #      ratio min: 0.601
 #      ratio max: 1.399
-      ratio min: 0.601
-      ratio max: 1.399
+      ratio min: 0.801
+      ratio max: 1.199
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
@@ -230,11 +232,11 @@ plots:
     - selector: '^mass_wide.*'
       log x: yes
     - selector: 'mass_inc0jet'
-      ratio min: 0.601
-      ratio max: 1.399
+      ratio min: 0.801
+      ratio max: 1.199
     # Axis labels
     - selector: '^mass.*'
-      x axis label: 'M_{ee}'
+      x axis label: 'M_{#mu#mu}'
       x axis unit: 'GeV'
     - selector: '^nJets.*'
       x axis label: 'Exclusive number of jets'
@@ -243,17 +245,17 @@ plots:
     - selector: '^phistar.*'
       x axis label: '#phi*'
     - selector: '^pt.*'
-      x axis label: 'p_{T}^{ee}'
+      x axis label: 'p_{T}^{#mu#mu}'
       x axis unit: 'GeV'
     - selector: '.+mass(.*)_(.*).*'
-      x axis detail: '$1 #leq M_{ee} < $2 GeV'
+      x axis detail: '$1 #leq M_{#mu#mu} < $2 GeV'
     - selector: '.*inc(1|2)jet.*'
       x axis detail: 'N_{jets} #geq $1'
     - selector: '.*exc(1|2)jet.*'
       x axis detail: 'N_{jets} = $1'
     - selector: '^mass_cut.*'
-      x axis label: 'M_{ee}'
+      x axis label: 'M_{#mu#mu}'
       x axis unit: 'GeV'
     - selector: '^pt_cut.*'
-      x axis label: 'p_{T}^{ee}'
+      x axis label: 'p_{T}^{#mu#mu}'
       x axis unit: 'GeV'

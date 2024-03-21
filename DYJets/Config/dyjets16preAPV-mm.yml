@@ -269,8 +269,10 @@ select the best muon trigger SF:
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: yes
-  offset: 1.19733
-  slope: -0.124065
+  parameters: [1.19069, -0.121672]
+  errors: [0.0359006, 0.0169732]
+  fakes plus: [1.14853, -0.106471]
+  fakes minus: [1.23283, -0.136858]
 
 # List of available data/MC samples
 samples:
@@ -415,6 +417,11 @@ samples:
       type: background
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - name: Fakes
+    #   type: background
+    #   nano dir: Catalogs/2016preAPV
+    #   catalog: Catalog2016_bonzai_SingleMuon_data.txt
 
 # Scale factors
 tables:
@@ -468,6 +475,10 @@ MC grouping:
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - legend: "Fakes"
+    #   samples: [ Fakes ]
+    #   color: 803 # kOrange + 3
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
@@ -573,3 +584,9 @@ uncertainties:
   Muon Rochester correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: true
+  emu method fake background: true
+  same-sign method fit parameter: false
+  same-sign method fit function choice: false
+  same-sign method ewk bkg reweight: false
+  same-sign method electron charge misid: false

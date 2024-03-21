@@ -144,6 +144,8 @@ void compare_builder_base::build()
             upper.SetLogx();
             lower.SetLogx();
         }
+        upper.RedrawAxis();
+        
         // Write file
         canvas.Print(
             (_output_dir_name + "/" + name + "." + _output_format).c_str());

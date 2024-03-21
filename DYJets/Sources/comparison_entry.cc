@@ -108,7 +108,7 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
     return res;
 }
 
-double mc_comparison_entry::Integral(const std::string &name, double lumi)
+double mc_comparison_entry::integral(const std::string &name, double lumi)
 {
     return get(name, lumi)->Integral();
 }
@@ -238,6 +238,8 @@ void data_comparison_entry::draw(const std::string &name, double lumi, bool same
             return;
         }
     }
+    _histo->SetStats(0);
+    _histo->SetTitle("");
     _histo->Draw(same ? "e same" : "e");
     _histo->SetMarkerStyle(20);
     _histo->SetMarkerColor(kBlack);
@@ -256,7 +258,7 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
     return res;
 }
 
-double data_comparison_entry::Integral(const std::string &name, double lumi)
+double data_comparison_entry::integral(const std::string &name, double lumi)
 {
     return get(name, lumi)->Integral();
 }

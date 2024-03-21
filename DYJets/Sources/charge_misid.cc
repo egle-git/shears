@@ -75,7 +75,7 @@ double charge_misid::get_charge_misid_mc(const lepton &lep)
     return _charge_misid_mc->GetBinContent(xbin, ybin);
 }
 
-double charge_misid::get_sf(const lepton &lep)
+double charge_misid::get_sf(const lepton &lep, const int &var)
 {
     double xbin = _charge_misid_sf->GetXaxis()->FindBin(std::abs(lep.raw_v.Eta()));
     if (xbin == 0) xbin = 1;
@@ -87,10 +87,10 @@ double charge_misid::get_sf(const lepton &lep)
 
     // util::logging::debug << "SF weight = " << _charge_misid_sf->GetBinContent(xbin, ybin) << std::endl;
     double weight = _charge_misid_sf->GetBinContent(xbin, ybin);
-    if (_var == 1) weight +=  _charge_misid_sf->GetBinError(xbin, ybin);
-    else if (_var == -1) weight -=  _charge_misid_sf->GetBinError(xbin, ybin);
-    // Additionally, apply the ratio of measured misID efficiencies AFTER SFs are applied
-    // weight *= _charge_misid_data->GetBinContent(xbin, ybin) / _charge_misid_mc->GetBinContent(xbin, ybin);
+
+    // var overrides _var for systematic variation if it has a reasonable value
+    if (var == 1 || (var < -100 && _var == 1)) weight +=  _charge_misid_sf->GetBinError(xbin, ybin);
+    else if (var == -1 || (var < -100 && _var == -1)) weight -=  _charge_misid_sf->GetBinError(xbin, ybin);
     
     return weight;
 }

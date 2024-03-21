@@ -16,7 +16,8 @@ class lepton
     TLorentzVector v; ///< Four-momentum
     TLorentzVector raw_v; ///< Four-momentum as provided by CMSSW (ie before applying corrections)
     float charge;     ///< Charge
-    unsigned iso;        ///< Isolation ID
+    float iso;        ///< PF Isolation
+    unsigned isoid;        ///< Isolation ID
     bool passes_id;   ///< Does the lepton pass the Id cut?
     bool passes_iso;   ///< Does the lepton pass the Iso cut?
     unsigned id;      ///< Id
@@ -34,6 +35,7 @@ class lepton
             && raw_v == other.raw_v
             && charge == other.charge
             && iso == other.iso
+            && isoid == other.isoid
             && passes_id == other.passes_id
             && passes_iso == other.passes_iso
             && id == other.id

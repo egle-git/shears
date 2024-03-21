@@ -34,12 +34,14 @@ class muons
 
     enum class iso
     {
-        veryloose,
-        loose,  ///< \brief Loose ID
-        medium, ///< \brief Medium ID
-        tight,  ///< \brief Tight ID
-        trkLoose, ///< \brief tracker isolation, loose
-        trkTight, ///< \brief tracker isolation, tight
+        none,      ///< \brief No check
+        veryloose, ///< \brief VeryLoose ID
+        loose,     ///< \brief Loose ID
+        medium,    ///< \brief Medium ID
+        tight,     ///< \brief Tight ID
+        verytight, ///< \brief VeryTight ID
+        trkLoose,  ///< \brief tracker isolation, loose
+        trkTight,  ///< \brief tracker isolation, tight
     };
 
 
@@ -116,6 +118,8 @@ class muons
 
     /// \brief Writes histograms to the current directory.
     void write();
+
+    lepton matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep);
 };
 } // namespace physics
 

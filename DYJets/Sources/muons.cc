@@ -62,10 +62,12 @@ void muons::configure(const util::options &opt) {
 
   if (node["iso"]) {
     std::string iso = node["iso"].as<std::string>();
-    if( iso == "loose" )          _iso_cut = muons::iso::loose;
+    if( iso == "none" )          _iso_cut = muons::iso::none;
+    else if( iso == "loose" )     _iso_cut = muons::iso::loose;
     else if( iso == "medium" )    _iso_cut = muons::iso::medium;
     else if( iso == "tight" )     _iso_cut = muons::iso::tight;
     else if( iso == "veryloose" ) _iso_cut = muons::iso::veryloose;
+    else if( iso == "verytight" ) _iso_cut = muons::iso::verytight;
     else if( iso == "trkLoose" )  _iso_cut = muons::iso::trkLoose;
     else if( iso == "trkTight" )  _iso_cut = muons::iso::trkTight;
     else                          throw std::invalid_argument("Unknown muon Isoid: \"" + iso + "\"");
@@ -83,7 +85,8 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     l.v.SetPtEtaPhiM(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
     l.raw_v = l.v;
     l.charge = Muon_charge[i];
-    l.iso = Muon_pfIsoId[i];
+    l.iso = Muon_pfRelIso04_all[i];
+    l.isoid = Muon_pfIsoId[i];
     l.id = Muon_looseId[i];
     l.pdgid = 13;
 
@@ -104,6 +107,9 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     if(!l.passes_id) continue;
 
     switch( _iso_cut ) {
+    case iso::none:
+      l.passes_iso = true;
+      break;
     case iso::veryloose:
       l.passes_iso = (Muon_pfIsoId[i] >= 1);
       break;
@@ -116,6 +122,8 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     case iso::tight:
       l.passes_iso = (Muon_pfIsoId[i] >= 4);
       break;
+    case iso::verytight:
+      l.passes_iso = (Muon_pfIsoId[i] >= 5);
     case iso::trkLoose:
       l.passes_iso = (Muon_tkIsoId[i] >= 1);
       break;

@@ -34,6 +34,13 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_muP,    "Muon Rochester correction", "calculate systematic variations from muon Roccor. unc. (mm channel only)");
   util::set_value_safe(node, _doSyst_elE,    "Electron energy correction", "calculate systematic variations from electron energy correction unc. (ee channel only)");
   util::set_value_safe(node, _doSyst_effSF,  "efficiency SF", "calculate systematic variations from the uncertainty of the efficiency SF");
+  util::set_value_safe(node, _doSyst_emuMethodFit, "emu method fit parameter", "calculate systematic variations from the uncertainty of the emu method reweighting parameters");
+  util::set_value_safe(node, _doSyst_emuMethodFakes, "emu method fake background", "calculate systematic variations from the systematic (not statistical!) uncertainty of the emu fakes");
+  util::set_value_safe(node, _doSyst_fakeSameSignFit, "same-sign method fit parameter", "calculate systematic variations from the uncertainty of the same-sign method reweighting parameters");
+  util::set_value_safe(node, _doSyst_fakeSameSignFitFun, "same-sign method fit function choice", "calculate systematic variations from the same-sign method fit function choice");
+  util::set_value_safe(node, _doSyst_fakeSameSignEmuMeth, "same-sign method ewk bkg reweight", "calculate systematic variations from the reweighting of the same-sign EWK backgrounds using the emu method");
+  util::set_value_safe(node, _doSyst_fakeSameSignElChMisid, "same-sign method electron charge misid", "calculate systematic variations from the uncertainty of the electron charge misidentification correction");
+  
   if( _channel == "ee" && _doSyst_elE )
     _use_eRoccor = (opt.config["electrons"])["use rochester electron energy correction"].as<bool>();
 
@@ -50,6 +57,84 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
     else               util::logging::info << "--> Variation on the E/gamma POG electron energy correction" << std::endl;
   }
   if( _doSyst_effSF )  util::logging::info << "Systematic variation for the efficiency SF is ON" << std::endl;
+  if( _doSyst_emuMethodFit ) {
+    if (_reweight_emu_method && opt.config["emu method reweighting"])
+    {
+      const YAML::Node node_emu = opt.config["emu method reweighting"];
+      _errs_emu_method = node_emu["errors"].as<std::vector<double>>();
+      if (_errs_emu_method != std::vector<double>({0.0, 0.0})) {
+        util::logging::info << "Systematic variation for the emu method fit parameters is ON" << std::endl;
+      } else {
+        util::logging::warn << "Systematic variation for the emu method fit parameters was set to ON but no alternative values were provided" << std::endl;
+        _doSyst_emuMethodFit = false;
+      }
+    } else _doSyst_emuMethodFit = false;
+  }
+  if( _doSyst_emuMethodFakes ) {
+    if (_reweight_emu_method && opt.config["emu method reweighting"])
+    {
+      const YAML::Node node_emu = opt.config["emu method reweighting"];
+      _pars_fakesPlus_emu_method = node_emu["fakes plus"].as<std::vector<double>>();
+      _pars_fakesMinus_emu_method = node_emu["fakes minus"].as<std::vector<double>>();
+      if (_pars_fakesPlus_emu_method.size() == 2 && _pars_fakesMinus_emu_method.size() == 2) {
+          util::logging::info << "Systematic variation for the emu method fake background is ON" << std::endl;
+      } else {
+        util::logging::warn << "Systematic variation for the emu method fake background was set to ON but alternative values were not (properly) provided" << std::endl;
+        _doSyst_emuMethodFakes = false;
+      }
+    } else _doSyst_emuMethodFakes = false;
+  }
+  if( _doSyst_fakeSameSignFit ) {
+    if (_reweight_same_sign_method && opt.config["same sign method reweighting"])
+    {
+      const YAML::Node node_fakes = opt.config["same sign method reweighting"];
+      // Collect the alternative values for the fit parameters
+      _pars_plus_same_sign_method[0] = node_fakes["up variation 1"].as<std::vector<double>>();
+      _pars_plus_same_sign_method[1] = node_fakes["up variation 2"].as<std::vector<double>>();
+      _pars_plus_same_sign_method[2] = node_fakes["up variation 3"].as<std::vector<double>>();
+      _pars_plus_same_sign_method[3] = node_fakes["up variation 4"].as<std::vector<double>>();
+      if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu) // muon channel has 5 fit parameters and 5 variations
+        _pars_plus_same_sign_method[4] = node_fakes["up variation 5"].as<std::vector<double>>();
+
+      _pars_minus_same_sign_method[0] = node_fakes["down variation 1"].as<std::vector<double>>();
+      _pars_minus_same_sign_method[1] = node_fakes["down variation 2"].as<std::vector<double>>();
+      _pars_minus_same_sign_method[2] = node_fakes["down variation 3"].as<std::vector<double>>();
+      _pars_minus_same_sign_method[3] = node_fakes["down variation 4"].as<std::vector<double>>();
+      if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu) // muon channel has 5 fit parameters and 5 variations
+        _pars_minus_same_sign_method[4] = node_fakes["down variation 5"].as<std::vector<double>>();
+
+      // Check if the values were properly provided
+      if ( (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::ee &&
+            _pars_plus_same_sign_method[0].size() == 4 && _pars_plus_same_sign_method[1].size() == 4 &&
+            _pars_plus_same_sign_method[2].size() == 4 && _pars_plus_same_sign_method[3].size() == 4 &&
+            _pars_minus_same_sign_method[0].size() == 4 && _pars_minus_same_sign_method[1].size() == 4 &&
+            _pars_minus_same_sign_method[2].size() == 4 && _pars_minus_same_sign_method[3].size() == 4) ||
+            (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu &&
+            _pars_plus_same_sign_method[0].size() == 5 && _pars_plus_same_sign_method[1].size() == 5 &&
+            _pars_plus_same_sign_method[2].size() == 5 && _pars_plus_same_sign_method[3].size() == 5 &&
+            _pars_plus_same_sign_method[4].size() == 5 &&
+            _pars_minus_same_sign_method[0].size() == 5 && _pars_minus_same_sign_method[1].size() == 5 &&
+            _pars_minus_same_sign_method[2].size() == 5 && _pars_minus_same_sign_method[3].size() == 5 &&
+            _pars_minus_same_sign_method[4].size() == 5) ){
+        util::logging::info << "Systematic variation for the same-sign method fit parameters is ON" << std::endl;
+      } else {
+        util::logging::warn << "Systematic variation for the same-sign method fit parameters was set to ON but alternative values were not (properly) provided" << std::endl;
+        _doSyst_fakeSameSignFit = false;
+      }
+    } else _doSyst_fakeSameSignFit = false;
+  }
+  if( _doSyst_fakeSameSignFitFun ) {
+    if (_reweight_same_sign_method)
+    {
+      // Get the constant OS/SS factor as an alternative to the variable function fit
+      _same_sign_reweight_const = node["constant os/ss ratio"].as<double>();
+      util::logging::info << "Systematic variation for the same-sign method fit function choice is ON" << std::endl;
+    } else _doSyst_fakeSameSignFitFun = false;
+  }
+  if( _doSyst_fakeSameSignEmuMeth && _reweight_emu_method && _reweight_same_sign_method)
+    util::logging::info << "Systematic variation for the same-sign method ewk bkg reweight is ON" << std::endl;
+  else _doSyst_fakeSameSignEmuMeth = false;
+  if( _doSyst_fakeSameSignElChMisid )  util::logging::info << "Systematic variation for the same-sign method electron charge misid is ON" << std::endl;
 }
 
 void dyjets_analyzer_syst::sanity_check() {
@@ -209,11 +294,21 @@ void dyjets_analyzer_syst::operator()() {
     if( _doSyst_pileup ) fill_systHist_pileup(evt, mass, tags_default);
     if( _doSyst_L1Pref ) fill_systHist_L1Pref(evt, mass, tags_default);
     if( _doSyst_theory ) fill_systHist_theory(evt, mass, tags_default);
+    if( _doSyst_emuMethodFit ) fill_systHist_emuMethodFit(evt, mass, _sample_name, tags_default);
+    if( _doSyst_emuMethodFakes ) fill_systHist_emuMethodFakes(evt, mass, _sample_name, tags_default);
   }
   if( _doSyst_muP && _channel == "mm" )
     fill_systHist_muP(evt, isLowQMuEvent, genleps_finalState, rndm_forRoccor);
   if( _doSyst_elE && _channel == "ee" )
     fill_systHist_elE(evt, genleps_dressed_noCut, genleps_finalState, rndm_forRoccor);
+  if( _doSyst_fakeSameSignFit )
+    fill_systHist_fakeSameSignFit(evt, mass, tags_default);
+  if( _doSyst_fakeSameSignFitFun )
+    fill_systHist_fakeSameSignFitFun(evt, mass, tags_default);
+  if( _doSyst_fakeSameSignEmuMeth )
+    fill_systHist_fakeSameSignEmuMeth(evt, mass, _sample_name, tags_default);
+  if (_doSyst_fakeSameSignElChMisid && _channel == "ee")
+    fill_systHist_fakeSameSignElChMisid(evt, mass, tags_default);
 }
 
 void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_contents>& evt,
@@ -558,6 +653,241 @@ void dyjets_analyzer_syst::fill_systHist_pileup(const util::matched<event_conten
   if( evt.rec ) tags_minus.rec = *tags_default.rec + "_pileup_minus";
   else          tags_minus.rec = boost::none;
   fill_unfolded("mass_wide_range", tags_minus, value, weights().gen_weight(), global_weight_minus);
+}
+
+void dyjets_analyzer_syst::fill_systHist_emuMethodFit(const util::matched<event_contents>& evt,
+                                                      const util::matched<double> &value,
+                                                      const std::string &sample_name,
+                                                      const util::matched<std::string>& tags_default) {
+  // -- cv = central value
+  double global_weight_cv    = weights().global_weight();
+  double global_weight_plus  = global_weight_cv;
+  double global_weight_minus = global_weight_cv;
+  // -- Reweight only TT and ST backgrounds
+  if (evt.rec && (_reweight_emu_method && (sample_name == "TT" || sample_name.find("ST") != std::string::npos))) {
+    double boson_reco_mass = evt.rec->get_boson_p().M();
+    double nom_weight   =  _pars_emu_method[0] + _pars_emu_method[1]  * std::log10(boson_reco_mass);
+    double weight_plus  = (_pars_emu_method[0] + _errs_emu_method[0]) +
+                          (_pars_emu_method[1] - _errs_emu_method[1]) * std::log10(boson_reco_mass);
+    double weight_minus = (_pars_emu_method[0] - _errs_emu_method[0]) +
+                          (_pars_emu_method[1] + _errs_emu_method[1]) * std::log10(boson_reco_mass);
+
+    global_weight_plus  = global_weight_cv * ( weight_plus  / nom_weight );
+    global_weight_minus = global_weight_cv * ( weight_minus / nom_weight );
+  }
+
+  util::matched<std::string> tags_plus;
+  if( evt.gen ) tags_plus.gen = *tags_default.gen + "_emuMethodFit_plus";
+  else          tags_plus.gen = boost::none;
+  if( evt.rec ) tags_plus.rec = *tags_default.rec + "_emuMethodFit_plus";
+  else          tags_plus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_plus, value, weights().gen_weight(), global_weight_plus);
+
+  util::matched<std::string> tags_minus;
+  if( evt.gen ) tags_minus.gen = *tags_default.gen + "_emuMethodFit_minus";
+  else          tags_minus.gen = boost::none;
+  if( evt.rec ) tags_minus.rec = *tags_default.rec + "_emuMethodFit_minus";
+  else          tags_minus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_minus, value, weights().gen_weight(), global_weight_minus);
+}
+
+void dyjets_analyzer_syst::fill_systHist_emuMethodFakes(const util::matched<event_contents>& evt,
+                                                        const util::matched<double> &value,
+                                                        const std::string &sample_name,
+                                                        const util::matched<std::string>& tags_default) {
+  if (!_reweight_emu_method) return;
+  // -- cv = central value
+  double global_weight_cv    = weights().global_weight();
+  double global_weight_plus  = global_weight_cv;
+  double global_weight_minus = global_weight_cv;
+
+  // -- Reweight only TT and ST backgrounds
+  if (evt.rec && (sample_name == "TT" || sample_name.find("ST") != std::string::npos)) {
+    double boson_reco_mass = evt.rec->get_boson_p().M();
+    double nom_weight   = _pars_emu_method           [0] + _pars_emu_method           [1] * std::log10(boson_reco_mass);
+    double weight_plus  = _pars_fakesPlus_emu_method [0] + _pars_fakesPlus_emu_method [1] * std::log10(boson_reco_mass);
+    double weight_minus = _pars_fakesMinus_emu_method[0] + _pars_fakesMinus_emu_method[1] * std::log10(boson_reco_mass);
+
+    global_weight_plus  = global_weight_cv * ( weight_plus  / nom_weight );
+    global_weight_minus = global_weight_cv * ( weight_minus / nom_weight );
+  }
+
+  util::matched<std::string> tags_plus;
+  if( evt.gen ) tags_plus.gen = *tags_default.gen + "_emuMethodFakes_plus";
+  else          tags_plus.gen = boost::none;
+  if( evt.rec ) tags_plus.rec = *tags_default.rec + "_emuMethodFakes_plus";
+  else          tags_plus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_plus, value, weights().gen_weight(), global_weight_plus);
+
+  util::matched<std::string> tags_minus;
+  if( evt.gen ) tags_minus.gen = *tags_default.gen + "_emuMethodFakes_minus";
+  else          tags_minus.gen = boost::none;
+  if( evt.rec ) tags_minus.rec = *tags_default.rec + "_emuMethodFakes_minus";
+  else          tags_minus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_minus, value, weights().gen_weight(), global_weight_minus);
+}
+
+void dyjets_analyzer_syst::fill_systHist_fakeSameSignFit(const util::matched<event_contents> &evt,
+                                                         const util::matched<double> &value,
+                                                         const util::matched<std::string> &tags_default) {
+  if (!_reweight_same_sign_method) return;
+  for (int i=0; i<5; ++i) {
+    if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::ee && i == 4) break;
+    fill_systHist_fakeSameSignFit_eachSystVar(evt, value, tags_default, i);
+  }
+}
+
+void dyjets_analyzer_syst::fill_systHist_fakeSameSignFit_eachSystVar(const util::matched<event_contents> &evt,
+                                                                     const util::matched<double> &value,
+                                                                     const util::matched<std::string> &tags_default,
+                                                                     const int ivar) {
+  // -- cv = central value
+  double global_weight_cv = weights().global_weight();
+  // -- placeholders
+  double nom_weight=1.0, weight_minus=1.0, weight_plus=1.0;
+  double global_weight_plus  = global_weight_cv;
+  double global_weight_minus = global_weight_cv;
+
+  if (evt.rec) {
+    // -- MET is used for the fit both channels
+    double met = _met.v().Pt();
+
+    if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::ee) {
+      nom_weight   = _pars_same_sign_method[0] - _pars_same_sign_method[1] * met -
+                    std::exp(_pars_same_sign_method[2] - _pars_same_sign_method[3] * met);
+      weight_plus  = _pars_plus_same_sign_method[ivar][0] - _pars_plus_same_sign_method[ivar][1] * met -
+                    std::exp(_pars_plus_same_sign_method[ivar][2] - _pars_plus_same_sign_method[ivar][3] * met);
+      weight_minus = _pars_minus_same_sign_method[ivar][0] - _pars_minus_same_sign_method[ivar][1] * met -
+                    std::exp(_pars_minus_same_sign_method[ivar][2] - _pars_minus_same_sign_method[ivar][3] * met);
+    } else if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu) {
+      double mass = evt.rec->get_boson_p().M();
+      nom_weight   = ( _pars_same_sign_method[2] - _pars_same_sign_method[3] *
+                       met * std::exp(-_pars_same_sign_method[4] * met) ) *
+                     ( _pars_same_sign_method[0] + _pars_same_sign_method[1] * std::log10(mass) );
+      weight_plus  = ( _pars_plus_same_sign_method[ivar][2] - _pars_plus_same_sign_method[ivar][3] *
+                       met * std::exp(-_pars_plus_same_sign_method[ivar][4] * met) ) *
+                     ( _pars_plus_same_sign_method[ivar][0] + _pars_plus_same_sign_method[ivar][1] *
+                       std::log10(mass) );
+      weight_minus = ( _pars_minus_same_sign_method[ivar][2] - _pars_minus_same_sign_method[ivar][3] *
+                      met * std::exp(-_pars_minus_same_sign_method[ivar][4] * met) ) *
+                     ( _pars_minus_same_sign_method[ivar][0] + _pars_minus_same_sign_method[ivar][1] *
+                       std::log10(mass) );
+    } else return;
+
+    global_weight_plus  *= weight_plus  / nom_weight;
+    global_weight_minus *= weight_minus / nom_weight;
+  }
+
+  util::matched<std::string> tags_plus;
+  if( evt.gen ) tags_plus.gen = *tags_default.gen + "_fakeSameSignFit_plus" + std::to_string(ivar+1);
+  else          tags_plus.gen = boost::none;
+  if( evt.rec ) tags_plus.rec = *tags_default.rec + "_fakeSameSignFit_plus" + std::to_string(ivar+1);
+  else          tags_plus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_plus, value, weights().gen_weight(), global_weight_plus);
+
+  util::matched<std::string> tags_minus;
+  if( evt.gen ) tags_minus.gen = *tags_default.gen + "_fakeSameSignFit_minus" + std::to_string(ivar+1);
+  else          tags_minus.gen = boost::none;
+  if( evt.rec ) tags_minus.rec = *tags_default.rec + "_fakeSameSignFit_minus" + std::to_string(ivar+1);
+  else          tags_minus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_minus, value, weights().gen_weight(), global_weight_minus);
+}
+
+void dyjets_analyzer_syst::fill_systHist_fakeSameSignFitFun(const util::matched<event_contents> &evt,
+                                                            const util::matched<double> &value,
+                                                            const util::matched<std::string> &tags_default) {
+  // -- cv = central value
+  double global_weight_cv = weights().global_weight();
+  // -- placeholders
+  double nom_weight=1.0;
+  double global_weight_alt  = global_weight_cv;
+
+  if (evt.rec) {
+    // -- MET is used for the fit both channels
+    double met = _met.v().Pt();
+
+    if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::ee) {
+      nom_weight = _pars_same_sign_method[0] - _pars_same_sign_method[1] * met -
+                  std::exp(_pars_same_sign_method[2] - _pars_same_sign_method[3] * met);
+    } else if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu) {
+      double mass = evt.rec->get_boson_p().M();
+      nom_weight = ( _pars_same_sign_method[2] - _pars_same_sign_method[3] *
+                    met * std::exp(-_pars_same_sign_method[4] * met) ) *
+                  ( _pars_same_sign_method[0] + _pars_same_sign_method[1] * std::log10(mass) );
+    } else return;
+
+    global_weight_alt *= _same_sign_reweight_const / nom_weight;
+  }
+
+  util::matched<std::string> tags_alt;
+  if( evt.gen ) tags_alt.gen = *tags_default.gen + "_fakeSameSignConstRatio";
+  else          tags_alt.gen = boost::none;
+  if( evt.rec ) tags_alt.rec = *tags_default.rec + "_fakeSameSignConstRatio";
+  else          tags_alt.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_alt, value, weights().gen_weight(), global_weight_alt);
+}
+
+void dyjets_analyzer_syst::fill_systHist_fakeSameSignEmuMeth(const util::matched<event_contents>& evt,
+                                                             const util::matched<double> &value,
+                                                             const std::string &sample_name,
+                                                             const util::matched<std::string>& tags_default) {
+  if (!_reweight_emu_method || !_reweight_same_sign_method) return;
+  // -- cv = central value
+  double global_weight_cv = weights().global_weight();
+  // Placeholder
+  double nom_weight = 1;
+  // -- Find the weight applied to TT and ST backgrounds
+  if (weights().ismc() && evt.rec && (sample_name == "TT" || sample_name.find("ST") != std::string::npos)) {
+    double boson_reco_mass = evt.rec->get_boson_p().M();
+    nom_weight = _pars_emu_method[0] + _pars_emu_method[1] * std::log10(boson_reco_mass);
+  }
+
+  util::matched<std::string> tags_no_emu;
+  if( evt.gen ) tags_no_emu.gen = *tags_default.gen + "_fakeSameSignNoEmuMeth";
+  else          tags_no_emu.gen = boost::none;
+  if( evt.rec ) tags_no_emu.rec = *tags_default.rec + "_fakeSameSignNoEmuMeth";
+  else          tags_no_emu.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_no_emu, value, weights().gen_weight(), global_weight_cv/nom_weight);
+}
+
+void dyjets_analyzer_syst::fill_systHist_fakeSameSignElChMisid(const util::matched<event_contents> &evt,
+                                                               const util::matched<double> &value,
+                                                               const util::matched<std::string> &tags_default) {
+  if (!_doSyst_fakeSameSignElChMisid || _zfinder.get_flavor_mode() != physics::zfinder::flavor_mode::ee)
+    return;
+
+  if (weights().ismc() && evt.rec) {
+    // -- Reverting the electron charge misid reweighting
+    _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 0, true);
+    // -- Apply a plus variation
+    _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 1, false);
+  }
+  
+  util::matched<std::string> tags_alt_plus;
+  if( evt.gen ) tags_alt_plus.gen = *tags_default.gen + "_fakeSameSignElChMisid_plus";
+  else          tags_alt_plus.gen = boost::none;
+  if( evt.rec ) tags_alt_plus.rec = *tags_default.rec + "_fakeSameSignElChMisid_plus";
+  else          tags_alt_plus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_alt_plus, value, weights().gen_weight(), weights().global_weight());
+
+  if (weights().ismc() && evt.rec) {
+    // -- Revert a plus variation
+    _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 1, true);
+    // -- Apply a minus variation
+    _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), -1, false);
+  }
+
+  util::matched<std::string> tags_alt_minus;
+  if( evt.gen ) tags_alt_minus.gen = *tags_default.gen + "_fakeSameSignElChMisid_minus";
+  else          tags_alt_minus.gen = boost::none;
+  if( evt.rec ) tags_alt_minus.rec = *tags_default.rec + "_fakeSameSignElChMisid_minus";
+  else          tags_alt_minus.rec = boost::none;
+  fill_unfolded("mass_wide_range", tags_alt_minus, value, weights().gen_weight(), weights().global_weight());
+
+  if (weights().ismc() && evt.rec) {
+    // -- Revert a minus variation
+    _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), -1, true);
+  }
 }
 
 void dyjets_analyzer_syst::fill_systHist_effSF(const util::matched<event_contents>& evt,

@@ -1,4 +1,5 @@
 #include "reco_compare_builder.h"
+#include "TFile.h"
 
 namespace util
 {
@@ -35,8 +36,18 @@ void reco_compare_builder::load()
 
 void reco_compare_builder::fill_upper_panel(const std::string &name)
 {
-    _mc_entry->draw(name, _lumi);
+    _data_entry->draw(name, _lumi);
+    _mc_entry->draw(name, _lumi, true);
     _data_entry->draw(name, _lumi, true);
+    // Fix axis ranges so that both data and MC are visible
+    if (_mc_entry->integral(name, _lumi) > _data_entry->integral(name, _lumi)) {
+        double min = _data_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _data_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _mc_entry->get(name, _lumi)->GetMaximum() * 1.5);
+    } else {
+        double min = _mc_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _mc_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _data_entry->get(name, _lumi)->GetMaximum() * 1.5);
+    }
+    
 
     if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
         format_upper_x_axis(*axis);
@@ -56,6 +67,7 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
     std::unique_ptr<TH1> num = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
+    double total_ratio = num->Integral() / den->Integral();
 
     if (num == nullptr || den == nullptr) {
         return false;

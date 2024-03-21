@@ -41,11 +41,10 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
         const YAML::Node node = opt.config["emu method reweighting"];
         _reweight_emu_method = node["use"].as<bool>();
         if (_reweight_emu_method) {
-            _offset_emu_method = node["offset"].as<double>();
-            _slope_emu_method = node["slope"].as<double>();
+            _pars_emu_method = node["parameters"].as<std::vector<double>>();
             util::logging::debug
                 << "Background will be reweighted according to their log(mass) with slope="
-                << _slope_emu_method << " and offset=" << _offset_emu_method << std::endl;
+                << _pars_emu_method[1] << " and offset=" << _pars_emu_method[0] << std::endl;
         }
     }
 
@@ -54,21 +53,21 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
         const YAML::Node node = opt.config["same sign method reweighting"];
         _reweight_same_sign_method = node["use"].as<bool>();
         if (_reweight_same_sign_method) {
-            if (node["MET offset"]) _met_offset_ss_method = node["MET offset"].as<double>();
-            if (node["MET slope"]) _met_slope_ss_method = node["MET slope"].as<double>();
-            if (node["MET exp offset"]) _met_exp_offset_ss_method = node["MET exp offset"].as<double>();
-            if (node["MET exp slope"]) _met_exp_slope_ss_method = node["MET exp slope"].as<double>();
-            util::logging::debug
-                << "Events will be reweighted according to their MET with linear slope="
-                << _met_slope_ss_method << ", offset=" << _met_offset_ss_method
-                << ", and exponent with slope=" << _met_exp_slope_ss_method
-                << " and offset=" << _met_exp_offset_ss_method << std::endl;
-
-            if (node["mass offset"]) _mass_offset_ss_method = node["mass offset"].as<double>();
-            if (node["mass slope"])  _mass_slope_ss_method  = node["mass slope"].as<double>();
-            util::logging::debug
-                << "Events will be reweighted according to their dilepton mass with linear slope="
-                << _mass_slope_ss_method << " and offset=" << _mass_offset_ss_method << std::endl;
+            _pars_same_sign_method = node["parameters"].as<std::vector<double>>();
+            if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::ee) {
+                util::logging::debug
+                    << "Events will be reweighted according to their MET with linear slope="
+                    << _pars_same_sign_method[1] << ", offset=" << _pars_same_sign_method[0]
+                    << ", and exponent with slope=" << _pars_same_sign_method[3]
+                    << " and offset=" << _pars_same_sign_method[2] << std::endl;
+            } else if (_zfinder.get_flavor_mode() == physics::zfinder::flavor_mode::mumu) {
+                util::logging::debug
+                    << "Events will be reweighted according to their dilepton mass with linear slope="
+                    << _pars_same_sign_method[1] << " and offset=" << _pars_same_sign_method[0]
+                    << ", and according to their MET with linear slope="
+                    << _pars_same_sign_method[3] << ", offset=" << _pars_same_sign_method[2]
+                    << ", and exponent with slope=" << _pars_same_sign_method[4] << std::endl;
+            }
         }
     }
 }
@@ -317,7 +316,6 @@ void dyjets_analyzer::fill(const util::matched<std::string> &tags,
     //DeltaEta
     //  histo_set.fill("deltaeta", *tags.rec, DeltaEta, weights().global_weight());
 
-
     /*
      * Variables in Z rest frame
      */
@@ -463,15 +461,21 @@ void dyjets_analyzer::reweight_backgrounds(physics::weights &weights,
 {
     // EMu method reweighting
     if (_reweight_emu_method && (sample_name == "TT" || sample_name.find("ST") != std::string::npos)) {
-        double weight = _offset_emu_method + _slope_emu_method * std::log10(boson.M());
+        double weight = _pars_emu_method[0] + _pars_emu_method[1] * std::log10(boson.M());
         weights.use_weight(weight);
     }
     // Same-sign method reweighting
     if (_reweight_same_sign_method) {
+        using physics::zfinder;
         double weight = 1.0;
-        weight = ( _met_offset_ss_method - _met_slope_ss_method * met.Pt() *
-                std::exp(_met_exp_offset_ss_method - _met_exp_slope_ss_method * met.Pt()) ) *
-            ( _mass_offset_ss_method + _mass_slope_ss_method * std::log10(boson.M()) );
+        if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::mumu) {
+            weight = ( _pars_same_sign_method[2] - _pars_same_sign_method[3] * met.Pt() *
+                       std::exp(-_pars_same_sign_method[4] * met.Pt()) ) *
+                     ( _pars_same_sign_method[0] + _pars_same_sign_method[1] * std::log10(boson.M()) );
+        } else if (_zfinder.get_flavor_mode() == zfinder::flavor_mode::ee) {
+            weight = _pars_same_sign_method[0] - _pars_same_sign_method[1] * met.Pt() -
+                     std::exp(_pars_same_sign_method[2] - _pars_same_sign_method[3] * met.Pt());
+        }
         weights.use_weight(weight);
     }
 }

@@ -17,6 +17,8 @@ Muon_charge(info.reader, "Muon_charge"),
 Muon_pfRelIso04_all(info.reader, "Muon_pfRelIso04_all"),
 Muon_nTrackerLayers(info.reader, "Muon_nTrackerLayers"),
 Muon_pfIsoId(info.reader, "Muon_pfIsoId"),
+Muon_tkIsoId(info.reader, "Muon_tkIsoId"),
+Muon_highPtId(info.reader, "Muon_highPtId"),
 Muon_tightId(info.reader, "Muon_tightId"),
 Muon_mediumId(info.reader, "Muon_mediumId"),
 Muon_looseId(info.reader, "Muon_looseId") {
@@ -54,15 +56,20 @@ void muons::configure(const util::options &opt) {
     if( id == "loose" )       _id_cut = muons::id::loose;
     else if( id == "medium" ) _id_cut = muons::id::medium;
     else if( id == "tight" )  _id_cut = muons::id::tight;
+    else if( id == "highPt" ) _id_cut = muons::id::highPt;
     else                      throw std::invalid_argument("Unknown muon id: \"" + id + "\"");
   }
 
   if (node["iso"]) {
     std::string iso = node["iso"].as<std::string>();
-    if( iso == "loose" )          _iso_cut = muons::iso::loose;
+    if( iso == "none" )          _iso_cut = muons::iso::none;
+    else if( iso == "loose" )     _iso_cut = muons::iso::loose;
     else if( iso == "medium" )    _iso_cut = muons::iso::medium;
     else if( iso == "tight" )     _iso_cut = muons::iso::tight;
     else if( iso == "veryloose" ) _iso_cut = muons::iso::veryloose;
+    else if( iso == "verytight" ) _iso_cut = muons::iso::verytight;
+    else if( iso == "trkLoose" )  _iso_cut = muons::iso::trkLoose;
+    else if( iso == "trkTight" )  _iso_cut = muons::iso::trkTight;
     else                          throw std::invalid_argument("Unknown muon Isoid: \"" + iso + "\"");
   }
 }
@@ -78,7 +85,8 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     l.v.SetPtEtaPhiM(Muon_pt[i], Muon_eta[i], Muon_phi[i], Muon_mass[i]);
     l.raw_v = l.v;
     l.charge = Muon_charge[i];
-    l.iso = Muon_pfIsoId[i];
+    l.iso = Muon_pfRelIso04_all[i];
+    l.isoid = Muon_pfIsoId[i];
     l.id = Muon_looseId[i];
     l.pdgid = 13;
 
@@ -92,10 +100,16 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
     case id::tight:
       l.passes_id = Muon_tightId[i];
       break;
+    case id::highPt:
+      l.passes_id = (Muon_highPtId[i] >= 2); // -- Muon_highPtId[i] == 1: tracker high-pT ID
+      break;
     }
     if(!l.passes_id) continue;
 
     switch( _iso_cut ) {
+    case iso::none:
+      l.passes_iso = true;
+      break;
     case iso::veryloose:
       l.passes_iso = (Muon_pfIsoId[i] >= 1);
       break;
@@ -107,6 +121,14 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
       break;
     case iso::tight:
       l.passes_iso = (Muon_pfIsoId[i] >= 4);
+      break;
+    case iso::verytight:
+      l.passes_iso = (Muon_pfIsoId[i] >= 5);
+    case iso::trkLoose:
+      l.passes_iso = (Muon_tkIsoId[i] >= 1);
+      break;
+    case iso::trkTight:
+      l.passes_iso = (Muon_tkIsoId[i] >= 2);
       break;
     }
     if(!l.passes_iso) continue;

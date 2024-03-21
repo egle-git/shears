@@ -1,0 +1,131 @@
+# This is the configuration file for e-mu method for the DY analysis, year 2016postAPV.
+# Please keep it organized, and don't delete comments.
+
+# IMPORTANT! This is NOT for running ./bin/dyjets-bkg-est
+# This is for drawing a comparison between dyjets-TopBkgs.root produced by emu method
+# and the reweighted MC top quark backgrounds.
+# dyjets-TopBkgs.root should be renamed to dyjets-data.root to use reco-level-agreement comparison
+# as is done in this settings file.
+
+# Options related to output and logs
+log:
+    # Whether to use colors in the terminal.
+    #Possible values: yes|no|auto (default: auto)
+    color: auto
+
+    # Controls what's printed to the screen.
+    # Possible values: debug|info|warn|error|fatal (default: info)
+    log level: info
+
+    # Pipe logs to the given log file, comment out for no log.
+    log file: log18_emu_method.txt
+
+    # Controls what's written in the log file.
+    # Possible values: debug|info|warn|error|fatal (default: debug)
+    log file level: debug
+
+    # Whether to override ROOT's default log handler.
+    # Default value: yes
+    #override root handler: yes
+
+# Whether results are preliminary (for plots)
+preliminary: yes
+
+# List of available data/MC samples
+samples:
+    ### DATA
+    - name: data
+      type: data
+      jobs: 16
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_SingleMuon_data.txt
+    ### BACKGROUND
+    - name: ST_s-channel
+      type: background
+      nano dir: Catalogs/2018/
+      catalog: Catalog2018_bonzai_ST_s-channel.txt
+    - name: ST_t-channel_antitop
+      type: background
+      nano dir: Catalogs/2018/
+      catalog: Catalog2018_bonzai_ST_t-channel_antitop.txt
+    - name: ST_t-channel_top
+      type: background
+      jobs: 3
+      nano dir: Catalogs/2018/
+      catalog: Catalog2018_bonzai_ST_t-channel_top.txt
+    - name: ST_tW_antitop
+      type: background
+      nano dir: Catalogs/2018/
+      catalog: Catalog2018_bonzai_ST_tW_antitop.txt
+    - name: ST_tW_top
+      type: background
+      nano dir: Catalogs/2018/
+      catalog: Catalog2018_bonzai_ST_tW_top.txt
+    - name: TT
+      type: background
+      jobs: 10
+      nano dir: Catalogs/2018
+      catalog: Catalog2018_bonzai_TTTo2L2Nu.txt
+
+MC grouping:
+    - legend: MC top bkgs (reweighted)
+      samples: [ TT, ST_s-channel, ST_t-channel_antitop, ST_t-channel_top, ST_tW_antitop, ST_tW_top ]
+      color: 600 # kMagenta
+
+plots:
+    - selector: '.*'
+      produce: no
+    - selector: 'mass_wide_range_inc0jet'
+      produce: yes
+    - selector: 'pt_inc0jet'
+      produce: yes
+    - selector: 'rapidity_inc0jet'
+      produce: yes
+    - selector: 'phistar_inc0jet'
+      produce: yes
+    - selector: 'MET_pt_inc0jet'
+      produce: yes
+    - selector: 'mll_over_ptsub_inc0jet'
+      produce: yes
+    # Style changes
+    - selector: '.*'
+#      ratio min: 0.601
+#      ratio max: 1.399
+      ratio min: 0.801
+      ratio max: 1.199
+    - selector: '^phistar.*'
+      log x: yes
+    - selector: '^pt.*'
+      log x: yes
+    - selector: '^pt_cut.*'
+      log x: yes
+    - selector: '^mass_wide.*'
+      log x: yes
+    - selector: 'mass_inc0jet'
+      ratio min: 0.801
+      ratio max: 1.199
+    # Axis labels
+    - selector: '^mass.*'
+      x axis label: 'M_{ee}'
+      x axis unit: 'GeV'
+    - selector: '^nJets.*'
+      x axis label: 'Exclusive number of jets'
+    - selector: '^nJetsIncl.*'
+      x axis label: 'Inclusive number of jets'
+    - selector: '^phistar.*'
+      x axis label: '#phi*'
+    - selector: '^pt.*'
+      x axis label: 'p_{T}^{ee}'
+      x axis unit: 'GeV'
+    - selector: '.+mass(.*)_(.*).*'
+      x axis detail: '$1 #leq M_{ee} < $2 GeV'
+    - selector: '.*inc(1|2)jet.*'
+      x axis detail: 'N_{jets} #geq $1'
+    - selector: '.*exc(1|2)jet.*'
+      x axis detail: 'N_{jets} = $1'
+    - selector: '^mass_cut.*'
+      x axis label: 'M_{ee}'
+      x axis unit: 'GeV'
+    - selector: '^pt_cut.*'
+      x axis label: 'p_{T}^{ee}'
+      x axis unit: 'GeV'

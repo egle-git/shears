@@ -29,14 +29,19 @@ class muons
         loose,  ///< \brief Loose ID
         medium, ///< \brief Medium ID
         tight,  ///< \brief Tight ID
+        highPt, ///< \brief High-pT ID
     };
 
     enum class iso
     {
-        veryloose,
-        loose,  ///< \brief Loose ID
-        medium, ///< \brief Medium ID
-        tight,  ///< \brief Tight ID
+        none,      ///< \brief No check
+        veryloose, ///< \brief VeryLoose ID
+        loose,     ///< \brief Loose ID
+        medium,    ///< \brief Medium ID
+        tight,     ///< \brief Tight ID
+        verytight, ///< \brief VeryTight ID
+        trkLoose,  ///< \brief tracker isolation, loose
+        trkTight,  ///< \brief tracker isolation, tight
     };
 
 
@@ -47,8 +52,10 @@ class muons
     TTreeReaderArray<float> Muon_mass;
     TTreeReaderArray<int> Muon_charge;
     TTreeReaderArray<unsigned char> Muon_pfIsoId;
+    TTreeReaderArray<unsigned char> Muon_tkIsoId;
     TTreeReaderArray<int> Muon_nTrackerLayers;
     TTreeReaderArray<float> Muon_pfRelIso04_all;
+    TTreeReaderArray<unsigned char> Muon_highPtId;
     TTreeReaderArray<bool> Muon_tightId;
     TTreeReaderArray<bool> Muon_mediumId;
     TTreeReaderArray<bool> Muon_looseId;
@@ -111,6 +118,8 @@ class muons
 
     /// \brief Writes histograms to the current directory.
     void write();
+
+    lepton matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep);
 };
 } // namespace physics
 

@@ -126,6 +126,10 @@ electrons:
     # Default value: yes
     use reconstruction scale factors: yes
 
+    # Whether to use the Rochester electron energy correction (instead of POG correction)
+    use rochester electron energy correction: yes
+    rochester energy correction path: EleEnergyCorr/e_16bUL_1.txt
+
     # Charge misidentification efficiency correction for electrons
     use charge misid sf: yes
     charge misid sf location: ChargeMisid/CFRate2016b.root
@@ -292,6 +296,11 @@ samples:
       type: background
       nano dir: Catalogs/2016postAPV
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - name: Fakes
+    #   type: background
+    #   nano dir: Catalogs/2016postAPV
+    #   catalog: Catalog2016_bonzai_SingleMuon_data.txt
 
 # Scale factors
 tables:
@@ -337,6 +346,10 @@ MC grouping:
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - legend: "Fakes"
+    #   samples: [ Fakes ]
+    #   color: 803 # kOrange + 3
 
 
 # The file below defines the binnings for histograms relevant to the analysis.
@@ -364,50 +377,44 @@ binning file: dyjets-binnings.yml
 #                  the main label. Captures from the selector can be used to
 #                  provide dynamic labels.
 plots:
-    - selector: '^.*'
+    - selector: '^_.*'
       produce: no
-    - selector: 'el.*_inc0jet'
+    - selector: '.*-gen$'
       produce: yes
-    - selector: 'el.*leading.*_inc0jet'
-      produce: yes
-    - selector: 'mu.*_inc0jet'
-      produce: yes
-    - selector: 'mu.*leading.*_inc0jet'
-      produce: yes
-    - selector: 'mass_wide_range_inc0jet'
-      produce: yes
-    - selector: 'mass_inc0jet'
-      produce: yes
-    - selector: 'nvtx_inc0jet'
-      produce: yes
-    - selector: 'phistar_inc0jet'
-      produce: yes
-    - selector: 'pt_inc0jet.*'
-      produce: yes
-    - selector: 'rapidity_inc0jet.*'
-      produce: yes
-    - selector: 'mll_over_ptsub_inc0jet'
-      produce: yes
-    - selector: 'MET_pt_inc0jet'
-      produce: yes
-    - selector: 'MT_inc0jet'
-      produce: yes
-    - selector: '.*gen.*'
+    - selector: '.*-matrix$'
       produce: no
-    - selector: '.*matrix.*'
+    - selector: '.*[12]jet.*'
       produce: no
-    - selector: '.*UF.*'
+    - selector: 'el.*'
+      produce: yes
+    - selector: 'mu.*'
+      produce: yes
+    - selector: 'genLep.*'
       produce: no
-    - selector: '.*OF.*'
+    - selector: 'bjet.*'
       produce: no
-    - selector: '.*zoom.*'
+    - selector: 'jet.*leading.*'
       produce: no
+    - selector: 'jet.*subleading.*'
+      produce: no
+    - selector: 'jet.*third.*'
+      produce: no
+    - selector: 'jet.*fourth.*'
+      produce: no
+    - selector: '.*exc.*'
+      produce: no
+    - selector: 'mass.*mass.*'
+      produce: no
+    - selector: 'nJets.*_inc.*'
+      produce: no
+    - selector: 'nJets.*_inc0jet.*'
+      produce: yes
     # Style changes
     - selector: '.*'
 #      ratio min: 0.601
 #      ratio max: 1.399
-      ratio min: 0.901
-      ratio max: 1.099
+      ratio min: 0.801
+      ratio max: 1.199
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
@@ -417,8 +424,8 @@ plots:
     - selector: '^mass_wide.*'
       log x: yes
     - selector: 'mass_inc0jet'
-      ratio min: 0.901
-      ratio max: 1.099
+      ratio min: 0.801
+      ratio max: 1.199
     # Axis labels
     - selector: '^mass.*'
       x axis label: 'M_{e#mu}'

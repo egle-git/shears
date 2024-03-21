@@ -129,6 +129,12 @@ electrons:
     use rochester electron energy correction: yes
     rochester energy correction path: EleEnergyCorr/e_16bUL_1.txt
 
+    # Charge misidentification efficiency correction for electrons
+    use charge misid sf: yes
+    charge misid sf location: ChargeMisid/CFRate2016b.root
+    # Choose mode: 0 -- nominal correction values, 1 -- up variation by 1 sigma, -1 -- down variation
+    charge misid sf mode: 0
+
 # Options related to the selection of muons
 muons:
     # Pt cut [GeV]
@@ -224,8 +230,10 @@ use trigger scale factors: yes
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: yes
-  offset: 1.37488
-  slope: -0.180619
+  parameters: [1.36704, -0.177791]
+  errors: [0.039661, 0.0187278]
+  fakes plus: [1.3173, -0.159832]
+  fakes minus: [1.41679, -0.195747]
 
 # List of available data/MC samples
 samples:
@@ -346,6 +354,12 @@ samples:
       type: background
       nano dir: Catalogs/2016postAPV
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - name: FakesInt
+    #   type: background
+    #   nano dir: Catalogs/2016postAPV
+    #   catalog: Catalog2016_bonzai_DoubleEG_data.txt
+
 
 # Scale factors
 tables:
@@ -397,6 +411,10 @@ MC grouping:
     - legend: "#gamma#gamma"
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
+    # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
+    # - legend: "Fakes"
+    #   samples: [ FakesInt ]
+    #   color: 803 # kOrange + 3
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml
@@ -508,3 +526,9 @@ uncertainties:
   Electron energy correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  emu method fit parameter: true
+  emu method fake background: true
+  same-sign method fit parameter: false
+  same-sign method fit function choice: false
+  same-sign method ewk bkg reweight: false
+  same-sign method electron charge misid: false

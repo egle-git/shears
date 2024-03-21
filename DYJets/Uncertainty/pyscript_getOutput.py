@@ -1,6 +1,11 @@
 import argparse
 import os
 import time
+import sys
+
+# -- usage:
+# -- python pyscript_getOutput.py -m collect -o <output directory name (default: result_date)>
+# -- python pyscript_getOutput.py -m distribute -i <input directory name>
 
 # -- (Directory, list of root files) combination
 # -- should be updated accordingly if more results are made
@@ -9,6 +14,9 @@ dic_result = {
 
   "Stat" : {"Uncertainty_and_Covariance_Stat_ee.root", 
             "Uncertainty_and_Covariance_Stat_mm.root" },
+
+  "Background" : {"Unfolded_And_Uncertainty_Bkg_ee.root", 
+                  "Unfolded_And_Uncertainty_Bkg_mm.root" },
 
   "Pileup" : {"Unfolded_And_Uncertainty_pileup_ee.root", 
               "Unfolded_And_Uncertainty_pileup_mm.root" },
@@ -94,7 +102,7 @@ if __name__ == '__main__':
       for rootFile in list_rootFile:
         filePath = "%s/%s" % (dirName, rootFile)
         if not os.path.exists(filePath):
-          print("File = %s does not exist!", filePath)
+          print("File = %s does not exist!" % filePath)
           sys.exit()
 
         if os.path.exists("%s/%s" % (args.output, rootFile)):

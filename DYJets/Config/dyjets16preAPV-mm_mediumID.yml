@@ -239,6 +239,11 @@ triggers: |
 
 use trigger scale factors: yes
 
+# Reweighting for top backgrounds (emu method)
+emu method reweighting:
+  use: yes
+  parameters: [1.19069, -0.121672]
+
 # select the best trigger SF depending on leading muon pt & fired trigger
 # this feature is only needed for the dimuon analysis
 select the best muon trigger SF:

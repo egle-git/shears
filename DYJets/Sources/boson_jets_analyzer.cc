@@ -243,7 +243,7 @@ void boson_jets_analyzer::operator()()
             // cout << "l1 prefiring weight: " << *L1PreFiringWeight_Nom << endl;
             break;
         case 1:
-           _weights.use_weight(*L1PreFiringWeight_Up);
+            _weights.use_weight(*L1PreFiringWeight_Up);
             break;
         case -1:
             _weights.use_weight(*L1PreFiringWeight_Dn);
@@ -342,6 +342,7 @@ void boson_jets_analyzer::operator()()
         // Apply weights for background estimation
         if (_weights.ismc())
             _electrons.apply_charge_misid_sf(_weights, chosen_electrons, _genleps.get_leptons_finalState());
+
         reweight_backgrounds(_weights, _sample_name, evt.rec->get_boson_p(), _met.v());
 
         // Fill lepton control plots
@@ -354,29 +355,13 @@ void boson_jets_analyzer::operator()()
             _use_smu_triggerSF = check_whichTriggerSF(chosen_muons);
         else
             _use_smu_triggerSF = true; // always use single muon trigger SF
-
-        // if( evt.rec->boson_p.M() < 40.0 ) {
-        //     vector<physics::lepton> vec_lep = evt.rec->leptons;
-
-        //     double mass_RocCorr = (vec_lep[0].v + vec_lep[1].v).M();
-        //     double mass_POGCorr = (vec_lep[0].raw_v + vec_lep[1].raw_v).M();
-        //     printf("[mass] RocCorr = %lf\n", mass_RocCorr); 
-        //     printf("       POGCorr = %lf\n", mass_POGCorr);
-
-        //     for(const auto& lep : vec_lep) {
-        //         printf("  [lepton] RocCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.v.Pt(), lep.v.Eta(), lep.v.Phi(), lep.v.M());
-        //         printf("           POGCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.raw_v.Pt(), lep.raw_v.Eta(), lep.raw_v.Phi(), lep.raw_v.M());
-        //         printf("\n");
-        //     }
-        //     printf("\n");
-        // }
     }
 
     /*
      * Handle jets and pileup
      */
     if (evt.rec) {
-       std::vector<lepton> l ;
+        std::vector<lepton> l ;
         if (evt.gen) l = evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
         evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto
@@ -419,28 +404,6 @@ void boson_jets_analyzer::operator()()
                         .apply(make_tag, _mass_bins);
 
     TString tstr_tag = mass_tags.rec ? *mass_tags.rec : "none";
-    // if( tstr_tag == "UF" ) {
-    //     printf("mass_tags.rec == UF\n");
-
-    //     bool isRecoed = evt.rec ? true : false;
-    //     if( !isRecoed ) printf("--> event is not reco'ed!\n");
-    //     else {
-    //         printf("--> event is reco'ed\n");
-    //         vector<physics::lepton> vec_lep = evt.rec->leptons;
-
-    //         double mass_RocCorr = (vec_lep[0].v + vec_lep[1].v).M();
-    //         double mass_POGCorr = (vec_lep[0].raw_v + vec_lep[1].raw_v).M();
-    //         printf("[mass] RocCorr = %lf\n", mass_RocCorr); 
-    //         printf("       POGCorr = %lf\n", mass_POGCorr);
-
-    //         for(const auto& lep : vec_lep) {
-    //             printf("  [lepton] RocCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.v.Pt(), lep.v.Eta(), lep.v.Phi(), lep.v.M());
-    //             printf("           POGCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.raw_v.Pt(), lep.raw_v.Eta(), lep.raw_v.Phi(), lep.raw_v.M());
-    //             printf("\n");
-    //         }
-    //         printf("\n");
-    //     }
-    // }
     
     util::matched<std::string> mass_tags_fullRange;
     std::string str_fullRange = std::to_string(int(_mass_bins.front())) + "_" + std::to_string(int(_mass_bins.back())); // 50to1000
@@ -549,24 +512,7 @@ void boson_jets_analyzer::fill(const util::matched<std::string> &tags,
 
         // Fill MET control plots
         _met.fill(histo_set, *tags.rec, evt.rec->leptons[0], weights());
-
-        TString tstr_tag = *tags.rec;
-        // if( tstr_tag.Contains("massUF") ) {
-        //     vector<physics::lepton> vec_lep = evt.rec->leptons;
-
-        //     double mass_RocCorr = (vec_lep[0].v + vec_lep[1].v).M();
-        //     double mass_POGCorr = (vec_lep[0].raw_v + vec_lep[1].raw_v).M();
-        //     printf("[boson_jets_analyzer::fill] when the tag has massUF (tag = %s)\n", tstr_tag.Data());
-        //     printf("[mass] RocCorr = %lf\n", mass_RocCorr); 
-        //     printf("       POGCorr = %lf\n", mass_POGCorr);
-
-        //     for(const auto& lep : vec_lep) {
-        //         printf("  [lepton] RocCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.v.Pt(), lep.v.Eta(), lep.v.Phi(), lep.v.M());
-        //         printf("           POGCorr: (pt, eta, phi, mass) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", lep.raw_v.Pt(), lep.raw_v.Eta(), lep.raw_v.Phi(), lep.raw_v.M());
-        //         printf("\n");
-        //     }
-        //     printf("\n\n");
-        // }
+        histo_set2D.fill("MET_vs_mass", *tags.rec, _met.v().Pt(), evt.rec->get_boson_p().M(), weights().global_weight());
     }
     if (tags.gen && evt.gen) {
         _genleps.fill(histo_set, *tags.gen, evt.gen->leptons, weights());

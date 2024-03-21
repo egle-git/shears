@@ -38,7 +38,7 @@ public:
 
   /// \brief Returns the misID SF for the electron that had its charge misidentified (by checking
   /// with GEN)
-  double get_sf(const lepton &lep);
+  double get_sf(const lepton &lep, const int &var=-999);
 };
 
 } // namespace physics

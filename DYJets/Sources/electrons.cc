@@ -49,7 +49,8 @@ void electrons::configure(const util::options &opt) {
 
   if( node["id"] ) {
     std::string id = node["id"].as<std::string>();
-    if( id == "veto" )         _id_cut = electrons::id::veto;
+    if( id == "none" )         _id_cut = electrons::id::none;
+    else if (id == "veto")     _id_cut = electrons::id::veto;
     else if (id == "loose")    _id_cut = electrons::id::loose;
     else if (id == "medium")   _id_cut = electrons::id::medium;
     else if (id == "tight")    _id_cut = electrons::id::tight;
@@ -99,6 +100,10 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
     l.pdgid = 11;
 
     switch( _id_cut ) {
+    case id::none:
+        l.id = Electron_cutBased[i];
+        l.passes_id = true;
+        break;
     case id::veto:
         l.id = Electron_cutBased[i];
         l.passes_id = (Electron_cutBased[i] >= 1);
@@ -247,7 +252,7 @@ lepton electrons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_ge
     for(int i=0; i<nGenLep; ++i) {
         const lepton& genLep = vec_genLep[i];
         double dR_ith = l.v.DeltaR(genLep.v);
-        if( dR_ith < dRCut && dR_ith < dR_min ) {
+        if( dR_ith < dRCut && dR_ith < dR_min && std::abs(genLep.pdgid) == 11 ) {
             i_matched = i;
             dR_min = dR_ith;
         }
@@ -272,20 +277,28 @@ lepton electrons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_ge
 
 void electrons::apply_sf(weights &w,
                          const std::vector<lepton> &electrons,
-                         const util::tables &tab) const {
-  if( !w.ismc() ) return;
-
-  for(const lepton &el : electrons) {
-    if( _reco_sf_enabled )
-      w.use_weight(tab.at("electron reco").getEfficiency(el.v.Pt(), el.raw_v.Eta()));
-    if( _id_sf_enabled )
-      w.use_weight(tab.at("electron id").getEfficiency(el.v.Pt(), el.raw_v.Eta()));            
-  }
+                         const util::tables &tab) const
+{
+    if (w.ismc()) {
+        for (const lepton &el : electrons) {
+            if (_reco_sf_enabled) {
+                // If ID cut is set to "none", SF is still applied on those electrons that pass the mediumID
+                if (_id_cut != id::none || el.id >= 3) {
+                    w.use_weight(tab.at("electron reco").getEfficiency(el.v.Pt(), el.raw_v.Eta()));
+                }
+            }
+            if (_id_sf_enabled) {
+                w.use_weight(tab.at("electron id").getEfficiency(el.v.Pt(), el.raw_v.Eta()));
+            }
+        }
+    }
 }
 
 void electrons::apply_charge_misid_sf(physics::weights &weights,
                                       const std::vector<physics::lepton> &_electrons,
-                                      const std::vector<physics::lepton> &_genleps)
+                                      const std::vector<physics::lepton> &_genleps,
+                                      const int var,
+                                      const bool inverse)
 {
     if (_charge_misid_sf_enabled && weights.ismc()) {
         if (_electrons.size() && _genleps.size()) {
@@ -308,6 +321,7 @@ void electrons::apply_charge_misid_sf(physics::weights &weights,
 
             for (unsigned iel = 0; iel < electrons.size(); iel++) {
                 if (matches[iel] >= 0 && drmins[iel] < 99999) continue; // We already found a match
+                if (std::abs(electrons[iel].pdgid) != 11) continue;
 
                 for (unsigned igen = 0; igen < genleps.size(); igen++) {
                     if (std::abs(genleps[igen].pdgid) != 11) continue;
@@ -336,13 +350,15 @@ void electrons::apply_charge_misid_sf(physics::weights &weights,
                 }
             }// for (electrons)
 
-            if (std::find(matches.begin(), matches.end(), -1) != matches.end())
-                util::logging::warn << "Not all gen leptons found for charge_misid!" << std::endl;
+            // if (std::find(matches.begin(), matches.end(), -1) != matches.end())
+                // util::logging::warn << "Not all gen leptons found for charge_misid!" << std::endl;
 
             for (unsigned iel = 0; iel < electrons.size(); iel++) {
                 if (matches[iel] >= 0) {
                     if (electrons[iel].charge != genleps[matches[iel]].charge) {
-                        weights.use_weight(_charge_misid.get_sf(electrons[iel]));
+                        double the_weight = _charge_misid.get_sf(electrons[iel], var);
+                        if (inverse) the_weight = 1.0 / the_weight;
+                        weights.use_weight(the_weight);
                     }
                 }
             }

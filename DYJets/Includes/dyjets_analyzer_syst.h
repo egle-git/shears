@@ -142,6 +142,12 @@ private:
   bool _doSyst_pileup = false; // -- Pileup
   bool _doSyst_L1Pref = false; // -- L1 pre-firing
   bool _doSyst_theory = false; // -- MC theory uncertainty (PDF, alpha_s, scale)
+  bool _doSyst_emuMethodFit = false; // -- emu method reweighting fit parameter uncertainty
+  bool _doSyst_emuMethodFakes = false; // -- emu method uncertainty related to the fake contribution to emu sample
+  bool _doSyst_fakeSameSignFit = false; // -- same-sign method OS/SS reweighting fit parameter uncertainty
+  bool _doSyst_fakeSameSignFitFun = false; // -- same-sign method OS/SS reweighting fit uncertainty (functional form)
+  bool _doSyst_fakeSameSignEmuMeth = false; // -- using vs not using the emu method reweighting on same-sign EWK backgrounds
+  bool _doSyst_fakeSameSignElChMisid = false; // -- electron charge misidentification correction for same-sign method
 
   std::string _fileName_effMap = ""; // -- .root file with systematic-varied efficiency maps
 
@@ -155,6 +161,17 @@ private:
   // -- for the uncertainty from the theory
   vector<GenWeightInfo> vec_PDFWeightInfo_;
   // vector<GenWeightInfo> vec_scaleWeightInfo_;
+
+  // -- for the uncertainty from the emu method fit parameters
+  std::vector<double> _pars_emuMethodFitPlus, _pars_emuMethodFitMinus;
+
+  //  -- for background reweighting uncertainties
+  std::vector<double> _errs_emu_method = {};
+  std::vector<double> _pars_fakesPlus_emu_method = {};
+  std::vector<double> _pars_fakesMinus_emu_method = {};
+  std::vector<std::vector<double>> _pars_plus_same_sign_method = {{}, {}, {}, {}, {}};
+  std::vector<std::vector<double>> _pars_minus_same_sign_method = {{}, {}, {}, {}, {}};
+  double _same_sign_reweight_const = 1;
 
   void fill_systHist_effSF(const util::matched<event_contents>& evt,
                            const util::matched<double> &value,
@@ -224,8 +241,46 @@ private:
   void fill_systHist_theory(const util::matched<event_contents>& evt,
                             const util::matched<double> &value,
                             const util::matched<std::string>& tags_default);
+
   void Init_GenWeightInfo(const util::options &opt);
   void Adjust_PDFWeight(const int i_mem, double& ratio_weight);
+
+  // -- for the background uncertainty related to the emu method fit parameters
+  void fill_systHist_emuMethodFit(const util::matched<event_contents>& evt,
+                                  const util::matched<double> &value,
+                                  const std::string &sample_name,
+                                  const util::matched<std::string>& tags_default);
+
+  // -- for the background uncertainty related to the emu method fake backgrounds
+  void fill_systHist_emuMethodFakes(const util::matched<event_contents>& evt,
+                                    const util::matched<double> &value,
+                                    const std::string &sample_name,
+                                    const util::matched<std::string>& tags_default);
+
+  // -- for the background uncertainty related to the same-sign method OS/SS reweighting fit parameter uncertainty
+  void fill_systHist_fakeSameSignFit(const util::matched<event_contents> &evt,
+                                     const util::matched<double> &value,
+                                     const util::matched<std::string> &tags_default);
+  void fill_systHist_fakeSameSignFit_eachSystVar(const util::matched<event_contents> &evt,
+                                                 const util::matched<double> &value,
+                                                 const util::matched<std::string> &tags_default,
+                                                 const int ivar);
+
+  // -- for the background uncertainty related to the same-sign method OS/SS reweighting fit uncertainty (functional form)
+  void fill_systHist_fakeSameSignFitFun(const util::matched<event_contents> &evt,
+                                        const util::matched<double> &value,
+                                        const util::matched<std::string> &tags_default);
+
+  // -- for the background uncertainty related to using vs not using the emu method reweighting on same-sign EWK backgrounds
+  void fill_systHist_fakeSameSignEmuMeth(const util::matched<event_contents> &evt,
+                                         const util::matched<double> &value,
+                                         const std::string &sample_name,
+                                         const util::matched<std::string> &tags_default);
+
+  // -- for the background uncertainty related to the electron charge misidentification correction for same-sign method
+  void fill_systHist_fakeSameSignElChMisid(const util::matched<event_contents> &evt,
+                                           const util::matched<double> &value,
+                                           const util::matched<std::string> &tags_default);
 };
 
 #endif // DYJETS_ANALYZER_SYST_H

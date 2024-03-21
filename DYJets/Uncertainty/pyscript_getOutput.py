@@ -84,7 +84,7 @@ if __name__ == '__main__':
     timeInfo = time.localtime()
     yearInfo = "%d" % timeInfo.tm_year
     yearInfo = yearInfo.split("20")[-1]
-    dateTag = "%s%d%d" % (yearInfo, timeInfo.tm_mon, timeInfo.tm_mday)
+    dateTag = "%s%02d%02d" % (yearInfo, timeInfo.tm_mon, timeInfo.tm_mday)
 
     args.output = args.output + "_" + dateTag
 

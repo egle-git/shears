@@ -723,11 +723,20 @@ public:
 
     // -- for actual data results
     Insert_AllEraHist("reco", "data");
+    // -- individual bkg. MCs
+    for( const auto& pair : DYTool::map_tag ) {
+      TString process = pair.first;
+      if( process == "data" || process == "DY" ) continue;
+      Insert_AllEraHist("reco", process);
+    }
+    // -- sum of bkg. MCs    
     Insert_AllEraHist_BkgMC();
+
     if( hasFake_fullRun2_ ) {
       Insert_AllEraHist_Fake();
       Insert_AllEraHist("reco", "bkgAll");
     }
+
     Insert_AllEraHist("reco", "data_bkgSub");
     Insert_MigM();
 

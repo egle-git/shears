@@ -124,6 +124,7 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
       break;
     case iso::verytight:
       l.passes_iso = (Muon_pfIsoId[i] >= 5);
+      break;
     case iso::trkLoose:
       l.passes_iso = (Muon_tkIsoId[i] >= 1);
       break;

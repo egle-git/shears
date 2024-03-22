@@ -58,15 +58,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -75,6 +79,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer19UL18_JRV2_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer19UL18_JRV2_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -178,7 +184,7 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: RoccoR2016bUL.txt
+    rochester correction path: 2018/RoccoR2018UL.txt
     #rochester correction path: rcdata.2016.v3
 
 # Good Z boson settings
@@ -230,7 +236,7 @@ use trigger scale factors: yes
 
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
-  use: yes
+  use: no
   parameters: [1.28941, -0.155911]
   errors: [0.0209709, 0.00985887]
   fakes plus: [1.24888, -0.142019]
@@ -253,7 +259,7 @@ samples:
     #  catalog: Catalog2018_bonzai_DYJetsToEE.txt
     - name: DYJets_M-10to50
       type: MC
-      jobs: 5
+      jobs: 10
       nano dir: Catalogs/2018/MassBinned_MiNNLO
       catalog: Catalog2018_bonzai_DYJetsToEE_M-10to50.txt
     - name: DYJets_M-50to100
@@ -300,23 +306,24 @@ samples:
     ### BACKGROUND
     - name: ST_s-channel
       type: background
-      nano dir: Catalogs/2018/
+      nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_s-channel.txt
     - name: ST_t-channel_antitop
       type: background
-      nano dir: Catalogs/2018/
+      nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
-      nano dir: Catalogs/2018/
+      jobs: 3
+      nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
       type: background
-      nano dir: Catalogs/2018/
+      nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_tW_antitop.txt
     - name: ST_tW_top
       type: background
-      nano dir: Catalogs/2018/
+      nano dir: Catalogs/2018
       catalog: Catalog2018_bonzai_ST_tW_top.txt
 #    - name: WJetsToLNu
 #      type: background
@@ -394,8 +401,8 @@ MC grouping:
     - legend: "Z/#gamma* #rightarrow ee"
       required: yes
       #samples: [ DYJets ]
-      samples: [ DYJets_M-10to50, DYJets_M-50to100, DYJets_M-100to200, DYJets_M-200to400, 
-                 DYJets_M-400to500, DYJets_M-500to700, DYJets_M-700to800, DYJets_M-800to1000, 
+      samples: [ DYJets_M-10to50, DYJets_M-50to100, DYJets_M-100to200, DYJets_M-200to400,
+                 DYJets_M-400to500, DYJets_M-500to700, DYJets_M-700to800, DYJets_M-800to1000,
                  DYJets_M-1000to1500, DYJets_M-1500to2000, DYJets_M-2000toInf ]
       color: 408 # kGreen - 8
       is signal: yes
@@ -452,7 +459,7 @@ plots:
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
-      produce: no
+      produce: yes
     - selector: 'el.*'
       produce: yes
     - selector: 'mu.*'
@@ -460,11 +467,11 @@ plots:
     - selector: 'genLep.*'
       produce: no
     - selector: 'bjet.*'
-      produce: no
+      produce: yes
     - selector: 'jet.*leading.*'
-      produce: no
+      produce: yes
     - selector: 'jet.*subleading.*'
-      produce: no
+      produce: yes
     - selector: 'jet.*third.*'
       produce: no
     - selector: 'jet.*fourth.*'
@@ -473,14 +480,40 @@ plots:
       produce: no
     - selector: 'mass.*mass.*'
       produce: no
-    - selector: 'nJets.*_inc.*'
+    - selector: '.*exc.*'
       produce: no
+    - selector: 'nJets.*_inc.*'
+      produce: yes
     - selector: 'nJets.*_inc0jet.*'
       produce: yes
+    - selector: '.*decay.*'
+      produce: no
+    - selector: '.*OF.*'
+      produce: no
+    - selector: '.*UF.*'
+      produce: no
+    - selector: '.*fineB.*'
+      produce: no
+    - selector: '.*-matrix.*'
+      produce: no
+    - selector: '.*L1Pref.*'
+      produce: no
+    - selector: '.*TUnfold.*'
+      produce: no
+    - selector: '.*phistar.*'
+      produce: no
+    - selector: '.*MET.*'
+      produce: no
+    - selector: '.mll_over_ptsub.*'
+      produce: no
+    - selector: '.*pileup.*'
+      produce: no
+    - selector: '^dyjets_events_peak.*'
+      produce: no
+    - selector: '^rapidity.*'
+      produce: no
     # Style changes
     - selector: '.*'
-#      ratio min: 0.601
-#      ratio max: 1.399
       ratio min: 0.901
       ratio max: 1.099
     - selector: '^phistar.*'
@@ -494,6 +527,12 @@ plots:
     - selector: 'mass_inc0jet'
       ratio min: 0.901
       ratio max: 1.099
+    - selector: '^nJets.*'
+      ratio min: 0.601
+      ratio max: 1.399
+    - selector: '^jet.*'
+      ratio min: 0.601
+      ratio max: 1.399
     # Axis labels
     - selector: '^mass.*'
       x axis label: 'M_{ee}'
@@ -529,8 +568,8 @@ uncertainties:
   Electron energy correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
-  emu method fit parameter: true
-  emu method fake background: true
+  emu method fit parameter: false
+  emu method fake background: false
   same-sign method fit parameter: false
   same-sign method fit function choice: false
   same-sign method ewk bkg reweight: false

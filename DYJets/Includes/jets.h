@@ -40,7 +40,9 @@ class jets
     TTreeReaderArray<int> Jet_puId;
     TTreeReaderArray<float> Jet_puIdDisc;
     TTreeReaderArray<float> Jet_btagCSVV2;
-    //TTreeReaderArray<float> Jet_hadronFlavour;
+    TTreeReaderArray<float> Jet_btagDeepB;
+    TTreeReaderArray<float> Jet_btagDeepFlavB;
+    std::optional<TTreeReaderArray<int>> Jet_hadronFlavour;
     TTreeReaderValue<float> fixedGridRhoFastjetAll;
 
     std::optional<TTreeReaderArray<float>> GenJet_pt;

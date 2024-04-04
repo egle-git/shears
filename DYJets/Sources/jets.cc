@@ -18,7 +18,9 @@ jets::jets(util::job::info &info, const util::options &opt)
       Jet_puId(info.reader, "Jet_puId"),//Max:check
       Jet_puIdDisc(info.reader, "Jet_puIdDisc"),//Iti:check
       Jet_btagCSVV2(info.reader, "Jet_btagCSVV2"),
-      //Jet_hadronFlavour(info.reader, "Jet_hadronFlavour"),
+      Jet_btagDeepB(info.reader, "Jet_btagDeepB"),
+      Jet_btagDeepFlavB(info.reader, "Jet_btagDeepFlavB"),
+      Jet_hadronFlavour(info.init_optional_branch<decltype(Jet_hadronFlavour)>("Jet_hadronFlavour")),//Max:check
       //EvtFastJetRho(info.reader, "EvtFastJetRho"),
       fixedGridRhoFastjetAll(info.reader, "fixedGridRhoFastjetAll"), //Iti:check
       GenJet_pt(info.init_optional_branch<decltype(GenJet_pt)>("GenJet_pt")),
@@ -96,6 +98,7 @@ void jets::declare_histograms(util::histo_set &h)
     h.declare("jetEta", "Jet eta", 25, -2.5, 2.5);
     h.declare("jetPhi", "Jet phi", 24, -pi, pi);
     h.declare("jetDr_gen", "Jet DeltaR", 24, -pi, pi);
+    h.declare("jetHadFlav", "Jet HadFlav", 6, -0.5, 5.5);
 }
 
 std::vector<jet> jets::getGen()
@@ -172,9 +175,9 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
         }
         j.raw_v = j.v;
         j.id = Jet_jetId[i];
-        j.puMva = Jet_puIdDisc[i];
-        j.bdisc = Jet_btagCSVV2[i];
-        j.hadflav = 0;
+        //j.puMva = Jet_puIdDisc[i];
+        //j.bdisc = Jet_btagDeepB[i]; //new DeepCSV
+        j.bdisc = Jet_btagDeepFlavB[i]; //DeepJet (recommended)
 
         // Check if the optional contains a value before accessing it
         if (!isdata && Jet_hadronFlavour.has_value()) {

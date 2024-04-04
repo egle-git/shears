@@ -95,6 +95,7 @@ void jets::declare_histograms(util::histo_set &h)
     //h.declare("jetPuMva", "Jet PU variable from MVA", 40, -1, 1);
     h.declare("jetbdisc", "Jet bdisc variable ", 50, 0, 1);
     h.declare("jetPt", "Jet pt", 40, 0, 200);
+    h.declare("jetPtforbveto_multiple", "Jet pt per eta region", 36, -0.5, 35.5); // (7 bins + UF + OF) * 4 eta regions
     h.declare("jetEta", "Jet eta", 25, -2.5, 2.5);
     h.declare("jetPhi", "Jet phi", 24, -pi, pi);
     h.declare("jetDr_gen", "Jet DeltaR", 24, -pi, pi);

@@ -48,7 +48,7 @@ void reco_compare_builder::fill_upper_panel(const std::string &name)
     //    double min = _mc_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _mc_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
     //    _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _data_entry->get(name, _lumi)->GetMaximum() * 1.5);
     //}
-    
+
 
     if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
         format_upper_x_axis(*axis);

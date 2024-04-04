@@ -15,9 +15,13 @@ namespace physics
 /// \brief Wrapper around b-tagging utilities
 class btagger
 {
-    double _bjet_cut = 0.5426;
-    std::string bjet_cut; 
-    BTagCalibrationReader _btag_calibration_reader;
+    int _era = -1 ;
+    double _bjet_cut = -1 ;
+    double _loose_cut = -1, _medium_cut = -1, _tight_cut = -1;
+    std::string bjet_cut = " " ;
+    BTagEntry::OperatingPoint wp = BTagEntry::OP_MEDIUM ;
+    std::string calib_file = " " ;
+    BTagCalibrationReader _btag_calibration_reader ;
 
   public:
     /// \brief Constructor

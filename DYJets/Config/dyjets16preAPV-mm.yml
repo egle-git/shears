@@ -1,4 +1,4 @@
-# This is the configuration file for the Higgs analysis, year 2016.
+# This is the configuration file for the DY analysis, year 2016.
 # Please keep it organized, and don't delete comments.
 
 # Options related to output and logs
@@ -110,7 +110,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -119,8 +119,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2016preAPV/wp_deepJet_2016preAPV.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -437,6 +436,10 @@ tables:
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
     smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
     smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
+    bjet medium eff:      2016preAPV/btag-medium-b.txt
+    cjet medium eff:      2016preAPV/btag-medium-c.txt
+    udsgjet medium eff:   2016preAPV/btag-medium-udsg.txt
+
 
 # Reweighing (eg for merged samples)
 #
@@ -519,7 +522,7 @@ plots:
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
-      produce: yes
+      produce: no
     - selector: 'el.*'
       produce: no
     - selector: 'mu.*'
@@ -531,11 +534,11 @@ plots:
     - selector: 'genLep.*'
       produce: no
     - selector: 'bjet.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*leading.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*subleading.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*third.*'
       produce: no
     - selector: 'jet.*fourth.*'
@@ -547,9 +550,9 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'
-      produce: yes
+      produce: no
     - selector: 'nJets.*_inc0jet.*'
-      produce: yes
+      produce: no
     - selector: '.*decay.*'
       produce: no
     - selector: '.*OF.*'

@@ -93,7 +93,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -102,8 +102,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2016preAPV/wp_deepJet_2016preAPV.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -373,6 +372,9 @@ tables:
     electron reco:  2016preAPVee/egamma_reco_all_SF.txt
     diel trigger leg1: Trigger_sf/2016a_Ele23Leg1_MediumID.txt
     diel trigger leg2: Trigger_sf/2016a_Ele12Leg2_MediumID.txt
+    bjet medium eff:     2016preAPV/btag-medium-b.txt
+    cjet medium eff:     2016preAPV/btag-medium-c.txt
+    udsgjet medium eff:  2016preAPV/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #
@@ -455,7 +457,7 @@ plots:
     - selector: '.*-matrix$'
       produce: no
     - selector: '.*[12]jet.*'
-      produce: yes
+      produce: no
     - selector: 'el.*'
       produce: yes
     - selector: 'mu.*'
@@ -463,11 +465,11 @@ plots:
     - selector: 'genLep.*'
       produce: no
     - selector: 'bjet.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*leading.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*subleading.*'
-      produce: yes
+      produce: no
     - selector: 'jet.*third.*'
       produce: no
     - selector: 'jet.*fourth.*'
@@ -479,9 +481,9 @@ plots:
     - selector: '.*exc.*'
       produce: no
     - selector: 'nJets.*_inc.*'
-      produce: yes
+      produce: no
     - selector: 'nJets.*_inc0jet.*'
-      produce: yes
+      produce: no
     - selector: '.*decay.*'
       produce: no
     - selector: '.*OF.*'

@@ -40,14 +40,14 @@ BTagEntry::BTagEntry(const std::string &csvLine)
   std::stringstream buff(csvLine);
   std::vector<std::string> vec;
   std::string token;
-  // Had to add a smart workaround. The csvlines are separated by "," between the 11 arguments of 
+  // Had to add a smart workaround. The csvlines are separated by "," between the 11 arguments of
   // each line. But in 2016 some formula have a pow(xx,yy) and the "," was creating a bug.
   // This fix can interpret if the "," is separating arguments in the csvline or in the formula.
   bool inQuotes = false;
   for (char c : csvLine) {
       if (c == '"') {
           inQuotes = !inQuotes;
-      } else if (c == ',' && !inQuotes) { 
+      } else if (c == ',' && !inQuotes) {
           token = BTagEntry::trimStr(token); // Trim the token
           vec.push_back(token);
           token.clear();
@@ -414,7 +414,7 @@ private:
   std::pair<float, float> min_max_pt(BTagEntry::JetFlavor jf,
                                      float eta,
                                      float discr) const;
- 
+
   std::pair<float, float> min_max_eta(BTagEntry::JetFlavor jf,
                                      float discr) const;
 
@@ -539,11 +539,11 @@ double BTagCalibrationReader::BTagCalibrationReaderImpl::eval_auto_bounds(
   auto sf_bounds_eta = min_max_eta(jf, discr);
   bool eta_is_out_of_bounds = false;
 
-  if (sf_bounds_eta.first < 0) sf_bounds_eta.first = -sf_bounds_eta.second;   
+  if (sf_bounds_eta.first < 0) sf_bounds_eta.first = -sf_bounds_eta.second;
   if (eta <= sf_bounds_eta.first || eta > sf_bounds_eta.second ) {
     eta_is_out_of_bounds = true;
   }
-   
+
   if (eta_is_out_of_bounds) {
     return 1.;
   }

@@ -27,7 +27,7 @@ class mc_group
 
   private:
     friend struct YAML::convert<data::mc_group>;
-    
+
     bool _required = false;
     double _scale_factor = 1;
     int _color;

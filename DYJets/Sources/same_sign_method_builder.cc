@@ -263,7 +263,7 @@ void same_sign_method_builder::build()
         reset_drawing_state();
 
     }// for (const std::string &name : _histogram_names)
-    
+
     // Cleanup
     reset_drawing_state();
 }// void same_sign_method_builder::build()
@@ -399,7 +399,7 @@ po::options_description same_sign_method_builder::options() const
     options.add_options()("format,f",
                           po::value<std::string>()->default_value("png"),
                           "Sets the output format (png, pdf, ...)");
-    options.add_options()("logy,l", "Use logarithmic scale on the y axis");                    
+    options.add_options()("logy,l", "Use logarithmic scale on the y axis");
     return options;
 }
 

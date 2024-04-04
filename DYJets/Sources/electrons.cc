@@ -11,7 +11,7 @@
 namespace physics
 {
 
-electrons::electrons(util::job::info &info, const util::options &opt, util::histo_set &h): 
+electrons::electrons(util::job::info &info, const util::options &opt, util::histo_set &h):
 Electron_pt(info.reader, "Electron_pt"),
 Electron_eta(info.reader, "Electron_eta"),
 Electron_phi(info.reader, "Electron_phi"),
@@ -74,19 +74,19 @@ void electrons::configure(const util::options &opt) {
       util::logging::info << "rochester energy correction path: " + eRoccor_dir << std::endl;
       _eRoccor->init(eRoccor_dir, Aepres::CB);
     }
-  }    
+  }
 }
 
 std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
                                    const vector<lepton>& vec_dressedGenLep,
                                    const vector<lepton>& vec_postFSRGenLep,
-                                   const double& rndm, int & nVetoElecs, 
+                                   const double& rndm, int & nVetoElecs,
                                    TString systMode, const int& s, const int& m) {
   nVetoElecs=0;
   std::vector<lepton> electrons;
   for(unsigned i=0; i<Electron_pt.GetSize(); ++i) {
     lepton l;
-    double etaSC = Electron_deltaEtaSC[i]+Electron_eta[i]; 
+    double etaSC = Electron_deltaEtaSC[i]+Electron_eta[i];
     if( std::abs(etaSC) > _eta_cut ) continue;
     if( std::abs(etaSC) > 1.4442 && std::abs(etaSC) < 1.566 ) continue; // Veto endcap-barrel transition
 
@@ -129,7 +129,7 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
         l.passes_id = (Electron_mvaFall17V2Iso_WP90[i] >= 1);
         break;
     }
-        
+
     if( !l.passes_id ) continue;
 
     if( systMode != "default" && !_eRoccor_enabled )
@@ -158,7 +158,7 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
     // printf("  [electrons::get] (after pt cut) (pt, eta, phi, pt_cut, pt>pt_cut?, pt<pt_cut?) = (%.3lf, %.3lf, %.3lf, %.3lf, %d, %d)\n", l.v.Pt(), l.v.Eta(), l.v.Phi(), _pt_cut, l.v.Pt() > _pt_cut, l.v.Pt() < _pt_cut);
     electrons.push_back(l);
   }
-  std::sort(electrons.begin(), electrons.end(), 
+  std::sort(electrons.begin(), electrons.end(),
             [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); }
   );
 
@@ -181,9 +181,9 @@ void electrons::SystVar_ElectronEnergy_POGCorr(lepton& l, const int& index, cons
   l.v.SetVectM(vecP3_old*corr, Electron_mass[index]); // -- scale the 3-momentum only
 }
 
-void electrons::apply_energyCorr_smp22010(lepton& l, 
+void electrons::apply_energyCorr_smp22010(lepton& l,
                                           const bool isData, const double factorToRawE,
-                                          const unsigned int& runNum, const double r9, 
+                                          const unsigned int& runNum, const double r9,
                                           const vector<lepton>& vec_dressedGenLep,
                                           const vector<lepton>& vec_postFSRGenLep,
                                           const double& rndm, const int& s, const int& m) {
@@ -219,13 +219,13 @@ void electrons::apply_energyCorr_smp22010(lepton& l,
     l.v.SetPtEtaPhiM(pt_corr, eta, phi, mass);
 
     // if( s == 0 ) {
-    //   printf("  (pt, eta, phi) = (%.3lf, %.3lf, %.3lf) w/ rndm = %lf --> (eCorr, pt_corr) = (%.6lf, %.3lf)\n", 
+    //   printf("  (pt, eta, phi) = (%.3lf, %.3lf, %.3lf) w/ rndm = %lf --> (eCorr, pt_corr) = (%.6lf, %.3lf)\n",
     //           pt, eta, phi, rndm, eCorr, pt_corr);
     // }
 }
 
-double electrons::Find_MatchedGenPt(lepton l, 
-                                    const vector<lepton>& vec_dressedGenLep, 
+double electrons::Find_MatchedGenPt(lepton l,
+                                    const vector<lepton>& vec_dressedGenLep,
                                     const vector<lepton>& vec_postFSRGenLep) {
   lepton genLep_matched = matchedGenLepton(l, vec_dressedGenLep);
   double pt_gen = genLep_matched.v.Pt();
@@ -263,7 +263,7 @@ lepton electrons::matchedGenLepton(const lepton& l, const vector<lepton>& vec_ge
         // printf("  [Given reco-lepton] (pt, eta, phi) = (%.3lf, %.3lf, %.3lf)\n", l.v.Pt(), l.v.Eta(), l.v.Phi());
         // for(const auto& genLep : vec_genLep ) {
         //     double dR = l.v.DeltaR( genLep.v );
-        //     printf("----> [gen-lepton] (pt, eta, phi, dR) = (%.3lf, %.3lf, %.3lf, %.3lf)\n", 
+        //     printf("----> [gen-lepton] (pt, eta, phi, dR) = (%.3lf, %.3lf, %.3lf, %.3lf)\n",
         //                                                      genLep.v.Pt(), genLep.v.Eta(), genLep.v.Phi(), dR);
         // }
         lepton l_null = l;
@@ -380,7 +380,7 @@ void electrons::fill(util::histo_set &h,
     const lepton &el = electrons[0];
     h.fill("elPt", "leading_" + tag, el.v.Pt(), w.global_weight());
     h.fill("elEta", "leading_" + tag, el.v.Eta(), w.global_weight());
-    h.fill("elPhi", "leading_" + tag, el.v.Phi(), w.global_weight());    
+    h.fill("elPhi", "leading_" + tag, el.v.Phi(), w.global_weight());
   }
   if( electrons.size() > 1 ) {
     const lepton &el = electrons[1];

@@ -16,7 +16,7 @@ namespace util
 class chains
 {
     std::shared_ptr<TChain> _events;
-    
+
   public:
     /// \brief Constructor.
     explicit chains(const std::vector<std::string> &files);

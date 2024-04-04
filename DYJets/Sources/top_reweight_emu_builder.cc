@@ -324,7 +324,7 @@ void top_reweight_emu_builder::format_lower_y_axis(TAxis &axis, const std::strin
 
 po::options_description top_reweight_emu_builder::options() const
 {
-    po::options_description options = po::options_description("EMu comparison options"); 
+    po::options_description options = po::options_description("EMu comparison options");
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
     options.add_options()("format,f",
                           po::value<std::string>()->default_value("png"),
@@ -392,7 +392,7 @@ bool top_reweight_emu_builder::fill_lower_panel(const std::string &name)
     std::unique_ptr<TH1> den = nullptr;
     den = _ll_mc_entry->get(name, _lumi);
     num = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(_bkg_estimation.get()->Clone()));
-    
+
 
     if (num == nullptr || den == nullptr) {
         return false;
@@ -589,7 +589,7 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     // For systematic uncertainty
     _bkg_estimation_fakes_plus   = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
     _bkg_estimation_fakes_minus  = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
-    
+
     bkg_est->Multiply(num.get());
     bkg_est->Divide(den.get());
 

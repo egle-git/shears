@@ -42,7 +42,7 @@ void dyjets_analyzer_syst::Init_GenWeightInfo(const util::options &opt) {
   util::logging::info << "Gen weight information is from " << fileName << std::endl;
 
   TFile *f_input = TFile::Open(fileName);
-  
+
   TString sampleName = get_sample_name();
 
   // -- only when the information for the given sample is available
@@ -108,7 +108,7 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_fakeSameSignFitFun, "same-sign method fit function choice", "calculate systematic variations from the same-sign method fit function choice");
   util::set_value_safe(node, _doSyst_fakeSameSignEmuMeth, "same-sign method ewk bkg reweight", "calculate systematic variations from the reweighting of the same-sign EWK backgrounds using the emu method");
   util::set_value_safe(node, _doSyst_fakeSameSignElChMisid, "same-sign method electron charge misid", "calculate systematic variations from the uncertainty of the electron charge misidentification correction");
-  
+
   if( _channel == "ee" && _doSyst_elE )
     _use_eRoccor = (opt.config["electrons"])["use rochester electron energy correction"].as<bool>();
 
@@ -273,12 +273,12 @@ void dyjets_analyzer_syst::operator()() {
     else                  genleps_dressed_noCut.clear(); // data: no gen-leptons
 
     rndm_forRoccor = gRandom->Rndm();
-    std::vector<physics::lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm_forRoccor);    
-    if( _select_bestMuonTrigSF && _reject_lowQMu ) 
+    std::vector<physics::lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm_forRoccor);
+    if( _select_bestMuonTrigSF && _reject_lowQMu )
       isLowQMuEvent = check_lowQualityMuon(muons);
 
     std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                            genleps_dressed_noCut, genleps_finalState, 
+                                                            genleps_dressed_noCut, genleps_finalState,
                                                             rndm_forRoccor, nVetoElecs);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
@@ -354,7 +354,7 @@ void dyjets_analyzer_syst::operator()() {
   else          tags_default.rec = boost::none;
   fill_unfolded("mass_wide_range", tags_default, mass);
 
-  ///////////////////////////////////////////  
+  ///////////////////////////////////////////
   // -- fill with systematic variations -- //
   ///////////////////////////////////////////
   if( _weights.ismc() ) {
@@ -382,7 +382,7 @@ void dyjets_analyzer_syst::operator()() {
 void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_contents>& evt,
                                                 const util::matched<double> &value,
                                                 const util::matched<std::string>& tags_default) {
-  
+
   // -- some samples do not have these branches
   if( !LHEPdfWeight || !LHEScaleWeight ) return;
 
@@ -413,7 +413,7 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
     // }
 
     // -- if ratio_weight is outside of 5-sigma range w.r.t mean -> force it to be the mean value
-    // -- to remove unphysical effect due to huge weight (e.g. >10000) 
+    // -- to remove unphysical effect due to huge weight (e.g. >10000)
     Adjust_PDFWeight(i_mem, ratio_weight);
 
     double gen_weight_PDFVar    = gen_weight_cv    * ratio_weight;
@@ -452,7 +452,7 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
     double gen_weight_scaleVar    = gen_weight_cv    * ratio_weight;
     double global_weight_scaleVar = global_weight_cv * ratio_weight;
 
-    
+
     util::matched<std::string> tags_scaleVar;
     if( evt.gen ) tags_scaleVar.gen = *tags_default.gen + "_" + tstr_scaleVarInfo.Data();
     else          tags_scaleVar.gen = boost::none;
@@ -542,7 +542,7 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::mat
 
     std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
                                                             genleps_dressed, genleps_fs,
-                                                            rndm_forRoccor, nVetoElecs, 
+                                                            rndm_forRoccor, nVetoElecs,
                                                             "default", s, m);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
@@ -649,7 +649,7 @@ void dyjets_analyzer_syst::fill_systHist_elE_POGCorr_eachSystVar(const util::mat
 }
 
 
-void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>& evt, 
+void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>& evt,
                                              const bool isLowQMuEvent,
                                              const std::vector<physics::lepton>& genleps_fs,
                                              const double rndm_forRoccor) {
@@ -665,7 +665,7 @@ void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>
 }
 
 void dyjets_analyzer_syst::fill_systHist_muP_eachSystVar(
-                           const util::matched<event_contents>& evt_default, 
+                           const util::matched<event_contents>& evt_default,
                            const bool isLowQMuEvent,
                            const std::vector<physics::lepton>& genleps_fs,
                            const double rndm_forRoccor,
@@ -984,7 +984,7 @@ void dyjets_analyzer_syst::fill_systHist_fakeSameSignElChMisid(const util::match
     // -- Apply a plus variation
     _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 1, false);
   }
-  
+
   util::matched<std::string> tags_alt_plus;
   if( evt.gen ) tags_alt_plus.gen = *tags_default.gen + "_fakeSameSignElChMisid_plus";
   else          tags_alt_plus.gen = boost::none;
@@ -1053,7 +1053,7 @@ void dyjets_analyzer_syst::fill_systHist_effSF(const util::matched<event_content
   }
 }
 
-void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::lepton>& chosen_leptons, 
+void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::lepton>& chosen_leptons,
                                                          std::map<TString, double>& map_uncType_effSFRatio) {
 
   // -- maybe std::unordered_map improves the performance
@@ -1077,7 +1077,7 @@ void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::l
   }
 }
 
-double dyjets_analyzer_syst::find_or_calculate_centralValueEffSF(const TString& type, 
+double dyjets_analyzer_syst::find_or_calculate_centralValueEffSF(const TString& type,
                                                             const vector<physics::lepton>& chosen_leptons,
                                                             std::map<TString, double>& map_type_effSFCV) {
   double effSF_cv = 1.0;

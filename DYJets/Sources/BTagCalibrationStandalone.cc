@@ -40,13 +40,23 @@ BTagEntry::BTagEntry(const std::string &csvLine)
   std::stringstream buff(csvLine);
   std::vector<std::string> vec;
   std::string token;
-  while (std::getline(buff, token, ","[0])) {
-    token = BTagEntry::trimStr(token);
-    if (token.empty()) {
-      continue;
-    }
-    vec.push_back(token);
+  // Had to add a smart workaround. The csvlines are separated by "," between the 11 arguments of 
+  // each line. But in 2016 some formula have a pow(xx,yy) and the "," was creating a bug.
+  // This fix can interpret if the "," is separating arguments in the csvline or in the formula.
+  bool inQuotes = false;
+  for (char c : csvLine) {
+      if (c == '"') {
+          inQuotes = !inQuotes;
+      } else if (c == ',' && !inQuotes) { 
+          token = BTagEntry::trimStr(token); // Trim the token
+          vec.push_back(token);
+          token.clear();
+      } else {
+          token += c;
+      }
   }
+  token = BTagEntry::trimStr(token); // Trim the last token
+  vec.push_back(token);
   if (vec.size() != 11) {
 std::cerr << "ERROR in BTagCalibration: "
           << "Invalid csv line; num tokens != 11: "
@@ -197,13 +207,13 @@ BTagEntry::BTagEntry(const TH1* hist, BTagEntry::Parameters p):
   TAxis const* axis = hist->GetXaxis();
 
   // overwrite bounds with histo values
-  if (params.operatingPoint == BTagEntry::OP_RESHAPING) {
-    params.discrMin = axis->GetBinLowEdge(1);
-    params.discrMax = axis->GetBinUpEdge(nbins);
-  } else {
+  //if (params.operatingPoint == BTagEntry::OP_RESHAPING) {
+  //  params.discrMin = axis->GetBinLowEdge(1);
+  //  params.discrMax = axis->GetBinUpEdge(nbins);
+  //} else {
     params.ptMin = axis->GetBinLowEdge(1);
     params.ptMax = axis->GetBinUpEdge(nbins);
-  }
+  //}
 
   // balanced full binary tree height = ceil(log(2*n_leaves)/log(2))
   // breakes even around 10, but lower values are more propable in pt-spectrum
@@ -466,13 +476,13 @@ throw std::exception();
     te.discrMin = be.params.discrMin;
     te.discrMax = be.params.discrMax;
 
-    if (op_ == BTagEntry::OP_RESHAPING) {
-      te.func = TF1("", be.formula.c_str(),
-                    be.params.discrMin, be.params.discrMax);
-    } else {
+    //if (op_ == BTagEntry::OP_RESHAPING) {
+    //  te.func = TF1("", be.formula.c_str(),
+    //                be.params.discrMin, be.params.discrMax);
+    //} else {
       te.func = TF1("", be.formula.c_str(),
                     be.params.ptMin, be.params.ptMax);
-    }
+    //}
 
     tmpData_[be.params.jetFlavor].push_back(te);
     if (te.etaMin < 0) {
@@ -491,7 +501,8 @@ double BTagCalibrationReader::BTagCalibrationReaderImpl::eval(
                                              float pt,
                                              float discr) const
 {
-  bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  //bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  bool use_discr = 0;
   if (useAbsEta_[jf] && eta < 0) {
     eta = -eta;
   }
@@ -578,7 +589,8 @@ std::pair<float, float> BTagCalibrationReader::BTagCalibrationReaderImpl::min_ma
                                                float eta,
                                                float discr) const
 {
-  bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  //bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  bool use_discr = 0;
   if (useAbsEta_[jf] && eta < 0) {
     eta = -eta;
   }
@@ -614,7 +626,8 @@ std::pair<float, float> BTagCalibrationReader::BTagCalibrationReaderImpl::min_ma
                                                BTagEntry::JetFlavor jf,
                                                float discr) const
 {
-  bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  //bool use_discr = (op_ == BTagEntry::OP_RESHAPING);
+  bool use_discr = 0;
 
   const auto &entries = tmpData_.at(jf);
   float min_eta = 0., max_eta = 0.;
@@ -671,7 +684,4 @@ std::pair<float, float> BTagCalibrationReader::min_max_pt(BTagEntry::JetFlavor j
 {
   return pimpl->min_max_pt(jf, eta, discr);
 }
-
-
-
 

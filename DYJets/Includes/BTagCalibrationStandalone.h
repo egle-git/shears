@@ -27,7 +27,6 @@ public:
     OP_LOOSE=0,
     OP_MEDIUM=1,
     OP_TIGHT=2,
-    OP_RESHAPING=3,
   };
   enum JetFlavor {
     FLAV_B=0,
@@ -48,7 +47,7 @@ public:
 
     // default constructor
     Parameters(
-      OperatingPoint op=OP_TIGHT,
+      OperatingPoint op=OP_MEDIUM,
       std::string measurement_type="comb",
       std::string sys_type="central",
       JetFlavor jf=FLAV_B,

@@ -1,0 +1,26 @@
+# primary dataset: /DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 0.00020
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_4.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_5.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_6.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_7.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_8.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_9.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_10.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_11.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_12.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_13.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_14.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_15.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_16.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-2000to3000_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-2000to3000_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150550/0000/tree_17.root

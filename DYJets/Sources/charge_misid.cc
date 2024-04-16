@@ -92,7 +92,6 @@ double charge_misid::get_sf(const lepton &lep, const int &var)
     if (var == 1 || (var < -100 && _var == 1)) weight +=  _charge_misid_sf->GetBinError(xbin, ybin);
     else if (var == -1 || (var < -100 && _var == -1)) weight -=  _charge_misid_sf->GetBinError(xbin, ybin);
 
-    
     return weight;
 }
 

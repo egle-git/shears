@@ -110,7 +110,11 @@ std::unique_ptr<TH1> mc_comparison_entry::get(const std::string &name, double lu
 
 double mc_comparison_entry::integral(const std::string &name, double lumi)
 {
-    return get(name, lumi)->Integral();
+    auto stack = get(name, lumi);
+    if (stack == nullptr) {
+        return 0;
+    }
+    return stack->Integral();
 }
 
 TAxis *mc_comparison_entry::get_x_axis(const std::string &name, double lumi)
@@ -260,7 +264,11 @@ std::unique_ptr<TH1> data_comparison_entry::get(const std::string &name, double 
 
 double data_comparison_entry::integral(const std::string &name, double lumi)
 {
-    return get(name, lumi)->Integral();
+    auto histo = get(name, lumi);
+    if (histo == nullptr) {
+        return 0;
+    }
+    return histo->Integral();
 }
 
 TAxis *data_comparison_entry::get_x_axis(const std::string &name, double lumi)

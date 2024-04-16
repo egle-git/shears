@@ -263,6 +263,7 @@ void same_sign_method_builder::build()
         reset_drawing_state();
 
     }// for (const std::string &name : _histogram_names)
+    
     // Cleanup
     reset_drawing_state();
 }// void same_sign_method_builder::build()

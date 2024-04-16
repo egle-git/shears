@@ -356,6 +356,7 @@ void os_ss_ratio_compare_builder::load()
     _os_mc_entry = load_mc(os_input_dir, 1, 1, "W+Jets #gamma+Jets QCD Fakes");
     _ss_data_entry = load_data(ss_input_dir);
     _ss_mc_entry = load_mc(ss_input_dir, 1, 1, "W+Jets #gamma+Jets QCD Fakes");
+
     _lumi = _os_data_entry->lumi();
     util::logging::info << "Normalizing MC to " << (_lumi / 1000) << " fb^-1" << std::endl;
     if (_lumi != _ss_data_entry->lumi())

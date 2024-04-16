@@ -108,6 +108,7 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_fakeSameSignFitFun, "same-sign method fit function choice", "calculate systematic variations from the same-sign method fit function choice");
   util::set_value_safe(node, _doSyst_fakeSameSignEmuMeth, "same-sign method ewk bkg reweight", "calculate systematic variations from the reweighting of the same-sign EWK backgrounds using the emu method");
   util::set_value_safe(node, _doSyst_fakeSameSignElChMisid, "same-sign method electron charge misid", "calculate systematic variations from the uncertainty of the electron charge misidentification correction");
+
   if( _channel == "ee" && _doSyst_elE )
     _use_eRoccor = (opt.config["electrons"])["use rochester electron energy correction"].as<bool>();
 
@@ -983,6 +984,7 @@ void dyjets_analyzer_syst::fill_systHist_fakeSameSignElChMisid(const util::match
     // -- Apply a plus variation
     _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 1, false);
   }
+
   util::matched<std::string> tags_alt_plus;
   if( evt.gen ) tags_alt_plus.gen = *tags_default.gen + "_fakeSameSignElChMisid_plus";
   else          tags_alt_plus.gen = boost::none;

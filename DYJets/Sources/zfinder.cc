@@ -92,13 +92,13 @@ zfinder::zfinder(const util::options &opt, const std::string &name)
         _invert_newcut = node["invert cut"].as<bool>();
     if (_invert_newcut)
         util::logging::info << "Using inverted mll/subleading lepton pT cut." << std::endl;
-    
+
     // Possibility to remove the Z peak for fake lepton studies
     if (node["Z peak removal range"])
         _z_peak_remove_range = std::abs(node["Z peak removal range"].as<double>());
     if (_z_peak_remove_range > 0.0)
         util::logging::info << "Removing the Z peak at 91 +/- " << _z_peak_remove_range << " GeV." << std::endl;
-    
+
     // Possibility to invert the electron(muon) ID(iso) cut for fake lepton studies
     if (node["invert lepton cuts"])
         _sideband_mode = node["invert lepton cuts"].as<unsigned>();

@@ -588,7 +588,7 @@ std::unique_ptr<TH1> top_reweight_emu_builder::emu_method()
     // For systematic uncertainty
     _bkg_estimation_fakes_plus   = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
     _bkg_estimation_fakes_minus  = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone(_current_histo_name.c_str())));
-    
+
     bkg_est->Multiply(num.get());
     bkg_est->Divide(den.get());
 

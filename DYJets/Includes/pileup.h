@@ -19,7 +19,7 @@ class weights;
 
 /// \brief Handles pileup
 class pileup
-{    
+{
     std::optional<TTreeReaderValue<float>> Pileup_nTrueInt;
     TTreeReaderValue<int> PV_npvsGood;
 

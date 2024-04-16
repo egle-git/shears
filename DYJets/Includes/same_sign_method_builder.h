@@ -143,7 +143,7 @@ class same_sign_method_builder
     void interpolate_mass_histo(std::unique_ptr<TH1> &hist, const bool &alt=false);
 
 //     /// \brief Finds the linearly interpolated histogram (linearly interpolates each bin of the histogram w.r.t. two other histograms)
-//     /// Not used anywhere yet, to be used for other mass-binned histograms 
+//     /// Not used anywhere yet, to be used for other mass-binned histograms
 //     std::unique_ptr<TH1> linear_interpolation(const double &x,
 //                                               const double &x0,
 //                                               const double &x1,

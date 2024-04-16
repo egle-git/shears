@@ -53,10 +53,10 @@ class job
         TTreeReader reader;
 
         /**
-         * \brief Initalizes a TTreeReaderValue if the branch is present, 
+         * \brief Initalizes a TTreeReaderValue if the branch is present,
          *        returns nullopt otherwise
          *
-         * This function can be used to initialize a variable of type 
+         * This function can be used to initialize a variable of type
          * @c std::optional<TTreeReaderValue<...>>. It is used as follows in
          * constructors:
          *
@@ -67,8 +67,8 @@ class job
         template<typename T>
         auto init_optional_branch(const char *name)
         {
-            // We test whether the branch is present. If it is, we create the 
-            // reader (using std::move because TTreeReaderX classes aren't 
+            // We test whether the branch is present. If it is, we create the
+            // reader (using std::move because TTreeReaderX classes aren't
             // copyable). If not, we return an empty optional.
             return reader.GetTree()->GetBranch(name) != nullptr
                 ? std::move(

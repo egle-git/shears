@@ -1,4 +1,4 @@
-#include "ValidationTool.h"
+// #include "ValidationTool.h"
 #include "AccProducer.h"
 
 void producePlot_acc() {
@@ -11,7 +11,8 @@ void producePlot_acc() {
   // validationTool.Validate();
 
   // -- produce the acceptance results & uncertainties
-  AccProducer producer("./output");
+  // AccProducer producer("./output");
+  AccProducer producer(DYTool::path_inputForAcc);
   producer.Set_OutputFileName("DYAcceptance.root");
   producer.ProduceAndSave();
 }

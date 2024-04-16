@@ -26,7 +26,7 @@ namespace DYTool {
 // -- paths can be modified for your test, investigation, etc
 
 TString path_SE = "/pnfs/iihe/cms/store/user/kplee";
-TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_231212/input_postProcess";
+TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_240214/input_postProcess";
 // TString path_base = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/input_postProcess";
 
 // -- path to your "Uncertainty" Directory
@@ -74,7 +74,8 @@ TString path_systVar_L1Pref = path_systVar_theory_pu_l1pref_muP_elE;
 
 TString path_systVar_muP = path_systVar_theory_pu_l1pref_muP_elE;
 
-TString path_systVar_theory = path_systVar_theory_pu_l1pref_muP_elE;
+// TString path_systVar_theory = path_systVar_theory_pu_l1pref_muP_elE;
+TString path_systVar_theory = path_base+"/shears/theory_5sigma";
 
 TString path_systVar_elE = path_systVar_theory_pu_l1pref_muP_elE;
 

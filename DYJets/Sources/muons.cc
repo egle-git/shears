@@ -8,7 +8,7 @@
 
 namespace physics {
 
-muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h): 
+muons::muons(util::job::info &info, const util::options &opt, util::histo_set &h):
 Muon_pt(info.reader, "Muon_pt"),
 Muon_eta(info.reader, "Muon_eta"),
 Muon_phi(info.reader, "Muon_phi"),
@@ -74,7 +74,7 @@ void muons::configure(const util::options &opt) {
   }
 }
 
-std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& genLeptons, 
+std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& genLeptons,
                                const double rndm_forRoccor, const int s, const int m) {
   std::uniform_real_distribution<> uniform(0.0, 1.0);
   std::vector<lepton> muons;
@@ -124,6 +124,7 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
       break;
     case iso::verytight:
       l.passes_iso = (Muon_pfIsoId[i] >= 5);
+      break;
     case iso::trkLoose:
       l.passes_iso = (Muon_tkIsoId[i] >= 1);
       break;
@@ -150,7 +151,7 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
 
           corr = corr_cv * (corr_systVar/corr_ref);
         }
-      } 
+      }
       else { // MC
         // look for a matched gen-level muon
         lepton genLepton_matched; double drmin=99.; bool match=false;
@@ -192,7 +193,7 @@ std::vector<lepton> muons::get(const bool isdata, const std::vector<lepton>& gen
   } // end of iteration over muons
 
   if( _roccor_enabled ) {
-    std::sort( muons.begin(), muons.end(), 
+    std::sort( muons.begin(), muons.end(),
                [](const lepton &lhs, const lepton &rhs) { return lhs.v.Pt() > rhs.v.Pt(); } );
   }
 

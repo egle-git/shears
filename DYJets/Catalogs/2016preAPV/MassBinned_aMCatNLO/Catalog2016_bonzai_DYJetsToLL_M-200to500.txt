@@ -1,0 +1,13 @@
+# primary dataset: /DYJetsToLL_M-200to500_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 2.93
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-200to500_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-200to500_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150251/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-200to500_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-200to500_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150251/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-200to500_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-200to500_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150251/0000/tree_3.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2016preAPV/mc/NanoBonzai12oct2023_2016preAPV_DYJetsToLL_M-200to500_TuneCP5_amcatnloFXFX_v3_GenVtx/DYJetsToLL_M-200to500_TuneCP5_13TeV-amcatnloFXFX-pythia8/Nano/231012_150251/0000/tree_4.root

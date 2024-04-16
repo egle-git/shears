@@ -275,11 +275,11 @@ void boson_jets_analyzer::operator()()
         std::vector<lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm);
 
         Bool_t isLowQMuEvent = false;
-        if( _select_bestMuonTrigSF && _reject_lowQMu ) 
+        if( _select_bestMuonTrigSF && _reject_lowQMu )
           isLowQMuEvent = check_lowQualityMuon(muons);
 
         std::vector<lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                       genleps_dressed_noCut, genleps_finalState, 
+                                                       genleps_dressed_noCut, genleps_finalState,
                                                        rndm, nVetoElecs);
 
         std::vector<lepton> leptons = find_boson(muons, electrons);
@@ -364,12 +364,11 @@ void boson_jets_analyzer::operator()()
         std::vector<lepton> l ;
         if (evt.gen) l = evt.gen->leptons;
         evt.rec->jets = _jets.get(weights().isdata(),l);
-        evt.rec->jets20 = _jets.get(weights().isdata(), l, 20); // For b veto
         _jets.veto(evt.rec->jets, evt.rec->leptons);
-        _jets.veto(evt.rec->jets20, evt.rec->leptons);
+        //_jets.fill(histo_set, "inc0jet_noweight_before_bveto", evt.rec->jets, weights());
 
         // Calculate b efficiencies and apply scale factors
-        if (_bjet_veto && _btagger.any(evt.rec->jets20, _weights, histo_set2D, tables())) {
+        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
             evt.rec = boost::none;
             if (!evt.gen && !evt.rec) {
                 // End early if vetoed and no gen boson
@@ -404,7 +403,7 @@ void boson_jets_analyzer::operator()()
                         .apply(make_tag, _mass_bins);
 
     TString tstr_tag = mass_tags.rec ? *mass_tags.rec : "none";
-    
+
     util::matched<std::string> mass_tags_fullRange;
     std::string str_fullRange = std::to_string(int(_mass_bins.front())) + "_" + std::to_string(int(_mass_bins.back())); // 50to1000
 
@@ -423,7 +422,7 @@ void boson_jets_analyzer::operator()()
         if( *mass_tags.gen != "UF" && *mass_tags.gen != "OF" )
             mass_tags_fullRange.gen = "mass" + str_fullRange;
         mass_tags.gen = "mass" + *mass_tags.gen;
-    }        
+    }
 
     auto njets = evt.apply(&event_contents::get_jets)
                     .apply(&std::vector<jet>::size);
@@ -462,7 +461,7 @@ void boson_jets_analyzer::operator()()
     // Inclusive
     // nj < 3 --> nj < 1 (only save inc0jet case): increase it if needed later
     for (std::size_t nj = 0; nj < 1; ++nj) {
-        // Exclusive
+        // Inclusive
         util::matched<std::string> tags; // eg "inc1jet"
         util::matched<std::string> tags_mass; // eg "inc1jet_mass50_71"
         util::matched<std::string> tags_mass_fullRange; // eg "inc1jet_mass50_1000"

@@ -195,7 +195,7 @@ void catalog::initialize_chains()
         std::string nanotreePath = fullpath + "Events";
         if (_event_chain) _event_chain->Add(nanotreePath.c_str());
             TFile *f = TFile::Open(fullpath.c_str());
-    }            
+    }
     _chains_initialized = true;
     logging::info << "Chains initialized." << std::endl;
 }

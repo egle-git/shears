@@ -38,7 +38,7 @@ class dilepton
      * \brief Returns the \f$ \phi^* \f$ variable
      */
     double phistar() const;
-    
+
     //DeltaPhi
     double DeltaPhi() const;
 

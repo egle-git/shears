@@ -41,7 +41,7 @@ void genleps::configure(const util::options &opt)
 {
     const YAML::Node node = opt.config["generator level"];
     util::set_value_safe(node, _pt_cut, "lepton pt", "gen lepton pt cut", [](double val) { return val >= 0; });
-    util::set_value_safe(node, _eta_cut, "lepton eta", "gen lepton eta cut", [](double val) { return val > 0; });    
+    util::set_value_safe(node, _eta_cut, "lepton eta", "gen lepton eta cut", [](double val) { return val > 0; });
 }
 
 std::vector<lepton> genleps::get()

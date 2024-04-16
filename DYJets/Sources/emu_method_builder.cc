@@ -349,7 +349,7 @@ void emu_method_builder::format_lower_y_axis(TAxis &axis, const std::string &tit
 
 po::options_description emu_method_builder::options() const
 {
-    po::options_description options = po::options_description("EMu comparison options"); 
+    po::options_description options = po::options_description("EMu comparison options");
     options.add_options()("output,o", po::value<std::string>(), "Sets the output directory");
     options.add_options()("format,f",
                           po::value<std::string>()->default_value("png"),
@@ -468,7 +468,7 @@ bool emu_method_builder::fill_lower_panel(const std::string &name)
             //     }
             //     fitFile << std::endl;
             // }
-            
+
             std::cout << "Fit parameters saved to 'fitParams.txt' successfully." << std::endl;
         } else {
             std::cerr << "Unable to open the file for fit parameters." << std::endl;
@@ -583,7 +583,7 @@ std::unique_ptr<TH1> emu_method_builder::emu_method(const TH1* ll_mc_input)
     util::logging::debug << "emu mc events: " << den->Integral() << std::endl;
 
     std::unique_ptr<TH1> bkg_est = std::unique_ptr<TH1>(dynamic_cast<TH1 *>(ll_mc_input->Clone()));
-    
+
     bkg_est->Multiply(num.get());
     bkg_est->Divide(den.get());
     return bkg_est;

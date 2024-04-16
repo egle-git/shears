@@ -10,13 +10,13 @@ weights::weights(util::job::info &info)
 //I: from tuppel: EvtWeights_->push_back(genEventInfoProd->weight()); EvtWeights_->push_back(lheEvent->weights()[iw].wgt)
 //available in nano: genWeight, LHEPdfWeight, LHEReweightingWeight, LHEScaleWeight, LHEWeight, PSWeight (w_var / w_nominal), )
       _ismc(info.catalog.ismc()),
-      
+
       _events_in_chain(info.reader.GetEntries(true)),
       _xsec(info.catalog.xsec()),
       _lumi(info.catalog.lumi())
 {
 }
- 
+
 void weights::process_event()
 {
     if (weights_count() > 0) {

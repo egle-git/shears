@@ -26,7 +26,7 @@ class jet
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
     float bdisc;      ///< b-tag ID score
-    float hadflav;    ///< jet hadron flavor
+    int hadflav;    ///< jet hadron flavor
 };
 
 /// \brief Handles jets.
@@ -37,9 +37,12 @@ class jets
     TTreeReaderArray<float> Jet_phi;
     TTreeReaderArray<float> Jet_mass;
     TTreeReaderArray<int> Jet_jetId;
+    TTreeReaderArray<int> Jet_puId;
     TTreeReaderArray<float> Jet_puIdDisc;
     TTreeReaderArray<float> Jet_btagCSVV2;
-    //TTreeReaderArray<float> Jet_hadronFlavour;
+    TTreeReaderArray<float> Jet_btagDeepB;
+    TTreeReaderArray<float> Jet_btagDeepFlavB;
+    std::optional<TTreeReaderArray<int>> Jet_hadronFlavour;
     TTreeReaderValue<float> fixedGridRhoFastjetAll;
 
     std::optional<TTreeReaderArray<float>> GenJet_pt;
@@ -50,15 +53,20 @@ class jets
     JME::JetResolution *m_JetResolution;
     JME::JetResolutionScaleFactor *m_JetResolutionScaleFactor;
     JME::JetParameters *m_JetParameters;
+    std::string JER_pt_dir;
+    std::string JER_SF_dir;
+
     float jetSF;
     double jetResolution;
     Variation m_Variation = Variation::NOMINAL;
 
-    double _pt_cut = 30;
-    double _y_cut = 2.4;
+    double _pt_cut = 50;
+    double _eta_cut = 2.5;
     double _pumva_cut = -0.2;
+    int _pu_id_cut = 7; // Tight pileup ID
     double _deltar_cut = 0.4;
     bool _jer_smearing = true;
+    int _era;
 
   public:
     /// \brief Constructor.
@@ -75,7 +83,7 @@ class jets
     std::vector<jet> get(bool isdata, const std::vector<lepton> &leptons, double ptcut = -1);
 
     std::vector<jet> getGen();
-    std::vector<jet> getGen(double ptmin, double rapmax);
+    std::vector<jet> getGen(double ptmin, double etamax);
 
     /// \brief Vetoes \c jets too close to one of the given \c leptons.
     void veto(std::vector<jet> &jets, const std::vector<lepton> &leptons) const;

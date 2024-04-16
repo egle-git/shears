@@ -50,7 +50,7 @@ class electrons
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WPL;
     TTreeReaderArray<float>Electron_eCorr;
     TTreeReaderArray<float>Electron_r9;
-    
+
 
     // -- systematic variation
     // ---- scale variation (only for data)
@@ -71,7 +71,7 @@ class electrons
     bool _charge_misid_sf_enabled = false;
 
     physics::charge_misid _charge_misid;
-    
+
     // -- "Rochester" correction of the electron version
     // -- unique_ptr gives error...
     std::shared_ptr<Aepcor> _eRoccor = nullptr;
@@ -93,7 +93,7 @@ class electrons
     std::vector<lepton> get(bool isData, const unsigned int& runNum,
                             const vector<lepton>& vec_dressedGenLep,
                             const vector<lepton>& vec_postFSRGenLep,
-                            const double& rndm, int & nVetoElecs, 
+                            const double& rndm, int & nVetoElecs,
                             TString systMode = "default", const int& s=0, const int& m=0);
 
     /**
@@ -143,16 +143,16 @@ class electrons
     void SystVar_ElectronEnergy_POGCorr(lepton& l, const int& index, const TString& systMode);
 
     bool _eRoccor_enabled = false;
-    void apply_energyCorr_smp22010(lepton& l, 
+    void apply_energyCorr_smp22010(lepton& l,
                                    const bool isData, const double factorToRawE,
-                                   const unsigned int& runNum, const double r9, 
+                                   const unsigned int& runNum, const double r9,
                                    const vector<lepton>& vec_dressedGenLep,
                                    const vector<lepton>& vec_postFSRGenLep,
                                    const double& rndm, const int& s, const int& m);
 
     lepton matchedGenLepton(const lepton& l, const vector<lepton>& vec_genLep);
-    double Find_MatchedGenPt(lepton l, 
-                             const vector<lepton>& vec_dressedGenLep, 
+    double Find_MatchedGenPt(lepton l,
+                             const vector<lepton>& vec_dressedGenLep,
                              const vector<lepton>& vec_postFSRGenLep);
 };
 } // namespace physics

@@ -1,5 +1,6 @@
 #include "reco_compare_builder.h"
 #include "TFile.h"
+#include "TLatex.h"
 
 namespace util
 {
@@ -40,14 +41,16 @@ void reco_compare_builder::fill_upper_panel(const std::string &name)
     _mc_entry->draw(name, _lumi, true);
     _data_entry->draw(name, _lumi, true);
     // Fix axis ranges so that both data and MC are visible
-    if (_mc_entry->integral(name, _lumi) > _data_entry->integral(name, _lumi)) {
-        double min = _data_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _data_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
-        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _mc_entry->get(name, _lumi)->GetMaximum() * 1.5);
-    } else {
-        double min = _mc_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _mc_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
-        _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _data_entry->get(name, _lumi)->GetMaximum() * 1.5);
+    if (_data_entry->get(name, _lumi) != nullptr && _mc_entry->get(name, _lumi) != nullptr) {
+        
+        if (_mc_entry->integral(name, _lumi) > _data_entry->integral(name, _lumi)) {
+            double min = _data_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _data_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+            _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _mc_entry->get(name, _lumi)->GetMaximum() * 1.5);
+        } else {
+            double min = _mc_entry->get(name, _lumi)->GetMinimum(0) < 100.0 ? _mc_entry->get(name, _lumi)->GetMinimum(0) : 100.0;
+            _data_entry->get_y_axis(name, _lumi)->SetRangeUser(min, _data_entry->get(name, _lumi)->GetMaximum() * 1.5);
+        }
     }
-    
 
     if (auto axis = _mc_entry->get_x_axis(name, _lumi)) {
         format_upper_x_axis(*axis);
@@ -67,7 +70,6 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
 {
     std::unique_ptr<TH1> num = _mc_entry->get(name, _lumi);
     std::unique_ptr<TH1> den = _data_entry->get(name, _lumi);
-    double total_ratio = num->Integral() / den->Integral();
 
     if (num == nullptr || den == nullptr) {
         return false;
@@ -76,7 +78,7 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
     if (_reversed) {
         std::swap(num, den);
     }
-
+    
     _ratio = std::move(num);
     num = nullptr;
 
@@ -96,6 +98,20 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
     _ratio->SetStats(0);
     _ratio->SetTitle("");
     _ratio->Draw("ep");
+
+    double int1, int2, myratio;
+    int1 = _data_entry ->get(name, _lumi) ->Integral(1, _data_entry->get(name, _lumi)->GetNbinsX());
+    int2 = _mc_entry ->get(name, _lumi) ->Integral(1, _mc_entry->get(name, _lumi)->GetNbinsX());
+    myratio = int2/int1;
+    TString name_h = _data_entry->get(name, _lumi)->GetName();
+    if (name_h.Contains("mass_wide_range")){
+        std::cout<< "MC event: "<< int2 << std::endl;
+        std::cout<< "Data events: " << int1 << std::endl;
+        std::cout<<"Average MC/data rate: " << myratio << std::endl;
+        TLatex latex_ratio;
+        TString ratioInfo = TString::Format("Overall MC/DATA = %.3lf", myratio);
+        latex_ratio.DrawLatexNDC(0.16, 0.85, "#font[42]{#scale[1.5]{#color[2]{"+ratioInfo+"}}}");
+    }
 
     return true;
 }

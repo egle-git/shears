@@ -20,7 +20,7 @@ class weights;
 
 /// \brief Handles pileup
 class met
-{    
+{
     TTreeReaderValue<float> MET_pt;
     TTreeReaderValue<float> MET_phi;
 

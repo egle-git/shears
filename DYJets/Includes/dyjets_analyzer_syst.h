@@ -6,6 +6,14 @@
 #include "TKey.h"
 #include "TSystem.h"
 
+// -- for adjusting PDF/scale weights for systematics
+struct GenWeightInfo {
+  double mean;
+  double sigma;
+  double lowerLimit;
+  double upperLimit;
+};
+
 /// \brief Implements a \f$ Z \to 2l \f$ analysis.
 class dyjets_analyzer_syst : public dyjets_analyzer {
 
@@ -63,7 +71,7 @@ private:
 
     // -- cv efficiency map of the counterpart (data -> mc, mc -> data)
     // -- for SF calculation, if dataType is efficiency, not SF
-    TH2D* _h2D_map_counter_cv = nullptr; 
+    TH2D* _h2D_map_counter_cv = nullptr;
 
     void init_fromHistName(TString fileName, TString histName) {
       _histName = histName;
@@ -104,7 +112,7 @@ private:
       h_return = f_input->GetListOfKeys()->Contains(histName) ?
                  (TH2D*)f_input->Get(histName)->Clone() : nullptr;
       if( h_return == nullptr )
-        throw std::invalid_argument("Histogram " + histName + " doesn't exist in" + fileName);        
+        throw std::invalid_argument("Histogram " + histName + " doesn't exist in" + fileName);
 
       f_input->Close();
 
@@ -143,12 +151,16 @@ private:
 
   std::string _fileName_effMap = ""; // -- .root file with systematic-varied efficiency maps
 
-  std::string _channel = "";
+  std::string _channel = ""; // -- ee or mm
   double _sMuTrigPtCut = 0;
 
   // -- for the uncertainty from the eff. SF
   std::vector<EffMap> _vec_effMap;
   std::map<TString, EffMap> _map_type_effMapCV;
+
+  // -- for the uncertainty from the theory
+  vector<GenWeightInfo> vec_PDFWeightInfo_;
+  // vector<GenWeightInfo> vec_scaleWeightInfo_;
 
   // -- for the uncertainty from the emu method fit parameters
   std::vector<double> _pars_emuMethodFitPlus, _pars_emuMethodFitMinus;
@@ -165,10 +177,10 @@ private:
                            const util::matched<double> &value,
                            const util::matched<std::string>& tags_default);
 
-  void calc_effSFRatio_systVariation(const std::vector<physics::lepton>& chosen_leptons, 
+  void calc_effSFRatio_systVariation(const std::vector<physics::lepton>& chosen_leptons,
                                      std::map<TString, double>& map_uncType_effSFRatio);
 
-  double find_or_calculate_centralValueEffSF(const TString& type, 
+  double find_or_calculate_centralValueEffSF(const TString& type,
                                         const vector<physics::lepton>& chosen_leptons,
                                         std::map<TString, double>& map_type_effSFCV);
 
@@ -181,13 +193,13 @@ private:
   void init_effMap();
 
   // -- for the uncertainty from the muon momentum correction (Rochester correction)
-  void fill_systHist_muP(const util::matched<event_contents>& evt, 
+  void fill_systHist_muP(const util::matched<event_contents>& evt,
                          const bool isLowQMuEvent,
                          const std::vector<physics::lepton>& genleps_fs,
                          const double rndm_forRoccor);
 
   void fill_systHist_muP_eachSystVar(
-                             const util::matched<event_contents>& evt_default, 
+                             const util::matched<event_contents>& evt_default,
                              const bool isLowQMuEvent,
                              const std::vector<physics::lepton>& genleps_fs,
                              const double rndm_forRoccor,
@@ -229,6 +241,9 @@ private:
   void fill_systHist_theory(const util::matched<event_contents>& evt,
                             const util::matched<double> &value,
                             const util::matched<std::string>& tags_default);
+
+  void Init_GenWeightInfo(const util::options &opt);
+  void Adjust_PDFWeight(const int i_mem, double& ratio_weight);
 
   // -- for the background uncertainty related to the emu method fit parameters
   void fill_systHist_emuMethodFit(const util::matched<event_contents>& evt,

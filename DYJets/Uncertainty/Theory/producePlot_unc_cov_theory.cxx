@@ -92,6 +92,8 @@ private:
     // canvas->SetRangeY(0, 0.275);
     // canvas->SetAutoRangeY();
 
+    canvas->SetRangeY(0, 0.2);
+
     canvas->Latex_CMSInternal();
     TString uncInfo = "Uncertainty from the theoretical inputs";
     canvas->RegisterLatex(0.16, 0.91, 42, 0.6, uncInfo);
@@ -103,7 +105,7 @@ private:
     canvas->Draw("HISTLP");
 
     canvas->SetCanvasName(canvasName+"_zoomIn");
-    canvas->SetRangeY(0, 0.2);
+    canvas->SetRangeY(0, 0.08);
     canvas->Draw("HISTLP");
   }
 

@@ -18,7 +18,75 @@ dyjets_analyzer_syst::dyjets_analyzer_syst(util::job::info &info, const util::op
     if( _doSyst_effSF ) init_effMap();
 
     sanity_check();
+
+    if( _doSyst_theory ) {
+      // histo_set.declare("pdfWRatio", "PDF weights ratio;PDF weights ratio", 5000, 0, 5);
+      // histo_set.declare("pdfWRatio", "PDF weights ratio;PDF weights ratio", 10000, 0, 10000);
+      histo_set.declare("pdfWRatio",      "PDF weights ratio;PDF weights ratio", 8000, -3, 5);
+      histo_set.declare("pdfWRatio_wide", "PDF weights ratio;PDF weights ratio", 2000, -1000000, 1000000);
+      Init_GenWeightInfo(opt);
+    }
 }
+
+void dyjets_analyzer_syst::Init_GenWeightInfo(const util::options &opt) {
+  const YAML::Node node = opt.config["uncertainties"];
+  TString baseDir = node["GenWeightInfo directory"].as<std::string>();
+
+  TString tag_era;
+  if( get_era() == 0 ) tag_era = "16pre";
+  if( get_era() == 1 ) tag_era = "16post";
+  if( get_era() == 2 ) tag_era = "17";
+  if( get_era() == 3 ) tag_era = "18";
+  TString tstr_channel = _channel;
+  TString fileName = TString::Format("%s/WeightInfo_%s_%s.root", baseDir.Data(), tstr_channel.Data(), tag_era.Data());
+  util::logging::info << "Gen weight information is from " << fileName << std::endl;
+
+  TFile *f_input = TFile::Open(fileName);
+
+  TString sampleName = get_sample_name();
+
+  // -- only when the information for the given sample is available
+  if( f_input->Get("h_mean_"+sampleName) == nullptr ) {
+    f_input->Close();
+    vec_PDFWeightInfo_.clear();
+    return;
+  }
+
+  TH1D* h_mean       = (TH1D*)f_input->Get("h_mean_"+sampleName)->Clone();
+  TH1D* h_sigma      = (TH1D*)f_input->Get("h_sigma_"+sampleName)->Clone();
+  TH1D* h_lowerLimit = (TH1D*)f_input->Get("h_lowerLimit_"+sampleName)->Clone();
+  TH1D* h_upperLimit = (TH1D*)f_input->Get("h_upperLimit_"+sampleName)->Clone();
+
+  Int_t nWeight = h_mean->GetNbinsX();
+  for(Int_t i=0; i<nWeight; ++i) {
+    Int_t i_bin = i+1;
+
+    TString label = h_mean->GetXaxis()->GetBinLabel(i_bin);
+
+    Double_t mean       = h_mean->GetBinContent(i_bin);
+    Double_t sigma      = h_sigma->GetBinContent(i_bin);
+    Double_t lowerLimit = h_lowerLimit->GetBinContent(i_bin);
+    Double_t upperLimit = h_upperLimit->GetBinContent(i_bin);
+
+    if( label.Contains("PDFVar_") ) {
+      GenWeightInfo info;
+      info.mean = mean;
+      info.sigma = sigma;
+      info.lowerLimit = lowerLimit;
+      info.upperLimit = upperLimit;
+
+      vec_PDFWeightInfo_.push_back(info); // -- same order with the one of histogram bins (0th element = 1st bin)
+    }
+
+    // // -- if necessary...
+    // if( label.Contains("scaleVar_") ) {
+
+    // }
+  }
+
+  f_input->Close();
+}
+
 
 void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   if( !opt.config["uncertainties"] ) {
@@ -40,7 +108,6 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_fakeSameSignFitFun, "same-sign method fit function choice", "calculate systematic variations from the same-sign method fit function choice");
   util::set_value_safe(node, _doSyst_fakeSameSignEmuMeth, "same-sign method ewk bkg reweight", "calculate systematic variations from the reweighting of the same-sign EWK backgrounds using the emu method");
   util::set_value_safe(node, _doSyst_fakeSameSignElChMisid, "same-sign method electron charge misid", "calculate systematic variations from the uncertainty of the electron charge misidentification correction");
-  
   if( _channel == "ee" && _doSyst_elE )
     _use_eRoccor = (opt.config["electrons"])["use rochester electron energy correction"].as<bool>();
 
@@ -205,12 +272,12 @@ void dyjets_analyzer_syst::operator()() {
     else                  genleps_dressed_noCut.clear(); // data: no gen-leptons
 
     rndm_forRoccor = gRandom->Rndm();
-    std::vector<physics::lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm_forRoccor);    
-    if( _select_bestMuonTrigSF && _reject_lowQMu ) 
+    std::vector<physics::lepton> muons = _muons.get(weights().isdata(), genleps_finalState, rndm_forRoccor);
+    if( _select_bestMuonTrigSF && _reject_lowQMu )
       isLowQMuEvent = check_lowQualityMuon(muons);
 
     std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
-                                                            genleps_dressed_noCut, genleps_finalState, 
+                                                            genleps_dressed_noCut, genleps_finalState,
                                                             rndm_forRoccor, nVetoElecs);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
@@ -286,7 +353,7 @@ void dyjets_analyzer_syst::operator()() {
   else          tags_default.rec = boost::none;
   fill_unfolded("mass_wide_range", tags_default, mass);
 
-  ///////////////////////////////////////////  
+  ///////////////////////////////////////////
   // -- fill with systematic variations -- //
   ///////////////////////////////////////////
   if( _weights.ismc() ) {
@@ -314,7 +381,8 @@ void dyjets_analyzer_syst::operator()() {
 void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_contents>& evt,
                                                 const util::matched<double> &value,
                                                 const util::matched<std::string>& tags_default) {
-  
+
+  // -- some samples do not have these branches
   if( !LHEPdfWeight || !LHEScaleWeight ) return;
 
   double gen_weight_cv    = weights().gen_weight();
@@ -325,12 +393,30 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
   // -- i_mem = 1 to 100:    PDF replicas
   // -- i_mem = 101 and 102: alpha_s variation (0.116 and 0.120)
   for(unsigned int i_mem=0; i_mem<LHEPdfWeight->GetSize(); ++i_mem) {
+    TString tstr_PDFVarInfo = TString::Format("PDFVar_%03d", i_mem);
+
     double ratio_weight = LHEPdfWeight->At(i_mem);
+
+    // -- fill before fixing the ratio
+    // -- this is not a physical distribution; no need to use gen-weight to fill the histogram
+    histo_set.fill("pdfWRatio",      tstr_PDFVarInfo.Data(), ratio_weight, 1.0);
+    histo_set.fill("pdfWRatio_wide", tstr_PDFVarInfo.Data(), ratio_weight, 1.0);
+
+    // if( std::abs(ratio_weight) > 1000.0 ) {
+    //   //   TString massInfo = "";
+    //   //   if( !value.gen ) massInfo = "no gen-mass";
+    //   //   else             massInfo = TString::Format("mass = %lf", *value.gen);
+    //   //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
+    //   //   util::logging::info << info.Data() << std::endl;
+    //   ratio_weight = 1.0; // -- force it to be 1.0
+    // }
+
+    // -- if ratio_weight is outside of 5-sigma range w.r.t mean -> force it to be the mean value
+    // -- to remove unphysical effect due to huge weight (e.g. >10000)
+    Adjust_PDFWeight(i_mem, ratio_weight);
 
     double gen_weight_PDFVar    = gen_weight_cv    * ratio_weight;
     double global_weight_PDFVar = global_weight_cv * ratio_weight;
-
-    TString tstr_PDFVarInfo = TString::Format("PDFVar_%03d", i_mem);
 
     util::matched<std::string> tags_PDFVar;
     if( evt.gen ) tags_PDFVar.gen = *tags_default.gen + "_" + tstr_PDFVarInfo.Data();
@@ -344,12 +430,28 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
   // -- definition of each case:
   // -- https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv9/2016ULpreVFP/doc_TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8_RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1.html#LHEScaleWeight
   for(unsigned int i_case=0; i_case<LHEScaleWeight->GetSize(); ++i_case) {
+    TString tstr_scaleVarInfo = TString::Format("scaleVar_%03d", i_case);
+
     double ratio_weight = LHEScaleWeight->At(i_case);
+
+    // -- fill before fixing the ratio
+    // -- this is not a physical distribution; no need to use gen-weight to fill the histogram
+    histo_set.fill("pdfWRatio",      tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
+    histo_set.fill("pdfWRatio_wide", tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
+
+    if( std::abs(ratio_weight) > 1000.0 ) {
+      //   TString massInfo = "";
+      //   if( !value.gen ) massInfo = "no gen-mass";
+      //   else             massInfo = TString::Format("mass = %lf", *value.gen);
+      //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
+      //   util::logging::info << info.Data() << std::endl;
+      ratio_weight = 1.0; // -- force it to be 1.0
+    }
 
     double gen_weight_scaleVar    = gen_weight_cv    * ratio_weight;
     double global_weight_scaleVar = global_weight_cv * ratio_weight;
 
-    TString tstr_scaleVarInfo = TString::Format("scaleVar_%03d", i_case);
+
     util::matched<std::string> tags_scaleVar;
     if( evt.gen ) tags_scaleVar.gen = *tags_default.gen + "_" + tstr_scaleVarInfo.Data();
     else          tags_scaleVar.gen = boost::none;
@@ -358,6 +460,25 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
 
     fill_unfolded("mass_wide_range", tags_scaleVar, value, gen_weight_scaleVar, global_weight_scaleVar);
   }
+}
+
+void dyjets_analyzer_syst::Adjust_PDFWeight(const int i_mem, double& ratio_weight) {
+  if( vec_PDFWeightInfo_.size() == 0 ) return; // -- no info was saved? --> no adjustment is needed
+  if( i_mem == 0 ) return; // -- central value
+  if( i_mem > 102 ) return; // -- no info above 102
+
+  int index = i_mem-1; // -- 0th element: i_mem = 1 i.e. PDFVar_001 (not 000)
+  GenWeightInfo& info = vec_PDFWeightInfo_[index];
+
+  Bool_t isNominal = (info.lowerLimit < ratio_weight && ratio_weight < info.upperLimit);
+
+  // printf("[i_mem = %d]\n", i_mem);
+  // printf("(mean, sigma, lowerLimit, upperLimit) = (%.3lf, %.3lf, %.3lf, %.3lf)\n",
+  //          info.mean, info.sigma, info.lowerLimit, info.upperLimit);
+  // printf("ratio_weight = %lf --> isNominal? = %d\n", ratio_weight, isNominal);
+
+  if( !isNominal )
+    ratio_weight = info.mean;
 }
 
 void dyjets_analyzer_syst::fill_systHist_elE(const util::matched<event_contents>& evt_default,
@@ -420,7 +541,7 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::mat
 
     std::vector<physics::lepton> electrons = _electrons.get(weights().isdata(), *run,
                                                             genleps_dressed, genleps_fs,
-                                                            rndm_forRoccor, nVetoElecs, 
+                                                            rndm_forRoccor, nVetoElecs,
                                                             "default", s, m);
 
     std::vector<physics::lepton> leptons = find_boson(muons, electrons);
@@ -527,7 +648,7 @@ void dyjets_analyzer_syst::fill_systHist_elE_POGCorr_eachSystVar(const util::mat
 }
 
 
-void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>& evt, 
+void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>& evt,
                                              const bool isLowQMuEvent,
                                              const std::vector<physics::lepton>& genleps_fs,
                                              const double rndm_forRoccor) {
@@ -543,7 +664,7 @@ void dyjets_analyzer_syst::fill_systHist_muP(const util::matched<event_contents>
 }
 
 void dyjets_analyzer_syst::fill_systHist_muP_eachSystVar(
-                           const util::matched<event_contents>& evt_default, 
+                           const util::matched<event_contents>& evt_default,
                            const bool isLowQMuEvent,
                            const std::vector<physics::lepton>& genleps_fs,
                            const double rndm_forRoccor,
@@ -862,7 +983,6 @@ void dyjets_analyzer_syst::fill_systHist_fakeSameSignElChMisid(const util::match
     // -- Apply a plus variation
     _electrons.apply_charge_misid_sf(_weights, evt.rec->leptons, _genleps.get_leptons_finalState(), 1, false);
   }
-  
   util::matched<std::string> tags_alt_plus;
   if( evt.gen ) tags_alt_plus.gen = *tags_default.gen + "_fakeSameSignElChMisid_plus";
   else          tags_alt_plus.gen = boost::none;
@@ -931,7 +1051,7 @@ void dyjets_analyzer_syst::fill_systHist_effSF(const util::matched<event_content
   }
 }
 
-void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::lepton>& chosen_leptons, 
+void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::lepton>& chosen_leptons,
                                                          std::map<TString, double>& map_uncType_effSFRatio) {
 
   // -- maybe std::unordered_map improves the performance
@@ -955,7 +1075,7 @@ void dyjets_analyzer_syst::calc_effSFRatio_systVariation(const vector<physics::l
   }
 }
 
-double dyjets_analyzer_syst::find_or_calculate_centralValueEffSF(const TString& type, 
+double dyjets_analyzer_syst::find_or_calculate_centralValueEffSF(const TString& type,
                                                             const vector<physics::lepton>& chosen_leptons,
                                                             std::map<TString, double>& map_type_effSFCV) {
   double effSF_cv = 1.0;

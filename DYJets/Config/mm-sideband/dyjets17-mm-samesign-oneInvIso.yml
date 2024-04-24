@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: MuMu/MuMu_2017_oneInvIso
-ss location: MuMu/MuMu_2017_samesign_oneInvIso
+os location: MuMu_BVETO/MuMu_2017_oneInvIso
+ss location: MuMu_BVETO/MuMu_2017_samesign_oneInvIso
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes
@@ -61,15 +61,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -78,6 +82,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer19UL17_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer19UL17_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -90,7 +96,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -99,8 +105,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2017/wp_deepJet_2017.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -264,11 +269,17 @@ select the best muon trigger SF:
 
 same sign method reweighting:
   use: no
-  mass offset: 1.26885
-  mass slope: -0.32319
-  MET offset: 1.98846
-  MET slope: -0.0654464
-  MET exp slope: 0.0267319
+  parameters: [1.27479, -0.222936, 1.60176, -0.0505248, 0.0241742]
+  up variation 1: [1.27832, -0.220499, 1.60298, -0.0492186, 0.0243769]
+  up variation 2: [1.27558, -0.212035, 1.5603, -0.0498454, 0.0242814]
+  up variation 3: [1.27487, -0.231471, 1.65473, -0.0495209, 0.0241556]
+  up variation 4: [1.27632, -0.220476, 1.61942, -0.0475141, 0.0240223]
+  up variation 5: [1.27587, -0.221161, 1.60027, -0.0512192, 0.0248326]
+  down variation 1: [1.27125, -0.225374, 1.60055, -0.0518309, 0.0239715]
+  down variation 2: [1.274, -0.233838, 1.64323, -0.0512041, 0.024067]
+  down variation 3: [1.27471, -0.214402, 1.5488, -0.0515286, 0.0241927]
+  down variation 4: [1.27325, -0.225396, 1.5841, -0.0535354, 0.024326]
+  down variation 5: [1.2737, -0.224711, 1.60325, -0.0498303, 0.0235158]
 
 # List of available data/MC samples
 samples:
@@ -409,6 +420,9 @@ tables:
     dimu trigger:   2017/ScaleFactor_DoubleMuonTriggers_UL2017_Tight.txt
     smu trigger data: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_Data.txt
     smu trigger mc: 2017/Efficiencies_muon_generalTracks_Z_Run2017_UL_SingleMuonTriggers_MC.txt
+    bjet medium eff:     2017/btag-medium-b.txt
+    cjet medium eff:     2017/btag-medium-c.txt
+    udsgjet medium eff:  2017/btag-medium-udsg.txt
 
 # How to group MC samples when drawing Data/MC comparisons
 MC grouping:

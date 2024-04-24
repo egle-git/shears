@@ -1,4 +1,4 @@
-# This is the configuration file for the DY analysis, year 2018.
+# This is the configuration file for the DY analysis, year 2016.
 # Please keep it organized, and don't delete comments.
 
 # Options related to output and logs
@@ -12,7 +12,7 @@ log:
     log level: info
 
     # Pipe logs to the given log file, comment out for no log.
-    log file: log18_emu.txt
+    log file: log16_postAPV_emu.txt
 
     # Controls what's written in the log file.
     # Possible values: debug|info|warn|error|fatal (default: debug)
@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: EMu_2018_elInvID
-ss location: EMu_2018_samesign_elInvID
+os location: EMu_BVETO/EMu_2016postAPV_bothInv
+ss location: EMu_BVETO/EMu_2016postAPV_samesign_bothInv
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: no
@@ -38,7 +38,7 @@ use pileup reweighing: true
 # - 2016_PreAPV_emu, 2016_PostAPV_emu (for the data collected with the emu trigger)
 # - 2017
 # - 2018
-pileup type: 2018
+pileup type: 2016_PostAPV
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -61,15 +61,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -78,6 +82,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer20UL16_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer20UL16_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -90,7 +96,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -99,8 +105,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2016postAPV/wp_deepJet_2016postAPV.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -131,11 +136,11 @@ electrons:
 
     # Whether to use the Rochester electron energy correction (instead of POG correction)
     use rochester electron energy correction: yes
-    rochester energy correction path: EleEnergyCorr/e_18UL_1.txt
+    rochester energy correction path: EleEnergyCorr/e_16bUL_1.txt
 
     # Charge misidentification efficiency correction for electrons
     use charge misid sf: no
-    charge misid sf location: ChargeMisid/CFRate2018.root
+    charge misid sf location: ChargeMisid/CFRate2016b.root
     # Choose mode: 0 -- nominal correction values, 1 -- up variation by 1 sigma, -1 -- down variation
     charge misid sf mode: 0
 
@@ -155,7 +160,7 @@ muons:
 
     #Iso
     # Possible values: veryloose, loose, medium, tight
-    iso: tight
+    iso: none
 
     # Id
     # Possible values: loose, medium, tight
@@ -168,7 +173,7 @@ muons:
 
     # Whether to use the isolation scale factors
     # Default value: yes
-    use isolation scale factors: yes
+    use isolation scale factors: no
 
     # Whether to use the tracking scale factors
     # Default value: yes
@@ -181,7 +186,7 @@ muons:
     # Path to the directory containing tables for Rochester corrections. Interpreted relative to
     # the EfficiencyTables/ directory.
     # Default value: rcdata.2016.v3
-    rochester correction path: 2018/RoccoR2018UL.txt
+    rochester correction path: 2016postAPV/RoccoR2016bUL.txt
 
 # Good Z boson settings
 Z:
@@ -226,7 +231,7 @@ Z:
     #   - 2: Both electrons (muons) must fail their Medium ID (tight iso) cuts
     # Default value: 0
     # DOUBLE CHECK! Electron ID (muon iso) must be set to "none" in the XML file for this to work!
-    invert lepton cuts: 1
+    invert lepton cuts: 2
 
 # How the measurement is binned in mass
 # Default value: empty
@@ -237,6 +242,7 @@ mass bins: [ 40, 50, 76, 106, 170, 350, 1000, 3000 ]
 # The values below must be strings; use an empty string to disable triggers. See the documentation
 # of physics::trigger_mask for more details.
 triggers: |
+     HLT_IsoTkMu24,
      HLT_IsoMu24
 
 use trigger scale factors: yes
@@ -246,81 +252,79 @@ samples:
     ### DATA
     - name: data
       type: data
-      jobs: 16
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_SingleMuon_data.txt
+      jobs: 32
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_SingleMuon_data.txt
     ### BACKGROUND
     - name: ST_s-channel
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ST_s-channel.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_ST_s-channel.txt
     - name: ST_t-channel_antitop
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ST_t-channel_antitop.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_ST_t-channel_antitop.txt
     - name: ST_t-channel_top
       type: background
       jobs: 3
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ST_t-channel_top.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_ST_t-channel_top.txt
     - name: ST_tW_antitop
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ST_tW_antitop.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_ST_tW_antitop.txt
     - name: ST_tW_top
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ST_tW_top.txt
-    - name: WJetsToLNu
-      type: background
-      jobs: 4
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_WJetsToLNu.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_ST_tW_top.txt
     - name: WWTo2L2Nu
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_WWTo2L2Nu.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_WWTo2L2Nu.txt
     - name: WZ
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_WZ.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_WZ.txt
     - name: ZZ
       type: background
       jobs: 5
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_ZZ.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_ZZ.txt
     - name: TT
       type: background
       jobs: 10
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_TTTo2L2Nu.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_TTTo2L2Nu.txt
     - name: TauTau
       type: background
       jobs: 3
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_TauTau.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_TauTau.txt
     - name: GammaGamma
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_GGToLL.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_GGToLL.txt
     - name: GammaGamma_M-5to50
       type: background
-      nano dir: Catalogs/2018
-      catalog: Catalog2018_bonzai_GGToLL_M-5to50.txt
+      nano dir: Catalogs/2016postAPV
+      catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
     - name: WJetsToLNu
       type: background
       jobs: 4
-      nano dir: Catalogs/2018/
-      catalog: Catalog2018_bonzai_WJetsToLNu.txt
+      nano dir: Catalogs/2016postAPV/
+      catalog: Catalog2016_bonzai_WJetsToLNu.txt
 
 # Scale factors
 tables:
-    muon id:          2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ID_TightID.txt
-    muon isolation:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
-    electron id:    2018ULee/egamma_Medium_UL18.txt
-    electron reco:  2018ULee/egamma_reco_all_SF_UL2018.txt
-    smu trigger data: 2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_Data.txt
-    smu trigger mc:   2018/Efficiencies_muon_generalTracks_Z_Run2018_UL_SingleMuonTriggers_MC.txt
+    muon id:        2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_ID_TightID.txt
+    muon isolation: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_ISO_NUM_TightRelIso_DEN_TightIDandIPCut.txt
+    electron id:    2016postAPVee/Id_medium_postVFP.txt 
+    electron reco:  2016postAPVee/Reco_postVFP.txt
+    smu trigger data: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_SingleMuonTriggers_Data.txt
+    smu trigger mc: 2016postAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_SingleMuonTriggers_MC.txt
+    bjet medium eff:     2016postAPV/btag-medium-b.txt
+    cjet medium eff:     2016postAPV/btag-medium-c.txt
+    udsgjet medium eff:  2016postAPV/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

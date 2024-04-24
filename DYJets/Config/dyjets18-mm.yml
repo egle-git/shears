@@ -262,10 +262,10 @@ select the best muon trigger SF:
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: no
-  parameters: [1.28941, -0.155911]
-  errors: [0.0209709, 0.00985887]
-  fakes plus: [1.24888, -0.142019]
-  fakes minus: [1.32987, -0.169767]
+  parameters: [1.53842, -0.252975]
+  errors: [0.0458459, 0.0212588]
+  fakes plus: [1.42788, -0.21408]
+  fakes minus: [1.64845, -0.291637]
 
 # List of available data/MC samples
 samples:
@@ -460,7 +460,7 @@ MC grouping:
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - legend: "Fakes"
     #   samples: [ Fakes ]
-    #   color: 803 # kOrange + 3
+    #   color: 879 # kViolet - 1
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

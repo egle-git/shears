@@ -58,15 +58,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -75,6 +79,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer19UL17_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer19UL17_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -87,7 +93,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -96,8 +102,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2017/wp_deepJet_2017.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -230,22 +235,22 @@ use trigger scale factors: yes
 
 emu method reweighting:
   use: yes
-  parameters: [1.36444, -0.175188]
-  errors: [0.0258315, 0.0121342]
-  fakes plus: [1.3229, -0.160637]
-  fakes minus: [1.40597, -0.189736]
+  parameters: [1.6709, -0.294066]
+  errors: [0.0557763, 0.0258441]
+  fakes plus: [1.55868, -0.253823]
+  fakes minus: [1.78288, -0.334201]
   
 same sign method reweighting:
   use: yes
-  parameters: [1.47981, 0.000622212, -1.19731, 0.0343239]
-  up variation 1: [1.56817, 0.00120405, -1.00483, 0.0170421]
-  up variation 2: [1.56386, 0.00123388, -0.997218, 0.019356]
-  up variation 3: [1.54555, 0.00109528, -0.938595, 0.0259721]
-  up variation 4: [1.39993, 0.000143296, -1.31033, 0.0534406]
-  down variation 1: [1.39144, 4.03755e-05, -1.38978, 0.0516056]
-  down variation 2: [1.39575, 1.05467e-05, -1.39739, 0.0492917]
-  down variation 3: [1.41407, 0.000149148, -1.45602, 0.0426756]
-  down variation 4: [1.55969, 0.00110113, -1.08428, 0.0152071]
+  parameters: [1.48619, 0.000879389, -1.15663, 0.039958]
+  up variation 1: [1.55098, 0.00134189, -1.0293, 0.0248787]
+  up variation 2: [1.54686, 0.00137335, -1.02014, 0.0274784]
+  up variation 3: [1.52329, 0.00118263, -0.934306, 0.0374028]
+  up variation 4: [1.43067, 0.00052916, -1.1889, 0.0575591]
+  down variation 1: [1.42139, 0.000416885, -1.28395, 0.0550372]
+  down variation 2: [1.42551, 0.000385429, -1.29311, 0.0524376]
+  down variation 3: [1.44908, 0.000576145, -1.37895, 0.0425132]
+  down variation 4: [1.5417, 0.00122962, -1.12435, 0.0223569]
 
 # Whether to use Z peak interpolation
 interpolate: yes
@@ -380,6 +385,9 @@ tables:
     #sel trigger: Egamma_single.txt
     diel trigger leg2: Trigger_sf/2017_Ele12Leg2_MediumID.txt
     #Trigger_sf/2017_Ele23Leg1_MediumID.txt
+    bjet medium eff:     2017/btag-medium-b.txt
+    cjet medium eff:     2017/btag-medium-c.txt
+    udsgjet medium eff:  2017/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

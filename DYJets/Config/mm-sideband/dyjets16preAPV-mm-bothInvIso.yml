@@ -22,8 +22,8 @@ log:
     # Default value: yes
     #override root handler: yes
 
-os location: MuMu/MuMu_2016preAPV_bothInvIso
-ss location: MuMu/MuMu_2016preAPV_samesign_bothInvIso
+os location: MuMu_BVETO/MuMu_2016preAPV_bothInvIso
+ss location: MuMu_BVETO/MuMu_2016preAPV_samesign_bothInvIso
 
 # when you want to separate a specific flavor from DY->ll events (e.g. Madgraph)
 # it will check the dilepton flavor at the generator level, and skip the events if the flavor is not same with the given flavor
@@ -77,15 +77,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -94,6 +98,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer20UL16APV_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer20UL16APV_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -106,7 +112,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -115,8 +121,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2016preAPV/wp_deepJet_2016preAPV.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -440,6 +445,9 @@ tables:
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
     smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
     smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
+    bjet medium eff:     2016preAPV/btag-medium-b.txt
+    cjet medium eff:     2016preAPV/btag-medium-c.txt
+    udsgjet medium eff:  2016preAPV/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

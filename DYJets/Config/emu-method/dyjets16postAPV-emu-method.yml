@@ -23,10 +23,10 @@ log:
     #override root handler: yes
 
 # Dilepton file location
-ll location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/MuMu_2016postAPV
+ll location: /pnfs/iihe/cms/store/user/mambroza/BVETO/PlotsForEMuMethod/MuMu_2016postAPV
 
 # emu file location
-emu location: /pnfs/iihe/cms/store/user/mambroza/EMu_method_top/EMu_2016postAPV
+emu location: /pnfs/iihe/cms/store/user/mambroza/BVETO/PlotsForEMuMethod/EMu_2016postAPV
 
 # Whether results are preliminary (for plots)
 preliminary: yes
@@ -178,7 +178,7 @@ MC grouping:
       color: 800 # kOrange
     - legend: "Fakes"
       samples: [ Fakes ]
-      color: 803 # kOrange+3
+      color: 879 # kViolet-1
 
 plots:
     - selector: '^.*'

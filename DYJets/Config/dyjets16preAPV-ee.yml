@@ -236,10 +236,10 @@ use trigger scale factors: yes
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
   use: no
-  parameters: [1.19069, -0.121672]
-  errors: [0.0359006, 0.0169732]
-  fakes plus: [1.14853, -0.106471]
-  fakes minus: [1.23283, -0.136858]
+  parameters: [1.30676, -0.160525]
+  errors: [0.0748408, 0.0349042]
+  fakes plus: [1.19579, -0.119882]
+  fakes minus: [1.41748, -0.201049]
 
 # List of available data/MC samples
 samples:
@@ -361,7 +361,7 @@ samples:
       nano dir: Catalogs/2016preAPV
       catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
-    # - name: FakesInt
+    # - name: Fakes
     #   type: background
     #   nano dir: Catalogs/2016preAPV
     #   catalog: Catalog2016_bonzai_DoubleEG_data.txt
@@ -421,8 +421,8 @@ MC grouping:
       color: 800 # kOrange
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - legend: "Fakes"
-    #   samples: [ FakesInt ]
-    #   color: 803 # kOrange + 3
+    #   samples: [ Fakes ]
+    #   color: 879 # kViolet - 1
 
 # The file below defines the binnings for histograms relevant to the analysis.
 # Default value: dyjets-binnings.yml

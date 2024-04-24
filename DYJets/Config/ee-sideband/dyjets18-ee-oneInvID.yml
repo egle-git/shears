@@ -23,8 +23,8 @@ log:
     #override root handler: yes
 
 # Fill in with your directory names
-os location: EE/EE_2018_oneInvID
-ss location: EE/EE_2018_samesign_oneInvID
+os location: EE_BVETO/EE_2018_oneInvID
+ss location: EE_BVETO/EE_2018_samesign_oneInvID
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes
@@ -62,15 +62,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -79,6 +83,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer19UL18_JRV2_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer19UL18_JRV2_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -91,7 +97,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -100,8 +106,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2018/wp_deepJet_2018.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -381,6 +386,9 @@ tables:
     #sel trigger: Egamma_single.txt
     diel trigger leg2: Trigger_sf/2018_Ele12Leg2_MediumID.txt
     #Trigger_sf/2018_Ele23Leg1_MediumID.txt
+    bjet medium eff:     2018/btag-medium-b.txt
+    cjet medium eff:     2018/btag-medium-c.txt
+    udsgjet medium eff:  2018/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

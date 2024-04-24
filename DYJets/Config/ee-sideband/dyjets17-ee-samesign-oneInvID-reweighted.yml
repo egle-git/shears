@@ -23,8 +23,8 @@ log:
     #override root handler: yes
 
 # Fill in with your directory names
-os location: EE/EE_2017_oneInvID
-ss location: EE/EE_2017_samesign_oneInvID_REWEIGHTED
+os location: EE_BVETO/EE_2017_oneInvID
+ss location: EE_BVETO/EE_2017_samesign_oneInvID_REWEIGHTED
 
 # Cut on the inclusive DYJets sample
 use exclusive mass binned DYJets samples: yes
@@ -62,15 +62,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -79,6 +83,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer19UL17_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer19UL17_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -91,7 +97,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -100,8 +106,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2017/wp_deepJet_2017.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -254,10 +259,15 @@ use trigger scale factors: yes
 #   MET exp slope: 0.0194544
 same sign method reweighting:
   use: yes
-  MET offset: 1.47981
-  MET slope: 0.000622212
-  MET exp offset: -1.19731
-  MET exp slope: 0.0343239
+  parameters: [1.48619, 0.000879389, -1.15663, 0.039958]
+  up variation 1: [1.55098, 0.00134189, -1.0293, 0.0248787]
+  up variation 2: [1.54686, 0.00137335, -1.02014, 0.0274784]
+  up variation 3: [1.52329, 0.00118263, -0.934306, 0.0374028]
+  up variation 4: [1.43067, 0.00052916, -1.1889, 0.0575591]
+  down variation 1: [1.42139, 0.000416885, -1.28395, 0.0550372]
+  down variation 2: [1.42551, 0.000385429, -1.29311, 0.0524376]
+  down variation 3: [1.44908, 0.000576145, -1.37895, 0.0425132]
+  down variation 4: [1.5417, 0.00122962, -1.12435, 0.0223569]
 
 # List of available data/MC samples
 samples:
@@ -389,6 +399,9 @@ tables:
     #sel trigger: Egamma_single.txt
     diel trigger leg2: Trigger_sf/2017_Ele12Leg2_MediumID.txt
     #Trigger_sf/2017_Ele23Leg1_MediumID.txt
+    bjet medium eff:     2017/btag-medium-b.txt
+    cjet medium eff:     2017/btag-medium-c.txt
+    udsgjet medium eff:  2017/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

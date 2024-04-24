@@ -75,15 +75,19 @@ generator level:
 jets:
     # Pt cut [GeV]
     # Default value: 30
-    pt: 30
+    pt: 50
 
-    # Rapidity cut
-    # Default value: 2.4
-    rapidity: 2.4
+    # Eta cut
+    # Default value: 2.5
+    eta: 2.5
 
     # PU MVA cut
     # Default value: -0.2
-    pu mva: -0.2
+    #pu mva: -0.2
+
+    # PU id
+    # Default value: tight
+    #pu id: tight
 
     # deltaR(jet, lepton) cut
     # Default value: 0.4
@@ -92,6 +96,8 @@ jets:
     # Whether to apply jet energy smearing
     # Default value: yes
     JER smearing: yes
+    Jet pt resolution: Summer20UL16APV_JRV3_MC_PtResolution_AK4PFchs.txt
+    Jet MC SF: Summer20UL16APV_JRV3_MC_SF_AK4PFchs.txt
 
 prefiring weights:
     # Whether to apply prefiring weights
@@ -104,7 +110,7 @@ prefiring weights:
 b jet veto:
     # Whether to cut events with b jets
     # Default value: yes
-    use: no
+    use: yes
 
     # Working point; see the b tagging POG TWiki for recommended working points
     # Allowed values: loose, medium, tight
@@ -113,8 +119,7 @@ b jet veto:
 
     # Location of the scale factors csv file. Interpreted relative to the
     # EfficiencyTables/ directory.
-    # Default value: CSVv2_Moriond17_B_H.csv
-    scale factor path: CSVv2_Moriond17_B_H.csv
+    scale factor path: 2016preAPV/wp_deepJet_2016preAPV.csv
 
 # Options related to the selection of electrons
 electrons:
@@ -268,24 +273,24 @@ select the best muon trigger SF:
 
 emu method reweighting:
   use: yes
-  parameters: [1.19069, -0.121672]
-  errors: [0.0359006, 0.0169732]
-  fakes plus: [1.14853, -0.106471]
-  fakes minus: [1.23283, -0.136858]
+  parameters: [1.30676, -0.160525]
+  errors: [0.0748408, 0.0349042]
+  fakes plus: [1.19579, -0.119882]
+  fakes minus: [1.41748, -0.201049]
   
 same sign method reweighting:
   use: yes
-  parameters: [1.22719, -0.341251, 1.77781, -0.0950183, 0.0256399]
-  up variation 1: [1.28053, -0.355539, 1.69987, -0.0907301, 0.0256828]
-  up variation 2: [1.18091, -0.324781, 1.82194, -0.0980703, 0.0257159]
-  up variation 3: [1.19232, -0.335155, 1.89704, -0.0951624, 0.0257259]
-  up variation 4: [1.25675, -0.347747, 1.77558, -0.0872801, 0.0255316]
-  up variation 5: [1.22966, -0.339897, 1.78889, -0.0959245, 0.0265647]
-  down variation 1: [1.17384, -0.326963, 1.85574, -0.0993066, 0.025597]
-  down variation 2: [1.27347, -0.357721, 1.73367, -0.0919664, 0.0255639]
-  down variation 3: [1.26205, -0.347347, 1.65857, -0.0948742, 0.0255539]
-  down variation 4: [1.19762, -0.334755, 1.78003, -0.102757, 0.0257482]
-  down variation 5: [1.22471, -0.342605, 1.76672, -0.0941122, 0.0247151]
+  parameters: [1.22833, -0.242389, 1.28505, -0.0836468, 0.0237286]
+  up variation 1: [1.2377, -0.238797, 1.31092, -0.079007, 0.0240101]
+  up variation 2: [1.23033, -0.225567, 1.22207, -0.0814877, 0.0239273]
+  up variation 3: [1.23109, -0.254454, 1.37287, -0.0815006, 0.0237236]
+  up variation 4: [1.23494, -0.236868, 1.3137, -0.0770676, 0.0236729]
+  up variation 5: [1.2316, -0.238245, 1.2845, -0.084101, 0.0245354]
+  down variation 1: [1.21895, -0.24598, 1.25918, -0.0882866, 0.0234471]
+  down variation 2: [1.22633, -0.259211, 1.34804, -0.0858059, 0.0235299]
+  down variation 3: [1.22557, -0.230323, 1.19724, -0.085793, 0.0237337]
+  down variation 4: [1.22172, -0.247909, 1.25641, -0.090226, 0.0237843]
+  down variation 5: [1.22506, -0.246532, 1.28561, -0.0831926, 0.0229219]
 
 # Whether to use Z peak interpolation
 interpolate: no
@@ -442,6 +447,9 @@ tables:
     dimu trigger:   2016preAPV/ScaleFactor_DoubleMuonTriggers_UL2016_HIPM_Tight.txt
     smu trigger data: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_Data.txt
     smu trigger mc: 2016preAPV/Efficiencies_muon_generalTracks_Z_Run2016_UL_HIPM_SingleMuonTriggers_MC.txt
+    bjet medium eff:     2016preAPV/btag-medium-b.txt
+    cjet medium eff:     2016preAPV/btag-medium-c.txt
+    udsgjet medium eff:  2016preAPV/btag-medium-udsg.txt
 
 # Reweighing (eg for merged samples)
 #

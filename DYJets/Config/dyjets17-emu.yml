@@ -301,10 +301,10 @@ samples:
       nano dir: Catalogs/2017
       catalog: Catalog2017_bonzai_GGToLL_M-5to50.txt
       # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
-    - name: Fakes
-      type: background
-      nano dir: Catalogs/2017
-      catalog: Catalog2017_bonzai_SingleMuon_data.txt
+    # - name: Fakes
+    #   type: background
+    #   nano dir: Catalogs/2017
+    #   catalog: Catalog2017_bonzai_SingleMuon_data.txt
 
 # Scale factors
 tables:
@@ -354,9 +354,9 @@ MC grouping:
       samples: [ GammaGamma, GammaGamma_M-5to50 ]
       color: 800 # kOrange
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
-    - legend: "Fakes"
-      samples: [ Fakes ]
-      color: 879 # kViolet - 1
+    # - legend: "Fakes"
+    #   samples: [ Fakes ]
+    #   color: 879 # kViolet - 1
 
 
 # The file below defines the binnings for histograms relevant to the analysis.

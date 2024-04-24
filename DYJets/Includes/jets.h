@@ -26,7 +26,7 @@ class jet
     float id;         ///< Jet ID
     float puMva;      ///< Result of the pileup MVA
     float bdisc;      ///< b-tag ID score
-    int hadflav;    ///< jet hadron flavor
+    int hadflav;      ///< jet hadron flavor
 };
 
 /// \brief Handles jets.

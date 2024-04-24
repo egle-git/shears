@@ -54,7 +54,8 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     }
     BTagCalibration calib("", calib_file);
 
-    _btag_calibration_reader = BTagCalibrationReader(wp, "central", {"up", "down"});
+    _btag_calibration_reader = BTagCalibrationReader(wp, "central", {"up_correlated", "down_correlated",
+            "up_uncorrelated","down_uncorrelated"});
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_UDSG, "incl");
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_C, "mujets");
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_B, "mujets");
@@ -62,19 +63,15 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
 
 bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t) const
 {
-    //cout<<"NEW EVENT"<<endl;
-    double wu=-999.;
-    for (const auto &jet : jets) {
-        apply_sf(jet, w, h,t,wu);
-        //fill_eff(jet, w, h,wu);
-        //cout<<jets.size()<<" "<<wu<<"  "<<w.global_weight()<<endl;
-    }
+    //for (const auto &jet : jets) {
+    //    fill_eff(jet, w, h);
+    //}
     return std::any_of(jets.begin(),
                        jets.end(),
                        [&](const jet &j) { return j.bdisc > _bjet_cut; });
 }
 
-void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h, double wu) const
+void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h) const
 {
     if (w.isdata()) return;
     std::string tg="";
@@ -98,12 +95,23 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h, double wu
     if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.raw_v.Pt(),j.raw_v.Eta(), w.global_weight());
 }
 
-
-void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab, double &wu ) const
+double btagger::get_and_apply_bveto_weight_full_event(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t, bool _apply_bveto_weight, std::string _sys, std::string _flavor_for_sys) const
 {
-    if (w.isdata()) return;
-    std::string tg="";
+    double bveto_final_weight_full_event = 1.;
+    for (const auto &jet : jets) {
+        bveto_final_weight_full_event *= get_and_apply_bveto_weight(jet, w, h, t, _apply_bveto_weight, _sys, _flavor_for_sys);
+    }
+    return bveto_final_weight_full_event;
+}
+
+double btagger::get_and_apply_bveto_weight(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab, bool _apply_bveto_weight, std::string _sys, std::string _flavor_for_sys) const
+{
+    if (w.isdata()) return 0;
+
     BTagEntry::JetFlavor flavor;
+    std::string tg="";
+    double eff = -1, sf = -1, bveto_final_weight = -1;
+
     if (std::abs(j.hadflav) == 5) {
         flavor = BTagEntry::FLAV_B;
         tg="bjet";
@@ -114,21 +122,43 @@ void btagger::apply_sf(const jet &j, weights &w, util::histo_set2D &h,const util
         flavor = BTagEntry::FLAV_UDSG;
         tg="udsgjet";
     }
-    double eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.raw_v.Pt(), j.raw_v.Eta());
+
     //std::cout << "NEW JET --------------" << std::endl;
     //std::cout << "Jet pt : " << j.raw_v.Pt() << "; Jet eta : " << j.raw_v.Eta() << "; Jet flavor : " << tg << std::endl;
-    bool tagged = j.bdisc > _bjet_cut;
-    if(tagged) tg+="_tagged";
-    //std::cout << "Jet bdisc : " << j.bdisc << "; Jet tagged : " << tagged << "; Jet initial weight : " << w.global_weight() << std::endl;
-    if(wu==-999.)wu=w.global_weight();
 
-    double sf = _btag_calibration_reader.eval_auto_bounds(
-        "central", flavor, std::abs(j.raw_v.Eta()), j.raw_v.Pt());
-    //std::cout << "Jet eff : " << eff << "; Jet sf : " << sf << std::endl;
+    // Evaluate scale factor
+    sf = _btag_calibration_reader.eval_auto_bounds("central", flavor, std::abs(j.raw_v.Eta()), j.raw_v.Pt());
 
-    w.use_weight(tagged ? sf : (1 - sf * eff) / (1 - eff));
-    //std::cout << "Jet final weight: " << w.global_weight() << std::endl;
-    //std::cout << "--------------" << std::endl;
+    // DEFAULT case
+    if ( _sys == "central" ) {
+        eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.raw_v.Pt(), j.raw_v.Eta());
+    }
+    // Systematics on the MC eff
+    else if ( _sys == "MC_eff_high" || _sys == "MC_eff_low" ) {
+        if ( _sys == "MC_eff_low" ) {
+            eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiencyLow(j.raw_v.Pt(), j.raw_v.Eta());
+        } else if ( _sys == "MC_eff_high" ) {
+            eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiencyHigh(j.raw_v.Pt(), j.raw_v.Eta());
+        }
+    }
+    // Systematics on the POG SF
+    else if (_sys == "up_correlated" || _sys == "down_correlated" || _sys == "up_uncorrelated"
+            || _sys == "down_uncorrelated") {
+        eff = tab.at(tg + " "+bjet_cut+" eff").getEfficiency(j.raw_v.Pt(), j.raw_v.Eta());
+        if ( _flavor_for_sys == "heavy" && (tg=="bjet" || tg=="cjet")) {
+            sf = _btag_calibration_reader.eval_auto_bounds(_sys, flavor, std::abs(j.raw_v.Eta()), j.raw_v.Pt());
+        } else if ( _flavor_for_sys == "light" && tg == "udsgjet" ) {
+            sf = _btag_calibration_reader.eval_auto_bounds(_sys, flavor, std::abs(j.raw_v.Eta()), j.raw_v.Pt());
+        }
+    }
+    else throw std::invalid_argument("Invalid systematics for bveto : \"" + _sys + "\"");
+
+    bveto_final_weight = (1 - sf * eff) / (1 - eff);
+    if (_apply_bveto_weight) w.use_weight(bveto_final_weight); // Apply the SF on the event
+
+    //cout << "This jet weight is : " << bveto_final_weight << endl;
+    //cout << "End of JET --------------" << endl;
+    return bveto_final_weight;
 }
 
 } // namespace physics

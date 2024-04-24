@@ -27,13 +27,24 @@ class btagger
     /// \brief Constructor
     explicit btagger(const util::options &opt, util::histo_set2D &h);
 
-    /// \brief Checks whether any jet is a b jet and apply the b-tagging scale factors
+    /// \brief Checks whether any jet is a b jet
     bool any(const std::vector<jet> &jets, weights &w,util::histo_set2D &h, const util::tables &tab) const;
+    /// \brief Apply the b-tagging scale factors on the event
+    double get_and_apply_bveto_weight_full_event(const std::vector<jet> &jets, weights &w,
+                                                util::histo_set2D &h, const util::tables &tab,
+                                                bool _apply_bveto_weight = true,
+                                                std::string _sys = "central",
+                                                std::string _flavor_for_sys = "None") const;
 
   private:
-    /// \brief Applies the b-tagging scale factors for the given jet
-    void apply_sf(const jet &j, weights &w,util::histo_set2D &h, const util::tables &tab, double &wu) const;
-    void fill_eff(const jet &j, weights &w, util::histo_set2D &h, double wu) const;
+    /// \brief Compute and applies the b-tagging scale factors for the given jet
+    double get_and_apply_bveto_weight(const jet &j, weights &w, util::histo_set2D &h,
+                                    const util::tables &tab,
+                                    bool _apply_bveto_weight = true,
+                                    std::string _sys = "central",
+                                    std::string _flavor_for_sys = "None") const;
+    /// \brief Compute and applies the b-tagging scale factors for the given jet
+    void fill_eff(const jet &j, weights &w, util::histo_set2D &h) const;
 
 };
 

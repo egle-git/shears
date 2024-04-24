@@ -368,11 +368,19 @@ void boson_jets_analyzer::operator()()
         //_jets.fill(histo_set, "inc0jet_noweight_before_bveto", evt.rec->jets, weights());
 
         // Calculate b efficiencies and apply scale factors
-        if (_bjet_veto && _btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
-            evt.rec = boost::none;
-            if (!evt.gen && !evt.rec) {
-                // End early if vetoed and no gen boson
-                return;
+        if (_bjet_veto && evt.rec->jets.size() != 0) {
+            if (_btagger.any(evt.rec->jets, _weights, histo_set2D, tables())) {
+                evt.rec = boost::none;
+                if (!evt.gen && !evt.rec) {
+                    // End early if vetoed and no gen boson
+                    return;
+                }
+            }
+            else {
+                _btagger.get_and_apply_bveto_weight_full_event(evt.rec->jets, _weights, histo_set2D, tables(), true);
+                // Example for using the function to extract the weight but not apply them
+                //double bveto_weight_for_sys = _btagger.get_and_apply_bveto_weight_full_event(evt.rec->jets, _weights, histo_set2D, tables(), false, "up_correlated", "heavy");
+                //cout<<" bveto weight for sys is : "<< bveto_weight_for_sys <<endl;
             }
         }
 

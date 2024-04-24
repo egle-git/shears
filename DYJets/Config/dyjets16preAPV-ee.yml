@@ -235,7 +235,7 @@ use trigger scale factors: yes
 
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
-  use: no
+  use: yes
   parameters: [1.30676, -0.160525]
   errors: [0.0748408, 0.0349042]
   fakes plus: [1.19579, -0.119882]

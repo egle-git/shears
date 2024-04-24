@@ -252,7 +252,7 @@ select the best muon trigger SF:
 
 # Reweighting for top backgrounds (emu method)
 emu method reweighting:
-  use: no
+  use: yes
   parameters: [1.6709, -0.294066]
   errors: [0.0557763, 0.0258441]
   fakes plus: [1.55868, -0.253823]

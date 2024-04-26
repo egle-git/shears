@@ -61,7 +61,7 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_B, "mujets");
 }
 
-bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t) const
+bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h) const
 {
     //for (const auto &jet : jets) {
     //    fill_eff(jet, w, h);
@@ -95,16 +95,16 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h) const
     if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.raw_v.Pt(),j.raw_v.Eta(), w.global_weight());
 }
 
-double btagger::get_and_apply_bveto_weight_full_event(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t, bool _apply_bveto_weight, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_and_apply_bveto_weight_full_event(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t, std::string _sys, std::string _flavor_for_sys) const
 {
     double bveto_final_weight_full_event = 1.;
     for (const auto &jet : jets) {
-        bveto_final_weight_full_event *= get_and_apply_bveto_weight(jet, w, h, t, _apply_bveto_weight, _sys, _flavor_for_sys);
+        bveto_final_weight_full_event *= get_and_apply_bveto_weight(jet, w, h, t, _sys, _flavor_for_sys);
     }
     return bveto_final_weight_full_event;
 }
 
-double btagger::get_and_apply_bveto_weight(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab, bool _apply_bveto_weight, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_and_apply_bveto_weight(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab, std::string _sys, std::string _flavor_for_sys) const
 {
     if (w.isdata()) return 0;
 
@@ -154,7 +154,6 @@ double btagger::get_and_apply_bveto_weight(const jet &j, weights &w, util::histo
     else throw std::invalid_argument("Invalid systematics for bveto : \"" + _sys + "\"");
 
     bveto_final_weight = (1 - sf * eff) / (1 - eff);
-    if (_apply_bveto_weight) w.use_weight(bveto_final_weight); // Apply the SF on the event
 
     //cout << "This jet weight is : " << bveto_final_weight << endl;
     //cout << "End of JET --------------" << endl;

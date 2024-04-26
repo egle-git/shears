@@ -95,16 +95,16 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h) const
     if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.raw_v.Pt(),j.raw_v.Eta(), w.global_weight());
 }
 
-double btagger::get_and_apply_bveto_weight_full_event(const std::vector<jet> &jets, weights &w, util::histo_set2D &h, const util::tables &t, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_bVetoSF_event(const std::vector<jet> &jets, weights &w, const util::tables &t, std::string _sys, std::string _flavor_for_sys) const
 {
-    double bveto_final_weight_full_event = 1.;
+    double bVetoSF_event = 1.;
     for (const auto &jet : jets) {
-        bveto_final_weight_full_event *= get_and_apply_bveto_weight(jet, w, h, t, _sys, _flavor_for_sys);
+        bVetoSF_event *= get_bVetoSF_perJet(jet, w, t, _sys, _flavor_for_sys);
     }
-    return bveto_final_weight_full_event;
+    return bVetoSF_event;
 }
 
-double btagger::get_and_apply_bveto_weight(const jet &j, weights &w, util::histo_set2D &h,const util::tables &tab, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_bVetoSF_perJet(const jet &j, weights &w, const util::tables &tab, std::string _sys, std::string _flavor_for_sys) const
 {
     if (w.isdata()) return 0;
 

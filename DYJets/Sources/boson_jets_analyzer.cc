@@ -377,9 +377,9 @@ void boson_jets_analyzer::operator()()
                 }
             }
             else {
-                _weights.use_weight(_btagger.get_and_apply_bveto_weight_full_event(evt.rec->jets, _weights, histo_set2D, tables()));
+                _weights.use_weight(_btagger.get_bVetoSF_event(evt.rec->jets, _weights, tables()));
                 // Example for using the function to extract the weight but not apply them
-                //double bveto_weight_for_sys = _btagger.get_and_apply_bveto_weight_full_event(evt.rec->jets, _weights, histo_set2D, tables(), "up_correlated", "heavy");
+                //double bveto_weight_for_sys = _btagger.get_bVetoSF_event(evt.rec->jets, _weights, tables(), "up_correlated", "heavy");
                 //cout<<" bveto weight for sys is : "<< bveto_weight_for_sys <<endl;
             }
         }

@@ -2,6 +2,13 @@
 # -- to make the script understand the shears output,
 # -- the output directory name in shears should contain the string "%s_%s" % (channel, era)
 # -- e.g. "ee_16pre", "mm_18"
+# -- example
+# python3 ShearsOutputDownloader.py \
+# -u kplee \
+# -s /user/kplee/Analysis/shears/240419_update_bVeto \
+# -o output \
+# -c all \
+# -t ""
 
 class ShearsOutput:
   def __init__(self):
@@ -29,7 +36,7 @@ def printCMD_hadd(shearsOutput):
   return cmd
 
 def printCMD_download(shearsOutput, outputDir):
-  cmd = "scp '%s@mshort.iihe.ac.be:%s/%s/*.root' %s/%s/%s" % (args.user, shearsOutput.shearsPath, shearsOutput.dirName, outputDir, shearsOutput.channel, shearsOutput.era)
+  cmd = "scp '%s@mlong.iihe.ac.be:%s/%s/*.root' %s/%s/%s" % (args.user, shearsOutput.shearsPath, shearsOutput.dirName, outputDir, shearsOutput.channel, shearsOutput.era)
   print(cmd)
   return cmd
 
@@ -53,7 +60,7 @@ if "DYJets" not in args.shears:
 
 client = paramiko.SSHClient()
 host_keys = client.load_system_host_keys()
-client.connect('mshort.iihe.ac.be', username=args.user, password='')
+client.connect('mlong.iihe.ac.be', username=args.user, password='')
 
 
 list_channel = ["ee", "mm"]

@@ -104,6 +104,10 @@ b jet veto:
     # EfficiencyTables/ directory.
     scale factor path: 2016preAPV/wp_deepJet_2016preAPV.csv
 
+    # fill the histograms for the mc-truth efficiency histograms
+    # which is used in the b-tagging SF
+    make mc-truth efficiency histogram: false
+
 # Options related to the selection of electrons
 electrons:
     # Pt cut [GeV]
@@ -568,6 +572,7 @@ uncertainties:
   Electron energy correction: false
   efficiency SF: false
   efficiency file: /pnfs/iihe/cms/store/user/kplee/Shears/Uncertainty/EffSF/v230730/LeptonEffMap_FullRun2.root
+  b veto SF: false
   emu method fit parameter: false
   emu method fake background: false
   same-sign method fit parameter: false

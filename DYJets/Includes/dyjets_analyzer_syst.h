@@ -142,6 +142,7 @@ private:
   bool _doSyst_pileup = false; // -- Pileup
   bool _doSyst_L1Pref = false; // -- L1 pre-firing
   bool _doSyst_theory = false; // -- MC theory uncertainty (PDF, alpha_s, scale)
+  bool _doSyst_bVetoSF = false; // -- b-veto SF uncertainty
   bool _doSyst_emuMethodFit = false; // -- emu method reweighting fit parameter uncertainty
   bool _doSyst_emuMethodFakes = false; // -- emu method uncertainty related to the fake contribution to emu sample
   bool _doSyst_fakeSameSignFit = false; // -- same-sign method OS/SS reweighting fit parameter uncertainty
@@ -242,6 +243,11 @@ private:
                             const util::matched<double> &value,
                             const util::matched<std::string>& tags_default);
 
+  // -- for the uncertainty from b-tagging SF used for b-veto
+  void fill_systHist_bVetoSF(const util::matched<event_contents>& evt,
+                             const util::matched<double> &value,
+                             const util::matched<std::string>& tags_default);
+
   void Init_GenWeightInfo(const util::options &opt);
   void Adjust_PDFWeight(const int i_mem, double& ratio_weight);
 
@@ -281,6 +287,11 @@ private:
   void fill_systHist_fakeSameSignElChMisid(const util::matched<event_contents> &evt,
                                            const util::matched<double> &value,
                                            const util::matched<std::string> &tags_default);
+
+  // -- make a new tag with an additional string
+  util::matched<std::string> make_newTag(const util::matched<event_contents>& evt,
+                                         const util::matched<std::string>& tags_default, 
+                                         TString uncType);
 };
 
 #endif // DYJETS_ANALYZER_SYST_H

@@ -59,7 +59,8 @@ double table::getEfficiencyBase(double pt, double eta, int mode) const
     bool isFound = false;
 
     if( pt < _ptBinEdge_lowest )  pt = _ptBinEdge_lowest + 0.001; // underflow: assign the first bin
-    if( pt > _ptBinEdge_highest ) pt = _ptBinEdge_highest - 0.001; // overflow: assign the last bin
+    // if( pt > _ptBinEdge_highest ) pt = _ptBinEdge_highest - 0.001; // overflow: assign the last bin
+    if( pt >= _ptBinEdge_highest ) pt = _ptBinEdge_highest - 0.001; // overflow: assign the last bin
 
     for (unsigned int i = 0; i != _recd.size(); i++) {
         if( (_recd[i]).belongTo(pt, eta) ) {

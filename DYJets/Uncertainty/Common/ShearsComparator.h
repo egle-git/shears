@@ -194,6 +194,10 @@ private:
       TString info_case = vec_eraCase_[i_case].Info();
       Int_t color_case  = vec_colorForCase_[i_case];
 
+      // if( process == "DY" ) {
+      //   PlotTool::Print_Histogram(h_case);
+      // }
+
       canvas->Register(h_case, info_case, color_case);
     }
 
@@ -250,7 +254,7 @@ private:
 
     TString canvasName = TString::Format("c%02d_%s_stack_%s", i_comp, histName.Data(), type.Data());
     PlotTool::HistStackCanvaswRatio* canvas = 
-      new PlotTool::HistStackCanvaswRatio(canvasName, Get_isLogX(histName), 1);
+      new PlotTool::HistStackCanvaswRatio(canvasName, Get_isLogX(histName), kTRUE);
 
     canvas->Ratio_Reversed();
 

@@ -60,6 +60,14 @@ public:
     return (TH1D*)((iter->second)->Clone());
   }
 
+  Bool_t DoesExist(TString histName) {
+    std::unique_ptr<TFile> f_input( TFile::Open(fileName_) );
+    Bool_t flag = f_input->Get(histName) != nullptr;
+    f_input->Close();
+
+    return flag;
+  }
+
   TH2D* Get2D(TString histName2D) {
     auto iter = map_hist2D_.find(histName2D.Data());
     // -- if it was not called: get it from the root file
@@ -191,11 +199,20 @@ private:
     TH1D* h_merged = nullptr;
 
     for( auto& pair : map_sampleOutput_ ) {
+
+      if( !pair.second.DoesExist(histName) ) {
+        printf("[ProcessOutput::Get_MergedHist] %s does not exist in %s ... skip\n", histName.Data(), pair.first.Data());
+        continue;
+      }
+
       TH1D* h_temp = pair.second.Get(histName);
 
       if( h_merged ) h_merged->Add( h_temp );
       else           h_merged = (TH1D*)h_temp->Clone();
     }
+
+    if( !h_merged )
+      throw std::runtime_error("[ProcessOutput::Get_MergedHist] merged histogram is not made for " + histName);
 
     return h_merged;
   }
@@ -1104,7 +1121,7 @@ protected:
   }
 
   // -- Even though "EraOutput" has its own way to provide "bkgMC" process (by adding up all bkgMC processes),
-  // -- DYRun2Result does ont use "EraOutput" method
+  // -- DYRun2Result does not use "EraOutput" method
   // -- to individually control the histogran name per bkg. MC processes
   // -- here, bkgMC histogram is merged
   void Insert_AllEraHist_BkgMC() {
@@ -1117,7 +1134,11 @@ protected:
 
     TH1D* h_allEra_bkgMC = nullptr;
     for(const auto& process : vec_bkgMCProcess ) {
-      TH1D* h_allEra_process = Make_AllEraHist("reco", process);
+      // TH1D* h_allEra_process = Make_AllEraHist("reco", process);
+      TString histType = "reco_"+process;
+      TH1D* h_allEra_process = (map_allEraHist_.find(histType.Data()) != map_allEraHist_.end()) ? 
+                               (TH1D*)map_allEraHist_[histType.Data()]->Clone() :
+                               Make_AllEraHist("reco", process);
 
       if( h_allEra_bkgMC == nullptr )
         h_allEra_bkgMC = (TH1D*)h_allEra_process->Clone();

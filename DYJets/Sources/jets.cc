@@ -160,11 +160,14 @@ std::vector<jet> jets::get(bool isdata, const std::vector<lepton> &leptons, doub
                 }
            }
            if (!matched) {
-                TRandom3 *random = new TRandom3(0);
+                // TRandom3 *random = new TRandom3(0);
+                // smearFactor =
+                //     1.0 +
+                //     random->Gaus(0.0, jetResolution) * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
+                // delete random;
                 smearFactor =
                     1.0 +
-                    random->Gaus(0.0, jetResolution) * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
-                delete random;
+                    gRandom->Gaus(0.0, jetResolution) * sqrt(std::max(pow(jetSF, 2) - 1.0, 0.0));
             }
             float oldJetPt = j.v.Pt();
             float newJetPt = oldJetPt * smearFactor;

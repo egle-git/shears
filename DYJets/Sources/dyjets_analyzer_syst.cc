@@ -102,6 +102,7 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
   util::set_value_safe(node, _doSyst_muP,    "Muon Rochester correction", "calculate systematic variations from muon Roccor. unc. (mm channel only)");
   util::set_value_safe(node, _doSyst_elE,    "Electron energy correction", "calculate systematic variations from electron energy correction unc. (ee channel only)");
   util::set_value_safe(node, _doSyst_effSF,  "efficiency SF", "calculate systematic variations from the uncertainty of the efficiency SF");
+  util::set_value_safe(node, _doSyst_bVetoSF, "b veto SF", "calculate systematic variations from the b-tagging SF used in b-veto");
   util::set_value_safe(node, _doSyst_emuMethodFit, "emu method fit parameter", "calculate systematic variations from the uncertainty of the emu method reweighting parameters");
   util::set_value_safe(node, _doSyst_emuMethodFakes, "emu method fake background", "calculate systematic variations from the systematic (not statistical!) uncertainty of the emu fakes");
   util::set_value_safe(node, _doSyst_fakeSameSignFit, "same-sign method fit parameter", "calculate systematic variations from the uncertainty of the same-sign method reweighting parameters");
@@ -124,7 +125,8 @@ void dyjets_analyzer_syst::readInfo_fromYAML(const util::options &opt) {
     if( _use_eRoccor ) util::logging::info << "--> Variation on the Rochester electron energy correction" << std::endl;
     else               util::logging::info << "--> Variation on the E/gamma POG electron energy correction" << std::endl;
   }
-  if( _doSyst_effSF )  util::logging::info << "Systematic variation for the efficiency SF is ON" << std::endl;
+  if( _doSyst_effSF )   util::logging::info << "Systematic variation for the efficiency SF is ON" << std::endl;
+  if( _doSyst_bVetoSF ) util::logging::info << "Systematic variation for the b-tagging SF for b-veto is ON" << std::endl;
   if( _doSyst_emuMethodFit ) {
     if (_reweight_emu_method && opt.config["emu method reweighting"])
     {
@@ -340,6 +342,31 @@ void dyjets_analyzer_syst::operator()() {
 
     if( _apply_triggerSF )
       apply_trigger_sf(_weights, evt.rec->leptons, _use_smu_triggerSF);
+
+    ///////////////////////
+    // -- b-veto part -- //
+    ///////////////////////
+    vector<physics::lepton> vec_genlep = {};
+    if( evt.gen ) vec_genlep = evt.gen->leptons;
+    evt.rec->jets = _jets.get(weights().isdata(), vec_genlep); // -- MC: need gen-leps
+    _jets.veto(evt.rec->jets, evt.rec->leptons); // -- remove jets overlapped with leptons
+
+    // Calculate b efficiencies and apply scale factors
+    if( _bjet_veto && evt.rec->jets.size() != 0 ) {
+      if( _btagger.any(evt.rec->jets) ) { // -- b-jet is found: reject
+          evt.rec = boost::none;
+          if( !evt.gen && !evt.rec ) return; // End early if vetoed and no gen boson
+      }
+      else // -- b-jet is not found: apply b-veto SF
+        _weights.use_weight(_btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables()));
+    } // -- if( b-veto )
+
+  } // if( evt.rec )
+
+  // -- if gen-boson available: additionally add gen-jet info.
+  if( evt.gen ) {
+    evt.gen->jets = _jets.getGen();
+    _jets.veto(evt.gen->jets, evt.gen->leptons);
   }
 
   // -- fill histograms
@@ -362,6 +389,7 @@ void dyjets_analyzer_syst::operator()() {
     if( _doSyst_pileup ) fill_systHist_pileup(evt, mass, tags_default);
     if( _doSyst_L1Pref ) fill_systHist_L1Pref(evt, mass, tags_default);
     if( _doSyst_theory ) fill_systHist_theory(evt, mass, tags_default);
+    if( _doSyst_bVetoSF ) fill_systHist_bVetoSF(evt, mass, tags_default);
     if( _doSyst_emuMethodFit ) fill_systHist_emuMethodFit(evt, mass, _sample_name, tags_default);
     if( _doSyst_emuMethodFakes ) fill_systHist_emuMethodFakes(evt, mass, _sample_name, tags_default);
   }
@@ -377,6 +405,62 @@ void dyjets_analyzer_syst::operator()() {
     fill_systHist_fakeSameSignEmuMeth(evt, mass, _sample_name, tags_default);
   if (_doSyst_fakeSameSignElChMisid && _channel == "ee")
     fill_systHist_fakeSameSignElChMisid(evt, mass, tags_default);
+}
+
+void dyjets_analyzer_syst::fill_systHist_bVetoSF(const util::matched<event_contents>& evt,
+                                                 const util::matched<double> &value,
+                                                 const util::matched<std::string>& tags_default) {
+
+  // -- cv = central value
+  double global_weight_cv = weights().global_weight();
+
+  // -- default b-veto correction
+  double weight_bVeto_default = (evt.rec) ? _btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables()) : 1.0;
+
+  // -- variation: MC stat. in the MC-truth efficiency map
+  vector<TString> vec_uncType_mcEff = {"MC_eff_high", "MC_eff_low"};
+  for(const auto& uncType : vec_uncType_mcEff ) {
+    double ratio_weight = 1.0;
+    if( evt.rec )
+      ratio_weight = _btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables(), uncType.Data(), "none") / weight_bVeto_default;
+    else // -- not reco'ed: no change due to the b-veto SF variation
+      ratio_weight = 1.0;
+
+    double global_weight_systVar = global_weight_cv*ratio_weight;
+    util::matched<std::string> tags_systVar = make_newTag(evt, tags_default, "bVeto_"+uncType);
+    fill_unfolded("mass_wide_range", tags_systVar, value, weights().gen_weight(), global_weight_systVar);
+  }
+
+  // -- variation: uncertainty on the POG b-tagging SF
+  vector<TString> vec_uncType_bTagSF = {"up_correlated", "down_correlated", "up_uncorrelated", "down_uncorrelated"};
+  vector<TString> vec_flavor_bTagSF = {"light", "heavy"};
+  for(const auto& uncType : vec_uncType_bTagSF ) {
+    for(const auto& flavor : vec_flavor_bTagSF ) {
+      double ratio_weight = 1.0;
+      if( evt.rec )
+        ratio_weight = _btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables(), uncType.Data(), flavor.Data()) / weight_bVeto_default;
+      else // -- not reco'ed: no change due to the b-veto SF variation
+        ratio_weight = 1.0;
+
+      double global_weight_systVar = global_weight_cv*ratio_weight;
+      util::matched<std::string> tags_systVar = make_newTag(evt, tags_default, "bVeto_"+uncType+"_"+flavor);
+      fill_unfolded("mass_wide_range", tags_systVar, value, weights().gen_weight(), global_weight_systVar);
+    }
+  }
+}
+
+util::matched<std::string> dyjets_analyzer_syst::make_newTag(const util::matched<event_contents>& evt,
+                                                             const util::matched<std::string>& tags_default, 
+                                                             TString uncType) {
+  // -- if( evt.gen ) is different with if( tag.gen )? not sure
+
+  util::matched<std::string> tags_new;
+  if( evt.gen ) tags_new.gen = *tags_default.gen + "_" + uncType.Data();
+  else          tags_new.gen = boost::none;
+  if( evt.rec ) tags_new.rec = *tags_default.rec + "_" + uncType.Data();
+  else          tags_new.rec = boost::none;
+
+  return tags_new;
 }
 
 void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_contents>& evt,
@@ -440,14 +524,14 @@ void dyjets_analyzer_syst::fill_systHist_theory(const util::matched<event_conten
     histo_set.fill("pdfWRatio",      tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
     histo_set.fill("pdfWRatio_wide", tstr_scaleVarInfo.Data(), ratio_weight, 1.0);
 
-    if( std::abs(ratio_weight) > 1000.0 ) {
-      //   TString massInfo = "";
-      //   if( !value.gen ) massInfo = "no gen-mass";
-      //   else             massInfo = TString::Format("mass = %lf", *value.gen);
-      //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
-      //   util::logging::info << info.Data() << std::endl;
-      ratio_weight = 1.0; // -- force it to be 1.0
-    }
+    // if( std::abs(ratio_weight) > 1000.0 ) {
+    //   //   TString massInfo = "";
+    //   //   if( !value.gen ) massInfo = "no gen-mass";
+    //   //   else             massInfo = TString::Format("mass = %lf", *value.gen);
+    //   //   TString info = TString::Format("[%s (%s, gen_weight = %.2lf)] ratio_PDFWeight = %lf", tstr_PDFVarInfo.Data(), massInfo.Data(), gen_weight_cv, ratio_weight);
+    //   //   util::logging::info << info.Data() << std::endl;
+    //   ratio_weight = 1.0; // -- force it to be 1.0
+    // }
 
     double gen_weight_scaleVar    = gen_weight_cv    * ratio_weight;
     double global_weight_scaleVar = global_weight_cv * ratio_weight;
@@ -562,6 +646,18 @@ void dyjets_analyzer_syst::fill_systHist_elE_RocCorr_eachSystVar(const util::mat
     } // -- if( !leptons.empty() )
   } // -- if( triggered )
 
+  // -- even if an event is newly added in the histogram by passing pt cut with the systematic variation of lepton momentum,
+  // -- the event should be rejected if it has a b-jet
+  if( evt_systVar.rec ) {
+    vector<physics::lepton> vec_genlep = {};
+    if( evt_systVar.gen ) vec_genlep = evt_systVar.gen->leptons;
+    evt_systVar.rec->jets = _jets.get(weights().isdata(), vec_genlep); // -- MC: need gen-leps
+    _jets.veto(evt_systVar.rec->jets, evt_systVar.rec->leptons); // -- remove jets overlapped with leptons
+
+    if( _bjet_veto && _btagger.any(evt_systVar.rec->jets) )
+      evt_systVar.rec = boost::none;
+  }
+
   if( !evt_systVar.gen && !evt_systVar.rec ) return; // -- early termination
 
   auto mass_systVar = evt_systVar.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
@@ -634,6 +730,18 @@ void dyjets_analyzer_syst::fill_systHist_elE_POGCorr_eachSystVar(const util::mat
     } // -- if( !leptons.empty() )
   } // -- if( triggered )
 
+  // -- even if an event is newly added in the histogram by passing pt cut with the systematic variation of lepton momentum,
+  // -- the event should be rejected if it has a b-jet
+  if( evt_systVar.rec ) {
+    vector<physics::lepton> vec_genlep = {};
+    if( evt_systVar.gen ) vec_genlep = evt_systVar.gen->leptons;
+    evt_systVar.rec->jets = _jets.get(weights().isdata(), vec_genlep); // -- MC: need gen-leps
+    _jets.veto(evt_systVar.rec->jets, evt_systVar.rec->leptons); // -- remove jets overlapped with leptons
+
+    if( _bjet_veto && _btagger.any(evt_systVar.rec->jets) )
+      evt_systVar.rec = boost::none;
+  }
+
   if( !evt_systVar.gen && !evt_systVar.rec ) return; // -- early termination
 
   auto mass_systVar = evt_systVar.apply(&event_contents::get_boson_p).apply(&TLorentzVector::M);
@@ -702,6 +810,18 @@ void dyjets_analyzer_syst::fill_systHist_muP_eachSystVar(
       } // -- if( mass > 10.0 )
     } // -- if( !leptons.empty() )
   } // -- if( passes_trigger() && !isLowQMuEvent )
+
+  // -- even if an event is newly added in the histogram by passing pt cut with the systematic variation of lepton momentum,
+  // -- the event should be rejected if it has a b-jet
+  if( evt_systVar.rec ) {
+    vector<physics::lepton> vec_genlep = {};
+    if( evt_systVar.gen ) vec_genlep = evt_systVar.gen->leptons;
+    evt_systVar.rec->jets = _jets.get(weights().isdata(), vec_genlep); // -- MC: need gen-leps
+    _jets.veto(evt_systVar.rec->jets, evt_systVar.rec->leptons); // -- remove jets overlapped with leptons
+
+    if( _bjet_veto && _btagger.any(evt_systVar.rec->jets) )
+      evt_systVar.rec = boost::none;
+  }
 
   if( !evt_systVar.gen && !evt_systVar.rec ) return; // -- early termination
 

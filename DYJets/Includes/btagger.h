@@ -28,21 +28,32 @@ class btagger
     explicit btagger(const util::options &opt, util::histo_set2D &h);
 
     /// \brief Checks whether any jet is a b jet
-    bool any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h) const;
+    bool any(const std::vector<jet> &jets) const;
     /// \brief Compute the b-tagging scale factors for the event
-    double get_bVetoSF_event(const std::vector<jet> &jets, weights &w,
+    double get_bVetoSF_event(const std::vector<jet> &jets, bool isData,
                             const util::tables &tab,
                             std::string _sys = "central",
                             std::string _flavor_for_sys = "None") const;
 
+    bool fillHist_mcTruthEff() const { return _fillHist_jet_mcTruthEff; }
+
+    /// \brief fill histograms for MC-truth efficiency of jet-tagging (used for b-tagging SF)
+    void fill_eff(const jet &j, weights &w, util::histo_set2D &h) const;
+
   private:
+    /// \brief turn on fill_eff()
+    bool _fillHist_jet_mcTruthEff = false; 
+
     /// \brief Compute and the b-tagging scale factors for the given jet
-    double get_bVetoSF_perJet(const jet &j, weights &w,
+    double get_bVetoSF_perJet(const jet &j, bool isData,
                             const util::tables &tab,
                             std::string _sys = "central",
                             std::string _flavor_for_sys = "None") const;
-    /// \brief Compute and applies the b-tagging scale factors for the given jet
-    void fill_eff(const jet &j, weights &w, util::histo_set2D &h) const;
+
+    void decide_jetFlavorInfo(const jet& j, std::string& tg, BTagEntry::JetFlavor& flavor) const;
+
+
+
 
 };
 

@@ -367,9 +367,16 @@ void boson_jets_analyzer::operator()()
         _jets.veto(evt.rec->jets, evt.rec->leptons);
         //_jets.fill(histo_set, "inc0jet_noweight_before_bveto", evt.rec->jets, weights());
 
+        // -- fill the histogram for the MC-truth efficiency calculation of jets
+        // -- used to obtain the b-tagging SF
+        if( _btagger.fillHist_mcTruthEff() ) {
+            for( const auto &jet : evt.rec->jets )
+               _btagger.fill_eff(jet, _weights, histo_set2D);
+        }
+
         // Calculate b efficiencies and apply scale factors
         if (_bjet_veto && evt.rec->jets.size() != 0) {
-            if (_btagger.any(evt.rec->jets, _weights, histo_set2D)) {
+            if( _btagger.any(evt.rec->jets) ) {
                 evt.rec = boost::none;
                 if (!evt.gen && !evt.rec) {
                     // End early if vetoed and no gen boson
@@ -377,9 +384,9 @@ void boson_jets_analyzer::operator()()
                 }
             }
             else {
-                _weights.use_weight(_btagger.get_bVetoSF_event(evt.rec->jets, _weights, tables()));
-                // Example for using the function to extract the weight but not apply them
-                //double bveto_weight_for_sys = _btagger.get_bVetoSF_event(evt.rec->jets, _weights, tables(), "up_correlated", "heavy");
+                _weights.use_weight(_btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables()));
+                // Example for using the function to extract the weight for systematic variation
+                //double bveto_weight_for_sys = _btagger.get_bVetoSF_event(evt.rec->jets, weights().isdata(), tables(), "up_correlated", "heavy");
                 //cout<<" bveto weight for sys is : "<< bveto_weight_for_sys <<endl;
             }
         }

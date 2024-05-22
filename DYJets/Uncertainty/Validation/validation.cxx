@@ -9,6 +9,15 @@
 // ---- the result from dyjets-loop-syst, muP systematics (where event selection is re-done)
 // ---- the result from dyjets-loop-syst, elE systematics (where event selection is re-done)
 
+// -- usage
+// Validator validator_ee("ee");
+// // validator_ee.Validate_ElE(kFALSE); # -- do not include elE case (default: true)
+// validator_ee.Validate();
+
+// Validator validator_mm("mm");
+// // validator_ee.Validate_MuP(kFALSE); # -- do not include muP case (default: true)
+// validator_mm.Validate();
+
 class Validator {
 public:
   Validator(TString channel): channel_(channel) {
@@ -43,7 +52,7 @@ private:
 
   void Init() {
     Insert("default", DYTool::path_default+"/"+channel_);
-    Insert("syst",    DYTool::path_systVar_pileup+"/"+channel_);
+    Insert("syst",    DYTool::path_systVar_bVeto+"/"+channel_);
     if( channel_ == "mm" && do_muP_ )
       Insert("syst_muP", DYTool::path_systVar_muP+"/"+channel_);
     if( channel_ == "ee" && do_elE_ )
@@ -132,10 +141,10 @@ private:
 
 void validation() {
   Validator validator_ee("ee");
-  // validator_ee.Validate_MuP(kFALSE);
-  // validator_ee.Validate_ElE(kFALSE);
+  validator_ee.Validate_ElE(kTRUE);
   validator_ee.Validate();
 
   Validator validator_mm("mm");
+  validator_mm.Validate_MuP(kTRUE);
   validator_mm.Validate();
 }

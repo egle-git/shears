@@ -587,6 +587,7 @@ private:
     PlotTool::HistCanvaswRatio* canvas = new PlotTool::HistCanvaswRatio(canvasName, 1, 1);
     canvas->SetTitle("m [GeV]", "d#sigma/dm [pb/GeV]", "mm/ee");
 
+    // -- FIXME: remove the correlated uncertainty on each dsigma/dm, to be consistent with the chi2/ndof calculation
     canvas->Register(result_ee_->Get("dsigdm_data"), "Electron channel", kGreen+2);
     canvas->Register(result_mm_->Get("dsigdm_data"), "Muon channel",     kBlue);
 
@@ -600,9 +601,11 @@ private:
     Double_t run2Lumi = LUMI_16pre + LUMI_16post + LUMI_17 + LUMI_18;
     canvas->Latex_LumiEnergy(run2Lumi/1000.0, 13);
 
-    Double_t normChi2 = Compute_NormChi2();
-    TString normChi2Info = TString::Format("Compatibility (ee, mm): #chi2/ndof = %.3lf", normChi2);
-    canvas->RegisterLatex(0.16, 0.91, 42, 0.6, normChi2Info);
+    Double_t totalChi2; Int_t nDOF;
+    Double_t normChi2 = Compute_NormChi2(totalChi2, nDOF);
+    Double_t pValue = ROOT::Math::chisquared_cdf_c(totalChi2, nDOF);
+    TString normChi2Info = TString::Format("Compatibility (ee, mm): #chi2/ndof = %.3lf/%d = %.3lf (p-value = %.3lf)", totalChi2, nDOF, normChi2, pValue);
+    canvas->RegisterLatex(0.16, 0.91, 42, 0.5, normChi2Info);
 
     canvas->RegisterLatex(0.18, 0.46, 62, 0.6, "Fiducial phase space (dressed level)");    
     canvas->RegisterLatex(0.18, 0.42, 42, 0.6, "p_{T}^{lead}(l) > 20 GeV, p_{T}^{sub}(l) > 15 GeV");
@@ -621,7 +624,7 @@ private:
     canvas->Draw();
   }
 
-  Double_t Compute_NormChi2() {
+  Double_t Compute_NormChi2(Double_t &totalChi2, Int_t& nDOF) {
 
     // -- initialize
     TMatrixD y_ee = Convert_To_TMatrixD(result_ee_->Get("dsigdm_data"));
@@ -644,11 +647,11 @@ private:
     yT.Transpose(yT);
 
     TMatrixD mChi2 = (y * mCovInvert) * yT;
-    Double_t totalChi2 = mChi2[0][0];
-    Int_t nBin = result_ee_->Get("dsigdm_data")->GetNbinsX();
-    Double_t normChi2 = totalChi2 / (Double_t)nBin;
+    totalChi2 = mChi2[0][0];
+    nDOF = result_ee_->Get("dsigdm_data")->GetNbinsX(); // -- # dof = # bins
+    Double_t normChi2 = totalChi2 / (Double_t)nDOF;
 
-    printf("***[Combinator::Compute_NormChi2] Chi2/ndof = %.5lf/%02d = %.5lf\n", totalChi2, nBin, normChi2);
+    printf("***[Combinator::Compute_NormChi2] Chi2/ndof = %.5lf/%02d = %.5lf\n", totalChi2, nDOF, normChi2);
     Compute_NormChi2_EachBin(y, mCovInvert, totalChi2);
 
     return normChi2;
@@ -657,11 +660,12 @@ private:
   // -- remove the covariance matrix from the correlated source between two channels
   void Subtract_CorrelatedSource(TMatrixD& mCov, ChannelResult* result) {
     // vector<TString> vec_tag_corrEM = { };
-    vector<TString> vec_tag_corrEM = {"lumi_tot", "theory_tot", "unfold_model"};
+    // vector<TString> vec_tag_corrEM = {"lumi_tot", "theory_tot", "unfold_model"};
     // vector<TString> vec_tag_corrEM = {"lumi_tot"};
     // vector<TString> vec_tag_corrEM = {"theory_tot"};
     // vector<TString> vec_tag_corrEM = {"unfold_model"};
     // vector<TString> vec_tag_corrEM = {"lumi_tot", "theory_tot"};
+    vector<TString> vec_tag_corrEM = vec_uncType_corr_em_;
 
     printf("***[Combinator::Subtract_CorrelatedSource] chi2(ee,mm): below uncertainties are not considered in chi2 calculation (correlated source between channels)\n");
     for(const auto& tag : vec_tag_corrEM)
@@ -885,7 +889,7 @@ private:
 // -- fiducial cross section
 void perform_combination_fid(Bool_t noCorr_em = kFALSE) {
   Combinator combinator("fid");
-  combinator.Set_CorrelatedUnc_BtwChannel( {"lumi_tot", "theory_tot", "unfold_model"} );
+  combinator.Set_CorrelatedUnc_BtwChannel( {"lumi_tot", "theory_tot", "unfold_model", "bVeto_tot"} );
   combinator.Set_NoCorr_BtwChannel(noCorr_em);
 
   // -- for the final comparison
@@ -904,7 +908,7 @@ void perform_combination_fid(Bool_t noCorr_em = kFALSE) {
 // -- full phase space cross section
 void perform_combination_FPS(Bool_t noCorr_em = kFALSE) {
   Combinator combinator("FPS");
-  combinator.Set_CorrelatedUnc_BtwChannel( {"lumi_tot", "theory_tot", "unfold_model"} );
+  combinator.Set_CorrelatedUnc_BtwChannel( {"lumi_tot", "theory_tot", "unfold_model", "bVeto_tot", "pileup"} );
   combinator.Set_NoCorr_BtwChannel(noCorr_em);
 
   // -- for the final comparison

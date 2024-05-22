@@ -157,6 +157,11 @@ private:
                    path_default+"/Unfolding/UncAndCov_Unfolding_mm.root",
                    "unfold_model");
 
+    Insert_UncInfo("bVeto", "b-veto", kGreen-6,
+                   path_default+"/bVeto/Unfolded_And_Uncertainty_bVeto_ee.root",
+                   path_default+"/bVeto/Unfolded_And_Uncertainty_bVeto_mm.root",
+                   "bVeto_tot");
+
     result_cv_ = new DYRun2Result(DYTool::path_default+"/"+channel_);
     if( useFake_ ) DYTool::Set_Fake(channel_, result_cv_);
     if( isFPS_ )   DYTool::Set_Acc(result_cv_, "cv");

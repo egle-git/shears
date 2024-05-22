@@ -2,6 +2,7 @@
 #include "Common/DYUncertainty.h"
 #include "Common/DYPath.h"
 #include "Common/DYTool.h"
+#include "TTXSec.h"
 
 class UncEstimator_Theory {
 public:
@@ -12,6 +13,8 @@ public:
   void Use_Fake(Bool_t flag = kTRUE) { useFake_ = flag; }
 
   void FullPhaseSpace(Bool_t flag = kTRUE) { isFPS_ = flag; }
+
+  void Use_NNLOScaleVar_TT(Bool_t flag = kTRUE) { use_NNLOScaleVar_TT_ = flag; }
 
   void EstimateAndSave() {
     if( isFPS_ ) {
@@ -40,6 +43,8 @@ private:
   Bool_t useFake_ = kTRUE;
 
   Bool_t isFPS_ = kFALSE; // -- true if the uncertainty is esimated for the full-phase space results
+
+  Bool_t use_NNLOScaleVar_TT_ = kTRUE; // -- use the scale uncertainty on the NNLO cross section for TT MC (not Powheg itself): default is true
 
   TString inputPath_ = DYTool::path_systVar_theory;
 
@@ -115,13 +120,37 @@ private:
     // ---- singleTop: except for ST_s-channel (doesn't have 101, 102 variation (alphaS))
     // -- VV, gg: small fraction & no weights are provided (pythia8 samples)
     // ---- their uncertainty will be estimated using the uncertainty on the cross sections
-    result->Update_HistName(era, "reco_TT",        "TUnfold1DReco_inc0jet_"+tag);
+    if( use_NNLOScaleVar_TT_ ) Update_TTMC(result, tag, era); // -- use NNLO scale uncertainty for TT (PDF & alphaS: same with the other samples)
+    else                       result->Update_HistName(era, "reco_TT",        "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "reco_TauTau",    "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "reco_singleTop", "ST_t-channel_antitop", "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "reco_singleTop", "ST_t-channel_top",     "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "reco_singleTop", "ST_tW_antitop",        "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "reco_singleTop", "ST_tW_top",            "TUnfold1DReco_inc0jet_"+tag);
     result->Update_HistName(era, "migM",    "TUnfold2DMig_inc0jet_"+tag);
+  }
+
+  void Update_TTMC(DYRun2Result* result, const TString tag, const TString era) {
+    // -- if it is not scale variation: usual procedure
+    if( !tag.Contains("scaleVar") ) {
+      result->Update_HistName(era, "reco_TT", "TUnfold1DReco_inc0jet_"+tag);
+      return;
+    }
+
+    // -- if it is scale variation: use the (flat) scale uncertainty from the NNLO cross section
+    TTXSec ttXSec;
+    Double_t histScale_scaleVar_up   = ttXSec.GetHistScale("scaleVar_up");
+    Double_t histScale_scaleVar_down = ttXSec.GetHistScale("scaleVar_down");
+    Double_t histScale = 0;
+    if( tag == "scaleVar_000" || tag == "scaleVar_001" || tag == "scaleVar_003" )
+      histScale = histScale_scaleVar_up; // -- the case when mean(weight) > 1.0
+    else
+      histScale = histScale_scaleVar_down; // -- (004, 7, 8): the case when mean(weight) < 1.0
+
+    TH1D* h_allEra_TT = result_cv_->Get_AllEra("reco", "TT");
+    h_allEra_TT->Scale( histScale );
+
+    result->Add_CustomAllEraHist("reco", "TT", h_allEra_TT);
   }
 
   void ProducePlots_Validation() {

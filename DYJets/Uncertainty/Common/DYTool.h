@@ -1,3 +1,4 @@
+#pragma once
 #include "SimplePlotTools.h"
 #include "DYPath.h"
 #include "DYOutput.h"

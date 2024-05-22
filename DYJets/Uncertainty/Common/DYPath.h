@@ -26,8 +26,8 @@ namespace DYTool {
 // -- paths can be modified for your test, investigation, etc
 
 TString path_SE = "/pnfs/iihe/cms/store/user/kplee";
-TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_240214/input_postProcess";
-// TString path_base = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/input_postProcess";
+TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_240521/input_postProcess";
+// TString path_base = "/Users/kplee/Research/Analysis/Logbook/240419_update_bVeto/data";
 
 // -- path to your "Uncertainty" Directory
 // TString path_uncDir = "/Users/kplee/Research/Analysis/Logbook/231124_update_latestSetup_v2/shears/DYJets/Uncertainty";
@@ -48,38 +48,47 @@ struct DYHistInfo {
   TString histName;
 };
 
-TString path_default_fake = path_base+"/shears/fromMarijus/FakeBkg";
+// TString path_default_fake = path_base+"/shears/fromMarijus/FakeBkg";
+TString path_default_fake = path_default;
 
 vector<DYTool::DYHistInfo> vec_fakeLepBkgInfo = {
-  DYTool::DYHistInfo{"ee", "16pre",  DYTool::path_default_fake+"/EE/2016preAPV/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "16post", DYTool::path_default_fake+"/EE/2016postAPV/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "17",     DYTool::path_default_fake+"/EE/2017/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"ee", "18",     DYTool::path_default_fake+"/EE/2018/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "16pre",  DYTool::path_default_fake+"/ee/16pre/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "16post", DYTool::path_default_fake+"/ee/16post/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "17",     DYTool::path_default_fake+"/ee/17/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"ee", "18",     DYTool::path_default_fake+"/ee/18/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
 
-  DYTool::DYHistInfo{"mm", "16pre",  DYTool::path_default_fake+"/MuMu/2016preAPV/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "16post", DYTool::path_default_fake+"/MuMu/2016postAPV/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "17",     DYTool::path_default_fake+"/MuMu/2017/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
-  DYTool::DYHistInfo{"mm", "18",     DYTool::path_default_fake+"/MuMu/2018/dyjets-Fakes.root",        "mass_wide_range_inc0jet"}
+  DYTool::DYHistInfo{"mm", "16pre",  DYTool::path_default_fake+"/mm/16pre/dyjets-Fakes.root",  "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "16post", DYTool::path_default_fake+"/mm/16post/dyjets-Fakes.root", "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "17",     DYTool::path_default_fake+"/mm/17/dyjets-Fakes.root",        "mass_wide_range_inc0jet"},
+  DYTool::DYHistInfo{"mm", "18",     DYTool::path_default_fake+"/mm/18/dyjets-Fakes.root",        "mass_wide_range_inc0jet"}
 };
 
 ///////////////////////////////////////////////////////////////
 // -- path_systVar_*: shears output from dyjets-loop-syst -- //
 // -- for each uncertainty source                         -- //
 ///////////////////////////////////////////////////////////////
-TString path_systVar_theory_pu_l1pref_muP_elE = path_base+"/shears/theory_pu_l1pref_muP_elE";
+// TString path_systVar_theory_pu_l1pref_muP_elE = path_base+"/shears/theory_pu_l1pref_muP_elE";
+TString path_systVar_lepE_bVeto_pileup_L1Pref = path_base+"/shears/lepE_bVeto_pileup_L1Pref";
 
-TString path_systVar_pileup = path_systVar_theory_pu_l1pref_muP_elE;
+TString path_systVar_pileup = path_systVar_lepE_bVeto_pileup_L1Pref;
 
-TString path_systVar_L1Pref = path_systVar_theory_pu_l1pref_muP_elE;
+TString path_systVar_L1Pref = path_systVar_lepE_bVeto_pileup_L1Pref;
 
-TString path_systVar_muP = path_systVar_theory_pu_l1pref_muP_elE;
+TString path_systVar_muP = path_systVar_lepE_bVeto_pileup_L1Pref;
 
 // TString path_systVar_theory = path_systVar_theory_pu_l1pref_muP_elE;
-TString path_systVar_theory = path_base+"/shears/theory_5sigma";
+// TString path_systVar_theory = path_base+"/shears/theory_5sigma";
+TString path_systVar_theory = path_base+"/shears/theory";
 
-TString path_systVar_elE = path_systVar_theory_pu_l1pref_muP_elE;
+TString path_systVar_elE = path_systVar_lepE_bVeto_pileup_L1Pref;
 
 TString path_systVar_effSF = path_base+"/shears/effSF";
+
+TString path_systVar_bVeto = path_systVar_lepE_bVeto_pileup_L1Pref;
+
+TString path_systVar_bkg_topRwgt = path_base+"/shears/bkg_topRwgt";
+
+TString path_systVar_bkg_fakeLep = path_base+"/shears/bkg_fakeLep";
 
 ////////////////////////////////////////////////////////
 // -- path for the additional/intermediate results -- //

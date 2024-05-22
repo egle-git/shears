@@ -37,6 +37,7 @@ public:
   void Set_CentralHist( TH1D* h_cv ) { h_cv_ = (TH1D*)h_cv->Clone(); }
   void Set_AltHist( vector<TH1D*> vec_altHist ) { vec_altHist_ = vec_altHist; }
 
+  TString Tag() const { return systTag_; }
   TH1D* RelUnc() const { return h_relUnc_; }
   TH1D* AbsUnc() const { return h_absUnc_; }
   TH2D* CovM() const   { return h_covM_; }

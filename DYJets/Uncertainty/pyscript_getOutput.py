@@ -40,6 +40,9 @@ dic_result = {
   "Unfolding" : {"UncAndCov_Unfolding_ee.root",
                  "UncAndCov_Unfolding_mm.root"},
 
+  "bVeto" : {"Unfolded_And_Uncertainty_bVeto_ee.root",
+             "Unfolded_And_Uncertainty_bVeto_mm.root"},
+
   "Summary" : {"UncAndCov_All_ee.root", "UncAndCov_All_ee_FPS.root",
                "UncAndCov_All_mm.root", "UncAndCov_All_mm_FPS.root"},
 
@@ -121,12 +124,13 @@ if __name__ == '__main__':
       print("Input directory = %s does not exist" % args.input)
       sys.exit()
 
+    absPath_input = os.path.abspath(args.input)
     for key in dic_result.keys():
       dirName = key
       list_rootFile = dic_result[key]
 
       for rootFile in list_rootFile:
-        filePath = "%s/%s" % (args.input, rootFile)
+        filePath = "%s/%s" % (absPath_input, rootFile)
         if not os.path.exists(filePath):
           print("File = %s does not exist in the input directory!", filePath)
           sys.exit()
@@ -135,12 +139,14 @@ if __name__ == '__main__':
           print("File = %s already exists in %s!" % (rootFile, dirName))
           sys.exit()
 
-        cmd_cp = "cp %s %s" % (filePath, dirName)
-        # print(cmd_cp)
-        os.system(cmd_cp)
+        # cmd_cp = "cp %s %s" % (filePath, dirName)
+        # os.system(cmd_cp)
+
+        cmd_ln = "ln -s %s %s" % (filePath, dirName)
+        os.system(cmd_ln)
 
 
-    print("All root files in %s are distributed in the current working space" % args.input)
+    print("All root files in %s are distributed (symbolic link) in the current working space" % args.input)
 
 
 

@@ -46,6 +46,11 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
         else                      throw std::invalid_argument("Unknown bjet cut : \"" + bjet_cut  + "\"");
     }
 
+    if( node["make mc-truth efficiency histogram"] )
+        _fillHist_jet_mcTruthEff = node["make mc-truth efficiency histogram"].as<bool>();
+    if( _fillHist_jet_mcTruthEff )
+        util::logging::info << "MC-truth efficiency histograms for jets will be filled" << endl;
+
     // Calibration file
     calib_file = "EfficiencyTables/2018/wp_deepJet.csv";
     if ( node["scale factor path"] ) {
@@ -61,11 +66,8 @@ btagger::btagger(const util::options &opt, util::histo_set2D &h)
     _btag_calibration_reader.load(calib, BTagEntry::FLAV_B, "mujets");
 }
 
-bool btagger::any(const std::vector<jet> &jets, weights &w, util::histo_set2D &h) const
+bool btagger::any(const std::vector<jet> &jets) const
 {
-    //for (const auto &jet : jets) {
-    //    fill_eff(jet, w, h);
-    //}
     return std::any_of(jets.begin(),
                        jets.end(),
                        [&](const jet &j) { return j.bdisc > _bjet_cut; });
@@ -76,16 +78,17 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h) const
     if (w.isdata()) return;
     std::string tg="";
     BTagEntry::JetFlavor flavor;
-    if (std::abs(j.hadflav) == 5) {
-        flavor = BTagEntry::FLAV_B;
-        tg="bjet";
-    } else if (std::abs(j.hadflav) == 4) {
-        flavor = BTagEntry::FLAV_C;
-        tg="cjet";
-    } else {
-        flavor = BTagEntry::FLAV_UDSG;
-        tg="udsgjet";
-    }
+    decide_jetFlavorInfo(j, tg, flavor);
+    // if (std::abs(j.hadflav) == 5) {
+    //     flavor = BTagEntry::FLAV_B;
+    //     tg="bjet";
+    // } else if (std::abs(j.hadflav) == 4) {
+    //     flavor = BTagEntry::FLAV_C;
+    //     tg="cjet";
+    // } else {
+    //     flavor = BTagEntry::FLAV_UDSG;
+    //     tg="udsgjet";
+    // }
     bool tagged_loose = j.bdisc > _loose_cut;
     bool tagged_medium = j.bdisc > _medium_cut;
     bool tagged_tight = j.bdisc > _tight_cut;
@@ -95,33 +98,34 @@ void btagger::fill_eff(const jet &j, weights &w, util::histo_set2D &h) const
     if(tagged_tight)    h.fill("bjetPtEta", tg+"_tagged_tight", j.raw_v.Pt(),j.raw_v.Eta(), w.global_weight());
 }
 
-double btagger::get_bVetoSF_event(const std::vector<jet> &jets, weights &w, const util::tables &t, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_bVetoSF_event(const std::vector<jet> &jets, bool isData, const util::tables &t, std::string _sys, std::string _flavor_for_sys) const
 {
     double bVetoSF_event = 1.;
     for (const auto &jet : jets) {
-        bVetoSF_event *= get_bVetoSF_perJet(jet, w, t, _sys, _flavor_for_sys);
+        bVetoSF_event *= get_bVetoSF_perJet(jet, isData, t, _sys, _flavor_for_sys);
     }
     return bVetoSF_event;
 }
 
-double btagger::get_bVetoSF_perJet(const jet &j, weights &w, const util::tables &tab, std::string _sys, std::string _flavor_for_sys) const
+double btagger::get_bVetoSF_perJet(const jet &j, bool isData, const util::tables &tab, std::string _sys, std::string _flavor_for_sys) const
 {
-    if (w.isdata()) return 0;
+    if( isData ) return 1.0;
 
     BTagEntry::JetFlavor flavor;
     std::string tg="";
+    decide_jetFlavorInfo(j, tg, flavor);
     double eff = -1, sf = -1, bveto_final_weight = -1;
 
-    if (std::abs(j.hadflav) == 5) {
-        flavor = BTagEntry::FLAV_B;
-        tg="bjet";
-    } else if (std::abs(j.hadflav) == 4) {
-        flavor = BTagEntry::FLAV_C;
-        tg="cjet";
-    } else {
-        flavor = BTagEntry::FLAV_UDSG;
-        tg="udsgjet";
-    }
+    // if (std::abs(j.hadflav) == 5) {
+    //     flavor = BTagEntry::FLAV_B;
+    //     tg="bjet";
+    // } else if (std::abs(j.hadflav) == 4) {
+    //     flavor = BTagEntry::FLAV_C;
+    //     tg="cjet";
+    // } else {
+    //     flavor = BTagEntry::FLAV_UDSG;
+    //     tg="udsgjet";
+    // }
 
     //std::cout << "NEW JET --------------" << std::endl;
     //std::cout << "Jet pt : " << j.raw_v.Pt() << "; Jet eta : " << j.raw_v.Eta() << "; Jet flavor : " << tg << std::endl;
@@ -153,11 +157,29 @@ double btagger::get_bVetoSF_perJet(const jet &j, weights &w, const util::tables 
     }
     else throw std::invalid_argument("Invalid systematics for bveto : \"" + _sys + "\"");
 
+    if( eff == 1.0 ) {
+        printf("[jet with flavor = %s] (pt, eta, phi) = (%lf, %lf, %lf)\n", tg, j.raw_v.Pt(), j.raw_v.Eta(), j.raw_v.Phi());
+        throw std::runtime_error("b-tagging efficiency is 1.0 -> b-veto weight is divided by (1-eff) = 0!");
+    }
+
     bveto_final_weight = (1 - sf * eff) / (1 - eff);
 
     //cout << "This jet weight is : " << bveto_final_weight << endl;
     //cout << "End of JET --------------" << endl;
     return bveto_final_weight;
+}
+
+void btagger::decide_jetFlavorInfo(const jet& j, std::string& tg, BTagEntry::JetFlavor& flavor) const {
+    if (std::abs(j.hadflav) == 5) {
+        flavor = BTagEntry::FLAV_B;
+        tg="bjet";
+    } else if (std::abs(j.hadflav) == 4) {
+        flavor = BTagEntry::FLAV_C;
+        tg="cjet";
+    } else {
+        flavor = BTagEntry::FLAV_UDSG;
+        tg="udsgjet";
+    }
 }
 
 } // namespace physics

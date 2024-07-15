@@ -391,14 +391,69 @@ samples:
       jobs: 3
       nano dir: Catalogs/2016postAPV
       catalog: Catalog2016_bonzai_TauTau.txt
-    - name: GammaGamma
+      #    - name: GammaGamma
+      #      type: background
+      #      nano dir: Catalogs/2016postAPV
+      #      catalog: Catalog2016_bonzai_GGToLL.txt
+      #    - name: GammaGamma_M-5to50
+      #      type: background
+      #      nano dir: Catalogs/2016postAPV
+      #      catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+    - name: GG_M10To50_El-El
       type: background
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_GGToLL.txt
-    - name: GammaGamma_M-5to50
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-10To50_El-El.txt
+    - name: GG_M10To50_El-Inel
       type: background
-      nano dir: Catalogs/2016postAPV
-      catalog: Catalog2016_bonzai_GGToLL_M-5to50.txt
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-10To50_Inel-El_El-Inel.txt
+      jobs: 2
+    - name: GG_M10To50_Inel-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-10To50_Inel-Inel.txt
+      jobs: 2
+    - name: GG_M50To200_El-El
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-50To200_El-El.txt
+      jobs: 2
+    - name: GG_M50To200_El-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-50To200_Inel-El_El-Inel.txt
+    - name: GG_M50To200_Inel-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-50To200_Inel-Inel.txt
+      jobs: 2
+    - name: GG_M200To1500_El-El
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-200To1500_El-El.txt
+      jobs: 2
+    - name: GG_M200To1500_El-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-200To1500_Inel-El_El-Inel.txt
+      jobs: 2
+    - name: GG_M200To1500_Inel-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-200To1500_Inel-Inel.txt
+    - name: GG_M1500ToInf_El-El
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-1500ToInf_El-El.txt
+    - name: GG_M1500ToInf_El-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-1500ToInf_Inel-El_El-Inel.txt
+      jobs: 2
+    - name: GG_M1500ToInf_Inel-Inel
+      type: background
+      nano dir: Catalogs/2016postAPV/GamGam_LPair
+      catalog: Catalog2016_GGToMuMu_Pt-2_Mll-1500ToInf_Inel-Inel.txt
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - name: Fakes
     #   type: background
@@ -457,7 +512,11 @@ MC grouping:
       samples: [ TauTau ]
       color: 434 # kCyan + 2
     - legend: "#gamma#gamma"
-      samples: [ GammaGamma, GammaGamma_M-5to50 ]
+      #samples: [ GammaGamma, GammaGamma_M-5to50 ]
+      samples: [ GG_M10To50_El-El, GG_M10To50_El-Inel, GG_M10To50_Inel-Inel, 
+                 GG_M50To200_El-El, GG_M50To200_El-Inel, GG_M50To200_Inel-Inel, 
+                 GG_M200To1500_El-El, GG_M200To1500_El-Inel, GG_M200To1500_Inel-Inel, 
+                 GG_M1500ToInf_El-El, GG_M1500ToInf_El-Inel, GG_M1500ToInf_Inel-Inel ]
       color: 800 # kOrange
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - legend: "Fakes"

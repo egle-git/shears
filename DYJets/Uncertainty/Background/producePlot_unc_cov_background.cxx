@@ -1,7 +1,5 @@
 #include "Common/SimplePlotTools.h"
 
-
-
 class PlotProducer {
 public:
   PlotProducer(TString channel): channel_(channel) {}
@@ -22,6 +20,7 @@ public:
     ProducePlot_2D("corrM", "fakeLepBkg_stat");
     ProducePlot_2D("corrM", "fakeLepBkg_constRatio");
     ProducePlot_2D("corrM", "fakeLepBkg_fitParam");
+    ProducePlot_2D("corrM", "fakeLepBkg_noSSEmuRwgt");
     if( channel_ == "ee" ) {
       ProducePlot_2D("corrM", "fakeLepBkg_misID");
       ProducePlot_2D("corrM", "fakeLepBkg_altInterp");
@@ -73,9 +72,10 @@ private:
     PlotTool::HistCanvas* canvas = new PlotTool::HistCanvas(canvasName, 0, 0);
     canvas->SetTitle("mass bin number", "Rel. uncertainty");
 
-    TH1D* h_relUnc_stat       = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_stat");
-    TH1D* h_relUnc_constRatio = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_constRatio");
-    TH1D* h_relUnc_fitParam   = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_fitParam");
+    TH1D* h_relUnc_stat        = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_stat");
+    TH1D* h_relUnc_constRatio  = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_constRatio");
+    TH1D* h_relUnc_fitParam    = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_fitParam");
+    TH1D* h_relUnc_noSSEmuRwgt = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_noSSEmuRwgt");
     TH1D* h_relUnc_misID = nullptr;
     TH1D* h_relUnc_altInterp = nullptr;
     if( channel_ == "ee" ) {
@@ -84,9 +84,10 @@ private:
     }
     TH1D* h_relUnc_tot      = PlotTool::Get_Hist(fileName_, "h_relUnc_fakeLepBkg_tot");
 
-    canvas->Register(h_relUnc_stat,       "stat. (same sign data sample)", kBlack);
-    canvas->Register(h_relUnc_constRatio, "const. OS/SS ratio", kCyan);
-    canvas->Register(h_relUnc_fitParam, "Fit parameter (OS/SS ratio fit)", kBlue);
+    canvas->Register(h_relUnc_stat,        "stat. (same sign data sample)", kBlack);
+    canvas->Register(h_relUnc_constRatio,  "const. OS/SS ratio", kCyan);
+    canvas->Register(h_relUnc_fitParam,    "Fit parameter (OS/SS ratio fit)", kBlue);
+    canvas->Register(h_relUnc_noSSEmuRwgt, "no e#mu rwgt. for SS top-quark bkg.", kRed-9);
     if( channel_ == "ee" ) {
       canvas->Register(h_relUnc_misID,     "Charge mis-identification", kGreen+2);
       canvas->Register(h_relUnc_altInterp, "Alternative interpolation (Z peak)", kViolet);

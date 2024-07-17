@@ -511,7 +511,21 @@ private:
         if( corr_ij < -1.0 || corr_ij  > 1.0 ) {
           printf("[%02d, %02d] bin: (sigma_i, sigma_j, cov_ij, corr_ij) = (%.3lf, %.3lf, %.3lf, %lf)\n",
             i_bin, j_bin, sigma_i, sigma_j, cov_ij, corr_ij);
-          throw std::runtime_error("systTag_ = "+systTag_+": corr_ij < -1.0 || corr_ij  > 1.0!");
+          // -- if the difference is not large (just due to limited precision: fix it)
+          if( corr_ij > 1.0 && std::abs(corr_ij-1.0) < 1e-3 ) {
+            corr_ij = 1.0;
+            cov_ij = sigma_i*sigma_j;
+            h_covM_->SetBinContent(i_bin, j_bin, cov_ij); // -- fix cov_ij so that it is consistent with corr_ij = 1.0
+            printf("--> corr_ij is set to be 1.0 (cov_ij is also changed acordingly)\n");
+          }
+          else if( corr_ij < -1.0 && std::abs(corr_ij+1.0) < 1e-3 ) {
+            corr_ij = -1.0;
+            cov_ij = -1*sigma_i*sigma_j;
+            h_covM_->SetBinContent(i_bin, j_bin, cov_ij); // -- fix cov_ij so that it is consistent with corr_ij = 1.0
+            printf("--> corr_ij is set to be -1.0 (cov_ij is also changed acordingly)\n");
+          }
+          else // -- if it is not very close to -1.0 or 1.0: something went wrong, give error
+            throw std::runtime_error("systTag_ = "+systTag_+": corr_ij < -1.0 || corr_ij  > 1.0!");
         }
 
         h_corrM_->SetBinContent(i_bin, j_bin, corr_ij);

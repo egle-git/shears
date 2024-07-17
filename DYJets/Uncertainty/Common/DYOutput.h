@@ -178,6 +178,18 @@ public:
     return (TH2D*)h->Clone();
   }
 
+  Bool_t DoesExist(TString histName) {
+    Bool_t flag = kFALSE;
+    for(auto& pair : map_sampleOutput_ ) {
+      if( pair.second.DoesExist(histName) ) { // -- one sample existence is enough
+        flag = kTRUE;
+        break;
+      }
+    }
+
+    return flag;
+  }
+
 private:
   TString process_;
   vector<TString> vec_tag_;
@@ -211,8 +223,10 @@ private:
       else           h_merged = (TH1D*)h_temp->Clone();
     }
 
-    if( !h_merged )
+    if( !h_merged ) {
       throw std::runtime_error("[ProcessOutput::Get_MergedHist] merged histogram is not made for " + histName);
+      // printf("[ProcessOutput::Get_MergedHist] no merged histogram is found ... return nullptr\n");
+    }
 
     return h_merged;
   }
@@ -348,6 +362,15 @@ public:
       throw std::invalid_argument("process = " + process + " doesn't exist");
 
     return iter->second.Get2D(map_histName);
+  }
+
+  Bool_t DoesExist(TString histName, TString process)  {
+    auto iter = map_processOutput_.find(process.Data());
+
+    if( iter == map_processOutput_.end() )
+      throw std::invalid_argument("process = " + process + " doesn't exist");
+
+    return iter->second.DoesExist(histName);
   }
 
   TString Path() const { return basePath_; }

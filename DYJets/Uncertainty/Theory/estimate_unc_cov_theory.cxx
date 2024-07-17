@@ -44,7 +44,7 @@ private:
 
   Bool_t isFPS_ = kFALSE; // -- true if the uncertainty is esimated for the full-phase space results
 
-  Bool_t use_NNLOScaleVar_TT_ = kTRUE; // -- use the scale uncertainty on the NNLO cross section for TT MC (not Powheg itself): default is true
+  Bool_t use_NNLOScaleVar_TT_ = kFALSE; // -- use the scale uncertainty on the NNLO cross section for TT MC (not Powheg itself): default is false
 
   TString inputPath_ = DYTool::path_systVar_theory;
 

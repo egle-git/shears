@@ -31,7 +31,9 @@ dic_result = {
              "Unfolded_SystVar_EffSF_mm.root", "UncAndCov_EffSF_mm.root" },
 
   "Theory" : {"Unfolded_SystVar_Theory_ee.root", "Unfolded_SystVar_Theory_ee_FPS.root",
-              "Unfolded_SystVar_Theory_mm.root", "Unfolded_SystVar_Theory_mm_FPS.root" },
+              "Unfolded_SystVar_Theory_mm.root", "Unfolded_SystVar_Theory_mm_FPS.root",
+              "UncAndCov_Theory_ee.root", "UncAndCov_Theory_mm.root",
+              "UncAndCov_Theory_ee_FPS.root", "UncAndCov_Theory_mm_FPS.root" },
   
   "elE": {"Unfolded_SystVar_elE.root", "UncAndCov_elE.root" },
 

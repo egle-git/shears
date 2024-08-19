@@ -7,6 +7,7 @@ public:
 
   void Produce() {
     fileName_ = "Unfolded_And_Uncertainty_Bkg_"+channel_+".root";
+    fileName_ = DYTool::Get_OutputPath(fileName_);
     plotDirPath_ = DYTool::Set_PlotPath("Background");
 
     ProducePlot_Unc_TopBkg();
@@ -140,7 +141,7 @@ private:
 
     // canvas->SetRangeY(0, 0.275);
     if( channel_ == "ee" )      canvas->SetAutoRangeY();
-    else if( channel_ == "mm" ) canvas->SetRangeY(0, 0.02);
+    else if( channel_ == "mm" ) canvas->SetRangeY(0, 0.025);
 
     canvas->Latex_CMSInternal();
     TString uncInfo = "Uncertainty from the data-driven backgrounds";
@@ -159,7 +160,7 @@ private:
     if( channel_ == "ee" ) {
       canvas->SetCanvasName(canvasName+"_zoomIn");
       canvas->SetAutoRangeY(kFALSE);
-      canvas->SetRangeY(0, 0.02);
+      canvas->SetRangeY(0, 0.025);
       canvas->Draw("HISTLP");
     }
   }

@@ -23,7 +23,7 @@ public:
     if( !result_ee_ || !result_mm_ )
       throw std::runtime_error("***[Combinator::Combine] ChannelResult is not set yet!");
 
-    TString plotDirName = "./plot/"+type_;
+    TString plotDirName = "Combination/"+type_;
     if( noCorr_em_ ) plotDirName += "/noCorr_em";
     plotDirPath_ = DYTool::Set_PlotPath(plotDirName);
 
@@ -898,7 +898,7 @@ void perform_combination_fid(Bool_t noCorr_em = kFALSE) {
 
   vector<TString> vec_channel = {"ee", "mm"};
   for(const auto& channel : vec_channel ) {
-    TString fileName = "../Summary/UncAndCov_All_"+channel+".root";
+    TString fileName = "UncAndCov_All_"+channel+".root";
     TString filePath = DYTool::Get_OutputPath(fileName);
     combinator.Set(channel, filePath);
   }

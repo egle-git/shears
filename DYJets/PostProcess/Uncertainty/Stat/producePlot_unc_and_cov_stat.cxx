@@ -14,9 +14,9 @@ public:
 
     plotDirPath_ = DYTool::Set_PlotPath("Stat/"+channel_);
 
-    bool recursive = kTRUE;
-    if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
-      throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
+    // bool recursive = kTRUE;
+    // if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
+    //   throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
 
     ProducePlot_Validation();
     ProducePlot_Unc();

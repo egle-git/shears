@@ -679,6 +679,10 @@ public:
   // -- remove negative bins in the fake histogram
   void Remove_NegativeBin_Fake(Bool_t flag = kTRUE) { removeNegativeBinFakeLep_ = flag; }
 
+  // -- to sync. the uncertainty between central value vs. syst-variated version for the fake lepton
+  // -- for the consistency in the uncertainty estimation
+  void Assign_100PUnc_NearZPeak_Fake(Bool_t flag = kTRUE) { assign100PUncNearZPeakFakeLep_ = flag; }
+
   void Set_Acc(TString fileName, TString histName) {
     hasAcc_ = kTRUE;
     h_acc_ = PlotTool::Get_Hist(fileName, histName);
@@ -849,6 +853,8 @@ protected:
   Bool_t hasFake_fullRun2_ = kFALSE;
 
   Bool_t removeNegativeBinFakeLep_ = kTRUE; // -- default: remove negative bin
+
+  Bool_t assign100PUncNearZPeakFakeLep_ = kFALSE;
 
   std::map<TString, HistNameContainer> map_hNameC_ = {
     {"16pre",  HistNameContainer()},
@@ -1195,6 +1201,14 @@ protected:
       Remove_NegativeBin(h_18);
     }
 
+    if( assign100PUncNearZPeakFakeLep_ ) {
+      cout << "[DYRun2Result::Insert_AllEraHist_Fake] fake lepton bkg: mass bins near Z peak will have 100\% uncertainty" << endl;
+      Assign_100PUnc_NearZPeak(h_16pre);
+      Assign_100PUnc_NearZPeak(h_16post);
+      Assign_100PUnc_NearZPeak(h_17);
+      Assign_100PUnc_NearZPeak(h_18);
+    }
+
     TH1D* h_allEra_16pre  = Convert_To_AllEraFormat( h_16pre, "16pre" );
     TH1D* h_allEra_16post = Convert_To_AllEraFormat( h_16post, "16post" );
     TH1D* h_allEra_17     = Convert_To_AllEraFormat( h_17, "17" );
@@ -1204,6 +1218,20 @@ protected:
 
     map_allEraHist_.insert( std::make_pair("reco_fake", h_allEra) );
     cout << "[DYRun2Result::Insert_AllEraHist_Fake] fake lepton backgrounds are inserted" << endl;
+  }
+
+  // -- assign 100% rel. uncertainty for the bin in [76, 106]
+  // -- input histogram should have m(ll) axis, not mass bin number axis!
+  void Assign_100PUnc_NearZPeak(TH1D* h_mass) {
+    // -- assign 100% uncertainty near Z peak region
+    for(Int_t i=0; i<h_mass->GetNbinsX(); ++i) {
+      Int_t i_bin = i+1;
+      Double_t binCenter = h_mass->GetBinCenter(i_bin);
+      if( 76 < binCenter && binCenter < 106 ) {
+        Double_t value = h_mass->GetBinContent(i_bin);
+        h_mass->SetBinError(i_bin, value); // -- 100% uncertainty
+      }
+    }
   }
 
   void Remove_NegativeBin(TH1D* h, Bool_t removeErrorAlso = kFALSE) {

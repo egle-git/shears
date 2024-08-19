@@ -387,7 +387,7 @@ private:
   }
 
   void Make_PlotDir(TString basePlotPath) {
-    plotDirPath_ = TString::Format("./plot/%s/%s", basePlotPath.Data(), era_.Data());
+    plotDirPath_ = TString::Format("%s/%s", basePlotPath.Data(), era_.Data());
     bool recursive = kTRUE;
     if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
       throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");
@@ -792,8 +792,8 @@ private:
     return histInfo;
   }
 
-  void Make_PlotDir(TString subDir) {
-    plotDirPath_ = subDir == "" ? "./plot" : "./plot/"+subDir;
+  void Make_PlotDir(TString dirPath) {
+    plotDirPath_ = dirPath == "" ? "./plot" : dirPath;
     bool recursive = kTRUE;
     if( gSystem->mkdir(plotDirPath_.Data(), recursive) < 0 )
       throw std::runtime_error("Directory = " + plotDirPath_ + " cannot be created (already exists?)");

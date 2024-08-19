@@ -26,8 +26,8 @@ namespace DYTool {
 // -- paths can be modified for your test, investigation, etc.
 
 TString path_SE = "/pnfs/iihe/cms/store/user/kplee";
-TString path_base = path_SE+"/DYFullRun2/dsigmadm/result_240716/input_postProcess";
-// TString path_base = "/Users/kplee/Research/Analysis/Logbook/240419_update_bVeto/data";
+TString path_base = path_SE+"/DYFullRun2/dsigmadm/output_240819/data";
+// TString path_base = "/Users/kplee/Research/Analysis/Logbook/240717_reorganize_postProcess/data";
 
 //////////////////////////////////////////////////
 // -- the path to the default shears output  -- //
@@ -86,6 +86,7 @@ TString path_systVar_bVeto = path_systVar_lepE_bVeto_pileup_L1Pref;
 TString path_systVar_bkg_topRwgt = path_base+"/shears/bkg_topRwgt";
 
 TString path_systVar_bkg_fakeLep = path_base+"/shears/bkg_fakeLep";
+// TString path_systVar_bkg_fakeLep = "/Users/kplee/Research/Analysis/Logbook/240717_reorganize_postProcess/data/shears/bkg_fakeLep";
 
 /////////////////////////////////////////////////////////////
 // -- path for additional inputs outside of shears -- //

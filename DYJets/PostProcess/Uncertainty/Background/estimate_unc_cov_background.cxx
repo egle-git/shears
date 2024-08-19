@@ -22,6 +22,7 @@ public:
 private:
   TString channel_ = "";
   Bool_t useFake_ = kTRUE;
+  TString plotDirPath_ = "";
 
   map<TString, DYRun2Result*> map_result_;
   map<TString, Uncertainty> map_unc_;
@@ -113,7 +114,7 @@ private:
       comparator.Set_Case(map_result_[tag],  "Alt. interpolation (Z peak)");
     }
 
-    TString plotPath = TString::Format("DYRun2Result/%s/%s", tag.Data(), channel_.Data());
+    TString plotPath = TString::Format("%s/DYRun2Result/%s/%s", plotDirPath_.Data(), tag.Data(), channel_.Data());
     comparator.Compare(plotPath);
   }
 
@@ -130,11 +131,12 @@ private:
     comparator.Set_Case(map_result_[tag_minus], legend_minus);
     // comparator.Expect_PerfectAgreement();
 
-    TString plotPath = TString::Format("DYRun2Result/%s/%s", tag.Data(), channel_.Data());
+    TString plotPath = TString::Format("%s/DYRun2Result/%s/%s", plotDirPath_.Data(), tag.Data(), channel_.Data());
     comparator.Compare(plotPath);
   }
 
   void Init() {
+    plotDirPath_ = DYTool::Set_PlotPath("Background");
     // -- cv
     DYRun2Result* result_cv = new DYRun2Result(DYTool::path_default+"/"+channel_);
     DYTool::Set_Fake(channel_, result_cv);
@@ -163,7 +165,12 @@ private:
       DYRun2Result* result_alt = new DYRun2Result(DYTool::path_default+"/"+channel_);
       vector<DYTool::DYHistInfo> vec_fakeLepBkgInfo = GetVector_FakeLepBkgInfo(tag);
       DYTool::Set_Fake(channel_, result_alt, vec_fakeLepBkgInfo);
-      // result_alt->Remove_NegativeBin_Fake();
+
+      // -- to sync. the uncertainty with the central fake lepton background (ee channel only)
+      // -- if uncertainty on the histogram is different, the final uncertainty seems to be unresonably increased
+      // -- why does the uncertainty affact the "central value" of the unfolded result, in unregularized unfolding? not sure yet ...
+      if( channel_ == "ee" ) result_alt->Assign_100PUnc_NearZPeak_Fake();
+
       result_alt->Produce();
       map_result_.insert( std::make_pair(tag, result_alt) );
     }

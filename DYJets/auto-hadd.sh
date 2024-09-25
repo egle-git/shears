@@ -38,13 +38,21 @@ sample_multiple=(
     dyjets-TauTau
     dyjets-TT
     dyjets-ZZ
-    dyjets-GG_M10To50_El-Inel
-    dyjets-GG_M10To50_Inel-Inel
+    dyjets-GG_M10To30_El-El
+    dyjets-GG_M10To30_El-Inel
+    dyjets-GG_M10To30_Inel-Inel
+    dyjets-GG_M30To50_El-El
+    dyjets-GG_M30To50_El-Inel
+    dyjets-GG_M30To50_Inel-Inel
     dyjets-GG_M50To200_El-El
+    dyjets-GG_M50To200_El-Inel
     dyjets-GG_M50To200_Inel-Inel
     dyjets-GG_M200To1500_El-El
     dyjets-GG_M200To1500_El-Inel
+    dyjets-GG_M200To1500_Inel-Inel
     dyjets-GG_M1500ToInf_El-Inel
+    dyjets-GG_M1500ToInf_El-El
+    dyjets-GG_M1500ToInf_Inel-Inel
 )
 
 # samples processed with a single job: no merging
@@ -68,11 +76,6 @@ sample_single=(
     dyjets-WZ
     #dyjets-GammaGamma
     #dyjets-GammaGamma_M-5to50
-    dyjets-GG_M10To50_El-El
-    dyjets-GG_M50To200_El-Inel
-    dyjets-GG_M200To1500_Inel-Inel
-    dyjets-GG_M1500ToInf_El-El
-    dyjets-GG_M1500ToInf_Inel-Inel
 )
 
 # merging samples in sample_multiple

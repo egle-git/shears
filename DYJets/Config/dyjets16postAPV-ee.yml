@@ -396,47 +396,47 @@ samples:
     - name: GG_M50To200_El-El
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-50To200_El-El.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-50To200_El-El.txt
       jobs: 2
     - name: GG_M50To200_El-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-50To200_Inel-El_El-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-50To200_Inel-El_El-Inel.txt
       jobs: 2
     - name: GG_M50To200_Inel-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-50To200_Inel-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-50To200_Inel-Inel.txt
       jobs: 2
     - name: GG_M200To1500_El-El
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-200To1500_El-El.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-200To1500_El-El.txt
       jobs: 2
     - name: GG_M200To1500_El-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-200To1500_Inel-El_El-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-200To1500_Inel-El_El-Inel.txt
       jobs: 2
     - name: GG_M200To1500_Inel-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-200To1500_Inel-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-200To1500_Inel-Inel.txt
       jobs: 2
     - name: GG_M1500ToInf_El-El
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-1500ToInf_El-El.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-1500ToInf_El-El.txt
       jobs: 2
     - name: GG_M1500ToInf_El-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-1500ToInf_Inel-El_El-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel.txt
       jobs: 2
     - name: GG_M1500ToInf_Inel-Inel
       type: background
       nano dir: Catalogs/2016postAPV/GamGam_LPair
-      catalog: Catalog2016_GGToEE_Pt-2_Mll-1500ToInf_Inel-Inel.txt
+      catalog: Catalog2016_GGToEE_Pt-5_Mll-1500ToInf_Inel-Inel.txt
       jobs: 2
     # Uncomment below only for reco histogram drawing when you have the fakes from SS method!
     # - name: Fakes

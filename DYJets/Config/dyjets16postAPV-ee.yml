@@ -497,7 +497,8 @@ MC grouping:
       color: 434 # kCyan + 2
     - legend: "#gamma#gamma"
       #samples: [ GammaGamma, GammaGamma_M-5to50 ]
-      samples: [ GG_M10To50_El-El, GG_M10To50_El-Inel, GG_M10To50_Inel-Inel, 
+      samples: [ GG_M10To30_El-El, GG_M10To30_El-Inel, GG_M10To30_Inel-Inel, 
+                 GG_M30To50_El-El, GG_M30To50_El-Inel, GG_M30To50_Inel-Inel,
                  GG_M50To200_El-El, GG_M50To200_El-Inel, GG_M50To200_Inel-Inel, 
                  GG_M200To1500_El-El, GG_M200To1500_El-Inel, GG_M200To1500_Inel-Inel, 
                  GG_M1500ToInf_El-El, GG_M1500ToInf_El-Inel, GG_M1500ToInf_Inel-Inel ]

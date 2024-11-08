@@ -5,7 +5,7 @@
 
 # Sample                                                                                              xsec (pb)
 
-DYJetsToMuMu_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos                                     1976
+DYJetsToMuMu_M-50_massWgtFix_TuneCP5_13TeV-powhegMiNNLO-pythia8-photos                                     2006.646
 TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8                                                                     88.29
 ZZTo4L_TuneCP5_13TeV_powheg_pythia8                                                                        1.325
 WZ_TuneCP5_13TeV-pythia8                                                                                   27.59

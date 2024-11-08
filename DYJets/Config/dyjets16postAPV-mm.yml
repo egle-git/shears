@@ -12,7 +12,7 @@ log:
     log level: info
 
     # Pipe logs to the given log file, comment out for no log.
-    log file: log16.txt
+    log file: log16b_mm.txt
 
     # Controls what's written in the log file.
     # Possible values: debug|info|warn|error|fatal (default: debug)
@@ -538,7 +538,7 @@ MC grouping:
 #                 GG_M50To200_El-El, GG_M50To200_El-Inel, GG_M50To200_Inel-Inel, 
 #                 GG_M200To1500_El-El, GG_M200To1500_El-Inel, GG_M200To1500_Inel-Inel, 
 #                 GG_M1500ToInf_El-El, GG_M1500ToInf_El-Inel, GG_M1500ToInf_Inel-Inel ]
-      color: 800 # kOrange
+#      color: 800 # kOrange
     - legend: "#gamma#gamma LPair InelInel"
       samples: [GG_M10To30_Inel-Inel,GG_M30To50_Inel-Inel,GG_M50To200_Inel-Inel,GG_M200To1500_Inel-Inel,GG_M1500ToInf_Inel-Inel]
       color: 840 # kTeal
@@ -647,14 +647,17 @@ plots:
       produce: no
     # Style changes
     - selector: '.*'
-      ratio min: 0.901
-      ratio max: 1.099
+      ratio min: 0.851
+      ratio max: 1.149
     - selector: '^phistar.*'
       log x: yes
     - selector: '^pt.*'
       log x: yes
     - selector: '^mass_wide.*'
       log x: yes
+    - selector: 'mass_inc0jet'
+      ratio min: 0.901
+      ratio max: 1.099
     - selector: '^nJets.*'
       ratio min: 0.601
       ratio max: 1.399

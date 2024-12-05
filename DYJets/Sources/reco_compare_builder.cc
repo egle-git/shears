@@ -103,7 +103,7 @@ bool reco_compare_builder::fill_lower_panel(const std::string &name)
     int2 = _mc_entry ->get(name, _lumi) ->Integral(1, _mc_entry->get(name, _lumi)->GetNbinsX());
     myratio = int2/int1;
     TString name_h = _data_entry->get(name, _lumi)->GetName();
-    if (name_h.Contains("mass_wide_range")){
+    if (name_h.Contains("mass_wide_range") || name_h.Contains("dyjets_events_wide_range")){
         std::cout<< "MC event: "<< int2 << std::endl;
         std::cout<< "Data events: " << int1 << std::endl;
         std::cout<<"Average MC/data rate: " << myratio << std::endl;

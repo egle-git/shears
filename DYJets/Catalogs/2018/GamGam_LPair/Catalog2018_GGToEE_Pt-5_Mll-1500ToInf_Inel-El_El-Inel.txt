@@ -1,0 +1,12 @@
+# primary dataset: /GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair-SY-pythia6/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM
+* data type: mc
+* primary events: 1
+* primary files: 1
+* lumi: -1
+* sample xsec: 8.767e-06
+
+# ROOTFILES
+
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/Nano_06Nov2024_2018_GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair/GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair-SY-pythia6/Nano/241106_152347/0000/tree_1.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/Nano_06Nov2024_2018_GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair/GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair-SY-pythia6/Nano/241106_152347/0000/tree_2.root
+/pnfs/iihe/cms/store/user/vandenbe/crab_bonzai/2018/mc/Nano_06Nov2024_2018_GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair/GGToEE_Pt-5_Mll-1500ToInf_Inel-El_El-Inel_13TeV-CepGen-lpair-SY-pythia6/Nano/241106_152347/0000/tree_3.root

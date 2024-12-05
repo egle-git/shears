@@ -372,10 +372,17 @@ samples:
 
 # Scale factors
 tables:
-    electron id:    2016postAPVee/Id_medium_postVFP.txt
-    electron reco:  2016postAPVee/Reco_postVFP.txt
-    diel trigger leg1: Trigger_sf/2016b_Ele23Leg1_MediumID.txt
-    diel trigger leg2: Trigger_sf/2016b_Ele12Leg2_MediumID.txt
+    # electron id:    2016postAPVee/Id_medium_postVFP.txt
+    # electron reco:  2016postAPVee/Reco_postVFP.txt
+    electron id:    elecSF_mcFit/16post/eff_el_ID_16post_custom.txt
+    electron reco:  elecSF_mcFit/16post/eff_el_RECO_16post_custom.txt
+    # diel trigger leg1: Trigger_sf/2016b_Ele23Leg1_MediumID.txt
+    # diel trigger leg2: Trigger_sf/2016b_Ele12Leg2_MediumID.txt
+    diel trigger leg1 plus:  elecSF_mcFit/16post/2016b_Ele23Leg1_MediumID_Plus.txt
+    diel trigger leg1 minus: elecSF_mcFit/16post/2016b_Ele23Leg1_MediumID_Minus.txt
+    diel trigger leg2 plus:  elecSF_mcFit/16post/2016b_Ele12Leg2_MediumID_Plus.txt
+    diel trigger leg2 minus: elecSF_mcFit/16post/2016b_Ele12Leg2_MediumID_Minus.txt
+    diel trigger dz: elecSF_mcFit/16post/2016b_DZ.txt
     bjet medium eff:     2016postAPV/btag-medium-b.txt
     cjet medium eff:     2016postAPV/btag-medium-c.txt
     udsgjet medium eff:  2016postAPV/btag-medium-udsg.txt

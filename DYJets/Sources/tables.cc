@@ -47,7 +47,7 @@ table::table(const std::string &filename)
     _ptBinEdge_lowest = pt_lowest; // -- lowest pT bin edge
     _ptBinEdge_highest = pt_highest; // -- highest pT bin edge
 
-    util::logging::debug << "[Table] (ptMin, ptMax) = (" << _ptBinEdge_lowest << ", " << _ptBinEdge_highest << ")" << std::endl;
+    util::logging::debug << "[Table (fileName = " << filename << ")] (ptMin, ptMax) = (" << _ptBinEdge_lowest << ", " << _ptBinEdge_highest << ")" << std::endl;
 }
 
 // mode = 0: nominal

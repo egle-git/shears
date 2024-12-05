@@ -50,6 +50,7 @@ class electrons
     TTreeReaderArray<bool>Electron_mvaFall17V2Iso_WPL;
     TTreeReaderArray<float>Electron_eCorr;
     TTreeReaderArray<float>Electron_r9;
+    TTreeReaderArray<float>Electron_scEtOverPt;
 
 
     // -- systematic variation

@@ -22,6 +22,7 @@ class lepton
     bool passes_iso;   ///< Does the lepton pass the Iso cut?
     unsigned id;      ///< Id
     int pdgid;        ///< PDG ID (absolute value): electron = 11, muon = 13
+    float scEt; ///< electron only; to look for RECO SF
 
 #ifdef DEBUG_PRINTOUT
     int tkLayerCnt;
@@ -39,7 +40,8 @@ class lepton
             && passes_id == other.passes_id
             && passes_iso == other.passes_iso
             && id == other.id
-            && pdgid == other.pdgid;
+            && pdgid == other.pdgid
+            && scEt == other.scEt;
     }
 };
 

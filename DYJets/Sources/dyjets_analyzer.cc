@@ -70,6 +70,11 @@ dyjets_analyzer::dyjets_analyzer(util::job::info &info, const util::options &opt
             }
         }
     }
+
+    if( opt.config["tables"]["diel trigger dz"] ) {
+        _use_trigDZSF = true;
+        util::logging::info << "dielectron trigger DZ filter SF will also be applied" << std::endl;
+    }
 }
 
 namespace /* anonymous */
@@ -132,13 +137,27 @@ void apply_smu_trigger_sf(physics::weights &w,
 void apply_diel_trigger_sf(physics::weights &w,
                            const physics::lepton &e1,
                            const physics::lepton &e2,
+                           const bool apply_trigDZSF,
                            const util::tables &tab)
 {
-    if (w.ismc()) {
-        w.use_weight(tab.at("diel trigger leg1")
-                        .getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
-        w.use_weight(tab.at("diel trigger leg2")
-                        .getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
+    if( w.ismc() ) {
+        // w.use_weight(tab.at("diel trigger leg1")
+        //                 .getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
+        // w.use_weight(tab.at("diel trigger leg2")
+        //                 .getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
+
+        // -- no reco-trigObj matching
+        // -- assumption: leading electron -> leg1, sub-leading electron -> leg2
+        if( e1.charge > 0 ) w.use_weight(tab.at("diel trigger leg1 plus").getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
+        else                w.use_weight(tab.at("diel trigger leg1 minus").getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
+
+        if( e2.charge > 0 ) w.use_weight(tab.at("diel trigger leg2 plus").getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
+        else                w.use_weight(tab.at("diel trigger leg2 minus").getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
+
+        if( apply_trigDZSF ) { // -- w(e1) * w(e2)
+            w.use_weight(tab.at("diel trigger dz").getEfficiency(e1.v.Pt(), e1.raw_v.Eta()));
+            w.use_weight(tab.at("diel trigger dz").getEfficiency(e2.v.Pt(), e2.raw_v.Eta()));
+        }
     }
 }
 
@@ -178,7 +197,7 @@ void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
         }
         break;
     case zfinder::flavor_mode::ee:
-        apply_diel_trigger_sf(weights, leptons[0], leptons[1], tables());
+        apply_diel_trigger_sf(weights, leptons[0], leptons[1], _use_trigDZSF, tables());
         break;
     case zfinder::flavor_mode::emu:
         apply_emu_trigger_sf(weights, leptons[0], leptons[1], tables());
@@ -188,7 +207,7 @@ void dyjets_analyzer::apply_trigger_sf(physics::weights &weights,
         if (leptons[0].pdgid == 13) {
             apply_dimu_trigger_sf(weights, leptons[0], leptons[1], tables());
         } else {
-            apply_diel_trigger_sf(weights, leptons[0], leptons[1], tables());
+            apply_diel_trigger_sf(weights, leptons[0], leptons[1], _use_trigDZSF, tables());
         }
         break;
     }

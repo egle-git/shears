@@ -372,10 +372,17 @@ samples:
 
 # Scale factors
 tables:
-    electron id:    2016preAPVee/egamma_Medium.txt
-    electron reco:  2016preAPVee/egamma_reco_all_SF.txt
-    diel trigger leg1: Trigger_sf/2016a_Ele23Leg1_MediumID.txt
-    diel trigger leg2: Trigger_sf/2016a_Ele12Leg2_MediumID.txt
+    # electron id:    2016preAPVee/egamma_Medium.txt
+    # electron reco:  2016preAPVee/egamma_reco_all_SF.txt
+    electron id:    elecSF_mcFit/16pre/eff_el_ID_16pre_custom.txt
+    electron reco:  elecSF_mcFit/16pre/eff_el_RECO_16pre_custom.txt
+    # diel trigger leg1: Trigger_sf/2016a_Ele23Leg1_MediumID.txt
+    # diel trigger leg2: Trigger_sf/2016a_Ele12Leg2_MediumID.txt
+    diel trigger leg1 plus:  elecSF_mcFit/16pre/2016a_Ele23Leg1_MediumID_Plus.txt
+    diel trigger leg1 minus: elecSF_mcFit/16pre/2016a_Ele23Leg1_MediumID_Minus.txt
+    diel trigger leg2 plus:  elecSF_mcFit/16pre/2016a_Ele12Leg2_MediumID_Plus.txt
+    diel trigger leg2 minus: elecSF_mcFit/16pre/2016a_Ele12Leg2_MediumID_Minus.txt
+    diel trigger dz: elecSF_mcFit/16pre/2016a_DZ.txt
     bjet medium eff:     2016preAPV/btag-medium-b.txt
     cjet medium eff:     2016preAPV/btag-medium-c.txt
     udsgjet medium eff:  2016preAPV/btag-medium-udsg.txt

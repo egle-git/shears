@@ -37,6 +37,8 @@ class dyjets_analyzer : public physics::boson_jets_analyzer
     double _mass_offset_ss_method = 1.0;
     double _mass_slope_ss_method = 0.0;
 
+    bool _use_trigDZSF = false; // -- only for electron, 2016 data
+
   public:
     physics::zfinder _zfinder;
 

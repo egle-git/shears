@@ -26,6 +26,7 @@ Electron_mvaFall17V2Iso_WP90(info.reader, "Electron_mvaFall17V2Iso_WP90"),
 Electron_mvaFall17V2Iso_WPL(info.reader, "Electron_mvaFall17V2Iso_WPL"),
 Electron_eCorr(info.reader, "Electron_eCorr"),
 Electron_r9(info.reader, "Electron_r9"),
+Electron_scEtOverPt(info.reader, "Electron_scEtOverPt"),
 Electron_dEscaleUp(info.reader, "Electron_dEscaleUp"),
 Electron_dEscaleDown(info.reader, "Electron_dEscaleDown"),
 Electron_dEsigmaUp(info.reader, "Electron_dEsigmaUp"),
@@ -96,6 +97,7 @@ std::vector<lepton> electrons::get(bool isData, const unsigned int& runNum,
     // -- eta: etaSC
     l.raw_v.SetPtEtaPhiM(l.v.Pt(), etaSC, l.v.Phi(), l.v.M());
     l.charge = Electron_charge[i];
+    l.scEt = (Electron_scEtOverPt[i]+1.0)*Electron_pt[i]; // -- supercluster e_T: to look for RECO SF
 
     l.pdgid = 11;
 
@@ -284,7 +286,7 @@ void electrons::apply_sf(weights &w,
             if (_reco_sf_enabled) {
                 // If ID cut is set to "none", SF is still applied on those electrons that pass the mediumID
                 if (_id_cut != id::none || el.id >= 3) {
-                    w.use_weight(tab.at("electron reco").getEfficiency(el.v.Pt(), el.raw_v.Eta()));
+                    w.use_weight(tab.at("electron reco").getEfficiency(el.scEt, el.raw_v.Eta()));
                 }
             }
             if (_id_sf_enabled) {
